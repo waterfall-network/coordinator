@@ -379,8 +379,8 @@ def prysm_deps():
     go_repository(
         name = "com_github_btcsuite_btcd",
         importpath = "github.com/btcsuite/btcd",
-        sum = "h1:LTDpDKUM5EeOFBPM8IXpinEcmZ6FWfNZbE3lfrfdnWo=",
-        version = "v0.22.0-beta",
+        sum = "h1:CnwP9LM/M9xuRrGSCGeMVs9iv09uMqwsVX7EeIpgV2c=",
+        version = "v0.22.1",
     )
     go_repository(
         name = "com_github_btcsuite_btcd_btcec_v2",
@@ -1048,7 +1048,7 @@ def prysm_deps():
     go_repository(
         name = "com_github_go_chi_chi_v5",
         importpath = "github.com/go-chi/chi/v5",
-#        importpath = "github.com/pressly/chi/v5",
+        #        importpath = "github.com/pressly/chi/v5",
         sum = "h1:DBPx88FjZJH3FsICfDAfIfnb7XxKIYVGG6lOPlhENAg=",
         version = "v5.0.0",
     )

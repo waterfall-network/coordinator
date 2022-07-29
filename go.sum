@@ -153,8 +153,9 @@ github.com/btcsuite/btcd v0.0.0-20190213025234-306aecffea32/go.mod h1:DrZx5ec/dm
 github.com/btcsuite/btcd v0.0.0-20190523000118-16327141da8c/go.mod h1:3J08xEfcugPacsc34/LKRU2yO7YmuT8yt28J8k2+rrI=
 github.com/btcsuite/btcd v0.20.1-beta/go.mod h1:wVuoA8VJLEcwgqHBwHmzLRazpKxTv13Px/pDuV7OomQ=
 github.com/btcsuite/btcd v0.21.0-beta/go.mod h1:ZSWyehm27aAuS9bvkATT+Xte3hjHZ+MRgMY/8NJ7K94=
-github.com/btcsuite/btcd v0.22.0-beta h1:LTDpDKUM5EeOFBPM8IXpinEcmZ6FWfNZbE3lfrfdnWo=
 github.com/btcsuite/btcd v0.22.0-beta/go.mod h1:9n5ntfhhHQBIhUvlhDvD3Qg6fRUj4jkN0VB8L8svzOA=
+github.com/btcsuite/btcd v0.22.1 h1:CnwP9LM/M9xuRrGSCGeMVs9iv09uMqwsVX7EeIpgV2c=
+github.com/btcsuite/btcd v0.22.1/go.mod h1:wqgTSL29+50LRkmOVknEdmt8ZojIzhuWvgu/iptuN7Y=
 github.com/btcsuite/btcd/btcec/v2 v2.1.2/go.mod h1:ctjw4H1kknNJmRN4iP1R7bTQ+v3GJkZBd6mui8ZsAZE=
 github.com/btcsuite/btcd/btcec/v2 v2.2.0 h1:fzn1qaOt32TuLjFlkzYSsBC35Q3KUjT1SwPxiMSCF5k=
 github.com/btcsuite/btcd/btcec/v2 v2.2.0/go.mod h1:U7MHm051Al6XmscBQ0BoNydpOTsFAn707034b5nY8zU=
@@ -1377,10 +1378,6 @@ github.com/valyala/fasttemplate v1.0.1/go.mod h1:UQGH1tvbgY+Nz5t2n7tXsz52dQxojPU
 github.com/valyala/fasttemplate v1.2.1/go.mod h1:KHLXt3tVN2HBp8eijSv/kGJopbvo7S+qRAEEKiv+SiQ=
 github.com/viant/assertly v0.4.8/go.mod h1:aGifi++jvCrUaklKEKT0BU95igDNaqkvz+49uaYMPRU=
 github.com/viant/toolbox v0.24.0/go.mod h1:OxMCG57V0PXuIP2HNQrtJf2CjqdmbrOx5EkMILuUhzM=
-github.com/waterfall-foundation/gwat v0.4.0 h1:Md1woO8sG8FwDATaHHeYA8ypb3P7IKrLViwHqRoas64=
-github.com/waterfall-foundation/gwat v0.4.0/go.mod h1:lzaI5FdxFb38ci54CLMn8vzPNelCU6AzbEq1wdBEvUw=
-github.com/waterfall-foundation/gwat v0.4.1 h1:J1CNPzyyN6dpvkXdc1SESw0Pp+fCeqIty36jWKHiNmY=
-github.com/waterfall-foundation/gwat v0.4.1/go.mod h1:jYjEIR3Y1ejKJwvPgqFOuZbx4g0mNOWjeMMIHfyPzFA=
 github.com/waterfall-foundation/gwat v0.4.2 h1:aWe+yXaqHehZNLdk1XnCb7DNckD9UQcINK/Fc4RDppQ=
 github.com/waterfall-foundation/gwat v0.4.2/go.mod h1:jYjEIR3Y1ejKJwvPgqFOuZbx4g0mNOWjeMMIHfyPzFA=
 github.com/wealdtech/go-bytesutil v1.1.1 h1:ocEg3Ke2GkZ4vQw5lp46rmO+pfqCCTgq35gqOy8JKVc=
