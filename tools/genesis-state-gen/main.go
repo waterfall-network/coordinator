@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"flag"
-	"github.com/prysmaticlabs/prysm/config/params"
 	"io"
 	"io/ioutil"
 	"log"
