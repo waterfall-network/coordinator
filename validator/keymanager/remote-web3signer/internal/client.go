@@ -13,13 +13,13 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/pkg/errors"
 	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
 	"github.com/prysmaticlabs/prysm/crypto/bls"
 	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
 	"github.com/prysmaticlabs/prysm/monitoring/tracing"
 	"github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/gwat/common/hexutil"
 	"go.opencensus.io/trace"
 )
 

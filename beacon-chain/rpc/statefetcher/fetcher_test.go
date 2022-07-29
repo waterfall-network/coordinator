@@ -9,7 +9,6 @@ import (
 
 	"github.com/prysmaticlabs/prysm/beacon-chain/state/stategen"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	types "github.com/prysmaticlabs/eth2-types"
 	chainMock "github.com/prysmaticlabs/prysm/beacon-chain/blockchain/testing"
 	testDB "github.com/prysmaticlabs/prysm/beacon-chain/db/testing"
@@ -21,6 +20,7 @@ import (
 	"github.com/prysmaticlabs/prysm/testing/assert"
 	"github.com/prysmaticlabs/prysm/testing/require"
 	"github.com/prysmaticlabs/prysm/testing/util"
+	"github.com/waterfall-foundation/gwat/common/hexutil"
 )
 
 func TestGetState(t *testing.T) {

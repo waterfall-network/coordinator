@@ -8,14 +8,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/p2p/discover"
-	"github.com/ethereum/go-ethereum/p2p/enode"
 	"github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/prysmaticlabs/prysm/network"
 	_ "github.com/prysmaticlabs/prysm/runtime/maxprocs"
 	"github.com/prysmaticlabs/prysm/testing/assert"
 	"github.com/prysmaticlabs/prysm/testing/require"
 	"github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/gwat/p2p/discover"
+	"github.com/waterfall-foundation/gwat/p2p/enode"
 )
 
 func TestMain(m *testing.M) {

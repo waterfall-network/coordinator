@@ -8,7 +8,6 @@ import (
 	"runtime"
 	runtimeDebug "runtime/debug"
 
-	gethlog "github.com/ethereum/go-ethereum/log"
 	golog "github.com/ipfs/go-log/v2"
 	joonix "github.com/joonix/log"
 	"github.com/prysmaticlabs/prysm/beacon-chain/node"
@@ -29,6 +28,7 @@ import (
 	"github.com/prysmaticlabs/prysm/runtime/version"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
+	gethlog "github.com/waterfall-foundation/gwat/log"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 

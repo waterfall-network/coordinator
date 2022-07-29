@@ -4,10 +4,10 @@ package params
 import (
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
 	types "github.com/prysmaticlabs/eth2-types"
 	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
 	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
+	"github.com/waterfall-foundation/gwat/common"
 )
 
 // BeaconChainConfig contains constant configs for node to participate in beacon chain.

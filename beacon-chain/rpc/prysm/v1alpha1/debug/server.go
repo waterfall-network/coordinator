@@ -7,7 +7,6 @@ import (
 	"context"
 	"os"
 
-	gethlog "github.com/ethereum/go-ethereum/log"
 	"github.com/golang/protobuf/ptypes/empty"
 	golog "github.com/ipfs/go-log/v2"
 	"github.com/prysmaticlabs/prysm/beacon-chain/blockchain"
@@ -16,6 +15,7 @@ import (
 	"github.com/prysmaticlabs/prysm/beacon-chain/state/stategen"
 	pbrpc "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/sirupsen/logrus"
+	gethlog "github.com/waterfall-foundation/gwat/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

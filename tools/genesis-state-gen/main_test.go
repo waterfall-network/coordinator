@@ -10,6 +10,7 @@ import (
 	"github.com/prysmaticlabs/prysm/runtime/interop"
 	"github.com/prysmaticlabs/prysm/testing/assert"
 	"github.com/prysmaticlabs/prysm/testing/require"
+	"github.com/waterfall-foundation/gwat/common"
 )
 
 func Test_genesisStateFromJSONValidators(t *testing.T) {
@@ -18,7 +19,7 @@ func Test_genesisStateFromJSONValidators(t *testing.T) {
 	jsonInput, err := json.Marshal(jsonData)
 	require.NoError(t, err)
 	genesisState, err := genesisStateFromJSONValidators(
-		bytes.NewReader(jsonInput), 0, /* genesis time defaults to time.Now() */
+		bytes.NewReader(jsonInput), common.Hash{}, 0, /* genesis time defaults to time.Now() */
 	)
 	require.NoError(t, err)
 	for i, val := range genesisState.Validators {

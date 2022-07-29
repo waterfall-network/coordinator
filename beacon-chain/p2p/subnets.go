@@ -5,13 +5,13 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/p2p/enr"
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/go-bitfield"
 	"github.com/prysmaticlabs/prysm/cmd/beacon-chain/flags"
 	mathutil "github.com/prysmaticlabs/prysm/math"
 	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/wrapper"
+	"github.com/waterfall-foundation/gwat/p2p/enode"
+	"github.com/waterfall-foundation/gwat/p2p/enr"
 	"go.opencensus.io/trace"
 
 	"github.com/prysmaticlabs/prysm/config/params"

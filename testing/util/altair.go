@@ -23,6 +23,7 @@ import (
 	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/wrapper"
+	"github.com/waterfall-foundation/gwat/dag/finalizer"
 )
 
 // DeterministicGenesisStateAltair returns a genesis state in hard fork 1 format made using the deterministic deposits.
@@ -183,6 +184,7 @@ func buildGenesisBeaconState(genesisTime uint64, preState state.BeaconStateAltai
 		Eth1Data: &ethpb.Eth1Data{
 			DepositRoot: make([]byte, fieldparams.RootLength),
 			BlockHash:   make([]byte, 32),
+			Candidates:  make([]byte, 0),
 		},
 		Graffiti: make([]byte, 32),
 		SyncAggregate: &ethpb.SyncAggregate{
@@ -254,6 +256,7 @@ func NewBeaconBlockAltair() *ethpb.SignedBeaconBlockAltair {
 				Eth1Data: &ethpb.Eth1Data{
 					DepositRoot: make([]byte, fieldparams.RootLength),
 					BlockHash:   make([]byte, 32),
+					Candidates:  make([]byte, 0),
 				},
 				Graffiti:          make([]byte, 32),
 				Attestations:      []*ethpb.Attestation{},

@@ -16,6 +16,8 @@ import (
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/time/slots"
 	"github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/gwat/dag"
+	"github.com/waterfall-foundation/gwat/dag/finalizer"
 	"go.opencensus.io/trace"
 )
 
@@ -144,6 +146,32 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 					log.WithError(err).Error("Could not process new slot")
 					return
 				}
+
+				currBlock := s.head.block
+				beaconBlock := currBlock.Block()
+				var (
+					epoch      = uint64((beaconBlock.Slot() + 1) / params.BeaconConfig().SlotsPerEpoch)
+					slot       = uint64((beaconBlock.Slot() + 1) % params.BeaconConfig().SlotsPerEpoch)
+					finalizing = finalizer.NrHashMap{}
+				)
+
+				creators, err := s.GetCurrentCreators()
+				if err != nil {
+					log.WithError(err).Errorf("Could not compute creators assignments: %v", err)
+				}
+
+				finalizing.SetBytes(beaconBlock.Body().Eth1Data().Candidates)
+				syncParams := &dag.ConsensusInfo{
+					Epoch:      epoch,
+					Slot:       slot,
+					Creators:   creators,
+					Finalizing: finalizing,
+				}
+				candidates, err := s.cfg.ExecutionEngineCaller.ExecutionDagSync(s.ctx, syncParams)
+				if err != nil {
+					log.WithError(err).Error("Error while execute finalization procedure")
+				}
+				s.setCandidates(candidates)
 
 				// Continue when there's no fork choice attestation, there's nothing to process and update head.
 				// This covers the condition when the node is still initial syncing to the head of the chain.

@@ -4,9 +4,9 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	gethTypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
+	"github.com/waterfall-foundation/gwat/common"
+	gethTypes "github.com/waterfall-foundation/gwat/core/types"
 )
 
 // HeaderInfo specifies the block header information in the ETH 1.0 chain.
@@ -25,7 +25,7 @@ func HeaderToHeaderInfo(hdr *gethTypes.Header) (*HeaderInfo, error) {
 
 	return &HeaderInfo{
 		Hash:   hdr.Hash(),
-		Number: new(big.Int).Set(hdr.Number),
+		Number: new(big.Int).SetUint64(hdr.Nr()),
 		Time:   hdr.Time,
 	}, nil
 }

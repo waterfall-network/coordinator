@@ -7,7 +7,6 @@ import (
 	"context"
 	"io"
 
-	"github.com/ethereum/go-ethereum/common"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/prysm/beacon-chain/db/filters"
 	slashertypes "github.com/prysmaticlabs/prysm/beacon-chain/slasher/types"
@@ -15,6 +14,7 @@ import (
 	"github.com/prysmaticlabs/prysm/monitoring/backup"
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/block"
+	"github.com/waterfall-foundation/gwat/common"
 )
 
 // ReadOnlyDatabase defines a struct which only has read access to database methods.

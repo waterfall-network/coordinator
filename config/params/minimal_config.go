@@ -99,7 +99,7 @@ func MinimalSpecConfig() *BeaconChainConfig {
 	// Ethereum PoW parameters.
 	minimalConfig.DepositChainID = 5   // Chain ID of eth1 goerli.
 	minimalConfig.DepositNetworkID = 5 // Network ID of eth1 goerli.
-	minimalConfig.DepositContractAddress = "0x1234567890123456789012345678901234567890"
+	minimalConfig.DepositContractAddress = "0xf30097f8c858c1f6b0c6efe72240319efa65b825"
 
 	minimalConfig.ConfigName = ConfigNames[Minimal]
 	minimalConfig.PresetBase = "minimal"

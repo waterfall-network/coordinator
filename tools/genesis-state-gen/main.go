@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"flag"
+	"github.com/prysmaticlabs/prysm/config/params"
 	"io"
 	"io/ioutil"
 	"log"
@@ -12,10 +13,10 @@ import (
 	"strings"
 
 	"github.com/ghodss/yaml"
-	"github.com/prysmaticlabs/prysm/config/params"
 	"github.com/prysmaticlabs/prysm/io/file"
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/runtime/interop"
+	"github.com/waterfall-foundation/gwat/common"
 )
 
 // DepositDataJSON representing a json object of hex string and uint64 values for
@@ -36,7 +37,8 @@ var (
 	)
 	numValidators    = flag.Int("num-validators", 0, "Number of validators to deterministically generate in the generated genesis state")
 	useMainnetConfig = flag.Bool("mainnet-config", false, "Select whether genesis state should be generated with mainnet or minimal (default) params")
-	genesisTime      = flag.Uint64("genesis-time", 0, "Unix timestamp used as the genesis time in the generated genesis state (defaults to now)")
+	genesisTime      = flag.Uint64("genesis-time", 0, "Unix timestamp used as the genesis time in the generated genesis state (defaults to now+120sec)")
+	gwatGenesisHash  = flag.String("gwat-genesis-hash", "", "Hash of the GWAT genesis block")
 	sszOutputFile    = flag.String("output-ssz", "", "Output filename of the SSZ marshaling of the generated genesis state")
 	yamlOutputFile   = flag.String("output-yaml", "", "Output filename of the YAML marshaling of the generated genesis state")
 	jsonOutputFile   = flag.String("output-json", "", "Output filename of the JSON marshaling of the generated genesis state")
@@ -44,15 +46,22 @@ var (
 
 func main() {
 	flag.Parse()
+	if len(*gwatGenesisHash) != 66 {
+		log.Print("Bad value of --gwat-genesis-hash specified")
+		return
+	}
+	gwatHash := common.HexToHash(*gwatGenesisHash)
+
 	if *genesisTime == 0 {
-		log.Print("No --genesis-time specified, defaulting to now")
+		log.Print("No --genesis-time specified, defaulting to now + 2min")
 	}
 	if *sszOutputFile == "" && *yamlOutputFile == "" && *jsonOutputFile == "" {
 		log.Println("Expected --output-ssz, --output-yaml, or --output-json to have been provided, received nil")
 		return
 	}
+	// Note: generated genesis with minimal config doesn't work
 	if !*useMainnetConfig {
-		params.OverrideBeaconConfig(params.MinimalSpecConfig())
+		//params.OverrideBeaconConfig(params.MinimalSpecConfig())
 	}
 	var genesisState *ethpb.BeaconState
 	var err error
@@ -74,7 +83,7 @@ func main() {
 			}
 		}()
 		log.Printf("Generating genesis state from input JSON deposit data %s", inputFile)
-		genesisState, err = genesisStateFromJSONValidators(inputJSON, *genesisTime)
+		genesisState, err = genesisStateFromJSONValidators(inputJSON, gwatHash, *genesisTime)
 		if err != nil {
 			log.Printf("Could not generate genesis beacon state: %v", err)
 			return
@@ -130,7 +139,7 @@ func main() {
 	}
 }
 
-func genesisStateFromJSONValidators(r io.Reader, genesisTime uint64) (*ethpb.BeaconState, error) {
+func genesisStateFromJSONValidators(r io.Reader, gwtGenesisHash common.Hash, genesisTime uint64) (*ethpb.BeaconState, error) {
 	enc, err := ioutil.ReadAll(r)
 	if err != nil {
 		return nil, err
@@ -149,7 +158,7 @@ func genesisStateFromJSONValidators(r io.Reader, genesisTime uint64) (*ethpb.Bea
 		depositDataList[i] = data
 		depositDataRoots[i] = dataRootBytes
 	}
-	beaconState, _, err := interop.GenerateGenesisStateFromDepositData(context.Background(), genesisTime, depositDataList, depositDataRoots)
+	beaconState, _, err := interop.GenerateGenesisStateFromDepositData(context.Background(), gwtGenesisHash, genesisTime, depositDataList, depositDataRoots)
 	if err != nil {
 		return nil, err
 	}

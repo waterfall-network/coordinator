@@ -16,6 +16,8 @@ import (
 	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/time/slots"
+	"github.com/waterfall-foundation/gwat/common"
+	"github.com/waterfall-foundation/gwat/dag/finalizer"
 )
 
 // eth1DataMajorityVote determines the appropriate eth1data for a block proposal using
@@ -37,6 +39,7 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 	slot := beaconState.Slot()
 	votingPeriodStartTime := vs.slotStartTime(slot)
 
+	// if inerOp true
 	if vs.MockEth1Votes {
 		return vs.mockETH1DataVote(ctx, slot)
 	}
@@ -135,6 +138,7 @@ func (vs *Server) mockETH1DataVote(ctx context.Context, slot types.Slot) (*ethpb
 	//   DepositRoot = hash(current_epoch + slot_in_voting_period),
 	//   DepositCount = state.eth1_deposit_index,
 	//   BlockHash = hash(hash(current_epoch + slot_in_voting_period)),
+	//   Candidates = ffinalizer.NrHashMap{ slot: hash(hash(current_epoch + slot_in_voting_period)) }
 	// )
 	slotInVotingPeriod := slot.ModSlot(params.BeaconConfig().SlotsPerEpoch.Mul(uint64(params.BeaconConfig().EpochsPerEth1VotingPeriod)))
 	headState, err := vs.HeadFetcher.HeadState(ctx)
@@ -145,10 +149,16 @@ func (vs *Server) mockETH1DataVote(ctx context.Context, slot types.Slot) (*ethpb
 	enc = fastssz.MarshalUint64(enc, uint64(slots.ToEpoch(slot))+uint64(slotInVotingPeriod))
 	depRoot := hash.Hash(enc)
 	blockHash := hash.Hash(depRoot[:])
+
+	finHash := &common.Hash{}
+	finHash.SetBytes(depRoot[:])
+	candidates := finalizer.NrHashMap{uint64(slot): finHash}
+
 	return &ethpb.Eth1Data{
 		DepositRoot:  depRoot[:],
 		DepositCount: headState.Eth1DepositIndex(),
 		BlockHash:    blockHash[:],
+		Candidates:   candidates.ToBytes(),
 	}, nil
 }
 
@@ -167,9 +177,16 @@ func (vs *Server) randomETH1DataVote(ctx context.Context) (*ethpb.Eth1Data, erro
 	randGen := rand.NewGenerator()
 	depRoot := hash.Hash(bytesutil.Bytes32(randGen.Uint64()))
 	blockHash := hash.Hash(bytesutil.Bytes32(randGen.Uint64()))
+
+	slot := headState.Slot()
+	finHash := &common.Hash{}
+	finHash.SetBytes(blockHash[:])
+	candidates := finalizer.NrHashMap{uint64(slot): finHash}
+
 	return &ethpb.Eth1Data{
 		DepositRoot:  depRoot[:],
 		DepositCount: headState.Eth1DepositIndex(),
 		BlockHash:    blockHash[:],
+		Candidates:   candidates.ToBytes(),
 	}, nil
 }

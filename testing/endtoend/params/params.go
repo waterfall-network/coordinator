@@ -10,7 +10,7 @@ import (
 	"strconv"
 
 	"github.com/bazelbuild/rules_go/go/tools/bazel"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/waterfall-foundation/gwat/common"
 )
 
 // params struct defines the parameters needed for running E2E tests to properly handle test sharding.

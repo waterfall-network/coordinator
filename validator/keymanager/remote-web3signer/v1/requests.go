@@ -3,9 +3,9 @@ package v1
 import (
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/pkg/errors"
 	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
+	"github.com/waterfall-foundation/gwat/common/hexutil"
 )
 
 // GetBlockSignRequest maps the request for signing type BLOCK.

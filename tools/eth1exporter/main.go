@@ -14,11 +14,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/ethereum/go-ethereum/params"
 	_ "github.com/prysmaticlabs/prysm/runtime/maxprocs"
 	"github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/gwat/common"
+	"github.com/waterfall-foundation/gwat/ethclient"
+	"github.com/waterfall-foundation/gwat/params"
 )
 
 var (
@@ -109,7 +109,7 @@ func CurrentBlock() uint64 {
 		fmt.Printf("Error fetching current block height: %v\n", err)
 		return 0
 	}
-	return block.NumberU64()
+	return block.Nr()
 }
 
 // ToEther from Wei.

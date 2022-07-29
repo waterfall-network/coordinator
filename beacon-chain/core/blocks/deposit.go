@@ -176,7 +176,7 @@ func ProcessDeposit(beaconState state.BeaconState, deposit *ethpb.Deposit, verif
 			}
 			if err := verifyDepositDataSigningRoot(deposit.Data, domain); err != nil {
 				// Ignore this error as in the spec pseudo code.
-				log.Debugf("Skipping deposit: could not verify deposit data signature: %v", err)
+				log.Infof("Skipping deposit: could not verify deposit data signature: %v", err)
 				return beaconState, newValidator, nil
 			}
 		}

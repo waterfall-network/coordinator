@@ -54,6 +54,7 @@ func NewBeaconBlock() *ethpb.SignedBeaconBlock {
 				Eth1Data: &ethpb.Eth1Data{
 					DepositRoot: make([]byte, fieldparams.RootLength),
 					BlockHash:   make([]byte, fieldparams.RootLength),
+					Candidates:  make([]byte, 0),
 				},
 				Graffiti:          make([]byte, fieldparams.RootLength),
 				Attestations:      []*ethpb.Attestation{},
@@ -457,6 +458,7 @@ func HydrateBeaconBlockBody(b *ethpb.BeaconBlockBody) *ethpb.BeaconBlockBody {
 		b.Eth1Data = &ethpb.Eth1Data{
 			DepositRoot: make([]byte, fieldparams.RootLength),
 			BlockHash:   make([]byte, fieldparams.RootLength),
+			Candidates:  make([]byte, 0),
 		}
 	}
 	return b
@@ -504,6 +506,7 @@ func HydrateV1BeaconBlockBody(b *v1.BeaconBlockBody) *v1.BeaconBlockBody {
 		b.Eth1Data = &v1.Eth1Data{
 			DepositRoot: make([]byte, fieldparams.RootLength),
 			BlockHash:   make([]byte, fieldparams.RootLength),
+			Candidates:  make([]byte, 0),
 		}
 	}
 	return b
@@ -551,6 +554,7 @@ func HydrateV2AltairBeaconBlockBody(b *v2.BeaconBlockBodyAltair) *v2.BeaconBlock
 		b.Eth1Data = &v1.Eth1Data{
 			DepositRoot: make([]byte, fieldparams.RootLength),
 			BlockHash:   make([]byte, fieldparams.RootLength),
+			Candidates:  make([]byte, 0),
 		}
 	}
 	if b.SyncAggregate == nil {
@@ -604,6 +608,7 @@ func HydrateV2BellatrixBeaconBlockBody(b *v2.BeaconBlockBodyBellatrix) *v2.Beaco
 		b.Eth1Data = &v1.Eth1Data{
 			DepositRoot: make([]byte, fieldparams.RootLength),
 			BlockHash:   make([]byte, fieldparams.RootLength),
+			Candidates:  make([]byte, 0),
 		}
 	}
 	if b.SyncAggregate == nil {
@@ -670,6 +675,7 @@ func HydrateBeaconBlockBodyAltair(b *ethpb.BeaconBlockBodyAltair) *ethpb.BeaconB
 		b.Eth1Data = &ethpb.Eth1Data{
 			DepositRoot: make([]byte, fieldparams.RootLength),
 			BlockHash:   make([]byte, fieldparams.RootLength),
+			Candidates:  make([]byte, 0),
 		}
 	}
 	if b.SyncAggregate == nil {
@@ -723,6 +729,7 @@ func HydrateBeaconBlockBodyBellatrix(b *ethpb.BeaconBlockBodyBellatrix) *ethpb.B
 		b.Eth1Data = &ethpb.Eth1Data{
 			DepositRoot: make([]byte, fieldparams.RootLength),
 			BlockHash:   make([]byte, fieldparams.RootLength),
+			Candidates:  make([]byte, 0),
 		}
 	}
 	if b.SyncAggregate == nil {
@@ -788,6 +795,7 @@ func HydrateBlindedBeaconBlockBodyBellatrix(b *ethpb.BlindedBeaconBlockBodyBella
 		b.Eth1Data = &ethpb.Eth1Data{
 			DepositRoot: make([]byte, fieldparams.RootLength),
 			BlockHash:   make([]byte, 32),
+			Candidates:  make([]byte, 0),
 		}
 	}
 	if b.SyncAggregate == nil {

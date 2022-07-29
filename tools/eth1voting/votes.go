@@ -7,6 +7,7 @@ import (
 	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
 	v1alpha1 "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/block"
+	"github.com/waterfall-foundation/gwat/crypto"
 )
 
 type votes struct {

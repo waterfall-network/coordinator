@@ -4,13 +4,13 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/prysmaticlabs/prysm/config/params"
 	"github.com/prysmaticlabs/prysm/container/trie"
 	depositcontract "github.com/prysmaticlabs/prysm/contracts/deposit/mock"
 	"github.com/prysmaticlabs/prysm/runtime/interop"
 	"github.com/prysmaticlabs/prysm/testing/assert"
 	"github.com/prysmaticlabs/prysm/testing/require"
+	"github.com/waterfall-foundation/gwat/accounts/abi/bind"
 )
 
 func TestDepositTrieRoot_OK(t *testing.T) {

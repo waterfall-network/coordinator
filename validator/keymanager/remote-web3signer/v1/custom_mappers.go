@@ -3,12 +3,12 @@ package v1
 import (
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/prysm/network/forks"
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/time/slots"
+	"github.com/waterfall-foundation/gwat/common/hexutil"
 )
 
 // MapForkInfo maps the eth2.ForkInfo proto to the Web3Signer spec.
@@ -110,6 +110,7 @@ func MapBeaconBlockBody(body *ethpb.BeaconBlockBody) (*BeaconBlockBody, error) {
 			DepositRoot:  hexutil.Encode(body.Eth1Data.DepositRoot),
 			DepositCount: fmt.Sprint(body.Eth1Data.DepositCount),
 			BlockHash:    hexutil.Encode(body.Eth1Data.BlockHash),
+			Candidates:   hexutil.Encode(body.Eth1Data.Candidates),
 		},
 		Graffiti:          hexutil.Encode(body.Graffiti),
 		ProposerSlashings: make([]*ProposerSlashing, len(body.ProposerSlashings)),
@@ -327,6 +328,7 @@ func MapBeaconBlockBodyAltair(body *ethpb.BeaconBlockBodyAltair) (*BeaconBlockBo
 			DepositRoot:  hexutil.Encode(body.Eth1Data.DepositRoot),
 			DepositCount: fmt.Sprint(body.Eth1Data.DepositCount),
 			BlockHash:    hexutil.Encode(body.Eth1Data.BlockHash),
+			Candidates:   hexutil.Encode(body.Eth1Data.Candidates),
 		},
 		Graffiti:          hexutil.Encode(body.Graffiti),
 		ProposerSlashings: make([]*ProposerSlashing, len(body.ProposerSlashings)),

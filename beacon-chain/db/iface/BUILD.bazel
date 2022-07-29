@@ -16,7 +16,7 @@ go_library(
         "//monitoring/backup:go_default_library",
         "//proto/prysm/v1alpha1:go_default_library",
         "//proto/prysm/v1alpha1/block:go_default_library",
-        "@com_github_ethereum_go_ethereum//common:go_default_library",
+        "@com_github_waterfall_foundation_gwat//common:go_default_library",
         "@com_github_prysmaticlabs_eth2_types//:go_default_library",
     ],
 )

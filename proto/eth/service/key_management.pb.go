@@ -7,9 +7,9 @@
 package service
 
 import (
-	context "context"
-	reflect "reflect"
-	sync "sync"
+	"context"
+	"reflect"
+	"sync"
 
 	_ "github.com/golang/protobuf/protoc-gen-go/descriptor"
 	empty "github.com/golang/protobuf/ptypes/empty"

@@ -40,6 +40,7 @@ import (
 	prysmTime "github.com/prysmaticlabs/prysm/time"
 	"github.com/prysmaticlabs/prysm/time/slots"
 	"github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/gwat/dag/finalizer"
 	"go.opencensus.io/trace"
 )
 
@@ -54,6 +55,8 @@ type Service struct {
 	ctx         context.Context
 	cancel      context.CancelFunc
 	genesisTime time.Time
+	candidates  *finalizer.NrHashMap
+	creators    creatorsAssignment
 	head        *head
 	headLock    sync.RWMutex
 	// originBlockRoot is the genesis root, or weak subjectivity checkpoint root, depending on how the node is initialized
@@ -103,6 +106,7 @@ func NewService(ctx context.Context, opts ...Option) (*Service, error) {
 		initSyncBlocks:       make(map[[32]byte]block.SignedBeaconBlock),
 		cfg:                  &config{},
 		store:                &store.Store{},
+		candidates:           &finalizer.NrHashMap{},
 	}
 	for _, opt := range opts {
 		if err := opt(srv); err != nil {
@@ -509,6 +513,10 @@ func (s *Service) hasBlock(ctx context.Context, root [32]byte) bool {
 func spawnCountdownIfPreGenesis(ctx context.Context, genesisTime time.Time, db db.HeadAccessDatabase) {
 	currentTime := prysmTime.Now()
 	if currentTime.After(genesisTime) {
+		log.WithFields(logrus.Fields{
+			"genesisTime": genesisTime.Local(),
+			"currentTime": currentTime.Local(),
+		}).Warn("⏳ The genesis time is expired")
 		return
 	}
 

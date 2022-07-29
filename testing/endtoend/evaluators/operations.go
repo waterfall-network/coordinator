@@ -20,6 +20,7 @@ import (
 	"github.com/prysmaticlabs/prysm/testing/endtoend/policies"
 	e2etypes "github.com/prysmaticlabs/prysm/testing/endtoend/types"
 	"github.com/prysmaticlabs/prysm/testing/util"
+	"github.com/waterfall-foundation/gwat/dag/finalizer"
 	"golang.org/x/exp/rand"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"

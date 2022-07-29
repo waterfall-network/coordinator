@@ -21,6 +21,7 @@ func NewGenesisBlock(stateRoot []byte) *ethpb.SignedBeaconBlock {
 				Eth1Data: &ethpb.Eth1Data{
 					DepositRoot: make([]byte, 32),
 					BlockHash:   make([]byte, 32),
+					Candidates:  make([]byte, 0),
 				},
 				Graffiti: make([]byte, 32),
 			},

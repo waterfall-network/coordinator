@@ -13,13 +13,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	gethTypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethclient"
-	gethRPC "github.com/ethereum/go-ethereum/rpc"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -44,6 +37,15 @@ import (
 	prysmTime "github.com/prysmaticlabs/prysm/time"
 	"github.com/prysmaticlabs/prysm/time/slots"
 	"github.com/sirupsen/logrus"
+	ethereum "github.com/waterfall-foundation/gwat"
+	"github.com/waterfall-foundation/gwat/accounts/abi/bind"
+	"github.com/waterfall-foundation/gwat/common"
+	"github.com/waterfall-foundation/gwat/common/hexutil"
+	gethTypes "github.com/waterfall-foundation/gwat/core/types"
+	"github.com/waterfall-foundation/gwat/dag"
+	"github.com/waterfall-foundation/gwat/dag/finalizer"
+	"github.com/waterfall-foundation/gwat/ethclient"
+	gethRPC "github.com/waterfall-foundation/gwat/rpc"
 )
 
 var (
@@ -99,6 +101,10 @@ type POWBlockFetcher interface {
 	BlockHashByHeight(ctx context.Context, height *big.Int) (common.Hash, error)
 	BlockExists(ctx context.Context, hash common.Hash) (bool, *big.Int, error)
 	BlockExistsWithCache(ctx context.Context, hash common.Hash) (bool, *big.Int, error)
+
+	ExecutionDagSync(ctx context.Context, syncParams *dag.ConsensusInfo) (finalizer.NrHashMap, error)
+	ExecutionDagGetCandidates(ctx context.Context) (finalizer.NrHashMap, error)
+	ExecutionDagFinalize(ctx context.Context, syncParams *dag.ConsensusInfo) (*map[string]string, error)
 }
 
 // Chain defines a standard interface for the powchain service in Prysm.
@@ -440,14 +446,13 @@ func (s *Service) initDepositCaches(ctx context.Context, ctrs []*ethpb.DepositCo
 // updates the latest blockHeight, blockHash, and blockTime properties of the service.
 func (s *Service) processBlockHeader(header *gethTypes.Header) {
 	defer safelyHandlePanic()
-	blockNumberGauge.Set(float64(header.Number.Int64()))
-	s.latestEth1Data.BlockHeight = header.Number.Uint64()
+	blockNumberGauge.Set(float64(header.Nr()))
+	s.latestEth1Data.BlockHeight = header.Nr()
 	s.latestEth1Data.BlockHash = header.Hash().Bytes()
 	s.latestEth1Data.BlockTime = header.Time
 	log.WithFields(logrus.Fields{
 		"blockNumber": s.latestEth1Data.BlockHeight,
 		"blockHash":   hexutil.Encode(s.latestEth1Data.BlockHash),
-		"difficulty":  header.Difficulty.String(),
 	}).Debug("Latest eth1 chain event")
 }
 
@@ -511,15 +516,15 @@ func (s *Service) handleETH1FollowDistance() {
 	defer safelyHandlePanic()
 	ctx := s.ctx
 
-	// use a 5 minutes timeout for block time, because the max mining time is 278 sec (block 7208027)
-	// (analyzed the time of the block from 2018-09-01 to 2019-02-13)
-	fiveMinutesTimeout := prysmTime.Now().Add(-5 * time.Minute)
-	// check that web3 client is syncing
-	if time.Unix(int64(s.latestEth1Data.BlockTime), 0).Before(fiveMinutesTimeout) {
-		log.Warn("Execution client is not syncing")
-	}
+	//// use a 5 minutes timeout for block time, because the max mining time is 278 sec (block 7208027)
+	//// (analyzed the time of the block from 2018-09-01 to 2019-02-13)
+	//fiveMinutesTimeout := prysmTime.Now().Add(-5 * time.Minute)
+	//// check that web3 client is syncing
+	//if time.Unix(int64(s.latestEth1Data.BlockTime), 0).Before(fiveMinutesTimeout) {
+	//	log.Warn("Execution client is not syncing")
+	//}
 	if !s.chainStartData.Chainstarted {
-		if err := s.checkBlockNumberForChainStart(ctx, big.NewInt(int64(s.latestEth1Data.LastRequestedBlock))); err != nil {
+		if err := s.checkBlockNumberForChainStart(ctx, s.latestEth1Data.LastRequestedBlock); err != nil {
 			s.runError = err
 			log.Error(err)
 			return
@@ -570,7 +575,7 @@ func (s *Service) initPOWService() {
 				continue
 			}
 
-			s.latestEth1Data.BlockHeight = header.Number.Uint64()
+			s.latestEth1Data.BlockHeight = header.Nr()
 			s.latestEth1Data.BlockHash = header.Hash().Bytes()
 			s.latestEth1Data.BlockTime = header.Time
 
@@ -599,7 +604,7 @@ func (s *Service) initPOWService() {
 						errorLogger(err, "Unable to retrieve proof-of-stake genesis block data")
 						continue
 					}
-					genBlock = genHeader.Number.Uint64()
+					genBlock = genHeader.Nr()
 				}
 				s.chainStartData.GenesisBlock = genBlock
 				if err := s.savePowchainData(ctx); err != nil {

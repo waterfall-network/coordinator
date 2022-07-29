@@ -1,7 +1,7 @@
 package deposit
 
 import (
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/waterfall-foundation/gwat/accounts/abi/bind"
 )
 
 // NewDepositContractcallFromBoundContract creates a new instance of DepositContractCaller, bound to

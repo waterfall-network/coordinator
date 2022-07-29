@@ -12,6 +12,8 @@ import (
 	"github.com/prysmaticlabs/prysm/testing/assert"
 	"github.com/prysmaticlabs/prysm/testing/require"
 	"github.com/prysmaticlabs/prysm/testing/util"
+	"github.com/waterfall-foundation/gwat/common"
+	"github.com/waterfall-foundation/gwat/dag/finalizer"
 )
 
 func TestAltairSignedBeaconBlock_Signature(t *testing.T) {

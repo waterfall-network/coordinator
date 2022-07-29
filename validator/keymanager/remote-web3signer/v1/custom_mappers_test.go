@@ -4,13 +4,13 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/go-bitfield"
 	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	v1 "github.com/prysmaticlabs/prysm/validator/keymanager/remote-web3signer/v1"
 	"github.com/prysmaticlabs/prysm/validator/keymanager/remote-web3signer/v1/mock"
+	"github.com/waterfall-foundation/gwat/common/hexutil"
 )
 
 func TestMapAggregateAndProof(t *testing.T) {
@@ -239,6 +239,7 @@ func TestMapBeaconBlockAltair(t *testing.T) {
 							DepositRoot:  make([]byte, fieldparams.RootLength),
 							DepositCount: 0,
 							BlockHash:    make([]byte, 32),
+							Candidates:   make([]byte, 0),
 						},
 						Graffiti: make([]byte, 32),
 						ProposerSlashings: []*ethpb.ProposerSlashing{
@@ -374,6 +375,7 @@ func TestMapBeaconBlockBody(t *testing.T) {
 						DepositRoot:  make([]byte, fieldparams.RootLength),
 						DepositCount: 0,
 						BlockHash:    make([]byte, 32),
+						Candidates:   make([]byte, 0),
 					},
 					Graffiti: make([]byte, 32),
 					ProposerSlashings: []*ethpb.ProposerSlashing{

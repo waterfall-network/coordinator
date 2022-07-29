@@ -9,7 +9,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/p2p/enr"
 	ssz "github.com/ferranbt/fastssz"
 	bhost "github.com/libp2p/go-libp2p-blankhost"
 	core "github.com/libp2p/go-libp2p-core"
@@ -27,6 +26,7 @@ import (
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/metadata"
 	"github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/gwat/p2p/enr"
 	"google.golang.org/protobuf/proto"
 )
 

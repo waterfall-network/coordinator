@@ -5,12 +5,12 @@ import (
 	"math/big"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/common"
-	gethTypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prysmaticlabs/prysm/beacon-chain/powchain/types"
 	"github.com/prysmaticlabs/prysm/config/params"
+	"github.com/waterfall-foundation/gwat/common"
+	gethTypes "github.com/waterfall-foundation/gwat/core/types"
 	"k8s.io/client-go/tools/cache"
 )
 

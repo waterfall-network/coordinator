@@ -7,15 +7,17 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/holiman/uint256"
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/prysm/config/params"
 	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
 	pb "github.com/prysmaticlabs/prysm/proto/engine/v1"
 	"github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/gwat/common"
+	"github.com/waterfall-foundation/gwat/common/hexutil"
+	"github.com/waterfall-foundation/gwat/dag"
+	"github.com/waterfall-foundation/gwat/dag/finalizer"
+	"github.com/waterfall-foundation/gwat/rpc"
 	"go.opencensus.io/trace"
 )
 
@@ -54,6 +56,10 @@ type EngineCaller interface {
 	) error
 	ExecutionBlockByHash(ctx context.Context, hash common.Hash) (*pb.ExecutionBlock, error)
 	GetTerminalBlockHash(ctx context.Context) ([]byte, bool, error)
+
+	ExecutionDagSync(ctx context.Context, syncParams *dag.ConsensusInfo) (finalizer.NrHashMap, error)
+	ExecutionDagFinalize(ctx context.Context, syncParams *dag.ConsensusInfo) (*map[string]string, error)
+	ExecutionDagGetCandidates(ctx context.Context) (finalizer.NrHashMap, error)
 }
 
 // NewPayload calls the engine_newPayloadV1 method via JSON-RPC.

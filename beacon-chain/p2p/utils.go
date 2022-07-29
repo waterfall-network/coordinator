@@ -13,8 +13,6 @@ import (
 	"path"
 	"time"
 
-	gcrypto "github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/p2p/enr"
 	"github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/go-bitfield"
@@ -24,6 +22,8 @@ import (
 	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/metadata"
 	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/wrapper"
 	"github.com/sirupsen/logrus"
+	gcrypto "github.com/waterfall-foundation/gwat/crypto"
+	"github.com/waterfall-foundation/gwat/p2p/enr"
 	"google.golang.org/protobuf/proto"
 )
 

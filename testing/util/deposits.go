@@ -16,6 +16,8 @@ import (
 	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/runtime/interop"
+	"github.com/waterfall-foundation/gwat/common"
+	"github.com/waterfall-foundation/gwat/dag/finalizer"
 )
 
 var lock sync.Mutex
@@ -243,7 +245,13 @@ func DeterministicEth1Data(size int) (*ethpb.Eth1Data, error) {
 		return nil, errors.Wrap(err, "failed to create trie")
 	}
 	root := depositTrie.HashTreeRoot()
+
+	finHash := &common.Hash{}
+	finHash.SetBytes(root[:])
+	candidates := finalizer.NrHashMap{uint64(0): finHash}
+
 	eth1Data := &ethpb.Eth1Data{
+		Candidates:   candidates.ToBytes(),
 		BlockHash:    root[:],
 		DepositRoot:  root[:],
 		DepositCount: uint64(size),

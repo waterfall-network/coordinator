@@ -6,19 +6,18 @@ import (
 	"math"
 	"testing"
 
+	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/prysm/beacon-chain/state"
 	"github.com/prysmaticlabs/prysm/config/params"
 	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
+	v1 "github.com/prysmaticlabs/prysm/proto/engine/v1"
+	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/block"
 	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/wrapper"
 	"github.com/prysmaticlabs/prysm/runtime/version"
+	"github.com/prysmaticlabs/prysm/testing/require"
 	"github.com/prysmaticlabs/prysm/testing/util"
 	"github.com/prysmaticlabs/prysm/time/slots"
-
-	types "github.com/prysmaticlabs/eth2-types"
-	v1 "github.com/prysmaticlabs/prysm/proto/engine/v1"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/prysmaticlabs/prysm/testing/require"
 )
 
 func TestSlotFromBlock(t *testing.T) {
@@ -302,7 +301,7 @@ func testBlockGenesis() *ethpb.SignedBeaconBlock {
 				Eth1Data: &ethpb.Eth1Data{
 					DepositRoot:  make([]byte, 32),
 					DepositCount: 0,
-					BlockHash:    make([]byte, 32),
+					Candidates:   make([]byte, 0),
 				},
 			},
 		},
@@ -329,7 +328,7 @@ func testBlockAltair() *ethpb.SignedBeaconBlockAltair {
 				Eth1Data: &ethpb.Eth1Data{
 					DepositRoot:  make([]byte, 32),
 					DepositCount: 0,
-					BlockHash:    make([]byte, 32),
+					Candidates:   make([]byte, 0),
 				},
 				Graffiti:          make([]byte, 32),
 				ProposerSlashings: []*ethpb.ProposerSlashing{},
@@ -366,7 +365,7 @@ func testBlockBellatrix() *ethpb.SignedBeaconBlockBellatrix {
 				Eth1Data: &ethpb.Eth1Data{
 					DepositRoot:  make([]byte, 32),
 					DepositCount: 0,
-					BlockHash:    make([]byte, 32),
+					Candidates:   make([]byte, 0),
 				},
 				Graffiti:          make([]byte, 32),
 				ProposerSlashings: []*ethpb.ProposerSlashing{},

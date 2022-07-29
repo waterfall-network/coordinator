@@ -5,10 +5,10 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethclient"
 	e2etypes "github.com/prysmaticlabs/prysm/testing/endtoend/types"
+	"github.com/waterfall-foundation/gwat/accounts/keystore"
+	"github.com/waterfall-foundation/gwat/core/types"
+	"github.com/waterfall-foundation/gwat/ethclient"
 )
 
 // NetworkId is the ID of the ETH1 chain.

@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/prysm/beacon-chain/powchain/types"
 	"github.com/prysmaticlabs/prysm/config/params"
 	"github.com/prysmaticlabs/prysm/monitoring/tracing"
+	"github.com/waterfall-foundation/gwat/common"
 	"go.opencensus.io/trace"
 )
 
@@ -42,7 +42,7 @@ func (s *Service) BlockExists(ctx context.Context, hash common.Hash) (bool, *big
 		return false, big.NewInt(0), err
 	}
 
-	return true, new(big.Int).Set(header.Number), nil
+	return true, new(big.Int).SetUint64(header.Nr()), nil
 }
 
 // BlockExistsWithCache returns true if the block exists in cache, its height and any possible error encountered.
@@ -116,6 +116,15 @@ func (s *Service) BlockByTimestamp(ctx context.Context, time uint64) (*types.Hea
 
 	latestBlkHeight := s.latestEth1Data.BlockHeight
 	latestBlkTime := s.latestEth1Data.BlockTime
+
+	if latestBlkHeight == 0 {
+		hi := &types.HeaderInfo{
+			Number: new(big.Int).SetInt64(0),
+			Hash:   common.BytesToHash(s.latestEth1Data.BlockHash),
+			Time:   latestBlkTime,
+		}
+		return hi, nil
+	}
 
 	if time > latestBlkTime {
 		return nil, errors.New("provided time is later than the current eth1 head")

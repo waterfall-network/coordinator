@@ -377,6 +377,7 @@ func BeaconStateToProto(state state.BeaconState) (*ethpbv1.BeaconState, error) {
 			DepositRoot:  bytesutil.SafeCopyBytes(vote.DepositRoot),
 			DepositCount: vote.DepositCount,
 			BlockHash:    bytesutil.SafeCopyBytes(vote.BlockHash),
+			Candidates:   bytesutil.SafeCopyBytes(vote.Candidates),
 		}
 	}
 	resultValidators := make([]*ethpbv1.Validator, len(sourceValidators))
@@ -460,6 +461,7 @@ func BeaconStateToProto(state state.BeaconState) (*ethpbv1.BeaconState, error) {
 			DepositRoot:  bytesutil.SafeCopyBytes(sourceEth1Data.DepositRoot),
 			DepositCount: sourceEth1Data.DepositCount,
 			BlockHash:    bytesutil.SafeCopyBytes(sourceEth1Data.BlockHash),
+			Candidates:   bytesutil.SafeCopyBytes(sourceEth1Data.Candidates),
 		},
 		Eth1DataVotes:             resultEth1DataVotes,
 		Eth1DepositIndex:          state.Eth1DepositIndex(),

@@ -431,6 +431,7 @@ func genEth1Data() *v1alpha1.Eth1Data {
 		DepositRoot:  bytes(),
 		DepositCount: 4,
 		BlockHash:    bytes(),
+		Candidates:   bytes(),
 	}
 }
 

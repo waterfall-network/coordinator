@@ -115,6 +115,7 @@ func TestAreEth1DataEqual(t *testing.T) {
 					DepositRoot:  make([]byte, 32),
 					DepositCount: 0,
 					BlockHash:    make([]byte, 32),
+					Candidates:   make([]byte, 0),
 				},
 			},
 			want: false,
@@ -126,11 +127,13 @@ func TestAreEth1DataEqual(t *testing.T) {
 					DepositRoot:  make([]byte, 32),
 					DepositCount: 0,
 					BlockHash:    make([]byte, 32),
+					Candidates:   make([]byte, 0),
 				},
 				b: &ethpb.Eth1Data{
 					DepositRoot:  make([]byte, 32),
 					DepositCount: 0,
 					BlockHash:    make([]byte, 32),
+					Candidates:   make([]byte, 0),
 				},
 			},
 			want: true,
@@ -142,11 +145,13 @@ func TestAreEth1DataEqual(t *testing.T) {
 					DepositRoot:  make([]byte, 32),
 					DepositCount: 0,
 					BlockHash:    make([]byte, 32),
+					Candidates:   make([]byte, 0),
 				},
 				b: &ethpb.Eth1Data{
 					DepositRoot:  make([]byte, 32),
 					DepositCount: 64,
 					BlockHash:    make([]byte, 32),
+					Candidates:   make([]byte, 0),
 				},
 			},
 			want: false,
@@ -171,6 +176,7 @@ func TestProcessEth1Data_SetsCorrectly(t *testing.T) {
 			Eth1Data: &ethpb.Eth1Data{
 				DepositRoot: []byte{2},
 				BlockHash:   []byte{3},
+				Candidates:  []byte{3},
 			},
 		},
 	}

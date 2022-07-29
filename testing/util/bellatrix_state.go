@@ -15,6 +15,7 @@ import (
 	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
 	enginev1 "github.com/prysmaticlabs/prysm/proto/engine/v1"
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/gwat/dag/finalizer"
 )
 
 // DeterministicGenesisStateBellatrix returns a genesis state in Bellatrix format made using the deterministic deposits.
@@ -187,6 +188,7 @@ func buildGenesisBeaconStateBellatrix(genesisTime uint64, preState state.BeaconS
 		Eth1Data: &ethpb.Eth1Data{
 			DepositRoot: make([]byte, 32),
 			BlockHash:   make([]byte, 32),
+			Candidates:  make([]byte, 0),
 		},
 		Graffiti: make([]byte, 32),
 		SyncAggregate: &ethpb.SyncAggregate{

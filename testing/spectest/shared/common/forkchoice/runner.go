@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/golang/snappy"
 	types "github.com/prysmaticlabs/eth2-types"
 	forkchoicetypes "github.com/prysmaticlabs/prysm/beacon-chain/forkchoice/types"
@@ -27,6 +26,7 @@ import (
 	"github.com/prysmaticlabs/prysm/testing/spectest/utils"
 	"github.com/prysmaticlabs/prysm/testing/util"
 	"github.com/prysmaticlabs/prysm/time/slots"
+	"github.com/waterfall-foundation/gwat/common"
 )
 
 // Run executes "forkchoice" test.

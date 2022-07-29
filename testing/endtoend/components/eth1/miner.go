@@ -13,10 +13,6 @@ import (
 	"time"
 
 	"github.com/bazelbuild/rules_go/go/tools/bazel"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/prysm/config/params"
 	contracts "github.com/prysmaticlabs/prysm/contracts/deposit/mock"
@@ -25,6 +21,10 @@ import (
 	e2e "github.com/prysmaticlabs/prysm/testing/endtoend/params"
 	e2etypes "github.com/prysmaticlabs/prysm/testing/endtoend/types"
 	log "github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/gwat/accounts/abi/bind"
+	"github.com/waterfall-foundation/gwat/accounts/keystore"
+	"github.com/waterfall-foundation/gwat/ethclient"
+	"github.com/waterfall-foundation/gwat/rpc"
 )
 
 // Miner represents an ETH1 node which mines blocks.
@@ -114,13 +114,13 @@ func (m *Miner) Start(ctx context.Context) error {
 		fmt.Sprintf("--port=%d", e2e.TestParams.Ports.Eth1Port),
 		fmt.Sprintf("--networkid=%d", NetworkId),
 		"--http",
-		"--http.api=engine,net,eth",
+		"--http.api=engine,net,eth,dag",
 		"--http.addr=127.0.0.1",
 		"--http.corsdomain=\"*\"",
 		"--http.vhosts=\"*\"",
 		"--rpc.allow-unprotected-txs",
 		"--ws",
-		"--ws.api=net,eth,engine",
+		"--ws.api=net,eth,engine,dag",
 		"--ws.addr=127.0.0.1",
 		"--ws.origins=\"*\"",
 		"--ipcdisable",

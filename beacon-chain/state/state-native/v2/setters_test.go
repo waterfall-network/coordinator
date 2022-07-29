@@ -77,6 +77,7 @@ func TestBeaconState_AppendBalanceWithTrie(t *testing.T) {
 		Eth1Data: &ethpb.Eth1Data{
 			DepositRoot: make([]byte, fieldparams.RootLength),
 			BlockHash:   make([]byte, fieldparams.RootLength),
+			Candidates:  make([]byte, 0),
 		},
 		BlockRoots:                  mockblockRoots,
 		StateRoots:                  mockstateRoots,

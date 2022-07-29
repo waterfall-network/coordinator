@@ -7,10 +7,6 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	gethTypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/prysm/beacon-chain/core/feed"
 	statefeed "github.com/prysmaticlabs/prysm/beacon-chain/core/feed/state"
@@ -24,6 +20,11 @@ import (
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/time/slots"
 	"github.com/sirupsen/logrus"
+	ethereum "github.com/waterfall-foundation/gwat"
+	"github.com/waterfall-foundation/gwat/accounts/abi/bind"
+	"github.com/waterfall-foundation/gwat/common"
+	gethTypes "github.com/waterfall-foundation/gwat/core/types"
+	"github.com/waterfall-foundation/gwat/dag/finalizer"
 )
 
 var (
@@ -49,13 +50,13 @@ func (s *Service) Eth2GenesisPowchainInfo() (uint64, *big.Int) {
 }
 
 // ProcessETH1Block processes the logs from the provided eth1Block.
-func (s *Service) ProcessETH1Block(ctx context.Context, blkNum *big.Int) error {
+func (s *Service) ProcessETH1Block(ctx context.Context, blkNum uint64) error {
 	query := ethereum.FilterQuery{
 		Addresses: []common.Address{
 			s.cfg.depositContractAddr,
 		},
-		FromBlock: blkNum,
-		ToBlock:   blkNum,
+		FromBlock: new(big.Int).SetUint64(blkNum),
+		ToBlock:   new(big.Int).SetUint64(blkNum),
 	}
 	logs, err := s.httpLogger.FilterLogs(ctx, query)
 	if err != nil {
@@ -63,7 +64,7 @@ func (s *Service) ProcessETH1Block(ctx context.Context, blkNum *big.Int) error {
 	}
 	for _, filterLog := range logs {
 		// ignore logs that are not of the required block number
-		if filterLog.BlockNumber != blkNum.Uint64() {
+		if filterLog.BlockNumber != blkNum {
 			continue
 		}
 		if err := s.ProcessLog(ctx, filterLog); err != nil {
@@ -207,9 +208,9 @@ func (s *Service) ProcessDepositLog(ctx context.Context, depositLog gethTypes.Lo
 
 // ProcessChainStart processes the log which had been received from
 // the ETH1.0 chain by trying to determine when to start the beacon chain.
-func (s *Service) ProcessChainStart(genesisTime uint64, eth1BlockHash [32]byte, blockNumber *big.Int) {
+func (s *Service) ProcessChainStart(genesisTime uint64, eth1BlockHash [32]byte, blockNumber uint64) {
 	s.chainStartData.Chainstarted = true
-	s.chainStartData.GenesisBlock = blockNumber.Uint64()
+	s.chainStartData.GenesisBlock = blockNumber
 
 	chainStartTime := time.Unix(int64(genesisTime), 0) // lint:ignore uintcast -- Genesis time wont exceed int64 in your lifetime.
 
@@ -222,10 +223,16 @@ func (s *Service) ProcessChainStart(genesisTime uint64, eth1BlockHash [32]byte, 
 	}
 
 	root := s.depositTrie.HashTreeRoot()
+
+	hash := common.Hash{}
+	hash.SetBytes(eth1BlockHash[:])
+	candidates := finalizer.NrHashMap{blockNumber: &hash}
+
 	s.chainStartData.Eth1Data = &ethpb.Eth1Data{
 		DepositCount: uint64(len(s.chainStartData.ChainstartDeposits)),
 		DepositRoot:  root[:],
 		BlockHash:    eth1BlockHash[:],
+		Candidates:   candidates.ToBytes(),
 	}
 
 	log.WithFields(logrus.Fields{
@@ -278,7 +285,7 @@ func (s *Service) processPastLogs(ctx context.Context) error {
 		}
 		for _, h := range headers {
 			if h != nil && h.Number != nil {
-				headersMap[h.Number.Uint64()] = h
+				headersMap[h.Nr()] = h
 			}
 		}
 		return nil
@@ -417,7 +424,7 @@ func (s *Service) requestBatchedHeadersAndLogs(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-		err = s.ProcessETH1Block(ctx, big.NewInt(0).SetUint64(i))
+		err = s.ProcessETH1Block(ctx, i)
 		if err != nil {
 			return err
 		}
@@ -443,8 +450,8 @@ func (s *Service) retrieveBlockHashAndTime(ctx context.Context, blkNum *big.Int)
 }
 
 // checkBlockNumberForChainStart checks the given block number for if chainstart has occurred.
-func (s *Service) checkBlockNumberForChainStart(ctx context.Context, blkNum *big.Int) error {
-	bHash, timeStamp, err := s.retrieveBlockHashAndTime(ctx, blkNum)
+func (s *Service) checkBlockNumberForChainStart(ctx context.Context, blkNum uint64) error {
+	bHash, timeStamp, err := s.retrieveBlockHashAndTime(ctx, new(big.Int).SetUint64(blkNum))
 	if err != nil {
 		return err
 	}
@@ -453,7 +460,7 @@ func (s *Service) checkBlockNumberForChainStart(ctx context.Context, blkNum *big
 }
 
 func (s *Service) checkHeaderForChainstart(ctx context.Context, header *gethTypes.Header) {
-	s.checkForChainstart(ctx, header.Hash(), header.Number, header.Time)
+	s.checkForChainstart(ctx, header.Hash(), header.Nr(), header.Time)
 }
 
 func (s *Service) checkHeaderRange(ctx context.Context, start, end uint64, headersMap map[uint64]*gethTypes.Header,
@@ -489,7 +496,7 @@ func (s *Service) currentCountAndTime(ctx context.Context, blockTime uint64) (ui
 	return valCount, createGenesisTime(blockTime)
 }
 
-func (s *Service) checkForChainstart(ctx context.Context, blockHash [32]byte, blockNumber *big.Int, blockTime uint64) {
+func (s *Service) checkForChainstart(ctx context.Context, blockHash [32]byte, blockNumber uint64, blockTime uint64) {
 	valCount, genesisTime := s.currentCountAndTime(ctx, blockTime)
 	if valCount == 0 {
 		return

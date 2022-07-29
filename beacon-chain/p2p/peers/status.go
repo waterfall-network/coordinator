@@ -28,7 +28,6 @@ import (
 	"sort"
 	"time"
 
-	"github.com/ethereum/go-ethereum/p2p/enr"
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
 	ma "github.com/multiformats/go-multiaddr"
@@ -45,6 +44,7 @@ import (
 	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/metadata"
 	prysmTime "github.com/prysmaticlabs/prysm/time"
 	"github.com/prysmaticlabs/prysm/time/slots"
+	"github.com/waterfall-foundation/gwat/p2p/enr"
 )
 
 const (

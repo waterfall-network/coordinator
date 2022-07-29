@@ -13,6 +13,8 @@ import (
 	"github.com/prysmaticlabs/prysm/testing/assert"
 	"github.com/prysmaticlabs/prysm/testing/require"
 	"github.com/prysmaticlabs/prysm/testing/util"
+	"github.com/waterfall-foundation/gwat/common"
+	"github.com/waterfall-foundation/gwat/dag/finalizer"
 )
 
 var (
@@ -94,10 +96,16 @@ func Test_V1Alpha1ToV1SignedBlock(t *testing.T) {
 	alphaBlock.Block.ParentRoot = parentRoot
 	alphaBlock.Block.StateRoot = stateRoot
 	alphaBlock.Block.Body.RandaoReveal = randaoReveal
+
+	finHash := &common.Hash{}
+	finHash.SetBytes(blockHash)
+	candidates := finalizer.NrHashMap{uint64(slot): finHash}
+
 	alphaBlock.Block.Body.Eth1Data = &ethpbalpha.Eth1Data{
 		DepositRoot:  depositRoot,
 		DepositCount: depositCount,
 		BlockHash:    blockHash,
+		Candidates:   candidates.ToBytes(),
 	}
 	alphaBlock.Signature = signature
 
@@ -117,10 +125,16 @@ func Test_V1ToV1Alpha1SignedBlock(t *testing.T) {
 	v1Block.Block.ParentRoot = parentRoot
 	v1Block.Block.StateRoot = stateRoot
 	v1Block.Block.Body.RandaoReveal = randaoReveal
+
+	finHash := &common.Hash{}
+	finHash.SetBytes(blockHash)
+	candidates := finalizer.NrHashMap{uint64(slot): finHash}
+
 	v1Block.Block.Body.Eth1Data = &ethpbv1.Eth1Data{
 		DepositRoot:  depositRoot,
 		DepositCount: depositCount,
 		BlockHash:    blockHash,
+		Candidates:   candidates.ToBytes(),
 	}
 	v1Block.Signature = signature
 
@@ -140,10 +154,16 @@ func Test_V1ToV1Alpha1Block(t *testing.T) {
 	alphaBlock.ParentRoot = parentRoot
 	alphaBlock.StateRoot = stateRoot
 	alphaBlock.Body.RandaoReveal = randaoReveal
+
+	finHash := &common.Hash{}
+	finHash.SetBytes(blockHash)
+	candidates := finalizer.NrHashMap{uint64(slot): finHash}
+
 	alphaBlock.Body.Eth1Data = &ethpbalpha.Eth1Data{
 		DepositRoot:  depositRoot,
 		DepositCount: depositCount,
 		BlockHash:    blockHash,
+		Candidates:   candidates.ToBytes(),
 	}
 
 	v1Block, err := V1Alpha1ToV1Block(alphaBlock)
@@ -357,10 +377,16 @@ func Test_BlockInterfaceToV1Block(t *testing.T) {
 	v1Alpha1Block.Block.ParentRoot = parentRoot
 	v1Alpha1Block.Block.StateRoot = stateRoot
 	v1Alpha1Block.Block.Body.RandaoReveal = randaoReveal
+
+	finHash := &common.Hash{}
+	finHash.SetBytes(blockHash)
+	candidates := finalizer.NrHashMap{uint64(slot): finHash}
+
 	v1Alpha1Block.Block.Body.Eth1Data = &ethpbalpha.Eth1Data{
 		DepositRoot:  depositRoot,
 		DepositCount: depositCount,
 		BlockHash:    blockHash,
+		Candidates:   candidates.ToBytes(),
 	}
 	v1Alpha1Block.Signature = signature
 
@@ -471,15 +497,27 @@ func TestBeaconStateToProto(t *testing.T) {
 		state.BlockRoots = [][]byte{bytesutil.PadTo([]byte("blockroots"), 32)}
 		state.StateRoots = [][]byte{bytesutil.PadTo([]byte("stateroots"), 32)}
 		state.HistoricalRoots = [][]byte{bytesutil.PadTo([]byte("historicalroots"), 32)}
+
+		finHash := &common.Hash{}
+		finHash.SetBytes(bytesutil.PadTo([]byte("e1dblockhash"), 32))
+		candidates := finalizer.NrHashMap{uint64(17): finHash}
+
 		state.Eth1Data = &ethpbalpha.Eth1Data{
 			DepositRoot:  bytesutil.PadTo([]byte("e1ddepositroot"), 32),
 			DepositCount: 6,
 			BlockHash:    bytesutil.PadTo([]byte("e1dblockhash"), 32),
+			Candidates:   candidates.ToBytes(),
 		}
+
+		finHash = &common.Hash{}
+		finHash.SetBytes(bytesutil.PadTo([]byte("e1dvblockhash"), 32))
+		candidates = finalizer.NrHashMap{uint64(24): finHash}
+
 		state.Eth1DataVotes = []*ethpbalpha.Eth1Data{{
 			DepositRoot:  bytesutil.PadTo([]byte("e1dvdepositroot"), 32),
 			DepositCount: 7,
 			BlockHash:    bytesutil.PadTo([]byte("e1dvblockhash"), 32),
+			Candidates:   candidates.ToBytes(),
 		}}
 		state.Eth1DepositIndex = 8
 		state.Validators = []*ethpbalpha.Validator{{
@@ -574,12 +612,24 @@ func TestBeaconStateToProto(t *testing.T) {
 	assert.DeepEqual(t, bytesutil.PadTo([]byte("e1ddepositroot"), 32), resultEth1Data.DepositRoot)
 	assert.Equal(t, uint64(6), resultEth1Data.DepositCount)
 	assert.DeepEqual(t, bytesutil.PadTo([]byte("e1dblockhash"), 32), resultEth1Data.BlockHash)
+
+	finHash := &common.Hash{}
+	finHash.SetBytes(bytesutil.PadTo([]byte("e1dblockhash"), 32))
+	candidates := finalizer.NrHashMap{uint64(17): finHash}
+	assert.DeepEqual(t, candidates.ToBytes(), resultEth1Data.Candidates)
+
 	require.Equal(t, 1, len(result.Eth1DataVotes))
 	resultEth1DataVote := result.Eth1DataVotes[0]
 	require.NotNil(t, resultEth1DataVote)
 	assert.DeepEqual(t, bytesutil.PadTo([]byte("e1dvdepositroot"), 32), resultEth1DataVote.DepositRoot)
 	assert.Equal(t, uint64(7), resultEth1DataVote.DepositCount)
 	assert.DeepEqual(t, bytesutil.PadTo([]byte("e1dvblockhash"), 32), resultEth1DataVote.BlockHash)
+
+	candidates = finalizer.NrHashMap{}
+	candidates.SetBytes(resultEth1DataVote.Candidates)
+	fHash := (*candidates.GetHashes())[len(*candidates.GetHashes())-1]
+	assert.DeepEqual(t, bytesutil.PadTo([]byte("e1dvblockhash"), 32), fHash.Bytes())
+
 	assert.Equal(t, uint64(8), result.Eth1DepositIndex)
 	require.Equal(t, 1, len(result.Validators))
 	resultValidator := result.Validators[0]

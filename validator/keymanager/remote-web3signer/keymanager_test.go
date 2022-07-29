@@ -7,7 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
 	"github.com/prysmaticlabs/prysm/crypto/bls"
 	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
@@ -17,6 +16,7 @@ import (
 	"github.com/prysmaticlabs/prysm/validator/keymanager/remote-web3signer/internal"
 	"github.com/prysmaticlabs/prysm/validator/keymanager/remote-web3signer/v1/mock"
 	"github.com/stretchr/testify/assert"
+	"github.com/waterfall-foundation/gwat/common/hexutil"
 )
 
 type MockClient struct {

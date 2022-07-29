@@ -7,6 +7,6 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//config/fieldparams:go_default_library",
-        "@com_github_ethereum_go_ethereum//common:go_default_library",
+        "@com_github_waterfall_foundation_gwat//common:go_default_library",
     ],
 )

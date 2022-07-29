@@ -11,6 +11,8 @@ import (
 	v1 "github.com/prysmaticlabs/prysm/beacon-chain/state/v1"
 	"github.com/prysmaticlabs/prysm/config/params"
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/gwat/common"
+	"github.com/waterfall-foundation/gwat/dag/finalizer"
 )
 
 // GenesisBeaconState gets called when MinGenesisActiveValidatorCount count of
@@ -118,8 +120,10 @@ func OptimizedGenesisBeaconState(genesisTime uint64, preState state.BeaconState,
 		GenesisValidatorsRoot: genesisValidatorsRoot[:],
 
 		Fork: &ethpb.Fork{
-			PreviousVersion: params.BeaconConfig().GenesisForkVersion,
-			CurrentVersion:  params.BeaconConfig().GenesisForkVersion,
+			//PreviousVersion: params.BeaconConfig().GenesisForkVersion,
+			//CurrentVersion:  params.BeaconConfig().GenesisForkVersion,
+			PreviousVersion: params.PyrmontConfig().GenesisForkVersion,
+			CurrentVersion:  params.PyrmontConfig().GenesisForkVersion,
 			Epoch:           0,
 		},
 
@@ -139,23 +143,31 @@ func OptimizedGenesisBeaconState(genesisTime uint64, preState state.BeaconState,
 			Epoch: 0,
 			Root:  params.BeaconConfig().ZeroHash[:],
 		},
-		JustificationBits: []byte{0},
+		JustificationBits: []byte{0, 0, 0, 0},
 		FinalizedCheckpoint: &ethpb.Checkpoint{
 			Epoch: 0,
 			Root:  params.BeaconConfig().ZeroHash[:],
 		},
 
-		HistoricalRoots:           [][]byte{},
-		BlockRoots:                blockRoots,
-		StateRoots:                stateRoots,
-		Slashings:                 slashings,
-		CurrentEpochAttestations:  []*ethpb.PendingAttestation{},
-		PreviousEpochAttestations: []*ethpb.PendingAttestation{},
+		//HistoricalRoots: [][]byte{},
+		HistoricalRoots: make([][]byte, 0, 16777216),
+		BlockRoots:      blockRoots,
+		StateRoots:      stateRoots,
+		Slashings:       slashings,
+		//CurrentEpochAttestations: []*ethpb.PendingAttestation{},
+		CurrentEpochAttestations: make([]*ethpb.PendingAttestation, 0, 4096),
+		//PreviousEpochAttestations: []*ethpb.PendingAttestation{},
+		PreviousEpochAttestations: make([]*ethpb.PendingAttestation, 0, 4096),
 
 		// Eth1 data.
-		Eth1Data:         eth1Data,
+		Eth1Data: &ethpb.Eth1Data{
+			DepositRoot:  eth1Data.GetDepositRoot(),
+			DepositCount: 0,
+			BlockHash:    eth1Data.GetBlockHash(),
+			Candidates:   eth1Data.GetCandidates(),
+		},
 		Eth1DataVotes:    []*ethpb.Eth1Data{},
-		Eth1DepositIndex: preState.Eth1DepositIndex(),
+		Eth1DepositIndex: 0,
 	}
 
 	bodyRoot, err := (&ethpb.BeaconBlockBody{
@@ -163,6 +175,7 @@ func OptimizedGenesisBeaconState(genesisTime uint64, preState state.BeaconState,
 		Eth1Data: &ethpb.Eth1Data{
 			DepositRoot: make([]byte, 32),
 			BlockHash:   make([]byte, 32),
+			Candidates:  make([]byte, 0),
 		},
 		Graffiti: make([]byte, 32),
 	}).HashTreeRoot()
@@ -171,9 +184,11 @@ func OptimizedGenesisBeaconState(genesisTime uint64, preState state.BeaconState,
 	}
 
 	state.LatestBlockHeader = &ethpb.BeaconBlockHeader{
-		ParentRoot: zeroHash,
-		StateRoot:  zeroHash,
-		BodyRoot:   bodyRoot[:],
+		Slot:          0,
+		ProposerIndex: 0,
+		ParentRoot:    zeroHash,
+		StateRoot:     zeroHash,
+		BodyRoot:      bodyRoot[:],
 	}
 
 	return v1.InitializeFromProto(state)

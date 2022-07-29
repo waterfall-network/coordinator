@@ -10,10 +10,17 @@ import (
 	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/wrapper"
 	"github.com/prysmaticlabs/prysm/testing/assert"
 	"github.com/prysmaticlabs/prysm/testing/require"
+	"github.com/waterfall-foundation/gwat/common"
+	"github.com/waterfall-foundation/gwat/dag/finalizer"
 )
 
 func TestBeaconBlockHeaderFromBlock(t *testing.T) {
 	hashLen := 32
+
+	finHash := &common.Hash{}
+	finHash.SetBytes(bytesutil.PadTo([]byte("block hash"), hashLen))
+	candidates := finalizer.NrHashMap{uint64(200): finHash}
+
 	blk := &eth.BeaconBlock{
 		Slot:          200,
 		ProposerIndex: 2,
@@ -22,6 +29,7 @@ func TestBeaconBlockHeaderFromBlock(t *testing.T) {
 		Body: &eth.BeaconBlockBody{
 			Eth1Data: &eth.Eth1Data{
 				BlockHash:    bytesutil.PadTo([]byte("block hash"), hashLen),
+				Candidates:   candidates.ToBytes(),
 				DepositRoot:  bytesutil.PadTo([]byte("deposit root"), hashLen),
 				DepositCount: 1,
 			},
@@ -51,6 +59,11 @@ func TestBeaconBlockHeaderFromBlock(t *testing.T) {
 
 func TestBeaconBlockHeaderFromBlockInterface(t *testing.T) {
 	hashLen := 32
+
+	finHash := &common.Hash{}
+	finHash.SetBytes(bytesutil.PadTo([]byte("block hash"), hashLen))
+	candidates := finalizer.NrHashMap{uint64(200): finHash}
+
 	blk := &eth.BeaconBlock{
 		Slot:          200,
 		ProposerIndex: 2,
@@ -59,6 +72,7 @@ func TestBeaconBlockHeaderFromBlockInterface(t *testing.T) {
 		Body: &eth.BeaconBlockBody{
 			Eth1Data: &eth.Eth1Data{
 				BlockHash:    bytesutil.PadTo([]byte("block hash"), hashLen),
+				Candidates:   candidates.ToBytes(),
 				DepositRoot:  bytesutil.PadTo([]byte("deposit root"), hashLen),
 				DepositCount: 1,
 			},
@@ -100,6 +114,11 @@ func TestBeaconBlockHeaderFromBlock_NilBlockBody(t *testing.T) {
 
 func TestSignedBeaconBlockHeaderFromBlock(t *testing.T) {
 	hashLen := 32
+
+	finHash := &common.Hash{}
+	finHash.SetBytes(bytesutil.PadTo([]byte("block hash"), hashLen))
+	candidates := finalizer.NrHashMap{uint64(200): finHash}
+
 	blk := &eth.SignedBeaconBlock{Block: &eth.BeaconBlock{
 		Slot:          200,
 		ProposerIndex: 2,
@@ -108,6 +127,7 @@ func TestSignedBeaconBlockHeaderFromBlock(t *testing.T) {
 		Body: &eth.BeaconBlockBody{
 			Eth1Data: &eth.Eth1Data{
 				BlockHash:    bytesutil.PadTo([]byte("block hash"), hashLen),
+				Candidates:   candidates.ToBytes(),
 				DepositRoot:  bytesutil.PadTo([]byte("deposit root"), hashLen),
 				DepositCount: 1,
 			},
@@ -141,6 +161,11 @@ func TestSignedBeaconBlockHeaderFromBlock(t *testing.T) {
 
 func TestSignedBeaconBlockHeaderFromBlockInterface(t *testing.T) {
 	hashLen := 32
+
+	finHash := &common.Hash{}
+	finHash.SetBytes(bytesutil.PadTo([]byte("block hash"), hashLen))
+	candidates := finalizer.NrHashMap{uint64(200): finHash}
+
 	blk := &eth.SignedBeaconBlock{Block: &eth.BeaconBlock{
 		Slot:          200,
 		ProposerIndex: 2,
@@ -149,6 +174,7 @@ func TestSignedBeaconBlockHeaderFromBlockInterface(t *testing.T) {
 		Body: &eth.BeaconBlockBody{
 			Eth1Data: &eth.Eth1Data{
 				BlockHash:    bytesutil.PadTo([]byte("block hash"), hashLen),
+				Candidates:   candidates.ToBytes(),
 				DepositRoot:  bytesutil.PadTo([]byte("deposit root"), hashLen),
 				DepositCount: 1,
 			},

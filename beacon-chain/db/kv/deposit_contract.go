@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/waterfall-foundation/gwat/common"
 	bolt "go.etcd.io/bbolt"
 	"go.opencensus.io/trace"
 )

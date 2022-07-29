@@ -94,8 +94,10 @@ func ProcessBlockHeader(
 func ProcessBlockHeaderNoVerify(
 	ctx context.Context,
 	beaconState state.BeaconState,
-	slot types.Slot, proposerIndex types.ValidatorIndex,
-	parentRoot, bodyRoot []byte,
+	slot types.Slot,
+	proposerIndex types.ValidatorIndex,
+	parentRoot,
+	bodyRoot []byte,
 ) (state.BeaconState, error) {
 	if beaconState.Slot() != slot {
 		return nil, fmt.Errorf("state slot: %d is different than block slot: %d", beaconState.Slot(), slot)

@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/prysmaticlabs/prysm/async/event"
 	"github.com/prysmaticlabs/prysm/beacon-chain/blockchain/store"
 	mock "github.com/prysmaticlabs/prysm/beacon-chain/blockchain/testing"
@@ -38,6 +37,7 @@ import (
 	"github.com/prysmaticlabs/prysm/testing/util"
 	"github.com/prysmaticlabs/prysm/time/slots"
 	logTest "github.com/sirupsen/logrus/hooks/test"
+	"github.com/waterfall-foundation/gwat/common"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -97,6 +97,7 @@ func setupBeaconChain(t *testing.T, beaconDB db.Database) *Service {
 				DepositRoot:  make([]byte, 32),
 				DepositCount: 0,
 				BlockHash:    make([]byte, 32),
+				Candidates:   make([]byte, 0),
 			},
 		},
 		DepositContainers: []*ethpb.DepositContainer{},
@@ -228,12 +229,13 @@ func TestChainService_InitializeBeaconChain(t *testing.T) {
 		DepositRoot:  hashTreeRoot[:],
 		DepositCount: uint64(len(deposits)),
 		BlockHash:    make([]byte, 32),
+		Candidates:   make([]byte, 0),
 	})
 	require.NoError(t, err)
 	genState, err = b.ProcessPreGenesisDeposits(ctx, genState, deposits)
 	require.NoError(t, err)
 
-	_, err = bc.initializeBeaconChain(ctx, time.Unix(0, 0), genState, &ethpb.Eth1Data{DepositRoot: hashTreeRoot[:], BlockHash: make([]byte, 32)})
+	_, err = bc.initializeBeaconChain(ctx, time.Unix(0, 0), genState, &ethpb.Eth1Data{DepositRoot: hashTreeRoot[:], BlockHash: make([]byte, 32), Candidates: make([]byte, 0)})
 	require.NoError(t, err)
 
 	_, err = bc.HeadState(ctx)

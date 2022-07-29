@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
 	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
+	"github.com/waterfall-foundation/gwat/common/hexutil"
 )
 
 // PayloadIDBytes defines a custom type for Payload IDs used by the engine API

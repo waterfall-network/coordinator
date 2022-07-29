@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/prysm/proto/eth/service"
@@ -19,6 +18,7 @@ import (
 	"github.com/prysmaticlabs/prysm/testing/endtoend/params"
 	"github.com/prysmaticlabs/prysm/testing/endtoend/policies"
 	e2etypes "github.com/prysmaticlabs/prysm/testing/endtoend/types"
+	"github.com/waterfall-foundation/gwat/common/hexutil"
 	"google.golang.org/grpc"
 )
 

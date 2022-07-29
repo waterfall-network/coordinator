@@ -5,12 +5,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/golang/snappy"
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/prysm/config/features"
 	"github.com/prysmaticlabs/prysm/monitoring/progress"
 	v1alpha1 "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/gwat/common/hexutil"
 	bolt "go.etcd.io/bbolt"
 )
 

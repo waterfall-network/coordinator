@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/google/uuid"
 	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
@@ -27,6 +26,7 @@ import (
 	remote_web3signer "github.com/prysmaticlabs/prysm/validator/keymanager/remote-web3signer"
 	"github.com/prysmaticlabs/prysm/validator/slashing-protection-history/format"
 	mocks "github.com/prysmaticlabs/prysm/validator/testing"
+	"github.com/waterfall-foundation/gwat/common/hexutil"
 	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 )
 

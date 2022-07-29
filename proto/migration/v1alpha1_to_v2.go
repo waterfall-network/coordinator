@@ -80,6 +80,7 @@ func BeaconStateAltairToProto(altairState state.BeaconStateAltair) (*ethpbv2.Bea
 			DepositRoot:  bytesutil.SafeCopyBytes(vote.DepositRoot),
 			DepositCount: vote.DepositCount,
 			BlockHash:    bytesutil.SafeCopyBytes(vote.BlockHash),
+			Candidates:   bytesutil.SafeCopyBytes(vote.Candidates),
 		}
 	}
 	resultValidators := make([]*ethpbv1.Validator, len(sourceValidators))
@@ -140,6 +141,7 @@ func BeaconStateAltairToProto(altairState state.BeaconStateAltair) (*ethpbv2.Bea
 			DepositRoot:  bytesutil.SafeCopyBytes(sourceEth1Data.DepositRoot),
 			DepositCount: sourceEth1Data.DepositCount,
 			BlockHash:    bytesutil.SafeCopyBytes(sourceEth1Data.BlockHash),
+			Candidates:   bytesutil.SafeCopyBytes(sourceEth1Data.Candidates),
 		},
 		Eth1DataVotes:              resultEth1DataVotes,
 		Eth1DepositIndex:           altairState.Eth1DepositIndex(),
@@ -193,6 +195,7 @@ func BeaconStateBellatrixToProto(st state.BeaconStateBellatrix) (*ethpbv2.Beacon
 			DepositRoot:  bytesutil.SafeCopyBytes(vote.DepositRoot),
 			DepositCount: vote.DepositCount,
 			BlockHash:    bytesutil.SafeCopyBytes(vote.BlockHash),
+			Candidates:   bytesutil.SafeCopyBytes(vote.Candidates),
 		}
 	}
 	resultValidators := make([]*ethpbv1.Validator, len(sourceValidators))
@@ -257,6 +260,7 @@ func BeaconStateBellatrixToProto(st state.BeaconStateBellatrix) (*ethpbv2.Beacon
 			DepositRoot:  bytesutil.SafeCopyBytes(sourceEth1Data.DepositRoot),
 			DepositCount: sourceEth1Data.DepositCount,
 			BlockHash:    bytesutil.SafeCopyBytes(sourceEth1Data.BlockHash),
+			Candidates:   bytesutil.SafeCopyBytes(sourceEth1Data.Candidates),
 		},
 		Eth1DataVotes:              resultEth1DataVotes,
 		Eth1DepositIndex:           st.Eth1DepositIndex(),

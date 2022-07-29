@@ -84,6 +84,7 @@ func TestProcessDeposits_MerkleBranchFailsVerification(t *testing.T) {
 		Eth1Data: &ethpb.Eth1Data{
 			DepositRoot: []byte{0},
 			BlockHash:   []byte{1},
+			Candidates:  []byte{1},
 		},
 	})
 	require.NoError(t, err)
@@ -180,6 +181,7 @@ func TestProcessDeposits_RepeatedDeposit_IncreasesValidatorBalance(t *testing.T)
 		Eth1Data: &ethpb.Eth1Data{
 			DepositRoot: root[:],
 			BlockHash:   root[:],
+			Candidates:  root[:],
 		},
 	})
 	require.NoError(t, err)
@@ -383,6 +385,7 @@ func TestProcessDeposit_RepeatedDeposit_IncreasesValidatorBalance(t *testing.T) 
 		Eth1Data: &ethpb.Eth1Data{
 			DepositRoot: root[:],
 			BlockHash:   root[:],
+			Candidates:  root[:],
 		},
 	})
 	require.NoError(t, err)

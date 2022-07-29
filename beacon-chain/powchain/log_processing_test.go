@@ -3,12 +3,9 @@ package powchain
 import (
 	"context"
 	"encoding/binary"
-	"math/big"
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/prysmaticlabs/prysm/beacon-chain/cache/depositcache"
 	"github.com/prysmaticlabs/prysm/beacon-chain/core/feed"
 	statefeed "github.com/prysmaticlabs/prysm/beacon-chain/core/feed/state"
@@ -22,6 +19,8 @@ import (
 	"github.com/prysmaticlabs/prysm/testing/require"
 	"github.com/prysmaticlabs/prysm/testing/util"
 	logTest "github.com/sirupsen/logrus/hooks/test"
+	ethereum "github.com/waterfall-foundation/gwat"
+	"github.com/waterfall-foundation/gwat/common"
 )
 
 func TestProcessDepositLog_OK(t *testing.T) {
@@ -355,7 +354,7 @@ func TestProcessETH2GenesisLog(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	err = web3Service.ProcessETH1Block(context.Background(), big.NewInt(int64(logs[len(logs)-1].BlockNumber)))
+	err = web3Service.ProcessETH1Block(context.Background(), uint64(logs[len(logs)-1].BlockNumber))
 	require.NoError(t, err)
 
 	cachedDeposits := web3Service.chainStartData.ChainstartDeposits
@@ -404,8 +403,8 @@ func TestProcessETH2GenesisLog_CorrectNumOfDeposits(t *testing.T) {
 	web3Service.httpLogger = testAcc.Backend
 	web3Service.eth1DataFetcher = &goodFetcher{backend: testAcc.Backend}
 	web3Service.latestEth1Data.LastRequestedBlock = 0
-	web3Service.latestEth1Data.BlockHeight = testAcc.Backend.Blockchain().CurrentBlock().NumberU64()
-	web3Service.latestEth1Data.BlockTime = testAcc.Backend.Blockchain().CurrentBlock().Time()
+	web3Service.latestEth1Data.BlockHeight = testAcc.Backend.Blockchain().GetLastFinalizedBlock().Nr()
+	web3Service.latestEth1Data.BlockTime = testAcc.Backend.Blockchain().GetLastFinalizedBlock().Time()
 	params.SetupTestConfigCleanup(t)
 	bConfig := params.MinimalSpecConfig()
 	bConfig.MinGenesisTime = 0
@@ -444,8 +443,8 @@ func TestProcessETH2GenesisLog_CorrectNumOfDeposits(t *testing.T) {
 	for i := uint64(0); i < params.BeaconConfig().Eth1FollowDistance; i++ {
 		testAcc.Backend.Commit()
 	}
-	web3Service.latestEth1Data.BlockHeight = testAcc.Backend.Blockchain().CurrentBlock().NumberU64()
-	web3Service.latestEth1Data.BlockTime = testAcc.Backend.Blockchain().CurrentBlock().Time()
+	web3Service.latestEth1Data.BlockHeight = testAcc.Backend.Blockchain().GetLastFinalizedBlock().Nr()
+	web3Service.latestEth1Data.BlockTime = testAcc.Backend.Blockchain().GetLastFinalizedBlock().Time()
 
 	// Set up our subscriber now to listen for the chain started event.
 	stateChannel := make(chan *feed.Event, 1)
@@ -502,8 +501,8 @@ func TestProcessETH2GenesisLog_LargePeriodOfNoLogs(t *testing.T) {
 	web3Service.httpLogger = testAcc.Backend
 	web3Service.eth1DataFetcher = &goodFetcher{backend: testAcc.Backend}
 	web3Service.latestEth1Data.LastRequestedBlock = 0
-	web3Service.latestEth1Data.BlockHeight = testAcc.Backend.Blockchain().CurrentBlock().NumberU64()
-	web3Service.latestEth1Data.BlockTime = testAcc.Backend.Blockchain().CurrentBlock().Time()
+	web3Service.latestEth1Data.BlockHeight = testAcc.Backend.Blockchain().GetLastFinalizedBlock().Nr()
+	web3Service.latestEth1Data.BlockTime = testAcc.Backend.Blockchain().GetLastFinalizedBlock().Time()
 	params.SetupTestConfigCleanup(t)
 	bConfig := params.MinimalSpecConfig()
 	bConfig.SecondsPerETH1Block = 10
@@ -541,14 +540,14 @@ func TestProcessETH2GenesisLog_LargePeriodOfNoLogs(t *testing.T) {
 	for i := uint64(0); i < 1500; i++ {
 		testAcc.Backend.Commit()
 	}
-	wantedGenesisTime := testAcc.Backend.Blockchain().CurrentBlock().Time()
+	wantedGenesisTime := testAcc.Backend.Blockchain().GetLastFinalizedBlock().Time()
 
 	// Forward the chain to account for the follow distance
 	for i := uint64(0); i < params.BeaconConfig().Eth1FollowDistance; i++ {
 		testAcc.Backend.Commit()
 	}
-	web3Service.latestEth1Data.BlockHeight = testAcc.Backend.Blockchain().CurrentBlock().NumberU64()
-	web3Service.latestEth1Data.BlockTime = testAcc.Backend.Blockchain().CurrentBlock().Time()
+	web3Service.latestEth1Data.BlockHeight = testAcc.Backend.Blockchain().GetLastFinalizedBlock().Nr()
+	web3Service.latestEth1Data.BlockTime = testAcc.Backend.Blockchain().GetLastFinalizedBlock().Time()
 
 	// Set the genesis time 500 blocks ahead of the last
 	// deposit log.
@@ -589,7 +588,7 @@ func TestCheckForChainstart_NoValidator(t *testing.T) {
 	require.NoError(t, err, "Unable to set up simulated backend")
 	beaconDB := testDB.SetupDB(t)
 	s := newPowchainService(t, testAcc, beaconDB)
-	s.checkForChainstart(context.Background(), [32]byte{}, nil, 0)
+	s.checkForChainstart(context.Background(), [32]byte{}, 0, 0)
 	require.LogsDoNotContain(t, hook, "Could not determine active validator count from pre genesis state")
 }
 

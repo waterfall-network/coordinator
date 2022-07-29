@@ -1,9 +1,15 @@
 package stateutil
 
 import (
+	"fmt"
 	"testing"
 
+	"github.com/prysmaticlabs/prysm/crypto/hash"
+	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
+	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/testing/assert"
+	"github.com/waterfall-foundation/gwat/common"
+	"github.com/waterfall-foundation/gwat/dag/finalizer"
 )
 
 func TestArraysTreeRoot_OnlyPowerOf2(t *testing.T) {

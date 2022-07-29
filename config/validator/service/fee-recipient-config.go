@@ -1,8 +1,8 @@
 package validator_service_config
 
 import (
-	"github.com/ethereum/go-ethereum/common"
 	field_params "github.com/prysmaticlabs/prysm/config/fieldparams"
+	"github.com/waterfall-foundation/gwat/common"
 )
 
 // FeeRecipientFileConfig is the struct representation of the JSON config file set in the validator through the CLI.

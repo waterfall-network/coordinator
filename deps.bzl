@@ -249,7 +249,6 @@ def prysm_deps():
         sum = "h1:6oiIS9yaG6XCCzhgAgKFfIWyo4LLCiDhZot6ltoThhY=",
         version = "v0.2.2",
     )
-
     go_repository(
         name = "com_github_azure_azure_sdk_for_go_sdk_azcore",
         importpath = "github.com/Azure/azure-sdk-for-go/sdk/azcore",
@@ -268,6 +267,7 @@ def prysm_deps():
         sum = "h1:Px2UA+2RvSSvv+RvJNuUB6n7rs5Wsel4dXLe90Um2n4=",
         version = "v0.3.0",
     )
+
     go_repository(
         name = "com_github_azure_azure_storage_blob_go",
         importpath = "github.com/Azure/azure-storage-blob-go",
@@ -385,14 +385,14 @@ def prysm_deps():
     go_repository(
         name = "com_github_btcsuite_btcd_btcec_v2",
         importpath = "github.com/btcsuite/btcd/btcec/v2",
-        sum = "h1:YoYoC9J0jwfukodSBMzZYUVQ8PTiYg4BnOWiJVzTmLs=",
-        version = "v2.1.2",
+        sum = "h1:fzn1qaOt32TuLjFlkzYSsBC35Q3KUjT1SwPxiMSCF5k=",
+        version = "v2.2.0",
     )
     go_repository(
         name = "com_github_btcsuite_btcd_chaincfg_chainhash",
         importpath = "github.com/btcsuite/btcd/chaincfg/chainhash",
-        sum = "h1:MSskdM4/xJYcFzy0altH/C/xHopifpWzHUi1JeVI34Q=",
-        version = "v1.0.0",
+        sum = "h1:q0rUy8C/TYNBQS1+CGKw68tLOFYSNEs0TFnxxnS9+4U=",
+        version = "v1.0.1",
     )
 
     go_repository(
@@ -800,8 +800,8 @@ def prysm_deps():
     go_repository(
         name = "com_github_dop251_goja",
         importpath = "github.com/dop251/goja",
-        sum = "h1:iZOop7pqsg+56twTopWgwCGxdB5SI2yDO8Ti7eTRliQ=",
-        version = "v0.0.0-20211011172007-d99e4b8cbf48",
+        sum = "h1:Yt+4K30SdjOkRoRRm3vYNQgR+/ZIy0RmeUDZo7Y8zeQ=",
+        version = "v0.0.0-20220405120441-9037c2b61cbf",
     )
     go_repository(
         name = "com_github_dop251_goja_nodejs",
@@ -896,8 +896,8 @@ def prysm_deps():
         patches = [
             "//third_party:com_github_ethereum_go_ethereum_secp256k1.patch",
         ],
-        sum = "h1:dZ/6iVmQ9XIKyp5V8TGoQmnpckp5bd2y/No31jZGhZU=",
-        version = "v1.10.17-0.20220323200026-535f25d65fa0",
+        sum = "h1:XEcumY+qSr1cZQaWsQs5Kck3FHB0V2RiMHPdTBJ+oT8=",
+        version = "v1.10.17",
     )
 
     go_repository(
@@ -986,6 +986,7 @@ def prysm_deps():
         sum = "h1:hsms1Qyu0jgnwNXIxa+/V/PDsU6CfLf6CNO8H7IWoS4=",
         version = "v1.4.9",
     )
+
     go_repository(
         name = "com_github_garyburd_redigo",
         importpath = "github.com/garyburd/redigo",
@@ -1047,6 +1048,7 @@ def prysm_deps():
     go_repository(
         name = "com_github_go_chi_chi_v5",
         importpath = "github.com/go-chi/chi/v5",
+#        importpath = "github.com/pressly/chi/v5",
         sum = "h1:DBPx88FjZJH3FsICfDAfIfnb7XxKIYVGG6lOPlhENAg=",
         version = "v5.0.0",
     )
@@ -1166,8 +1168,8 @@ def prysm_deps():
     go_repository(
         name = "com_github_go_stack_stack",
         importpath = "github.com/go-stack/stack",
-        sum = "h1:5SgMzNM5HxrEjV0ww2lTmX6E2Izsfxas4+YHWRs3Lsk=",
-        version = "v1.8.0",
+        sum = "h1:ntEHSVwIt7PNXNpgPmVfMrNhLtgjlmnZha2kOpuRiDw=",
+        version = "v1.8.1",
     )
     go_repository(
         name = "com_github_go_task_slim_sprig",
@@ -1640,8 +1642,8 @@ def prysm_deps():
     go_repository(
         name = "com_github_huin_goupnp",
         importpath = "github.com/huin/goupnp",
-        sum = "h1:+EYBkW+dbi3F/atB+LSQZSWh7+HNrV3A/N0y6DSoy9k=",
-        version = "v1.0.3-0.20220313090229-ca81a64b4204",
+        sum = "h1:N8No57ls+MnjlB+JPiCVSOyy/ot7MJTqlo7rn+NYSqQ=",
+        version = "v1.0.3",
     )
     go_repository(
         name = "com_github_huin_goutil",
@@ -3801,6 +3803,20 @@ def prysm_deps():
         sum = "h1:6+hBz+qvs0JOrrNhhmR7lFxo5sINxBCGXrdtl/UvroE=",
         version = "v1.0.0",
     )
+    go_repository(
+        name = "com_github_waterfall_foundation_gwat",
+        build_directives = [
+            "gazelle:resolve go github.com/karalabe/usb @prysm//third_party/usb:go_default_library",
+        ],
+        importpath = "github.com/waterfall-foundation/gwat",
+        sum = "h1:aWe+yXaqHehZNLdk1XnCb7DNckD9UQcINK/Fc4RDppQ=",
+        version = "v0.4.2",
+
+        ## to use local repo comment `sum` & `version`, and uncomment follows below
+        #vcs = "git",
+        #remote = "file:///home/mezin/go/src/gwat",
+        #tag = "v0.4.20",
+    )
 
     go_repository(
         name = "com_github_wealdtech_go_bytesutil",
@@ -4409,14 +4425,14 @@ def prysm_deps():
     go_repository(
         name = "org_golang_x_crypto",
         importpath = "golang.org/x/crypto",
-        sum = "h1:QAqMVf3pSa6eeTsuklijukjXBlj7Es2QQplab+/RbQ4=",
-        version = "v0.0.0-20211209193657-4570a0811e8b",
+        sum = "h1:T8NU3HyQ8ClP4SEE+KbFlg6n0NhuTsN4MyznaarGsZM=",
+        version = "v0.0.0-20220525230936-793ad666bf5e",
     )
     go_repository(
         name = "org_golang_x_exp",
         importpath = "golang.org/x/exp",
-        sum = "h1:rMqLP+9XLy+LdbCXHjJHAmTfXCr93W7oruWA6Hq1Alc=",
-        version = "v0.0.0-20200513190911-00229845015e",
+        sum = "h1:rxKZ2gOnYxjfmakvUUqh9Gyb6KXfrj7JWTxORTYqb0E=",
+        version = "v0.0.0-20220426173459-3bcf042a4bf5",
     )
     go_repository(
         name = "org_golang_x_image",
@@ -4441,8 +4457,8 @@ def prysm_deps():
     go_repository(
         name = "org_golang_x_mod",
         importpath = "golang.org/x/mod",
-        sum = "h1:OJxoQ/rynoF0dcCdI7cLPktw/hR2cueqYfjm43oqK38=",
-        version = "v0.5.1",
+        sum = "h1:LQmS1nU0twXLA96Kt7U9qtHJEbBk3z6Q0V4UXjZkpr4=",
+        version = "v0.6.0-dev.0.20211013180041-c96bc1413d57",
     )
 
     go_repository(
@@ -4473,8 +4489,8 @@ def prysm_deps():
     go_repository(
         name = "org_golang_x_sys",
         importpath = "golang.org/x/sys",
-        sum = "h1:1oIt9o40TWWI9FUaveVpUvBe13FNqBNVXy3ue2fcfkw=",
-        version = "v0.0.0-20211214234402-4825e8c3871d",
+        sum = "h1:dGzPydgVsqGcTRVwiLJ1jVbufYwmzD3LfVPLKsKg+0k=",
+        version = "v0.0.0-20220520151302-bc2c85ada10a",
     )
     go_repository(
         name = "org_golang_x_term",

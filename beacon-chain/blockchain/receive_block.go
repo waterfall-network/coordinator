@@ -24,7 +24,7 @@ type BlockReceiver interface {
 	HasInitSyncBlock(root [32]byte) bool
 }
 
-// ReceiveBlock is a function that defines the the operations (minus pubsub)
+// ReceiveBlock is a function that defines the operations (minus pubsub)
 // that are performed on blocks that is received from regular sync service. The operations consists of:
 //   1. Validate block, apply state transition and update check points
 //   2. Apply fork choice to the processed block

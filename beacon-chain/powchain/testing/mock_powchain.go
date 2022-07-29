@@ -9,17 +9,19 @@ import (
 	"net/http/httptest"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind/backends"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	gethTypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/prysmaticlabs/prysm/async/event"
 	"github.com/prysmaticlabs/prysm/beacon-chain/powchain/types"
 	"github.com/prysmaticlabs/prysm/beacon-chain/state"
 	"github.com/prysmaticlabs/prysm/config/params"
 	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/gwat/accounts/abi/bind/backends"
+	"github.com/waterfall-foundation/gwat/common"
+	"github.com/waterfall-foundation/gwat/common/hexutil"
+	gethTypes "github.com/waterfall-foundation/gwat/core/types"
+	"github.com/waterfall-foundation/gwat/dag"
+	"github.com/waterfall-foundation/gwat/dag/finalizer"
+	"github.com/waterfall-foundation/gwat/rpc"
 )
 
 // POWChain defines a properly functioning mock for the powchain service.
@@ -36,6 +38,39 @@ type POWChain struct {
 	CurrError         error
 	Endpoints         []string
 	Errors            []error
+}
+
+func (m *POWChain) ExecutionDagGetCandidates(ctx context.Context) (finalizer.NrHashMap, error) {
+	var err error
+	candidates := make(finalizer.NrHashMap, len(m.HashesByHeight))
+	for k, val := range m.HashesByHeight {
+		h := common.BytesToHash(val)
+		candidates[uint64(k)] = &h
+	}
+	if candidates.HasGap() {
+		err = finalizer.ErrChainGap
+		candidates = finalizer.NrHashMap{}
+	}
+	return candidates, err
+}
+
+func (m *POWChain) ExecutionDagSync(ctx context.Context, syncParams *dag.ConsensusInfo) (finalizer.NrHashMap, error) {
+	var err error
+	candidates := make(finalizer.NrHashMap, len(m.HashesByHeight))
+	for k, val := range m.HashesByHeight {
+		h := common.BytesToHash(val)
+		candidates[uint64(k)] = &h
+	}
+	if candidates.HasGap() {
+		err = finalizer.ErrChainGap
+		candidates = finalizer.NrHashMap{}
+	}
+	return candidates, err
+}
+
+func (m *POWChain) ExecutionDagFinalize(ctx context.Context, syncParams *dag.ConsensusInfo) (*map[string]string, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 // GenesisTime represents a static past date - JAN 01 2000.
@@ -93,7 +128,7 @@ func (m *POWChain) BlockTimeByHeight(_ context.Context, height *big.Int) (uint64
 // BlockByTimestamp --
 func (m *POWChain) BlockByTimestamp(_ context.Context, time uint64) (*types.HeaderInfo, error) {
 	var chosenTime uint64
-	var chosenNumber *big.Int
+	var chosenNumber *big.Int = new(big.Int).SetInt64(0)
 	for t, num := range m.BlockNumberByTime {
 		if t > chosenTime && t <= time {
 			chosenNumber = num

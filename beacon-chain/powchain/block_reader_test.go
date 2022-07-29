@@ -6,16 +6,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	gethTypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/trie"
 	dbutil "github.com/prysmaticlabs/prysm/beacon-chain/db/testing"
 	mockPOW "github.com/prysmaticlabs/prysm/beacon-chain/powchain/testing"
 	contracts "github.com/prysmaticlabs/prysm/contracts/deposit"
 	"github.com/prysmaticlabs/prysm/contracts/deposit/mock"
 	"github.com/prysmaticlabs/prysm/testing/assert"
 	"github.com/prysmaticlabs/prysm/testing/require"
+	"github.com/waterfall-foundation/gwat/common"
+	"github.com/waterfall-foundation/gwat/common/hexutil"
+	gethTypes "github.com/waterfall-foundation/gwat/core/types"
+	"github.com/waterfall-foundation/gwat/trie"
 )
 
 func setDefaultMocks(service *Service) *Service {
@@ -66,7 +66,7 @@ func TestLatestMainchainInfo_OK(t *testing.T) {
 	web3Service.cancel()
 	exitRoutine <- true
 
-	assert.Equal(t, web3Service.latestEth1Data.BlockHeight, header.Number.Uint64())
+	assert.Equal(t, web3Service.latestEth1Data.BlockHeight, header.Nr())
 	assert.Equal(t, hexutil.Encode(web3Service.latestEth1Data.BlockHash), header.Hash().Hex())
 	assert.Equal(t, web3Service.latestEth1Data.BlockTime, header.Time)
 }
@@ -87,8 +87,9 @@ func TestBlockHashByHeight_ReturnsHash(t *testing.T) {
 	web3Service = setDefaultMocks(web3Service)
 	ctx := context.Background()
 
+	nr_15 := uint64(15)
 	header := &gethTypes.Header{
-		Number: big.NewInt(15),
+		Number: &nr_15,
 		Time:   150,
 	}
 
@@ -139,12 +140,12 @@ func TestBlockExists_ValidHash(t *testing.T) {
 
 	web3Service = setDefaultMocks(web3Service)
 
+	nr_0 := uint64(0)
 	block := gethTypes.NewBlock(
 		&gethTypes.Header{
-			Number: big.NewInt(0),
+			Number: &nr_0,
 		},
 		[]*gethTypes.Transaction{},
-		[]*gethTypes.Header{},
 		[]*gethTypes.Receipt{},
 		new(trie.Trie),
 	)
@@ -152,7 +153,7 @@ func TestBlockExists_ValidHash(t *testing.T) {
 	exists, height, err := web3Service.BlockExists(context.Background(), block.Hash())
 	require.NoError(t, err, "Could not get block hash with given height")
 	require.Equal(t, true, exists)
-	require.Equal(t, 0, height.Cmp(block.Number()))
+	require.Equal(t, 0, height.Cmp(new(big.Int).SetUint64(block.Nr())))
 
 	exists, _, err = web3Service.headerCache.HeaderInfoByHeight(height)
 	require.NoError(t, err)
@@ -193,9 +194,9 @@ func TestBlockExists_UsesCachedBlockInfo(t *testing.T) {
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 	// nil eth1DataFetcher would panic if cached value not used
 	web3Service.eth1DataFetcher = nil
-
+	nr_0 := uint64(0)
 	header := &gethTypes.Header{
-		Number: big.NewInt(0),
+		Number: &nr_0,
 	}
 
 	err = web3Service.headerCache.AddHeader(header)
@@ -204,7 +205,7 @@ func TestBlockExists_UsesCachedBlockInfo(t *testing.T) {
 	exists, height, err := web3Service.BlockExists(context.Background(), header.Hash())
 	require.NoError(t, err, "Could not get block hash with given height")
 	require.Equal(t, true, exists)
-	require.Equal(t, 0, height.Cmp(header.Number))
+	require.Equal(t, 0, height.Cmp(new(big.Int).SetUint64(header.Nr())))
 }
 
 func TestBlockExistsWithCache_UsesCachedHeaderInfo(t *testing.T) {
@@ -220,8 +221,9 @@ func TestBlockExistsWithCache_UsesCachedHeaderInfo(t *testing.T) {
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 
+	nr_0 := uint64(0)
 	header := &gethTypes.Header{
-		Number: big.NewInt(0),
+		Number: &nr_0,
 	}
 
 	err = web3Service.headerCache.AddHeader(header)
@@ -230,7 +232,7 @@ func TestBlockExistsWithCache_UsesCachedHeaderInfo(t *testing.T) {
 	exists, height, err := web3Service.BlockExistsWithCache(context.Background(), header.Hash())
 	require.NoError(t, err, "Could not get block hash with given height")
 	require.Equal(t, true, exists)
-	require.Equal(t, 0, height.Cmp(header.Number))
+	require.Equal(t, 0, height.Cmp(new(big.Int).SetUint64(header.Nr())))
 }
 
 func TestBlockExistsWithCache_HeaderNotCached(t *testing.T) {
@@ -276,7 +278,7 @@ func TestService_BlockNumberByTimestamp(t *testing.T) {
 	hd, err := testAcc.Backend.HeaderByNumber(ctx, nil)
 	require.NoError(t, err)
 	web3Service.latestEth1Data.BlockTime = hd.Time
-	web3Service.latestEth1Data.BlockHeight = hd.Number.Uint64()
+	web3Service.latestEth1Data.BlockHeight = hd.Nr()
 	blk, err := web3Service.BlockByTimestamp(ctx, 1000 /* time */)
 	require.NoError(t, err)
 	if blk.Number.Cmp(big.NewInt(0)) == 0 {
@@ -313,13 +315,13 @@ func TestService_BlockNumberByTimestampLessTargetTime(t *testing.T) {
 	defer cancel()
 
 	// Provide an unattainable target time
-	_, err = web3Service.findLessTargetEth1Block(ctx, hd.Number, hd.Time/2)
+	_, err = web3Service.findLessTargetEth1Block(ctx, new(big.Int).SetUint64(hd.Nr()), hd.Time/2)
 	require.ErrorContains(t, context.DeadlineExceeded.Error(), err)
 
 	// Provide an attainable target time
-	blk, err := web3Service.findLessTargetEth1Block(context.Background(), hd.Number, hd.Time-5)
+	blk, err := web3Service.findLessTargetEth1Block(context.Background(), new(big.Int).SetUint64(hd.Nr()), hd.Time-5)
 	require.NoError(t, err)
-	require.NotEqual(t, hd.Number.Uint64(), blk.Number.Uint64(), "retrieved block is not less than the head")
+	require.NotEqual(t, hd.Nr(), blk.Number.Uint64(), "retrieved block is not less than the head")
 }
 
 func TestService_BlockNumberByTimestampMoreTargetTime(t *testing.T) {
@@ -351,13 +353,13 @@ func TestService_BlockNumberByTimestampMoreTargetTime(t *testing.T) {
 	defer cancel()
 
 	// Provide an unattainable target time with respect to head
-	_, err = web3Service.findMoreTargetEth1Block(ctx, big.NewInt(0).Div(hd.Number, big.NewInt(2)), hd.Time)
+	_, err = web3Service.findMoreTargetEth1Block(ctx, big.NewInt(0).Div(new(big.Int).SetUint64(hd.Nr()), big.NewInt(2)), hd.Time)
 	require.ErrorContains(t, context.DeadlineExceeded.Error(), err)
 
 	// Provide an attainable target time with respect to head
-	blk, err := web3Service.findMoreTargetEth1Block(context.Background(), big.NewInt(0).Sub(hd.Number, big.NewInt(5)), hd.Time)
+	blk, err := web3Service.findMoreTargetEth1Block(context.Background(), big.NewInt(0).Sub(new(big.Int).SetUint64(hd.Nr()), big.NewInt(5)), hd.Time)
 	require.NoError(t, err)
-	require.Equal(t, hd.Number.Uint64(), blk.Number.Uint64(), "retrieved block is not equal to the head")
+	require.Equal(t, hd.Nr(), blk.Number.Uint64(), "retrieved block is not equal to the head")
 }
 
 func TestService_BlockTimeByHeight_ReturnsError_WhenNoEth1Client(t *testing.T) {

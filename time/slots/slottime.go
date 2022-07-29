@@ -5,11 +5,11 @@ import (
 	"math"
 	"time"
 
-	commonMath "github.com/ethereum/go-ethereum/common/math"
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/prysm/config/params"
 	prysmTime "github.com/prysmaticlabs/prysm/time"
+	commonMath "github.com/waterfall-foundation/gwat/common/math"
 )
 
 // MaxSlotBuffer specifies the max buffer given to slots from

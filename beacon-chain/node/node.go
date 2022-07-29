@@ -15,7 +15,6 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	apigateway "github.com/prysmaticlabs/prysm/api/gateway"
@@ -63,6 +62,7 @@ import (
 	"github.com/prysmaticlabs/prysm/runtime/version"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
+	"github.com/waterfall-foundation/gwat/common"
 )
 
 const testSkipPowFlag = "test-skip-pow"

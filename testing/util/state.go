@@ -7,7 +7,6 @@ import (
 	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/block"
 	"github.com/prysmaticlabs/prysm/testing/require"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/go-bitfield"
 	"github.com/prysmaticlabs/prysm/beacon-chain/state"
@@ -17,6 +16,7 @@ import (
 	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
 	"github.com/prysmaticlabs/prysm/config/params"
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/gwat/common/hexutil"
 )
 
 // FillRootsNaturalOpt is meant to be used as an option when calling NewBeaconState.
@@ -88,6 +88,7 @@ func NewBeaconState(options ...NewBeaconStateOption) (state.BeaconState, error) 
 		Eth1Data: &ethpb.Eth1Data{
 			DepositRoot: make([]byte, fieldparams.RootLength),
 			BlockHash:   make([]byte, 32),
+			Candidates:  make([]byte, 0),
 		},
 		Fork: &ethpb.Fork{
 			PreviousVersion: make([]byte, 4),
@@ -135,6 +136,7 @@ func NewBeaconStateAltair(options ...func(state *ethpb.BeaconStateAltair) error)
 		Eth1Data: &ethpb.Eth1Data{
 			DepositRoot: make([]byte, fieldparams.RootLength),
 			BlockHash:   make([]byte, 32),
+			Candidates:  make([]byte, 0),
 		},
 		Fork: &ethpb.Fork{
 			PreviousVersion: make([]byte, 4),
@@ -190,6 +192,7 @@ func NewBeaconStateBellatrix(options ...func(state *ethpb.BeaconStateBellatrix) 
 		Eth1Data: &ethpb.Eth1Data{
 			DepositRoot: make([]byte, fieldparams.RootLength),
 			BlockHash:   make([]byte, 32),
+			Candidates:  make([]byte, 0),
 		},
 		Fork: &ethpb.Fork{
 			PreviousVersion: make([]byte, 4),

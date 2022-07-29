@@ -16,6 +16,7 @@ import (
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/block"
 	"github.com/prysmaticlabs/prysm/time/slots"
+	"github.com/waterfall-foundation/gwat/dag/finalizer"
 	"go.opencensus.io/trace"
 )
 
@@ -61,6 +62,7 @@ type HeadFetcher interface {
 	HeadSyncCommitteeFetcher
 	HeadDomainFetcher
 	ForkChoicer() forkchoice.ForkChoicer
+	GetCandidates() finalizer.NrHashMap
 }
 
 // ForkFetcher retrieves the current fork information of the Ethereum beacon chain.

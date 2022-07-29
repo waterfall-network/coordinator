@@ -14,6 +14,7 @@ func CopyETH1Data(data *Eth1Data) *Eth1Data {
 		DepositRoot:  bytesutil.SafeCopyBytes(data.DepositRoot),
 		DepositCount: data.DepositCount,
 		BlockHash:    bytesutil.SafeCopyBytes(data.BlockHash),
+		Candidates:   bytesutil.SafeCopyBytes(data.Candidates),
 	}
 }
 

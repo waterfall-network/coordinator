@@ -4,13 +4,15 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/holiman/uint256"
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/prysm/config/params"
 	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
 	pb "github.com/prysmaticlabs/prysm/proto/engine/v1"
+	"github.com/waterfall-foundation/gwat/common"
+	"github.com/waterfall-foundation/gwat/common/hexutil"
+	"github.com/waterfall-foundation/gwat/dag"
+	"github.com/waterfall-foundation/gwat/dag/finalizer"
 )
 
 // EngineClient --
@@ -28,6 +30,18 @@ type EngineClient struct {
 	BlockByHashMap          map[[32]byte]*pb.ExecutionBlock
 	TerminalBlockHash       []byte
 	TerminalBlockHashExists bool
+}
+
+func (e *EngineClient) ExecutionDagSync(ctx context.Context, syncParams *dag.ConsensusInfo) (finalizer.NrHashMap, error) {
+	panic("implement me")
+}
+
+func (e *EngineClient) ExecutionDagGetCandidates(ctx context.Context) (finalizer.NrHashMap, error) {
+	panic("implement me")
+}
+
+func (e *EngineClient) ExecutionDagFinalize(ctx context.Context, syncParams *dag.ConsensusInfo) (*map[string]string, error) {
+	panic("implement me")
 }
 
 // NewPayload --

@@ -3,12 +3,12 @@ package mock
 import (
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/prysmaticlabs/go-bitfield"
 	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
 	v1 "github.com/prysmaticlabs/prysm/validator/keymanager/remote-web3signer/v1"
+	"github.com/waterfall-foundation/gwat/common/hexutil"
 )
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -113,6 +113,7 @@ func GetMockSignRequest(t string) *validatorpb.SignRequest {
 							DepositRoot:  make([]byte, fieldparams.RootLength),
 							DepositCount: 0,
 							BlockHash:    make([]byte, 32),
+							Candidates:   make([]byte, 0),
 						},
 						Graffiti: make([]byte, 32),
 						ProposerSlashings: []*eth.ProposerSlashing{
@@ -226,6 +227,7 @@ func GetMockSignRequest(t string) *validatorpb.SignRequest {
 							DepositRoot:  make([]byte, fieldparams.RootLength),
 							DepositCount: 0,
 							BlockHash:    make([]byte, 32),
+							Candidates:   make([]byte, 0),
 						},
 						Graffiti: make([]byte, 32),
 						ProposerSlashings: []*eth.ProposerSlashing{
@@ -592,6 +594,7 @@ func MockBeaconBlockAltair() *v1.BeaconBlockAltair {
 				DepositRoot:  hexutil.Encode(make([]byte, fieldparams.RootLength)),
 				DepositCount: "0",
 				BlockHash:    hexutil.Encode(make([]byte, 32)),
+				Candidates:   hexutil.Encode(make([]byte, 0)),
 			},
 			Graffiti: hexutil.Encode(make([]byte, 32)),
 			ProposerSlashings: []*v1.ProposerSlashing{
@@ -662,6 +665,7 @@ func MockBeaconBlockBody() *v1.BeaconBlockBody {
 			DepositRoot:  hexutil.Encode(make([]byte, fieldparams.RootLength)),
 			DepositCount: "0",
 			BlockHash:    hexutil.Encode(make([]byte, 32)),
+			Candidates:   hexutil.Encode(make([]byte, 0)),
 		},
 		Graffiti: hexutil.Encode(make([]byte, 32)),
 		ProposerSlashings: []*v1.ProposerSlashing{

@@ -5,11 +5,11 @@ import (
 	"testing"
 
 	"github.com/bazelbuild/rules_go/go/tools/bazel"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/go-yaml/yaml"
 	"github.com/prysmaticlabs/prysm/runtime/interop"
 	"github.com/prysmaticlabs/prysm/testing/assert"
 	"github.com/prysmaticlabs/prysm/testing/require"
+	"github.com/waterfall-foundation/gwat/common/hexutil"
 )
 
 type TestCase struct {

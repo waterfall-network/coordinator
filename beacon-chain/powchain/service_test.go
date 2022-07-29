@@ -9,10 +9,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind/backends"
-	"github.com/ethereum/go-ethereum/common"
-	gethTypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/prysm/async/event"
 	"github.com/prysmaticlabs/prysm/beacon-chain/cache/depositcache"
@@ -31,6 +27,10 @@ import (
 	"github.com/prysmaticlabs/prysm/testing/util"
 	"github.com/prysmaticlabs/prysm/time/slots"
 	logTest "github.com/sirupsen/logrus/hooks/test"
+	ethereum "github.com/waterfall-foundation/gwat"
+	"github.com/waterfall-foundation/gwat/accounts/abi/bind/backends"
+	"github.com/waterfall-foundation/gwat/common"
+	gethTypes "github.com/waterfall-foundation/gwat/core/types"
 )
 
 var _ ChainStartFetcher = (*Service)(nil)
@@ -89,8 +89,9 @@ func (g *goodFetcher) HeaderByHash(_ context.Context, hash common.Hash) (*gethTy
 		return nil, fmt.Errorf("expected block hash to be nonzero %v", hash)
 	}
 	if g.backend == nil {
+		nr_0 := uint64(0)
 		return &gethTypes.Header{
-			Number: big.NewInt(0),
+			Number: &nr_0,
 		}, nil
 	}
 	header := g.backend.Blockchain().GetHeaderByHash(hash)
@@ -103,14 +104,15 @@ func (g *goodFetcher) HeaderByHash(_ context.Context, hash common.Hash) (*gethTy
 
 func (g *goodFetcher) HeaderByNumber(_ context.Context, number *big.Int) (*gethTypes.Header, error) {
 	if g.backend == nil {
+		nr_15 := uint64(15)
 		return &gethTypes.Header{
-			Number: big.NewInt(15),
+			Number: &nr_15,
 			Time:   150,
 		}, nil
 	}
 	var header *gethTypes.Header
 	if number == nil {
-		header = g.backend.Blockchain().CurrentHeader()
+		header = g.backend.Blockchain().GetLastFinalizedHeader()
 	} else {
 		header = g.backend.Blockchain().GetHeaderByNumber(number.Uint64())
 	}
@@ -225,7 +227,7 @@ func TestService_Eth1Synced(t *testing.T) {
 	require.NoError(t, err)
 	web3Service.eth1DataFetcher = &goodFetcher{backend: testAcc.Backend}
 
-	currTime := testAcc.Backend.Blockchain().CurrentHeader().Time
+	currTime := testAcc.Backend.Blockchain().GetLastFinalizedHeader().Time
 	now := time.Now()
 	assert.NoError(t, testAcc.Backend.AdjustTime(now.Sub(time.Unix(int64(currTime), 0))))
 	testAcc.Backend.Commit()
@@ -256,14 +258,14 @@ func TestFollowBlock_OK(t *testing.T) {
 
 	web3Service = setDefaultMocks(web3Service)
 	web3Service.eth1DataFetcher = &goodFetcher{backend: testAcc.Backend}
-	baseHeight := testAcc.Backend.Blockchain().CurrentBlock().NumberU64()
+	baseHeight := testAcc.Backend.Blockchain().GetLastFinalizedBlock().Nr()
 	// process follow_distance blocks
 	for i := 0; i < int(params.BeaconConfig().Eth1FollowDistance); i++ {
 		testAcc.Backend.Commit()
 	}
 	// set current height
-	web3Service.latestEth1Data.BlockHeight = testAcc.Backend.Blockchain().CurrentBlock().NumberU64()
-	web3Service.latestEth1Data.BlockTime = testAcc.Backend.Blockchain().CurrentBlock().Time()
+	web3Service.latestEth1Data.BlockHeight = testAcc.Backend.Blockchain().GetLastFinalizedBlock().Nr()
+	web3Service.latestEth1Data.BlockTime = testAcc.Backend.Blockchain().GetLastFinalizedBlock().Time()
 
 	h, err := web3Service.followBlockHeight(context.Background())
 	require.NoError(t, err)
@@ -275,8 +277,8 @@ func TestFollowBlock_OK(t *testing.T) {
 		testAcc.Backend.Commit()
 	}
 	// set current height
-	web3Service.latestEth1Data.BlockHeight = testAcc.Backend.Blockchain().CurrentBlock().NumberU64()
-	web3Service.latestEth1Data.BlockTime = testAcc.Backend.Blockchain().CurrentBlock().Time()
+	web3Service.latestEth1Data.BlockHeight = testAcc.Backend.Blockchain().GetLastFinalizedBlock().Nr()
+	web3Service.latestEth1Data.BlockTime = testAcc.Backend.Blockchain().GetLastFinalizedBlock().Time()
 
 	h, err = web3Service.followBlockHeight(context.Background())
 	require.NoError(t, err)
@@ -522,15 +524,15 @@ func TestNewService_EarliestVotingBlock(t *testing.T) {
 	for i := 0; i < numToForward; i++ {
 		testAcc.Backend.Commit()
 	}
-	currTime := testAcc.Backend.Blockchain().CurrentHeader().Time
+	currTime := testAcc.Backend.Blockchain().GetLastFinalizedHeader().Time
 	now := time.Now()
 	err = testAcc.Backend.AdjustTime(now.Sub(time.Unix(int64(currTime), 0)))
 	require.NoError(t, err)
 	testAcc.Backend.Commit()
 
-	currTime = testAcc.Backend.Blockchain().CurrentHeader().Time
-	web3Service.latestEth1Data.BlockHeight = testAcc.Backend.Blockchain().CurrentHeader().Number.Uint64()
-	web3Service.latestEth1Data.BlockTime = testAcc.Backend.Blockchain().CurrentHeader().Time
+	currTime = testAcc.Backend.Blockchain().GetLastFinalizedHeader().Time
+	web3Service.latestEth1Data.BlockHeight = testAcc.Backend.Blockchain().GetLastFinalizedHeader().Nr()
+	web3Service.latestEth1Data.BlockTime = testAcc.Backend.Blockchain().GetLastFinalizedHeader().Time
 	web3Service.chainStartData.GenesisTime = currTime
 
 	// With a current slot of zero, only request follow_blocks behind.

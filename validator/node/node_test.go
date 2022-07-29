@@ -11,8 +11,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/prysmaticlabs/prysm/cmd/validator/flags"
 	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
 	validator_service_config "github.com/prysmaticlabs/prysm/config/validator/service"
@@ -24,6 +22,8 @@ import (
 	remote_web3signer "github.com/prysmaticlabs/prysm/validator/keymanager/remote-web3signer"
 	logTest "github.com/sirupsen/logrus/hooks/test"
 	"github.com/urfave/cli/v2"
+	"github.com/waterfall-foundation/gwat/common"
+	"github.com/waterfall-foundation/gwat/common/hexutil"
 )
 
 // Test that the sharding node can build with default flag values.

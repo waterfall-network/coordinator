@@ -11,15 +11,15 @@ import (
 
 	"github.com/MariusVanDerWijden/FuzzyVM/filler"
 	txfuzz "github.com/MariusVanDerWijden/tx-fuzz"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/prysmaticlabs/prysm/config/params"
 	"github.com/prysmaticlabs/prysm/crypto/rand"
 	e2e "github.com/prysmaticlabs/prysm/testing/endtoend/params"
 	"github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/gwat/accounts/keystore"
+	"github.com/waterfall-foundation/gwat/common"
+	"github.com/waterfall-foundation/gwat/core/types"
+	"github.com/waterfall-foundation/gwat/ethclient"
+	"github.com/waterfall-foundation/gwat/rpc"
 	"golang.org/x/sync/errgroup"
 )
 
