@@ -13,6 +13,7 @@ import (
 type votes struct {
 	l sync.RWMutex
 
+	candidates map[[32]byte]uint
 	hashes     map[[32]byte]uint
 	roots      map[[32]byte]uint
 	counts     map[uint64]uint
@@ -23,6 +24,7 @@ type votes struct {
 
 func NewVotes() *votes {
 	return &votes{
+		candidates: make(map[[32]byte]uint),
 		hashes:     make(map[[32]byte]uint),
 		roots:      make(map[[32]byte]uint),
 		counts:     make(map[uint64]uint),
@@ -40,6 +42,8 @@ func (v *votes) Insert(blk block.BeaconBlock) {
 	if err != nil {
 		panic(err)
 	}
+	finId := crypto.Keccak256Hash(e1d.Candidates)
+	v.candidates[bytesutil.ToBytes32(finId.Bytes())]++
 	v.hashes[bytesutil.ToBytes32(e1d.BlockHash)]++
 	v.roots[bytesutil.ToBytes32(e1d.DepositRoot)]++
 	v.counts[e1d.DepositCount]++
@@ -55,6 +59,8 @@ func (v *votes) Report() string {
 
 Total votes: %d
 
+Hashed Candidates
+%s
 Block Hashes
 %s
 Deposit Roots
@@ -64,6 +70,10 @@ Deposit Counts
 Votes
 %s
 `
+	var hashedCandidates string
+	for r, cnt := range v.candidates {
+		hashedCandidates += fmt.Sprintf("%#x=%d\n", r, cnt)
+	}
 	var blockHashes string
 	for r, cnt := range v.hashes {
 		blockHashes += fmt.Sprintf("%#x=%d\n", r, cnt)
@@ -84,6 +94,7 @@ Votes
 	return fmt.Sprintf(
 		format,
 		v.total,
+		hashedCandidates,
 		blockHashes,
 		depositRoots,
 		depositCounts,
