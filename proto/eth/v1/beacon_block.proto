@@ -160,6 +160,10 @@ message Eth1Data {
     // The 32 byte block hash of the Ethereum 1.x block considered for deposit
     // inclusion.
     bytes block_hash = 3 [(ethereum.eth.ext.ssz_size) = "32"];
+
+    // The 8+32 byte of map number-hash of the GWAT finalization chain.
+    // ssz_max = (8+32) * 128
+    bytes candidates = 4 [(ethereum.eth.ext.ssz_max) = "5120"];
 }
 
 // A beacon block header is essentially a beacon block with only a reference to
