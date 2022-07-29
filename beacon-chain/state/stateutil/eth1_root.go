@@ -17,13 +17,14 @@ func Eth1DataRootWithHasher(hasher ssz.HashFn, eth1Data *ethpb.Eth1Data) ([32]by
 	if eth1Data == nil {
 		return [32]byte{}, errors.New("nil eth1 data")
 	}
+	fixedFldsCount := 3
 
 	finLen := len(eth1Data.Candidates)
 	finChunks := finLen / 32
 	if finLen%32 > 0 {
 		finChunks++
 	}
-	fieldRoots := make([][32]byte, 3+finChunks)
+	fieldRoots := make([][32]byte, fixedFldsCount+finChunks)
 
 	for i := 0; i < len(fieldRoots); i++ {
 		fieldRoots[i] = [32]byte{}
@@ -39,9 +40,6 @@ func Eth1DataRootWithHasher(hasher ssz.HashFn, eth1Data *ethpb.Eth1Data) ([32]by
 	if len(eth1Data.BlockHash) > 0 {
 		fieldRoots[2] = bytesutil.ToBytes32(eth1Data.BlockHash)
 	}
-	//else {
-	//	fieldRoots[2] = [32]byte{}
-	//}
 
 	if finLen > 0 {
 		for i := 0; i < finChunks; i++ {
@@ -52,7 +50,7 @@ func Eth1DataRootWithHasher(hasher ssz.HashFn, eth1Data *ethpb.Eth1Data) ([32]by
 			}
 			val := eth1Data.Candidates[from:to]
 			if len(val) > 0 {
-				fieldRoots[i+2] = bytesutil.ToBytes32(val)
+				fieldRoots[i+fixedFldsCount] = bytesutil.ToBytes32(val)
 			}
 		}
 	}

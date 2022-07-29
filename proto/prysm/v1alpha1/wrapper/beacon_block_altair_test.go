@@ -191,6 +191,41 @@ func TestAltairBeaconBlock_SSZ(t *testing.T) {
 	assert.NoError(t, wb.UnmarshalSSZ(b))
 }
 
+func TestAltairBeaconBlock_SSZ_2(t *testing.T) {
+	wb, err := wrapper.WrappedAltairBeaconBlock(util.HydrateBeaconBlockAltair(&ethpb.BeaconBlockAltair{}))
+
+	finHash := common.HexToHash("0xffffffffffffffffffffffffffffffffffffffffffffffff0101010101010101")
+	candidates := finalizer.NrHashMap{
+		1: &finHash, 2: &finHash, 3: &finHash, 4: &finHash, 5: &finHash, 6: &finHash, 7: &finHash, 8: &finHash,
+		9: &finHash, 10: &finHash, 11: &finHash, 12: &finHash, 13: &finHash, 14: &finHash, 15: &finHash, 16: &finHash,
+		17: &finHash, 18: &finHash, 19: &finHash, 20: &finHash, 21: &finHash, 22: &finHash, 23: &finHash, 24: &finHash,
+		25: &finHash, 26: &finHash, 27: &finHash, 28: &finHash, 29: &finHash, 30: &finHash, 31: &finHash, 32: &finHash,
+	}
+	wb.Body().Eth1Data().Candidates = candidates.ToBytes()
+
+	assert.NoError(t, err)
+
+	b, err := wb.MarshalSSZ()
+	assert.NoError(t, err)
+	assert.NotEqual(t, 0, len(b))
+
+	assert.NotEqual(t, 0, wb.SizeSSZ())
+	assert.NoError(t, wb.UnmarshalSSZ(b))
+
+	wb2, err := wrapper.WrappedAltairBeaconBlock(util.HydrateBeaconBlockAltair(&ethpb.BeaconBlockAltair{}))
+	assert.NoError(t, wb2.UnmarshalSSZ(b))
+
+	finRez := finalizer.NrHashMap{}
+	finRez.SetBytes(wb2.Body().Eth1Data().Candidates)
+
+	//fmt.Printf("%v", finRez)
+	//fmt.Printf("\n")
+	//fmt.Printf("%v", candidates)
+
+	assert.DeepEqual(t, candidates.ToBytes(), finRez.ToBytes())
+	assert.DeepEqual(t, candidates, finRez)
+}
+
 func TestAltairBeaconBlock_Version(t *testing.T) {
 	wb, err := wrapper.WrappedAltairBeaconBlock(&ethpb.BeaconBlockAltair{})
 	require.NoError(t, err)

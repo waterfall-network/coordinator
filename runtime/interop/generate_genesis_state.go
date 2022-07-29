@@ -54,7 +54,7 @@ func GenerateGenesisStateFromDepositData(ctx context.Context, gwtGenesisHash com
 	beaconState, err := coreState.GenesisBeaconState(ctx, deposits, genesisTime, &ethpb.Eth1Data{
 		DepositRoot:  root[:],
 		DepositCount: uint64(len(deposits)),
-		BlockHash:    gwtGenesisHash.Byte(),
+		BlockHash:    gwtGenesisHash.Bytes(),
 		Candidates:   genesisCandidates.ToBytes(),
 	})
 	if err != nil {
