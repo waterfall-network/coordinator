@@ -446,6 +446,14 @@ func (s *Service) initDepositCaches(ctx context.Context, ctrs []*ethpb.DepositCo
 // updates the latest blockHeight, blockHash, and blockTime properties of the service.
 func (s *Service) processBlockHeader(header *gethTypes.Header) {
 	defer safelyHandlePanic()
+	if header.Nr() == 0 && header.Height != 0 {
+		log.WithFields(logrus.Fields{
+			"header.Nr":     header.Nr(),
+			"header.Height": header.Height,
+			"blockHash":     hexutil.Encode(s.latestEth1Data.BlockHash),
+		}).Warn("Latest eth1 chain event: skipping not finalized block")
+		return
+	}
 	blockNumberGauge.Set(float64(header.Nr()))
 	s.latestEth1Data.BlockHeight = header.Nr()
 	s.latestEth1Data.BlockHash = header.Hash().Bytes()
@@ -575,6 +583,14 @@ func (s *Service) initPOWService() {
 				continue
 			}
 
+			if header.Nr() == 0 && header.Height != 0 {
+				log.WithFields(logrus.Fields{
+					"header.Nr":     header.Nr(),
+					"header.Height": header.Height,
+					"blockHash":     hexutil.Encode(s.latestEth1Data.BlockHash),
+				}).Fatal("Latest eth1 block is not finalized")
+			}
+
 			s.latestEth1Data.BlockHeight = header.Nr()
 			s.latestEth1Data.BlockHash = header.Hash().Bytes()
 			s.latestEth1Data.BlockTime = header.Time
@@ -592,21 +608,8 @@ func (s *Service) initPOWService() {
 			}
 			// Handle edge case with embedded genesis state by fetching genesis header to determine
 			// its height.
-			if s.chainStartData.Chainstarted && s.chainStartData.GenesisBlock == 0 {
-				genHash := common.BytesToHash(s.chainStartData.Eth1Data.BlockHash)
-				genBlock := s.chainStartData.GenesisBlock
-				// In the event our provided chainstart data references a non-existent blockhash
-				// we assume the genesis block to be 0.
-				if genHash != [32]byte{} {
-					genHeader, err := s.eth1DataFetcher.HeaderByHash(ctx, genHash)
-					if err != nil {
-						s.retryExecutionClientConnection(ctx, err)
-						errorLogger(err, "Unable to retrieve proof-of-stake genesis block data")
-						continue
-					}
-					genBlock = genHeader.Nr()
-				}
-				s.chainStartData.GenesisBlock = genBlock
+			if s.chainStartData.Chainstarted && s.chainStartData.GenesisBlock != 0 {
+				s.chainStartData.GenesisBlock = 0
 				if err := s.savePowchainData(ctx); err != nil {
 					s.retryExecutionClientConnection(ctx, err)
 					errorLogger(err, "Unable to save execution client data")
@@ -641,11 +644,6 @@ func (s *Service) run(done <-chan struct{}) {
 			if err != nil {
 				s.pollConnectionStatus(s.ctx)
 				log.WithError(err).Debug("Could not fetch latest eth1 header")
-				continue
-			}
-			if eth1HeadIsBehind(head.Time) {
-				s.pollConnectionStatus(s.ctx)
-				log.WithError(errFarBehind).Debug("Could not get an up to date eth1 header")
 				continue
 			}
 			s.processBlockHeader(head)

@@ -489,6 +489,7 @@ type eth1DataJson struct {
 	DepositRoot  string `json:"deposit_root" hex:"true"`
 	DepositCount string `json:"deposit_count"`
 	BlockHash    string `json:"block_hash" hex:"true"`
+	Candidates   string `json:"candidates" hex:"true"`
 }
 
 type proposerSlashingJson struct {

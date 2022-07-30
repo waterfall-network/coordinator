@@ -8,8 +8,10 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"math/big"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/ghodss/yaml"
 	"github.com/prysmaticlabs/prysm/io/file"
@@ -99,6 +101,10 @@ func main() {
 			return
 		}
 	}
+
+	genTime := new(big.Int).SetUint64(genesisState.GetGenesisTime())
+	tm := time.Unix(genTime.Int64(), 0)
+	log.Printf("set genesis time: %v  (timestamp=%d)", tm, genTime.Int64())
 
 	if *sszOutputFile != "" {
 		encodedState, err := genesisState.MarshalSSZ()

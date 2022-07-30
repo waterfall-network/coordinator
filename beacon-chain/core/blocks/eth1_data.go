@@ -47,7 +47,7 @@ func AreEth1DataEqual(a, b *ethpb.Eth1Data) bool {
 		return false
 	}
 	return a.DepositCount == b.DepositCount &&
-		bytes.Equal(a.Candidates, b.Candidates) &&
+		bytes.Equal(a.BlockHash, b.BlockHash) &&
 		bytes.Equal(a.DepositRoot, b.DepositRoot)
 }
 

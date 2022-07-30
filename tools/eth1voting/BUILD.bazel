@@ -19,6 +19,7 @@ go_library(
         "@com_github_prysmaticlabs_eth2_types//:go_default_library",
         "@org_golang_google_grpc//:go_default_library",
         "@org_golang_x_sync//errgroup:go_default_library",
+        "@com_github_waterfall_foundation_gwat//crypto:go_default_library",
     ],
 )
 

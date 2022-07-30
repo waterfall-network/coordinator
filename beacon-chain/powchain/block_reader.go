@@ -9,6 +9,7 @@ import (
 	"github.com/prysmaticlabs/prysm/beacon-chain/powchain/types"
 	"github.com/prysmaticlabs/prysm/config/params"
 	"github.com/prysmaticlabs/prysm/monitoring/tracing"
+	"github.com/sirupsen/logrus"
 	"github.com/waterfall-foundation/gwat/common"
 	"go.opencensus.io/trace"
 )
@@ -82,6 +83,21 @@ func (s *Service) BlockHashByHeight(ctx context.Context, height *big.Int) (commo
 
 	header, err := s.eth1DataFetcher.HeaderByNumber(ctx, height)
 	if err != nil {
+		if height == nil {
+			return [32]byte{}, errors.Wrap(err, fmt.Sprintf("could not query last finalized header"))
+		}
+		return [32]byte{}, errors.Wrap(err, fmt.Sprintf("could not query header with nr=%d", height.Uint64()))
+	}
+	if header == nil {
+		log.Errorf("could not query header with height %d", height.Uint64())
+		return [32]byte{}, errors.Wrap(err, fmt.Sprintf("could not query header with nr=%d", height.Uint64()))
+	}
+	if header.Nr() == 0 && header.Height != 0 {
+		log.WithFields(logrus.Fields{
+			"header.Nr":     header.Nr(),
+			"header.Height": header.Height,
+			"blockHash":     fmt.Sprintf("%#x", s.latestEth1Data.BlockHash),
+		}).Error("Latest eth1 block is not finalized")
 		return [32]byte{}, errors.Wrap(err, fmt.Sprintf("could not query header with height %d", height.Uint64()))
 	}
 	if err := s.headerCache.AddHeader(header); err != nil {

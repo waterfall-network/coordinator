@@ -248,6 +248,7 @@ func ProcessSlots(ctx context.Context, state state.BeaconState, slot types.Slot)
 			return nil, errors.Wrap(err, "could not process slot")
 		}
 		if time.CanProcessEpoch(state) {
+			// new epoch
 			switch state.Version() {
 			case version.Phase0:
 				state, err = ProcessEpochPrecompute(ctx, state)

@@ -319,7 +319,7 @@ func (vs *Server) validatorStatus(
 		}
 		if err := deposit.VerifyDepositSignature(dep.Data, domain); err != nil {
 			resp.Status = ethpb.ValidatorStatus_INVALID
-			log.Warn("Invalid Eth1 deposit")
+			log.WithError(err).Warn("Invalid Eth1 deposit")
 			return resp, nonExistentIndex
 		}
 		// Set validator deposit status if their deposit is visible.

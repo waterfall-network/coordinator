@@ -1,9 +1,9 @@
 package types
 
 import (
-	"errors"
 	"math/big"
 
+	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
 	"github.com/waterfall-foundation/gwat/common"
 	gethTypes "github.com/waterfall-foundation/gwat/core/types"
@@ -18,9 +18,8 @@ type HeaderInfo struct {
 
 // HeaderToHeaderInfo converts an eth1 header to a header metadata type.
 func HeaderToHeaderInfo(hdr *gethTypes.Header) (*HeaderInfo, error) {
-	if hdr.Number == nil {
-		// A nil number will panic when calling *big.Int.Set(...)
-		return nil, errors.New("cannot convert block header with nil block number")
+	if hdr.Nr() == 0 && hdr.Height != 0 {
+		return nil, errors.Errorf("Not finalized block hash=%s height=%d", hdr.Hash().Hex(), hdr.Height)
 	}
 
 	return &HeaderInfo{

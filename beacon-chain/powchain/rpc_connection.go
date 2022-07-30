@@ -70,7 +70,9 @@ func (s *Service) pollConnectionStatus(ctx context.Context) {
 				continue
 			}
 			// Close previous client, if connection was successful.
-			currClient.Close()
+			if currClient != nil {
+				currClient.Close()
+			}
 			log.Infof("Connected to new endpoint: %s", logs.MaskCredentialsLogging(s.cfg.currHttpEndpoint.Url))
 			return
 		case <-s.ctx.Done():
