@@ -9,7 +9,6 @@ import (
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/prysm/beacon-chain/core/blocks"
 	"github.com/prysmaticlabs/prysm/beacon-chain/state"
-	"github.com/prysmaticlabs/prysm/config/features"
 	"github.com/prysmaticlabs/prysm/config/params"
 	"github.com/prysmaticlabs/prysm/crypto/hash"
 	"github.com/prysmaticlabs/prysm/crypto/rand"
@@ -44,7 +43,15 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 		return vs.mockETH1DataVote(ctx, slot)
 	}
 	if !vs.Eth1InfoFetcher.IsConnectedToETH1() {
-		return vs.randomETH1DataVote(ctx)
+		//return vs.randomETH1DataVote
+		prevEth1Data := vs.HeadFetcher.HeadETH1Data()
+		candidates := vs.HeadFetcher.GetCandidates()
+		return &ethpb.Eth1Data{
+			Candidates:   candidates.ToBytes(),
+			BlockHash:    prevEth1Data.GetBlockHash(),
+			DepositCount: prevEth1Data.GetDepositCount(),
+			DepositRoot:  prevEth1Data.GetDepositRoot(),
+		}, nil
 	}
 	eth1DataNotification = false
 
@@ -52,18 +59,26 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 	earliestValidTime := votingPeriodStartTime - 2*params.BeaconConfig().SecondsPerETH1Block*eth1FollowDistance
 	latestValidTime := votingPeriodStartTime - params.BeaconConfig().SecondsPerETH1Block*eth1FollowDistance
 
-	if !features.Get().EnableGetBlockOptimizations {
-		_, err := vs.Eth1BlockFetcher.BlockByTimestamp(ctx, earliestValidTime)
-		if err != nil {
-			log.WithError(err).Error("Could not get last block by earliest valid time")
-			return vs.randomETH1DataVote(ctx)
-		}
-	}
+	//if !features.Get().EnableGetBlockOptimizations {
+	//	_, err := vs.Eth1BlockFetcher.BlockByTimestamp(ctx, earliestValidTime)
+	//	if err != nil {
+	//		log.WithError(err).Error("Could not get last block by earliest valid time")
+	//		return vs.randomETH1DataVote(ctx)
+	//	}
+	//}
 
 	lastBlockByLatestValidTime, err := vs.Eth1BlockFetcher.BlockByTimestamp(ctx, latestValidTime)
 	if err != nil {
 		log.WithError(err).Error("Could not get last block by latest valid time")
-		return vs.randomETH1DataVote(ctx)
+		//return vs.randomETH1DataVote(ctx)
+		prevEth1Data := vs.HeadFetcher.HeadETH1Data()
+		candidates := vs.HeadFetcher.GetCandidates()
+		return &ethpb.Eth1Data{
+			Candidates:   candidates.ToBytes(),
+			BlockHash:    prevEth1Data.GetBlockHash(),
+			DepositCount: prevEth1Data.GetDepositCount(),
+			DepositRoot:  prevEth1Data.GetDepositRoot(),
+		}, nil
 	}
 	if lastBlockByLatestValidTime.Time < earliestValidTime {
 		prevEth1Data := vs.HeadFetcher.HeadETH1Data()
@@ -77,23 +92,30 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 	}
 
 	lastBlockDepositCount, lastBlockDepositRoot := vs.DepositFetcher.DepositsNumberAndRootAtHeight(ctx, lastBlockByLatestValidTime.Number)
-	if lastBlockDepositCount == 0 {
-		prevEth1Data := vs.ChainStartFetcher.ChainStartEth1Data()
-		candidates := vs.HeadFetcher.GetCandidates()
-		return &ethpb.Eth1Data{
-			Candidates:   candidates.ToBytes(),
-			BlockHash:    prevEth1Data.GetBlockHash(),
-			DepositCount: prevEth1Data.GetDepositCount(),
-			DepositRoot:  prevEth1Data.GetDepositRoot(),
-		}, nil
-
-	}
+	//if lastBlockDepositCount == 0 {
+	//  prevEth1Data := vs.HeadFetcher.HeadETH1Data()
+	//	candidates := vs.HeadFetcher.GetCandidates()
+	//	return &ethpb.Eth1Data{
+	//		Candidates:   candidates.ToBytes(),
+	//		BlockHash:    prevEth1Data.GetBlockHash(),
+	//		DepositCount: prevEth1Data.GetDepositCount(),
+	//		DepositRoot:  prevEth1Data.GetDepositRoot(),
+	//	}, nil
+	//}
 
 	if lastBlockDepositCount >= vs.HeadFetcher.HeadETH1Data().DepositCount {
 		hash, err := vs.Eth1BlockFetcher.BlockHashByHeight(ctx, lastBlockByLatestValidTime.Number)
 		if err != nil {
 			log.WithError(err).Error("Could not get hash of last block by latest valid time")
-			return vs.randomETH1DataVote(ctx)
+			//return vs.randomETH1DataVote(ctx)
+			prevEth1Data := vs.HeadFetcher.HeadETH1Data()
+			candidates := vs.HeadFetcher.GetCandidates()
+			return &ethpb.Eth1Data{
+				Candidates:   candidates.ToBytes(),
+				BlockHash:    prevEth1Data.GetBlockHash(),
+				DepositCount: prevEth1Data.GetDepositCount(),
+				DepositRoot:  prevEth1Data.GetDepositRoot(),
+			}, nil
 		}
 		candidates := vs.HeadFetcher.GetCandidates()
 		return &ethpb.Eth1Data{
@@ -203,13 +225,15 @@ func (vs *Server) randomETH1DataVote(ctx context.Context) (*ethpb.Eth1Data, erro
 	depRoot := hash.Hash(bytesutil.Bytes32(randGen.Uint64()))
 	blockHash := hash.Hash(bytesutil.Bytes32(randGen.Uint64()))
 
-	candidates := vs.HeadFetcher.GetCandidates()
+	slot := headState.Slot()
+	finHash := &common.Hash{}
+	finHash.SetBytes(blockHash[:])
+	candidates := finalizer.NrHashMap{uint64(slot): finHash}
 
 	return &ethpb.Eth1Data{
 		DepositRoot:  depRoot[:],
 		DepositCount: headState.Eth1DepositIndex(),
 		BlockHash:    blockHash[:],
-		//Candidates:   (&finalizer.NrHashMap{}).ToBytes(),
-		Candidates: candidates.ToBytes(),
+		Candidates:   candidates.ToBytes(),
 	}, nil
 }
