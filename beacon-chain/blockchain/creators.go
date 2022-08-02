@@ -27,6 +27,7 @@ func (s *Service) GetCurrentCreators() ([]common.Address, error) {
 
 	// calculate creators assignments
 	creatorsAssig := make(map[types.Slot][]common.Address, params.BeaconConfig().SlotsPerEpoch)
+	slotAssigIndexes := make(map[types.Slot][]types.ValidatorIndex, params.BeaconConfig().SlotsPerEpoch)
 	ctx := s.ctx
 	state := s.headState(ctx)
 	epoch := slots.ToEpoch(slot)
@@ -36,23 +37,40 @@ func (s *Service) GetCurrentCreators() ([]common.Address, error) {
 	}
 
 	for inx, val := range validatorIndexToCommittee {
-		validator, err := s.headValidatorAtIndex(inx)
-		if err != nil {
-			log.WithError(err).Errorf("Get validator data failed: index=%v", inx)
+		if slotAssigIndexes[val.AttesterSlot] == nil {
+			slotAssigIndexes[val.AttesterSlot] = []types.ValidatorIndex{}
 		}
 		if creatorsAssig[val.AttesterSlot] == nil {
 			creatorsAssig[val.AttesterSlot] = []common.Address{}
 		}
-		// Withdrawal address uses as gwat coinbase
-		address := common.BytesToAddress(validator.WithdrawalCredentials()[12:])
-		//check address in slot
-		addrInSlot := false
-		for _, addr := range creatorsAssig[val.AttesterSlot] {
-			if address == addr {
-				addrInSlot = true
+		//check index in slot
+		isCreator := false
+		for i, vix := range val.Committee {
+			if i >= int(params.BeaconConfig().MaxCreatorsPerSlot) {
+				break
+			}
+			if inx == vix {
+				isCreator = true
 			}
 		}
-		if !addrInSlot {
+		if isCreator {
+			// skip already added
+			for _, vix := range slotAssigIndexes[val.AttesterSlot] {
+				if inx == vix {
+					isCreator = false
+				}
+			}
+		}
+		if isCreator {
+			slotAssigIndexes[val.AttesterSlot] = append(slotAssigIndexes[val.AttesterSlot], inx)
+			// retrieve and set creator address
+			validator, err := s.headValidatorAtIndex(inx)
+			if err != nil {
+				log.WithError(err).Errorf("Get validator data failed: index=%v", inx)
+				continue
+			}
+			// Withdrawal address uses as gwat coinbase
+			address := common.BytesToAddress(validator.WithdrawalCredentials()[12:])
 			creatorsAssig[val.AttesterSlot] = append(creatorsAssig[val.AttesterSlot], address)
 		}
 	}

@@ -79,6 +79,7 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	GenesisDelay:             300, // 5 min.
 
 	// Misc constant.
+	MaxCreatorsPerSlot:             4,
 	TargetCommitteeSize:            128,
 	MaxValidatorsPerCommittee:      2048,
 	MaxCommitteesPerSlot:           64,
@@ -103,19 +104,22 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	ZeroHash:                [32]byte{},
 
 	// Time parameter constants.
-	MinAttestationInclusionDelay:     1,
-	SecondsPerSlot:                   12,
-	SlotsPerEpoch:                    32,
-	SqrRootSlotsPerEpoch:             5,
-	MinSeedLookahead:                 1,
-	MaxSeedLookahead:                 4,
-	EpochsPerEth1VotingPeriod:        64,
+	MinAttestationInclusionDelay: 1,
+	//SecondsPerSlot:               12,
+	SecondsPerSlot:       4,
+	SlotsPerEpoch:        32,
+	SqrRootSlotsPerEpoch: 5,
+	MinSeedLookahead:     1,
+	MaxSeedLookahead:     4,
+	//EpochsPerEth1VotingPeriod:        64,
+	EpochsPerEth1VotingPeriod:        4,
 	SlotsPerHistoricalRoot:           8192,
 	MinValidatorWithdrawabilityDelay: 256,
 	ShardCommitteePeriod:             256,
 	MinEpochsToInactivityPenalty:     4,
-	Eth1FollowDistance:               2048,
-	SafeSlotsToUpdateJustified:       8,
+	//Eth1FollowDistance:               2048,
+	Eth1FollowDistance:         16,
+	SafeSlotsToUpdateJustified: 8,
 
 	// Fork choice algorithm constants.
 	ProposerScoreBoost: 70,
@@ -136,7 +140,8 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	// Additional context: https://github.com/ethereum/consensus-specs/issues/2132
 	// Bug prompting this change: https://github.com/prysmaticlabs/prysm/issues/7856
 	// Future optimization: https://github.com/prysmaticlabs/prysm/issues/7739
-	SecondsPerETH1Block: 14,
+	//SecondsPerETH1Block: 14,
+	SecondsPerETH1Block: 4,
 
 	// State list length constants.
 	EpochsPerHistoricalVector: 65536,
