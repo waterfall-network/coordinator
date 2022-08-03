@@ -150,8 +150,8 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 				currBlock := s.head.block
 				beaconBlock := currBlock.Block()
 				var (
-					epoch      = uint64((beaconBlock.Slot() + 1) / params.BeaconConfig().SlotsPerEpoch)
-					slot       = uint64((beaconBlock.Slot() + 1) % params.BeaconConfig().SlotsPerEpoch)
+					//slot       = uint64(beaconBlock.Slot() + 1)
+					slot       = uint64(s.CurrentSlot())
 					finalizing = finalizer.NrHashMap{}
 				)
 
@@ -162,7 +162,6 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 
 				finalizing.SetBytes(beaconBlock.Body().Eth1Data().Candidates)
 				syncParams := &dag.ConsensusInfo{
-					Epoch:      epoch,
 					Slot:       slot,
 					Creators:   creators,
 					Finalizing: finalizing,

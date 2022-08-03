@@ -46,7 +46,6 @@ func TestDagClient_IPC(t *testing.T) {
 
 		hash_1 := common.HexToHash("0xa659fcd4ed3f3ad9cd43ab36eb29080a4655328fe16f045962afab1d66a5da09")
 		arg := &dag.ConsensusInfo{
-			Epoch:      15,
 			Slot:       10,
 			Creators:   []common.Address{common.HexToAddress("0x0000000000000000000000000000000000000000")},
 			Finalizing: finalizer.NrHashMap{1: &hash_1},
@@ -61,7 +60,6 @@ func TestDagClient_IPC(t *testing.T) {
 
 		hash_1 := common.HexToHash("0xa659fcd4ed3f3ad9cd43ab36eb29080a4655328fe16f045962afab1d66a5da09")
 		arg := &dag.ConsensusInfo{
-			Epoch:      15,
 			Slot:       10,
 			Creators:   []common.Address{common.HexToAddress("0x0000000000000000000000000000000000000000")},
 			Finalizing: finalizer.NrHashMap{1: &hash_1},
@@ -111,7 +109,6 @@ func TestDagClient_HTTP(t *testing.T) {
 	t.Run(ExecutionDagFinalizeMethod, func(t *testing.T) {
 		hash_1 := common.HexToHash("0xa659fcd4ed3f3ad9cd43ab36eb29080a4655328fe16f045962afab1d66a5da09")
 		arg := &dag.ConsensusInfo{
-			Epoch:      15,
 			Slot:       10,
 			Creators:   []common.Address{common.HexToAddress("0x0000000000000000000000000000000000000000")},
 			Finalizing: finalizer.NrHashMap{1: &hash_1},
@@ -159,7 +156,6 @@ func TestDagClient_HTTP(t *testing.T) {
 	t.Run(ExecutionDagSyncMethod, func(t *testing.T) {
 		hash_1 := common.HexToHash("0xa659fcd4ed3f3ad9cd43ab36eb29080a4655328fe16f045962afab1d66a5da09")
 		arg := &dag.ConsensusInfo{
-			Epoch:      15,
 			Slot:       10,
 			Creators:   []common.Address{common.HexToAddress("0x0000000000000000000000000000000000000000")},
 			Finalizing: finalizer.NrHashMap{1: &hash_1},
