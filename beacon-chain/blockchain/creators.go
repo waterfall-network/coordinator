@@ -54,14 +54,6 @@ func (s *Service) GetCurrentCreators() ([]common.Address, error) {
 			}
 		}
 		if isCreator {
-			// skip already added
-			for _, vix := range slotAssigIndexes[val.AttesterSlot] {
-				if inx == vix {
-					isCreator = false
-				}
-			}
-		}
-		if isCreator {
 			slotAssigIndexes[val.AttesterSlot] = append(slotAssigIndexes[val.AttesterSlot], inx)
 			// retrieve and set creator address
 			validator, err := s.headValidatorAtIndex(inx)
@@ -71,7 +63,16 @@ func (s *Service) GetCurrentCreators() ([]common.Address, error) {
 			}
 			// Withdrawal address uses as gwat coinbase
 			address := common.BytesToAddress(validator.WithdrawalCredentials()[12:])
-			creatorsAssig[val.AttesterSlot] = append(creatorsAssig[val.AttesterSlot], address)
+			// skip already added
+			for _, addr := range creatorsAssig[val.AttesterSlot] {
+				if address == addr {
+					isCreator = false
+					break
+				}
+			}
+			if isCreator {
+				creatorsAssig[val.AttesterSlot] = append(creatorsAssig[val.AttesterSlot], address)
+			}
 		}
 	}
 	s.creators.assignment = creatorsAssig
