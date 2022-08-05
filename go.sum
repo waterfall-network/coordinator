@@ -1378,8 +1378,6 @@ github.com/valyala/fasttemplate v1.0.1/go.mod h1:UQGH1tvbgY+Nz5t2n7tXsz52dQxojPU
 github.com/valyala/fasttemplate v1.2.1/go.mod h1:KHLXt3tVN2HBp8eijSv/kGJopbvo7S+qRAEEKiv+SiQ=
 github.com/viant/assertly v0.4.8/go.mod h1:aGifi++jvCrUaklKEKT0BU95igDNaqkvz+49uaYMPRU=
 github.com/viant/toolbox v0.24.0/go.mod h1:OxMCG57V0PXuIP2HNQrtJf2CjqdmbrOx5EkMILuUhzM=
-github.com/waterfall-foundation/gwat v0.4.2 h1:aWe+yXaqHehZNLdk1XnCb7DNckD9UQcINK/Fc4RDppQ=
-github.com/waterfall-foundation/gwat v0.4.2/go.mod h1:jYjEIR3Y1ejKJwvPgqFOuZbx4g0mNOWjeMMIHfyPzFA=
 github.com/waterfall-foundation/gwat v0.4.5 h1:1x3uzt+XnTO5hTixtCIGaRY3Uzxixziw40WgI3i2728=
 github.com/waterfall-foundation/gwat v0.4.5/go.mod h1:jYjEIR3Y1ejKJwvPgqFOuZbx4g0mNOWjeMMIHfyPzFA=
 github.com/wealdtech/go-bytesutil v1.1.1 h1:ocEg3Ke2GkZ4vQw5lp46rmO+pfqCCTgq35gqOy8JKVc=
