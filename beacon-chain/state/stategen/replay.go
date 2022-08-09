@@ -69,7 +69,8 @@ func (_ *State) ReplayBlocks(
 
 	duration := time.Since(start)
 	log.WithFields(logrus.Fields{
-		"duration": duration,
+		"duration":     duration,
+		"state.Slot()": state.Slot(),
 	}).Debug("Replayed state")
 
 	return state, nil
