@@ -16,8 +16,7 @@ import (
 	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/runtime/interop"
-	"github.com/waterfall-foundation/gwat/common"
-	"github.com/waterfall-foundation/gwat/dag/finalizer"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 )
 
 var lock sync.Mutex
@@ -246,9 +245,9 @@ func DeterministicEth1Data(size int) (*ethpb.Eth1Data, error) {
 	}
 	root := depositTrie.HashTreeRoot()
 
-	finHash := &common.Hash{}
+	finHash := &gwatCommon.Hash{}
 	finHash.SetBytes(root[:])
-	candidates := finalizer.NrHashMap{uint64(0): finHash}
+	candidates := gwatCommon.HashArray{*finHash}
 
 	eth1Data := &ethpb.Eth1Data{
 		Candidates:   candidates.ToBytes(),

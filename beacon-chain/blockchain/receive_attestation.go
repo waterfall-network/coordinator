@@ -16,8 +16,8 @@ import (
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/time/slots"
 	"github.com/sirupsen/logrus"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	"github.com/waterfall-foundation/gwat/dag"
-	"github.com/waterfall-foundation/gwat/dag/finalizer"
 	"go.opencensus.io/trace"
 )
 
@@ -152,7 +152,7 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 				var (
 					//slot       = uint64(beaconBlock.Slot() + 1)
 					slot       = uint64(s.CurrentSlot())
-					finalizing = finalizer.NrHashMap{}
+					finalizing = gwatCommon.HashArray{}
 				)
 
 				creators, err := s.GetCurrentCreators()
@@ -160,7 +160,7 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 					log.WithError(err).Errorf("Could not compute creators assignments: %v", err)
 				}
 
-				finalizing.SetBytes(beaconBlock.Body().Eth1Data().Candidates)
+				finalizing = gwatCommon.HashArrayFromBytes(beaconBlock.Body().Eth1Data().Candidates)
 				syncParams := &dag.ConsensusInfo{
 					Slot:       slot,
 					Creators:   creators,

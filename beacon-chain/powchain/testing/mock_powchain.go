@@ -17,10 +17,10 @@ import (
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/waterfall-foundation/gwat/accounts/abi/bind/backends"
 	"github.com/waterfall-foundation/gwat/common"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	"github.com/waterfall-foundation/gwat/common/hexutil"
 	gethTypes "github.com/waterfall-foundation/gwat/core/types"
 	"github.com/waterfall-foundation/gwat/dag"
-	"github.com/waterfall-foundation/gwat/dag/finalizer"
 	"github.com/waterfall-foundation/gwat/rpc"
 )
 
@@ -40,30 +40,22 @@ type POWChain struct {
 	Errors            []error
 }
 
-func (m *POWChain) ExecutionDagGetCandidates(ctx context.Context) (finalizer.NrHashMap, error) {
+func (m *POWChain) ExecutionDagGetCandidates(ctx context.Context) (gwatCommon.HashArray, error) {
 	var err error
-	candidates := make(finalizer.NrHashMap, len(m.HashesByHeight))
-	for k, val := range m.HashesByHeight {
+	candidates := make(gwatCommon.HashArray, len(m.HashesByHeight))
+	for _, val := range m.HashesByHeight {
 		h := common.BytesToHash(val)
-		candidates[uint64(k)] = &h
-	}
-	if candidates.HasGap() {
-		err = finalizer.ErrChainGap
-		candidates = finalizer.NrHashMap{}
+		candidates = append(candidates, h)
 	}
 	return candidates, err
 }
 
-func (m *POWChain) ExecutionDagSync(ctx context.Context, syncParams *dag.ConsensusInfo) (finalizer.NrHashMap, error) {
+func (m *POWChain) ExecutionDagSync(ctx context.Context, syncParams *dag.ConsensusInfo) (gwatCommon.HashArray, error) {
 	var err error
-	candidates := make(finalizer.NrHashMap, len(m.HashesByHeight))
-	for k, val := range m.HashesByHeight {
+	candidates := make(gwatCommon.HashArray, len(m.HashesByHeight))
+	for _, val := range m.HashesByHeight {
 		h := common.BytesToHash(val)
-		candidates[uint64(k)] = &h
-	}
-	if candidates.HasGap() {
-		err = finalizer.ErrChainGap
-		candidates = finalizer.NrHashMap{}
+		candidates = append(candidates, h)
 	}
 	return candidates, err
 }

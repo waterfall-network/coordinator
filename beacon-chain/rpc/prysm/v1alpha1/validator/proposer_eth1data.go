@@ -16,7 +16,7 @@ import (
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/time/slots"
 	"github.com/waterfall-foundation/gwat/common"
-	"github.com/waterfall-foundation/gwat/dag/finalizer"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 )
 
 // eth1DataMajorityVote determines the appropriate eth1data for a block proposal using
@@ -199,7 +199,7 @@ func (vs *Server) mockETH1DataVote(ctx context.Context, slot types.Slot) (*ethpb
 
 	finHash := &common.Hash{}
 	finHash.SetBytes(depRoot[:])
-	candidates := finalizer.NrHashMap{uint64(slot): finHash}
+	candidates := gwatCommon.HashArray{*finHash}
 
 	return &ethpb.Eth1Data{
 		DepositRoot:  depRoot[:],
@@ -225,10 +225,9 @@ func (vs *Server) randomETH1DataVote(ctx context.Context) (*ethpb.Eth1Data, erro
 	depRoot := hash.Hash(bytesutil.Bytes32(randGen.Uint64()))
 	blockHash := hash.Hash(bytesutil.Bytes32(randGen.Uint64()))
 
-	slot := headState.Slot()
 	finHash := &common.Hash{}
 	finHash.SetBytes(blockHash[:])
-	candidates := finalizer.NrHashMap{uint64(slot): finHash}
+	candidates := gwatCommon.HashArray{*finHash}
 
 	return &ethpb.Eth1Data{
 		DepositRoot:  depRoot[:],

@@ -8,8 +8,7 @@ import (
 	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/waterfall-foundation/gwat/common"
-	"github.com/waterfall-foundation/gwat/dag/finalizer"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 )
 
 func TestArraysTreeRoot_OnlyPowerOf2(t *testing.T) {
@@ -30,9 +29,9 @@ func TestArraysTreeRoot_ZeroLength(t *testing.T) {
 
 func TestEth1DataRootWithHasher(t *testing.T) {
 	hasher := hash.CustomSHA256Hasher()
-	lastFinHash := common.HexToHash("0x5084316e3b55e27ea074588f3f1000ceff6e1c67d35e9e4eb14d6e5a7980426e")
-	finHash := common.HexToHash("0xffffffffffffffffffffffffffffffffffffffffffffffff0101010101010101")
-	candidates := finalizer.NrHashMap{uint64(0xaaaaaaaa): &finHash}
+	lastFinHash := gwatCommon.HexToHash("0x5084316e3b55e27ea074588f3f1000ceff6e1c67d35e9e4eb14d6e5a7980426e")
+	finHash := gwatCommon.HexToHash("0xffffffffffffffffffffffffffffffffffffffffffffffff0101010101010101")
+	candidates := gwatCommon.HashArray{finHash}
 	eth1Data := &ethpb.Eth1Data{
 		DepositRoot:  bytesutil.PadTo([]byte("DepositRoot"), 32),
 		DepositCount: 3,
@@ -48,13 +47,13 @@ func TestEth1DataRootWithHasher(t *testing.T) {
 
 func TestEth1DataRootWithHasher2(t *testing.T) {
 	hasher := hash.CustomSHA256Hasher()
-	lastFinHash := common.HexToHash("0x5084316e3b55e27ea074588f3f1000ceff6e1c67d35e9e4eb14d6e5a7980426e")
-	finHash := common.HexToHash("0xffffffffffffffffffffffffffffffffffffffffffffffff0101010101010101")
-	candidates := finalizer.NrHashMap{
-		1: &finHash, 2: &finHash, 3: &finHash, 4: &finHash, 5: &finHash, 6: &finHash, 7: &finHash, 8: &finHash,
-		9: &finHash, 10: &finHash, 11: &finHash, 12: &finHash, 13: &finHash, 14: &finHash, 15: &finHash, 16: &finHash,
-		17: &finHash, 18: &finHash, 19: &finHash, 20: &finHash, 21: &finHash, 22: &finHash, 23: &finHash, 24: &finHash,
-		25: &finHash, 26: &finHash, 27: &finHash, 28: &finHash, 29: &finHash, 30: &finHash, 31: &finHash, 32: &finHash,
+	lastFinHash := gwatCommon.HexToHash("0x5084316e3b55e27ea074588f3f1000ceff6e1c67d35e9e4eb14d6e5a7980426e")
+	finHash := gwatCommon.HexToHash("0xffffffffffffffffffffffffffffffffffffffffffffffff0101010101010101")
+	candidates := gwatCommon.HashArray{
+		finHash, finHash, finHash, finHash, finHash, finHash, finHash, finHash,
+		finHash, finHash, finHash, finHash, finHash, finHash, finHash, finHash,
+		finHash, finHash, finHash, finHash, finHash, finHash, finHash, finHash,
+		finHash, finHash, finHash, finHash, finHash, finHash, finHash, finHash,
 	}
 	eth1Data := &ethpb.Eth1Data{
 		DepositRoot:  bytesutil.PadTo([]byte("DepositRoot"), 32),

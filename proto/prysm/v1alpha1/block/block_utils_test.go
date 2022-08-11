@@ -10,16 +10,15 @@ import (
 	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/wrapper"
 	"github.com/prysmaticlabs/prysm/testing/assert"
 	"github.com/prysmaticlabs/prysm/testing/require"
-	"github.com/waterfall-foundation/gwat/common"
-	"github.com/waterfall-foundation/gwat/dag/finalizer"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 )
 
 func TestBeaconBlockHeaderFromBlock(t *testing.T) {
 	hashLen := 32
 
-	finHash := &common.Hash{}
+	finHash := &gwatCommon.Hash{}
 	finHash.SetBytes(bytesutil.PadTo([]byte("block hash"), hashLen))
-	candidates := finalizer.NrHashMap{uint64(200): finHash}
+	candidates := gwatCommon.HashArray{*finHash}
 
 	blk := &eth.BeaconBlock{
 		Slot:          200,
@@ -60,9 +59,9 @@ func TestBeaconBlockHeaderFromBlock(t *testing.T) {
 func TestBeaconBlockHeaderFromBlockInterface(t *testing.T) {
 	hashLen := 32
 
-	finHash := &common.Hash{}
+	finHash := &gwatCommon.Hash{}
 	finHash.SetBytes(bytesutil.PadTo([]byte("block hash"), hashLen))
-	candidates := finalizer.NrHashMap{uint64(200): finHash}
+	candidates := gwatCommon.HashArray{*finHash}
 
 	blk := &eth.BeaconBlock{
 		Slot:          200,
@@ -115,9 +114,9 @@ func TestBeaconBlockHeaderFromBlock_NilBlockBody(t *testing.T) {
 func TestSignedBeaconBlockHeaderFromBlock(t *testing.T) {
 	hashLen := 32
 
-	finHash := &common.Hash{}
+	finHash := &gwatCommon.Hash{}
 	finHash.SetBytes(bytesutil.PadTo([]byte("block hash"), hashLen))
-	candidates := finalizer.NrHashMap{uint64(200): finHash}
+	candidates := gwatCommon.HashArray{*finHash}
 
 	blk := &eth.SignedBeaconBlock{Block: &eth.BeaconBlock{
 		Slot:          200,
@@ -162,9 +161,9 @@ func TestSignedBeaconBlockHeaderFromBlock(t *testing.T) {
 func TestSignedBeaconBlockHeaderFromBlockInterface(t *testing.T) {
 	hashLen := 32
 
-	finHash := &common.Hash{}
+	finHash := &gwatCommon.Hash{}
 	finHash.SetBytes(bytesutil.PadTo([]byte("block hash"), hashLen))
-	candidates := finalizer.NrHashMap{uint64(200): finHash}
+	candidates := gwatCommon.HashArray{*finHash}
 
 	blk := &eth.SignedBeaconBlock{Block: &eth.BeaconBlock{
 		Slot:          200,

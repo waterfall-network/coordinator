@@ -59,7 +59,6 @@ go_library(
         "@com_github_waterfall_foundation_gwat//common/hexutil:go_default_library",
         "@com_github_waterfall_foundation_gwat//core/types:go_default_library",
         "@com_github_waterfall_foundation_gwat//dag:go_default_library",
-        "@com_github_waterfall_foundation_gwat//dag/finalizer:go_default_library",
         "@com_github_waterfall_foundation_gwat//ethclient:go_default_library",
         "@com_github_waterfall_foundation_gwat//rpc:go_default_library",
         "@com_github_holiman_uint256//:go_default_library",

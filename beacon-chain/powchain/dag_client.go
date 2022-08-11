@@ -2,10 +2,10 @@ package powchain
 
 import (
 	"context"
-	"github.com/waterfall-foundation/gwat/dag/finalizer"
 	"go.opencensus.io/trace"
 
 	"github.com/pkg/errors"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	"github.com/waterfall-foundation/gwat/dag"
 	"github.com/waterfall-foundation/gwat/rpc"
 )
@@ -24,7 +24,7 @@ const (
 // - get candidates
 // - block creation
 // by calling dag_sync via JSON-RPC.
-func (s *Service) ExecutionDagSync(ctx context.Context, syncParams *dag.ConsensusInfo) (finalizer.NrHashMap, error) {
+func (s *Service) ExecutionDagSync(ctx context.Context, syncParams *dag.ConsensusInfo) (gwatCommon.HashArray, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagSync")
 	defer span.End()
 	result := &dag.ConsensusResult{}
@@ -38,13 +38,9 @@ func (s *Service) ExecutionDagSync(ctx context.Context, syncParams *dag.Consensu
 		err = errors.New(*result.Error)
 	}
 	if result.Candidates == nil {
-		result.Candidates = &finalizer.NrHashMap{}
+		result.Candidates = gwatCommon.HashArray{}
 	}
-	if result.Candidates.HasGap() {
-		err = finalizer.ErrChainGap
-		result.Candidates = &finalizer.NrHashMap{}
-	}
-	return *result.Candidates, handleDagRPCError(err)
+	return result.Candidates, handleDagRPCError(err)
 }
 
 // ExecutionDagFinalize executing finalisation procedure
@@ -67,7 +63,7 @@ func (s *Service) ExecutionDagFinalize(ctx context.Context, syncParams *dag.Cons
 
 // ExecutionDagGetCandidates executing consensus procedure
 // by calling dag_sync via JSON-RPC.
-func (s *Service) ExecutionDagGetCandidates(ctx context.Context) (finalizer.NrHashMap, error) {
+func (s *Service) ExecutionDagGetCandidates(ctx context.Context) (gwatCommon.HashArray, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionGetCandidates")
 	defer span.End()
 	result := &dag.CandidatesResult{}
@@ -80,13 +76,9 @@ func (s *Service) ExecutionDagGetCandidates(ctx context.Context) (finalizer.NrHa
 		err = errors.New(*result.Error)
 	}
 	if result.Candidates == nil {
-		result.Candidates = &finalizer.NrHashMap{}
+		result.Candidates = gwatCommon.HashArray{}
 	}
-	if result.Candidates.HasGap() {
-		err = finalizer.ErrChainGap
-		result.Candidates = &finalizer.NrHashMap{}
-	}
-	return *result.Candidates, handleDagRPCError(err)
+	return result.Candidates, handleDagRPCError(err)
 }
 
 // handleDagRPCError errors received from the RPC server according to the specification.

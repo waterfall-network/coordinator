@@ -40,10 +40,10 @@ import (
 	ethereum "github.com/waterfall-foundation/gwat"
 	"github.com/waterfall-foundation/gwat/accounts/abi/bind"
 	"github.com/waterfall-foundation/gwat/common"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	"github.com/waterfall-foundation/gwat/common/hexutil"
 	gethTypes "github.com/waterfall-foundation/gwat/core/types"
 	"github.com/waterfall-foundation/gwat/dag"
-	"github.com/waterfall-foundation/gwat/dag/finalizer"
 	"github.com/waterfall-foundation/gwat/ethclient"
 	gethRPC "github.com/waterfall-foundation/gwat/rpc"
 )
@@ -102,8 +102,8 @@ type POWBlockFetcher interface {
 	BlockExists(ctx context.Context, hash common.Hash) (bool, *big.Int, error)
 	BlockExistsWithCache(ctx context.Context, hash common.Hash) (bool, *big.Int, error)
 
-	ExecutionDagSync(ctx context.Context, syncParams *dag.ConsensusInfo) (finalizer.NrHashMap, error)
-	ExecutionDagGetCandidates(ctx context.Context) (finalizer.NrHashMap, error)
+	ExecutionDagSync(ctx context.Context, syncParams *dag.ConsensusInfo) (gwatCommon.HashArray, error)
+	ExecutionDagGetCandidates(ctx context.Context) (gwatCommon.HashArray, error)
 	ExecutionDagFinalize(ctx context.Context, syncParams *dag.ConsensusInfo) (*map[string]string, error)
 }
 

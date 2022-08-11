@@ -43,7 +43,7 @@ import (
 	"github.com/prysmaticlabs/prysm/time/slots"
 	logTest "github.com/sirupsen/logrus/hooks/test"
 	"github.com/waterfall-foundation/gwat/common"
-	"github.com/waterfall-foundation/gwat/dag/finalizer"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
@@ -365,7 +365,7 @@ func TestProposer_PendingDeposits_Eth1DataVoteOK(t *testing.T) {
 
 	finHash := &common.Hash{}
 	finHash.SetBytes(blockHash)
-	candidates := finalizer.NrHashMap{uint64(1): finHash}
+	candidates := gwatCommon.HashArray{*finHash}
 	vote := &ethpb.Eth1Data{
 		DepositRoot:  make([]byte, 32),
 		BlockHash:    blockHash,
@@ -380,7 +380,7 @@ func TestProposer_PendingDeposits_Eth1DataVoteOK(t *testing.T) {
 	blockHash = make([]byte, 32)
 	copy(blockHash, "0x0")
 	finHash.SetBytes(blockHash)
-	candidates = finalizer.NrHashMap{uint64(1): finHash}
+	candidates = common.HashArray{*finHash}
 	beaconState, err := util.NewBeaconState()
 	require.NoError(t, err)
 	require.NoError(t, beaconState.SetEth1DepositIndex(2))
@@ -445,7 +445,7 @@ func TestProposer_PendingDeposits_OutsideEth1FollowWindow(t *testing.T) {
 	}
 
 	finHash := &common.Hash{0x30, 0x78, 0x30}
-	candidates := finalizer.NrHashMap{height.Uint64(): finHash}
+	candidates := gwatCommon.HashArray{*finHash}
 	beaconState, err := v1.InitializeFromProto(&ethpb.BeaconState{
 		Eth1Data: &ethpb.Eth1Data{
 			BlockHash:   bytesutil.PadTo([]byte("0x0"), 32),
@@ -567,7 +567,7 @@ func TestProposer_PendingDeposits_FollowsCorrectEth1Block(t *testing.T) {
 
 	finHash := &common.Hash{}
 	finHash.SetBytes(bytesutil.PadTo([]byte("0x1"), 32))
-	candidates := finalizer.NrHashMap{newHeight.Uint64(): finHash}
+	candidates := gwatCommon.HashArray{*finHash}
 	vote := &ethpb.Eth1Data{
 		BlockHash:    bytesutil.PadTo([]byte("0x1"), 32),
 		Candidates:   candidates.ToBytes(),
@@ -580,7 +580,7 @@ func TestProposer_PendingDeposits_FollowsCorrectEth1Block(t *testing.T) {
 	}
 
 	finHash.SetBytes(bytesutil.PadTo([]byte("0x0"), 32))
-	candidates = finalizer.NrHashMap{height.Uint64(): finHash}
+	candidates = gwatCommon.HashArray{*finHash}
 	beaconState, err := v1.InitializeFromProto(&ethpb.BeaconState{
 		Eth1Data: &ethpb.Eth1Data{
 			BlockHash:    []byte("0x0"),
@@ -699,7 +699,7 @@ func TestProposer_PendingDeposits_CantReturnBelowStateEth1DepositIndex(t *testin
 
 	finHash := &common.Hash{}
 	finHash.SetBytes(bytesutil.PadTo([]byte("0x0"), 32))
-	candidates := finalizer.NrHashMap{height.Uint64(): finHash}
+	candidates := gwatCommon.HashArray{*finHash}
 
 	beaconState, err := util.NewBeaconState()
 	require.NoError(t, err)
@@ -800,7 +800,7 @@ func TestProposer_PendingDeposits_CantReturnMoreThanMax(t *testing.T) {
 
 	finHash := &common.Hash{}
 	finHash.SetBytes(bytesutil.PadTo([]byte("0x0"), 32))
-	candidates := finalizer.NrHashMap{height.Uint64(): finHash}
+	candidates := gwatCommon.HashArray{*finHash}
 
 	beaconState, err := v1.InitializeFromProto(&ethpb.BeaconState{
 		Eth1Data: &ethpb.Eth1Data{
@@ -899,7 +899,7 @@ func TestProposer_PendingDeposits_CantReturnMoreThanDepositCount(t *testing.T) {
 
 	finHash := &common.Hash{}
 	finHash.SetBytes(bytesutil.PadTo([]byte("0x0"), 32))
-	candidates := finalizer.NrHashMap{height.Uint64(): finHash}
+	candidates := gwatCommon.HashArray{*finHash}
 
 	beaconState, err := v1.InitializeFromProto(&ethpb.BeaconState{
 		Eth1Data: &ethpb.Eth1Data{
@@ -998,7 +998,7 @@ func TestProposer_DepositTrie_UtilizesCachedFinalizedDeposits(t *testing.T) {
 
 	finHash := &common.Hash{}
 	finHash.SetBytes(bytesutil.PadTo([]byte("0x0"), 32))
-	candidates := finalizer.NrHashMap{height.Uint64(): finHash}
+	candidates := gwatCommon.HashArray{*finHash}
 
 	beaconState, err := v1.InitializeFromProto(&ethpb.BeaconState{
 		Eth1Data: &ethpb.Eth1Data{
@@ -1113,7 +1113,7 @@ func TestProposer_DepositTrie_RebuildTrie(t *testing.T) {
 
 	finHash := &common.Hash{}
 	finHash.SetBytes(bytesutil.PadTo([]byte("0x0"), 32))
-	candidates := finalizer.NrHashMap{height.Uint64(): finHash}
+	candidates := gwatCommon.HashArray{*finHash}
 
 	beaconState, err := v1.InitializeFromProto(&ethpb.BeaconState{
 		Eth1Data: &ethpb.Eth1Data{
@@ -1554,7 +1554,7 @@ func TestProposer_Eth1Data_MajorityVote(t *testing.T) {
 
 		finHash := &common.Hash{}
 		finHash.SetBytes(bytesutil.PadTo([]byte("current"), 32))
-		candidates := finalizer.NrHashMap{uint64(4): finHash}
+		candidates := gwatCommon.HashArray{*finHash}
 
 		currentEth1Data := &ethpb.Eth1Data{DepositCount: 1, Candidates: candidates.ToBytes(), BlockHash: []byte("current")}
 		ps := &Server{
@@ -1585,11 +1585,11 @@ func TestProposer_Eth1Data_MajorityVote(t *testing.T) {
 
 		brHash := &common.Hash{}
 		brHash.SetBytes(bytesutil.PadTo([]byte("before_range"), 32))
-		brCandidates := finalizer.NrHashMap{uint64(slot): brHash}
+		brCandidates := gwatCommon.HashArray{*brHash}
 
 		arHash := &common.Hash{}
 		arHash.SetBytes(bytesutil.PadTo([]byte("after_range"), 32))
-		arCandidates := finalizer.NrHashMap{uint64(slot): arHash}
+		arCandidates := gwatCommon.HashArray{*arHash}
 
 		beaconState, err := v1.InitializeFromProto(&ethpb.BeaconState{
 			Slot: slot,
@@ -1985,7 +1985,7 @@ func TestProposer_Deposits_ReturnsEmptyList_IfLatestEth1DataEqGenesisEth1Block(t
 
 	finHash := &common.Hash{}
 	finHash.SetBytes(bytesutil.PadTo([]byte("0x0"), 32))
-	candidates := finalizer.NrHashMap{height.Uint64(): finHash}
+	candidates := gwatCommon.HashArray{*finHash}
 
 	beaconState, err := v1.InitializeFromProto(&ethpb.BeaconState{
 		Eth1Data: &ethpb.Eth1Data{

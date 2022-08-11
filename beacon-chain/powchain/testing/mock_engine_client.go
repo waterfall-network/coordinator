@@ -10,9 +10,9 @@ import (
 	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
 	pb "github.com/prysmaticlabs/prysm/proto/engine/v1"
 	"github.com/waterfall-foundation/gwat/common"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	"github.com/waterfall-foundation/gwat/common/hexutil"
 	"github.com/waterfall-foundation/gwat/dag"
-	"github.com/waterfall-foundation/gwat/dag/finalizer"
 )
 
 // EngineClient --
@@ -32,11 +32,11 @@ type EngineClient struct {
 	TerminalBlockHashExists bool
 }
 
-func (e *EngineClient) ExecutionDagSync(ctx context.Context, syncParams *dag.ConsensusInfo) (finalizer.NrHashMap, error) {
+func (e *EngineClient) ExecutionDagSync(ctx context.Context, syncParams *dag.ConsensusInfo) (gwatCommon.HashArray, error) {
 	panic("implement me")
 }
 
-func (e *EngineClient) ExecutionDagGetCandidates(ctx context.Context) (finalizer.NrHashMap, error) {
+func (e *EngineClient) ExecutionDagGetCandidates(ctx context.Context) (gwatCommon.HashArray, error) {
 	panic("implement me")
 }
 

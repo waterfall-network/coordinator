@@ -13,8 +13,7 @@ import (
 	"github.com/prysmaticlabs/prysm/testing/assert"
 	"github.com/prysmaticlabs/prysm/testing/require"
 	"github.com/prysmaticlabs/prysm/testing/util"
-	"github.com/waterfall-foundation/gwat/common"
-	"github.com/waterfall-foundation/gwat/dag/finalizer"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 )
 
 var (
@@ -97,15 +96,11 @@ func Test_V1Alpha1ToV1SignedBlock(t *testing.T) {
 	alphaBlock.Block.StateRoot = stateRoot
 	alphaBlock.Block.Body.RandaoReveal = randaoReveal
 
-	finHash := &common.Hash{}
-	finHash.SetBytes(blockHash)
-	candidates := finalizer.NrHashMap{uint64(slot): finHash}
-
 	alphaBlock.Block.Body.Eth1Data = &ethpbalpha.Eth1Data{
 		DepositRoot:  depositRoot,
 		DepositCount: depositCount,
 		BlockHash:    blockHash,
-		Candidates:   candidates.ToBytes(),
+		Candidates:   gwatCommon.HashArray{gwatCommon.BytesToHash(blockHash)}.ToBytes(),
 	}
 	alphaBlock.Signature = signature
 
@@ -126,9 +121,9 @@ func Test_V1ToV1Alpha1SignedBlock(t *testing.T) {
 	v1Block.Block.StateRoot = stateRoot
 	v1Block.Block.Body.RandaoReveal = randaoReveal
 
-	finHash := &common.Hash{}
+	finHash := &gwatCommon.Hash{}
 	finHash.SetBytes(blockHash)
-	candidates := finalizer.NrHashMap{uint64(slot): finHash}
+	candidates := gwatCommon.HashArray{*finHash}
 
 	v1Block.Block.Body.Eth1Data = &ethpbv1.Eth1Data{
 		DepositRoot:  depositRoot,
@@ -155,9 +150,9 @@ func Test_V1ToV1Alpha1Block(t *testing.T) {
 	alphaBlock.StateRoot = stateRoot
 	alphaBlock.Body.RandaoReveal = randaoReveal
 
-	finHash := &common.Hash{}
+	finHash := &gwatCommon.Hash{}
 	finHash.SetBytes(blockHash)
-	candidates := finalizer.NrHashMap{uint64(slot): finHash}
+	candidates := gwatCommon.HashArray{*finHash}
 
 	alphaBlock.Body.Eth1Data = &ethpbalpha.Eth1Data{
 		DepositRoot:  depositRoot,
@@ -378,9 +373,9 @@ func Test_BlockInterfaceToV1Block(t *testing.T) {
 	v1Alpha1Block.Block.StateRoot = stateRoot
 	v1Alpha1Block.Block.Body.RandaoReveal = randaoReveal
 
-	finHash := &common.Hash{}
+	finHash := &gwatCommon.Hash{}
 	finHash.SetBytes(blockHash)
-	candidates := finalizer.NrHashMap{uint64(slot): finHash}
+	candidates := gwatCommon.HashArray{*finHash}
 
 	v1Alpha1Block.Block.Body.Eth1Data = &ethpbalpha.Eth1Data{
 		DepositRoot:  depositRoot,
@@ -498,9 +493,9 @@ func TestBeaconStateToProto(t *testing.T) {
 		state.StateRoots = [][]byte{bytesutil.PadTo([]byte("stateroots"), 32)}
 		state.HistoricalRoots = [][]byte{bytesutil.PadTo([]byte("historicalroots"), 32)}
 
-		finHash := &common.Hash{}
+		finHash := &gwatCommon.Hash{}
 		finHash.SetBytes(bytesutil.PadTo([]byte("e1dblockhash"), 32))
-		candidates := finalizer.NrHashMap{uint64(17): finHash}
+		candidates := gwatCommon.HashArray{*finHash}
 
 		state.Eth1Data = &ethpbalpha.Eth1Data{
 			DepositRoot:  bytesutil.PadTo([]byte("e1ddepositroot"), 32),
@@ -509,9 +504,9 @@ func TestBeaconStateToProto(t *testing.T) {
 			Candidates:   candidates.ToBytes(),
 		}
 
-		finHash = &common.Hash{}
+		finHash = &gwatCommon.Hash{}
 		finHash.SetBytes(bytesutil.PadTo([]byte("e1dvblockhash"), 32))
-		candidates = finalizer.NrHashMap{uint64(24): finHash}
+		candidates = gwatCommon.HashArray{*finHash}
 
 		state.Eth1DataVotes = []*ethpbalpha.Eth1Data{{
 			DepositRoot:  bytesutil.PadTo([]byte("e1dvdepositroot"), 32),
@@ -613,9 +608,9 @@ func TestBeaconStateToProto(t *testing.T) {
 	assert.Equal(t, uint64(6), resultEth1Data.DepositCount)
 	assert.DeepEqual(t, bytesutil.PadTo([]byte("e1dblockhash"), 32), resultEth1Data.BlockHash)
 
-	finHash := &common.Hash{}
+	finHash := &gwatCommon.Hash{}
 	finHash.SetBytes(bytesutil.PadTo([]byte("e1dblockhash"), 32))
-	candidates := finalizer.NrHashMap{uint64(17): finHash}
+	candidates := gwatCommon.HashArray{*finHash}
 	assert.DeepEqual(t, candidates.ToBytes(), resultEth1Data.Candidates)
 
 	require.Equal(t, 1, len(result.Eth1DataVotes))
@@ -625,9 +620,8 @@ func TestBeaconStateToProto(t *testing.T) {
 	assert.Equal(t, uint64(7), resultEth1DataVote.DepositCount)
 	assert.DeepEqual(t, bytesutil.PadTo([]byte("e1dvblockhash"), 32), resultEth1DataVote.BlockHash)
 
-	candidates = finalizer.NrHashMap{}
-	candidates.SetBytes(resultEth1DataVote.Candidates)
-	fHash := (*candidates.GetHashes())[len(*candidates.GetHashes())-1]
+	candidates = gwatCommon.HashArrayFromBytes(resultEth1DataVote.Candidates)
+	fHash := candidates[len(candidates)-1]
 	assert.DeepEqual(t, bytesutil.PadTo([]byte("e1dvblockhash"), 32), fHash.Bytes())
 
 	assert.Equal(t, uint64(8), result.Eth1DepositIndex)

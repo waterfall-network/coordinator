@@ -14,7 +14,7 @@ import (
 	"github.com/prysmaticlabs/prysm/testing/require"
 	"github.com/prysmaticlabs/prysm/testing/util"
 	"github.com/waterfall-foundation/gwat/common"
-	"github.com/waterfall-foundation/gwat/dag/finalizer"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 )
 
 func TestV1Alpha1SignedContributionAndProofToV2(t *testing.T) {
@@ -57,7 +57,7 @@ func Test_V1Alpha1BeaconBlockAltairToV2(t *testing.T) {
 
 	finHash := &common.Hash{}
 	finHash.SetBytes(blockHash)
-	candidates := finalizer.NrHashMap{uint64(slot): finHash}
+	candidates := gwatCommon.HashArray{*finHash}
 
 	alphaBlock.Body.Eth1Data = &ethpbalpha.Eth1Data{
 		DepositRoot:  depositRoot,
@@ -91,7 +91,7 @@ func Test_AltairToV1Alpha1SignedBlock(t *testing.T) {
 
 	finHash := &common.Hash{}
 	finHash.SetBytes(blockHash)
-	candidates := finalizer.NrHashMap{uint64(slot): finHash}
+	candidates := gwatCommon.HashArray{*finHash}
 
 	v2Block.Message.Body.Eth1Data = &ethpbv1.Eth1Data{
 		DepositRoot:  depositRoot,
@@ -126,7 +126,7 @@ func Test_BellatrixToV1Alpha1SignedBlock(t *testing.T) {
 
 	finHash := &common.Hash{}
 	finHash.SetBytes(blockHash)
-	candidates := finalizer.NrHashMap{uint64(slot): finHash}
+	candidates := gwatCommon.HashArray{*finHash}
 
 	v2Block.Message.Body.Eth1Data = &ethpbv1.Eth1Data{
 		DepositRoot:  depositRoot,
@@ -177,7 +177,7 @@ func Test_V1Alpha1BeaconBlockBellatrixToV2(t *testing.T) {
 
 	finHash := &common.Hash{}
 	finHash.SetBytes(blockHash)
-	candidates := finalizer.NrHashMap{uint64(slot): finHash}
+	candidates := gwatCommon.HashArray{*finHash}
 
 	alphaBlock.Body.Eth1Data = &ethpbalpha.Eth1Data{
 		DepositRoot:  depositRoot,
@@ -224,7 +224,7 @@ func TestBeaconStateAltairToProto(t *testing.T) {
 
 		finHash := &common.Hash{}
 		finHash.SetBytes(bytesutil.PadTo([]byte("e1dblockhash"), 32))
-		candidates := finalizer.NrHashMap{uint64(4): finHash}
+		candidates := gwatCommon.HashArray{*finHash}
 
 		state.Eth1Data = &ethpbalpha.Eth1Data{
 			DepositRoot:  bytesutil.PadTo([]byte("e1ddepositroot"), 32),
@@ -235,7 +235,7 @@ func TestBeaconStateAltairToProto(t *testing.T) {
 
 		finHash = &common.Hash{}
 		finHash.SetBytes(bytesutil.PadTo([]byte("e1dvblockhash"), 32))
-		candidates = finalizer.NrHashMap{uint64(6): finHash}
+		candidates = gwatCommon.HashArray{*finHash}
 
 		state.Eth1DataVotes = []*ethpbalpha.Eth1Data{{
 			DepositRoot:  bytesutil.PadTo([]byte("e1dvdepositroot"), 32),
@@ -312,9 +312,8 @@ func TestBeaconStateAltairToProto(t *testing.T) {
 	assert.Equal(t, uint64(6), resultEth1Data.DepositCount)
 	assert.DeepEqual(t, bytesutil.PadTo([]byte("e1dblockhash"), 32), resultEth1Data.BlockHash)
 
-	candidates := finalizer.NrHashMap{}
-	candidates.SetBytes(resultEth1Data.Candidates)
-	fHash := (*candidates.GetHashes())[len(*candidates.GetHashes())-1]
+	candidates := gwatCommon.HashArrayFromBytes(resultEth1Data.Candidates)
+	fHash := candidates[len(candidates)-1]
 
 	assert.DeepEqual(t, bytesutil.PadTo([]byte("e1dblockhash"), 32), fHash.Bytes())
 	require.Equal(t, 1, len(result.Eth1DataVotes))
@@ -324,9 +323,8 @@ func TestBeaconStateAltairToProto(t *testing.T) {
 	assert.Equal(t, uint64(7), resultEth1DataVote.DepositCount)
 	assert.DeepEqual(t, bytesutil.PadTo([]byte("e1dvblockhash"), 32), resultEth1DataVote.BlockHash)
 
-	candidates = finalizer.NrHashMap{}
-	candidates.SetBytes(resultEth1DataVote.Candidates)
-	fHash = (*candidates.GetHashes())[len(*candidates.GetHashes())-1]
+	candidates = gwatCommon.HashArrayFromBytes(resultEth1DataVote.Candidates)
+	fHash = candidates[len(candidates)-1]
 
 	assert.DeepEqual(t, bytesutil.PadTo([]byte("e1dvblockhash"), 32), fHash.Bytes())
 	assert.Equal(t, uint64(8), result.Eth1DepositIndex)
@@ -391,7 +389,7 @@ func TestBeaconStateBellatrixToProto(t *testing.T) {
 
 		finHash := &common.Hash{}
 		finHash.SetBytes(bytesutil.PadTo([]byte("e1dblockhash"), 32))
-		candidates := finalizer.NrHashMap{uint64(slot): finHash}
+		candidates := gwatCommon.HashArray{*finHash}
 
 		state.Eth1Data = &ethpbalpha.Eth1Data{
 			DepositRoot:  bytesutil.PadTo([]byte("e1ddepositroot"), 32),
@@ -402,7 +400,7 @@ func TestBeaconStateBellatrixToProto(t *testing.T) {
 
 		finHash = &common.Hash{}
 		finHash.SetBytes(bytesutil.PadTo([]byte("e1dvblockhash"), 32))
-		candidates = finalizer.NrHashMap{uint64(slot): finHash}
+		candidates = gwatCommon.HashArray{*finHash}
 
 		state.Eth1DataVotes = []*ethpbalpha.Eth1Data{{
 			DepositRoot:  bytesutil.PadTo([]byte("e1dvdepositroot"), 32),
@@ -494,9 +492,8 @@ func TestBeaconStateBellatrixToProto(t *testing.T) {
 	assert.DeepEqual(t, bytesutil.PadTo([]byte("e1ddepositroot"), 32), resultEth1Data.DepositRoot)
 	assert.Equal(t, uint64(6), resultEth1Data.DepositCount)
 
-	candidates := finalizer.NrHashMap{}
-	candidates.SetBytes(resultEth1Data.Candidates)
-	fHash := (*candidates.GetHashes())[len(*candidates.GetHashes())-1]
+	candidates := gwatCommon.HashArrayFromBytes(resultEth1Data.Candidates)
+	fHash := candidates[len(candidates)-1]
 	assert.DeepEqual(t, bytesutil.PadTo([]byte("e1dblockhash"), 32), fHash.Bytes())
 
 	assert.DeepEqual(t, bytesutil.PadTo([]byte("e1dblockhash"), 32), resultEth1Data.BlockHash)
@@ -506,8 +503,8 @@ func TestBeaconStateBellatrixToProto(t *testing.T) {
 	assert.DeepEqual(t, bytesutil.PadTo([]byte("e1dvdepositroot"), 32), resultEth1DataVote.DepositRoot)
 	assert.Equal(t, uint64(7), resultEth1DataVote.DepositCount)
 
-	candidates.SetBytes(resultEth1DataVote.Candidates)
-	fHash = (*candidates.GetHashes())[len(*candidates.GetHashes())-1]
+	candidates = gwatCommon.HashArrayFromBytes(resultEth1DataVote.Candidates)
+	fHash = candidates[len(candidates)-1]
 
 	assert.DeepEqual(t, bytesutil.PadTo([]byte("e1dvblockhash"), 32), fHash.Bytes())
 	assert.DeepEqual(t, bytesutil.PadTo([]byte("e1dvblockhash"), 32), resultEth1DataVote.BlockHash)

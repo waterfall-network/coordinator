@@ -17,8 +17,7 @@ import (
 	"github.com/prysmaticlabs/prysm/testing/endtoend/policies"
 	e2eTypes "github.com/prysmaticlabs/prysm/testing/endtoend/types"
 	"github.com/prysmaticlabs/prysm/testing/util"
-	"github.com/waterfall-foundation/gwat/common"
-	"github.com/waterfall-foundation/gwat/dag/finalizer"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -244,9 +243,9 @@ func proposeDoubleBlock(conns ...*grpc.ClientConn) error {
 
 	hashLen := 32
 
-	finHash := &common.Hash{}
+	finHash := &gwatCommon.Hash{}
 	finHash.SetBytes(bytesutil.PadTo([]byte("bad block hash"), hashLen))
-	candidates := finalizer.NrHashMap{uint64(chainHead.HeadSlot + 1): finHash}
+	candidates := gwatCommon.HashArray{*finHash}
 
 	blk := &eth.BeaconBlock{
 		Slot:          chainHead.HeadSlot + 1,

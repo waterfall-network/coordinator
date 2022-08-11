@@ -14,9 +14,9 @@ import (
 	pb "github.com/prysmaticlabs/prysm/proto/engine/v1"
 	"github.com/sirupsen/logrus"
 	"github.com/waterfall-foundation/gwat/common"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	"github.com/waterfall-foundation/gwat/common/hexutil"
 	"github.com/waterfall-foundation/gwat/dag"
-	"github.com/waterfall-foundation/gwat/dag/finalizer"
 	"github.com/waterfall-foundation/gwat/rpc"
 	"go.opencensus.io/trace"
 )
@@ -57,9 +57,9 @@ type EngineCaller interface {
 	ExecutionBlockByHash(ctx context.Context, hash common.Hash) (*pb.ExecutionBlock, error)
 	GetTerminalBlockHash(ctx context.Context) ([]byte, bool, error)
 
-	ExecutionDagSync(ctx context.Context, syncParams *dag.ConsensusInfo) (finalizer.NrHashMap, error)
+	ExecutionDagSync(ctx context.Context, syncParams *dag.ConsensusInfo) (gwatCommon.HashArray, error)
 	ExecutionDagFinalize(ctx context.Context, syncParams *dag.ConsensusInfo) (*map[string]string, error)
-	ExecutionDagGetCandidates(ctx context.Context) (finalizer.NrHashMap, error)
+	ExecutionDagGetCandidates(ctx context.Context) (gwatCommon.HashArray, error)
 }
 
 // NewPayload calls the engine_newPayloadV1 method via JSON-RPC.

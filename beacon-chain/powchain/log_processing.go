@@ -23,8 +23,8 @@ import (
 	ethereum "github.com/waterfall-foundation/gwat"
 	"github.com/waterfall-foundation/gwat/accounts/abi/bind"
 	"github.com/waterfall-foundation/gwat/common"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	gethTypes "github.com/waterfall-foundation/gwat/core/types"
-	"github.com/waterfall-foundation/gwat/dag/finalizer"
 )
 
 var (
@@ -226,7 +226,7 @@ func (s *Service) ProcessChainStart(genesisTime uint64, eth1BlockHash [32]byte, 
 
 	hash := common.Hash{}
 	hash.SetBytes(eth1BlockHash[:])
-	candidates := finalizer.NrHashMap{blockNumber: &hash}
+	candidates := gwatCommon.HashArray{hash}
 
 	s.chainStartData.Eth1Data = &ethpb.Eth1Data{
 		DepositCount: uint64(len(s.chainStartData.ChainstartDeposits)),

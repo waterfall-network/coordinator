@@ -17,8 +17,7 @@ import (
 	"github.com/prysmaticlabs/prysm/crypto/hash"
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/time"
-	"github.com/waterfall-foundation/gwat/common"
-	"github.com/waterfall-foundation/gwat/dag/finalizer"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 )
 
 // GenerateGenesisState deterministically given a genesis time and number of validators.
@@ -32,12 +31,12 @@ func GenerateGenesisState(ctx context.Context, genesisTime, numValidators uint64
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "could not generate deposit data from keys")
 	}
-	return GenerateGenesisStateFromDepositData(ctx, common.Hash{}, genesisTime, depositDataItems, depositDataRoots)
+	return GenerateGenesisStateFromDepositData(ctx, gwatCommon.Hash{}, genesisTime, depositDataItems, depositDataRoots)
 }
 
 // GenerateGenesisStateFromDepositData creates a genesis state given a list of
 // deposit data items and their corresponding roots.
-func GenerateGenesisStateFromDepositData(ctx context.Context, gwtGenesisHash common.Hash, genesisTime uint64, depositData []*ethpb.Deposit_Data, depositDataRoots [][]byte) (*ethpb.BeaconState, []*ethpb.Deposit, error) {
+func GenerateGenesisStateFromDepositData(ctx context.Context, gwtGenesisHash gwatCommon.Hash, genesisTime uint64, depositData []*ethpb.Deposit_Data, depositDataRoots [][]byte) (*ethpb.BeaconState, []*ethpb.Deposit, error) {
 	trie, err := trie.GenerateTrieFromItems(depositDataRoots, params.BeaconConfig().DepositContractTreeDepth)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "could not generate Merkle trie for deposit proofs")
@@ -50,7 +49,7 @@ func GenerateGenesisStateFromDepositData(ctx context.Context, gwtGenesisHash com
 	if genesisTime == 0 {
 		genesisTime = uint64(time.Now().Unix() + 120)
 	}
-	genesisCandidates := finalizer.NrHashMap{uint64(0): &gwtGenesisHash}
+	genesisCandidates := gwatCommon.HashArray{gwtGenesisHash}
 	beaconState, err := coreState.GenesisBeaconState(ctx, deposits, genesisTime, &ethpb.Eth1Data{
 		DepositRoot:  root[:],
 		DepositCount: uint64(len(deposits)),
