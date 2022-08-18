@@ -62,7 +62,7 @@ type HeadFetcher interface {
 	HeadSyncCommitteeFetcher
 	HeadDomainFetcher
 	ForkChoicer() forkchoice.ForkChoicer
-	GetCandidates() gwatCommon.HashArray
+	GetCacheCandidates() gwatCommon.HashArray
 }
 
 // ForkFetcher retrieves the current fork information of the Ethereum beacon chain.

@@ -152,7 +152,7 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 				var (
 					//slot       = uint64(beaconBlock.Slot() + 1)
 					slot       = uint64(s.CurrentSlot())
-					finalizing = gwatCommon.HashArray{}
+					finalizing gwatCommon.HashArray
 				)
 
 				creators, err := s.GetCurrentCreators()
@@ -170,7 +170,7 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 				if err != nil {
 					log.WithError(err).Error("Error while execute finalization procedure")
 				}
-				s.setCandidates(candidates)
+				s.setCacheCandidates(candidates)
 
 				// Continue when there's no fork choice attestation, there's nothing to process and update head.
 				// This covers the condition when the node is still initial syncing to the head of the chain.

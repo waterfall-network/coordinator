@@ -36,7 +36,7 @@ func TestDagClient_IPC(t *testing.T) {
 	t.Run(ExecutionDagGetCandidatesMethod, func(t *testing.T) {
 		want, ok := fix["ExecutionCandidates"].(*dag.CandidatesResult)
 		require.Equal(t, true, ok)
-		resp, err := srv.ExecutionDagGetCandidates(ctx)
+		resp, err := srv.ExecutionDagGetCandidates(ctx, 1000)
 		require.NoError(t, err)
 		require.DeepEqual(t, want.Candidates, resp)
 	})
@@ -102,7 +102,7 @@ func TestDagClient_HTTP(t *testing.T) {
 		service.rpcClient = rpcClient
 
 		// We call the RPC method via HTTP and expect a proper result.
-		resp, err := service.ExecutionDagGetCandidates(ctx)
+		resp, err := service.ExecutionDagGetCandidates(ctx, 1000)
 		require.NoError(t, err)
 		require.DeepEqual(t, want.Candidates, resp)
 	})

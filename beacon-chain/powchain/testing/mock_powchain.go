@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"time"
 
+	typesEth2 "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/prysm/async/event"
 	"github.com/prysmaticlabs/prysm/beacon-chain/powchain/types"
 	"github.com/prysmaticlabs/prysm/beacon-chain/state"
@@ -40,7 +41,7 @@ type POWChain struct {
 	Errors            []error
 }
 
-func (m *POWChain) ExecutionDagGetCandidates(ctx context.Context) (gwatCommon.HashArray, error) {
+func (m *POWChain) ExecutionDagGetCandidates(ctx context.Context, slot typesEth2.Slot) (gwatCommon.HashArray, error) {
 	var err error
 	candidates := make(gwatCommon.HashArray, len(m.HashesByHeight))
 	for _, val := range m.HashesByHeight {

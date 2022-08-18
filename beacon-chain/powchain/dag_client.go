@@ -5,6 +5,7 @@ import (
 	"go.opencensus.io/trace"
 
 	"github.com/pkg/errors"
+	types "github.com/prysmaticlabs/eth2-types"
 	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	"github.com/waterfall-foundation/gwat/dag"
 	"github.com/waterfall-foundation/gwat/rpc"
@@ -63,7 +64,7 @@ func (s *Service) ExecutionDagFinalize(ctx context.Context, syncParams *dag.Cons
 
 // ExecutionDagGetCandidates executing consensus procedure
 // by calling dag_sync via JSON-RPC.
-func (s *Service) ExecutionDagGetCandidates(ctx context.Context) (gwatCommon.HashArray, error) {
+func (s *Service) ExecutionDagGetCandidates(ctx context.Context, slot types.Slot) (gwatCommon.HashArray, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionGetCandidates")
 	defer span.End()
 	result := &dag.CandidatesResult{}
@@ -71,6 +72,7 @@ func (s *Service) ExecutionDagGetCandidates(ctx context.Context) (gwatCommon.Has
 		ctx,
 		result,
 		ExecutionDagGetCandidatesMethod,
+		slot,
 	)
 	if result.Error != nil {
 		err = errors.New(*result.Error)

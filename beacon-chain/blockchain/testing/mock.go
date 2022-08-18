@@ -65,7 +65,7 @@ type ChainService struct {
 	ReceiveBlockMockErr         error
 }
 
-func (s *ChainService) GetCandidates() gwatCommon.HashArray {
+func (s *ChainService) GetCacheCandidates() gwatCommon.HashArray {
 	//TODO implement me
 	panic("implement me")
 }

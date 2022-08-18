@@ -16,6 +16,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	typesEth2 "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/prysm/beacon-chain/cache/depositcache"
 	"github.com/prysmaticlabs/prysm/beacon-chain/core/feed"
 	statefeed "github.com/prysmaticlabs/prysm/beacon-chain/core/feed/state"
@@ -103,7 +104,7 @@ type POWBlockFetcher interface {
 	BlockExistsWithCache(ctx context.Context, hash common.Hash) (bool, *big.Int, error)
 
 	ExecutionDagSync(ctx context.Context, syncParams *dag.ConsensusInfo) (gwatCommon.HashArray, error)
-	ExecutionDagGetCandidates(ctx context.Context) (gwatCommon.HashArray, error)
+	ExecutionDagGetCandidates(ctx context.Context, slot typesEth2.Slot) (gwatCommon.HashArray, error)
 	ExecutionDagFinalize(ctx context.Context, syncParams *dag.ConsensusInfo) (*map[string]string, error)
 }
 

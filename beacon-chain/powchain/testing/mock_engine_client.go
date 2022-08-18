@@ -6,6 +6,7 @@ import (
 
 	"github.com/holiman/uint256"
 	"github.com/pkg/errors"
+	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/prysm/config/params"
 	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
 	pb "github.com/prysmaticlabs/prysm/proto/engine/v1"
@@ -36,7 +37,7 @@ func (e *EngineClient) ExecutionDagSync(ctx context.Context, syncParams *dag.Con
 	panic("implement me")
 }
 
-func (e *EngineClient) ExecutionDagGetCandidates(ctx context.Context) (gwatCommon.HashArray, error) {
+func (e *EngineClient) ExecutionDagGetCandidates(ctx context.Context, slot types.Slot) (gwatCommon.HashArray, error) {
 	panic("implement me")
 }
 

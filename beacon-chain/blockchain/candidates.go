@@ -4,12 +4,12 @@ import (
 	gwatCommon "github.com/waterfall-foundation/gwat/common"
 )
 
-// setCandidates cashes current candidates.
-func (s *Service) setCandidates(candidates gwatCommon.HashArray) {
+// setCacheCandidates cashes current candidates.
+func (s *Service) setCacheCandidates(candidates gwatCommon.HashArray) {
 	s.candidates = candidates.Copy()
 }
 
 // GetCandidates returns current candidates.
-func (s *Service) GetCandidates() gwatCommon.HashArray {
+func (s *Service) GetCacheCandidates() gwatCommon.HashArray {
 	return s.candidates.Copy()
 }
