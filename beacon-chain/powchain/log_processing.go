@@ -23,7 +23,6 @@ import (
 	ethereum "github.com/waterfall-foundation/gwat"
 	"github.com/waterfall-foundation/gwat/accounts/abi/bind"
 	"github.com/waterfall-foundation/gwat/common"
-	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	gethTypes "github.com/waterfall-foundation/gwat/core/types"
 )
 
@@ -224,15 +223,12 @@ func (s *Service) ProcessChainStart(genesisTime uint64, eth1BlockHash [32]byte, 
 
 	root := s.depositTrie.HashTreeRoot()
 
-	hash := common.Hash{}
-	hash.SetBytes(eth1BlockHash[:])
-	candidates := gwatCommon.HashArray{hash}
-
 	s.chainStartData.Eth1Data = &ethpb.Eth1Data{
 		DepositCount: uint64(len(s.chainStartData.ChainstartDeposits)),
 		DepositRoot:  root[:],
 		BlockHash:    eth1BlockHash[:],
-		Candidates:   candidates.ToBytes(),
+		Candidates:   []byte{},
+		Finalization: []byte{},
 	}
 
 	log.WithFields(logrus.Fields{

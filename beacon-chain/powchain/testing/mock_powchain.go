@@ -9,7 +9,7 @@ import (
 	"net/http/httptest"
 	"time"
 
-	typesEth2 "github.com/prysmaticlabs/eth2-types"
+	ethTypes "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/prysm/async/event"
 	"github.com/prysmaticlabs/prysm/beacon-chain/powchain/types"
 	"github.com/prysmaticlabs/prysm/beacon-chain/state"
@@ -21,6 +21,7 @@ import (
 	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	"github.com/waterfall-foundation/gwat/common/hexutil"
 	gethTypes "github.com/waterfall-foundation/gwat/core/types"
+	gwatTypes "github.com/waterfall-foundation/gwat/core/types"
 	"github.com/waterfall-foundation/gwat/dag"
 	"github.com/waterfall-foundation/gwat/rpc"
 )
@@ -41,7 +42,7 @@ type POWChain struct {
 	Errors            []error
 }
 
-func (m *POWChain) ExecutionDagGetCandidates(ctx context.Context, slot typesEth2.Slot) (gwatCommon.HashArray, error) {
+func (m *POWChain) ExecutionDagGetCandidates(ctx context.Context, slot ethTypes.Slot) (gwatCommon.HashArray, error) {
 	var err error
 	candidates := make(gwatCommon.HashArray, len(m.HashesByHeight))
 	for _, val := range m.HashesByHeight {
@@ -63,6 +64,14 @@ func (m *POWChain) ExecutionDagSync(ctx context.Context, syncParams *dag.Consens
 
 func (m *POWChain) ExecutionDagFinalize(ctx context.Context, syncParams *dag.ConsensusInfo) (*map[string]string, error) {
 	//TODO implement me
+	panic("implement me")
+}
+
+func (m *POWChain) GetHeaderByHash(ctx context.Context, hash gwatCommon.Hash) (*gwatTypes.Header, error) {
+	panic("implement me")
+}
+
+func (m *POWChain) GetHeaderByNumber(ctx context.Context, nr *big.Int) (*gwatTypes.Header, error) {
 	panic("implement me")
 }
 

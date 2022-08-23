@@ -30,5 +30,6 @@ go_test(
         "//proto/prysm/v1alpha1/wrapper:go_default_library",
         "//testing/assert:go_default_library",
         "//testing/require:go_default_library",
+        "@com_github_waterfall_foundation_gwat//common:go_default_library",
     ],
 )

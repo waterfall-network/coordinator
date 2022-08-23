@@ -13,6 +13,7 @@ import (
 	"github.com/waterfall-foundation/gwat/common"
 	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	"github.com/waterfall-foundation/gwat/common/hexutil"
+	gwatTypes "github.com/waterfall-foundation/gwat/core/types"
 	"github.com/waterfall-foundation/gwat/dag"
 )
 
@@ -42,6 +43,14 @@ func (e *EngineClient) ExecutionDagGetCandidates(ctx context.Context, slot types
 }
 
 func (e *EngineClient) ExecutionDagFinalize(ctx context.Context, syncParams *dag.ConsensusInfo) (*map[string]string, error) {
+	panic("implement me")
+}
+
+func (e *EngineClient) GetHeaderByHash(ctx context.Context, hash gwatCommon.Hash) (*gwatTypes.Header, error) {
+	panic("implement me")
+}
+
+func (e *EngineClient) GetHeaderByNumber(ctx context.Context, nr *big.Int) (*gwatTypes.Header, error) {
 	panic("implement me")
 }
 

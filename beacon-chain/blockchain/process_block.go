@@ -307,6 +307,13 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 
 	defer reportAttestationInclusion(b)
 
+	//calculate sequence of finalization spines
+	finSpines, err := s.CalculateFinalizationSpinesByBlockRoot(blockRoot)
+	if err != nil {
+		return errors.Wrap(err, "could not calculate finalization spines")
+	}
+	s.setCacheFinalisation(finSpines)
+
 	return s.handleEpochBoundary(ctx, postState)
 }
 

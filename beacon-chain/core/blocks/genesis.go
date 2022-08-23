@@ -19,9 +19,10 @@ func NewGenesisBlock(stateRoot []byte) *ethpb.SignedBeaconBlock {
 			Body: &ethpb.BeaconBlockBody{
 				RandaoReveal: make([]byte, fieldparams.BLSSignatureLength),
 				Eth1Data: &ethpb.Eth1Data{
-					DepositRoot: make([]byte, 32),
-					BlockHash:   make([]byte, 32),
-					Candidates:  make([]byte, 0),
+					DepositRoot:  make([]byte, 32),
+					BlockHash:    make([]byte, 32),
+					Candidates:   make([]byte, 0),
+					Finalization: make([]byte, 0),
 				},
 				Graffiti: make([]byte, 32),
 			},

@@ -3,10 +3,12 @@ package powchain
 import (
 	"context"
 	"go.opencensus.io/trace"
+	"math/big"
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	gwatCommon "github.com/waterfall-foundation/gwat/common"
+	gwatTypes "github.com/waterfall-foundation/gwat/core/types"
 	"github.com/waterfall-foundation/gwat/dag"
 	"github.com/waterfall-foundation/gwat/rpc"
 )
@@ -63,7 +65,7 @@ func (s *Service) ExecutionDagFinalize(ctx context.Context, syncParams *dag.Cons
 }
 
 // ExecutionDagGetCandidates executing consensus procedure
-// by calling dag_sync via JSON-RPC.
+// by calling dag_getCandidates via JSON-RPC.
 func (s *Service) ExecutionDagGetCandidates(ctx context.Context, slot types.Slot) (gwatCommon.HashArray, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionGetCandidates")
 	defer span.End()
@@ -81,6 +83,22 @@ func (s *Service) ExecutionDagGetCandidates(ctx context.Context, slot types.Slot
 		result.Candidates = gwatCommon.HashArray{}
 	}
 	return result.Candidates, handleDagRPCError(err)
+}
+
+// GetHeaderByHash retrieves gwat block header by hash.
+func (s *Service) GetHeaderByHash(ctx context.Context, hash gwatCommon.Hash) (*gwatTypes.Header, error) {
+	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.GetHeaderByHash")
+	defer span.End()
+	header, err := s.eth1DataFetcher.HeaderByHash(ctx, hash)
+	return header, handleDagRPCError(err)
+}
+
+// GetHeaderByNumber retrieves gwat block header by finalization number.
+func (s *Service) GetHeaderByNumber(ctx context.Context, nr *big.Int) (*gwatTypes.Header, error) {
+	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.GetHeaderByNumber")
+	defer span.End()
+	header, err := s.eth1DataFetcher.HeaderByNumber(ctx, nr)
+	return header, handleDagRPCError(err)
 }
 
 // handleDagRPCError errors received from the RPC server according to the specification.

@@ -18,6 +18,8 @@ var (
 	errWrongBlockCount = errors.New("wrong number of blocks or block roots")
 	// block is not a valid optimistic candidate block
 	errNotOptimisticCandidate = errors.New("block is not suitable for optimistic sync")
-	// block has an invalid spine candidates
+	// errBadSpineCandidates block has an invalid spine candidates
 	errBadSpineCandidates = errors.New("block is not suitable for spyne candidates sync")
+	// errRetrievingSpine block has an invalid spine candidates
+	errRetrievingSpineFailed = errors.New("retrieving spine data failed")
 )

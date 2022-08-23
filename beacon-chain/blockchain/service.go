@@ -40,7 +40,6 @@ import (
 	prysmTime "github.com/prysmaticlabs/prysm/time"
 	"github.com/prysmaticlabs/prysm/time/slots"
 	"github.com/sirupsen/logrus"
-	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	"go.opencensus.io/trace"
 )
 
@@ -55,7 +54,7 @@ type Service struct {
 	ctx         context.Context
 	cancel      context.CancelFunc
 	genesisTime time.Time
-	candidates  gwatCommon.HashArray
+	spineData   spineData
 	creators    creatorsAssignment
 	head        *head
 	headLock    sync.RWMutex
@@ -106,7 +105,7 @@ func NewService(ctx context.Context, opts ...Option) (*Service, error) {
 		initSyncBlocks:       make(map[[32]byte]block.SignedBeaconBlock),
 		cfg:                  &config{},
 		store:                &store.Store{},
-		candidates:           gwatCommon.HashArray{},
+		spineData:            spineData{},
 	}
 	for _, opt := range opts {
 		if err := opt(srv); err != nil {
