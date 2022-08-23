@@ -60,31 +60,10 @@ func (s *Service) GetCacheFinalization() gwatCommon.HashArray {
 	return s.spineData.finalization.Copy()
 }
 
-// GetCacheLastFinSpine returns current candidates.
-func (s *Service) GetCacheLastFinSpine() (gwatCommon.Hash, types.Slot, error) {
+// GetLastFinSpine returns current candidates.
+func (s *Service) GetLastFinSpine() (gwatCommon.Hash, types.Slot, error) {
 	s.spineData.RLock()
 	defer s.spineData.RUnlock()
-
-	////todo откатиться на использование пред кода и проверить
-	//
-	//// retrieve last finalized header
-	//header, err := s.cfg.ExecutionEngineCaller.GetHeaderByNumber(s.ctx, nil)
-	//
-	//log.WithFields(logrus.Fields{
-	//	"header.Hash()": header.Hash().Hex(),
-	//	"header.Slot":   header.Slot,
-	//}).WithError(err).Info("<<<< GetCacheLastFinSpine:GetHeaderByNumber (lastFinalized) >>>>")
-	//
-	//if err != nil || header == nil {
-	//	log.WithError(err).Error(errRetrievingSpineFailed.Error())
-	//	return gwatCommon.Hash{}, 0, errRetrievingSpineFailed
-	//}
-	////set finalization data
-	//s.spineData.finalization = gwatCommon.HashArray{header.Hash()}
-	//s.spineData.lastFinHash = header.Hash()
-	//s.spineData.lastFinSlot = types.Slot(header.Slot)
-	//return s.spineData.lastFinHash, s.spineData.lastFinSlot, nil
-
 	if len(s.spineData.finalization) == 0 {
 		// retrieve last finalized header
 		header, err := s.cfg.ExecutionEngineCaller.GetHeaderByNumber(s.ctx, nil)
@@ -98,9 +77,9 @@ func (s *Service) GetCacheLastFinSpine() (gwatCommon.Hash, types.Slot, error) {
 		s.spineData.lastFinSlot = types.Slot(header.Slot)
 		return s.spineData.lastFinHash, s.spineData.lastFinSlot, nil
 	}
-	hash := s.spineData.finalization[len(s.spineData.finalization)-1]
-	// check is data actual
-	if s.spineData.lastFinHash == hash {
+	lastHash := s.spineData.finalization[len(s.spineData.finalization)-1]
+	// if finalization is unchanged used cache
+	if s.spineData.lastFinHash == lastHash {
 		return s.spineData.lastFinHash, s.spineData.lastFinSlot, nil
 	}
 	// retrieve last finalized header
@@ -109,12 +88,12 @@ func (s *Service) GetCacheLastFinSpine() (gwatCommon.Hash, types.Slot, error) {
 		log.WithError(err).Error(errRetrievingSpineFailed.Error())
 		return gwatCommon.Hash{}, 0, errRetrievingSpineFailed
 	}
-
-	log.WithFields(logrus.Fields{
-		"header.Hash()": header.Hash().Hex(),
-		"header.Slot":   header.Slot,
-	}).WithError(err).Info("<<<< GetCacheLastFinSpine:GetHeaderByHash !!!! >>>>")
-
+	// if Finalization fully finalized
+	//  - cutoff it to last spine
+	if header.Hash() == lastHash {
+		s.spineData.finalization = gwatCommon.HashArray{header.Hash()}
+	}
+	s.spineData.lastFinHash = header.Hash()
 	s.spineData.lastFinSlot = types.Slot(header.Slot)
 	return s.spineData.lastFinHash, s.spineData.lastFinSlot, nil
 }
@@ -132,7 +111,7 @@ func (s *Service) CalculateFinalizationSpinesByBlockRoot(blockRoot [32]byte) (gw
 		votesNeeded    = getVoteNeeded()
 	)
 
-	lastSpineHash, lastSpineSlot, err := s.GetCacheLastFinSpine()
+	lastSpineHash, lastSpineSlot, err := s.GetLastFinSpine()
 	if err != nil || lastSpineHash == (gwatCommon.Hash{}) {
 		return gwatCommon.HashArray{}, err
 	}

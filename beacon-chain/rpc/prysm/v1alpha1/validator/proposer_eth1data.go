@@ -46,8 +46,10 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 		//return vs.randomETH1DataVote
 		prevEth1Data := vs.HeadFetcher.HeadETH1Data()
 		candidates := vs.HeadFetcher.GetCacheCandidates()
+		finalization := vs.HeadFetcher.GetCacheFinalization()
 		return &ethpb.Eth1Data{
 			Candidates:   candidates.ToBytes(),
+			Finalization: finalization.ToBytes(),
 			BlockHash:    prevEth1Data.GetBlockHash(),
 			DepositCount: prevEth1Data.GetDepositCount(),
 			DepositRoot:  prevEth1Data.GetDepositRoot(),
@@ -73,8 +75,10 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 		//return vs.randomETH1DataVote(ctx)
 		prevEth1Data := vs.HeadFetcher.HeadETH1Data()
 		candidates := vs.HeadFetcher.GetCacheCandidates()
+		finalization := vs.HeadFetcher.GetCacheFinalization()
 		return &ethpb.Eth1Data{
 			Candidates:   candidates.ToBytes(),
+			Finalization: finalization.ToBytes(),
 			BlockHash:    prevEth1Data.GetBlockHash(),
 			DepositCount: prevEth1Data.GetDepositCount(),
 			DepositRoot:  prevEth1Data.GetDepositRoot(),
@@ -83,8 +87,10 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 	if lastBlockByLatestValidTime.Time < earliestValidTime {
 		prevEth1Data := vs.HeadFetcher.HeadETH1Data()
 		candidates := vs.HeadFetcher.GetCacheCandidates()
+		finalization := vs.HeadFetcher.GetCacheFinalization()
 		return &ethpb.Eth1Data{
 			Candidates:   candidates.ToBytes(),
+			Finalization: finalization.ToBytes(),
 			BlockHash:    prevEth1Data.GetBlockHash(),
 			DepositCount: prevEth1Data.GetDepositCount(),
 			DepositRoot:  prevEth1Data.GetDepositRoot(),
@@ -93,10 +99,12 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 
 	lastBlockDepositCount, lastBlockDepositRoot := vs.DepositFetcher.DepositsNumberAndRootAtHeight(ctx, lastBlockByLatestValidTime.Number)
 	//if lastBlockDepositCount == 0 {
-	//  prevEth1Data := vs.HeadFetcher.HeadETH1Data()
+	//	prevEth1Data := vs.HeadFetcher.HeadETH1Data()
 	//	candidates := vs.HeadFetcher.GetCacheCandidates()
+	//	finalization := vs.HeadFetcher.GetCacheFinalization()
 	//	return &ethpb.Eth1Data{
 	//		Candidates:   candidates.ToBytes(),
+	//		Finalization: finalization.ToBytes(),
 	//		BlockHash:    prevEth1Data.GetBlockHash(),
 	//		DepositCount: prevEth1Data.GetDepositCount(),
 	//		DepositRoot:  prevEth1Data.GetDepositRoot(),
@@ -110,16 +118,20 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 			//return vs.randomETH1DataVote(ctx)
 			prevEth1Data := vs.HeadFetcher.HeadETH1Data()
 			candidates := vs.HeadFetcher.GetCacheCandidates()
+			finalization := vs.HeadFetcher.GetCacheFinalization()
 			return &ethpb.Eth1Data{
 				Candidates:   candidates.ToBytes(),
+				Finalization: finalization.ToBytes(),
 				BlockHash:    prevEth1Data.GetBlockHash(),
 				DepositCount: prevEth1Data.GetDepositCount(),
 				DepositRoot:  prevEth1Data.GetDepositRoot(),
 			}, nil
 		}
 		candidates := vs.HeadFetcher.GetCacheCandidates()
+		finalization := vs.HeadFetcher.GetCacheFinalization()
 		return &ethpb.Eth1Data{
 			Candidates:   candidates.ToBytes(),
+			Finalization: finalization.ToBytes(),
 			BlockHash:    hash.Bytes(),
 			DepositCount: lastBlockDepositCount,
 			DepositRoot:  lastBlockDepositRoot[:],
@@ -128,8 +140,10 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 
 	prevEth1Data := vs.HeadFetcher.HeadETH1Data()
 	candidates := vs.HeadFetcher.GetCacheCandidates()
+	finalization := vs.HeadFetcher.GetCacheFinalization()
 	return &ethpb.Eth1Data{
 		Candidates:   candidates.ToBytes(),
+		Finalization: finalization.ToBytes(),
 		BlockHash:    prevEth1Data.GetBlockHash(),
 		DepositCount: prevEth1Data.GetDepositCount(),
 		DepositRoot:  prevEth1Data.GetDepositRoot(),

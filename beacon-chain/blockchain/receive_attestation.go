@@ -147,10 +147,7 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 					return
 				}
 
-				currBlock := s.head.block
-				beaconBlock := currBlock.Block()
 				var (
-					//slot       = uint64(beaconBlock.Slot() + 1)
 					slot       = uint64(s.CurrentSlot())
 					finalizing gwatCommon.HashArray
 				)
@@ -159,8 +156,8 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 				if err != nil {
 					log.WithError(err).Errorf("Could not compute creators assignments: %v", err)
 				}
-
-				finalizing = gwatCommon.HashArrayFromBytes(beaconBlock.Body().Eth1Data().Candidates)
+				headState := s.headState(s.ctx)
+				finalizing = gwatCommon.HashArrayFromBytes(headState.Eth1Data().Finalization)
 				syncParams := &dag.ConsensusInfo{
 					Slot:       slot,
 					Creators:   creators,
