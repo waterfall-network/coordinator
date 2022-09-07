@@ -27,7 +27,7 @@ func (v listValIx) Swap(i, j int)      { v[i], v[j] = v[j], v[i] }
 func (s *Service) GetCurrentCreators() ([]gwatCommon.Address, error) {
 	s.creators.lock.RLock()
 	defer s.creators.lock.RUnlock()
-	slot := s.HeadSlot() + 1
+	slot := s.CurrentSlot()
 	// retrieve creators assignments from cache
 	if s.creators.assignment != nil && s.creators.assignment[slot] != nil {
 		return s.creators.assignment[slot], nil

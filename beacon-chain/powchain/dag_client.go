@@ -2,6 +2,7 @@ package powchain
 
 import (
 	"context"
+	"fmt"
 	"go.opencensus.io/trace"
 	"math/big"
 
@@ -31,6 +32,11 @@ func (s *Service) ExecutionDagSync(ctx context.Context, syncParams *dag.Consensu
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagSync")
 	defer span.End()
 	result := &dag.ConsensusResult{}
+
+	if s.rpcClient == nil {
+		return result.Candidates, fmt.Errorf("Rpc Client not init")
+	}
+
 	err := s.rpcClient.CallContext(
 		ctx,
 		result,
@@ -52,6 +58,11 @@ func (s *Service) ExecutionDagFinalize(ctx context.Context, syncParams *dag.Cons
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagFinalize")
 	defer span.End()
 	result := &dag.FinalizationResult{}
+
+	if s.rpcClient == nil {
+		return result.Info, fmt.Errorf("Rpc Client not init")
+	}
+
 	err := s.rpcClient.CallContext(
 		ctx,
 		result,
@@ -70,6 +81,11 @@ func (s *Service) ExecutionDagGetCandidates(ctx context.Context, slot types.Slot
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionGetCandidates")
 	defer span.End()
 	result := &dag.CandidatesResult{}
+
+	if s.rpcClient == nil {
+		return result.Candidates, fmt.Errorf("Rpc Client not init")
+	}
+
 	err := s.rpcClient.CallContext(
 		ctx,
 		result,

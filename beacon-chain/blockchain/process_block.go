@@ -127,6 +127,16 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		}
 	}
 
+	if s.CurrentSlot() == signed.Block().Slot() {
+		isValidCandidates, err := s.ValidateBlockCandidates(signed.Block())
+		if err != nil {
+			log.WithError(err).WithField("slotCandidates", isValidCandidates).Warn("could not verify new new block candidates")
+		}
+		if !isValidCandidates {
+			return errBadSpineCandidates
+		}
+	}
+
 	if err := s.insertBlockAndAttestationsToForkChoiceStore(ctx, signed.Block(), blockRoot, postState); err != nil {
 		return errors.Wrapf(err, "could not insert block %d to fork choice store", signed.Block().Slot())
 	}
@@ -134,14 +144,6 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		if err := s.cfg.ForkChoiceStore.SetOptimisticToValid(ctx, blockRoot); err != nil {
 			return errors.Wrap(err, "could not set optimistic block to valid")
 		}
-	}
-
-	isValidCandidates, err := s.ValidateBlockCandidates(signed.Block())
-	if err != nil {
-		return errors.Wrap(err, "could not verify new block candidates")
-	}
-	if !isValidCandidates {
-		return errBadSpineCandidates
 	}
 
 	// We add a proposer score boost to fork choice for the block root if applicable, right after
