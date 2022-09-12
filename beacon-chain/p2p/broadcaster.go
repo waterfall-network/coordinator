@@ -123,7 +123,8 @@ func (s *Service) broadcastAttestation(ctx context.Context, subnet uint64, att *
 			}
 			return errors.New("failed to find peers for subnet")
 		}(); err != nil {
-			log.WithError(err).Error("Failed to find peers")
+			//todo ???
+			//log.WithError(err).Error("Failed to find peers")
 			tracing.AnnotateError(span, err)
 		}
 	}
@@ -179,7 +180,8 @@ func (s *Service) broadcastSyncCommittee(ctx context.Context, subnet uint64, sMs
 			}
 			return errors.New("failed to find peers for subnet")
 		}(); err != nil {
-			log.WithError(err).Error("Failed to find peers")
+			//todo ???
+			//log.WithError(err).Error("Failed to find peers")
 			tracing.AnnotateError(span, err)
 		}
 	}
