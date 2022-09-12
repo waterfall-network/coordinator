@@ -158,6 +158,7 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 				}
 				headState := s.headState(s.ctx)
 				finalizing = gwatCommon.HashArrayFromBytes(headState.Eth1Data().Finalization)
+				//finalizing = gwatCommon.HashArrayFromBytes(s.head.block.Block().Body().Eth1Data().GetFinalization())
 				syncParams := &dag.ConsensusInfo{
 					Slot:       slot,
 					Creators:   creators,
