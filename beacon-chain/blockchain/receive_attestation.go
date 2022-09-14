@@ -151,24 +151,27 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 					slot       = uint64(s.CurrentSlot())
 					finalizing gwatCommon.HashArray
 				)
-
-				creators, err := s.GetCurrentCreators()
-				if err != nil {
-					log.WithError(err).Errorf("Could not compute creators assignments: %v", err)
-				}
 				headState := s.headState(s.ctx)
-				finalizing = gwatCommon.HashArrayFromBytes(headState.Eth1Data().Finalization)
-				//finalizing = gwatCommon.HashArrayFromBytes(s.head.block.Block().Body().Eth1Data().GetFinalization())
-				syncParams := &dag.ConsensusInfo{
-					Slot:       slot,
-					Creators:   creators,
-					Finalizing: finalizing,
+				curEpoch := slots.ToEpoch(s.CurrentSlot())
+				stateNextEpoch := slots.ToEpoch(headState.Slot()) + 1
+				if curEpoch <= stateNextEpoch {
+					creators, err := s.GetCurrentCreators()
+					if err != nil {
+						log.WithError(err).Errorf("Could not compute creators assignments: %v", err)
+					}
+					finalizing = gwatCommon.HashArrayFromBytes(headState.Eth1Data().Finalization)
+					//finalizing = gwatCommon.HashArrayFromBytes(s.head.block.Block().Body().Eth1Data().GetFinalization())
+					syncParams := &dag.ConsensusInfo{
+						Slot:       slot,
+						Creators:   creators,
+						Finalizing: finalizing,
+					}
+					candidates, err := s.cfg.ExecutionEngineCaller.ExecutionDagSync(s.ctx, syncParams)
+					if err != nil {
+						log.WithError(err).Error("Error while execute finalization procedure")
+					}
+					s.setCacheCandidates(candidates)
 				}
-				candidates, err := s.cfg.ExecutionEngineCaller.ExecutionDagSync(s.ctx, syncParams)
-				if err != nil {
-					log.WithError(err).Error("Error while execute finalization procedure")
-				}
-				s.setCacheCandidates(candidates)
 
 				// Continue when there's no fork choice attestation, there's nothing to process and update head.
 				// This covers the condition when the node is still initial syncing to the head of the chain.
