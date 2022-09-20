@@ -105,6 +105,9 @@ func (s *Service) ExecutionDagGetCandidates(ctx context.Context, slot types.Slot
 func (s *Service) GetHeaderByHash(ctx context.Context, hash gwatCommon.Hash) (*gwatTypes.Header, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.GetHeaderByHash")
 	defer span.End()
+	if s.rpcClient == nil {
+		return nil, fmt.Errorf("Rpc Client not init")
+	}
 	header, err := s.eth1DataFetcher.HeaderByHash(ctx, hash)
 	return header, handleDagRPCError(err)
 }
@@ -113,6 +116,9 @@ func (s *Service) GetHeaderByHash(ctx context.Context, hash gwatCommon.Hash) (*g
 func (s *Service) GetHeaderByNumber(ctx context.Context, nr *big.Int) (*gwatTypes.Header, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.GetHeaderByNumber")
 	defer span.End()
+	if s.rpcClient == nil {
+		return nil, fmt.Errorf("Rpc Client not init")
+	}
 	header, err := s.eth1DataFetcher.HeaderByNumber(ctx, nr)
 	return header, handleDagRPCError(err)
 }
