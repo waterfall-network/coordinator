@@ -10,7 +10,6 @@ import (
 	types "github.com/prysmaticlabs/eth2-types"
 	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	gwatTypes "github.com/waterfall-foundation/gwat/core/types"
-	"github.com/waterfall-foundation/gwat/dag"
 	"github.com/waterfall-foundation/gwat/rpc"
 )
 
@@ -28,10 +27,10 @@ const (
 // - get candidates
 // - block creation
 // by calling dag_sync via JSON-RPC.
-func (s *Service) ExecutionDagSync(ctx context.Context, syncParams *dag.ConsensusInfo) (gwatCommon.HashArray, error) {
+func (s *Service) ExecutionDagSync(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (gwatCommon.HashArray, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagSync")
 	defer span.End()
-	result := &dag.ConsensusResult{}
+	result := &gwatTypes.ConsensusResult{}
 
 	if s.rpcClient == nil {
 		return result.Candidates, fmt.Errorf("Rpc Client not init")
@@ -54,10 +53,10 @@ func (s *Service) ExecutionDagSync(ctx context.Context, syncParams *dag.Consensu
 
 // ExecutionDagFinalize executing finalisation procedure
 // by calling dag_finalize via JSON-RPC.
-func (s *Service) ExecutionDagFinalize(ctx context.Context, syncParams *dag.ConsensusInfo) (*map[string]string, error) {
+func (s *Service) ExecutionDagFinalize(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (*map[string]string, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagFinalize")
 	defer span.End()
-	result := &dag.FinalizationResult{}
+	result := &gwatTypes.FinalizationResult{}
 
 	if s.rpcClient == nil {
 		return result.Info, fmt.Errorf("Rpc Client not init")
@@ -80,7 +79,7 @@ func (s *Service) ExecutionDagFinalize(ctx context.Context, syncParams *dag.Cons
 func (s *Service) ExecutionDagGetCandidates(ctx context.Context, slot types.Slot) (gwatCommon.HashArray, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionGetCandidates")
 	defer span.End()
-	result := &dag.CandidatesResult{}
+	result := &gwatTypes.CandidatesResult{}
 
 	if s.rpcClient == nil {
 		return result.Candidates, fmt.Errorf("Rpc Client not init")

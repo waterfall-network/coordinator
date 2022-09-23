@@ -14,7 +14,6 @@ import (
 	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	"github.com/waterfall-foundation/gwat/common/hexutil"
 	gwatTypes "github.com/waterfall-foundation/gwat/core/types"
-	"github.com/waterfall-foundation/gwat/dag"
 )
 
 // EngineClient --
@@ -34,7 +33,7 @@ type EngineClient struct {
 	TerminalBlockHashExists bool
 }
 
-func (e *EngineClient) ExecutionDagSync(ctx context.Context, syncParams *dag.ConsensusInfo) (gwatCommon.HashArray, error) {
+func (e *EngineClient) ExecutionDagSync(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (gwatCommon.HashArray, error) {
 	panic("implement me")
 }
 
@@ -42,7 +41,7 @@ func (e *EngineClient) ExecutionDagGetCandidates(ctx context.Context, slot types
 	panic("implement me")
 }
 
-func (e *EngineClient) ExecutionDagFinalize(ctx context.Context, syncParams *dag.ConsensusInfo) (*map[string]string, error) {
+func (e *EngineClient) ExecutionDagFinalize(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (*map[string]string, error) {
 	panic("implement me")
 }
 

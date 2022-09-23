@@ -18,7 +18,6 @@ import (
 	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	"github.com/waterfall-foundation/gwat/common/hexutil"
 	gwatTypes "github.com/waterfall-foundation/gwat/core/types"
-	"github.com/waterfall-foundation/gwat/dag"
 	"github.com/waterfall-foundation/gwat/rpc"
 	"go.opencensus.io/trace"
 )
@@ -59,8 +58,8 @@ type EngineCaller interface {
 	ExecutionBlockByHash(ctx context.Context, hash common.Hash) (*pb.ExecutionBlock, error)
 	GetTerminalBlockHash(ctx context.Context) ([]byte, bool, error)
 
-	ExecutionDagSync(ctx context.Context, syncParams *dag.ConsensusInfo) (gwatCommon.HashArray, error)
-	ExecutionDagFinalize(ctx context.Context, syncParams *dag.ConsensusInfo) (*map[string]string, error)
+	ExecutionDagSync(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (gwatCommon.HashArray, error)
+	ExecutionDagFinalize(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (*map[string]string, error)
 	ExecutionDagGetCandidates(ctx context.Context, slot types.Slot) (gwatCommon.HashArray, error)
 	GetHeaderByHash(ctx context.Context, hash gwatCommon.Hash) (*gwatTypes.Header, error)
 	GetHeaderByNumber(ctx context.Context, nr *big.Int) (*gwatTypes.Header, error)

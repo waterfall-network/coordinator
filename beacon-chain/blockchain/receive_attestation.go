@@ -17,7 +17,7 @@ import (
 	"github.com/prysmaticlabs/prysm/time/slots"
 	"github.com/sirupsen/logrus"
 	gwatCommon "github.com/waterfall-foundation/gwat/common"
-	"github.com/waterfall-foundation/gwat/dag"
+	gwatTypes "github.com/waterfall-foundation/gwat/core/types"
 	"go.opencensus.io/trace"
 )
 
@@ -161,7 +161,7 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 					}
 					finalizing = gwatCommon.HashArrayFromBytes(headState.Eth1Data().Finalization)
 					//finalizing = gwatCommon.HashArrayFromBytes(s.head.block.Block().Body().Eth1Data().GetFinalization())
-					syncParams := &dag.ConsensusInfo{
+					syncParams := &gwatTypes.ConsensusInfo{
 						Slot:       slot,
 						Creators:   creators,
 						Finalizing: finalizing,

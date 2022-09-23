@@ -14,7 +14,7 @@ import (
 	"github.com/prysmaticlabs/prysm/testing/require"
 	"github.com/waterfall-foundation/gwat/common"
 	gwatCommon "github.com/waterfall-foundation/gwat/common"
-	"github.com/waterfall-foundation/gwat/dag"
+	gwatTypes "github.com/waterfall-foundation/gwat/core/types"
 	"github.com/waterfall-foundation/gwat/rpc"
 )
 
@@ -34,18 +34,18 @@ func TestDagClient_IPC(t *testing.T) {
 	fix := dagFixtures()
 
 	t.Run(ExecutionDagGetCandidatesMethod, func(t *testing.T) {
-		want, ok := fix["ExecutionCandidates"].(*dag.CandidatesResult)
+		want, ok := fix["ExecutionCandidates"].(*gwatTypes.CandidatesResult)
 		require.Equal(t, true, ok)
 		resp, err := srv.ExecutionDagGetCandidates(ctx, 1000)
 		require.NoError(t, err)
 		require.DeepEqual(t, want.Candidates, resp)
 	})
 	t.Run(ExecutionDagFinalizeMethod, func(t *testing.T) {
-		want, ok := fix["ExecutionFinalize"].(*dag.FinalizationResult)
+		want, ok := fix["ExecutionFinalize"].(*gwatTypes.FinalizationResult)
 		require.Equal(t, true, ok)
 
 		hash_1 := common.HexToHash("0xa659fcd4ed3f3ad9cd43ab36eb29080a4655328fe16f045962afab1d66a5da09")
-		arg := &dag.ConsensusInfo{
+		arg := &gwatTypes.ConsensusInfo{
 			Slot:       10,
 			Creators:   []common.Address{common.HexToAddress("0x0000000000000000000000000000000000000000")},
 			Finalizing: gwatCommon.HashArray{hash_1},
@@ -55,11 +55,11 @@ func TestDagClient_IPC(t *testing.T) {
 		require.DeepEqual(t, want.Info, resp)
 	})
 	t.Run(ExecutionDagSyncMethod, func(t *testing.T) {
-		want, ok := fix["ExecutionSync"].(*dag.ConsensusResult)
+		want, ok := fix["ExecutionSync"].(*gwatTypes.ConsensusResult)
 		require.Equal(t, true, ok)
 
 		hash_1 := common.HexToHash("0xa659fcd4ed3f3ad9cd43ab36eb29080a4655328fe16f045962afab1d66a5da09")
-		arg := &dag.ConsensusInfo{
+		arg := &gwatTypes.ConsensusInfo{
 			Slot:       10,
 			Creators:   []common.Address{common.HexToAddress("0x0000000000000000000000000000000000000000")},
 			Finalizing: gwatCommon.HashArray{hash_1},
@@ -75,7 +75,7 @@ func TestDagClient_HTTP(t *testing.T) {
 	fix := dagFixtures()
 
 	t.Run(ExecutionDagGetCandidatesMethod, func(t *testing.T) {
-		want, ok := fix["ExecutionCandidates"].(*dag.CandidatesResult)
+		want, ok := fix["ExecutionCandidates"].(*gwatTypes.CandidatesResult)
 		require.Equal(t, true, ok)
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
@@ -108,12 +108,12 @@ func TestDagClient_HTTP(t *testing.T) {
 	})
 	t.Run(ExecutionDagFinalizeMethod, func(t *testing.T) {
 		hash_1 := common.HexToHash("0xa659fcd4ed3f3ad9cd43ab36eb29080a4655328fe16f045962afab1d66a5da09")
-		arg := &dag.ConsensusInfo{
+		arg := &gwatTypes.ConsensusInfo{
 			Slot:       10,
 			Creators:   []common.Address{common.HexToAddress("0x0000000000000000000000000000000000000000")},
 			Finalizing: gwatCommon.HashArray{hash_1},
 		}
-		want, ok := fix["ExecutionFinalize"].(*dag.FinalizationResult)
+		want, ok := fix["ExecutionFinalize"].(*gwatTypes.FinalizationResult)
 		require.Equal(t, true, ok)
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
@@ -155,12 +155,12 @@ func TestDagClient_HTTP(t *testing.T) {
 	})
 	t.Run(ExecutionDagSyncMethod, func(t *testing.T) {
 		hash_1 := common.HexToHash("0xa659fcd4ed3f3ad9cd43ab36eb29080a4655328fe16f045962afab1d66a5da09")
-		arg := &dag.ConsensusInfo{
+		arg := &gwatTypes.ConsensusInfo{
 			Slot:       10,
 			Creators:   []common.Address{common.HexToAddress("0x0000000000000000000000000000000000000000")},
 			Finalizing: gwatCommon.HashArray{hash_1},
 		}
-		want, ok := fix["ExecutionSync"].(*dag.ConsensusResult)
+		want, ok := fix["ExecutionSync"].(*gwatTypes.ConsensusResult)
 		require.Equal(t, true, ok)
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
@@ -211,18 +211,18 @@ func newTestDagIPCServer(t *testing.T) *rpc.Server {
 
 func dagFixtures() map[string]interface{} {
 	hash_1 := common.HexToHash("0xa659fcd4ed3f3ad9cd43ab36eb29080a4655328fe16f045962afab1d66a5da09")
-	executionCandidates := &dag.CandidatesResult{
+	executionCandidates := &gwatTypes.CandidatesResult{
 		Error:      nil,
 		Candidates: gwatCommon.HashArray{hash_1},
 	}
 
 	finErr := "test error"
-	executionFinalize := &dag.FinalizationResult{
+	executionFinalize := &gwatTypes.FinalizationResult{
 		Error: &finErr,
 		Info:  nil,
 	}
 
-	executionSync := &dag.ConsensusResult{
+	executionSync := &gwatTypes.ConsensusResult{
 		Error:      nil,
 		Candidates: gwatCommon.HashArray{hash_1},
 	}
@@ -238,10 +238,10 @@ type testDagEngineService struct{}
 func (*testDagEngineService) NoArgsRets() {}
 
 func (*testDagEngineService) Sync(
-	_ context.Context, _ *dag.ConsensusInfo,
-) *dag.ConsensusResult {
+	_ context.Context, _ *gwatTypes.ConsensusInfo,
+) *gwatTypes.ConsensusResult {
 	fix := dagFixtures()
-	item, ok := fix["ExecutionSync"].(*dag.ConsensusResult)
+	item, ok := fix["ExecutionSync"].(*gwatTypes.ConsensusResult)
 	if !ok {
 		panic("not found")
 	}
@@ -249,10 +249,10 @@ func (*testDagEngineService) Sync(
 }
 
 func (*testDagEngineService) GetCandidates(
-	_ context.Context,
-) *dag.CandidatesResult {
+	_ context.Context, slot uint64,
+) *gwatTypes.CandidatesResult {
 	fix := dagFixtures()
-	item, ok := fix["ExecutionCandidates"].(*dag.CandidatesResult)
+	item, ok := fix["ExecutionCandidates"].(*gwatTypes.CandidatesResult)
 	if !ok {
 		panic("not found")
 	}
@@ -260,10 +260,10 @@ func (*testDagEngineService) GetCandidates(
 }
 
 func (*testDagEngineService) Finalize(
-	_ context.Context, _ *dag.ConsensusInfo,
-) *dag.FinalizationResult {
+	_ context.Context, _ *gwatTypes.ConsensusInfo,
+) *gwatTypes.FinalizationResult {
 	fix := dagFixtures()
-	item, ok := fix["ExecutionFinalize"].(*dag.FinalizationResult)
+	item, ok := fix["ExecutionFinalize"].(*gwatTypes.FinalizationResult)
 	if !ok {
 		panic("not found")
 	}

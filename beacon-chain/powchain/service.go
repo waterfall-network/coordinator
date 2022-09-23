@@ -43,8 +43,7 @@ import (
 	"github.com/waterfall-foundation/gwat/common"
 	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	"github.com/waterfall-foundation/gwat/common/hexutil"
-	gethTypes "github.com/waterfall-foundation/gwat/core/types"
-	"github.com/waterfall-foundation/gwat/dag"
+	gwatTypes "github.com/waterfall-foundation/gwat/core/types"
 	"github.com/waterfall-foundation/gwat/ethclient"
 	gethRPC "github.com/waterfall-foundation/gwat/rpc"
 )
@@ -103,9 +102,9 @@ type POWBlockFetcher interface {
 	BlockExists(ctx context.Context, hash common.Hash) (bool, *big.Int, error)
 	BlockExistsWithCache(ctx context.Context, hash common.Hash) (bool, *big.Int, error)
 
-	ExecutionDagSync(ctx context.Context, syncParams *dag.ConsensusInfo) (gwatCommon.HashArray, error)
+	ExecutionDagSync(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (gwatCommon.HashArray, error)
 	ExecutionDagGetCandidates(ctx context.Context, slot ethTypes.Slot) (gwatCommon.HashArray, error)
-	ExecutionDagFinalize(ctx context.Context, syncParams *dag.ConsensusInfo) (*map[string]string, error)
+	ExecutionDagFinalize(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (*map[string]string, error)
 }
 
 // Chain defines a standard interface for the powchain service in Prysm.
@@ -119,8 +118,8 @@ type Chain interface {
 // fetching eth1 data from the clients.
 type RPCDataFetcher interface {
 	Close()
-	HeaderByNumber(ctx context.Context, number *big.Int) (*gethTypes.Header, error)
-	HeaderByHash(ctx context.Context, hash common.Hash) (*gethTypes.Header, error)
+	HeaderByNumber(ctx context.Context, number *big.Int) (*gwatTypes.Header, error)
+	HeaderByHash(ctx context.Context, hash common.Hash) (*gwatTypes.Header, error)
 	SyncProgress(ctx context.Context) (*ethereum.SyncProgress, error)
 }
 
@@ -445,7 +444,7 @@ func (s *Service) initDepositCaches(ctx context.Context, ctrs []*ethpb.DepositCo
 
 // processBlockHeader adds a newly observed eth1 block to the block cache and
 // updates the latest blockHeight, blockHash, and blockTime properties of the service.
-func (s *Service) processBlockHeader(header *gethTypes.Header) {
+func (s *Service) processBlockHeader(header *gwatTypes.Header) {
 	defer safelyHandlePanic()
 	if header.Nr() == 0 && header.Height != 0 {
 		log.WithFields(logrus.Fields{
@@ -467,19 +466,19 @@ func (s *Service) processBlockHeader(header *gethTypes.Header) {
 
 // batchRequestHeaders requests the block range specified in the arguments. Instead of requesting
 // each block in one call, it batches all requests into a single rpc call.
-func (s *Service) batchRequestHeaders(startBlock, endBlock uint64) ([]*gethTypes.Header, error) {
+func (s *Service) batchRequestHeaders(startBlock, endBlock uint64) ([]*gwatTypes.Header, error) {
 	if startBlock > endBlock {
 		return nil, fmt.Errorf("start block height %d cannot be > end block height %d", startBlock, endBlock)
 	}
 	requestRange := (endBlock - startBlock) + 1
 	elems := make([]gethRPC.BatchElem, 0, requestRange)
-	headers := make([]*gethTypes.Header, 0, requestRange)
+	headers := make([]*gwatTypes.Header, 0, requestRange)
 	errs := make([]error, 0, requestRange)
 	if requestRange == 0 {
 		return headers, nil
 	}
 	for i := startBlock; i <= endBlock; i++ {
-		header := &gethTypes.Header{}
+		header := &gwatTypes.Header{}
 		err := error(nil)
 		elems = append(elems, gethRPC.BatchElem{
 			Method: "eth_getBlockByNumber",

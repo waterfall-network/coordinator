@@ -22,7 +22,6 @@ import (
 	"github.com/waterfall-foundation/gwat/common/hexutil"
 	gethTypes "github.com/waterfall-foundation/gwat/core/types"
 	gwatTypes "github.com/waterfall-foundation/gwat/core/types"
-	"github.com/waterfall-foundation/gwat/dag"
 	"github.com/waterfall-foundation/gwat/rpc"
 )
 
@@ -52,7 +51,7 @@ func (m *POWChain) ExecutionDagGetCandidates(ctx context.Context, slot ethTypes.
 	return candidates, err
 }
 
-func (m *POWChain) ExecutionDagSync(ctx context.Context, syncParams *dag.ConsensusInfo) (gwatCommon.HashArray, error) {
+func (m *POWChain) ExecutionDagSync(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (gwatCommon.HashArray, error) {
 	var err error
 	candidates := make(gwatCommon.HashArray, len(m.HashesByHeight))
 	for _, val := range m.HashesByHeight {
@@ -62,7 +61,7 @@ func (m *POWChain) ExecutionDagSync(ctx context.Context, syncParams *dag.Consens
 	return candidates, err
 }
 
-func (m *POWChain) ExecutionDagFinalize(ctx context.Context, syncParams *dag.ConsensusInfo) (*map[string]string, error) {
+func (m *POWChain) ExecutionDagFinalize(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (*map[string]string, error) {
 	//TODO implement me
 	panic("implement me")
 }
