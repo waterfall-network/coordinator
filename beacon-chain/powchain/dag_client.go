@@ -20,6 +20,10 @@ const (
 	ExecutionDagGetCandidatesMethod = "dag_getCandidates"
 	//ExecutionDagFinalizeMethod request string for JSON-RPC of dag api.
 	ExecutionDagFinalizeMethod = "dag_finalize"
+	//ExecutionDagHeadSyncReadyMethod request string for JSON-RPC of dag api.
+	ExecutionDagHeadSyncReadyMethod = "dag_headSyncReady"
+	//ExecutionDagHeadSyncMethod request string for JSON-RPC of dag api.
+	ExecutionDagHeadSyncMethod = "dag_headSync"
 )
 
 // ExecutionDagSync executing following procedures:
@@ -98,6 +102,44 @@ func (s *Service) ExecutionDagGetCandidates(ctx context.Context, slot types.Slot
 		result.Candidates = gwatCommon.HashArray{}
 	}
 	return result.Candidates, handleDagRPCError(err)
+}
+
+// ExecutionDagHeadSyncReady executing head sync ready procedure
+// by calling dag_headSyncReady via JSON-RPC.
+func (s *Service) ExecutionDagHeadSyncReady(ctx context.Context, params *gwatTypes.ConsensusInfo) (bool, error) {
+	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagHeadSyncReady")
+	defer span.End()
+	result := false
+
+	if s.rpcClient == nil {
+		return result, fmt.Errorf("Rpc Client not init")
+	}
+	err := s.rpcClient.CallContext(
+		ctx,
+		&result,
+		ExecutionDagHeadSyncReadyMethod,
+		params,
+	)
+	return result, handleDagRPCError(err)
+}
+
+// ExecutionDagHeadSync executing head sync procedure
+// by calling dag_headSync via JSON-RPC.
+func (s *Service) ExecutionDagHeadSync(ctx context.Context, params []gwatTypes.ConsensusInfo) (bool, error) {
+	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagHeadSync")
+	defer span.End()
+	result := false
+
+	if s.rpcClient == nil {
+		return result, fmt.Errorf("Rpc Client not init")
+	}
+	err := s.rpcClient.CallContext(
+		ctx,
+		&result,
+		ExecutionDagHeadSyncMethod,
+		params,
+	)
+	return result, handleDagRPCError(err)
 }
 
 // GetHeaderByHash retrieves gwat block header by hash.
