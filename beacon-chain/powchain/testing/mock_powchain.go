@@ -74,6 +74,14 @@ func (m *POWChain) GetHeaderByNumber(ctx context.Context, nr *big.Int) (*gwatTyp
 	panic("implement me")
 }
 
+func (m *POWChain) ExecutionDagHeadSyncReady(ctx context.Context, params *gwatTypes.ConsensusInfo) (bool, error) {
+	panic("implement me")
+}
+
+func (m *POWChain) ExecutionDagHeadSync(ctx context.Context, params []gwatTypes.ConsensusInfo) (bool, error) {
+	panic("implement me")
+}
+
 // GenesisTime represents a static past date - JAN 01 2000.
 var GenesisTime = time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Unix()
 

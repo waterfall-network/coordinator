@@ -16,6 +16,8 @@ import (
 	statefeed "github.com/prysmaticlabs/prysm/beacon-chain/core/feed/state"
 	"github.com/prysmaticlabs/prysm/beacon-chain/db"
 	"github.com/prysmaticlabs/prysm/beacon-chain/p2p"
+	"github.com/prysmaticlabs/prysm/beacon-chain/powchain"
+	"github.com/prysmaticlabs/prysm/beacon-chain/state/stategen"
 	"github.com/prysmaticlabs/prysm/cmd/beacon-chain/flags"
 	"github.com/prysmaticlabs/prysm/config/params"
 	"github.com/prysmaticlabs/prysm/runtime"
@@ -34,11 +36,13 @@ type blockchainService interface {
 
 // Config to set up the initial sync service.
 type Config struct {
-	P2P           p2p.P2P
-	DB            db.ReadOnlyDatabase
-	Chain         blockchainService
-	StateNotifier statefeed.Notifier
-	BlockNotifier blockfeed.Notifier
+	P2P                   p2p.P2P
+	DB                    db.ReadOnlyDatabase
+	Chain                 blockchainService
+	StateNotifier         statefeed.Notifier
+	BlockNotifier         blockfeed.Notifier
+	ExecutionEngineCaller powchain.EngineCaller
+	StateGen              *stategen.State
 }
 
 // Service service.
@@ -108,6 +112,14 @@ func (s *Service) Start() {
 		}
 		panic(err)
 	}
+	// start head syns procedure with gwat
+	if err := s.execHeadSyncReady(s.ctx); err != nil {
+		if errors.Is(s.ctx.Err(), context.Canceled) {
+			return
+		}
+		panic(err)
+	}
+
 	log.Infof("Synced up to slot %d", s.cfg.Chain.HeadSlot())
 	s.markSynced(genesis)
 }

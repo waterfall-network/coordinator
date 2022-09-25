@@ -45,6 +45,14 @@ func (e *EngineClient) ExecutionDagFinalize(ctx context.Context, syncParams *gwa
 	panic("implement me")
 }
 
+func (e *EngineClient) ExecutionDagHeadSyncReady(ctx context.Context, params *gwatTypes.ConsensusInfo) (bool, error) {
+	panic("implement me")
+}
+
+func (e *EngineClient) ExecutionDagHeadSync(ctx context.Context, params []gwatTypes.ConsensusInfo) (bool, error) {
+	panic("implement me")
+}
+
 func (e *EngineClient) GetHeaderByHash(ctx context.Context, hash gwatCommon.Hash) (*gwatTypes.Header, error) {
 	panic("implement me")
 }

@@ -5,6 +5,7 @@ import (
 	"math/big"
 	"testing"
 
+	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/prysm/beacon-chain/blockchain"
 	mock "github.com/prysmaticlabs/prysm/beacon-chain/blockchain/testing"
 	"github.com/prysmaticlabs/prysm/beacon-chain/cache"
@@ -23,6 +24,7 @@ import (
 	"github.com/prysmaticlabs/prysm/testing/require"
 	"github.com/waterfall-foundation/gwat/common"
 	"github.com/waterfall-foundation/gwat/common/hexutil"
+	gwatTypes "github.com/waterfall-foundation/gwat/core/types"
 )
 
 func startChainService(t *testing.T, st state.BeaconState, block block.SignedBeaconBlock, engineMock *engineMock) *blockchain.Service {
@@ -68,6 +70,31 @@ func startChainService(t *testing.T, st state.BeaconState, block block.SignedBea
 
 type engineMock struct {
 	powBlocks map[[32]byte]*ethpb.PowBlock
+}
+
+func (m *engineMock) ExecutionDagSync(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (common.HashArray, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *engineMock) ExecutionDagFinalize(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (*map[string]string, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *engineMock) ExecutionDagGetCandidates(ctx context.Context, slot types.Slot) (common.HashArray, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *engineMock) GetHeaderByHash(ctx context.Context, hash common.Hash) (*gwatTypes.Header, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *engineMock) GetHeaderByNumber(ctx context.Context, nr *big.Int) (*gwatTypes.Header, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (m *engineMock) GetPayload(context.Context, [8]byte) (*pb.ExecutionPayload, error) {
