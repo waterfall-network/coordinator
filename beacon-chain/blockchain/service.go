@@ -43,6 +43,12 @@ import (
 	"go.opencensus.io/trace"
 )
 
+// SyncSrv interface to treat sync functionality.
+type SyncSrv interface {
+	SetHeadSyncFn(ctx context.Context, fn func(context.Context, bool) error)
+	SetIsSyncFn(ctx context.Context, fn func(context.Context) bool)
+}
+
 // headSyncMinEpochsAfterCheckpoint defines how many epochs should elapse after known finalization
 // checkpoint for head sync to be triggered.
 const headSyncMinEpochsAfterCheckpoint = 128
@@ -68,6 +74,8 @@ type Service struct {
 	justifiedBalances     *stateBalanceCache
 	wsVerifier            *WeakSubjectivityVerifier
 	store                 *store.Store
+	fnHeadSync            func(context.Context, bool) error
+	fnIsSync              func(context.Context) bool
 }
 
 // config options for the service.
@@ -507,6 +515,31 @@ func (s *Service) hasBlock(ctx context.Context, root [32]byte) bool {
 	}
 
 	return s.cfg.BeaconDB.HasBlock(ctx, root)
+}
+
+func (s *Service) SetHeadSyncFn(ctx context.Context, fn func(context.Context, bool) error) {
+	s.fnHeadSync = fn
+}
+
+func (s *Service) runHeadSync(ctx context.Context) {
+	if s.fnHeadSync == nil {
+		return
+	}
+	err := s.fnHeadSync(ctx, false)
+	if err != nil {
+		log.WithError(err).Error("Head sync error")
+	}
+}
+
+func (s *Service) SetIsSyncFn(ctx context.Context, fn func(context.Context) bool) {
+	s.fnIsSync = fn
+}
+
+func (s *Service) isSync(ctx context.Context) bool {
+	if s.fnHeadSync == nil {
+		return false
+	}
+	return s.fnIsSync(ctx)
 }
 
 func spawnCountdownIfPreGenesis(ctx context.Context, genesisTime time.Time, db db.HeadAccessDatabase) {

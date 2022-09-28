@@ -154,7 +154,7 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 				headState := s.headState(s.ctx)
 				curEpoch := slots.ToEpoch(s.CurrentSlot())
 				stateNextEpoch := slots.ToEpoch(headState.Slot()) + 1
-				if curEpoch <= stateNextEpoch {
+				if curEpoch <= stateNextEpoch && !s.isSync(s.ctx) {
 					creators, err := s.GetCurrentCreators()
 					if err != nil {
 						log.WithError(err).Errorf("Could not compute creators assignments: %v", err)
@@ -166,11 +166,17 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 						Creators:   creators,
 						Finalizing: finalizing,
 					}
+
 					candidates, err := s.cfg.ExecutionEngineCaller.ExecutionDagSync(s.ctx, syncParams)
 					if err != nil {
 						log.WithError(err).Error("Error while execute finalization procedure")
+						if err.Error() == "got an unexpected error: synchronization" {
+							log.Warn("******* Start head sync procedure (spawnProcessAttestationsRoutine) ******")
+							go s.runHeadSync(s.ctx)
+						}
+					} else {
+						s.setCacheCandidates(candidates)
 					}
-					s.setCacheCandidates(candidates)
 				}
 
 				// Continue when there's no fork choice attestation, there's nothing to process and update head.

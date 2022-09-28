@@ -91,7 +91,7 @@ func (s *Service) syncToFinalizedEpoch(ctx context.Context, genesis time.Time) e
 		"currentSlot": slots.Since(genesis),
 	}).Info("Synced to finalized epoch - now syncing blocks up to current head")
 	if err := queue.stop(); err != nil {
-		log.WithError(err).Debug("Error stopping queue")
+		log.WithError(err).Error("Error stopping queue")
 	}
 
 	return nil

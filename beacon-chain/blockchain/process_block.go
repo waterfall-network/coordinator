@@ -127,13 +127,18 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		}
 	}
 
-	if s.CurrentSlot() == signed.Block().Slot() {
+	if s.CurrentSlot() == signed.Block().Slot() && !s.isSync(s.ctx) {
 		isValidCandidates, err := s.ValidateBlockCandidates(signed.Block())
 		if err != nil {
 			log.WithError(err).WithField("slotCandidates", isValidCandidates).Warn("could not verify new new block candidates")
-		}
-		if !isValidCandidates {
-			return errBadSpineCandidates
+			if err.Error() == "got an unexpected error: synchronization" {
+				log.Warn("******* Start head sync procedure (onBlock) ******")
+				go s.runHeadSync(s.ctx)
+			}
+		} else {
+			if !isValidCandidates {
+				return errBadSpineCandidates
+			}
 		}
 	}
 

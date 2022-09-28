@@ -20,6 +20,7 @@ import (
 	"github.com/prysmaticlabs/prysm/beacon-chain/state/stategen"
 	"github.com/prysmaticlabs/prysm/cmd/beacon-chain/flags"
 	"github.com/prysmaticlabs/prysm/config/params"
+	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/runtime"
 	prysmTime "github.com/prysmaticlabs/prysm/time"
 	"github.com/prysmaticlabs/prysm/time/slots"
@@ -32,6 +33,7 @@ var _ runtime.Service = (*Service)(nil)
 type blockchainService interface {
 	blockchain.BlockReceiver
 	blockchain.ChainInfoFetcher
+	blockchain.SyncSrv
 }
 
 // Config to set up the initial sync service.
@@ -47,13 +49,16 @@ type Config struct {
 
 // Service service.
 type Service struct {
-	cfg          *Config
-	ctx          context.Context
-	cancel       context.CancelFunc
-	synced       *abool.AtomicBool
-	chainStarted *abool.AtomicBool
-	counter      *ratecounter.RateCounter
-	genesisChan  chan time.Time
+	cfg                 *Config
+	ctx                 context.Context
+	cancel              context.CancelFunc
+	synced              *abool.AtomicBool
+	chainStarted        *abool.AtomicBool
+	counter             *ratecounter.RateCounter
+	genesisChan         chan time.Time
+	creators            creatorsAssignment
+	headSyncCp          *ethpb.Checkpoint
+	isInitSynchronizing bool
 }
 
 // NewService configures the initial sync service responsible for bringing the node up to the
@@ -75,6 +80,10 @@ func NewService(ctx context.Context, cfg *Config) *Service {
 
 // Start the initial sync service.
 func (s *Service) Start() {
+	s.isInitSynchronizing = true
+	defer func() {
+		s.isInitSynchronizing = false
+	}()
 	// Wait for state initialized event.
 	genesis := <-s.genesisChan
 	if genesis.IsZero() {
@@ -91,9 +100,23 @@ func (s *Service) Start() {
 		log.WithField("genesisTime", genesis).Info("Genesis time has not arrived - not syncing")
 		return
 	}
+
+	s.cfg.Chain.SetHeadSyncFn(s.ctx, s.HeadSync)
+	s.cfg.Chain.SetIsSyncFn(s.ctx, s.IsInitSync)
+
 	currentSlot := slots.Since(genesis)
 	if slots.ToEpoch(currentSlot) == 0 {
 		log.WithField("genesisTime", genesis).Info("Chain started within the last epoch - not syncing")
+
+		// start head sync procedure with gwat
+		if err := s.HeadSync(s.ctx, true); err != nil {
+			if errors.Is(s.ctx.Err(), context.Canceled) {
+				//return
+			} else {
+				panic(err)
+			}
+		}
+
 		s.markSynced(genesis)
 		return
 	}
@@ -108,16 +131,18 @@ func (s *Service) Start() {
 	s.waitForMinimumPeers()
 	if err := s.roundRobinSync(genesis); err != nil {
 		if errors.Is(s.ctx.Err(), context.Canceled) {
-			return
+			//return
+		} else {
+			panic(err)
 		}
-		panic(err)
 	}
-	// start head syns procedure with gwat
-	if err := s.execHeadSyncReady(s.ctx); err != nil {
+	// start head sync procedure with gwat
+	if err := s.HeadSync(s.ctx, true); err != nil {
 		if errors.Is(s.ctx.Err(), context.Canceled) {
-			return
+			//return
+		} else {
+			panic(err)
 		}
-		panic(err)
 	}
 
 	log.Infof("Synced up to slot %d", s.cfg.Chain.HeadSlot())

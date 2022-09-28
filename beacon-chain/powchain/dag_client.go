@@ -139,6 +139,11 @@ func (s *Service) ExecutionDagHeadSync(ctx context.Context, params []gwatTypes.C
 		ExecutionDagHeadSyncMethod,
 		params,
 	)
+
+	if err != nil {
+		log.WithError(err).Error("ExecutionDagHeadSync")
+	}
+
 	return result, handleDagRPCError(err)
 }
 

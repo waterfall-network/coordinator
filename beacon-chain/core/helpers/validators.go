@@ -19,6 +19,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+//ValidatorIndexList array of validators' indexes
+type ValidatorIndexList []types.ValidatorIndex
+
+func (v ValidatorIndexList) Len() int           { return len(v) }
+func (v ValidatorIndexList) Less(i, j int) bool { return v[i] < v[j] }
+func (v ValidatorIndexList) Swap(i, j int)      { v[i], v[j] = v[j], v[i] }
+
 var CommitteeCacheInProgressHit = promauto.NewCounter(prometheus.CounterOpts{
 	Name: "committee_cache_in_progress_hit",
 	Help: "The number of committee requests that are present in the cache.",
