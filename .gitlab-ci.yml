@@ -1,12 +1,12 @@
 image: node:16
 before_script:
   - apt-get update -y
-  - apt-get install cmake git libssl-dev libgmp-dev libtinfo5 libprotoc-dev -y
+  - apt-get install cmake git libssl-dev libgmp-dev libtinfo5 libprotoc-dev wget -y
   - npm install -g @bazel/bazelisk
   - echo "$GITCONFIG" > ~/.gitconfig
   - echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
 
-build:
+coordinator-build:
   stage: build
 #  rules:
 #    - if: '$CI_COMMIT_TAG == null'
@@ -14,22 +14,27 @@ build:
   tags:
     - docker
   script:
-    - bazel version
-    - bazel build //beacon-chain:beacon-chain --config=release
-    - bazel build //validator:validator --config=release
-    - bazel build //tools/bootnode:bootnode --config=release
-    - bazel build //tools/genesis-state-gen --config=release
     - mkdir -p ./dist
+    - bazel version
+    - wget -O https://github.com/ethereum/eth2.0-deposit-cli/releases/download/v1.2.0/eth2deposit-cli-256ea21-linux-amd64.tar.gz
+    - tar -xvf eth2deposit-cli-256ea21-linux-amd64.tar.gz
+    - cp eth2deposit-cli-256ea21-linux-amd64/deposit ./dist/prysm-deposit
+    - bazel build //beacon-chain:beacon-chain --config=release
     - cp ./bazel-bin/cmd/beacon-chain/beacon-chain_/beacon-chain ./dist/prysm-beacon
+    - bazel build //validator:validator --config=release
     - cp ./bazel-bin/cmd/validator/validator_/validator ./dist/prysm-coordinator
+    - bazel build //tools/bootnode:bootnode --config=release
     - cp ./bazel-bin/tools/bootnode/bootnode_/bootnode ./dist/prysm-bootnode
+    - bazel build //tools/genesis-state-gen --config=release
     - cp ./bazel-bin/tools/genesis-state-gen/genesis-state-gen_/genesis-state-gen ./dist/prysm-genesis-generate
   artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     paths:
       - dist/prysm-beacon
       - dist/prysm-coordinator
       - dist/prysm-bootnode
       - dist/prysm-genesis-generate
+      - dist/prysm-deposit
 
 cache:
   key: bazel_cache
