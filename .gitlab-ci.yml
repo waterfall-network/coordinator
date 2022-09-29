@@ -17,15 +17,19 @@ build:
     - bazel version
     - bazel build //beacon-chain:beacon-chain --config=release
     - bazel build //validator:validator --config=release
-    - bazel build //tools/bootnode:bootnode
-    - bazel build //tools/genesis-state-gen
+    - bazel build //tools/bootnode:bootnode --config=release
+    - bazel build //tools/genesis-state-gen --config=release
     - mkdir -p ./dist
     - cp ./bazel-bin/cmd/beacon-chain/beacon-chain_/beacon-chain ./dist/prysm-beacon
     - cp ./bazel-bin/cmd/validator/validator_/validator ./dist/prysm-coordinator
+    - cp ./bazel-bin/tools/bootnode/bootnode_/bootnode ./dist/prysm-bootnode
+    - cp ./bazel-bin/tools/genesis-state-gen/genesis-state-gen_/genesis-state-gen ./dist/prysm-genesis-generate
   artifacts:
     paths:
       - dist/prysm-beacon
       - dist/prysm-coordinator
+      - dist/prysm-bootnode
+      - dist/prysm-genesis-generate
 
 cache:
   key: bazel_cache
