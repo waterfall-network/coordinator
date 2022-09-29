@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"testing"
 
-	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
-	"github.com/prysmaticlabs/prysm/testing/assert"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
 )
 
 func TestStateRoots_Casting(t *testing.T) {

@@ -12,11 +12,11 @@ import (
 	"strings"
 
 	"github.com/bazelbuild/rules_go/go/tools/bazel"
-	"github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/io/file"
-	"github.com/prysmaticlabs/prysm/testing/endtoend/helpers"
-	e2e "github.com/prysmaticlabs/prysm/testing/endtoend/params"
-	e2etypes "github.com/prysmaticlabs/prysm/testing/endtoend/types"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/io/file"
+	"github.com/waterfall-foundation/coordinator/testing/endtoend/helpers"
+	e2e "github.com/waterfall-foundation/coordinator/testing/endtoend/params"
+	e2etypes "github.com/waterfall-foundation/coordinator/testing/endtoend/types"
 )
 
 var _ e2etypes.ComponentRunner = (*LighthouseBeaconNode)(nil)

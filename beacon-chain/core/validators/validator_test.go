@@ -5,14 +5,14 @@ import (
 	"testing"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/time"
-	v1 "github.com/prysmaticlabs/prysm/beacon-chain/state/v1"
-	"github.com/prysmaticlabs/prysm/config/params"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/prysmaticlabs/prysm/runtime/version"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/time"
+	v1 "github.com/waterfall-foundation/coordinator/beacon-chain/state/v1"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/runtime/version"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func TestHasVoted_OK(t *testing.T) {

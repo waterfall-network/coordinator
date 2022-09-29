@@ -11,12 +11,12 @@ import (
 	"testing"
 
 	"github.com/gogo/protobuf/types"
-	"github.com/prysmaticlabs/prysm/api/gateway/apimiddleware"
-	"github.com/prysmaticlabs/prysm/config/params"
-	ethpbv2 "github.com/prysmaticlabs/prysm/proto/eth/v2"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
-	"github.com/prysmaticlabs/prysm/time/slots"
+	"github.com/waterfall-foundation/coordinator/api/gateway/apimiddleware"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	ethpbv2 "github.com/waterfall-foundation/coordinator/proto/eth/v2"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
+	"github.com/waterfall-foundation/coordinator/time/slots"
 )
 
 func TestWrapAttestationArray(t *testing.T) {

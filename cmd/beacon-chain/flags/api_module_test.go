@@ -3,7 +3,7 @@ package flags
 import (
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
 )
 
 func TestEnableHTTPPrysmAPI(t *testing.T) {

@@ -2,11 +2,11 @@ package migration
 
 import (
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state"
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
-	ethpbv1 "github.com/prysmaticlabs/prysm/proto/eth/v1"
-	ethpbv2 "github.com/prysmaticlabs/prysm/proto/eth/v2"
-	ethpbalpha "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	ethpbv1 "github.com/waterfall-foundation/coordinator/proto/eth/v1"
+	ethpbv2 "github.com/waterfall-foundation/coordinator/proto/eth/v2"
+	ethpbalpha "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	"google.golang.org/protobuf/proto"
 )
 

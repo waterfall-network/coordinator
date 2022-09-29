@@ -7,9 +7,9 @@ import (
 	"testing"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/crypto/hash"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
+	"github.com/waterfall-foundation/coordinator/crypto/hash"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func TestParseGraffitiFile_Default(t *testing.T) {

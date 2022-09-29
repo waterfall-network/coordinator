@@ -6,10 +6,10 @@ import (
 	"testing"
 
 	"github.com/bazelbuild/rules_go/go/tools/bazel"
-	"github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/io/file"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/io/file"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func testnetConfigFilePath(t *testing.T, network string) string {

@@ -3,8 +3,8 @@ package v2
 import (
 	"testing"
 
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/prysmaticlabs/prysm/testing/require"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func TestBeaconState_PreviousEpochAttestations(t *testing.T) {

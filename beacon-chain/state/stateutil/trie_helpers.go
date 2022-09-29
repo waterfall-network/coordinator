@@ -5,12 +5,12 @@ import (
 	"encoding/binary"
 
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/config/features"
-	"github.com/prysmaticlabs/prysm/container/trie"
-	"github.com/prysmaticlabs/prysm/crypto/hash"
-	"github.com/prysmaticlabs/prysm/crypto/hash/htr"
-	"github.com/prysmaticlabs/prysm/encoding/ssz"
-	"github.com/prysmaticlabs/prysm/math"
+	"github.com/waterfall-foundation/coordinator/config/features"
+	"github.com/waterfall-foundation/coordinator/container/trie"
+	"github.com/waterfall-foundation/coordinator/crypto/hash"
+	"github.com/waterfall-foundation/coordinator/crypto/hash/htr"
+	"github.com/waterfall-foundation/coordinator/encoding/ssz"
+	"github.com/waterfall-foundation/coordinator/math"
 )
 
 // ReturnTrieLayer returns the representation of a merkle trie when

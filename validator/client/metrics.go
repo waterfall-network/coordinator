@@ -7,12 +7,12 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	types "github.com/prysmaticlabs/eth2-types"
-	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
-	"github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/prysmaticlabs/prysm/time/slots"
 	"github.com/sirupsen/logrus"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/time/slots"
 )
 
 var (

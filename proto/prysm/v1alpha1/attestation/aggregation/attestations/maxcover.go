@@ -5,9 +5,9 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/go-bitfield"
-	"github.com/prysmaticlabs/prysm/crypto/bls"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/attestation/aggregation"
+	"github.com/waterfall-foundation/coordinator/crypto/bls"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/attestation/aggregation"
 )
 
 // MaxCoverAttestationAggregation relies on Maximum Coverage greedy algorithm for aggregation.

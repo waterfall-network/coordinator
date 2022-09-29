@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"text/template"
 
-	"github.com/prysmaticlabs/prysm/io/file"
+	"github.com/waterfall-foundation/coordinator/io/file"
 )
 
 var (

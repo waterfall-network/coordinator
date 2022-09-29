@@ -4,15 +4,15 @@ import (
 	"testing"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/time"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state"
-	v1 "github.com/prysmaticlabs/prysm/beacon-chain/state/v1"
-	"github.com/prysmaticlabs/prysm/config/params"
-	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
-	"github.com/prysmaticlabs/prysm/testing/util"
-	"github.com/prysmaticlabs/prysm/time/slots"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/time"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	v1 "github.com/waterfall-foundation/coordinator/beacon-chain/state/v1"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	eth "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
+	"github.com/waterfall-foundation/coordinator/testing/util"
+	"github.com/waterfall-foundation/coordinator/time/slots"
 )
 
 func TestSlotToEpoch_OK(t *testing.T) {

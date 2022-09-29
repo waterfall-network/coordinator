@@ -7,17 +7,17 @@ import (
 	"time"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"
-	v1 "github.com/prysmaticlabs/prysm/beacon-chain/state/v1"
-	"github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/crypto/bls"
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
-	"github.com/prysmaticlabs/prysm/testing/util"
-	prysmTime "github.com/prysmaticlabs/prysm/time"
-	"github.com/prysmaticlabs/prysm/time/slots"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
+	v1 "github.com/waterfall-foundation/coordinator/beacon-chain/state/v1"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/crypto/bls"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
+	"github.com/waterfall-foundation/coordinator/testing/util"
+	prysmTime "github.com/waterfall-foundation/coordinator/time"
+	"github.com/waterfall-foundation/coordinator/time/slots"
 )
 
 func TestAttestation_IsAggregator(t *testing.T) {

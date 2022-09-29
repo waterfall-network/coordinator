@@ -3,7 +3,7 @@ package params_test
 import (
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/config/params"
+	"github.com/waterfall-foundation/coordinator/config/params"
 )
 
 func TestPraterConfigMatchesUpstreamYaml(t *testing.T) {

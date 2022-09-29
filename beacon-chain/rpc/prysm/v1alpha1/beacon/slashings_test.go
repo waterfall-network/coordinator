@@ -5,16 +5,16 @@ import (
 	"testing"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/config/features"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/prysmaticlabs/prysm/testing/util"
+	"github.com/waterfall-foundation/coordinator/config/features"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/testing/util"
 	"google.golang.org/protobuf/proto"
 
-	mock "github.com/prysmaticlabs/prysm/beacon-chain/blockchain/testing"
-	"github.com/prysmaticlabs/prysm/beacon-chain/operations/slashings"
-	mockp2p "github.com/prysmaticlabs/prysm/beacon-chain/p2p/testing"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
+	mock "github.com/waterfall-foundation/coordinator/beacon-chain/blockchain/testing"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/operations/slashings"
+	mockp2p "github.com/waterfall-foundation/coordinator/beacon-chain/p2p/testing"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func TestServer_SubmitProposerSlashing(t *testing.T) {

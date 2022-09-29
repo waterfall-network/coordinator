@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	slashertypes "github.com/prysmaticlabs/prysm/beacon-chain/slasher/types"
-	"github.com/prysmaticlabs/prysm/testing/require"
+	slashertypes "github.com/waterfall-foundation/coordinator/beacon-chain/slasher/types"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func Test_attestationsQueue(t *testing.T) {

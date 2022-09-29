@@ -6,13 +6,13 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/blocks"
-	dbIface "github.com/prysmaticlabs/prysm/beacon-chain/db/iface"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state"
-	statev1 "github.com/prysmaticlabs/prysm/beacon-chain/state/v1"
-	"github.com/prysmaticlabs/prysm/config/params"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/wrapper"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/blocks"
+	dbIface "github.com/waterfall-foundation/coordinator/beacon-chain/db/iface"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	statev1 "github.com/waterfall-foundation/coordinator/beacon-chain/state/v1"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
 )
 
 // SaveGenesisData bootstraps the beaconDB with a given genesis state.

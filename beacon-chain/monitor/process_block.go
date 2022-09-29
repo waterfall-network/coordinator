@@ -5,13 +5,13 @@ import (
 	"fmt"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/blocks"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state"
-	"github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
-	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/block"
-	"github.com/prysmaticlabs/prysm/time/slots"
 	"github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/blocks"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
+	"github.com/waterfall-foundation/coordinator/time/slots"
 )
 
 // AggregateReportingPeriod defines the number of epochs between aggregate reports.

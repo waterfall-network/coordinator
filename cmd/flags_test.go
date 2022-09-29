@@ -6,8 +6,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/testing/require"
 	"github.com/urfave/cli/v2"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func TestLoadFlagsFromConfig(t *testing.T) {

@@ -1,7 +1,7 @@
 package beacon
 
 import (
-	"github.com/prysmaticlabs/prysm/config/params"
+	"github.com/waterfall-foundation/coordinator/config/params"
 )
 
 func init() {

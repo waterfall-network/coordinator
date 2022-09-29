@@ -16,12 +16,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/prysmaticlabs/prysm/config/params"
-	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	e2e "github.com/prysmaticlabs/prysm/testing/endtoend/params"
-	e2etypes "github.com/prysmaticlabs/prysm/testing/endtoend/types"
-	"github.com/prysmaticlabs/prysm/time/slots"
 	log "github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	eth "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	e2e "github.com/waterfall-foundation/coordinator/testing/endtoend/params"
+	e2etypes "github.com/waterfall-foundation/coordinator/testing/endtoend/types"
+	"github.com/waterfall-foundation/coordinator/time/slots"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 )

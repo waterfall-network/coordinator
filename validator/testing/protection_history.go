@@ -4,13 +4,13 @@ import (
 	"fmt"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
-	"github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/crypto/bls"
-	"github.com/prysmaticlabs/prysm/crypto/rand"
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
-	"github.com/prysmaticlabs/prysm/validator/db/kv"
-	"github.com/prysmaticlabs/prysm/validator/slashing-protection-history/format"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/crypto/bls"
+	"github.com/waterfall-foundation/coordinator/crypto/rand"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	"github.com/waterfall-foundation/coordinator/validator/db/kv"
+	"github.com/waterfall-foundation/coordinator/validator/slashing-protection-history/format"
 )
 
 // MockSlashingProtectionJSON creates a mock, full slashing protection JSON struct

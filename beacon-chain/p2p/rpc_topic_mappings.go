@@ -5,9 +5,9 @@ import (
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
-	p2ptypes "github.com/prysmaticlabs/prysm/beacon-chain/p2p/types"
-	"github.com/prysmaticlabs/prysm/config/params"
-	pb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	p2ptypes "github.com/waterfall-foundation/coordinator/beacon-chain/p2p/types"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	pb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 )
 
 // SchemaVersionV1 specifies the schema version for our rpc protocol ID.

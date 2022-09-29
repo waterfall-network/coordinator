@@ -9,11 +9,11 @@ import (
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/async"
-	"github.com/prysmaticlabs/prysm/beacon-chain/p2p"
-	p2ptypes "github.com/prysmaticlabs/prysm/beacon-chain/p2p/types"
-	"github.com/prysmaticlabs/prysm/time/slots"
 	"github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/coordinator/async"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p"
+	p2ptypes "github.com/waterfall-foundation/coordinator/beacon-chain/p2p/types"
+	"github.com/waterfall-foundation/coordinator/time/slots"
 )
 
 var backOffTime = map[types.SSZUint64]time.Duration{

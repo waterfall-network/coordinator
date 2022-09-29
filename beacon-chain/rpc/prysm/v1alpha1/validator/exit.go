@@ -3,11 +3,11 @@ package validator
 import (
 	"context"
 
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/blocks"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/feed"
-	opfeed "github.com/prysmaticlabs/prysm/beacon-chain/core/feed/operation"
-	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/blocks"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/feed"
+	opfeed "github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/operation"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

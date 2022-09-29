@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/gorilla/mux"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func TestHandleURLParameters(t *testing.T) {

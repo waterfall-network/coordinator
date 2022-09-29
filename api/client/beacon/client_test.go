@@ -3,7 +3,7 @@ package beacon
 import (
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/testing/require"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func TestParseNodeVersion(t *testing.T) {

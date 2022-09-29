@@ -7,13 +7,13 @@ import (
 	"testing"
 	"time"
 
-	mock "github.com/prysmaticlabs/prysm/beacon-chain/blockchain/testing"
-	mockPOW "github.com/prysmaticlabs/prysm/beacon-chain/powchain/testing"
-	mockSync "github.com/prysmaticlabs/prysm/beacon-chain/sync/initial-sync/testing"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
 	"github.com/sirupsen/logrus"
 	logTest "github.com/sirupsen/logrus/hooks/test"
+	mock "github.com/waterfall-foundation/coordinator/beacon-chain/blockchain/testing"
+	mockPOW "github.com/waterfall-foundation/coordinator/beacon-chain/powchain/testing"
+	mockSync "github.com/waterfall-foundation/coordinator/beacon-chain/sync/initial-sync/testing"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func init() {

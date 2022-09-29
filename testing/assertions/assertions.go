@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/d4l3k/messagediff"
-	"github.com/prysmaticlabs/prysm/encoding/ssz/equality"
 	"github.com/sirupsen/logrus/hooks/test"
+	"github.com/waterfall-foundation/coordinator/encoding/ssz/equality"
 	"google.golang.org/protobuf/proto"
 )
 

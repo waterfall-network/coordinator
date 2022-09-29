@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/crypto/bls"
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
-	"github.com/prysmaticlabs/prysm/validator/keymanager"
+	"github.com/waterfall-foundation/coordinator/crypto/bls"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager"
 	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 )
 

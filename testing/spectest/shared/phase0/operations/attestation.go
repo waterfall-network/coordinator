@@ -7,13 +7,13 @@ import (
 
 	"github.com/golang/snappy"
 	"github.com/pkg/errors"
-	b "github.com/prysmaticlabs/prysm/beacon-chain/core/blocks"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/block"
-	"github.com/prysmaticlabs/prysm/testing/require"
-	"github.com/prysmaticlabs/prysm/testing/spectest/utils"
-	"github.com/prysmaticlabs/prysm/testing/util"
+	b "github.com/waterfall-foundation/coordinator/beacon-chain/core/blocks"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
+	"github.com/waterfall-foundation/coordinator/testing/require"
+	"github.com/waterfall-foundation/coordinator/testing/spectest/utils"
+	"github.com/waterfall-foundation/coordinator/testing/util"
 )
 
 // RunAttestationTest executes "operations/attestation" tests.

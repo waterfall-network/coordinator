@@ -4,9 +4,9 @@
 package bls
 
 import (
-	"github.com/prysmaticlabs/prysm/crypto/bls/blst"
-	"github.com/prysmaticlabs/prysm/crypto/bls/common"
-	"github.com/prysmaticlabs/prysm/crypto/bls/herumi"
+	"github.com/waterfall-foundation/coordinator/crypto/bls/blst"
+	"github.com/waterfall-foundation/coordinator/crypto/bls/common"
+	"github.com/waterfall-foundation/coordinator/crypto/bls/herumi"
 )
 
 // Initialize herumi temporarily while we transition to blst for ethdo.

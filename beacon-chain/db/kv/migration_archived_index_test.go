@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/util"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/util"
 	"go.etcd.io/bbolt"
 )
 

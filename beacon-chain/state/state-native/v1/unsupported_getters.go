@@ -2,7 +2,7 @@ package v1
 
 import (
 	"github.com/pkg/errors"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 )
 
 // CurrentEpochParticipation is not supported for phase 0 beacon state.

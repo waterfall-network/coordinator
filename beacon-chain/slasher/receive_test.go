@@ -5,17 +5,17 @@ import (
 	"testing"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/async/event"
-	mock "github.com/prysmaticlabs/prysm/beacon-chain/blockchain/testing"
-	dbtest "github.com/prysmaticlabs/prysm/beacon-chain/db/testing"
-	slashertypes "github.com/prysmaticlabs/prysm/beacon-chain/slasher/types"
-	params2 "github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
-	"github.com/prysmaticlabs/prysm/testing/util"
 	logTest "github.com/sirupsen/logrus/hooks/test"
+	"github.com/waterfall-foundation/coordinator/async/event"
+	mock "github.com/waterfall-foundation/coordinator/beacon-chain/blockchain/testing"
+	dbtest "github.com/waterfall-foundation/coordinator/beacon-chain/db/testing"
+	slashertypes "github.com/waterfall-foundation/coordinator/beacon-chain/slasher/types"
+	params2 "github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
+	"github.com/waterfall-foundation/coordinator/testing/util"
 )
 
 func TestSlasher_receiveAttestations_OK(t *testing.T) {

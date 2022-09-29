@@ -10,11 +10,11 @@ import (
 	"sync"
 
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/config/features"
-	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
-	"github.com/prysmaticlabs/prysm/crypto/bls/common"
-	"github.com/prysmaticlabs/prysm/crypto/rand"
 	blst "github.com/supranational/blst/bindings/go"
+	"github.com/waterfall-foundation/coordinator/config/features"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	"github.com/waterfall-foundation/coordinator/crypto/bls/common"
+	"github.com/waterfall-foundation/coordinator/crypto/rand"
 )
 
 var dst = []byte("BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_POP_")

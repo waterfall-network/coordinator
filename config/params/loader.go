@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/math"
 	log "github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/coordinator/math"
 	"gopkg.in/yaml.v2"
 )
 

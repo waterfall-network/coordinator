@@ -4,8 +4,8 @@ import (
 	"context"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state/stategen"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stategen"
 )
 
 func NewMockReplayerBuilder(opt ...MockReplayerBuilderOption) *MockReplayerBuilder {

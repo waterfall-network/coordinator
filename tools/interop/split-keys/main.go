@@ -20,12 +20,12 @@ import (
 	"os"
 	"path"
 
-	"github.com/prysmaticlabs/prysm/io/file"
-	"github.com/prysmaticlabs/prysm/validator/accounts/wallet"
-	"github.com/prysmaticlabs/prysm/validator/keymanager"
-	"github.com/prysmaticlabs/prysm/validator/keymanager/derived"
-	"github.com/prysmaticlabs/prysm/validator/keymanager/local"
 	"github.com/tyler-smith/go-bip39"
+	"github.com/waterfall-foundation/coordinator/io/file"
+	"github.com/waterfall-foundation/coordinator/validator/accounts/wallet"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager/derived"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager/local"
 	util "github.com/wealdtech/go-eth2-util"
 )
 

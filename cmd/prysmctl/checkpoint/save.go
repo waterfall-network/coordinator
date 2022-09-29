@@ -5,9 +5,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/prysmaticlabs/prysm/api/client/beacon"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
+	"github.com/waterfall-foundation/coordinator/api/client/beacon"
 )
 
 var saveFlags = struct {

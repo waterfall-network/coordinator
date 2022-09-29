@@ -2,10 +2,10 @@ package v1
 
 import (
 	"github.com/pkg/errors"
-	customtypes "github.com/prysmaticlabs/prysm/beacon-chain/state/state-native/custom-types"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state/stateutil"
-	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
+	customtypes "github.com/waterfall-foundation/coordinator/beacon-chain/state/state-native/custom-types"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stateutil"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
 )
 
 // SetRandaoMixes for the beacon state. Updates the entire

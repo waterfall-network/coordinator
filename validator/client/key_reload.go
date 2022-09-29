@@ -3,8 +3,8 @@ package client
 import (
 	"context"
 
-	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
-	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	eth "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	"go.opencensus.io/trace"
 )
 

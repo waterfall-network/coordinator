@@ -1,8 +1,8 @@
 package flags
 
 import (
-	"github.com/prysmaticlabs/prysm/cmd"
 	"github.com/urfave/cli/v2"
+	"github.com/waterfall-foundation/coordinator/cmd"
 )
 
 // GlobalFlags specifies all the global flags for the

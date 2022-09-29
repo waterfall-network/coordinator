@@ -10,10 +10,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/testing/require"
-	"github.com/prysmaticlabs/prysm/validator/accounts/wallet"
-	"github.com/prysmaticlabs/prysm/validator/keymanager"
-	"github.com/prysmaticlabs/prysm/validator/keymanager/local"
+	"github.com/waterfall-foundation/coordinator/testing/require"
+	"github.com/waterfall-foundation/coordinator/validator/accounts/wallet"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager/local"
 )
 
 const testMnemonic = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"

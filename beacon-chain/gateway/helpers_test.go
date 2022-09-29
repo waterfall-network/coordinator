@@ -3,9 +3,9 @@ package gateway
 import (
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/api/gateway"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
+	"github.com/waterfall-foundation/coordinator/api/gateway"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func TestDefaultConfig(t *testing.T) {

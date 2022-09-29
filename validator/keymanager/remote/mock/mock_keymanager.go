@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 
-	"github.com/prysmaticlabs/prysm/async/event"
-	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
-	"github.com/prysmaticlabs/prysm/crypto/bls"
-	ethpbservice "github.com/prysmaticlabs/prysm/proto/eth/service"
-	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
-	"github.com/prysmaticlabs/prysm/validator/keymanager"
+	"github.com/waterfall-foundation/coordinator/async/event"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	"github.com/waterfall-foundation/coordinator/crypto/bls"
+	ethpbservice "github.com/waterfall-foundation/coordinator/proto/eth/service"
+	validatorpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/validator-client"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager"
 )
 
 // MockKeymanager --

@@ -9,10 +9,10 @@ import (
 
 	"github.com/go-yaml/yaml"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"
-	"github.com/prysmaticlabs/prysm/testing/require"
-	"github.com/prysmaticlabs/prysm/testing/spectest/utils"
-	"github.com/prysmaticlabs/prysm/testing/util"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
+	"github.com/waterfall-foundation/coordinator/testing/require"
+	"github.com/waterfall-foundation/coordinator/testing/spectest/utils"
+	"github.com/waterfall-foundation/coordinator/testing/util"
 	"github.com/waterfall-foundation/gwat/common"
 )
 

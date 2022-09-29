@@ -5,8 +5,8 @@ import (
 	stdmath "math"
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/math"
-	"github.com/prysmaticlabs/prysm/testing/require"
+	"github.com/waterfall-foundation/coordinator/math"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func TestIntegerSquareRoot(t *testing.T) {

@@ -3,12 +3,12 @@ package p2p
 import (
 	pubsub_pb "github.com/libp2p/go-libp2p-pubsub/pb"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/beacon-chain/p2p/encoder"
-	"github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/crypto/hash"
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
-	"github.com/prysmaticlabs/prysm/math"
-	"github.com/prysmaticlabs/prysm/network/forks"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/encoder"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/crypto/hash"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	"github.com/waterfall-foundation/coordinator/math"
+	"github.com/waterfall-foundation/coordinator/network/forks"
 )
 
 // MsgID is a content addressable ID function.

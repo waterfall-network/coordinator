@@ -3,8 +3,8 @@ package protoarray
 import (
 	"context"
 
-	"github.com/prysmaticlabs/prysm/config/params"
-	pmath "github.com/prysmaticlabs/prysm/math"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	pmath "github.com/waterfall-foundation/coordinator/math"
 	"go.opencensus.io/trace"
 )
 

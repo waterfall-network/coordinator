@@ -9,10 +9,10 @@ import (
 
 	"github.com/k0kubun/go-ansi"
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/crypto/bls"
-	ethpbservice "github.com/prysmaticlabs/prysm/proto/eth/service"
-	"github.com/prysmaticlabs/prysm/validator/keymanager"
 	"github.com/schollz/progressbar/v3"
+	"github.com/waterfall-foundation/coordinator/crypto/bls"
+	ethpbservice "github.com/waterfall-foundation/coordinator/proto/eth/service"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager"
 	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 )
 

@@ -1,11 +1,11 @@
 package db
 
 import (
-	"github.com/prysmaticlabs/prysm/cmd"
-	"github.com/prysmaticlabs/prysm/runtime/tos"
-	validatordb "github.com/prysmaticlabs/prysm/validator/db"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
+	"github.com/waterfall-foundation/coordinator/cmd"
+	"github.com/waterfall-foundation/coordinator/runtime/tos"
+	validatordb "github.com/waterfall-foundation/coordinator/validator/db"
 )
 
 var log = logrus.WithField("prefix", "db")

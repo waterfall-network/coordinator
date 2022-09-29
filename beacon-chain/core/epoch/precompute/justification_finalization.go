@@ -2,11 +2,11 @@ package precompute
 
 import (
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/time"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/prysmaticlabs/prysm/time/slots"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/time"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/time/slots"
 )
 
 // ProcessJustificationAndFinalizationPreCompute processes justification and finalization during

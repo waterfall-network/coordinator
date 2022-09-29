@@ -7,13 +7,13 @@ import (
 
 	"github.com/golang/snappy"
 	pubsubpb "github.com/libp2p/go-libp2p-pubsub/pb"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/signing"
-	"github.com/prysmaticlabs/prysm/beacon-chain/p2p"
-	"github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/crypto/hash"
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
-	"github.com/prysmaticlabs/prysm/network/forks"
-	"github.com/prysmaticlabs/prysm/testing/assert"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/signing"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/crypto/hash"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	"github.com/waterfall-foundation/coordinator/network/forks"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
 )
 
 func TestMsgID_HashesCorrectly(t *testing.T) {

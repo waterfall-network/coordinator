@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/beacon-chain/db"
-	"github.com/prysmaticlabs/prysm/io/file"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/db"
+	"github.com/waterfall-foundation/coordinator/io/file"
 )
 
 // Initializer describes a type that is able to obtain the checkpoint sync data (BeaconState and SignedBeaconBlock)

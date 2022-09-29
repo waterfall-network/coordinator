@@ -3,8 +3,8 @@ package rewards
 import (
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/config/features"
-	"github.com/prysmaticlabs/prysm/testing/spectest/shared/altair/rewards"
+	"github.com/waterfall-foundation/coordinator/config/features"
+	"github.com/waterfall-foundation/coordinator/testing/spectest/shared/altair/rewards"
 )
 
 func TestMain(m *testing.M) {

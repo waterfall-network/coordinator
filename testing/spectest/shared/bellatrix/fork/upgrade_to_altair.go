@@ -6,14 +6,14 @@ import (
 	"testing"
 
 	"github.com/golang/snappy"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/execution"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"
-	v2 "github.com/prysmaticlabs/prysm/beacon-chain/state/v2"
-	v3 "github.com/prysmaticlabs/prysm/beacon-chain/state/v3"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/prysmaticlabs/prysm/testing/require"
-	"github.com/prysmaticlabs/prysm/testing/spectest/utils"
-	"github.com/prysmaticlabs/prysm/testing/util"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/execution"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
+	v2 "github.com/waterfall-foundation/coordinator/beacon-chain/state/v2"
+	v3 "github.com/waterfall-foundation/coordinator/beacon-chain/state/v3"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/testing/require"
+	"github.com/waterfall-foundation/coordinator/testing/spectest/utils"
+	"github.com/waterfall-foundation/coordinator/testing/util"
 	"google.golang.org/protobuf/proto"
 )
 

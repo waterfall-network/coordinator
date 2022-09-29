@@ -1,8 +1,8 @@
 package v3
 
 import (
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 )
 
 // LatestBlockHeader stored within the beacon state.

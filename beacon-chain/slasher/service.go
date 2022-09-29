@@ -9,17 +9,17 @@ import (
 	"time"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/async/event"
-	"github.com/prysmaticlabs/prysm/beacon-chain/blockchain"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/feed"
-	statefeed "github.com/prysmaticlabs/prysm/beacon-chain/core/feed/state"
-	"github.com/prysmaticlabs/prysm/beacon-chain/db"
-	"github.com/prysmaticlabs/prysm/beacon-chain/operations/slashings"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state/stategen"
-	"github.com/prysmaticlabs/prysm/beacon-chain/sync"
-	"github.com/prysmaticlabs/prysm/config/params"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/prysmaticlabs/prysm/time/slots"
+	"github.com/waterfall-foundation/coordinator/async/event"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/blockchain"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/feed"
+	statefeed "github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/state"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/db"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/operations/slashings"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stategen"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/sync"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/time/slots"
 )
 
 const (

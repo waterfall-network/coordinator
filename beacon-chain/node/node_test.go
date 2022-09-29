@@ -7,13 +7,13 @@ import (
 	"path/filepath"
 	"testing"
 
-	statefeed "github.com/prysmaticlabs/prysm/beacon-chain/core/feed/state"
-	"github.com/prysmaticlabs/prysm/beacon-chain/powchain"
-	mockPOW "github.com/prysmaticlabs/prysm/beacon-chain/powchain/testing"
-	"github.com/prysmaticlabs/prysm/cmd"
-	"github.com/prysmaticlabs/prysm/testing/require"
 	logTest "github.com/sirupsen/logrus/hooks/test"
 	"github.com/urfave/cli/v2"
+	statefeed "github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/state"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/powchain"
+	mockPOW "github.com/waterfall-foundation/coordinator/beacon-chain/powchain/testing"
+	"github.com/waterfall-foundation/coordinator/cmd"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 // Ensure BeaconNode implements interfaces.

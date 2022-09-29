@@ -8,9 +8,9 @@ import (
 	"testing"
 
 	"github.com/libp2p/go-libp2p-core/crypto"
-	"github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 	gethCrypto "github.com/waterfall-foundation/gwat/crypto"
 	"github.com/waterfall-foundation/gwat/p2p/enode"
 	"github.com/waterfall-foundation/gwat/p2p/enr"

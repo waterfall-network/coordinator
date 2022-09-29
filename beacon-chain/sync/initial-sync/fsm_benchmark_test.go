@@ -3,7 +3,7 @@ package initialsync
 import (
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/testing/require"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func BenchmarkStateMachine_trigger(b *testing.B) {

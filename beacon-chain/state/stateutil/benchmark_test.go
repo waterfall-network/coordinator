@@ -3,9 +3,9 @@ package stateutil_test
 import (
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/crypto/hash"
-	"github.com/prysmaticlabs/prysm/encoding/ssz"
-	"github.com/prysmaticlabs/prysm/testing/require"
+	"github.com/waterfall-foundation/coordinator/crypto/hash"
+	"github.com/waterfall-foundation/coordinator/encoding/ssz"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func BenchmarkMerkleize_Buffered(b *testing.B) {

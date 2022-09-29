@@ -5,9 +5,9 @@ import (
 	"sync"
 
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state/stateutil"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state/types"
-	pmath "github.com/prysmaticlabs/prysm/math"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stateutil"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state/types"
+	pmath "github.com/waterfall-foundation/coordinator/math"
 )
 
 // FieldTrie is the representation of the representative

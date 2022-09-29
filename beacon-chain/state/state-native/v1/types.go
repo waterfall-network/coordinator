@@ -1,9 +1,9 @@
 package v1
 
 import (
-	"github.com/prysmaticlabs/prysm/beacon-chain/state"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state/types"
-	"github.com/prysmaticlabs/prysm/config/params"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state/types"
+	"github.com/waterfall-foundation/coordinator/config/params"
 )
 
 // Ensure type BeaconState below implements BeaconState interface.

@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/cmd"
-	"github.com/prysmaticlabs/prysm/testing/require"
 	"github.com/urfave/cli/v2"
+	"github.com/waterfall-foundation/coordinator/cmd"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func TestVerifyTosAcceptedOrPrompt(t *testing.T) {

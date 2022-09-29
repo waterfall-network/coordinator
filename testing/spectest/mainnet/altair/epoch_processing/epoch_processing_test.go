@@ -3,7 +3,7 @@ package epoch_processing
 import (
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/config/features"
+	"github.com/waterfall-foundation/coordinator/config/features"
 )
 
 func TestMain(m *testing.M) {

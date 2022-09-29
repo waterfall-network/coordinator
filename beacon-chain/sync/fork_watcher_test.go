@@ -6,14 +6,14 @@ import (
 	"time"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/async/abool"
-	mockChain "github.com/prysmaticlabs/prysm/beacon-chain/blockchain/testing"
-	"github.com/prysmaticlabs/prysm/beacon-chain/p2p"
-	p2ptest "github.com/prysmaticlabs/prysm/beacon-chain/p2p/testing"
-	mockSync "github.com/prysmaticlabs/prysm/beacon-chain/sync/initial-sync/testing"
-	"github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/network/forks"
-	"github.com/prysmaticlabs/prysm/testing/assert"
+	"github.com/waterfall-foundation/coordinator/async/abool"
+	mockChain "github.com/waterfall-foundation/coordinator/beacon-chain/blockchain/testing"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p"
+	p2ptest "github.com/waterfall-foundation/coordinator/beacon-chain/p2p/testing"
+	mockSync "github.com/waterfall-foundation/coordinator/beacon-chain/sync/initial-sync/testing"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/network/forks"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
 )
 
 func TestService_CheckForNextEpochFork(t *testing.T) {

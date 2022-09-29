@@ -4,8 +4,8 @@ import (
 	"context"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/beacon-chain/operations/attestations/kv"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/operations/attestations/kv"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 )
 
 // Pool defines the necessary methods for Prysm attestations pool to serve

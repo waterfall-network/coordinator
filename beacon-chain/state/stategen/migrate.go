@@ -5,9 +5,9 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/prysmaticlabs/prysm/beacon-chain/state"
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
 	"github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
 	"go.opencensus.io/trace"
 )
 

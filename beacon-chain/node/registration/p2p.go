@@ -4,9 +4,9 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
-	"github.com/prysmaticlabs/prysm/cmd"
-	"github.com/prysmaticlabs/prysm/config/params"
 	"github.com/urfave/cli/v2"
+	"github.com/waterfall-foundation/coordinator/cmd"
+	"github.com/waterfall-foundation/coordinator/config/params"
 	"gopkg.in/yaml.v2"
 )
 

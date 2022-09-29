@@ -5,9 +5,9 @@ import (
 	"os"
 	"path"
 
-	"github.com/prysmaticlabs/prysm/config/features"
-	"github.com/prysmaticlabs/prysm/io/file"
-	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/block"
+	"github.com/waterfall-foundation/coordinator/config/features"
+	"github.com/waterfall-foundation/coordinator/io/file"
+	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
 )
 
 // WriteBlockToDisk as a block ssz. Writes to temp directory. Debug!

@@ -6,9 +6,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/async"
-	"github.com/prysmaticlabs/prysm/testing/require"
 	log "github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/coordinator/async"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 var input [][]byte

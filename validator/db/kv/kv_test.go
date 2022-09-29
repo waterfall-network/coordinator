@@ -5,9 +5,9 @@ import (
 	"io/ioutil"
 	"testing"
 
-	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
-	"github.com/prysmaticlabs/prysm/testing/require"
 	"github.com/sirupsen/logrus"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func TestMain(m *testing.M) {

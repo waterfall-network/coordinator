@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/prysmaticlabs/prysm/runtime"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
 	"github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/coordinator/runtime"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func init() {

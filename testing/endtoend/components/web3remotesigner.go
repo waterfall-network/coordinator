@@ -15,11 +15,11 @@ import (
 
 	"github.com/bazelbuild/rules_go/go/tools/bazel"
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/crypto/bls"
-	"github.com/prysmaticlabs/prysm/runtime/interop"
-	e2e "github.com/prysmaticlabs/prysm/testing/endtoend/params"
-	e2etypes "github.com/prysmaticlabs/prysm/testing/endtoend/types"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/crypto/bls"
+	"github.com/waterfall-foundation/coordinator/runtime/interop"
+	e2e "github.com/waterfall-foundation/coordinator/testing/endtoend/params"
+	e2etypes "github.com/waterfall-foundation/coordinator/testing/endtoend/types"
 	"github.com/waterfall-foundation/gwat/common/hexutil"
 	"gopkg.in/yaml.v2"
 )

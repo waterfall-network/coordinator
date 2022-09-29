@@ -1,7 +1,7 @@
 package validator_service_config
 
 import (
-	field_params "github.com/prysmaticlabs/prysm/config/fieldparams"
+	field_params "github.com/waterfall-foundation/coordinator/config/fieldparams"
 	"github.com/waterfall-foundation/gwat/common"
 )
 

@@ -7,8 +7,8 @@ import (
 	ssz "github.com/ferranbt/fastssz"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/beacon-chain/p2p"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	"google.golang.org/protobuf/proto"
 )
 

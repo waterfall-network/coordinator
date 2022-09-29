@@ -4,8 +4,8 @@ import (
 	"time"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/config/params"
-	prysmTime "github.com/prysmaticlabs/prysm/time"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	prysmTime "github.com/waterfall-foundation/coordinator/time"
 )
 
 // pruneAttsPool prunes attestations pool on every slot interval.

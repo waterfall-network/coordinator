@@ -5,9 +5,9 @@ import (
 
 	lru "github.com/hashicorp/golang-lru"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state"
-	lruwrpr "github.com/prysmaticlabs/prysm/cache/lru"
-	"github.com/prysmaticlabs/prysm/runtime/version"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	lruwrpr "github.com/waterfall-foundation/coordinator/cache/lru"
+	"github.com/waterfall-foundation/coordinator/runtime/version"
 )
 
 // SyncCommitteeHeadStateCache for the latest head state requested by a sync committee participant.

@@ -4,11 +4,11 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
-	e "github.com/prysmaticlabs/prysm/beacon-chain/core/epoch"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/epoch/precompute"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state"
-	"github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/runtime/version"
+	e "github.com/waterfall-foundation/coordinator/beacon-chain/core/epoch"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/epoch/precompute"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/runtime/version"
 	"go.opencensus.io/trace"
 )
 

@@ -17,14 +17,14 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/prysmaticlabs/prysm/network/forks"
+	"github.com/waterfall-foundation/coordinator/network/forks"
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/beacon-chain/rpc/apimiddleware"
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	log "github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/rpc/apimiddleware"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	"github.com/waterfall-foundation/gwat/common/hexutil"
 )
 

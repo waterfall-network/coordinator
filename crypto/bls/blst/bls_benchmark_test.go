@@ -7,9 +7,9 @@ package blst_test
 import (
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/crypto/bls/blst"
-	"github.com/prysmaticlabs/prysm/crypto/bls/common"
-	"github.com/prysmaticlabs/prysm/testing/require"
+	"github.com/waterfall-foundation/coordinator/crypto/bls/blst"
+	"github.com/waterfall-foundation/coordinator/crypto/bls/common"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func BenchmarkSignature_Verify(b *testing.B) {

@@ -2,7 +2,7 @@ package block
 
 import (
 	"github.com/pkg/errors"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 )
 
 // SignedBeaconBlockHeaderFromBlock function to retrieve signed block header from block.

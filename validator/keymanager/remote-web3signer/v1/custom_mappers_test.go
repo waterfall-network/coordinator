@@ -6,10 +6,10 @@ import (
 
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/go-bitfield"
-	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	v1 "github.com/prysmaticlabs/prysm/validator/keymanager/remote-web3signer/v1"
-	"github.com/prysmaticlabs/prysm/validator/keymanager/remote-web3signer/v1/mock"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	v1 "github.com/waterfall-foundation/coordinator/validator/keymanager/remote-web3signer/v1"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager/remote-web3signer/v1/mock"
 	"github.com/waterfall-foundation/gwat/common/hexutil"
 )
 

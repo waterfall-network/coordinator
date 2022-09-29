@@ -8,12 +8,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
-	"github.com/prysmaticlabs/prysm/validator/accounts/wallet"
-	"github.com/prysmaticlabs/prysm/validator/keymanager"
-	"github.com/prysmaticlabs/prysm/validator/keymanager/local"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
+	"github.com/waterfall-foundation/coordinator/validator/accounts/wallet"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager/local"
 )
 
 func TestDeleteAccounts_Noninteractive(t *testing.T) {

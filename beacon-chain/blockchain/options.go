@@ -1,20 +1,20 @@
 package blockchain
 
 import (
-	"github.com/prysmaticlabs/prysm/async/event"
-	"github.com/prysmaticlabs/prysm/beacon-chain/cache"
-	"github.com/prysmaticlabs/prysm/beacon-chain/cache/depositcache"
-	statefeed "github.com/prysmaticlabs/prysm/beacon-chain/core/feed/state"
-	"github.com/prysmaticlabs/prysm/beacon-chain/db"
-	"github.com/prysmaticlabs/prysm/beacon-chain/forkchoice"
-	"github.com/prysmaticlabs/prysm/beacon-chain/operations/attestations"
-	"github.com/prysmaticlabs/prysm/beacon-chain/operations/slashings"
-	"github.com/prysmaticlabs/prysm/beacon-chain/operations/voluntaryexits"
-	"github.com/prysmaticlabs/prysm/beacon-chain/p2p"
-	"github.com/prysmaticlabs/prysm/beacon-chain/powchain"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state/stategen"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/async/event"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/cache"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/cache/depositcache"
+	statefeed "github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/state"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/db"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/forkchoice"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/operations/attestations"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/operations/slashings"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/operations/voluntaryexits"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/powchain"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stategen"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 )
 
 type Option func(s *Service) error

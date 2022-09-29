@@ -6,10 +6,10 @@ import (
 	"fmt"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/transition/interop"
-	"github.com/prysmaticlabs/prysm/beacon-chain/db"
-	"github.com/prysmaticlabs/prysm/beacon-chain/db/kv"
-	"github.com/prysmaticlabs/prysm/config/features"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/transition/interop"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/db"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/db/kv"
+	"github.com/waterfall-foundation/coordinator/config/features"
 )
 
 var (

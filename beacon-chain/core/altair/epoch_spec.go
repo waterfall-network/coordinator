@@ -3,11 +3,11 @@ package altair
 import (
 	"context"
 
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/time"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state"
-	"github.com/prysmaticlabs/prysm/config/params"
 	log "github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/time"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	"github.com/waterfall-foundation/coordinator/config/params"
 )
 
 // ProcessSyncCommitteeUpdates  processes sync client committee updates for the beacon state.

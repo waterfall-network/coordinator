@@ -8,12 +8,12 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
-	"github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
-	"github.com/prysmaticlabs/prysm/monitoring/progress"
-	"github.com/prysmaticlabs/prysm/validator/db"
-	"github.com/prysmaticlabs/prysm/validator/slashing-protection-history/format"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	"github.com/waterfall-foundation/coordinator/monitoring/progress"
+	"github.com/waterfall-foundation/coordinator/validator/db"
+	"github.com/waterfall-foundation/coordinator/validator/slashing-protection-history/format"
 )
 
 // ExportStandardProtectionJSON extracts all slashing protection data from a validator database

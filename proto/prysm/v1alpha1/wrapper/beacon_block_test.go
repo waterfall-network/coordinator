@@ -3,9 +3,9 @@ package wrapper_test
 import (
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/wrapper"
-	"github.com/prysmaticlabs/prysm/testing/require"
-	"github.com/prysmaticlabs/prysm/testing/util"
+	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
+	"github.com/waterfall-foundation/coordinator/testing/require"
+	"github.com/waterfall-foundation/coordinator/testing/util"
 )
 
 func TestWrappedSignedBeaconBlock(t *testing.T) {

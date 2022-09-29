@@ -3,7 +3,7 @@ package store
 import (
 	"sync"
 
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 )
 
 // Store is defined in the fork choice consensus spec for tracking current time and various versions of checkpoints.

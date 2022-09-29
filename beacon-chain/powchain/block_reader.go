@@ -6,10 +6,10 @@ import (
 	"math/big"
 
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/beacon-chain/powchain/types"
-	"github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/monitoring/tracing"
 	"github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/powchain/types"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/monitoring/tracing"
 	"github.com/waterfall-foundation/gwat/common"
 	"go.opencensus.io/trace"
 )

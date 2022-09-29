@@ -7,9 +7,9 @@ import (
 	"runtime"
 	"time"
 
-	field_params "github.com/prysmaticlabs/prysm/config/fieldparams"
-	"github.com/prysmaticlabs/prysm/io/file"
 	"github.com/urfave/cli/v2"
+	field_params "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	"github.com/waterfall-foundation/coordinator/io/file"
 )
 
 const (

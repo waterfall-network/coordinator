@@ -3,8 +3,8 @@ package random
 import (
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/config/features"
-	"github.com/prysmaticlabs/prysm/testing/spectest/shared/phase0/sanity"
+	"github.com/waterfall-foundation/coordinator/config/features"
+	"github.com/waterfall-foundation/coordinator/testing/spectest/shared/phase0/sanity"
 )
 
 func TestMain(m *testing.M) {

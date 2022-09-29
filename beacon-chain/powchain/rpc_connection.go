@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/config/params"
-	contracts "github.com/prysmaticlabs/prysm/contracts/deposit"
-	"github.com/prysmaticlabs/prysm/io/logs"
-	"github.com/prysmaticlabs/prysm/network"
-	"github.com/prysmaticlabs/prysm/network/authorization"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	contracts "github.com/waterfall-foundation/coordinator/contracts/deposit"
+	"github.com/waterfall-foundation/coordinator/io/logs"
+	"github.com/waterfall-foundation/coordinator/network"
+	"github.com/waterfall-foundation/coordinator/network/authorization"
 	"github.com/waterfall-foundation/gwat/ethclient"
 	gethRPC "github.com/waterfall-foundation/gwat/rpc"
 )

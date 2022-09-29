@@ -5,10 +5,10 @@ import (
 	"testing"
 
 	"github.com/golang/protobuf/ptypes/empty"
-	mock "github.com/prysmaticlabs/prysm/beacon-chain/blockchain/testing"
-	"github.com/prysmaticlabs/prysm/beacon-chain/forkchoice/protoarray"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
+	mock "github.com/waterfall-foundation/coordinator/beacon-chain/blockchain/testing"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/forkchoice/protoarray"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func TestServer_GetForkChoice_ProtoArray(t *testing.T) {

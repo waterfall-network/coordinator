@@ -6,11 +6,11 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/beacon-chain/powchain"
-	"github.com/prysmaticlabs/prysm/cmd/beacon-chain/flags"
-	"github.com/prysmaticlabs/prysm/io/file"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/powchain"
+	"github.com/waterfall-foundation/coordinator/cmd/beacon-chain/flags"
+	"github.com/waterfall-foundation/coordinator/io/file"
 )
 
 var log = logrus.WithField("prefix", "cmd-powchain")

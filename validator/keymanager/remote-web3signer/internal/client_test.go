@@ -10,8 +10,8 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/validator/keymanager/remote-web3signer/internal"
 	"github.com/stretchr/testify/assert"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager/remote-web3signer/internal"
 )
 
 // mockTransport is the mock Transport object

@@ -3,9 +3,9 @@ package equality_test
 import (
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/encoding/ssz/equality"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/prysmaticlabs/prysm/testing/assert"
+	"github.com/waterfall-foundation/coordinator/encoding/ssz/equality"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
 )
 
 func TestDeepEqualBasicTypes(t *testing.T) {

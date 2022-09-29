@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/prysmaticlabs/prysm/time/mclock"
+	"github.com/waterfall-foundation/coordinator/time/mclock"
 )
 
 // waitQuotient is divided against the max backoff time, in order to have N requests based on the full

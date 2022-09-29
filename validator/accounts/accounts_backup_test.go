@@ -12,15 +12,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/io/file"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
-	"github.com/prysmaticlabs/prysm/validator/accounts/iface"
-	"github.com/prysmaticlabs/prysm/validator/accounts/wallet"
-	"github.com/prysmaticlabs/prysm/validator/keymanager"
-	"github.com/prysmaticlabs/prysm/validator/keymanager/derived"
-	constant "github.com/prysmaticlabs/prysm/validator/testing"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/io/file"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
+	"github.com/waterfall-foundation/coordinator/validator/accounts/iface"
+	"github.com/waterfall-foundation/coordinator/validator/accounts/wallet"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager/derived"
+	constant "github.com/waterfall-foundation/coordinator/validator/testing"
 )
 
 func TestBackupAccounts_Noninteractive_Derived(t *testing.T) {

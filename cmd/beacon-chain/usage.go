@@ -5,13 +5,13 @@ import (
 	"io"
 	"sort"
 
-	"github.com/prysmaticlabs/prysm/cmd"
-	"github.com/prysmaticlabs/prysm/cmd/beacon-chain/flags"
-	"github.com/prysmaticlabs/prysm/cmd/beacon-chain/sync/checkpoint"
-	"github.com/prysmaticlabs/prysm/cmd/beacon-chain/sync/genesis"
-	"github.com/prysmaticlabs/prysm/config/features"
-	"github.com/prysmaticlabs/prysm/runtime/debug"
 	"github.com/urfave/cli/v2"
+	"github.com/waterfall-foundation/coordinator/cmd"
+	"github.com/waterfall-foundation/coordinator/cmd/beacon-chain/flags"
+	"github.com/waterfall-foundation/coordinator/cmd/beacon-chain/sync/checkpoint"
+	"github.com/waterfall-foundation/coordinator/cmd/beacon-chain/sync/genesis"
+	"github.com/waterfall-foundation/coordinator/config/features"
+	"github.com/waterfall-foundation/coordinator/runtime/debug"
 )
 
 var appHelpTemplate = `NAME:

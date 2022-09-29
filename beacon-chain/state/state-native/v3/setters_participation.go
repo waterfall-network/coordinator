@@ -1,7 +1,7 @@
 package v3
 
 import (
-	"github.com/prysmaticlabs/prysm/beacon-chain/state/stateutil"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stateutil"
 )
 
 // SetPreviousParticipationBits for the beacon state. Updates the entire

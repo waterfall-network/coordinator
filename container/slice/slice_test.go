@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/container/slice"
+	"github.com/waterfall-foundation/coordinator/container/slice"
 )
 
 func TestSubsetUint64(t *testing.T) {

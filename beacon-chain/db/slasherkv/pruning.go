@@ -7,7 +7,7 @@ import (
 
 	fssz "github.com/ferranbt/fastssz"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/time/slots"
+	"github.com/waterfall-foundation/coordinator/time/slots"
 	bolt "go.etcd.io/bbolt"
 )
 

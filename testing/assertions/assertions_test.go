@@ -6,13 +6,13 @@ import (
 	"strings"
 	"testing"
 
-	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	testpb "github.com/prysmaticlabs/prysm/proto/testing"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/assertions"
-	"github.com/prysmaticlabs/prysm/testing/require"
 	"github.com/sirupsen/logrus"
 	"github.com/sirupsen/logrus/hooks/test"
+	eth "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	testpb "github.com/waterfall-foundation/coordinator/proto/testing"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/assertions"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 

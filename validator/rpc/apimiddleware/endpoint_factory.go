@@ -2,7 +2,7 @@ package apimiddleware
 
 import (
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/api/gateway/apimiddleware"
+	"github.com/waterfall-foundation/coordinator/api/gateway/apimiddleware"
 )
 
 // ValidatorEndpointFactory creates endpoints used for running validator API calls through the API Middleware.

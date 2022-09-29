@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/testing/require"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 // setupDB instantiates and returns a Store instance.

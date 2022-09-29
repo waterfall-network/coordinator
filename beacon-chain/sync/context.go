@@ -3,9 +3,9 @@ package sync
 import (
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/beacon-chain/blockchain"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/signing"
-	"github.com/prysmaticlabs/prysm/beacon-chain/p2p"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/blockchain"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/signing"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p"
 )
 
 // Specifies the fixed size context length.

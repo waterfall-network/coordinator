@@ -6,7 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/time/slots"
+	"github.com/waterfall-foundation/coordinator/time/slots"
 )
 
 // NewSlot mimics the implementation of `on_tick` in fork choice consensus spec.

@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
-	"github.com/prysmaticlabs/prysm/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
 )
 
 func TestOverlayParameters(t *testing.T) {

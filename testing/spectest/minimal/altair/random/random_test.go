@@ -3,7 +3,7 @@ package random
 import (
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/testing/spectest/shared/altair/sanity"
+	"github.com/waterfall-foundation/coordinator/testing/spectest/shared/altair/sanity"
 )
 
 func TestMinimal_Altair_Random(t *testing.T) {

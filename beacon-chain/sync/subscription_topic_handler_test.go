@@ -6,10 +6,10 @@ import (
 	"time"
 
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
-	"github.com/prysmaticlabs/prysm/beacon-chain/p2p"
-	"github.com/prysmaticlabs/prysm/beacon-chain/p2p/encoder"
-	"github.com/prysmaticlabs/prysm/network/forks"
-	"github.com/prysmaticlabs/prysm/testing/assert"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/encoder"
+	"github.com/waterfall-foundation/coordinator/network/forks"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
 )
 
 func TestSubTopicHandler_CRUD(t *testing.T) {

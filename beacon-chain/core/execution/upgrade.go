@@ -3,11 +3,11 @@ package execution
 import (
 	"context"
 
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/time"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state"
-	v3 "github.com/prysmaticlabs/prysm/beacon-chain/state/v3"
-	"github.com/prysmaticlabs/prysm/config/params"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/time"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	v3 "github.com/waterfall-foundation/coordinator/beacon-chain/state/v3"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 )
 
 // UpgradeToBellatrix updates inputs a generic state to return the version Bellatrix state.

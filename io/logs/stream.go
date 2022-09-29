@@ -4,9 +4,9 @@ import (
 	"io"
 
 	lru "github.com/hashicorp/golang-lru"
-	"github.com/prysmaticlabs/prysm/async/event"
-	lruwrpr "github.com/prysmaticlabs/prysm/cache/lru"
-	"github.com/prysmaticlabs/prysm/crypto/rand"
+	"github.com/waterfall-foundation/coordinator/async/event"
+	lruwrpr "github.com/waterfall-foundation/coordinator/cache/lru"
+	"github.com/waterfall-foundation/coordinator/crypto/rand"
 )
 
 const (

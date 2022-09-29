@@ -3,10 +3,10 @@ package monitor
 import (
 	"fmt"
 
-	"github.com/prysmaticlabs/prysm/beacon-chain/state"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/block"
 	"github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
 )
 
 // processSyncCommitteeContribution logs the event when tracked validators' aggregated sync contribution has been processed.

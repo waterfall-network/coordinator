@@ -1,6 +1,6 @@
 package db
 
-import "github.com/prysmaticlabs/prysm/beacon-chain/db/iface"
+import "github.com/waterfall-foundation/coordinator/beacon-chain/db/iface"
 
 // ReadOnlyDatabase exposes Prysm's Ethereum data backend for read access only, no information about
 // head info. For head info, use github.com/prysmaticlabs/prysm/blockchain.HeadFetcher.

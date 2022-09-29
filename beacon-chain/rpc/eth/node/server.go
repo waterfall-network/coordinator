@@ -4,10 +4,10 @@
 package node
 
 import (
-	"github.com/prysmaticlabs/prysm/beacon-chain/blockchain"
-	"github.com/prysmaticlabs/prysm/beacon-chain/db"
-	"github.com/prysmaticlabs/prysm/beacon-chain/p2p"
-	"github.com/prysmaticlabs/prysm/beacon-chain/sync"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/blockchain"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/db"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/sync"
 	"google.golang.org/grpc"
 )
 

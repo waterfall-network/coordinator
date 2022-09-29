@@ -4,11 +4,11 @@ import (
 	"fmt"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/cmd"
-	"github.com/prysmaticlabs/prysm/cmd/beacon-chain/flags"
-	"github.com/prysmaticlabs/prysm/config/params"
-	tracing2 "github.com/prysmaticlabs/prysm/monitoring/tracing"
 	"github.com/urfave/cli/v2"
+	"github.com/waterfall-foundation/coordinator/cmd"
+	"github.com/waterfall-foundation/coordinator/cmd/beacon-chain/flags"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	tracing2 "github.com/waterfall-foundation/coordinator/monitoring/tracing"
 	"github.com/waterfall-foundation/gwat/common"
 )
 

@@ -2,9 +2,9 @@ package v2
 
 import (
 	"github.com/pkg/errors"
-	customtypes "github.com/prysmaticlabs/prysm/beacon-chain/state/state-native/custom-types"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state/stateutil"
-	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
+	customtypes "github.com/waterfall-foundation/coordinator/beacon-chain/state/state-native/custom-types"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stateutil"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
 )
 
 // SetStateRoots for the beacon state. Updates the state roots

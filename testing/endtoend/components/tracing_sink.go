@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/testing/endtoend/helpers"
-	e2e "github.com/prysmaticlabs/prysm/testing/endtoend/params"
+	"github.com/waterfall-foundation/coordinator/testing/endtoend/helpers"
+	e2e "github.com/waterfall-foundation/coordinator/testing/endtoend/params"
 )
 
 // TracingSink to capture HTTP requests from opentracing pushes. This is meant

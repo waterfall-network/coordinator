@@ -4,9 +4,9 @@ import (
 	"sync"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	coreutils "github.com/prysmaticlabs/prysm/beacon-chain/core/transition/stateutils"
-	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	coreutils "github.com/waterfall-foundation/coordinator/beacon-chain/core/transition/stateutils"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 )
 
 // ValidatorMapHandler is a container to hold the map and a reference tracker for how many

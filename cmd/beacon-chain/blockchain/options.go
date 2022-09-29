@@ -1,11 +1,11 @@
 package blockchaincmd
 
 import (
-	"github.com/prysmaticlabs/prysm/beacon-chain/blockchain"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"
-	"github.com/prysmaticlabs/prysm/cmd"
-	"github.com/prysmaticlabs/prysm/cmd/beacon-chain/flags"
 	"github.com/urfave/cli/v2"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/blockchain"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
+	"github.com/waterfall-foundation/coordinator/cmd"
+	"github.com/waterfall-foundation/coordinator/cmd/beacon-chain/flags"
 )
 
 // FlagOptions for blockchain service flag configurations.

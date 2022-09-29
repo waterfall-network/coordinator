@@ -8,9 +8,9 @@ import (
 	"time"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/validator/accounts/iface"
-	iface2 "github.com/prysmaticlabs/prysm/validator/client/iface"
-	"github.com/prysmaticlabs/prysm/validator/keymanager"
+	"github.com/waterfall-foundation/coordinator/validator/accounts/iface"
+	iface2 "github.com/waterfall-foundation/coordinator/validator/client/iface"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager"
 )
 
 // Wallet contains an in-memory, simulated wallet implementation.

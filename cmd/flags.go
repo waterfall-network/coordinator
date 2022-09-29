@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/prysmaticlabs/prysm/config/params"
 	"github.com/urfave/cli/v2"
 	"github.com/urfave/cli/v2/altsrc"
+	"github.com/waterfall-foundation/coordinator/config/params"
 )
 
 var (

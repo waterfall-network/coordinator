@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	mocks "github.com/prysmaticlabs/prysm/beacon-chain/powchain/testing"
-	"github.com/prysmaticlabs/prysm/testing/require"
+	mocks "github.com/waterfall-foundation/coordinator/beacon-chain/powchain/testing"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 	"github.com/waterfall-foundation/gwat/common"
 	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	gwatTypes "github.com/waterfall-foundation/gwat/core/types"

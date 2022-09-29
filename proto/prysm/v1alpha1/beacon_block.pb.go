@@ -12,8 +12,8 @@ import (
 
 	github_com_prysmaticlabs_eth2_types "github.com/prysmaticlabs/eth2-types"
 	github_com_prysmaticlabs_go_bitfield "github.com/prysmaticlabs/go-bitfield"
-	v1 "github.com/prysmaticlabs/prysm/proto/engine/v1"
-	_ "github.com/prysmaticlabs/prysm/proto/eth/ext"
+	v1 "github.com/waterfall-foundation/coordinator/proto/engine/v1"
+	_ "github.com/waterfall-foundation/coordinator/proto/eth/ext"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )

@@ -7,12 +7,12 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/cmd/validator/flags"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/prysmaticlabs/prysm/validator/accounts/iface"
-	"github.com/prysmaticlabs/prysm/validator/accounts/wallet"
-	"github.com/prysmaticlabs/prysm/validator/keymanager"
 	"github.com/urfave/cli/v2"
+	"github.com/waterfall-foundation/coordinator/cmd/validator/flags"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/validator/accounts/iface"
+	"github.com/waterfall-foundation/coordinator/validator/accounts/wallet"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager"
 )
 
 // ListAccountsCli displays all available validator accounts in a Prysm wallet.

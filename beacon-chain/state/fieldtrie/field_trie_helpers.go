@@ -6,15 +6,15 @@ import (
 	"reflect"
 
 	"github.com/pkg/errors"
-	customtypes "github.com/prysmaticlabs/prysm/beacon-chain/state/state-native/custom-types"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state/stateutil"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state/types"
-	"github.com/prysmaticlabs/prysm/crypto/hash"
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
-	"github.com/prysmaticlabs/prysm/encoding/ssz"
-	pmath "github.com/prysmaticlabs/prysm/math"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/prysmaticlabs/prysm/runtime/version"
+	customtypes "github.com/waterfall-foundation/coordinator/beacon-chain/state/state-native/custom-types"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stateutil"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state/types"
+	"github.com/waterfall-foundation/coordinator/crypto/hash"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	"github.com/waterfall-foundation/coordinator/encoding/ssz"
+	pmath "github.com/waterfall-foundation/coordinator/math"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/runtime/version"
 )
 
 // ProofFromMerkleLayers creates a proof starting at the leaf index of the state Merkle layers.

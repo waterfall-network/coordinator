@@ -4,12 +4,12 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/container/trie"
-	depositcontract "github.com/prysmaticlabs/prysm/contracts/deposit/mock"
-	"github.com/prysmaticlabs/prysm/runtime/interop"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/container/trie"
+	depositcontract "github.com/waterfall-foundation/coordinator/contracts/deposit/mock"
+	"github.com/waterfall-foundation/coordinator/runtime/interop"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 	"github.com/waterfall-foundation/gwat/accounts/abi/bind"
 )
 

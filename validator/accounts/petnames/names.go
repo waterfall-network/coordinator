@@ -3,8 +3,8 @@ package petnames
 import (
 	"strings"
 
-	"github.com/prysmaticlabs/prysm/crypto/hash"
-	"github.com/prysmaticlabs/prysm/crypto/rand"
+	"github.com/waterfall-foundation/coordinator/crypto/hash"
+	"github.com/waterfall-foundation/coordinator/crypto/rand"
 )
 
 var (

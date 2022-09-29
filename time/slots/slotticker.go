@@ -5,7 +5,7 @@ import (
 	"time"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	prysmTime "github.com/prysmaticlabs/prysm/time"
+	prysmTime "github.com/waterfall-foundation/coordinator/time"
 )
 
 // The Ticker interface defines a type which can expose a

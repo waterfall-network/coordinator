@@ -8,8 +8,8 @@ import (
 
 	"github.com/k0kubun/go-ansi"
 	types "github.com/prysmaticlabs/eth2-types"
-	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
 	"github.com/schollz/progressbar/v3"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
 )
 
 func initializeProgressBar(numItems int, msg string) *progressbar.ProgressBar {

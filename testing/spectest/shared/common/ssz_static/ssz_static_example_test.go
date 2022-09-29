@@ -7,10 +7,10 @@ import (
 
 	fssz "github.com/ferranbt/fastssz"
 	"github.com/pkg/errors"
-	v1 "github.com/prysmaticlabs/prysm/beacon-chain/state/v1"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/prysmaticlabs/prysm/testing/require"
-	common "github.com/prysmaticlabs/prysm/testing/spectest/shared/common/ssz_static"
+	v1 "github.com/waterfall-foundation/coordinator/beacon-chain/state/v1"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/testing/require"
+	common "github.com/waterfall-foundation/coordinator/testing/spectest/shared/common/ssz_static"
 )
 
 func ExampleRunSSZStaticTests() {

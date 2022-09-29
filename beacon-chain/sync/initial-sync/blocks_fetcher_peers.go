@@ -7,13 +7,13 @@ import (
 	"time"
 
 	"github.com/libp2p/go-libp2p-core/peer"
-	"github.com/prysmaticlabs/prysm/beacon-chain/p2p/peers/scorers"
-	"github.com/prysmaticlabs/prysm/cmd/beacon-chain/flags"
-	"github.com/prysmaticlabs/prysm/config/params"
-	mathutil "github.com/prysmaticlabs/prysm/math"
-	prysmTime "github.com/prysmaticlabs/prysm/time"
-	"github.com/prysmaticlabs/prysm/time/slots"
 	"github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/peers/scorers"
+	"github.com/waterfall-foundation/coordinator/cmd/beacon-chain/flags"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	mathutil "github.com/waterfall-foundation/coordinator/math"
+	prysmTime "github.com/waterfall-foundation/coordinator/time"
+	"github.com/waterfall-foundation/coordinator/time/slots"
 	"go.opencensus.io/trace"
 )
 

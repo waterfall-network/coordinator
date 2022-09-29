@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/api/client/beacon"
-	"github.com/prysmaticlabs/prysm/beacon-chain/db"
+	"github.com/waterfall-foundation/coordinator/api/client/beacon"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/db"
 )
 
 // APIInitializer manages initializing the genesis state and block to prepare the beacon node for syncing.

@@ -6,17 +6,17 @@ import (
 	"time"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/altair"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state"
-	stateAltair "github.com/prysmaticlabs/prysm/beacon-chain/state/v2"
-	v2 "github.com/prysmaticlabs/prysm/beacon-chain/state/v2"
-	"github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/crypto/bls"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
-	prysmTime "github.com/prysmaticlabs/prysm/time"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/altair"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	stateAltair "github.com/waterfall-foundation/coordinator/beacon-chain/state/v2"
+	v2 "github.com/waterfall-foundation/coordinator/beacon-chain/state/v2"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/crypto/bls"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
+	prysmTime "github.com/waterfall-foundation/coordinator/time"
 )
 
 func TestSyncCommitteeIndices_CanGet(t *testing.T) {

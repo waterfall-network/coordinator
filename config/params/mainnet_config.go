@@ -4,7 +4,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
 )
 
 // MainnetConfig returns the configuration to be used in the main network.

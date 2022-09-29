@@ -6,10 +6,10 @@ import (
 
 	"github.com/patrickmn/go-cache"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/container/slice"
-	"github.com/prysmaticlabs/prysm/crypto/rand"
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/container/slice"
+	"github.com/waterfall-foundation/coordinator/crypto/rand"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
 )
 
 type syncSubnetIDs struct {

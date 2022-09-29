@@ -7,9 +7,9 @@ import (
 	lru "github.com/hashicorp/golang-lru"
 	"github.com/patrickmn/go-cache"
 	types "github.com/prysmaticlabs/eth2-types"
-	lruwrpr "github.com/prysmaticlabs/prysm/cache/lru"
-	"github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/container/slice"
+	lruwrpr "github.com/waterfall-foundation/coordinator/cache/lru"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/container/slice"
 )
 
 type subnetIDs struct {

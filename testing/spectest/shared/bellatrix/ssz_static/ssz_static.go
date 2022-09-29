@@ -6,11 +6,11 @@ import (
 	"testing"
 
 	fssz "github.com/ferranbt/fastssz"
-	v3 "github.com/prysmaticlabs/prysm/beacon-chain/state/v3"
-	enginev1 "github.com/prysmaticlabs/prysm/proto/engine/v1"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/prysmaticlabs/prysm/testing/require"
-	common "github.com/prysmaticlabs/prysm/testing/spectest/shared/common/ssz_static"
+	v3 "github.com/waterfall-foundation/coordinator/beacon-chain/state/v3"
+	enginev1 "github.com/waterfall-foundation/coordinator/proto/engine/v1"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/testing/require"
+	common "github.com/waterfall-foundation/coordinator/testing/spectest/shared/common/ssz_static"
 )
 
 // RunSSZStaticTests executes "ssz_static" tests.

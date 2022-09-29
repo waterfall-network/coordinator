@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/libp2p/go-libp2p-core/peer"
-	"github.com/prysmaticlabs/prysm/beacon-chain/p2p/peers/peerdata"
-	"github.com/prysmaticlabs/prysm/cmd/beacon-chain/flags"
-	"github.com/prysmaticlabs/prysm/config/features"
-	"github.com/prysmaticlabs/prysm/crypto/rand"
-	prysmTime "github.com/prysmaticlabs/prysm/time"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/peers/peerdata"
+	"github.com/waterfall-foundation/coordinator/cmd/beacon-chain/flags"
+	"github.com/waterfall-foundation/coordinator/config/features"
+	"github.com/waterfall-foundation/coordinator/crypto/rand"
+	prysmTime "github.com/waterfall-foundation/coordinator/time"
 )
 
 var _ Scorer = (*BlockProviderScorer)(nil)

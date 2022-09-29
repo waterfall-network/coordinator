@@ -14,8 +14,8 @@ import (
 	"strings"
 	"time"
 
-	_ "github.com/prysmaticlabs/prysm/runtime/maxprocs"
 	"github.com/sirupsen/logrus"
+	_ "github.com/waterfall-foundation/coordinator/runtime/maxprocs"
 	"github.com/waterfall-foundation/gwat/common"
 	"github.com/waterfall-foundation/gwat/ethclient"
 	"github.com/waterfall-foundation/gwat/params"

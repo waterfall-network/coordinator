@@ -7,14 +7,14 @@ import (
 	"time"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/async/event"
-	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
-	"github.com/prysmaticlabs/prysm/validator/client/iface"
-	"github.com/prysmaticlabs/prysm/validator/client/testutil"
-	"github.com/prysmaticlabs/prysm/validator/keymanager/remote/mock"
 	logTest "github.com/sirupsen/logrus/hooks/test"
+	"github.com/waterfall-foundation/coordinator/async/event"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
+	"github.com/waterfall-foundation/coordinator/validator/client/iface"
+	"github.com/waterfall-foundation/coordinator/validator/client/testutil"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager/remote/mock"
 )
 
 func cancelledContext() context.Context {

@@ -7,9 +7,9 @@ import (
 	"testing"
 
 	"github.com/pborman/uuid"
-	"github.com/prysmaticlabs/prysm/crypto/bls"
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
-	"github.com/prysmaticlabs/prysm/testing/require"
+	"github.com/waterfall-foundation/coordinator/crypto/bls"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func TestMarshalAndUnmarshal(t *testing.T) {

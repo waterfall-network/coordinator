@@ -4,11 +4,11 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/validator/accounts/userprompt"
-	"github.com/prysmaticlabs/prysm/validator/accounts/wallet"
-	"github.com/prysmaticlabs/prysm/validator/keymanager"
-	"github.com/prysmaticlabs/prysm/validator/keymanager/remote"
 	"github.com/urfave/cli/v2"
+	"github.com/waterfall-foundation/coordinator/validator/accounts/userprompt"
+	"github.com/waterfall-foundation/coordinator/validator/accounts/wallet"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager/remote"
 )
 
 // EditWalletConfigurationCli for a user's on-disk wallet, being able to change

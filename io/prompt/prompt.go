@@ -10,9 +10,9 @@ import (
 
 	"github.com/logrusorgru/aurora"
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/io/file"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
+	"github.com/waterfall-foundation/coordinator/io/file"
 	"golang.org/x/crypto/ssh/terminal"
 )
 

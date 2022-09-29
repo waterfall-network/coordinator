@@ -5,9 +5,9 @@ import (
 	"os"
 	"path"
 
-	"github.com/prysmaticlabs/prysm/beacon-chain/state"
-	"github.com/prysmaticlabs/prysm/config/features"
-	"github.com/prysmaticlabs/prysm/io/file"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	"github.com/waterfall-foundation/coordinator/config/features"
+	"github.com/waterfall-foundation/coordinator/io/file"
 )
 
 // WriteStateToDisk as a state ssz. Writes to temp directory. Debug!

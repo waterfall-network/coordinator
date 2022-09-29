@@ -17,10 +17,10 @@ import (
 
 	"github.com/emicklei/dot"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/beacon-chain/db"
-	"github.com/prysmaticlabs/prysm/beacon-chain/db/filters"
-	"github.com/prysmaticlabs/prysm/beacon-chain/db/kv"
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/db"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/db/filters"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/db/kv"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
 )
 
 var (

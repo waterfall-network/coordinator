@@ -8,8 +8,8 @@ import (
 	"time"
 
 	lru "github.com/hashicorp/golang-lru"
-	lruwrpr "github.com/prysmaticlabs/prysm/cache/lru"
-	"github.com/prysmaticlabs/prysm/config/params"
+	lruwrpr "github.com/waterfall-foundation/coordinator/cache/lru"
+	"github.com/waterfall-foundation/coordinator/config/params"
 )
 
 var forkChoiceProcessedRootsSize = 1 << 16

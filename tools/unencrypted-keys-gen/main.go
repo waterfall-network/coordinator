@@ -5,9 +5,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/prysmaticlabs/prysm/crypto/bls"
-	"github.com/prysmaticlabs/prysm/runtime/interop"
-	"github.com/prysmaticlabs/prysm/tools/unencrypted-keys-gen/keygen"
+	"github.com/waterfall-foundation/coordinator/crypto/bls"
+	"github.com/waterfall-foundation/coordinator/runtime/interop"
+	"github.com/waterfall-foundation/coordinator/tools/unencrypted-keys-gen/keygen"
 )
 
 var (

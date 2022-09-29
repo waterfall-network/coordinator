@@ -9,10 +9,10 @@ import (
 	libp2pcore "github.com/libp2p/go-libp2p-core"
 	"github.com/libp2p/go-libp2p-core/peer"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/beacon-chain/p2p"
-	p2ptypes "github.com/prysmaticlabs/prysm/beacon-chain/p2p/types"
-	"github.com/prysmaticlabs/prysm/time"
-	"github.com/prysmaticlabs/prysm/time/slots"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p"
+	p2ptypes "github.com/waterfall-foundation/coordinator/beacon-chain/p2p/types"
+	"github.com/waterfall-foundation/coordinator/time"
+	"github.com/waterfall-foundation/coordinator/time/slots"
 )
 
 // pingHandler reads the incoming ping rpc message from the peer.

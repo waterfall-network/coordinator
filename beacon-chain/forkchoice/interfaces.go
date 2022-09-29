@@ -4,9 +4,9 @@ import (
 	"context"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	forkchoicetypes "github.com/prysmaticlabs/prysm/beacon-chain/forkchoice/types"
-	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
-	pbrpc "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	forkchoicetypes "github.com/waterfall-foundation/coordinator/beacon-chain/forkchoice/types"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	pbrpc "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 )
 
 // ForkChoicer represents the full fork choice interface composed of all the sub-interfaces.

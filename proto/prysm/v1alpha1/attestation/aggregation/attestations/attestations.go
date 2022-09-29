@@ -2,10 +2,10 @@ package attestations
 
 import (
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/crypto/bls"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/attestation/aggregation"
 	"github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/coordinator/crypto/bls"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/attestation/aggregation"
 )
 
 // attList represents list of attestations, defined for easier en masse operations (filtering, sorting).
