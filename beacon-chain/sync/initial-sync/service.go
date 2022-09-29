@@ -196,6 +196,16 @@ func (s *Service) Resync() error {
 		log = log.WithError(err)
 	}
 	log.WithField("slot", s.cfg.Chain.HeadSlot()).Info("Resync attempt complete")
+
+	// start head sync procedure with gwat
+	if err := s.HeadSync(s.ctx, true); err != nil {
+		if errors.Is(s.ctx.Err(), context.Canceled) {
+			//return
+		} else {
+			panic(err)
+		}
+	}
+
 	return nil
 }
 
