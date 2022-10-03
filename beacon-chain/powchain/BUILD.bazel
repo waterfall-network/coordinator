@@ -19,7 +19,7 @@ go_library(
         "rpc_connection.go",
         "service.go",
     ],
-    importpath = "github.com/prysmaticlabs/prysm/beacon-chain/powchain",
+    importpath = "github.com/waterfall-foundation/coordinator/beacon-chain/powchain",
     visibility = [
         "//beacon-chain:__subpackages__",
         "//cmd/beacon-chain:__subpackages__",

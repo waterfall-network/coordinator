@@ -106,7 +106,7 @@ go_library(
                 "stub.go",
             ],
         }),
-    importpath = "github.com/prysmaticlabs/prysm/crypto/bls/blst",
+    importpath = "github.com/waterfall-foundation/coordinator/crypto/bls/blst",
     visibility = [
         "//crypto/bls:__pkg__",
     ],

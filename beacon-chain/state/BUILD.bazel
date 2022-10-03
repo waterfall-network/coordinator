@@ -9,7 +9,7 @@ go_library(
         "phase0.go",
         "prometheus.go",
     ],
-    importpath = "github.com/prysmaticlabs/prysm/beacon-chain/state",
+    importpath = "github.com/waterfall-foundation/coordinator/beacon-chain/state",
     visibility = ["//visibility:public"],
     deps = [
         "//config/fieldparams:go_default_library",

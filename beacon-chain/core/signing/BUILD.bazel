@@ -6,7 +6,7 @@ go_library(
         "domain.go",
         "signing_root.go",
     ],
-    importpath = "github.com/prysmaticlabs/prysm/beacon-chain/core/signing",
+    importpath = "github.com/waterfall-foundation/coordinator/beacon-chain/core/signing",
     visibility = ["//visibility:public"],
     deps = [
         "//beacon-chain/state:go_default_library",

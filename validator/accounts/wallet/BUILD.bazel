@@ -6,7 +6,7 @@ go_library(
         "log.go",
         "wallet.go",
     ],
-    importpath = "github.com/prysmaticlabs/prysm/validator/accounts/wallet",
+    importpath = "github.com/waterfall-foundation/coordinator/validator/accounts/wallet",
     visibility = [
         "//tools:__subpackages__",
         "//validator:__subpackages__",

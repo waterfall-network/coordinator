@@ -1,11 +1,11 @@
 # Prysm: An Ethereum Consensus Implementation Written in Go
 
 [![Build status](https://badge.buildkite.com/b555891daf3614bae4284dcf365b2340cefc0089839526f096.svg?branch=master)](https://buildkite.com/prysmatic-labs/prysm)
-[![Go Report Card](https://goreportcard.com/badge/github.com/prysmaticlabs/prysm)](https://goreportcard.com/report/github.com/prysmaticlabs/prysm)
+[![Go Report Card](https://goreportcard.com/badge/github.com/waterfall-foundation/coordinator)](https://goreportcard.com/report/github.com/waterfall-foundation/coordinator)
 [![Consensus_Spec_Version 1.1.8](https://img.shields.io/badge/Consensus%20Spec%20Version-v1.1.8-blue.svg)](https://github.com/ethereum/consensus-specs/tree/v1.1.8)
 [![Discord](https://user-images.githubusercontent.com/7288322/34471967-1df7808a-efbb-11e7-9088-ed0b04151291.png)](https://discord.gg/CTYGPUJ)
 
-This is the core repository for Prysm, a [Golang](https://golang.org/) implementation of the [Ethereum Consensus](https://ethereum.org/en/eth2/) specification, developed by [Prysmatic Labs](https://prysmaticlabs.com). See the [Changelog](https://github.com/prysmaticlabs/prysm/releases) for details of the latest releases and upcoming breaking changes.
+This is the core repository for Prysm, a [Golang](https://golang.org/) implementation of the [Ethereum Consensus](https://ethereum.org/en/eth2/) specification, developed by [Prysmatic Labs](https://prysmaticlabs.com). See the [Changelog](https://github.com/waterfall-foundation/coordinator/releases) for details of the latest releases and upcoming breaking changes.
 
 ### Getting Started
 
@@ -20,8 +20,8 @@ To participate in staking, you can join the [official eth2 launchpad](https://la
 ### Branches
 Prysm maintains two permanent branches:
 
-* [master](https://github.com/prysmaticlabs/prysm/tree/master): This points to the latest stable release. It is ideal for most users.
-* [develop](https://github.com/prysmaticlabs/prysm/tree/develop): This is used for development, it contains the latest PRs. Developers should base their PRs on this branch.
+* [master](https://github.com/waterfall-foundation/coordinator/tree/master): This points to the latest stable release. It is ideal for most users.
+* [develop](https://github.com/waterfall-foundation/coordinator/tree/develop): This is used for development, it contains the latest PRs. Developers should base their PRs on this branch.
 
 ### Guide
 Want to get involved? Check out our [Contribution Guide](https://docs.prylabs.network/docs/contribute/contribution-guidelines/) to learn more!

@@ -13,7 +13,7 @@ go_library(
         "transition.go",
         "upgrade.go",
     ],
-    importpath = "github.com/prysmaticlabs/prysm/beacon-chain/core/altair",
+    importpath = "github.com/waterfall-foundation/coordinator/beacon-chain/core/altair",
     visibility = [
         "//beacon-chain:__subpackages__",
         "//testing/spectest:__subpackages__",
