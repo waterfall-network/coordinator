@@ -132,7 +132,7 @@ func (s *Service) execHeadSync(ctx context.Context) error {
 
 	cpState, err := s.cfg.StateGen.StateByRoot(ctx, bytesutil.ToBytes32(s.headSyncCp.Root))
 	if err != nil {
-		log.WithField("cpState", cpState).WithError(err).Error("Head sync readiness: error")
+		log.WithField("cpState", cpState).WithError(err).Error("Head sync main: error")
 		return err
 	}
 	//cpState := s.headSyncState
@@ -190,16 +190,37 @@ func (s *Service) execHeadSync(ctx context.Context) error {
 		}
 
 		slot := b.Block().Slot()
+		stateEpoche := slots.ToEpoch(cpState.Slot())
+		blockEpoche := slots.ToEpoch(slot)
+		if stateEpoche != blockEpoche {
+			cpRoot, err := b.Block().HashTreeRoot()
+			if err != nil {
+				log.WithField("root", cpRoot).WithError(err).Error("Head sync main: root err")
+				return err
+			}
+			cpState, err = s.cfg.StateGen.StateByRoot(ctx, cpRoot)
+			if err != nil {
+				log.WithField("state", cpState).WithError(err).Error("Head sync main: state error")
+				return err
+			}
+			log.WithField("state", cpState).Info("Head sync main: next epoche")
+		}
 		bState := cpState
 		if bState == nil {
 			log.WithField("state", bState).Error("Head sync main: state not found")
-
-			bState, err = s.cfg.DB.State(ctx, bytesutil.ToBytes32(b.Block().StateRoot()))
-			log.WithField("state", bState).Error("Head sync main: state not found 2222222")
+			cpRoot, err := b.Block().HashTreeRoot()
 			if err != nil {
-				log.WithField("state", bState).WithError(err).Error("Head sync main: error 222222222")
+				log.WithField("root", cpRoot).WithError(err).Error("Head sync main: root err")
+				return err
 			}
-			panic("state not found")
+			bState, err = s.cfg.StateGen.StateByRoot(ctx, cpRoot)
+			if err != nil {
+				log.WithField("state", bState).WithError(err).Error("Head sync main: state error")
+				return err
+			}
+			if bState == nil {
+				panic("state not found")
+			}
 		}
 
 		creators, err := s.GetCreators(ctx, bState, slot)
