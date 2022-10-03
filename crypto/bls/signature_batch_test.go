@@ -3,7 +3,7 @@ package bls
 import (
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
 )
 
 func TestCopySignatureSet(t *testing.T) {

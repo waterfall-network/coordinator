@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
-	"github.com/prysmaticlabs/prysm/config/params"
 	"github.com/urfave/cli/v2"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	"github.com/waterfall-foundation/coordinator/config/params"
 )
 
 // Flags is a struct to represent which features the client will perform on runtime.

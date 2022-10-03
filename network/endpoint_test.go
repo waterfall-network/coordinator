@@ -3,9 +3,9 @@ package network
 import (
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/network/authorization"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
+	"github.com/waterfall-foundation/coordinator/network/authorization"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func TestToHeaderValue(t *testing.T) {

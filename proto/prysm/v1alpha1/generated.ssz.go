@@ -5,7 +5,7 @@ package eth
 import (
 	ssz "github.com/ferranbt/fastssz"
 	github_com_prysmaticlabs_eth2_types "github.com/prysmaticlabs/eth2-types"
-	v1 "github.com/prysmaticlabs/prysm/proto/engine/v1"
+	v1 "github.com/waterfall-foundation/coordinator/proto/engine/v1"
 )
 
 // MarshalSSZ ssz marshals the Attestation object

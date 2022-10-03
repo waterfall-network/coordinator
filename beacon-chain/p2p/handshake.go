@@ -10,10 +10,10 @@ import (
 
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
-	"github.com/prysmaticlabs/prysm/beacon-chain/p2p/peers"
-	"github.com/prysmaticlabs/prysm/beacon-chain/p2p/peers/peerdata"
-	prysmTime "github.com/prysmaticlabs/prysm/time"
 	"github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/peers"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/peers/peerdata"
+	prysmTime "github.com/waterfall-foundation/coordinator/time"
 )
 
 const (

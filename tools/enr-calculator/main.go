@@ -9,9 +9,9 @@ import (
 	"net"
 
 	"github.com/libp2p/go-libp2p-core/crypto"
-	"github.com/prysmaticlabs/prysm/io/file"
-	_ "github.com/prysmaticlabs/prysm/runtime/maxprocs"
 	log "github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/coordinator/io/file"
+	_ "github.com/waterfall-foundation/coordinator/runtime/maxprocs"
 	"github.com/waterfall-foundation/gwat/p2p/enode"
 	"github.com/waterfall-foundation/gwat/p2p/enr"
 )

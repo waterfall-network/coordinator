@@ -3,7 +3,7 @@ package logs
 import (
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/testing/require"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func TestStreamServer_BackfillsMessages(t *testing.T) {

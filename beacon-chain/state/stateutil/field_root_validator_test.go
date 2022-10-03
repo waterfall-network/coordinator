@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	mathutil "github.com/prysmaticlabs/prysm/math"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/prysmaticlabs/prysm/testing/assert"
+	mathutil "github.com/waterfall-foundation/coordinator/math"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
 )
 
 func TestValidatorConstants(t *testing.T) {

@@ -14,7 +14,7 @@ go_library(
         "standard_api.go",
         "wallet.go",
     ],
-    importpath = "github.com/prysmaticlabs/prysm/validator/rpc",
+    importpath = "github.com/waterfall-foundation/coordinator/validator/rpc",
     visibility = [
         "//cmd/validator:__subpackages__",
         "//validator:__subpackages__",

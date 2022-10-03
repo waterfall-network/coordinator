@@ -1,17 +1,17 @@
 package sync
 
 import (
-	"github.com/prysmaticlabs/prysm/async/event"
-	blockfeed "github.com/prysmaticlabs/prysm/beacon-chain/core/feed/block"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/feed/operation"
-	statefeed "github.com/prysmaticlabs/prysm/beacon-chain/core/feed/state"
-	"github.com/prysmaticlabs/prysm/beacon-chain/db"
-	"github.com/prysmaticlabs/prysm/beacon-chain/operations/attestations"
-	"github.com/prysmaticlabs/prysm/beacon-chain/operations/slashings"
-	"github.com/prysmaticlabs/prysm/beacon-chain/operations/synccommittee"
-	"github.com/prysmaticlabs/prysm/beacon-chain/operations/voluntaryexits"
-	"github.com/prysmaticlabs/prysm/beacon-chain/p2p"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state/stategen"
+	"github.com/waterfall-foundation/coordinator/async/event"
+	blockfeed "github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/block"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/operation"
+	statefeed "github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/state"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/db"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/operations/attestations"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/operations/slashings"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/operations/synccommittee"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/operations/voluntaryexits"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stategen"
 )
 
 type Option func(s *Service) error

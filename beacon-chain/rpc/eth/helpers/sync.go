@@ -5,10 +5,10 @@ import (
 	"strconv"
 
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/api/grpc"
-	"github.com/prysmaticlabs/prysm/beacon-chain/blockchain"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state"
-	"github.com/prysmaticlabs/prysm/beacon-chain/sync"
+	"github.com/waterfall-foundation/coordinator/api/grpc"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/blockchain"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/sync"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

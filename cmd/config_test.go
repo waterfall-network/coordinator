@@ -4,9 +4,9 @@ import (
 	"flag"
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/testing/assert"
 	"github.com/urfave/cli/v2"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
 )
 
 func TestOverrideConfig(t *testing.T) {

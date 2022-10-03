@@ -6,9 +6,9 @@ import (
 	"github.com/libp2p/go-libp2p-core/peer"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/blocks"
-	"github.com/prysmaticlabs/prysm/monitoring/tracing"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/blocks"
+	"github.com/waterfall-foundation/coordinator/monitoring/tracing"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	"go.opencensus.io/trace"
 )
 

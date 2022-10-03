@@ -7,8 +7,8 @@ import (
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/config/params"
-	prysmTime "github.com/prysmaticlabs/prysm/time"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	prysmTime "github.com/waterfall-foundation/coordinator/time"
 	commonMath "github.com/waterfall-foundation/gwat/common/math"
 )
 

@@ -4,11 +4,11 @@ import (
 	"flag"
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/cmd"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
-	dbtest "github.com/prysmaticlabs/prysm/validator/db/testing"
 	"github.com/urfave/cli/v2"
+	"github.com/waterfall-foundation/coordinator/cmd"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
+	dbtest "github.com/waterfall-foundation/coordinator/validator/db/testing"
 )
 
 func TestMigrateUp_NoDBFound(t *testing.T) {

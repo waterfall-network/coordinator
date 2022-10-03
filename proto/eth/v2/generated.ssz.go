@@ -5,8 +5,8 @@ package eth
 import (
 	ssz "github.com/ferranbt/fastssz"
 	github_com_prysmaticlabs_eth2_types "github.com/prysmaticlabs/eth2-types"
-	v11 "github.com/prysmaticlabs/prysm/proto/engine/v1"
-	v1 "github.com/prysmaticlabs/prysm/proto/eth/v1"
+	v11 "github.com/waterfall-foundation/coordinator/proto/engine/v1"
+	v1 "github.com/waterfall-foundation/coordinator/proto/eth/v1"
 )
 
 // MarshalSSZ ssz marshals the SignedBeaconBlockBellatrix object

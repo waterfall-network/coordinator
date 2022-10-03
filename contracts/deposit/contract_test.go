@@ -5,11 +5,11 @@ import (
 	"encoding/binary"
 	"testing"
 
-	depositcontract "github.com/prysmaticlabs/prysm/contracts/deposit"
-	"github.com/prysmaticlabs/prysm/contracts/deposit/mock"
-	"github.com/prysmaticlabs/prysm/runtime/interop"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
+	depositcontract "github.com/waterfall-foundation/coordinator/contracts/deposit"
+	"github.com/waterfall-foundation/coordinator/contracts/deposit/mock"
+	"github.com/waterfall-foundation/coordinator/runtime/interop"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 	ethereum "github.com/waterfall-foundation/gwat"
 	"github.com/waterfall-foundation/gwat/common"
 )

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/prysmaticlabs/prysm/api/client/beacon"
 	"github.com/urfave/cli/v2"
+	"github.com/waterfall-foundation/coordinator/api/client/beacon"
 )
 
 var latestFlags = struct {

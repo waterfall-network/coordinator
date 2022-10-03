@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"testing"
 
-	p2ptest "github.com/prysmaticlabs/prysm/beacon-chain/p2p/testing"
-	"github.com/prysmaticlabs/prysm/beacon-chain/p2p/types"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
+	p2ptest "github.com/waterfall-foundation/coordinator/beacon-chain/p2p/testing"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/types"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func TestRegularSync_generateErrorResponse(t *testing.T) {

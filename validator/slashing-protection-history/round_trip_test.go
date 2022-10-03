@@ -8,13 +8,13 @@ import (
 	"testing"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
-	"github.com/prysmaticlabs/prysm/validator/db/kv"
-	dbtest "github.com/prysmaticlabs/prysm/validator/db/testing"
-	history "github.com/prysmaticlabs/prysm/validator/slashing-protection-history"
-	"github.com/prysmaticlabs/prysm/validator/slashing-protection-history/format"
-	slashtest "github.com/prysmaticlabs/prysm/validator/testing"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
+	"github.com/waterfall-foundation/coordinator/validator/db/kv"
+	dbtest "github.com/waterfall-foundation/coordinator/validator/db/testing"
+	history "github.com/waterfall-foundation/coordinator/validator/slashing-protection-history"
+	"github.com/waterfall-foundation/coordinator/validator/slashing-protection-history/format"
+	slashtest "github.com/waterfall-foundation/coordinator/validator/testing"
 )
 
 func TestImportExport_RoundTrip(t *testing.T) {

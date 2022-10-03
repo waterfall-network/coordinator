@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	eth "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	grpc "google.golang.org/grpc"
 )
 

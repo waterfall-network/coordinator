@@ -4,18 +4,18 @@
 package beacon
 
 import (
-	"github.com/prysmaticlabs/prysm/beacon-chain/blockchain"
-	blockfeed "github.com/prysmaticlabs/prysm/beacon-chain/core/feed/block"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/feed/operation"
-	"github.com/prysmaticlabs/prysm/beacon-chain/db"
-	"github.com/prysmaticlabs/prysm/beacon-chain/operations/attestations"
-	"github.com/prysmaticlabs/prysm/beacon-chain/operations/slashings"
-	"github.com/prysmaticlabs/prysm/beacon-chain/operations/voluntaryexits"
-	"github.com/prysmaticlabs/prysm/beacon-chain/p2p"
-	v1alpha1validator "github.com/prysmaticlabs/prysm/beacon-chain/rpc/prysm/v1alpha1/validator"
-	"github.com/prysmaticlabs/prysm/beacon-chain/rpc/statefetcher"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state/stategen"
-	"github.com/prysmaticlabs/prysm/beacon-chain/sync"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/blockchain"
+	blockfeed "github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/block"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/operation"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/db"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/operations/attestations"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/operations/slashings"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/operations/voluntaryexits"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p"
+	v1alpha1validator "github.com/waterfall-foundation/coordinator/beacon-chain/rpc/prysm/v1alpha1/validator"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/rpc/statefetcher"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stategen"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/sync"
 )
 
 // Server defines a server implementation of the gRPC Beacon Chain service,

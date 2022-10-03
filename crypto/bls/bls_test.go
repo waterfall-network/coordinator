@@ -3,8 +3,8 @@ package bls
 import (
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/crypto/bls/common"
-	"github.com/prysmaticlabs/prysm/testing/require"
+	"github.com/waterfall-foundation/coordinator/crypto/bls/common"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func TestDisallowZeroSecretKeys(t *testing.T) {

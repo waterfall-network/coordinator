@@ -5,9 +5,9 @@ import (
 	"os"
 
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/crypto/rand"
-	"github.com/prysmaticlabs/prysm/io/prompt"
 	"github.com/tyler-smith/go-bip39"
+	"github.com/waterfall-foundation/coordinator/crypto/rand"
+	"github.com/waterfall-foundation/coordinator/io/prompt"
 )
 
 const confirmationText = "Confirm you have written down the recovery words somewhere safe (offline) [y|Y]"

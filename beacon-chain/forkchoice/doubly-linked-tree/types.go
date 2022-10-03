@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
 )
 
 // ForkChoice defines the overall fork choice store which includes all block nodes, validator's latest votes and balances.

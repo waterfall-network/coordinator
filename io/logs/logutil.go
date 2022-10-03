@@ -8,8 +8,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/prysmaticlabs/prysm/config/params"
 	"github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/coordinator/config/params"
 )
 
 func addLogWriter(w io.Writer) {

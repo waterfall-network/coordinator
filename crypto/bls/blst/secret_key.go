@@ -8,11 +8,11 @@ import (
 	"crypto/subtle"
 	"fmt"
 
-	"github.com/prysmaticlabs/prysm/config/features"
-	"github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/crypto/bls/common"
-	"github.com/prysmaticlabs/prysm/crypto/rand"
 	blst "github.com/supranational/blst/bindings/go"
+	"github.com/waterfall-foundation/coordinator/config/features"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/crypto/bls/common"
+	"github.com/waterfall-foundation/coordinator/crypto/rand"
 )
 
 // bls12SecretKey used in the BLS signature scheme.

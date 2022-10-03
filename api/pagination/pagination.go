@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/config/params"
+	"github.com/waterfall-foundation/coordinator/config/params"
 )
 
 // StartAndEndPage takes in the requested page token, wanted page size, total page size.

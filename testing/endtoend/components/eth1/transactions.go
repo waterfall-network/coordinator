@@ -11,10 +11,10 @@ import (
 
 	"github.com/MariusVanDerWijden/FuzzyVM/filler"
 	txfuzz "github.com/MariusVanDerWijden/tx-fuzz"
-	"github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/crypto/rand"
-	e2e "github.com/prysmaticlabs/prysm/testing/endtoend/params"
 	"github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/crypto/rand"
+	e2e "github.com/waterfall-foundation/coordinator/testing/endtoend/params"
 	"github.com/waterfall-foundation/gwat/accounts/keystore"
 	"github.com/waterfall-foundation/gwat/common"
 	"github.com/waterfall-foundation/gwat/core/types"

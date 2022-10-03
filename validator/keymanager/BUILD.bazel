@@ -6,7 +6,7 @@ go_library(
         "constants.go",
         "types.go",
     ],
-    importpath = "github.com/prysmaticlabs/prysm/validator/keymanager",
+    importpath = "github.com/waterfall-foundation/coordinator/validator/keymanager",
     visibility = [
         "//testing/endtoend/components:__subpackages__",
         "//tools:__subpackages__",

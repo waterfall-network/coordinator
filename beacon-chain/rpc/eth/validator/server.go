@@ -1,13 +1,13 @@
 package validator
 
 import (
-	"github.com/prysmaticlabs/prysm/beacon-chain/blockchain"
-	"github.com/prysmaticlabs/prysm/beacon-chain/operations/attestations"
-	"github.com/prysmaticlabs/prysm/beacon-chain/operations/synccommittee"
-	"github.com/prysmaticlabs/prysm/beacon-chain/p2p"
-	v1alpha1validator "github.com/prysmaticlabs/prysm/beacon-chain/rpc/prysm/v1alpha1/validator"
-	"github.com/prysmaticlabs/prysm/beacon-chain/rpc/statefetcher"
-	"github.com/prysmaticlabs/prysm/beacon-chain/sync"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/blockchain"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/operations/attestations"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/operations/synccommittee"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p"
+	v1alpha1validator "github.com/waterfall-foundation/coordinator/beacon-chain/rpc/prysm/v1alpha1/validator"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/rpc/statefetcher"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/sync"
 )
 
 // Server defines a server implementation of the gRPC Validator service,

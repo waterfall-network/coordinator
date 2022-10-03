@@ -7,12 +7,12 @@ import (
 	"time"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/crypto/bls"
-	"github.com/prysmaticlabs/prysm/crypto/hash"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	prysmTime "github.com/prysmaticlabs/prysm/time"
-	"github.com/prysmaticlabs/prysm/time/slots"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/crypto/bls"
+	"github.com/waterfall-foundation/coordinator/crypto/hash"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	prysmTime "github.com/waterfall-foundation/coordinator/time"
+	"github.com/waterfall-foundation/coordinator/time/slots"
 )
 
 // ValidateNilAttestation checks if any composite field of input attestation is nil.

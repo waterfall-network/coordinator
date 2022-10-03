@@ -4,8 +4,8 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/config/params"
 	"github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/coordinator/config/params"
 )
 
 func TestMain(m *testing.M) {

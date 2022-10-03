@@ -3,7 +3,7 @@ package protoarray
 import (
 	"context"
 
-	"github.com/prysmaticlabs/prysm/config/params"
+	"github.com/waterfall-foundation/coordinator/config/params"
 )
 
 // IsOptimistic returns true if this node is optimistically synced

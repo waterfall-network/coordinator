@@ -3,8 +3,8 @@ package main
 import (
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/config/features"
 	"github.com/urfave/cli/v2"
+	"github.com/waterfall-foundation/coordinator/config/features"
 )
 
 func TestAllFlagsExistInHelp(t *testing.T) {

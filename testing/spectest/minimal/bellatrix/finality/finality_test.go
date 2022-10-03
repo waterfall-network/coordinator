@@ -3,7 +3,7 @@ package finality
 import (
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/testing/spectest/shared/bellatrix/finality"
+	"github.com/waterfall-foundation/coordinator/testing/spectest/shared/bellatrix/finality"
 )
 
 func TestMinimal_Bellatrix_Finality(t *testing.T) {

@@ -13,7 +13,7 @@ import (
 
 	github_com_prysmaticlabs_eth2_types "github.com/prysmaticlabs/eth2-types"
 	github_com_prysmaticlabs_go_bitfield "github.com/prysmaticlabs/go-bitfield"
-	_ "github.com/prysmaticlabs/prysm/proto/eth/ext"
+	_ "github.com/waterfall-foundation/coordinator/proto/eth/ext"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"

@@ -4,11 +4,11 @@ import (
 	"context"
 	"testing"
 
-	v3 "github.com/prysmaticlabs/prysm/beacon-chain/state/v3"
-	"github.com/prysmaticlabs/prysm/container/trie"
-	"github.com/prysmaticlabs/prysm/crypto/bls"
-	"github.com/prysmaticlabs/prysm/testing/require"
-	"github.com/prysmaticlabs/prysm/testing/util"
+	v3 "github.com/waterfall-foundation/coordinator/beacon-chain/state/v3"
+	"github.com/waterfall-foundation/coordinator/container/trie"
+	"github.com/waterfall-foundation/coordinator/crypto/bls"
+	"github.com/waterfall-foundation/coordinator/testing/require"
+	"github.com/waterfall-foundation/coordinator/testing/util"
 )
 
 func TestBeaconStateMerkleProofs(t *testing.T) {

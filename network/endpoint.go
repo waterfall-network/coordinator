@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/prysmaticlabs/prysm/network/authorization"
+	"github.com/waterfall-foundation/coordinator/network/authorization"
 )
 
 // Endpoint is an endpoint with authorization data.

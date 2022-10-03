@@ -10,12 +10,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/prysmaticlabs/prysm/api/gateway/apimiddleware"
-	"github.com/prysmaticlabs/prysm/api/grpc"
-	"github.com/prysmaticlabs/prysm/beacon-chain/rpc/eth/events"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
 	"github.com/r3labs/sse"
+	"github.com/waterfall-foundation/coordinator/api/gateway/apimiddleware"
+	"github.com/waterfall-foundation/coordinator/api/grpc"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/rpc/eth/events"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 type testSSZResponseJson struct {

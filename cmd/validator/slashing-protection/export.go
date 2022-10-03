@@ -6,13 +6,13 @@ import (
 	"path/filepath"
 
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/cmd"
-	"github.com/prysmaticlabs/prysm/cmd/validator/flags"
-	"github.com/prysmaticlabs/prysm/io/file"
-	"github.com/prysmaticlabs/prysm/validator/accounts/userprompt"
-	"github.com/prysmaticlabs/prysm/validator/db/kv"
-	slashingprotection "github.com/prysmaticlabs/prysm/validator/slashing-protection-history"
 	"github.com/urfave/cli/v2"
+	"github.com/waterfall-foundation/coordinator/cmd"
+	"github.com/waterfall-foundation/coordinator/cmd/validator/flags"
+	"github.com/waterfall-foundation/coordinator/io/file"
+	"github.com/waterfall-foundation/coordinator/validator/accounts/userprompt"
+	"github.com/waterfall-foundation/coordinator/validator/db/kv"
+	slashingprotection "github.com/waterfall-foundation/coordinator/validator/slashing-protection-history"
 )
 
 const (

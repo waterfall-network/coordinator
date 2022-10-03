@@ -1,8 +1,8 @@
 package assert
 
 import (
-	"github.com/prysmaticlabs/prysm/testing/assertions"
 	"github.com/sirupsen/logrus/hooks/test"
+	"github.com/waterfall-foundation/coordinator/testing/assertions"
 )
 
 // Equal compares values using comparison operator.

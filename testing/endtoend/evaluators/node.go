@@ -12,10 +12,10 @@ import (
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
-	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	e2e "github.com/prysmaticlabs/prysm/testing/endtoend/params"
-	"github.com/prysmaticlabs/prysm/testing/endtoend/policies"
-	e2etypes "github.com/prysmaticlabs/prysm/testing/endtoend/types"
+	eth "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	e2e "github.com/waterfall-foundation/coordinator/testing/endtoend/params"
+	"github.com/waterfall-foundation/coordinator/testing/endtoend/policies"
+	e2etypes "github.com/waterfall-foundation/coordinator/testing/endtoend/types"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )

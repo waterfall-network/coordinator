@@ -7,17 +7,17 @@ import (
 	"testing"
 
 	"github.com/holiman/uint256"
-	testDB "github.com/prysmaticlabs/prysm/beacon-chain/db/testing"
-	"github.com/prysmaticlabs/prysm/beacon-chain/forkchoice/protoarray"
-	mocks "github.com/prysmaticlabs/prysm/beacon-chain/powchain/testing"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state/stategen"
-	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
-	"github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
-	enginev1 "github.com/prysmaticlabs/prysm/proto/engine/v1"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/wrapper"
-	"github.com/prysmaticlabs/prysm/testing/require"
+	testDB "github.com/waterfall-foundation/coordinator/beacon-chain/db/testing"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/forkchoice/protoarray"
+	mocks "github.com/waterfall-foundation/coordinator/beacon-chain/powchain/testing"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stategen"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	enginev1 "github.com/waterfall-foundation/coordinator/proto/engine/v1"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func Test_validTerminalPowBlock(t *testing.T) {

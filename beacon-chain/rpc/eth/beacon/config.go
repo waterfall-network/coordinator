@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/network/forks"
-	ethpb "github.com/prysmaticlabs/prysm/proto/eth/v1"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/network/forks"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/eth/v1"
 	"github.com/waterfall-foundation/gwat/common/hexutil"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc/codes"

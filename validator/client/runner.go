@@ -8,12 +8,12 @@ import (
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
-	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
-	"github.com/prysmaticlabs/prysm/config/params"
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
-	"github.com/prysmaticlabs/prysm/time/slots"
-	"github.com/prysmaticlabs/prysm/validator/client/iface"
-	"github.com/prysmaticlabs/prysm/validator/keymanager/remote"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	"github.com/waterfall-foundation/coordinator/time/slots"
+	"github.com/waterfall-foundation/coordinator/validator/client/iface"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager/remote"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -230,7 +230,7 @@ func run(ctx context.Context, v iface.Validator) {
 					if err := recover(); err != nil { // catch any panic in logging
 						log.WithField("err", err).
 							Error("Panic occurred when logging validator report. This" +
-								" should never happen! Please file a report at github.com/prysmaticlabs/prysm/issues/new")
+								" should never happen! Please file a report at github.com/waterfall-foundation/coordinator/issues/new")
 					}
 				}()
 				// Log this client performance in the previous epoch

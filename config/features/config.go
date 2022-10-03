@@ -23,9 +23,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/prysmaticlabs/prysm/config/params"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
+	"github.com/waterfall-foundation/coordinator/config/params"
 )
 
 var log = logrus.WithField("prefix", "flags")

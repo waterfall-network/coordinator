@@ -3,12 +3,12 @@ package debug
 import (
 	"context"
 
-	"github.com/prysmaticlabs/prysm/beacon-chain/rpc/eth/helpers"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state"
-	ethpbv1 "github.com/prysmaticlabs/prysm/proto/eth/v1"
-	ethpbv2 "github.com/prysmaticlabs/prysm/proto/eth/v2"
-	"github.com/prysmaticlabs/prysm/proto/migration"
-	"github.com/prysmaticlabs/prysm/runtime/version"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/rpc/eth/helpers"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	ethpbv1 "github.com/waterfall-foundation/coordinator/proto/eth/v1"
+	ethpbv2 "github.com/waterfall-foundation/coordinator/proto/eth/v2"
+	"github.com/waterfall-foundation/coordinator/proto/migration"
+	"github.com/waterfall-foundation/coordinator/runtime/version"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

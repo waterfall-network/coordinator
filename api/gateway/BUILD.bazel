@@ -7,7 +7,7 @@ go_library(
         "log.go",
         "options.go",
     ],
-    importpath = "github.com/prysmaticlabs/prysm/api/gateway",
+    importpath = "github.com/waterfall-foundation/coordinator/api/gateway",
     visibility = [
         "//beacon-chain:__subpackages__",
         "//validator:__subpackages__",

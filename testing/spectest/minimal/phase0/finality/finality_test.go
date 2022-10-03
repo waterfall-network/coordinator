@@ -3,7 +3,7 @@ package finality
 import (
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/testing/spectest/shared/phase0/finality"
+	"github.com/waterfall-foundation/coordinator/testing/spectest/shared/phase0/finality"
 )
 
 func TestMinimal_Phase0_Finality(t *testing.T) {

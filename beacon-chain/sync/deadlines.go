@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/libp2p/go-libp2p-core/network"
-	"github.com/prysmaticlabs/prysm/config/params"
 	"github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/coordinator/config/params"
 )
 
 var defaultReadDuration = ttfbTimeout

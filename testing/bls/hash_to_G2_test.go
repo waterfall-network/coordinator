@@ -7,9 +7,9 @@ import (
 	"testing"
 
 	"github.com/ghodss/yaml"
-	"github.com/prysmaticlabs/prysm/testing/bls/utils"
-	"github.com/prysmaticlabs/prysm/testing/require"
 	blst "github.com/supranational/blst/bindings/go"
+	"github.com/waterfall-foundation/coordinator/testing/bls/utils"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func TestHashToG2(t *testing.T) {

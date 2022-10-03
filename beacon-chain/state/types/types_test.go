@@ -3,7 +3,7 @@ package types
 import (
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
 )
 
 func TestStateFieldIndexes(t *testing.T) {

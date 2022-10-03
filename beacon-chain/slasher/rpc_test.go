@@ -6,12 +6,12 @@ import (
 	"time"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	dbtest "github.com/prysmaticlabs/prysm/beacon-chain/db/testing"
-	slashertypes "github.com/prysmaticlabs/prysm/beacon-chain/slasher/types"
-	"github.com/prysmaticlabs/prysm/config/params"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
+	dbtest "github.com/waterfall-foundation/coordinator/beacon-chain/db/testing"
+	slashertypes "github.com/waterfall-foundation/coordinator/beacon-chain/slasher/types"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func TestIsSlashableBlock(t *testing.T) {

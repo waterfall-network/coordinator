@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/binary"
 
-	"github.com/prysmaticlabs/prysm/beacon-chain/state/fieldtrie"
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state/fieldtrie"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
 )
 
 const (

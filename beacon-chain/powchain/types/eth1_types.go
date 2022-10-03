@@ -4,7 +4,7 @@ import (
 	"math/big"
 
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
 	"github.com/waterfall-foundation/gwat/common"
 	gethTypes "github.com/waterfall-foundation/gwat/core/types"
 )

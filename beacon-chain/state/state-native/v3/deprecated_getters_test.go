@@ -3,7 +3,7 @@ package v3
 import (
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/testing/require"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func TestBeaconState_CurrentEpochAttestations(t *testing.T) {

@@ -4,13 +4,13 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
-	coreHelper "github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
-	wrapperv2 "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/wrapper"
-	"github.com/prysmaticlabs/prysm/testing/endtoend/helpers"
-	"github.com/prysmaticlabs/prysm/testing/endtoend/policies"
-	"github.com/prysmaticlabs/prysm/testing/endtoend/types"
-	"github.com/prysmaticlabs/prysm/time/slots"
+	coreHelper "github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	wrapperv2 "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
+	"github.com/waterfall-foundation/coordinator/testing/endtoend/helpers"
+	"github.com/waterfall-foundation/coordinator/testing/endtoend/policies"
+	"github.com/waterfall-foundation/coordinator/testing/endtoend/types"
+	"github.com/waterfall-foundation/coordinator/time/slots"
 	"google.golang.org/grpc"
 )
 

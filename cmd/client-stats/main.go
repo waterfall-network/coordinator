@@ -7,14 +7,14 @@ import (
 	"time"
 
 	joonix "github.com/joonix/log"
-	"github.com/prysmaticlabs/prysm/cmd"
-	"github.com/prysmaticlabs/prysm/cmd/client-stats/flags"
-	"github.com/prysmaticlabs/prysm/io/logs"
-	"github.com/prysmaticlabs/prysm/monitoring/clientstats"
-	"github.com/prysmaticlabs/prysm/monitoring/journald"
-	"github.com/prysmaticlabs/prysm/runtime/version"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
+	"github.com/waterfall-foundation/coordinator/cmd"
+	"github.com/waterfall-foundation/coordinator/cmd/client-stats/flags"
+	"github.com/waterfall-foundation/coordinator/io/logs"
+	"github.com/waterfall-foundation/coordinator/monitoring/clientstats"
+	"github.com/waterfall-foundation/coordinator/monitoring/journald"
+	"github.com/waterfall-foundation/coordinator/runtime/version"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 

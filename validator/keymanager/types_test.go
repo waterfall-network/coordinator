@@ -5,13 +5,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
-	"github.com/prysmaticlabs/prysm/validator/keymanager"
-	"github.com/prysmaticlabs/prysm/validator/keymanager/derived"
-	"github.com/prysmaticlabs/prysm/validator/keymanager/local"
-	"github.com/prysmaticlabs/prysm/validator/keymanager/remote"
-	remote_web3signer "github.com/prysmaticlabs/prysm/validator/keymanager/remote-web3signer"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager/derived"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager/local"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager/remote"
+	remote_web3signer "github.com/waterfall-foundation/coordinator/validator/keymanager/remote-web3signer"
 )
 
 var (

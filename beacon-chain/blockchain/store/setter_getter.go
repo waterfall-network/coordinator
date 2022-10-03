@@ -1,6 +1,6 @@
 package store
 
-import ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+import ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 
 // PrevJustifiedCheckpt returns the previous justified checkpoint in the Store.
 func (s *Store) PrevJustifiedCheckpt() *ethpb.Checkpoint {

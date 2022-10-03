@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
-	forkchoicetypes "github.com/prysmaticlabs/prysm/beacon-chain/forkchoice/types"
-	"github.com/prysmaticlabs/prysm/config/params"
+	forkchoicetypes "github.com/waterfall-foundation/coordinator/beacon-chain/forkchoice/types"
+	"github.com/waterfall-foundation/coordinator/config/params"
 )
 
 // BoostProposerRoot sets the block root which should be boosted during

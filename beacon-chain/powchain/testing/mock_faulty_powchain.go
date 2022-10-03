@@ -5,11 +5,11 @@ import (
 	"math/big"
 
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/async/event"
-	"github.com/prysmaticlabs/prysm/beacon-chain/powchain/types"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state"
-	v1 "github.com/prysmaticlabs/prysm/beacon-chain/state/v1"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/async/event"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/powchain/types"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	v1 "github.com/waterfall-foundation/coordinator/beacon-chain/state/v1"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	"github.com/waterfall-foundation/gwat/common"
 )
 

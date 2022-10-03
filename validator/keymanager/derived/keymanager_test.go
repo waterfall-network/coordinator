@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"testing"
 
-	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
-	"github.com/prysmaticlabs/prysm/crypto/bls"
-	"github.com/prysmaticlabs/prysm/crypto/rand"
-	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
-	mock "github.com/prysmaticlabs/prysm/validator/accounts/testing"
-	constant "github.com/prysmaticlabs/prysm/validator/testing"
 	"github.com/tyler-smith/go-bip39"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	"github.com/waterfall-foundation/coordinator/crypto/bls"
+	"github.com/waterfall-foundation/coordinator/crypto/rand"
+	validatorpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/validator-client"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
+	mock "github.com/waterfall-foundation/coordinator/validator/accounts/testing"
+	constant "github.com/waterfall-foundation/coordinator/validator/testing"
 	util "github.com/wealdtech/go-eth2-util"
 )
 

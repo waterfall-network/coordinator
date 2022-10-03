@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
-	"github.com/prysmaticlabs/prysm/validator/db/iface"
-	"github.com/prysmaticlabs/prysm/validator/db/kv"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	"github.com/waterfall-foundation/coordinator/validator/db/iface"
+	"github.com/waterfall-foundation/coordinator/validator/db/kv"
 )
 
 // SetupDB instantiates and returns a DB instance for the validator client.

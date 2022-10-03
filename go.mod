@@ -1,4 +1,4 @@
-module github.com/prysmaticlabs/prysm
+module github.com/waterfall-foundation/coordinator
 
 go 1.17
 

@@ -6,12 +6,12 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/config/params"
-	ev "github.com/prysmaticlabs/prysm/testing/endtoend/evaluators"
-	"github.com/prysmaticlabs/prysm/testing/endtoend/helpers"
-	e2eParams "github.com/prysmaticlabs/prysm/testing/endtoend/params"
-	"github.com/prysmaticlabs/prysm/testing/endtoend/types"
-	"github.com/prysmaticlabs/prysm/testing/require"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	ev "github.com/waterfall-foundation/coordinator/testing/endtoend/evaluators"
+	"github.com/waterfall-foundation/coordinator/testing/endtoend/helpers"
+	e2eParams "github.com/waterfall-foundation/coordinator/testing/endtoend/params"
+	"github.com/waterfall-foundation/coordinator/testing/endtoend/types"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 type testArgs struct {

@@ -3,9 +3,9 @@ package eth1
 import (
 	"context"
 
-	"github.com/prysmaticlabs/prysm/testing/endtoend/helpers"
-	e2e "github.com/prysmaticlabs/prysm/testing/endtoend/params"
-	e2etypes "github.com/prysmaticlabs/prysm/testing/endtoend/types"
+	"github.com/waterfall-foundation/coordinator/testing/endtoend/helpers"
+	e2e "github.com/waterfall-foundation/coordinator/testing/endtoend/params"
+	e2etypes "github.com/waterfall-foundation/coordinator/testing/endtoend/types"
 )
 
 // NodeSet represents a set of Eth1 nodes, none of which is a mining node.

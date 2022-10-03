@@ -5,7 +5,7 @@ package db
 import (
 	"context"
 
-	"github.com/prysmaticlabs/prysm/beacon-chain/db/kv"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/db/kv"
 )
 
 // NewDB initializes a new DB.

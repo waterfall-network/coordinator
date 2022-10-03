@@ -9,17 +9,17 @@ import (
 
 	"github.com/manifoldco/promptui"
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/cmd/validator/flags"
-	"github.com/prysmaticlabs/prysm/io/prompt"
-	"github.com/prysmaticlabs/prysm/validator/accounts/iface"
-	"github.com/prysmaticlabs/prysm/validator/accounts/userprompt"
-	"github.com/prysmaticlabs/prysm/validator/accounts/wallet"
-	"github.com/prysmaticlabs/prysm/validator/keymanager"
-	"github.com/prysmaticlabs/prysm/validator/keymanager/derived"
-	"github.com/prysmaticlabs/prysm/validator/keymanager/local"
-	"github.com/prysmaticlabs/prysm/validator/keymanager/remote"
-	remote_web3signer "github.com/prysmaticlabs/prysm/validator/keymanager/remote-web3signer"
 	"github.com/urfave/cli/v2"
+	"github.com/waterfall-foundation/coordinator/cmd/validator/flags"
+	"github.com/waterfall-foundation/coordinator/io/prompt"
+	"github.com/waterfall-foundation/coordinator/validator/accounts/iface"
+	"github.com/waterfall-foundation/coordinator/validator/accounts/userprompt"
+	"github.com/waterfall-foundation/coordinator/validator/accounts/wallet"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager/derived"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager/local"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager/remote"
+	remote_web3signer "github.com/waterfall-foundation/coordinator/validator/keymanager/remote-web3signer"
 )
 
 // CreateWalletConfig defines the parameters needed to call the create wallet functions.

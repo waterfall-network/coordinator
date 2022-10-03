@@ -11,12 +11,12 @@ import (
 
 	"github.com/gorilla/mux"
 	joonix "github.com/joonix/log"
-	"github.com/prysmaticlabs/prysm/api/gateway"
-	beaconGateway "github.com/prysmaticlabs/prysm/beacon-chain/gateway"
-	"github.com/prysmaticlabs/prysm/beacon-chain/rpc/apimiddleware"
-	"github.com/prysmaticlabs/prysm/cmd/beacon-chain/flags"
-	_ "github.com/prysmaticlabs/prysm/runtime/maxprocs"
 	"github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/coordinator/api/gateway"
+	beaconGateway "github.com/waterfall-foundation/coordinator/beacon-chain/gateway"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/rpc/apimiddleware"
+	"github.com/waterfall-foundation/coordinator/cmd/beacon-chain/flags"
+	_ "github.com/waterfall-foundation/coordinator/runtime/maxprocs"
 )
 
 var (

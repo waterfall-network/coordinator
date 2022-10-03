@@ -3,10 +3,10 @@ package v3
 import (
 	"fmt"
 
-	customtypes "github.com/prysmaticlabs/prysm/beacon-chain/state/state-native/custom-types"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state/stateutil"
-	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	customtypes "github.com/waterfall-foundation/coordinator/beacon-chain/state/state-native/custom-types"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stateutil"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 )
 
 // SetLatestBlockHeader in the beacon state.

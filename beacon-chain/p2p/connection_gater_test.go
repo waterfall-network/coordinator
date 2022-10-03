@@ -9,13 +9,13 @@ import (
 	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p-core/peer"
 	ma "github.com/multiformats/go-multiaddr"
-	"github.com/prysmaticlabs/prysm/beacon-chain/p2p/peers"
-	"github.com/prysmaticlabs/prysm/beacon-chain/p2p/peers/peerdata"
-	"github.com/prysmaticlabs/prysm/beacon-chain/p2p/peers/scorers"
-	mockp2p "github.com/prysmaticlabs/prysm/beacon-chain/p2p/testing"
-	ethpb "github.com/prysmaticlabs/prysm/proto/eth/v1"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/peers"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/peers/peerdata"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/peers/scorers"
+	mockp2p "github.com/waterfall-foundation/coordinator/beacon-chain/p2p/testing"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/eth/v1"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func TestPeer_AtMaxLimit(t *testing.T) {

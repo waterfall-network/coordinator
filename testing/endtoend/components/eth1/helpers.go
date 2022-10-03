@@ -5,7 +5,7 @@ import (
 	"math/big"
 	"time"
 
-	e2etypes "github.com/prysmaticlabs/prysm/testing/endtoend/types"
+	e2etypes "github.com/waterfall-foundation/coordinator/testing/endtoend/types"
 	"github.com/waterfall-foundation/gwat/accounts/keystore"
 	"github.com/waterfall-foundation/gwat/core/types"
 	"github.com/waterfall-foundation/gwat/ethclient"

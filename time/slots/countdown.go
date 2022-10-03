@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/prysmaticlabs/prysm/config/params"
-	prysmTime "github.com/prysmaticlabs/prysm/time"
 	"github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	prysmTime "github.com/waterfall-foundation/coordinator/time"
 )
 
 var log = logrus.WithField("prefix", "slotutil")

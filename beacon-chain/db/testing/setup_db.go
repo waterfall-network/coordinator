@@ -6,10 +6,10 @@ import (
 	"context"
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/beacon-chain/db"
-	"github.com/prysmaticlabs/prysm/beacon-chain/db/iface"
-	"github.com/prysmaticlabs/prysm/beacon-chain/db/kv"
-	"github.com/prysmaticlabs/prysm/beacon-chain/db/slasherkv"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/db"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/db/iface"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/db/kv"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/db/slasherkv"
 )
 
 // SetupDB instantiates and returns database backed by key value store.

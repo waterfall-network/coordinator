@@ -2,9 +2,9 @@ package genesis
 
 import (
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/beacon-chain/node"
-	"github.com/prysmaticlabs/prysm/beacon-chain/sync/genesis"
 	"github.com/urfave/cli/v2"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/node"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/sync/genesis"
 )
 
 var (

@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/prysmaticlabs/prysm/monitoring/prometheus"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
 	log "github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/coordinator/monitoring/prometheus"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 const addr = "127.0.0.1:8989"

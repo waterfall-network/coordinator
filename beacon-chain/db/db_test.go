@@ -1,5 +1,5 @@
 package db
 
-import "github.com/prysmaticlabs/prysm/beacon-chain/db/kv"
+import "github.com/waterfall-foundation/coordinator/beacon-chain/db/kv"
 
 var _ Database = (*kv.Store)(nil)

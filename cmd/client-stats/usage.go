@@ -5,9 +5,9 @@ import (
 	"io"
 	"sort"
 
-	"github.com/prysmaticlabs/prysm/cmd"
-	"github.com/prysmaticlabs/prysm/cmd/client-stats/flags"
 	"github.com/urfave/cli/v2"
+	"github.com/waterfall-foundation/coordinator/cmd"
+	"github.com/waterfall-foundation/coordinator/cmd/client-stats/flags"
 )
 
 var appHelpTemplate = `NAME:

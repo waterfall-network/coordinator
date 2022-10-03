@@ -3,7 +3,7 @@ package rewards
 import (
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/testing/spectest/shared/bellatrix/rewards"
+	"github.com/waterfall-foundation/coordinator/testing/spectest/shared/bellatrix/rewards"
 )
 
 func TestMainnet_Bellatrix_Rewards(t *testing.T) {

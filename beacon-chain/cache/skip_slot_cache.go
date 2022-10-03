@@ -9,8 +9,8 @@ import (
 	lru "github.com/hashicorp/golang-lru"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state"
-	lruwrpr "github.com/prysmaticlabs/prysm/cache/lru"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	lruwrpr "github.com/waterfall-foundation/coordinator/cache/lru"
 	"go.opencensus.io/trace"
 )
 

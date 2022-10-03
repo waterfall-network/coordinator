@@ -5,9 +5,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/async"
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
+	"github.com/waterfall-foundation/coordinator/async"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func TestDouble(t *testing.T) {

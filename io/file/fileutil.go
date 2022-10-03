@@ -14,8 +14,8 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/config/params"
 	log "github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/coordinator/config/params"
 )
 
 // ExpandPath given a string which may be a relative path.

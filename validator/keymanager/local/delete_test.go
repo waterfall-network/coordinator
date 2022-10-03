@@ -7,13 +7,13 @@ import (
 	"strings"
 	"testing"
 
-	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
-	ethpbservice "github.com/prysmaticlabs/prysm/proto/eth/service"
-	"github.com/prysmaticlabs/prysm/testing/require"
-	mock "github.com/prysmaticlabs/prysm/validator/accounts/testing"
-	"github.com/prysmaticlabs/prysm/validator/keymanager"
 	logTest "github.com/sirupsen/logrus/hooks/test"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	ethpbservice "github.com/waterfall-foundation/coordinator/proto/eth/service"
+	"github.com/waterfall-foundation/coordinator/testing/require"
+	mock "github.com/waterfall-foundation/coordinator/validator/accounts/testing"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager"
 	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 )
 

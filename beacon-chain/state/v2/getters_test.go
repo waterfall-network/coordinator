@@ -4,10 +4,10 @@ import (
 	"runtime/debug"
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/beacon-chain/state"
-	testtmpl "github.com/prysmaticlabs/prysm/beacon-chain/state/testing"
-	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
-	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	testtmpl "github.com/waterfall-foundation/coordinator/beacon-chain/state/testing"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 )
 
 func TestBeaconState_SlotDataRace(t *testing.T) {

@@ -3,9 +3,9 @@ package derived
 import (
 	"testing"
 
-	"github.com/prysmaticlabs/prysm/testing/assert"
-	"github.com/prysmaticlabs/prysm/testing/require"
 	"github.com/tyler-smith/go-bip39"
+	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func TestMnemonic_Generate_CanRecover(t *testing.T) {

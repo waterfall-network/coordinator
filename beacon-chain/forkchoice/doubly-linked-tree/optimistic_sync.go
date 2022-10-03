@@ -3,7 +3,7 @@ package doublylinkedtree
 import (
 	"context"
 
-	"github.com/prysmaticlabs/prysm/config/params"
+	"github.com/waterfall-foundation/coordinator/config/params"
 )
 
 func (s *Store) setOptimisticToInvalid(ctx context.Context, root, payloadHash [32]byte) ([][32]byte, error) {

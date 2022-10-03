@@ -7,15 +7,15 @@ import (
 	"strings"
 	"testing"
 
-	fieldparams "github.com/prysmaticlabs/prysm/config/fieldparams"
-	"github.com/prysmaticlabs/prysm/crypto/bls"
-	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
-	ethpbservice "github.com/prysmaticlabs/prysm/proto/eth/service"
-	validatorpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/validator-client"
-	"github.com/prysmaticlabs/prysm/testing/require"
-	"github.com/prysmaticlabs/prysm/validator/keymanager/remote-web3signer/internal"
-	"github.com/prysmaticlabs/prysm/validator/keymanager/remote-web3signer/v1/mock"
 	"github.com/stretchr/testify/assert"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	"github.com/waterfall-foundation/coordinator/crypto/bls"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	ethpbservice "github.com/waterfall-foundation/coordinator/proto/eth/service"
+	validatorpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/validator-client"
+	"github.com/waterfall-foundation/coordinator/testing/require"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager/remote-web3signer/internal"
+	"github.com/waterfall-foundation/coordinator/validator/keymanager/remote-web3signer/v1/mock"
 	"github.com/waterfall-foundation/gwat/common/hexutil"
 )
 

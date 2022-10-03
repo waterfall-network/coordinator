@@ -7,18 +7,18 @@ import (
 	"time"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/async/event"
-	mock "github.com/prysmaticlabs/prysm/beacon-chain/blockchain/testing"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/feed"
-	statefeed "github.com/prysmaticlabs/prysm/beacon-chain/core/feed/state"
-	dbtest "github.com/prysmaticlabs/prysm/beacon-chain/db/testing"
-	mockslasher "github.com/prysmaticlabs/prysm/beacon-chain/slasher/mock"
-	mockSync "github.com/prysmaticlabs/prysm/beacon-chain/sync/initial-sync/testing"
-	"github.com/prysmaticlabs/prysm/testing/require"
-	"github.com/prysmaticlabs/prysm/testing/util"
-	"github.com/prysmaticlabs/prysm/time/slots"
 	"github.com/sirupsen/logrus"
 	logTest "github.com/sirupsen/logrus/hooks/test"
+	"github.com/waterfall-foundation/coordinator/async/event"
+	mock "github.com/waterfall-foundation/coordinator/beacon-chain/blockchain/testing"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/core/feed"
+	statefeed "github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/state"
+	dbtest "github.com/waterfall-foundation/coordinator/beacon-chain/db/testing"
+	mockslasher "github.com/waterfall-foundation/coordinator/beacon-chain/slasher/mock"
+	mockSync "github.com/waterfall-foundation/coordinator/beacon-chain/sync/initial-sync/testing"
+	"github.com/waterfall-foundation/coordinator/testing/require"
+	"github.com/waterfall-foundation/coordinator/testing/util"
+	"github.com/waterfall-foundation/coordinator/time/slots"
 )
 
 var _ = SlashingChecker(&Service{})

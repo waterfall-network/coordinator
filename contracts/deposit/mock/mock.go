@@ -6,7 +6,7 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/prysmaticlabs/prysm/contracts/deposit"
+	"github.com/waterfall-foundation/coordinator/contracts/deposit"
 	"github.com/waterfall-foundation/gwat/accounts/abi"
 	"github.com/waterfall-foundation/gwat/accounts/abi/bind"
 	"github.com/waterfall-foundation/gwat/accounts/abi/bind/backends"

@@ -4,8 +4,8 @@ import (
 	"context"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/beacon-chain/state"
-	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	eth "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 )
 
 // PoolMock is a fake implementation of PoolManager.

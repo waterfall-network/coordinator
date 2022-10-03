@@ -3,8 +3,8 @@ package signing
 import (
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/prysm/crypto/bls"
-	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
+	"github.com/waterfall-foundation/coordinator/crypto/bls"
+	eth "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 )
 
 // Domain returns the domain version for BLS private key to sign and verify.

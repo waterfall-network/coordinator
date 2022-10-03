@@ -6,7 +6,7 @@ go_library(
         "log.go",
         "parse_graffiti.go",
     ],
-    importpath = "github.com/prysmaticlabs/prysm/validator/graffiti",
+    importpath = "github.com/waterfall-foundation/coordinator/validator/graffiti",
     visibility = ["//validator:__subpackages__"],
     deps = [
         "//crypto/hash:go_default_library",

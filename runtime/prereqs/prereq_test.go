@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/testing/require"
 	logTest "github.com/sirupsen/logrus/hooks/test"
+	"github.com/waterfall-foundation/coordinator/testing/require"
 )
 
 func TestMeetsMinPlatformReqs(t *testing.T) {
