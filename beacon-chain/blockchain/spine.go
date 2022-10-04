@@ -99,7 +99,7 @@ func (s *Service) GetLastFinSpine() (gwatCommon.Hash, types.Slot, error) {
 }
 
 func getVoteNeeded() int {
-	return 3
+	return 6
 }
 
 func (s *Service) CalculateFinalizationSpinesByBlockRoot(blockRoot [32]byte) (gwatCommon.HashArray, error) {
