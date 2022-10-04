@@ -12,7 +12,7 @@ import (
 	gwatCommon "github.com/waterfall-foundation/gwat/common"
 )
 
-const RequiredVotesPct = 66
+//const RequiredVotesPct = 66
 
 type mapVoting map[gwatCommon.Hash]int
 type mapPriority map[int]gwatCommon.HashArray
@@ -226,5 +226,14 @@ func (s *Service) ValidateBlockCandidates(block block.BeaconBlock) (bool, error)
 		return false, nil
 	}
 	validCandidates := slotCandidates[startIx : endIx+1]
-	return validCandidates.IsEqualTo(blCandidates), nil
+	isValid := validCandidates.IsEqualTo(blCandidates)
+	if !isValid {
+		log.WithFields(logrus.Fields{
+			"isValid":         isValid,
+			"slot":            slot,
+			"blockCandidates": blCandidates,
+			"gwatCandidates":  slotCandidates,
+		}).Warn("**** Blocks Candidates Validation: failed ****")
+	}
+	return isValid, nil
 }

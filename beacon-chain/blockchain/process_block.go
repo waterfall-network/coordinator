@@ -131,10 +131,10 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		isValidCandidates, err := s.ValidateBlockCandidates(signed.Block())
 		if err != nil {
 			log.WithError(err).WithField("slotCandidates", isValidCandidates).Warn("on Block: could not verify new new block candidates")
-			if err.Error() == "got an unexpected error: synchronization" {
-				log.Warn("******* Start head sync procedure (onBlock) ******")
-				//go s.runHeadSync(s.ctx)
-			}
+			//if err.Error() == "got an unexpected error: synchronization" {
+			//	log.Warn("******* Start head sync procedure (onBlock) ******")
+			//	go s.runHeadSync(s.ctx)
+			//}
 		} else {
 			if !isValidCandidates {
 				return errBadSpineCandidates
