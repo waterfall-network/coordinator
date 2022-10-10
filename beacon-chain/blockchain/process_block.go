@@ -102,31 +102,37 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		return err
 	}
 
-	preStateVersion, preStateHeader, err := getStateVersionAndPayload(preState)
-	if err != nil {
-		return err
-	}
+	//// todo test no-belatrix
+	//preStateVersion, preStateHeader, err := getStateVersionAndPayload(preState)
+	//if err != nil {
+	//	return err
+	//}
+	//// todo test no-belatrix
+
 	postState, err := transition.ExecuteStateTransition(ctx, preState, signed)
 	if err != nil {
 		return err
 	}
-	postStateVersion, postStateHeader, err := getStateVersionAndPayload(postState)
-	if err != nil {
-		return err
-	}
-	isValidPayload, err := s.notifyNewPayload(ctx, preStateVersion, postStateVersion, preStateHeader, postStateHeader, signed)
-	if err != nil {
-		return errors.Wrap(err, "could not verify new payload")
-	}
-	if !isValidPayload {
-		candidate, err := s.optimisticCandidateBlock(ctx, b)
-		if err != nil {
-			return errors.Wrap(err, "could not check if block is optimistic candidate")
-		}
-		if !candidate {
-			return errNotOptimisticCandidate
-		}
-	}
+
+	//// todo test no-belatrix
+	//postStateVersion, postStateHeader, err := getStateVersionAndPayload(postState)
+	//if err != nil {
+	//	return err
+	//}
+	//isValidPayload, err := s.notifyNewPayload(ctx, preStateVersion, postStateVersion, preStateHeader, postStateHeader, signed)
+	//if err != nil {
+	//	return errors.Wrap(err, "could not verify new payload")
+	//}
+	//if !isValidPayload {
+	//	candidate, err := s.optimisticCandidateBlock(ctx, b)
+	//	if err != nil {
+	//		return errors.Wrap(err, "could not check if block is optimistic candidate")
+	//	}
+	//	if !candidate {
+	//		return errNotOptimisticCandidate
+	//	}
+	//}
+	//// todo test no-belatrix
 
 	if s.CurrentSlot() == signed.Block().Slot() && !s.isSync(s.ctx) {
 		isValidCandidates, err := s.ValidateBlockCandidates(signed.Block())
@@ -146,11 +152,14 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	if err := s.insertBlockAndAttestationsToForkChoiceStore(ctx, signed.Block(), blockRoot, postState); err != nil {
 		return errors.Wrapf(err, "could not insert block %d to fork choice store", signed.Block().Slot())
 	}
-	if isValidPayload {
-		if err := s.cfg.ForkChoiceStore.SetOptimisticToValid(ctx, blockRoot); err != nil {
-			return errors.Wrap(err, "could not set optimistic block to valid")
-		}
-	}
+
+	//// todo test no-belatrix
+	//if isValidPayload {
+	//	if err := s.cfg.ForkChoiceStore.SetOptimisticToValid(ctx, blockRoot); err != nil {
+	//		return errors.Wrap(err, "could not set optimistic block to valid")
+	//	}
+	//}
+	//// todo test no-belatrix
 
 	// We add a proposer score boost to fork choice for the block root if applicable, right after
 	// running a successful state transition for the block.
