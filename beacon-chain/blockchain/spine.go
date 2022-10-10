@@ -1,7 +1,6 @@
 package blockchain
 
 import (
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
 	"sort"
 	"sync"
 
@@ -9,10 +8,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/waterfall-foundation/coordinator/config/params"
 	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
 	gwatCommon "github.com/waterfall-foundation/gwat/common"
 )
-
-//const RequiredVotesPct = 66
 
 type mapVoting map[gwatCommon.Hash]int
 type mapPriority map[int]gwatCommon.HashArray
@@ -121,16 +119,16 @@ func (s *Service) CalculateFinalizationSpinesByBlockRoot(blockRoot [32]byte) (gw
 		if currRoot == params.BeaconConfig().ZeroHash {
 			return gwatCommon.HashArray{}, nil
 		}
-		block, err := s.cfg.BeaconDB.Block(s.ctx, currRoot)
+		sigBlock, err := s.cfg.BeaconDB.Block(s.ctx, currRoot)
 		if err != nil {
 			return gwatCommon.HashArray{}, err
 		}
 		// if reach finalized slot
-		if block.Block().Slot() <= lastSpineSlot {
+		if sigBlock.Block().Slot() <= lastSpineSlot {
 			break
 		}
 
-		candidates := gwatCommon.HashArrayFromBytes(block.Block().Body().Eth1Data().Candidates)
+		candidates := gwatCommon.HashArrayFromBytes(sigBlock.Block().Body().Eth1Data().Candidates)
 
 		if !candidates.IsUniq() {
 			log.WithField("candidates", candidates).Warn("skip bad candidates: is not uniq")
@@ -152,7 +150,7 @@ func (s *Service) CalculateFinalizationSpinesByBlockRoot(blockRoot [32]byte) (gw
 			candidatesList = append(candidatesList, reduction)
 		}
 		//set next block root
-		currRoot = bytesutil.ToBytes32(block.Block().ParentRoot())
+		currRoot = bytesutil.ToBytes32(sigBlock.Block().ParentRoot())
 	}
 
 	//calculate voting params
@@ -173,7 +171,7 @@ func (s *Service) CalculateFinalizationSpinesByBlockRoot(blockRoot [32]byte) (gw
 
 	//sort by priority
 	priorities := []int{}
-	for p, _ := range tabPriority {
+	for p := range tabPriority {
 		priorities = append(priorities, p)
 	}
 	sort.Sort(sort.Reverse(sort.IntSlice(priorities)))

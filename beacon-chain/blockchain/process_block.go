@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/core/blocks"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/core/feed"
 	statefeed "github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/state"
@@ -314,12 +315,22 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 
 	defer reportAttestationInclusion(b)
 
-	//calculate sequence of finalization spines
-	finSpines, err := s.CalculateFinalizationSpinesByBlockRoot(blockRoot)
-	if err != nil {
-		return errors.Wrap(err, "could not calculate finalization spines")
+	log.WithFields(logrus.Fields{
+		"condition":                s.CurrentSlot() == signed.Block().Slot() && !s.isSync(s.ctx),
+		"isSync":                   s.isSync(s.ctx),
+		"CurrentSlot == BlockSlot": s.CurrentSlot() == signed.Block().Slot(),
+		"CurrentSlot":              s.CurrentSlot(),
+		"BlockSlot":                signed.Block().Slot(),
+	}).Error("On block sync status")
+
+	if s.CurrentSlot() == signed.Block().Slot() && !s.isSync(s.ctx) {
+		//calculate sequence of finalization spines
+		finSpines, err := s.CalculateFinalizationSpinesByBlockRoot(blockRoot)
+		if err != nil {
+			return errors.Wrap(err, "could not calculate finalization spines")
+		}
+		s.setCacheFinalisation(finSpines)
 	}
-	s.setCacheFinalisation(finSpines)
 
 	return s.handleEpochBoundary(ctx, postState)
 }
