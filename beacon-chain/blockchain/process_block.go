@@ -332,7 +332,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		"BlockSlot":                signed.Block().Slot(),
 	}).Error("On block sync status")
 
-	if s.CurrentSlot() == signed.Block().Slot() && !s.isSync(s.ctx) {
+	if !s.isSync(s.ctx) {
 		//calculate sequence of finalization spines
 		finSpines, err := s.CalculateFinalizationSpinesByBlockRoot(blockRoot)
 		if err != nil {
