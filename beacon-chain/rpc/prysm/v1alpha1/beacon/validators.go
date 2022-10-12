@@ -688,6 +688,9 @@ func (bs *Server) GetValidatorPerformance(
 		if err != nil {
 			return nil, err
 		}
+
+		log.WithField("headState.slot", headState.Slot()).Info("*** process rewards and penalties *** Phase0")
+
 		headState, err = precompute.ProcessRewardsAndPenaltiesPrecompute(headState, bp, vp, precompute.AttestationsDelta, precompute.ProposersDelta)
 		if err != nil {
 			return nil, err
@@ -706,6 +709,9 @@ func (bs *Server) GetValidatorPerformance(
 		if err != nil {
 			return nil, err
 		}
+
+		log.WithField("headState.slot", headState.Slot()).Info("*** process rewards and penalties *** Altair")
+
 		headState, err = altair.ProcessRewardsAndPenaltiesPrecompute(headState, bp, vp)
 		if err != nil {
 			return nil, err

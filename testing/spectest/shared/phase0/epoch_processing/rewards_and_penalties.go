@@ -10,6 +10,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
 	"github.com/waterfall-foundation/coordinator/testing/require"
 	"github.com/waterfall-foundation/coordinator/testing/spectest/utils"
+	"github.com/waterfall-foundation/gwat/log"
 )
 
 // RunRewardsAndPenaltiesTests executes "epoch_processing/rewards_and_penalties" tests.
@@ -33,6 +34,8 @@ func processRewardsAndPenaltiesPrecomputeWrapper(t *testing.T, st state.BeaconSt
 	require.NoError(t, err)
 	vp, bp, err = precompute.ProcessAttestations(ctx, st, vp, bp)
 	require.NoError(t, err)
+
+	log.Info("*** process rewards and penalties *** Wrapper", "st.slot", st.Slot())
 
 	st, err = precompute.ProcessRewardsAndPenaltiesPrecompute(st, bp, vp, precompute.AttestationsDelta, precompute.ProposersDelta)
 	require.NoError(t, err, "Could not process reward")
