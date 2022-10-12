@@ -47,6 +47,7 @@ message BeaconStateV2 {
   v1.Eth1Data eth1_data = 3001;
   repeated v1.Eth1Data eth1_data_votes = 3002 [(ethereum.eth.ext.ssz_max) = "eth1_data_votes.size"];
   uint64 eth1_deposit_index = 3003;
+  repeated v1.BlockVoting block_voting = 3004 [(ethereum.eth.ext.ssz_max) = "block_voting.size"];
 
   // Registry [4001-5000]
   repeated v1.Validator validators = 4001 [(ethereum.eth.ext.ssz_max) = "1099511627776"];
@@ -92,6 +93,7 @@ message BeaconStateBellatrix {
   v1.Eth1Data eth1_data = 3001;
   repeated v1.Eth1Data eth1_data_votes = 3002 [(ethereum.eth.ext.ssz_max) = "eth1_data_votes.size"];
   uint64 eth1_deposit_index = 3003;
+  repeated v1.BlockVoting block_voting = 3004 [(ethereum.eth.ext.ssz_max) = "block_voting.size"];
 
   // Registry [4001-5000]
   repeated v1.Validator validators = 4001 [(ethereum.eth.ext.ssz_max) = "1099511627776"];
