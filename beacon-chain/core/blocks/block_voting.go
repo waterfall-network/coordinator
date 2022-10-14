@@ -49,7 +49,7 @@ func GetBlockVotingRoots(ctx context.Context, beaconState state.BeaconState, blo
 		if err != nil {
 			return supported, unsupported, err
 		}
-		if blockVotingCountVotes(bv) >= minSupport {
+		if blockVotingCountVotes(bv) >= uint64(minSupport) {
 			supported = append(supported, bv.GetRoot())
 		} else {
 			unsupported = append(unsupported, bv.GetRoot())
@@ -71,7 +71,7 @@ func blockVotingMinSupport(ctx context.Context, beaconState state.BeaconState, b
 }
 
 // blockVotingCountVotes counts votes of BlockVoting
-func blockVotingCountVotes(blockVoting *ethpb.BlockVoting) int {
+func blockVotingCountVotes(blockVoting *ethpb.BlockVoting) uint64 {
 	count := uint64(0)
 	for _, att := range blockVoting.Attestations {
 		if helpers.IsAggregated(att) {
@@ -80,7 +80,7 @@ func blockVotingCountVotes(blockVoting *ethpb.BlockVoting) int {
 			count++
 		}
 	}
-	return int(count)
+	return count
 }
 
 // blockVotingSlotCommitteeIndex returns first slot and CommitteeIndex of BlockVoting
