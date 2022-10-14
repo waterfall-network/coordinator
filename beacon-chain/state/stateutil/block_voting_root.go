@@ -17,9 +17,9 @@ func BlockVotingDataRootWithHasher(hasher ssz.HashFn, blockVoting *ethpb.BlockVo
 	if blockVoting == nil {
 		return [32]byte{}, errors.New("nil blockVoting data")
 	}
-	fixedFldsCount := 1
+	fixedFldsCount := 2
 
-	attBytes := []byte{}
+	attBytes := append([]byte{}, blockVoting.GetCandidates()...)
 	for _, att := range blockVoting.GetAttestations() {
 		attBytes = []byte(att.String())
 	}
@@ -37,6 +37,9 @@ func BlockVotingDataRootWithHasher(hasher ssz.HashFn, blockVoting *ethpb.BlockVo
 	if len(blockVoting.Root) > 0 {
 		fieldRoots[0] = bytesutil.ToBytes32(blockVoting.Root)
 	}
+	totalAttestersBuf := make([]byte, 8)
+	binary.LittleEndian.PutUint64(totalAttestersBuf, blockVoting.TotalAttesters)
+	fieldRoots[1] = bytesutil.ToBytes32(totalAttestersBuf)
 
 	if finLen > 0 {
 		for i := 0; i < finChunks; i++ {

@@ -55,7 +55,17 @@ type BeaconState struct {
 	sharedFieldReferences map[types.FieldIndex]*stateutil.Reference
 }
 
-func (b *BeaconState) AppendBlockVoting(val *ethpb.Attestation) error {
+func (b *BeaconState) AddBlockVoting(root []byte, totalAttrs uint64, candidates []byte) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (b *BeaconState) RemoveBlockVoting(roots [][]byte) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (b *BeaconState) AppendBlockVotingAtt(val *ethpb.Attestation) error {
 	//TODO implement me
 	panic("implement me")
 }

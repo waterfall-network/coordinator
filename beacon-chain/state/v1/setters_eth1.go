@@ -93,16 +93,15 @@ func (b *BeaconState) SetBlockVoting(val []*ethpb.BlockVoting) error {
 	return nil
 }
 
-// AppendBlockVoting for the beacon state. Appends the new value.
-func (b *BeaconState) AppendBlockVoting(val *ethpb.Attestation) error {
+// AddBlockVoting adds or update the new BlockVoting data
+// for the beacon state.
+func (b *BeaconState) AddBlockVoting(root []byte, totalAttrs uint64, candidates []byte) error {
 	if !b.hasInnerState() {
 		return ErrNilInnerState
 	}
 	b.lock.Lock()
 	defer b.lock.Unlock()
-
 	votes := b.state.BlockVoting
-
 	if b.sharedFieldReferences[blockVoting].Refs() > 1 {
 		// Copy elements in underlying array by reference.
 		votes = make([]*ethpb.BlockVoting, len(b.state.BlockVoting))
@@ -110,12 +109,56 @@ func (b *BeaconState) AppendBlockVoting(val *ethpb.Attestation) error {
 		b.sharedFieldReferences[blockVoting].MinusRef()
 		b.sharedFieldReferences[blockVoting] = stateutil.NewRef(1)
 	}
+	dirtyIxs := []uint64{}
+	addItem := true
+	addKey := root
+	for i, itm := range votes {
+		if bytes.Equal(itm.Root, addKey) {
+			dirtyIxs = append(dirtyIxs, uint64(i))
+			addItem = false
+			itm.TotalAttesters = totalAttrs
+			itm.Candidates = candidates
+		}
+	}
+	if addItem {
+		newItem := &ethpb.BlockVoting{
+			Root:           addKey,
+			Attestations:   []*ethpb.Attestation{},
+			TotalAttesters: totalAttrs,
+			Candidates:     candidates,
+		}
+		votes = append(votes, newItem)
+		dirtyIxs = append(dirtyIxs, uint64(len(votes)-1))
+	}
+	b.state.BlockVoting = votes
+	b.markFieldAsDirty(blockVoting)
+	b.addDirtyIndices(blockVoting, dirtyIxs)
+	return nil
+}
 
+// AppendBlockVotingAtt appends the new attestation to BlockVoting data
+// for the beacon state.
+func (b *BeaconState) AppendBlockVotingAtt(val *ethpb.Attestation) error {
+	if !b.hasInnerState() {
+		return ErrNilInnerState
+	}
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	votes := b.state.BlockVoting
+	if b.sharedFieldReferences[blockVoting].Refs() > 1 {
+		// Copy elements in underlying array by reference.
+		votes = make([]*ethpb.BlockVoting, len(b.state.BlockVoting))
+		copy(votes, b.state.BlockVoting)
+		b.sharedFieldReferences[blockVoting].MinusRef()
+		b.sharedFieldReferences[blockVoting] = stateutil.NewRef(1)
+	}
+	dirtyIxs := []uint64{}
 	addItem := true
 	var err error
 	addKey := val.GetData().BeaconBlockRoot
-	for _, itm := range votes {
+	for i, itm := range votes {
 		if bytes.Equal(itm.Root, addKey) {
+			dirtyIxs = append(dirtyIxs, uint64(i))
 			addItem = false
 			atts := append(itm.GetAttestations(), val)
 			itm.Attestations, err = stateutil.Dedup(atts)
@@ -126,18 +169,16 @@ func (b *BeaconState) AppendBlockVoting(val *ethpb.Attestation) error {
 	}
 	if addItem {
 		newItem := &ethpb.BlockVoting{
-			Root:         addKey,
-			Attestations: []*ethpb.Attestation{val},
+			Root:           addKey,
+			Attestations:   []*ethpb.Attestation{val},
+			TotalAttesters: val.GetAggregationBits().Len(),
+			Candidates:     nil,
 		}
 		votes = append(votes, newItem)
+		dirtyIxs = append(dirtyIxs, uint64(len(votes)-1))
 	}
-
 	b.state.BlockVoting = votes
 	b.markFieldAsDirty(blockVoting)
-	dirtyIxs := make([]uint64, len(b.state.BlockVoting))
-	for i := 0; i < len(b.state.BlockVoting); i++ {
-		dirtyIxs[i] = uint64(i)
-	}
 	b.addDirtyIndices(blockVoting, dirtyIxs)
 	return nil
 }

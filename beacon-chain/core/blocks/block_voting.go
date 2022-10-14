@@ -24,7 +24,7 @@ func ProcessBlockVoting(ctx context.Context, beaconState state.BeaconState, atte
 	//preState := beaconState.Copy()
 
 	for _, att := range attestations {
-		if err := beaconState.AppendBlockVoting(att); err != nil {
+		if err := beaconState.AppendBlockVotingAtt(att); err != nil {
 			return beaconState, err
 		}
 	}

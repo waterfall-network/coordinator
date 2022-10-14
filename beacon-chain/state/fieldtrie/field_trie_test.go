@@ -70,7 +70,7 @@ func TestFieldTrie_RecomputeTrieBlockVoting(t *testing.T) {
 	bitlist.SetBitAt(0, true)
 	bitlist.SetBitAt(1, true)
 
-	err = newState.AppendBlockVoting(&ethpb.Attestation{
+	err = newState.AppendBlockVotingAtt(&ethpb.Attestation{
 		AggregationBits: bitlist,
 		Data: &ethpb.AttestationData{
 			Slot:            1,
@@ -88,7 +88,7 @@ func TestFieldTrie_RecomputeTrieBlockVoting(t *testing.T) {
 		Signature: []byte{0x77},
 	})
 	require.NoError(t, err)
-	err = newState.AppendBlockVoting(&ethpb.Attestation{
+	err = newState.AppendBlockVotingAtt(&ethpb.Attestation{
 		AggregationBits: bitlist,
 		Data: &ethpb.AttestationData{
 			Slot:            1,

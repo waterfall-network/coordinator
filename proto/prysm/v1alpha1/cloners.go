@@ -25,8 +25,10 @@ func CopyBlockVoting(data *BlockVoting) *BlockVoting {
 		return nil
 	}
 	return &BlockVoting{
-		Root:         bytesutil.SafeCopyBytes(data.Root),
-		Attestations: CopyAttestations(data.Attestations),
+		Root:           bytesutil.SafeCopyBytes(data.Root),
+		TotalAttesters: data.TotalAttesters,
+		Candidates:     bytesutil.SafeCopyBytes(data.Candidates),
+		Attestations:   CopyAttestations(data.Attestations),
 	}
 }
 
