@@ -130,6 +130,46 @@ func (b *BeaconState) AppendBlockVoting(val *ethpb.Attestation) error {
 	}
 	b.state.BlockVoting = votes
 	b.markFieldAsDirty(blockVoting)
-	b.addDirtyIndices(blockVoting, []uint64{uint64(len(b.state.BlockVoting) - 1)})
+	dirtyIxs := make([]uint64, len(b.state.BlockVoting))
+	for i := 0; i < len(b.state.BlockVoting); i++ {
+		dirtyIxs[i] = uint64(i)
+	}
+	b.addDirtyIndices(blockVoting, dirtyIxs)
+	return nil
+}
+
+// RemoveBlockVoting removes deprecated values from BlockVoting
+// of the beacon state.
+func (b *BeaconState) RemoveBlockVoting(roots [][]byte) error {
+	if !b.hasInnerState() {
+		return ErrNilInnerState
+	}
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
+	votes := b.state.BlockVoting
+	if b.sharedFieldReferences[blockVoting].Refs() > 1 {
+		// Copy elements in underlying array by reference.
+		votes = make([]*ethpb.BlockVoting, len(b.state.BlockVoting))
+		copy(votes, b.state.BlockVoting)
+		b.sharedFieldReferences[blockVoting].MinusRef()
+		b.sharedFieldReferences[blockVoting] = stateutil.NewRef(1)
+	}
+	upVotes := []*ethpb.BlockVoting{}
+	for _, itm := range votes {
+		for _, rmRoot := range roots {
+			if !bytes.Equal(itm.Root, rmRoot) {
+				upVotes = append(upVotes, itm)
+			}
+		}
+	}
+
+	b.state.BlockVoting = upVotes
+	b.markFieldAsDirty(blockVoting)
+	dirtyIxs := make([]uint64, len(b.state.BlockVoting))
+	for i := 0; i < len(b.state.BlockVoting); i++ {
+		dirtyIxs[i] = uint64(i)
+	}
+	b.addDirtyIndices(blockVoting, dirtyIxs)
 	return nil
 }
