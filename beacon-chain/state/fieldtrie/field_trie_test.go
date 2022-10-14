@@ -60,7 +60,7 @@ func TestFieldTrie_RecomputeTrieBlockVoting(t *testing.T) {
 	newState, _ := util.DeterministicGenesisState(t, 32)
 	// 10 represents the enum value of validators
 
-	trie, err := fieldtrie.NewFieldTrie(21, stateTypes.CompositeArray, newState.BlockVoting(), 32768)
+	trie, err := fieldtrie.NewFieldTrie(21, stateTypes.CompositeArray, newState.BlockVoting(), 2048)
 	require.NoError(t, err)
 
 	changedIdx := []uint64{0}
