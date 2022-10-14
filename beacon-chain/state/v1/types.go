@@ -24,6 +24,7 @@ func init() {
 
 	// Initialize the composite arrays.
 	fieldMap[types.Eth1DataVotes] = types.CompositeArray
+	fieldMap[types.BlockVoting] = types.CompositeArray
 	fieldMap[types.Validators] = types.CompositeArray
 	fieldMap[types.PreviousEpochAttestations] = types.CompositeArray
 	fieldMap[types.CurrentEpochAttestations] = types.CompositeArray
@@ -75,4 +76,5 @@ const (
 	previousJustifiedCheckpoint = types.PreviousJustifiedCheckpoint
 	currentJustifiedCheckpoint  = types.CurrentJustifiedCheckpoint
 	finalizedCheckpoint         = types.FinalizedCheckpoint
+	blockVoting                 = types.BlockVoting
 )

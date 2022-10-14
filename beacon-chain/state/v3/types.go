@@ -21,6 +21,7 @@ func init() {
 
 	// Initialize the composite arrays.
 	fieldMap[types.Eth1DataVotes] = types.CompositeArray
+	fieldMap[types.BlockVoting] = types.CompositeArray
 	fieldMap[types.Validators] = types.CompositeArray
 	fieldMap[types.Balances] = types.CompressedArray
 }
@@ -52,6 +53,7 @@ const (
 	currentSyncCommittee           = types.CurrentSyncCommittee
 	nextSyncCommittee              = types.NextSyncCommittee
 	latestExecutionPayloadHeader   = types.LatestExecutionPayloadHeader
+	blockVoting                    = types.BlockVoting
 )
 
 // fieldMap keeps track of each field

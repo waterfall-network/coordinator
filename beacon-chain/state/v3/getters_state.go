@@ -34,6 +34,7 @@ func (b *BeaconState) CloneInnerState() interface{} {
 		HistoricalRoots:              b.historicalRoots(),
 		Eth1Data:                     b.eth1Data(),
 		Eth1DataVotes:                b.eth1DataVotes(),
+		BlockVoting:                  b.blockVoting(),
 		Eth1DepositIndex:             b.eth1DepositIndex(),
 		Validators:                   b.validators(),
 		Balances:                     b.balances(),

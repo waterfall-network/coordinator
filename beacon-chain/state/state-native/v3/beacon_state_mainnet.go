@@ -29,6 +29,7 @@ type BeaconState struct {
 	eth1Data                     *ethpb.Eth1Data               `ssz-gen:"true"`
 	eth1DataVotes                []*ethpb.Eth1Data             `ssz-gen:"true" ssz-max:"2048"`
 	eth1DepositIndex             uint64                        `ssz-gen:"true"`
+	blockVoting                  []*ethpb.BlockVoting          `ssz-gen:"true" ssz-max:"32768"`
 	validators                   []*ethpb.Validator            `ssz-gen:"true" ssz-max:"1099511627776"`
 	balances                     []uint64                      `ssz-gen:"true" ssz-max:"1099511627776"`
 	randaoMixes                  *customtypes.RandaoMixes      `ssz-gen:"true" ssz-size:"65536,32"`
@@ -52,4 +53,9 @@ type BeaconState struct {
 	valMapHandler         *stateutil.ValidatorMapHandler
 	merkleLayers          [][][]byte
 	sharedFieldReferences map[types.FieldIndex]*stateutil.Reference
+}
+
+func (b *BeaconState) AppendBlockVoting(val *ethpb.Attestation) error {
+	//TODO implement me
+	panic("implement me")
 }

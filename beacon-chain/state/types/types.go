@@ -48,6 +48,8 @@ func (f FieldIndex) String(stateVersion int) string {
 		return "eth1Data"
 	case Eth1DataVotes:
 		return "eth1DataVotes"
+	case BlockVoting:
+		return "blockVoting"
 	case Eth1DepositIndex:
 		return "eth1DepositIndex"
 	case Validators:
@@ -128,6 +130,7 @@ const (
 	PreviousJustifiedCheckpoint
 	CurrentJustifiedCheckpoint
 	FinalizedCheckpoint
+	BlockVoting
 	// State Fields Added in Altair.
 	InactivityScores
 	CurrentSyncCommittee

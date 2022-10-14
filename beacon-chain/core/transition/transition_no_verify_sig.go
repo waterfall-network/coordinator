@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/core/altair"
 	b "github.com/waterfall-foundation/coordinator/beacon-chain/core/blocks"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
@@ -310,6 +311,18 @@ func ProcessBlockForStateRoot(
 	if err != nil {
 		tracing.AnnotateError(span, err)
 		return nil, errors.Wrap(err, "could not process eth1 data")
+	}
+
+	state, err = b.ProcessBlockVoting(ctx, state, signed.Block().Body().Attestations())
+
+	log.WithError(err).WithFields(logrus.Fields{
+		"block.slot":        signed.Block().Slot(),
+		"state.BlockVoting": state.BlockVoting(),
+	}).Info("Block voting processed")
+
+	if err != nil {
+		tracing.AnnotateError(span, err)
+		return nil, errors.Wrap(err, "could not process block voting data")
 	}
 
 	state, err = ProcessOperationsNoVerifyAttsSigs(ctx, state, signed)

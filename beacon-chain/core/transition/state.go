@@ -141,7 +141,7 @@ func OptimizedGenesisBeaconState(genesisTime uint64, preState state.BeaconState,
 			Epoch: 0,
 			Root:  params.BeaconConfig().ZeroHash[:],
 		},
-		JustificationBits: []byte{0, 0, 0, 0},
+		JustificationBits: preState.JustificationBits(),
 		FinalizedCheckpoint: &ethpb.Checkpoint{
 			Epoch: 0,
 			Root:  params.BeaconConfig().ZeroHash[:],
@@ -166,6 +166,7 @@ func OptimizedGenesisBeaconState(genesisTime uint64, preState state.BeaconState,
 			Finalization: eth1Data.GetFinalization(),
 		},
 		Eth1DataVotes:    []*ethpb.Eth1Data{},
+		BlockVoting:      []*ethpb.BlockVoting{},
 		Eth1DepositIndex: 0,
 	}
 
@@ -216,6 +217,7 @@ func EmptyGenesisState() (state.BeaconState, error) {
 		// Eth1 data.
 		Eth1Data:         &ethpb.Eth1Data{},
 		Eth1DataVotes:    []*ethpb.Eth1Data{},
+		BlockVoting:      []*ethpb.BlockVoting{},
 		Eth1DepositIndex: 0,
 	}
 	return v1.InitializeFromProto(state)

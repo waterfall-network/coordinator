@@ -159,6 +159,14 @@ func ComputeFieldRootsWithHasherPhase0(ctx context.Context, state *ethpb.BeaconS
 		return nil, errors.Wrap(err, "could not compute finalized checkpoint merkleization")
 	}
 	fieldRoots[20] = finalRoot[:]
+
+	// BlockVoting slice root.
+	blockVotingHashTreeRoot, err := blockVotingRoot(state.BlockVoting)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not compute blockVoting merkleization")
+	}
+	fieldRoots[21] = blockVotingHashTreeRoot[:]
+
 	return fieldRoots, nil
 }
 
@@ -328,6 +336,13 @@ func ComputeFieldRootsWithHasherAltair(ctx context.Context, state *ethpb.BeaconS
 		return nil, errors.Wrap(err, "could not compute sync committee merkleization")
 	}
 	fieldRoots[23] = nextSyncCommitteeRoot[:]
+
+	// BlockVoting slice root.
+	blockVotingHashTreeRoot, err := blockVotingRoot(state.BlockVoting)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not compute blockVoting merkleization")
+	}
+	fieldRoots[24] = blockVotingHashTreeRoot[:]
 
 	return fieldRoots, nil
 }
@@ -505,6 +520,13 @@ func ComputeFieldRootsWithHasherBellatrix(ctx context.Context, state *ethpb.Beac
 		return nil, err
 	}
 	fieldRoots[24] = executionPayloadRoot[:]
+
+	// BlockVoting slice root.
+	blockVotingHashTreeRoot, err := blockVotingRoot(state.BlockVoting)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not compute blockVoting merkleization")
+	}
+	fieldRoots[25] = blockVotingHashTreeRoot[:]
 
 	return fieldRoots, nil
 }
