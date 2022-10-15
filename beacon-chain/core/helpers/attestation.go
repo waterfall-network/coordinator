@@ -13,6 +13,7 @@ import (
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	prysmTime "github.com/waterfall-foundation/coordinator/time"
 	"github.com/waterfall-foundation/coordinator/time/slots"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 )
 
 // ValidateNilAttestation checks if any composite field of input attestation is nil.
@@ -199,4 +200,29 @@ func VerifyCheckpointEpoch(c *ethpb.Checkpoint, genesis time.Time) bool {
 	}
 
 	return true
+}
+
+// BlockVotingsRootsHashArray returns HashArray of roots of array of BlockVotings.
+func PrintBlockVotings(blockVoting []*ethpb.BlockVoting) string {
+	str := "["
+	for _, bv := range blockVoting {
+		str += "{"
+		str += fmt.Sprintf("root: %#x,", bv.Root)
+		str += fmt.Sprintf("candidates: %v,", gwatCommon.HashArrayFromBytes(bv.GetCandidates()))
+		str += fmt.Sprintf("totalAttesters: %d,", bv.GetTotalAttesters())
+		str += fmt.Sprintf("attestations: [")
+		for _, att := range bv.Attestations {
+			str += "{"
+			str += fmt.Sprintf("aggrBitLen: %d,", att.GetAggregationBits().Count())
+			str += fmt.Sprintf("aggrBitCount: %d,", att.GetAggregationBits().Count())
+			str += fmt.Sprintf("slot: %d,", att.Data.GetSlot())
+			str += fmt.Sprintf("committeeIndex: %d,", att.Data.GetCommitteeIndex())
+			str += fmt.Sprintf("beaconBlockRoot: %#x,", att.Data.GetBeaconBlockRoot())
+			str += "},"
+		}
+		str += fmt.Sprintf("]")
+		str += "},"
+	}
+	str += "]"
+	return str
 }
