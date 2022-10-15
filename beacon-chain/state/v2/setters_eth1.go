@@ -4,6 +4,7 @@ import (
 	"bytes"
 
 	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stateutil"
+	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 )
 
@@ -171,7 +172,7 @@ func (b *BeaconState) AppendBlockVotingAtt(val *ethpb.Attestation) error {
 		newItem := &ethpb.BlockVoting{
 			Root:           addKey,
 			Attestations:   []*ethpb.Attestation{val},
-			TotalAttesters: val.GetAggregationBits().Len(),
+			TotalAttesters: 0,
 			Candidates:     nil,
 		}
 		votes = append(votes, newItem)
@@ -212,6 +213,10 @@ func (b *BeaconState) RemoveBlockVoting(roots [][]byte) error {
 	b.state.BlockVoting = upVotes
 	b.markFieldAsDirty(blockVoting)
 	dirtyIxs := make([]uint64, len(b.state.BlockVoting))
+	err := b.resetFieldTrie(blockVoting, b.state.BlockVoting, fieldparams.BlockVotingLength)
+	if err != nil {
+		return err
+	}
 	for i := 0; i < len(b.state.BlockVoting); i++ {
 		dirtyIxs[i] = uint64(i)
 	}
