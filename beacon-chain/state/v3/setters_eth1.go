@@ -4,7 +4,6 @@ import (
 	"bytes"
 
 	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stateutil"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 )
 
@@ -169,14 +168,7 @@ func (b *BeaconState) AppendBlockVotingAtt(val *ethpb.Attestation) error {
 		}
 	}
 	if addItem {
-		newItem := &ethpb.BlockVoting{
-			Root:           addKey,
-			Attestations:   []*ethpb.Attestation{val},
-			TotalAttesters: 0,
-			Candidates:     nil,
-		}
-		votes = append(votes, newItem)
-		dirtyIxs = append(dirtyIxs, uint64(len(votes)-1))
+		return ErrBlockVotingNotFound
 	}
 	b.state.BlockVoting = votes
 	b.markFieldAsDirty(blockVoting)
@@ -193,6 +185,9 @@ func (b *BeaconState) RemoveBlockVoting(roots [][]byte) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
+	if len(roots) == 0 {
+		return nil
+	}
 	votes := b.state.BlockVoting
 	if b.sharedFieldReferences[blockVoting].Refs() > 1 {
 		// Copy elements in underlying array by reference.
@@ -210,16 +205,36 @@ func (b *BeaconState) RemoveBlockVoting(roots [][]byte) error {
 		}
 	}
 
-	b.state.BlockVoting = upVotes
-	b.markFieldAsDirty(blockVoting)
-	dirtyIxs := make([]uint64, len(b.state.BlockVoting))
-	err := b.resetFieldTrie(blockVoting, b.state.BlockVoting, fieldparams.BlockVotingLength)
-	if err != nil {
-		return err
+	//if votes updated
+	if len(upVotes) != len(votes) {
+		b.state.BlockVoting = upVotes
+		b.markFieldAsDirty(blockVoting)
+		b.rebuildTrie[blockVoting] = true
 	}
-	for i := 0; i < len(b.state.BlockVoting); i++ {
-		dirtyIxs[i] = uint64(i)
-	}
-	b.addDirtyIndices(blockVoting, dirtyIxs)
 	return nil
+}
+
+// IsBlockVotingExists checks existing of BlockVoting item by root
+// in the beacon state.
+func (b *BeaconState) IsBlockVotingExists(root []byte) bool {
+	if !b.hasInnerState() {
+		return false
+	}
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
+	votes := b.state.BlockVoting
+	if b.sharedFieldReferences[blockVoting].Refs() > 1 {
+		// Copy elements in underlying array by reference.
+		votes = make([]*ethpb.BlockVoting, len(b.state.BlockVoting))
+		copy(votes, b.state.BlockVoting)
+		b.sharedFieldReferences[blockVoting].MinusRef()
+		b.sharedFieldReferences[blockVoting] = stateutil.NewRef(1)
+	}
+	for _, itm := range votes {
+		if !bytes.Equal(itm.Root, root) {
+			return true
+		}
+	}
+	return false
 }

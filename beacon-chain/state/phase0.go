@@ -173,6 +173,7 @@ type WriteOnlyEth1Data interface {
 	AddBlockVoting(root []byte, totalAttrs uint64, candidates []byte) error
 	AppendBlockVotingAtt(val *ethpb.Attestation) error
 	RemoveBlockVoting(roots [][]byte) error
+	IsBlockVotingExists(root []byte) bool
 }
 
 // WriteOnlyValidators defines a struct which only has write access to validators methods.

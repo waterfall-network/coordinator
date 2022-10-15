@@ -313,7 +313,7 @@ func ProcessBlockForStateRoot(
 		return nil, errors.Wrap(err, "could not process eth1 data")
 	}
 
-	state, err = b.ProcessBlockVoting(ctx, state, signed.Block().Body().Attestations())
+	state, err = b.ProcessBlockVoting(ctx, state, signed)
 
 	log.WithError(err).WithFields(logrus.Fields{
 		"block.slot":        signed.Block().Slot(),

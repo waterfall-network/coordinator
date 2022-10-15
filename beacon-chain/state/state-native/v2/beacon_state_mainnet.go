@@ -68,3 +68,8 @@ func (b *BeaconState) AppendBlockVotingAtt(val *ethpb.Attestation) error {
 	//TODO implement me
 	panic("implement me")
 }
+
+func (b *BeaconState) IsBlockVotingExists(root []byte) bool {
+	//TODO implement me
+	panic("implement me")
+}
