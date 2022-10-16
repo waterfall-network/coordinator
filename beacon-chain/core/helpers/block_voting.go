@@ -33,8 +33,9 @@ func BlockVotingsCalcFinalization(ctx context.Context, state state.BeaconState, 
 		candidates := gwatCommon.HashArrayFromBytes(bv.Candidates)
 		if !candidates.IsUniq() {
 			log.WithFields(log.Fields{
-				"root":       fmt.Sprintf("%#x", bv.GetRoot()),
-				"candidates": candidates,
+				"root":         fmt.Sprintf("%#x", bv.GetRoot()),
+				"candidates":   candidates,
+				"lastFinSpine": lastFinSpine.Hex(),
 			}).Warn("skip: bad candidates (not uniq)")
 			badVotes = append(badVotes, bv)
 			continue
@@ -68,8 +69,9 @@ func BlockVotingsCalcFinalization(ctx context.Context, state state.BeaconState, 
 		// if all current candidates handled
 		if len(candidates) == 0 && fullLen > len(candidates) {
 			log.WithFields(log.Fields{
-				"root":       fmt.Sprintf("%#x", bv.GetRoot()),
-				"candidates": candidates,
+				"root":         fmt.Sprintf("%#x", bv.GetRoot()),
+				"candidates":   candidates,
+				"lastFinSpine": lastFinSpine.Hex(),
 			}).Warn("skip: all candidates is finalized")
 			badVotes = append(badVotes, bv)
 			continue

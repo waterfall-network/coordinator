@@ -272,6 +272,8 @@ func ProcessBlockForStateRoot(
 	if err := helpers.BeaconBlockIsNil(signed); err != nil {
 		return nil, err
 	}
+	finalization := gwatCommon.HashArrayFromBytes(state.Eth1Data().Finalization)
+	lastFinSpine := finalization[len(finalization)-1]
 
 	blk := signed.Block()
 	body := blk.Body()
@@ -312,7 +314,7 @@ func ProcessBlockForStateRoot(
 		return nil, errors.Wrap(err, "could not process eth1 data")
 	}
 
-	state, err = b.ProcessBlockVoting(ctx, state, signed)
+	state, err = b.ProcessBlockVoting(ctx, state, signed, lastFinSpine)
 	if err != nil {
 		tracing.AnnotateError(span, err)
 		return nil, errors.Wrap(err, "could not process block voting data")
