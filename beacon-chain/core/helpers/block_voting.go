@@ -1,44 +1,161 @@
 package helpers
 
 import (
+	"context"
 	"fmt"
-	"math"
-
+	types "github.com/prysmaticlabs/eth2-types"
+	log "github.com/sirupsen/logrus"
+	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
 	"github.com/waterfall-foundation/coordinator/config/params"
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	gwatCommon "github.com/waterfall-foundation/gwat/common"
+	"math"
+	"sort"
 )
 
-// GetBlockVotingResults retrieves from BlockVoting supporting results.
-func GetBlockVotingResults(blockVoting []*ethpb.BlockVoting) (supported, unsupported []*ethpb.BlockVoting, err error) {
-	for _, bv := range blockVoting {
-		minSupport, err := BlockVotingMinSupport(bv)
-		if err != nil {
-			return supported, unsupported, err
+type mapVoting map[gwatCommon.Hash]int
+type mapPriority map[int]gwatCommon.HashArray
+type mapCandidates map[gwatCommon.Hash]gwatCommon.HashArray
+
+// BlockVotingsCalcFinalization calculates finalization sequence by BlockVotings.
+func BlockVotingsCalcFinalization(ctx context.Context, state state.BeaconState, blockVotings []*ethpb.BlockVoting, lastFinSpine gwatCommon.Hash) (gwatCommon.HashArray, error) {
+	var (
+		supportedVotes  = []*ethpb.BlockVoting{}
+		candidatesParts = [][]gwatCommon.HashArray{}
+		tabPriority     = mapPriority{}
+		tabVoting       = mapVoting{}
+		tabCandidates   = mapCandidates{}
+		slotsToConfirm  = 3
+		badVotes        = []*ethpb.BlockVoting{}
+	)
+	for _, bv := range blockVotings {
+		// candidates must be uniq
+		candidates := gwatCommon.HashArrayFromBytes(bv.Candidates)
+		if !candidates.IsUniq() {
+			log.WithFields(log.Fields{
+				"root":       fmt.Sprintf("%#x", bv.GetRoot()),
+				"candidates": candidates,
+			}).Warn("skip: bad candidates (not uniq)")
+			badVotes = append(badVotes, bv)
+			continue
 		}
-		if BlockVotingCountVotes(bv) >= uint64(minSupport) {
-			supported = append(supported, bv)
-		} else {
-			unsupported = append(unsupported, bv)
+
+		// handle data for each attestations' slot
+		mapSlotAtt := map[types.Slot][]*ethpb.Attestation{}
+		for _, att := range bv.GetAttestations() {
+			mapSlotAtt[att.GetData().GetSlot()] = append(mapSlotAtt[att.GetData().GetSlot()], att)
+		}
+		for slot, atts := range mapSlotAtt {
+			minSupport, err := BlockVotingMinSupport(ctx, state, slot)
+			if err != nil {
+				return nil, err
+			}
+			// if provided enough support for slot adds data as separated item
+			if CountAttestationsVotes(atts) >= uint64(minSupport) {
+				supportedVotes = append(supportedVotes, ethpb.CopyBlockVoting(bv))
+			}
 		}
 	}
-	return supported, unsupported, nil
+
+	// handle supported votes
+	for _, bv := range supportedVotes {
+		candidates := gwatCommon.HashArrayFromBytes(bv.Candidates)
+		//exclude finalized spines
+		fullLen := len(candidates)
+		if i := candidates.IndexOf(lastFinSpine); i >= 0 {
+			candidates = candidates[i+1:]
+		}
+		// if all current candidates handled
+		if len(candidates) == 0 && fullLen > len(candidates) {
+			log.WithFields(log.Fields{
+				"root":       fmt.Sprintf("%#x", bv.GetRoot()),
+				"candidates": candidates,
+			}).Warn("skip: all candidates is finalized")
+			badVotes = append(badVotes, bv)
+			continue
+		}
+
+		reductedParts := []gwatCommon.HashArray{}
+		// reduction of sequence up to single item
+		for i := len(candidates) - 1; i > 0; i-- {
+			reduction := candidates[:i]
+			reductedParts = append(reductedParts, reduction)
+		}
+		candidatesParts = append(candidatesParts, reductedParts)
+	}
+
+	//calculate voting params
+	for i, candidatesList := range candidatesParts {
+		var restList []gwatCommon.HashArray
+		restParts := candidatesParts[i+1:]
+		for _, rp := range restParts {
+			restList = append(restList, rp...)
+		}
+		for _, candidates := range candidatesList {
+			for _, rc := range restList {
+				intersect := candidates.SequenceIntersection(rc)
+				key := intersect.Key()
+				tabCandidates[key] = intersect
+				tabPriority[len(intersect)] = append(tabPriority[len(intersect)], key).Uniq()
+				tabVoting[key]++
+			}
+		}
+	}
+
+	//sort by priority
+	priorities := []int{}
+	for p := range tabPriority {
+		priorities = append(priorities, p)
+	}
+	sort.Sort(sort.Reverse(sort.IntSlice(priorities)))
+
+	// find voting result
+	resKey := gwatCommon.Hash{}
+	for _, p := range priorities {
+		// select by max number of vote which satisfies the condition
+		// of min required number of votes
+		maxVotes := 0
+		for _, key := range tabPriority[p] {
+			votes := tabVoting[key]
+			if votes >= slotsToConfirm && votes > maxVotes {
+				resKey = key
+			}
+		}
+		if resKey != (gwatCommon.Hash{}) {
+			break
+		}
+	}
+
+	log.WithFields(log.Fields{
+		"lastFinSpine": lastFinSpine.Hex(),
+		"finalization": tabCandidates[resKey],
+	}).Info("Calculation of finalization sequence")
+
+	if resKey == (gwatCommon.Hash{}) {
+		return gwatCommon.HashArray{}, nil
+	}
+	return tabCandidates[resKey], nil
+
 }
 
 // BlockVotingMinSupport calc minimal required number of votes for BlockVoting consensus
-func BlockVotingMinSupport(blockVoting *ethpb.BlockVoting) (int, error) {
-	if blockVoting.GetTotalAttesters() == 0 {
-		return 0, fmt.Errorf("BlockVoting struct is not properly initialized properly (root=%#x)", blockVoting.Root)
-	}
+func BlockVotingMinSupport(ctx context.Context, state state.BeaconState, slot types.Slot) (int, error) {
 	minSupport := params.BeaconConfig().BlockVotingMinSupportPrc
-	slotValidators := blockVoting.TotalAttesters
-	return int(math.Ceil((float64(slotValidators) / 100) * float64(minSupport))), nil
+	committees, err := CalcSlotCommitteesIndexes(ctx, state, slot)
+	if err != nil {
+		return 0, err
+	}
+	slotAtts := 0
+	for _, cmt := range committees {
+		slotAtts += len(cmt)
+	}
+	return int(math.Ceil((float64(slotAtts) / 100) * float64(minSupport))), nil
 }
 
 // BlockVotingCountVotes counts votes of BlockVoting
-func BlockVotingCountVotes(blockVoting *ethpb.BlockVoting) uint64 {
+func CountAttestationsVotes(attestations []*ethpb.Attestation) uint64 {
 	count := uint64(0)
-	for _, att := range blockVoting.Attestations {
+	for _, att := range attestations {
 		if IsAggregated(att) {
 			count += att.GetAggregationBits().Count()
 		} else {
@@ -46,15 +163,6 @@ func BlockVotingCountVotes(blockVoting *ethpb.BlockVoting) uint64 {
 		}
 	}
 	return count
-}
-
-// BlockVotingsRootsHashArray returns HashArray of roots of array of BlockVotings.
-func BlockVotingsRootsHashArray(blockVoting []*ethpb.BlockVoting) gwatCommon.HashArray {
-	roots := make(gwatCommon.HashArray, len(blockVoting))
-	for i, bv := range blockVoting {
-		roots[i] = gwatCommon.BytesToHash(bv.GetRoot())
-	}
-	return roots
 }
 
 // PrintBlockVotingArr returns formatted string of BlockVoting array.
