@@ -335,6 +335,12 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		return errors.Wrap(err, "could not save head")
 	}
 
+	log.WithError(err).WithFields(logrus.Fields{
+		"block.slot": signed.Block().Slot(),
+		//"postBlockVoting": helpers.PrintBlockVotingArr(postState.BlockVoting()),
+		"headState.Finalization": gwatCommon.HashArrayFromBytes(s.head.state.Eth1Data().Finalization),
+	}).Info("==== saveHead ====")
+
 	log.WithFields(logrus.Fields{
 		"condition":                s.CurrentSlot() == signed.Block().Slot() && !s.isSync(s.ctx),
 		"isSync":                   s.isSync(s.ctx),
