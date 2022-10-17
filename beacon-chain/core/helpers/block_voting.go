@@ -3,13 +3,14 @@ package helpers
 import (
 	"context"
 	"fmt"
+	"github.com/waterfall-foundation/coordinator/config/params"
+	"math"
+
 	types "github.com/prysmaticlabs/eth2-types"
 	log "github.com/sirupsen/logrus"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/config/params"
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	gwatCommon "github.com/waterfall-foundation/gwat/common"
-	"math"
 	"sort"
 )
 
@@ -172,7 +173,7 @@ func PrintBlockVotingArr(blockVotings []*ethpb.BlockVoting) string {
 	str := "["
 	for i, bv := range blockVotings {
 		str += PrintBlockVoting(bv)
-		if i < len(blockVotings)-2 {
+		if i < len(blockVotings)-1 {
 			str += ","
 		}
 	}
@@ -186,7 +187,7 @@ func PrintBlockVoting(blockVoting *ethpb.BlockVoting) string {
 	cands := gwatCommon.HashArrayFromBytes(blockVoting.GetCandidates())
 	for i, c := range cands {
 		candStr += fmt.Sprintf("\"%#x\"", c)
-		if i < len(cands)-2 {
+		if i < len(cands)-1 {
 			candStr += ","
 		}
 	}
@@ -205,7 +206,7 @@ func PrintBlockVoting(blockVoting *ethpb.BlockVoting) string {
 		str += fmt.Sprintf("committeeIndex: %d,", att.Data.GetCommitteeIndex())
 		str += fmt.Sprintf("beaconBlockRoot: \"%#x\",", att.Data.GetBeaconBlockRoot())
 		str += "}"
-		if i < len(blockVoting.Attestations)-2 {
+		if i < len(blockVoting.Attestations)-1 {
 			str += ","
 		}
 	}

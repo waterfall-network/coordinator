@@ -110,6 +110,13 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	//// todo test no-belatrix
 
 	postState, err := transition.ExecuteStateTransition(ctx, preState, signed)
+
+	log.WithError(err).WithFields(logrus.Fields{
+		"block.slot": signed.Block().Slot(),
+		//"postBlockVoting": helpers.PrintBlockVotingArr(postState.BlockVoting()),
+		"postBlockVoting": len(postState.BlockVoting()),
+	}).Info("State transition executed")
+
 	if err != nil {
 		return err
 	}
@@ -134,20 +141,27 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	//}
 	//// todo test no-belatrix
 
-	if s.CurrentSlot() == signed.Block().Slot() && !s.isSync(s.ctx) {
-		isValidCandidates, err := s.ValidateBlockCandidates(signed.Block())
-		if err != nil {
-			log.WithError(err).WithField("slotCandidates", isValidCandidates).Warn("on Block: could not verify new new block candidates")
-			//if err.Error() == "got an unexpected error: synchronization" {
-			//	log.Warn("******* Start head sync procedure (onBlock) ******")
-			//	go s.runHeadSync(s.ctx)
-			//}
-		} else {
-			if !isValidCandidates {
-				return errBadSpineCandidates
-			}
-		}
-	}
+	//TODO RM
+	//if s.CurrentSlot() == signed.Block().Slot() && !s.isSync(s.ctx) {
+	//	isValidCandidates, err := s.ValidateBlockCandidates(signed.Block())
+	//
+	//	log.WithError(err).WithFields(logrus.Fields{
+	//		"block.slot":        signed.Block().Slot(),
+	//		"isValidCandidates": isValidCandidates,
+	//	}).Info("<<<< ValidateBlockCandidates >>>>> 222222")
+	//
+	//	if err != nil {
+	//		log.WithError(err).WithField("slotCandidates", isValidCandidates).Warn("on Block: could not verify new new block candidates")
+	//		//if err.Error() == "got an unexpected error: synchronization" {
+	//		//	log.Warn("******* Start head sync procedure (onBlock) ******")
+	//		//	go s.runHeadSync(s.ctx)
+	//		//}
+	//	} else {
+	//		if !isValidCandidates {
+	//			return errBadSpineCandidates
+	//		}
+	//	}
+	//}
 
 	if err := s.insertBlockAndAttestationsToForkChoiceStore(ctx, signed.Block(), blockRoot, postState); err != nil {
 		return errors.Wrapf(err, "could not insert block %d to fork choice store", signed.Block().Slot())
@@ -244,9 +258,13 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	if err != nil {
 		return err
 	}
-	if _, err := s.notifyForkchoiceUpdate(ctx, headState, headBlock.Block(), headRoot, bytesutil.ToBytes32(finalized.Root)); err != nil {
-		return err
-	}
+
+	//// todo test no-belatrix
+	//if _, err := s.notifyForkchoiceUpdate(ctx, headState, headBlock.Block(), headRoot, bytesutil.ToBytes32(finalized.Root)); err != nil {
+	//	return err
+	//}
+	//// todo test no-belatrix
+
 	if err := s.saveHead(ctx, headRoot, headBlock, headState); err != nil {
 		return errors.Wrap(err, "could not save head")
 	}
@@ -323,23 +341,6 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	}
 
 	defer reportAttestationInclusion(b)
-
-	log.WithFields(logrus.Fields{
-		"condition":                s.CurrentSlot() == signed.Block().Slot() && !s.isSync(s.ctx),
-		"isSync":                   s.isSync(s.ctx),
-		"CurrentSlot == BlockSlot": s.CurrentSlot() == signed.Block().Slot(),
-		"CurrentSlot":              s.CurrentSlot(),
-		"BlockSlot":                signed.Block().Slot(),
-	}).Error("On block sync status")
-
-	if !s.isSync(s.ctx) {
-		//calculate sequence of finalization spines
-		finSpines, err := s.CalculateFinalizationSpinesByBlockRoot(blockRoot)
-		if err != nil {
-			return errors.Wrap(err, "could not calculate finalization spines")
-		}
-		s.setCacheFinalisation(finSpines)
-	}
 
 	return s.handleEpochBoundary(ctx, postState)
 }

@@ -69,6 +69,7 @@ func BeaconStateAltairToProto(altairState state.BeaconStateAltair) (*ethpbv2.Bea
 	sourceLatestBlockHeader := altairState.LatestBlockHeader()
 	sourceEth1Data := altairState.Eth1Data()
 	sourceEth1DataVotes := altairState.Eth1DataVotes()
+	sourceBlockVoting := altairState.BlockVoting()
 	sourceValidators := altairState.Validators()
 	sourcePrevJustifiedCheckpoint := altairState.PreviousJustifiedCheckpoint()
 	sourceCurrJustifiedCheckpoint := altairState.CurrentJustifiedCheckpoint()
@@ -81,6 +82,35 @@ func BeaconStateAltairToProto(altairState state.BeaconStateAltair) (*ethpbv2.Bea
 			DepositCount: vote.DepositCount,
 			BlockHash:    bytesutil.SafeCopyBytes(vote.BlockHash),
 			Candidates:   bytesutil.SafeCopyBytes(vote.Candidates),
+		}
+	}
+	resultBlockVoting := make([]*ethpbv1.BlockVoting, len(sourceBlockVoting))
+	for i, vote := range sourceBlockVoting {
+		attestations := make([]*ethpbv1.Attestation, len(vote.Attestations))
+		for i, att := range vote.Attestations {
+			attestations[i] = &ethpbv1.Attestation{
+				AggregationBits: att.AggregationBits,
+				Data: &ethpbv1.AttestationData{
+					Slot:            att.GetData().GetSlot(),
+					Index:           att.GetData().GetCommitteeIndex(),
+					BeaconBlockRoot: bytesutil.SafeCopyBytes(att.GetData().BeaconBlockRoot),
+					Source: &ethpbv1.Checkpoint{
+						Epoch: att.GetData().GetSource().GetEpoch(),
+						Root:  bytesutil.SafeCopyBytes(att.GetData().GetSource().GetRoot()),
+					},
+					Target: &ethpbv1.Checkpoint{
+						Epoch: att.GetData().GetTarget().GetEpoch(),
+						Root:  bytesutil.SafeCopyBytes(att.GetData().GetTarget().GetRoot()),
+					},
+				},
+				Signature: bytesutil.SafeCopyBytes(att.Signature),
+			}
+		}
+		resultBlockVoting[i] = &ethpbv1.BlockVoting{
+			Root:           bytesutil.SafeCopyBytes(vote.Root),
+			TotalAttesters: vote.TotalAttesters,
+			Candidates:     bytesutil.SafeCopyBytes(vote.Candidates),
+			Attestations:   attestations,
 		}
 	}
 	resultValidators := make([]*ethpbv1.Validator, len(sourceValidators))
@@ -144,6 +174,7 @@ func BeaconStateAltairToProto(altairState state.BeaconStateAltair) (*ethpbv2.Bea
 			Candidates:   bytesutil.SafeCopyBytes(sourceEth1Data.Candidates),
 		},
 		Eth1DataVotes:              resultEth1DataVotes,
+		BlockVoting:                resultBlockVoting,
 		Eth1DepositIndex:           altairState.Eth1DepositIndex(),
 		Validators:                 resultValidators,
 		Balances:                   altairState.Balances(),
@@ -184,6 +215,7 @@ func BeaconStateBellatrixToProto(st state.BeaconStateBellatrix) (*ethpbv2.Beacon
 	sourceLatestBlockHeader := st.LatestBlockHeader()
 	sourceEth1Data := st.Eth1Data()
 	sourceEth1DataVotes := st.Eth1DataVotes()
+	sourceBlockVoting := st.BlockVoting()
 	sourceValidators := st.Validators()
 	sourcePrevJustifiedCheckpoint := st.PreviousJustifiedCheckpoint()
 	sourceCurrJustifiedCheckpoint := st.CurrentJustifiedCheckpoint()
@@ -196,6 +228,35 @@ func BeaconStateBellatrixToProto(st state.BeaconStateBellatrix) (*ethpbv2.Beacon
 			DepositCount: vote.DepositCount,
 			BlockHash:    bytesutil.SafeCopyBytes(vote.BlockHash),
 			Candidates:   bytesutil.SafeCopyBytes(vote.Candidates),
+		}
+	}
+	resultBlockVoting := make([]*ethpbv1.BlockVoting, len(sourceBlockVoting))
+	for i, vote := range sourceBlockVoting {
+		attestations := make([]*ethpbv1.Attestation, len(vote.Attestations))
+		for i, att := range vote.Attestations {
+			attestations[i] = &ethpbv1.Attestation{
+				AggregationBits: att.AggregationBits,
+				Data: &ethpbv1.AttestationData{
+					Slot:            att.GetData().GetSlot(),
+					Index:           att.GetData().GetCommitteeIndex(),
+					BeaconBlockRoot: bytesutil.SafeCopyBytes(att.GetData().BeaconBlockRoot),
+					Source: &ethpbv1.Checkpoint{
+						Epoch: att.GetData().GetSource().GetEpoch(),
+						Root:  bytesutil.SafeCopyBytes(att.GetData().GetSource().GetRoot()),
+					},
+					Target: &ethpbv1.Checkpoint{
+						Epoch: att.GetData().GetTarget().GetEpoch(),
+						Root:  bytesutil.SafeCopyBytes(att.GetData().GetTarget().GetRoot()),
+					},
+				},
+				Signature: bytesutil.SafeCopyBytes(att.Signature),
+			}
+		}
+		resultBlockVoting[i] = &ethpbv1.BlockVoting{
+			Root:           bytesutil.SafeCopyBytes(vote.Root),
+			TotalAttesters: vote.TotalAttesters,
+			Candidates:     bytesutil.SafeCopyBytes(vote.Candidates),
+			Attestations:   attestations,
 		}
 	}
 	resultValidators := make([]*ethpbv1.Validator, len(sourceValidators))
@@ -263,6 +324,7 @@ func BeaconStateBellatrixToProto(st state.BeaconStateBellatrix) (*ethpbv2.Beacon
 			Candidates:   bytesutil.SafeCopyBytes(sourceEth1Data.Candidates),
 		},
 		Eth1DataVotes:              resultEth1DataVotes,
+		BlockVoting:                resultBlockVoting,
 		Eth1DepositIndex:           st.Eth1DepositIndex(),
 		Validators:                 resultValidators,
 		Balances:                   st.Balances(),

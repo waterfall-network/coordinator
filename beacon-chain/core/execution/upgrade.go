@@ -51,6 +51,7 @@ func UpgradeToBellatrix(ctx context.Context, state state.BeaconState) (state.Bea
 		HistoricalRoots:             state.HistoricalRoots(),
 		Eth1Data:                    state.Eth1Data(),
 		Eth1DataVotes:               state.Eth1DataVotes(),
+		BlockVoting:                 state.BlockVoting(),
 		Eth1DepositIndex:            state.Eth1DepositIndex(),
 		Validators:                  state.Validators(),
 		Balances:                    state.Balances(),

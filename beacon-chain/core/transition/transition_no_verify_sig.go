@@ -16,6 +16,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/monitoring/tracing"
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
 	"github.com/waterfall-foundation/coordinator/runtime/version"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	"go.opencensus.io/trace"
 )
 

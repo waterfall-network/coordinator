@@ -34,14 +34,6 @@ func ProcessEth1DataInBlock(_ context.Context, beaconState state.BeaconState, et
 		if err := beaconState.SetEth1Data(eth1Data); err != nil {
 			return nil, err
 		}
-	} else {
-		//update only spines data
-		updateEth1Data := beaconState.Eth1Data()
-		updateEth1Data.Candidates = eth1Data.Candidates
-		updateEth1Data.Finalization = eth1Data.Finalization
-		if err := beaconState.SetEth1Data(updateEth1Data); err != nil {
-			return nil, err
-		}
 	}
 	return beaconState, nil
 }

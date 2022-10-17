@@ -78,7 +78,8 @@ func emptyGenesisStateBellatrix() (state.BeaconState, error) {
 
 		// Eth1 data.
 		Eth1Data:         &ethpb.Eth1Data{},
-		Eth1DataVotes:    []*ethpb.Eth1Data{},
+		Eth1DataVotes:    make([]*ethpb.Eth1Data, 0),
+		BlockVoting:      make([]*ethpb.BlockVoting, 0),
 		Eth1DepositIndex: 0,
 
 		LatestExecutionPayloadHeader: &ethpb.ExecutionPayloadHeader{},
@@ -178,7 +179,8 @@ func buildGenesisBeaconStateBellatrix(genesisTime uint64, preState state.BeaconS
 
 		// Eth1 data.
 		Eth1Data:         eth1Data,
-		Eth1DataVotes:    []*ethpb.Eth1Data{},
+		Eth1DataVotes:    make([]*ethpb.Eth1Data, 0),
+		BlockVoting:      make([]*ethpb.BlockVoting, 0),
 		Eth1DepositIndex: preState.Eth1DepositIndex(),
 	}
 

@@ -165,7 +165,7 @@ func waitForWebWalletInitialization(
 			}
 			return keyManager, nil
 		case <-ctx.Done():
-			return nil, errors.New("context canceled")
+			return nil, errors.New("context canceled (wait for web wallet)")
 		case <-sub.Err():
 			log.Error("Subscriber closed, exiting goroutine")
 			return nil, nil

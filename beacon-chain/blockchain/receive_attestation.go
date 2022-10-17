@@ -177,6 +177,11 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 					} else {
 						s.setCacheCandidates(candidates)
 					}
+					log.WithError(err).WithFields(logrus.Fields{
+						"slot":         slot,
+						"finalization": gwatCommon.HashArrayFromBytes(headState.Eth1Data().Finalization),
+						"candidates":   s.GetCacheCandidates(),
+					}).Info("gwat dag sync")
 				}
 
 				// Continue when there's no fork choice attestation, there's nothing to process and update head.
