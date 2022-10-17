@@ -52,12 +52,26 @@ func BlockVotingsCalcFinalization(ctx context.Context, state state.BeaconState, 
 			if err != nil {
 				return nil, err
 			}
+			votesCount := CountAttestationsVotes(atts)
+
+			log.WithFields(log.Fields{
+				"slot":       slot,
+				"minSupport": minSupport,
+				"votesCount": votesCount,
+				"root":       fmt.Sprintf("%#x", bv.GetRoot()),
+			}).Warn("VOTING INFO >>>>")
+
 			// if provided enough support for slot adds data as separated item
 			if CountAttestationsVotes(atts) >= uint64(minSupport) {
 				supportedVotes = append(supportedVotes, ethpb.CopyBlockVoting(bv))
 			}
 		}
 	}
+
+	log.WithFields(log.Fields{
+		"total-BlockVoting":     len(blockVotings),
+		"supported-BlockVoting": len(supportedVotes),
+	}).Warn("VOTING INFO >>>>")
 
 	// handle supported votes
 	for _, bv := range supportedVotes {

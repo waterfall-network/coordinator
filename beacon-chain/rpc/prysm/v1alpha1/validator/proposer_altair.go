@@ -3,8 +3,10 @@ package validator
 import (
 	"context"
 	"fmt"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 
 	types "github.com/prysmaticlabs/eth2-types"
+	"github.com/sirupsen/logrus"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/core/transition/interop"
 	"github.com/waterfall-foundation/coordinator/config/params"
 	"github.com/waterfall-foundation/coordinator/crypto/bls"
@@ -19,6 +21,13 @@ func (vs *Server) buildAltairBeaconBlock(ctx context.Context, req *ethpb.BlockRe
 	ctx, span := trace.StartSpan(ctx, "ProposerServer.buildAltairBeaconBlock")
 	defer span.End()
 	blkData, err := vs.buildPhase0BlockData(ctx, req)
+
+	log.WithError(err).WithFields(logrus.Fields{
+		"req.slot":             req.Slot,
+		"blkData.Finalization": gwatCommon.HashArrayFromBytes(blkData.Eth1Data.Finalization),
+		"blkData.Candidates":   gwatCommon.HashArrayFromBytes(blkData.Eth1Data.Candidates),
+	}).Info("#### build-Altair-BeaconBlock ###")
+
 	if err != nil {
 		return nil, fmt.Errorf("could not build block data: %v", err)
 	}
@@ -67,6 +76,11 @@ func (vs *Server) getAltairBeaconBlock(ctx context.Context, req *ethpb.BlockRequ
 		return nil, err
 	}
 	stateRoot, err := vs.computeStateRoot(ctx, wsb)
+
+	log.WithError(err).WithFields(logrus.Fields{
+		"block.slot": wsb.Block().Slot(),
+	}).Info("<<<< getAltairBeaconBlock:computeStateRoot >>>>> 1111111")
+
 	if err != nil {
 		interop.WriteBlockToDisk(wsb, true /*failed*/)
 		return nil, fmt.Errorf("could not compute state root: %v", err)

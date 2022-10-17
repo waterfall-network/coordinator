@@ -26,6 +26,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
 	"github.com/waterfall-foundation/coordinator/runtime/version"
 	"github.com/waterfall-foundation/coordinator/time/slots"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	"go.opencensus.io/trace"
 )
 
@@ -93,12 +94,18 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	ctx, span := trace.StartSpan(ctx, "blockChain.onBlock")
 	defer span.End()
 	if err := helpers.BeaconBlockIsNil(signed); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+		}).Error("onBlock error")
 		return err
 	}
 	b := signed.Block()
 
 	preState, err := s.getBlockPreState(ctx, b)
 	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+		}).Error("onBlock error")
 		return err
 	}
 
@@ -111,15 +118,18 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 
 	postState, err := transition.ExecuteStateTransition(ctx, preState, signed)
 
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+		}).Error("onBlock error")
+		return err
+	}
+
 	log.WithError(err).WithFields(logrus.Fields{
 		"block.slot": signed.Block().Slot(),
 		//"postBlockVoting": helpers.PrintBlockVotingArr(postState.BlockVoting()),
 		"postBlockVoting": len(postState.BlockVoting()),
 	}).Info("State transition executed")
-
-	if err != nil {
-		return err
-	}
 
 	//// todo test no-belatrix
 	//postStateVersion, postStateHeader, err := getStateVersionAndPayload(postState)
@@ -164,6 +174,9 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	//}
 
 	if err := s.insertBlockAndAttestationsToForkChoiceStore(ctx, signed.Block(), blockRoot, postState); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+		}).Error("onBlock error")
 		return errors.Wrapf(err, "could not insert block %d to fork choice store", signed.Block().Slot())
 	}
 
@@ -184,12 +197,29 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		CurrentSlot:     slots.SinceGenesis(s.genesisTime),
 		SecondsIntoSlot: secondsIntoSlot,
 	}); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+		}).Error("onBlock error")
 		return err
 	}
 
 	if err := s.savePostStateInfo(ctx, blockRoot, signed, postState, false /* reg sync */); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+		}).Error("onBlock error")
 		return err
 	}
+
+	log.WithError(err).WithFields(logrus.Fields{
+		"block.slot": signed.Block().Slot(),
+		//"postBlockVoting": helpers.PrintBlockVotingArr(postState.BlockVoting()),
+		"postState.Finalization": gwatCommon.HashArrayFromBytes(postState.Eth1Data().Finalization),
+	}).Info("==== savePostStateInfo ====")
+
+	//TODO валидация кандидатов после
+	//err := s.savePostStateInfo(ctx, blockRoot, signed, postState, false /* reg sync */); err != nil {
+	//~~решить проблему если престета Нет (откинули пр)~~
+
 	// If slasher is configured, forward the attestations in the block via
 	// an event feed for processing.
 	if features.Get().EnableSlasher {
@@ -220,17 +250,26 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	// Update justified check point.
 	justified := s.store.JustifiedCheckpt()
 	if justified == nil {
+		log.WithError(errNilJustifiedInStore).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+		}).Error("onBlock error")
 		return errNilJustifiedInStore
 	}
 	currJustifiedEpoch := justified.Epoch
 	if postState.CurrentJustifiedCheckpoint().Epoch > currJustifiedEpoch {
 		if err := s.updateJustified(ctx, postState); err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"block.slot": signed.Block().Slot(),
+			}).Error("onBlock error")
 			return err
 		}
 	}
 
 	finalized := s.store.FinalizedCheckpt()
 	if finalized == nil {
+		log.WithError(errNilFinalizedInStore).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+		}).Error("onBlock error")
 		return errNilFinalizedInStore
 	}
 	newFinalized := postState.FinalizedCheckpointEpoch() > finalized.Epoch
@@ -244,18 +283,42 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	balances, err := s.justifiedBalances.get(ctx, bytesutil.ToBytes32(justified.Root))
 	if err != nil {
 		msg := fmt.Sprintf("could not read balances for state w/ justified checkpoint %#x", justified.Root)
+		log.WithError(err).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+			"message":    msg,
+		}).Error("onBlock error")
 		return errors.Wrap(err, msg)
 	}
 	headRoot, err := s.updateHead(ctx, balances)
+
+	log.WithError(err).WithFields(logrus.Fields{
+		"block.slot": signed.Block().Slot(),
+		//"postBlockVoting": helpers.PrintBlockVotingArr(postState.BlockVoting()),
+		"headState.Finalization": gwatCommon.HashArrayFromBytes(s.head.state.Eth1Data().Finalization),
+	}).Info("==== updateHead ====")
+
 	if err != nil {
 		log.WithError(err).Warn("Could not update head")
 	}
 	headBlock, err := s.cfg.BeaconDB.Block(ctx, headRoot)
 	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+		}).Error("onBlock error")
 		return err
 	}
 	headState, err := s.cfg.StateGen.StateByRoot(ctx, headRoot)
+
+	log.WithError(err).WithFields(logrus.Fields{
+		"block.slot": signed.Block().Slot(),
+		//"postBlockVoting": helpers.PrintBlockVotingArr(postState.BlockVoting()),
+		"headState.Finalization": gwatCommon.HashArrayFromBytes(headState.Eth1Data().Finalization),
+	}).Info("==== StateByRoot ====")
+
 	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+		}).Error("onBlock error")
 		return err
 	}
 
@@ -266,10 +329,39 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	//// todo test no-belatrix
 
 	if err := s.saveHead(ctx, headRoot, headBlock, headState); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+		}).Error("onBlock error could not save head")
 		return errors.Wrap(err, "could not save head")
 	}
 
+	log.WithFields(logrus.Fields{
+		"condition":                s.CurrentSlot() == signed.Block().Slot() && !s.isSync(s.ctx),
+		"isSync":                   s.isSync(s.ctx),
+		"CurrentSlot == BlockSlot": s.CurrentSlot() == signed.Block().Slot(),
+		"CurrentSlot":              s.CurrentSlot(),
+		"BlockSlot":                signed.Block().Slot(),
+	}).Info("On block sync status")
+
+	//// TODO наверное можно удалить
+	//if !s.isSync(s.ctx) {
+	//	// TODO подумать об отправке финализации в живат тут
+	//	// TOD0 кешировать финализированную цепочку
+	//	//calculate sequence of finalization spines
+	//	finSpines, err := s.CalculateFinalizationSpinesByBlockRoot(blockRoot)
+	//	if err != nil {
+	//		log.WithError(err).WithFields(logrus.Fields{
+	//			"block.slot": signed.Block().Slot(),
+	//		}).Info("<<<< CalculateFinalizationSpinesByBlockRoot >>>>> 99999")
+	//		return errors.Wrap(err, "could not calculate finalization spines")
+	//	}
+	//	s.setCacheFinalisation(finSpines)
+	//}
+
 	if err := s.pruneCanonicalAttsFromPool(ctx, blockRoot, signed); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+		}).Error("onBlock error")
 		return err
 	}
 
@@ -299,6 +391,9 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	// Save justified check point to db.
 	if postState.CurrentJustifiedCheckpoint().Epoch > currJustifiedEpoch {
 		if err := s.cfg.BeaconDB.SaveJustifiedCheckpoint(ctx, postState.CurrentJustifiedCheckpoint()); err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"block.slot": signed.Block().Slot(),
+			}).Error("onBlock error")
 			return err
 		}
 	}
@@ -306,14 +401,23 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	// Update finalized check point.
 	if newFinalized {
 		if err := s.updateFinalized(ctx, postState.FinalizedCheckpoint()); err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"block.slot": signed.Block().Slot(),
+			}).Error("onBlock error")
 			return err
 		}
 		fRoot := bytesutil.ToBytes32(postState.FinalizedCheckpoint().Root)
 		if err := s.cfg.ForkChoiceStore.Prune(ctx, fRoot); err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"block.slot": signed.Block().Slot(),
+			}).Error("onBlock error could not prune proto array fork choice nodes")
 			return errors.Wrap(err, "could not prune proto array fork choice nodes")
 		}
 		isOptimistic, err := s.cfg.ForkChoiceStore.IsOptimistic(fRoot)
 		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"block.slot": signed.Block().Slot(),
+			}).Error("onBlock error could not check if node is optimistically synced")
 			return errors.Wrap(err, "could not check if node is optimistically synced")
 		}
 		go func() {

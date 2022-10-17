@@ -3,9 +3,11 @@ package validator
 import (
 	"context"
 	"fmt"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
+	"github.com/sirupsen/logrus"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/core/blocks"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/core/transition"
@@ -35,6 +37,13 @@ func (vs *Server) getPhase0BeaconBlock(ctx context.Context, req *ethpb.BlockRequ
 	ctx, span := trace.StartSpan(ctx, "ProposerServer.getPhase0BeaconBlock")
 	defer span.End()
 	blkData, err := vs.buildPhase0BlockData(ctx, req)
+
+	log.WithError(err).WithFields(logrus.Fields{
+		"req.slot":             req.Slot,
+		"blkData.Finalization": gwatCommon.HashArrayFromBytes(blkData.Eth1Data.Finalization),
+		"blkData.Candidates":   gwatCommon.HashArrayFromBytes(blkData.Eth1Data.Candidates),
+	}).Info("#### get-Phase0Beacon-Block ###")
+
 	if err != nil {
 		return nil, fmt.Errorf("could not build block data: %v", err)
 	}
@@ -65,6 +74,11 @@ func (vs *Server) getPhase0BeaconBlock(ctx context.Context, req *ethpb.BlockRequ
 		return nil, err
 	}
 	stateRoot, err = vs.computeStateRoot(ctx, wsb)
+
+	log.WithError(err).WithFields(logrus.Fields{
+		"block.slot": wsb.Block().Slot(),
+	}).Info("<<<< getPhase0BeaconBlock:computeStateRoot >>>>> 000000")
+
 	if err != nil {
 		interop.WriteBlockToDisk(wsb, true /*failed*/)
 		return nil, errors.Wrap(err, "could not compute state root")

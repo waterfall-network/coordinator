@@ -3,7 +3,6 @@ package blocks
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/sirupsen/logrus"
 
 	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
@@ -65,8 +64,9 @@ func ProcessBlockVoting(ctx context.Context, beaconState state.BeaconState, sign
 		//"BlockVoting":     helpers.PrintBlockVotingArr(beaconState.BlockVoting()),
 		"BlockVoting": len(beaconState.BlockVoting()),
 		//"cpSlot":          cpSlot,
-		"deprecatedRoots": fmt.Sprintf("%#x", deprecatedRoots),
-		//"staleRoots-len":  len(staleRoots),
+		//"deprecatedRoots": fmt.Sprintf("%#x", deprecatedRoots),
+		"deprecatedRoots":    len(deprecatedRoots),
+		"State.Finalization": gwatCommon.HashArrayFromBytes(beaconState.Eth1Data().Finalization),
 	}).Info("--------- ProcessBlockVoting ---------")
 
 	return beaconState, nil
