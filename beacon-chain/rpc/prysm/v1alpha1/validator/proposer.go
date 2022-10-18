@@ -186,7 +186,7 @@ func (vs *Server) computeStateRoot(ctx context.Context, block block.SignedBeacon
 
 	log.WithField(
 		"beaconStateRoot", fmt.Sprintf("%#x", root),
-	).Info("### PROPOSER: Computed state root")
+	).Info("--------- PROPOSER: Computed state root")
 	//).Info("Computed state root")
 	return root[:], nil
 }
