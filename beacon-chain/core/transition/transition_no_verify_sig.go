@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/core/altair"
 	b "github.com/waterfall-foundation/coordinator/beacon-chain/core/blocks"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
@@ -271,6 +272,9 @@ func ProcessBlockForStateRoot(
 	ctx, span := trace.StartSpan(ctx, "core.state.ProcessBlockForStateRoot")
 	defer span.End()
 	if err := helpers.BeaconBlockIsNil(signed); err != nil {
+		log.WithError(
+			errors.Wrap(err, "BeaconBlockIsNil"),
+		).Error("ProcessBlockForStateRoot:Err")
 		return nil, err
 	}
 	finalization := gwatCommon.HashArrayFromBytes(state.Eth1Data().Finalization)
@@ -280,49 +284,117 @@ func ProcessBlockForStateRoot(
 	body := blk.Body()
 	bodyRoot, err := body.HashTreeRoot()
 	if err != nil {
+		log.WithError(
+			errors.Wrap(err, "could not hash tree root beacon block body"),
+		).Error("ProcessBlockForStateRoot:Err")
 		return nil, errors.Wrap(err, "could not hash tree root beacon block body")
 	}
+
+	// todo tmp log
+	stateRoot, err := state.HashTreeRoot(ctx)
+	if err != nil {
+		log.WithError(
+			errors.Wrap(err, "could not hash tree root state"),
+		).Error("ProcessBlockForStateRoot:Err:000")
+		return nil, errors.Wrap(err, "could not hash tree root state")
+	}
+	blkSSZ, err := blk.MarshalSSZ()
+	if err != nil {
+		log.WithError(
+			errors.Wrap(err, "could not MarshalSSZ"),
+		).Error("ProcessBlockForStateRoot:Err:000")
+		return nil, errors.Wrap(err, "could not MarshalSSZ")
+	}
+	log.WithError(err).WithFields(logrus.Fields{
+		"bSlot":     signed.Block().Slot(),
+		"bodyRoot":  fmt.Sprintf("%#x", bodyRoot),
+		"stateRoot": fmt.Sprintf("%#x", stateRoot),
+		//"ctx":       fmt.Sprintf("%v", ctx),
+	}).Info("--------- ProcessBlockForStateRoot:General:000")
+
+	log.WithError(err).WithFields(logrus.Fields{
+		"slot":         state.Slot(),
+		"Validators":   len(state.Validators()),
+		"BlockRoots":   len(state.BlockRoots()),
+		"BlockVoting":  len(state.BlockVoting()),
+		"Finalization": gwatCommon.HashArrayFromBytes(state.Eth1Data().Finalization),
+		"Candidates":   gwatCommon.HashArrayFromBytes(state.Eth1Data().Candidates),
+		"DepositRoot":  gwatCommon.HashArrayFromBytes(state.Eth1Data().DepositRoot),
+		"JBits":        fmt.Sprintf("%#x", state.JustificationBits().Bytes()),
+	}).Info("--------- ProcessBlockForStateRoot:state:111")
+
+	log.WithError(err).WithFields(logrus.Fields{
+		"slot":         blk.Slot(),
+		"ParentRoot":   fmt.Sprintf("%#x", blk.ParentRoot()),
+		"StateRoot":    fmt.Sprintf("%#x", blk.StateRoot()),
+		"Eth1BlHash":   fmt.Sprintf("%#x", blk.Body().Eth1Data().GetBlockHash()),
+		"PropIx":       blk.ProposerIndex(),
+		"Attestations": len(blk.Body().Attestations()),
+		"Finalization": gwatCommon.HashArrayFromBytes(blk.Body().Eth1Data().Finalization),
+		"Candidates":   gwatCommon.HashArrayFromBytes(blk.Body().Eth1Data().Candidates),
+		"DepositRoot":  fmt.Sprintf("%#x", blk.Body().Eth1Data().DepositRoot),
+		"blkSSZ":       fmt.Sprintf("%x", blkSSZ),
+		"Randao":       fmt.Sprintf("%x", signed.Block().Body().RandaoReveal()),
+	}).Info("--------- ProcessBlockForStateRoot:Block:222")
+
 	state, err = b.ProcessBlockHeaderNoVerify(ctx, state, blk.Slot(), blk.ProposerIndex(), blk.ParentRoot(), bodyRoot[:])
 	if err != nil {
+		log.WithError(
+			errors.Wrap(err, "could not process block header"),
+		).Error("ProcessBlockForStateRoot:Err")
 		tracing.AnnotateError(span, err)
 		return nil, errors.Wrap(err, "could not process block header")
 	}
 
-	enabled, err := b.IsExecutionEnabled(state, blk.Body())
-	if err != nil {
-		return nil, errors.Wrap(err, "could not check if execution is enabled")
-	}
-	if enabled {
-		payload, err := blk.Body().ExecutionPayload()
-		if err != nil {
-			return nil, err
-		}
-		state, err = b.ProcessPayload(state, payload)
-		if err != nil {
-			return nil, errors.Wrap(err, "could not process execution payload")
-		}
-	}
+	//// todo test no-belatrix
+	//enabled, err := b.IsExecutionEnabled(state, blk.Body())
+	//if err != nil {
+	//	return nil, errors.Wrap(err, "could not check if execution is enabled")
+	//}
+	//if enabled {
+	//	payload, err := blk.Body().ExecutionPayload()
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	state, err = b.ProcessPayload(state, payload)
+	//	if err != nil {
+	//		return nil, errors.Wrap(err, "could not process execution payload")
+	//	}
+	//}
+	//// todo test no-belatrix
 
 	state, err = b.ProcessRandaoNoVerify(state, signed.Block().Body().RandaoReveal())
 	if err != nil {
+		log.WithError(
+			errors.Wrap(err, "could not verify and process randao"),
+		).Error("ProcessBlockForStateRoot:Err")
 		tracing.AnnotateError(span, err)
 		return nil, errors.Wrap(err, "could not verify and process randao")
 	}
 
 	state, err = b.ProcessEth1DataInBlock(ctx, state, signed.Block().Body().Eth1Data())
 	if err != nil {
+		log.WithError(
+			errors.Wrap(err, "could not process eth1 data"),
+		).Error("ProcessBlockForStateRoot:Err")
 		tracing.AnnotateError(span, err)
 		return nil, errors.Wrap(err, "could not process eth1 data")
 	}
 
 	state, err = b.ProcessBlockVoting(ctx, state, signed, lastFinSpine)
 	if err != nil {
+		log.WithError(
+			errors.Wrap(err, "could not process block voting data"),
+		).Error("ProcessBlockForStateRoot:Err")
 		tracing.AnnotateError(span, err)
 		return nil, errors.Wrap(err, "could not process block voting data")
 	}
 
 	state, err = ProcessOperationsNoVerifyAttsSigs(ctx, state, signed)
 	if err != nil {
+		log.WithError(
+			errors.Wrap(err, "could not process block operation"),
+		).Error("ProcessBlockForStateRoot:Err")
 		tracing.AnnotateError(span, err)
 		return nil, errors.Wrap(err, "could not process block operation")
 	}
@@ -333,10 +405,16 @@ func ProcessBlockForStateRoot(
 
 	sa, err := signed.Block().Body().SyncAggregate()
 	if err != nil {
+		log.WithError(
+			errors.Wrap(err, "could not get sync aggregate from block"),
+		).Error("ProcessBlockForStateRoot:Err")
 		return nil, errors.Wrap(err, "could not get sync aggregate from block")
 	}
 	state, err = altair.ProcessSyncAggregate(ctx, state, sa)
 	if err != nil {
+		log.WithError(
+			errors.Wrap(err, "process_sync_aggregate failed"),
+		).Error("ProcessBlockForStateRoot:Err")
 		return nil, errors.Wrap(err, "process_sync_aggregate failed")
 	}
 
