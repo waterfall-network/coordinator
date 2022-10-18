@@ -60,6 +60,11 @@ func (b *BeaconState) SetBlockVoting(val []*ethpb.BlockVoting) error {
 	panic("implement me")
 }
 
+func (b *BeaconState) AppendBlockVoting(val *ethpb.BlockVoting) error {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (b *BeaconState) AddBlockVoting(root []byte, totalAttrs uint64, candidates []byte) error {
 	//TODO implement me
 	panic("implement me")

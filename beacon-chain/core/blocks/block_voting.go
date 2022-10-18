@@ -96,10 +96,10 @@ func ProcessBlockVoting(ctx context.Context, beaconState state.BeaconState, sign
 	//	return nil, err
 	//}
 
-	//log.WithFields(logrus.Fields{
-	//	"BlockVoting":     helpers.PrintBlockVotingArr(blockVoting),
-	//	"deprecatedRoots": fmt.Sprintf("%#x", deprecatedRoots),
-	//}).Info("********** ProcessBlockVoting ********** 3333")
+	log.WithFields(logrus.Fields{
+		"BlockVoting":     len(blockVoting),
+		"deprecatedRoots": fmt.Sprintf("%#x", deprecatedRoots),
+	}).Info("********** ProcessBlockVoting ********** 3333")
 
 	// removes stale BlockVoting
 	//todo on change epoch only
@@ -115,14 +115,21 @@ func ProcessBlockVoting(ctx context.Context, beaconState state.BeaconState, sign
 	//	"staleRoots":  fmt.Sprintf("%#x", staleRoots),
 	//}).Info("********** ProcessBlockVoting ********** 4444")
 
-	if err := beaconState.SetBlockVoting(blockVoting); err != nil {
+	if err := beaconState.SetBlockVoting([]*ethpb.BlockVoting{}); err != nil {
 		return nil, err
 	}
 
+	for _, bv := range blockVoting {
+		if err := beaconState.AppendBlockVoting(bv); err != nil {
+			return nil, err
+		}
+	}
+
 	log.WithFields(logrus.Fields{
-		"BlockVoting":     len(beaconState.BlockVoting()),
-		"deprecatedRoots": fmt.Sprintf("%#x", deprecatedRoots),
-		"staleRoots":      fmt.Sprintf("%#x", staleRoots),
+		"BlockVoting":      len(blockVoting),
+		"StateBlockVoting": len(beaconState.BlockVoting()),
+		"deprecatedRoots":  fmt.Sprintf("%#x", deprecatedRoots),
+		"staleRoots":       fmt.Sprintf("%#x", staleRoots),
 	}).Info("********** ProcessBlockVoting ********** 4444")
 
 	//log.WithError(err).WithFields(logrus.Fields{
@@ -229,9 +236,11 @@ func appendBlockVotingAtt(votes []*ethpb.BlockVoting, val *ethpb.Attestation) []
 }
 
 func removeBlockVoting(votes []*ethpb.BlockVoting, roots [][]byte) []*ethpb.BlockVoting {
+
 	if len(roots) == 0 {
 		return votes
 	}
+
 	upVotes := make([]*ethpb.BlockVoting, 0)
 	for _, itm := range votes {
 		for _, rmRoot := range roots {

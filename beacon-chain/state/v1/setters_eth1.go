@@ -93,6 +93,24 @@ func (b *BeaconState) SetBlockVoting(val []*ethpb.BlockVoting) error {
 	return nil
 }
 
+func (b *BeaconState) AppendBlockVoting(val *ethpb.BlockVoting) error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
+	votes := b.state.BlockVoting
+	if b.sharedFieldReferences[blockVoting].Refs() > 1 {
+		// Copy elements in underlying array by reference.
+		votes = make([]*ethpb.BlockVoting, len(b.state.BlockVoting))
+		copy(votes, b.state.BlockVoting)
+		b.sharedFieldReferences[blockVoting].MinusRef()
+		b.sharedFieldReferences[blockVoting] = stateutil.NewRef(1)
+	}
+	b.state.BlockVoting = append(votes, val)
+	b.markFieldAsDirty(blockVoting)
+	b.addDirtyIndices(blockVoting, []uint64{uint64(len(b.state.BlockVoting) - 1)})
+	return nil
+}
+
 // AddBlockVoting adds or update the new BlockVoting data
 // for the beacon state.
 func (b *BeaconState) AddBlockVoting(root []byte, totalAttrs uint64, candidates []byte) error {
