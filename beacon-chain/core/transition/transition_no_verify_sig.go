@@ -298,13 +298,13 @@ func ProcessBlockForStateRoot(
 		).Error("ProcessBlockForStateRoot:Err:000")
 		return nil, errors.Wrap(err, "could not hash tree root state")
 	}
-	blkSSZ, err := blk.MarshalSSZ()
-	if err != nil {
-		log.WithError(
-			errors.Wrap(err, "could not MarshalSSZ"),
-		).Error("ProcessBlockForStateRoot:Err:000")
-		return nil, errors.Wrap(err, "could not MarshalSSZ")
-	}
+	//blkSSZ, err := blk.MarshalSSZ()
+	//if err != nil {
+	//	log.WithError(
+	//		errors.Wrap(err, "could not MarshalSSZ"),
+	//	).Error("ProcessBlockForStateRoot:Err:000")
+	//	return nil, errors.Wrap(err, "could not MarshalSSZ")
+	//}
 	log.WithError(err).WithFields(logrus.Fields{
 		"bSlot":     signed.Block().Slot(),
 		"bodyRoot":  fmt.Sprintf("%#x", bodyRoot),
@@ -333,8 +333,8 @@ func ProcessBlockForStateRoot(
 		"Finalization": gwatCommon.HashArrayFromBytes(blk.Body().Eth1Data().Finalization),
 		"Candidates":   gwatCommon.HashArrayFromBytes(blk.Body().Eth1Data().Candidates),
 		"DepositRoot":  fmt.Sprintf("%#x", blk.Body().Eth1Data().DepositRoot),
-		"blkSSZ":       fmt.Sprintf("%x", blkSSZ),
-		"Randao":       fmt.Sprintf("%x", signed.Block().Body().RandaoReveal()),
+		//"blkSSZ":       fmt.Sprintf("%x", blkSSZ),
+		"Randao": fmt.Sprintf("%x", signed.Block().Body().RandaoReveal()),
 	}).Info("--------- ProcessBlockForStateRoot:Block:222")
 
 	state, err = b.ProcessBlockHeaderNoVerify(ctx, state, blk.Slot(), blk.ProposerIndex(), blk.ParentRoot(), bodyRoot[:])

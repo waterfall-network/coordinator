@@ -9,6 +9,7 @@ import (
 	types "github.com/prysmaticlabs/eth2-types"
 	log "github.com/sirupsen/logrus"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	"sort"
@@ -19,9 +20,10 @@ type mapPriority map[int]gwatCommon.HashArray
 type mapCandidates map[gwatCommon.Hash]gwatCommon.HashArray
 
 // BlockVotingsCalcFinalization calculates finalization sequence by BlockVotings.
-func BlockVotingsCalcFinalization(ctx context.Context, state state.BeaconState, blockVotings []*ethpb.BlockVoting, lastFinSpine gwatCommon.Hash) (gwatCommon.HashArray, error) {
+func BlockVotingsCalcFinalization(ctx context.Context, state state.BeaconState, blockVotingArr []*ethpb.BlockVoting, lastFinSpine gwatCommon.Hash) (gwatCommon.HashArray, error) {
 	var (
-		supportedVotes  = []*ethpb.BlockVoting{}
+		blockVotings    = BlockVotingArrCopy(blockVotingArr)
+		supportedVotes  = make([]*ethpb.BlockVoting, 0)
 		candidatesParts = [][]gwatCommon.HashArray{}
 		tabPriority     = mapPriority{}
 		tabVoting       = mapVoting{}
@@ -54,7 +56,8 @@ func BlockVotingsCalcFinalization(ctx context.Context, state state.BeaconState, 
 			}
 			// if provided enough support for slot adds data as separated item
 			if CountAttestationsVotes(atts) >= uint64(minSupport) {
-				supportedVotes = append(supportedVotes, ethpb.CopyBlockVoting(bv))
+				//supportedVotes = append(supportedVotes, ethpb.CopyBlockVoting(bv))
+				supportedVotes = append(supportedVotes, BlockVotingCopy(bv))
 			}
 		}
 	}
@@ -171,6 +174,59 @@ func CountAttestationsVotes(attestations []*ethpb.Attestation) uint64 {
 		}
 	}
 	return count
+}
+
+// BlockVotingCopy
+func BlockVotingCopy(vote *ethpb.BlockVoting) *ethpb.BlockVoting {
+	attestations := make([]*ethpb.Attestation, len(vote.Attestations))
+	for i, att := range vote.Attestations {
+		attestations[i] = &ethpb.Attestation{
+			AggregationBits: att.AggregationBits,
+			Data: &ethpb.AttestationData{
+				Slot:            att.GetData().GetSlot(),
+				CommitteeIndex:  att.GetData().GetCommitteeIndex(),
+				BeaconBlockRoot: bytesutil.SafeCopyBytes(att.GetData().BeaconBlockRoot),
+				Source: &ethpb.Checkpoint{
+					Epoch: att.GetData().GetSource().GetEpoch(),
+					Root:  bytesutil.SafeCopyBytes(att.GetData().GetSource().GetRoot()),
+				},
+				Target: &ethpb.Checkpoint{
+					Epoch: att.GetData().GetTarget().GetEpoch(),
+					Root:  bytesutil.SafeCopyBytes(att.GetData().GetTarget().GetRoot()),
+				},
+			},
+			Signature: bytesutil.SafeCopyBytes(att.Signature),
+		}
+	}
+	return &ethpb.BlockVoting{
+		Root:           bytesutil.SafeCopyBytes(vote.Root),
+		TotalAttesters: vote.TotalAttesters,
+		Candidates:     bytesutil.SafeCopyBytes(vote.Candidates),
+		Attestations:   attestations,
+	}
+}
+
+// BlockVotingArrCopy
+func BlockVotingArrUniq(votes []*ethpb.BlockVoting) []*ethpb.BlockVoting {
+	cpy := make([]*ethpb.BlockVoting, 0)
+	mapRoots := map[gwatCommon.Hash]int{}
+	for _, bv := range votes {
+		root := gwatCommon.BytesToHash(bv.GetRoot())
+		if mapRoots[root] == 0 {
+			cpy = append(cpy, BlockVotingCopy(bv))
+		}
+		mapRoots[root]++
+	}
+	return cpy
+}
+
+// BlockVotingArrCopy
+func BlockVotingArrCopy(votes []*ethpb.BlockVoting) []*ethpb.BlockVoting {
+	cpy := make([]*ethpb.BlockVoting, len(votes))
+	for i, vote := range votes {
+		cpy[i] = BlockVotingCopy(vote)
+	}
+	return cpy
 }
 
 // PrintBlockVotingArr returns formatted string of BlockVoting array.
