@@ -291,50 +291,28 @@ func ProcessBlockForStateRoot(
 	}
 
 	// todo tmp log
-	stateRoot, err := state.HashTreeRoot(ctx)
+	sigRoot, err := blk.HashTreeRoot()
 	if err != nil {
 		log.WithError(
-			errors.Wrap(err, "could not hash tree root state"),
+			errors.Wrap(err, "could not hash tree root siBlock"),
 		).Error("ProcessBlockForStateRoot:Err:000")
-		return nil, errors.Wrap(err, "could not hash tree root state")
+		return nil, errors.Wrap(err, "could not hash tree root siBlock")
 	}
-	//blkSSZ, err := blk.MarshalSSZ()
-	//if err != nil {
-	//	log.WithError(
-	//		errors.Wrap(err, "could not MarshalSSZ"),
-	//	).Error("ProcessBlockForStateRoot:Err:000")
-	//	return nil, errors.Wrap(err, "could not MarshalSSZ")
-	//}
-	log.WithError(err).WithFields(logrus.Fields{
-		"bSlot":     signed.Block().Slot(),
-		"bodyRoot":  fmt.Sprintf("%#x", bodyRoot),
-		"stateRoot": fmt.Sprintf("%#x", stateRoot),
-		//"ctx":       fmt.Sprintf("%v", ctx),
-	}).Info("--------- ProcessBlockForStateRoot:General:000")
-
 	log.WithError(err).WithFields(logrus.Fields{
 		"slot":         state.Slot(),
 		"Validators":   len(state.Validators()),
-		"BlockRoots":   len(state.BlockRoots()),
 		"BlockVoting":  len(state.BlockVoting()),
 		"Finalization": gwatCommon.HashArrayFromBytes(state.Eth1Data().Finalization),
 		"Candidates":   gwatCommon.HashArrayFromBytes(state.Eth1Data().Candidates),
-		"DepositRoot":  gwatCommon.HashArrayFromBytes(state.Eth1Data().DepositRoot),
-		"JBits":        fmt.Sprintf("%#x", state.JustificationBits().Bytes()),
 	}).Info("--------- ProcessBlockForStateRoot:state:111")
 
 	log.WithError(err).WithFields(logrus.Fields{
 		"slot":         blk.Slot(),
 		"ParentRoot":   fmt.Sprintf("%#x", blk.ParentRoot()),
-		"StateRoot":    fmt.Sprintf("%#x", blk.StateRoot()),
-		"Eth1BlHash":   fmt.Sprintf("%#x", blk.Body().Eth1Data().GetBlockHash()),
-		"PropIx":       blk.ProposerIndex(),
+		"sigRoot":      fmt.Sprintf("%#x", sigRoot),
 		"Attestations": len(blk.Body().Attestations()),
 		"Finalization": gwatCommon.HashArrayFromBytes(blk.Body().Eth1Data().Finalization),
 		"Candidates":   gwatCommon.HashArrayFromBytes(blk.Body().Eth1Data().Candidates),
-		"DepositRoot":  fmt.Sprintf("%#x", blk.Body().Eth1Data().DepositRoot),
-		//"blkSSZ":       fmt.Sprintf("%x", blkSSZ),
-		"Randao": fmt.Sprintf("%x", signed.Block().Body().RandaoReveal()),
 	}).Info("--------- ProcessBlockForStateRoot:Block:222")
 
 	state, err = b.ProcessBlockHeaderNoVerify(ctx, state, blk.Slot(), blk.ProposerIndex(), blk.ParentRoot(), bodyRoot[:])

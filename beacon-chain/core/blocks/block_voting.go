@@ -97,50 +97,39 @@ func ProcessBlockVoting(ctx context.Context, beaconState state.BeaconState, sign
 	//}
 
 	log.WithFields(logrus.Fields{
-		"BlockVoting":     len(blockVoting),
-		"deprecatedRoots": fmt.Sprintf("%#x", deprecatedRoots),
-	}).Info("********** ProcessBlockVoting ********** 3333")
-
-	// removes stale BlockVoting
-	//todo on change epoch only
-	cpSlot, err := slots.EpochStart(beaconState.FinalizedCheckpointEpoch())
-	if err != nil {
-		return nil, err
-	}
-	staleRoots := getBlockVotingRootsLtSlot(blockVoting, uint64(cpSlot))
-	//blockVoting = removeBlockVoting(blockVoting, staleRoots)
-
-	//log.WithFields(logrus.Fields{
-	//	"BlockVoting": helpers.PrintBlockVotingArr(blockVoting),
-	//	"staleRoots":  fmt.Sprintf("%#x", staleRoots),
-	//}).Info("********** ProcessBlockVoting ********** 4444")
-
-	if err := beaconState.SetBlockVoting([]*ethpb.BlockVoting{}); err != nil {
-		return nil, err
-	}
-
-	for _, bv := range blockVoting {
-		if err := beaconState.AppendBlockVoting(bv); err != nil {
-			return nil, err
-		}
-	}
-
-	log.WithFields(logrus.Fields{
 		"BlockVoting":      len(blockVoting),
 		"StateBlockVoting": len(beaconState.BlockVoting()),
 		"deprecatedRoots":  fmt.Sprintf("%#x", deprecatedRoots),
-		"staleRoots":       fmt.Sprintf("%#x", staleRoots),
 	}).Info("********** ProcessBlockVoting ********** 4444")
 
-	//log.WithError(err).WithFields(logrus.Fields{
-	//	"block.slot": signed.Block().Slot(),
-	//	//"BlockVoting":     helpers.PrintBlockVotingArr(beaconState.BlockVoting()),
-	//	"BlockVoting": len(beaconState.BlockVoting()),
-	//	//"cpSlot":          cpSlot,
-	//	//"deprecatedRoots": fmt.Sprintf("%#x", deprecatedRoots),
-	//	"deprecatedRoots":    len(deprecatedRoots),
-	//	"State.Finalization": gwatCommon.HashArrayFromBytes(beaconState.Eth1Data().Finalization),
-	//}).Info("--------- ProcessBlockVoting ---------")
+	// if it's a new epoch - removes stale BlockVoting.
+	if slots.IsEpochStart(beaconBlock.Slot()) {
+		cpSlot, err := slots.EpochStart(beaconState.FinalizedCheckpointEpoch())
+		if err != nil {
+			return nil, err
+		}
+		staleRoots := getBlockVotingRootsLtSlot(blockVoting, uint64(cpSlot))
+		blockVoting = removeBlockVoting(blockVoting, staleRoots)
+
+		log.WithFields(logrus.Fields{
+			"BlockVoting":      len(blockVoting),
+			"StateBlockVoting": len(beaconState.BlockVoting()),
+			"staleRoots":       fmt.Sprintf("%#x", staleRoots),
+		}).Info("********** ProcessBlockVoting ********** 5555 new epoch:removes stale")
+
+	}
+
+	if err := beaconState.SetBlockVoting(blockVoting); err != nil {
+		return nil, err
+	}
+	//if err := beaconState.SetBlockVoting([]*ethpb.BlockVoting{}); err != nil {
+	//	return nil, err
+	//}
+	//for _, bv := range blockVoting {
+	//	if err := beaconState.AppendBlockVoting(bv); err != nil {
+	//		return nil, err
+	//	}
+	//}
 
 	return beaconState, nil
 }
@@ -236,17 +225,13 @@ func appendBlockVotingAtt(votes []*ethpb.BlockVoting, val *ethpb.Attestation) []
 }
 
 func removeBlockVoting(votes []*ethpb.BlockVoting, roots [][]byte) []*ethpb.BlockVoting {
-
 	if len(roots) == 0 {
 		return votes
 	}
-
 	upVotes := make([]*ethpb.BlockVoting, 0)
 	for _, itm := range votes {
-		for _, rmRoot := range roots {
-			if !bytes.Equal(itm.Root, rmRoot) {
-				upVotes = append(upVotes, itm)
-			}
+		if helpers.IndexOfRoot(roots, itm.Root) == -1 {
+			upVotes = append(upVotes, itm)
 		}
 	}
 	return upVotes

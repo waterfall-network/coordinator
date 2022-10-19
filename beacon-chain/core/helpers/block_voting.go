@@ -1,14 +1,15 @@
 package helpers
 
 import (
+	"bytes"
 	"context"
 	"fmt"
-	"github.com/waterfall-foundation/coordinator/config/params"
 	"math"
 
 	types "github.com/prysmaticlabs/eth2-types"
 	log "github.com/sirupsen/logrus"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	"github.com/waterfall-foundation/coordinator/config/params"
 	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	gwatCommon "github.com/waterfall-foundation/gwat/common"
@@ -229,6 +230,15 @@ func BlockVotingArrCopy(votes []*ethpb.BlockVoting) []*ethpb.BlockVoting {
 	return cpy
 }
 
+func IndexOfRoot(arrRoots [][]byte, root []byte) int {
+	for i, r := range arrRoots {
+		if bytes.Equal(r, root) {
+			return i
+		}
+	}
+	return -1
+}
+
 // PrintBlockVotingArr returns formatted string of BlockVoting array.
 func PrintBlockVotingArr(blockVotings []*ethpb.BlockVoting) string {
 	str := "["
@@ -264,8 +274,8 @@ func PrintBlockVoting(blockVoting *ethpb.BlockVoting) string {
 		str += fmt.Sprintf("aggrBitLen: %d,", att.GetAggregationBits().Count())
 		str += fmt.Sprintf("aggrBitCount: %d,", att.GetAggregationBits().Count())
 		str += fmt.Sprintf("slot: %d,", att.Data.GetSlot())
-		str += fmt.Sprintf("committeeIndex: %d,", att.Data.GetCommitteeIndex())
-		str += fmt.Sprintf("beaconBlockRoot: \"%#x\",", att.Data.GetBeaconBlockRoot())
+		str += fmt.Sprintf("committeeIndex: %d", att.Data.GetCommitteeIndex())
+		//str += fmt.Sprintf("beaconBlockRoot: \"%#x\"", att.Data.GetBeaconBlockRoot())
 		str += "}"
 		if i < len(blockVoting.Attestations)-1 {
 			str += ","
