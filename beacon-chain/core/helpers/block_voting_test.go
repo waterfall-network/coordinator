@@ -120,3 +120,129 @@ func TestBlockVotingsCalcFinalization_finalization_OK(t *testing.T) {
 	assert.NoError(t, err)
 	assert.DeepEqual(t, fmt.Sprintf("%v", want), fmt.Sprintf("%v", finalization))
 }
+
+func TestBlockVotingsCalcFinalization_fin_after_3_slots(t *testing.T) {
+	state, keys := util.DeterministicGenesisState(t, 128)
+
+	sig := keys[0].Sign([]byte{'t', 'e', 's', 't'})
+
+	list := bitfield.NewBitlist(4)
+	list.SetBitAt(0, true)
+	list.SetBitAt(1, true)
+	list.SetBitAt(2, true)
+
+	root_0 := gwatCommon.BytesToHash([]byte("root-0--------------------------"))
+	var atts_0 []*ethpb.Attestation
+	atts_0 = append(atts_0, &ethpb.Attestation{
+		Data: &ethpb.AttestationData{
+			CommitteeIndex:  0,
+			Slot:            types.Slot(5),
+			BeaconBlockRoot: root_0[:],
+		},
+		Signature:       sig.Marshal(),
+		AggregationBits: list,
+	})
+
+	atts_0 = append(atts_0, &ethpb.Attestation{
+		Data: &ethpb.AttestationData{
+			CommitteeIndex:  0,
+			Slot:            types.Slot(6),
+			BeaconBlockRoot: root_0[:],
+		},
+		Signature:       sig.Marshal(),
+		AggregationBits: list,
+	})
+
+	atts_0 = append(atts_0, &ethpb.Attestation{
+		Data: &ethpb.AttestationData{
+			CommitteeIndex:  0,
+			Slot:            types.Slot(7),
+			BeaconBlockRoot: root_0[:],
+		},
+		Signature:       sig.Marshal(),
+		AggregationBits: list,
+	})
+
+	blobVotings := []*ethpb.BlockVoting{
+		{
+			Root:           root_0[:],
+			TotalAttesters: 5,
+			Candidates: gwatCommon.HashArray{
+				gwatCommon.Hash{0x11, 0x11},
+			}.ToBytes(),
+			Attestations: atts_0,
+		},
+	}
+
+	want := gwatCommon.HashArray{
+		gwatCommon.Hash{0x11, 0x11},
+	}
+
+	finalization, err := helpers.BlockVotingsCalcFinalization(context.Background(), state, blobVotings, gwatCommon.Hash{0xff, 0xff})
+
+	assert.NoError(t, err)
+	assert.DeepEqual(t, fmt.Sprintf("%v", want), fmt.Sprintf("%v", finalization))
+}
+
+func TestBlockVotingsCalcFinalization_fin_after_3_slots_v2(t *testing.T) {
+	state, keys := util.DeterministicGenesisState(t, 128)
+
+	sig := keys[0].Sign([]byte{'t', 'e', 's', 't'})
+
+	list := bitfield.NewBitlist(4)
+	list.SetBitAt(0, true)
+	list.SetBitAt(1, true)
+	list.SetBitAt(2, true)
+
+	root_0 := gwatCommon.BytesToHash([]byte("root-0--------------------------"))
+	var atts_0 []*ethpb.Attestation
+	atts_0 = append(atts_0, &ethpb.Attestation{
+		Data: &ethpb.AttestationData{
+			CommitteeIndex:  0,
+			Slot:            types.Slot(5),
+			BeaconBlockRoot: root_0[:],
+		},
+		Signature:       sig.Marshal(),
+		AggregationBits: list,
+	})
+
+	blobVotings := []*ethpb.BlockVoting{
+		{
+			Root:           root_0[:],
+			TotalAttesters: 5,
+			Candidates: gwatCommon.HashArray{
+				gwatCommon.Hash{0x11, 0x11},
+				gwatCommon.Hash{0x11, 0x22},
+			}.ToBytes(),
+			Attestations: atts_0,
+		},
+		{
+			Root:           root_0[:],
+			TotalAttesters: 6,
+			Candidates: gwatCommon.HashArray{
+				gwatCommon.Hash{0x11, 0x11},
+				gwatCommon.Hash{0x11, 0x22},
+			}.ToBytes(),
+			Attestations: atts_0,
+		},
+		{
+			Root:           root_0[:],
+			TotalAttesters: 7,
+			Candidates: gwatCommon.HashArray{
+				gwatCommon.Hash{0x11, 0x11},
+				gwatCommon.Hash{0x11, 0x22},
+			}.ToBytes(),
+			Attestations: atts_0,
+		},
+	}
+
+	want := gwatCommon.HashArray{
+		gwatCommon.Hash{0x11, 0x11},
+		gwatCommon.Hash{0x11, 0x22},
+	}
+
+	finalization, err := helpers.BlockVotingsCalcFinalization(context.Background(), state, blobVotings, gwatCommon.Hash{0xff, 0xff})
+
+	assert.NoError(t, err)
+	assert.DeepEqual(t, fmt.Sprintf("%v", want), fmt.Sprintf("%v", finalization))
+}

@@ -87,7 +87,7 @@ func BlockVotingsCalcFinalization(ctx context.Context, state state.BeaconState, 
 			continue
 		}
 
-		reductedParts := []gwatCommon.HashArray{}
+		reductedParts := []gwatCommon.HashArray{candidates}
 		// reduction of sequence up to single item
 		for i := len(candidates) - 1; i > 0; i-- {
 			reduction := candidates[:i]
@@ -105,11 +105,13 @@ func BlockVotingsCalcFinalization(ctx context.Context, state state.BeaconState, 
 		}
 		for _, candidates := range candidatesList {
 			for _, rc := range restList {
-				intersect := candidates.SequenceIntersection(rc)
-				key := intersect.Key()
-				tabCandidates[key] = intersect
-				tabPriority[len(intersect)] = append(tabPriority[len(intersect)], key).Uniq()
-				tabVoting[key]++
+				if candidates.IsEqualTo(rc) {
+					intersect := candidates
+					key := intersect.Key()
+					tabCandidates[key] = intersect
+					tabPriority[len(intersect)] = append(tabPriority[len(intersect)], key).Uniq()
+					tabVoting[key]++
+				}
 			}
 		}
 	}
@@ -205,20 +207,6 @@ func BlockVotingCopy(vote *ethpb.BlockVoting) *ethpb.BlockVoting {
 		Candidates:     bytesutil.SafeCopyBytes(vote.Candidates),
 		Attestations:   attestations,
 	}
-}
-
-// BlockVotingArrCopy
-func BlockVotingArrUniq(votes []*ethpb.BlockVoting) []*ethpb.BlockVoting {
-	cpy := make([]*ethpb.BlockVoting, 0)
-	mapRoots := map[gwatCommon.Hash]int{}
-	for _, bv := range votes {
-		root := gwatCommon.BytesToHash(bv.GetRoot())
-		if mapRoots[root] == 0 {
-			cpy = append(cpy, BlockVotingCopy(bv))
-		}
-		mapRoots[root]++
-	}
-	return cpy
 }
 
 // BlockVotingArrCopy
