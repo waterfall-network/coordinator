@@ -151,28 +151,6 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	//}
 	//// todo test no-belatrix
 
-	//TODO RM
-	//if s.CurrentSlot() == signed.Block().Slot() && !s.isSync(s.ctx) {
-	//	isValidCandidates, err := s.ValidateBlockCandidates(signed.Block())
-	//
-	//	log.WithError(err).WithFields(logrus.Fields{
-	//		"block.slot":        signed.Block().Slot(),
-	//		"isValidCandidates": isValidCandidates,
-	//	}).Info("<<<< ValidateBlockCandidates >>>>> 222222")
-	//
-	//	if err != nil {
-	//		log.WithError(err).WithField("slotCandidates", isValidCandidates).Warn("on Block: could not verify new new block candidates")
-	//		//if err.Error() == "got an unexpected error: synchronization" {
-	//		//	log.Warn("******* Start head sync procedure (onBlock) ******")
-	//		//	go s.runHeadSync(s.ctx)
-	//		//}
-	//	} else {
-	//		if !isValidCandidates {
-	//			return errBadSpineCandidates
-	//		}
-	//	}
-	//}
-
 	if err := s.insertBlockAndAttestationsToForkChoiceStore(ctx, signed.Block(), blockRoot, postState); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"block.slot": signed.Block().Slot(),
@@ -216,9 +194,16 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		"postState.Finalization": gwatCommon.HashArrayFromBytes(postState.Eth1Data().Finalization),
 	}).Info("==== savePostStateInfo ====")
 
-	//TODO валидация кандидатов после
-	//err := s.savePostStateInfo(ctx, blockRoot, signed, postState, false /* reg sync */); err != nil {
-	//~~решить проблему если престета Нет (откинули пр)~~
+	if !s.isSync(s.ctx) {
+		isValidCandidates, err := s.ValidateBlockCandidates(signed.Block())
+		if err != nil {
+			log.WithError(err).WithField("slotCandidates", isValidCandidates).Warn("!!!!!! on Block: could not verify new new block candidates")
+		} else {
+			if !isValidCandidates {
+				return errBadSpineCandidates
+			}
+		}
+	}
 
 	// If slasher is configured, forward the attestations in the block via
 	// an event feed for processing.
