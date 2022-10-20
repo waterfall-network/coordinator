@@ -27,18 +27,6 @@ func ProcessBlockVoting(ctx context.Context, beaconState state.BeaconState, sign
 	candidates := beaconBlock.Body().Eth1Data().GetCandidates()
 	blockVoting := helpers.BlockVotingArrCopy(beaconState.BlockVoting())
 
-	//todo rm
-	if len(blockVoting) > 100 {
-		panic("len(blockVoting) > 100")
-	}
-
-	//helpers.BlockVotingArrUniq
-
-	//log.WithFields(logrus.Fields{
-	//	"ParentRoot":  fmt.Sprintf("%#x", beaconBlock.ParentRoot()),
-	//	"BlockVoting": helpers.PrintBlockVotingArr(blockVoting),
-	//}).Info("********** ProcessBlockVoting ********** 0000")
-
 	//add item of block voting for the current block
 	if len(candidates) > 0 {
 		blockVoting = addBlockVoting(blockVoting, beaconBlock.ParentRoot(), uint64(beaconBlock.Slot()-1), candidates)
@@ -46,11 +34,6 @@ func ProcessBlockVoting(ctx context.Context, beaconState state.BeaconState, sign
 		//	return nil, err
 		//}
 	}
-
-	//log.WithFields(logrus.Fields{
-	//	"ParentRoot":  fmt.Sprintf("%#x", beaconBlock.ParentRoot()),
-	//	"BlockVoting": helpers.PrintBlockVotingArr(blockVoting),
-	//}).Info("********** ProcessBlockVoting ********** 1111")
 
 	//append attestations of the current block to block voting
 	for _, att := range attestations {
