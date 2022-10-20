@@ -27,6 +27,14 @@ func ProcessBlockVoting(ctx context.Context, beaconState state.BeaconState, sign
 	candidates := beaconBlock.Body().Eth1Data().GetCandidates()
 	blockVoting := helpers.BlockVotingArrCopy(beaconState.BlockVoting())
 
+	//todo rm
+	if len(blockVoting) > 160 {
+		log.WithFields(logrus.Fields{
+			"blockSlot":   signed.Block().Slot(),
+			"BlockVoting": helpers.PrintBlockVotingArr(blockVoting),
+		}).Error("********** ProcessBlockVoting ********** len(blockVoting) > 160")
+	}
+
 	//add item of block voting for the current block
 	if len(candidates) > 0 {
 		blockVoting = addBlockVoting(blockVoting, beaconBlock.ParentRoot(), uint64(beaconBlock.Slot()-1), candidates)
@@ -100,6 +108,11 @@ func ProcessBlockVoting(ctx context.Context, beaconState state.BeaconState, sign
 			"staleRoots":       fmt.Sprintf("%#x", staleRoots),
 		}).Info("********** ProcessBlockVoting ********** 5555 new epoch:removes stale")
 
+	}
+
+	blockVoting, err = helpers.BlockVotingArrStateOrder(blockVoting)
+	if err != nil {
+		return nil, err
 	}
 
 	if err := beaconState.SetBlockVoting(blockVoting); err != nil {

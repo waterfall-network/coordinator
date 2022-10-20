@@ -218,6 +218,65 @@ func BlockVotingArrCopy(votes []*ethpb.BlockVoting) []*ethpb.BlockVoting {
 	return cpy
 }
 
+// BlockVotingArrSort put BlockVoting array to order to calculate state hash.
+func BlockVotingArrStateOrder(votes []*ethpb.BlockVoting) ([]*ethpb.BlockVoting, error) {
+	var err error
+	cpyAttOrd := make([]*ethpb.BlockVoting, len(votes))
+	for i, itm := range votes {
+		cpyItm := BlockVotingCopy(itm)
+		cpyItm.Attestations, err = AttestationArrSort(cpyItm.Attestations)
+		if err != nil {
+			return nil, err
+		}
+		cpyAttOrd[i] = cpyItm
+	}
+	return BlockVotingArrSort(cpyAttOrd)
+}
+
+// BlockVotingArrSort sorts BlockVoting array.
+func BlockVotingArrSort(votes []*ethpb.BlockVoting) ([]*ethpb.BlockVoting, error) {
+	keys := gwatCommon.HashArray{}
+	mapKeyData := map[[32]byte]*ethpb.BlockVoting{}
+	for _, itm := range votes {
+		k, err := itm.HashTreeRoot()
+		if err != nil {
+			return nil, err
+		}
+		mapKeyData[k] = itm
+	}
+	for k := range mapKeyData {
+		keys = append(keys, k)
+	}
+	keys = keys.Sort()
+	sorted := make([]*ethpb.BlockVoting, len(keys))
+	for i, k := range keys {
+		sorted[i] = mapKeyData[k]
+	}
+	return sorted, nil
+}
+
+// AttestationArrSort sorts attestations array.
+func AttestationArrSort(atts []*ethpb.Attestation) ([]*ethpb.Attestation, error) {
+	keys := gwatCommon.HashArray{}
+	mapKeyData := map[[32]byte]*ethpb.Attestation{}
+	for _, itm := range atts {
+		k, err := itm.HashTreeRoot()
+		if err != nil {
+			return nil, err
+		}
+		mapKeyData[k] = itm
+	}
+	for k := range mapKeyData {
+		keys = append(keys, k)
+	}
+	keys = keys.Sort()
+	sorted := make([]*ethpb.Attestation, len(keys))
+	for i, k := range keys {
+		sorted[i] = mapKeyData[k]
+	}
+	return sorted, nil
+}
+
 func IndexOfRoot(arrRoots [][]byte, root []byte) int {
 	for i, r := range arrRoots {
 		if bytes.Equal(r, root) {
