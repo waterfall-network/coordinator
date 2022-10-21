@@ -14,7 +14,9 @@ import (
 //type mapCandidates map[gwatCommon.Hash]gwatCommon.HashArray
 
 type spineData struct {
-	candidates   gwatCommon.HashArray
+	candidates gwatCommon.HashArray
+	actual     bool
+
 	finalization gwatCommon.HashArray
 	lastFinHash  gwatCommon.Hash
 	lastFinSlot  types.Slot
@@ -37,6 +39,20 @@ func (s *Service) GetCacheCandidates() gwatCommon.HashArray {
 	return s.spineData.candidates.Copy()
 }
 
+// setCacheCandidates cashes current candidates.
+func (s *Service) setCandidatesActual(actual bool) {
+	s.spineData.RLock()
+	defer s.spineData.RUnlock()
+	s.spineData.actual = actual
+}
+
+// GetCacheCandidates returns current candidates.
+func (s *Service) AreCandidatesActual() bool {
+	s.spineData.RLock()
+	defer s.spineData.RUnlock()
+	return s.spineData.actual
+}
+
 // ValidateBlockCandidates validate new block candidates.
 func (s *Service) ValidateBlockCandidates(block block.BeaconBlock) (bool, error) {
 	slot := block.Slot()
@@ -47,11 +63,25 @@ func (s *Service) ValidateBlockCandidates(block block.BeaconBlock) (bool, error)
 	}
 	slotCandidates, err := s.cfg.ExecutionEngineCaller.ExecutionDagGetCandidates(s.ctx, slot)
 	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"slot":            slot,
+			"blockCandidates": blCandidates,
+			"gwatCandidates":  slotCandidates,
+		}).Warn("**** Blocks Candidates Validation: err ****")
 		return false, err
 	}
 	startIx := slotCandidates.IndexOf(blCandidates[0])
 	endIx := slotCandidates.IndexOf(blCandidates[lenBlC-1])
 	if startIx < 0 || endIx < 0 {
+		log.WithFields(logrus.Fields{
+			"slot":            slot,
+			"condition":       "startIx < 0 || endIx < 0",
+			"startIx":         startIx,
+			"endIx":           endIx,
+			"blockCandidates": blCandidates,
+			"gwatCandidates":  slotCandidates,
+		}).Warn("**** Blocks Candidates Validation: failed ****")
+
 		return false, nil
 	}
 	validCandidates := slotCandidates[startIx : endIx+1]

@@ -2,6 +2,7 @@ package validator
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 
 	fastssz "github.com/ferranbt/fastssz"
@@ -42,6 +43,11 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 	if vs.MockEth1Votes {
 		return vs.mockETH1DataVote(ctx, slot)
 	}
+
+	if !vs.HeadFetcher.AreCandidatesActual() {
+		return nil, fmt.Errorf("candidates are not actual")
+	}
+
 	if !vs.Eth1InfoFetcher.IsConnectedToETH1() {
 		//return vs.randomETH1DataVote
 		prevEth1Data := vs.HeadFetcher.HeadETH1Data()
@@ -97,7 +103,7 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 	lastBlockDepositCount, lastBlockDepositRoot := vs.DepositFetcher.DepositsNumberAndRootAtHeight(ctx, lastBlockByLatestValidTime.Number)
 
 	if lastBlockDepositCount >= vs.HeadFetcher.HeadETH1Data().DepositCount {
-		hash, err := vs.Eth1BlockFetcher.BlockHashByHeight(ctx, lastBlockByLatestValidTime.Number)
+		lvtHash, err := vs.Eth1BlockFetcher.BlockHashByHeight(ctx, lastBlockByLatestValidTime.Number)
 		if err != nil {
 			log.WithError(err).Error("Could not get hash of last block by latest valid time")
 			//return vs.randomETH1DataVote(ctx)
@@ -115,7 +121,7 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 		return &ethpb.Eth1Data{
 			Candidates:   candidates.ToBytes(),
 			Finalization: beaconState.Eth1Data().GetFinalization(),
-			BlockHash:    hash.Bytes(),
+			BlockHash:    lvtHash.Bytes(),
 			DepositCount: lastBlockDepositCount,
 			DepositRoot:  lastBlockDepositRoot[:],
 		}, nil

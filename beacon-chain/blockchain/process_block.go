@@ -196,12 +196,11 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 
 	if !s.isSync(s.ctx) {
 		isValidCandidates, err := s.ValidateBlockCandidates(signed.Block())
-		if err != nil {
-			log.WithError(err).WithField("slotCandidates", isValidCandidates).Warn("!!!!!! on Block: could not verify new new block candidates")
-		} else {
-			if !isValidCandidates {
-				return errBadSpineCandidates
-			}
+		if !isValidCandidates || err != nil {
+			log.WithError(err).WithField(
+				"slotCandidates", isValidCandidates,
+			).Warn("!!!!!! onBlock: validation of candidates failed")
+			return errBadSpineCandidates
 		}
 	}
 

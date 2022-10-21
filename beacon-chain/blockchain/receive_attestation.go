@@ -146,7 +146,7 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 					log.WithError(err).Error("Could not process new slot")
 					return
 				}
-
+				s.setCandidatesActual(false)
 				var (
 					slot       = uint64(s.CurrentSlot())
 					finalizing gwatCommon.HashArray
@@ -176,6 +176,7 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 						//}
 					} else {
 						s.setCacheCandidates(candidates)
+						s.setCandidatesActual(true)
 					}
 					log.WithError(err).WithFields(logrus.Fields{
 						"slot":         slot,
