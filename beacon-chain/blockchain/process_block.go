@@ -194,7 +194,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		"postState.Finalization": gwatCommon.HashArrayFromBytes(postState.Eth1Data().Finalization),
 	}).Info("==== savePostStateInfo ====")
 
-	if !s.isSync(s.ctx) {
+	if s.isSync(s.ctx) {
 		log.WithError(errSyncIsRunning).Warn("!!!!!! onBlock: skip head update")
 		return errSyncIsRunning
 	}
