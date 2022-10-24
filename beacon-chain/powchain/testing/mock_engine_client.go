@@ -53,6 +53,10 @@ func (e *EngineClient) ExecutionDagHeadSync(ctx context.Context, params []gwatTy
 	panic("implement me")
 }
 
+func (e *EngineClient) ExecutionDagValidateSpines(ctx context.Context, params gwatCommon.HashArray) (bool, error) {
+	panic("implement me")
+}
+
 func (e *EngineClient) GetHeaderByHash(ctx context.Context, hash gwatCommon.Hash) (*gwatTypes.Header, error) {
 	panic("implement me")
 }

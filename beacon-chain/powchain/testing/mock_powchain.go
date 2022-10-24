@@ -82,6 +82,10 @@ func (m *POWChain) ExecutionDagHeadSync(ctx context.Context, params []gwatTypes.
 	panic("implement me")
 }
 
+func (m *POWChain) ExecutionDagValidateSpines(ctx context.Context, params gwatCommon.HashArray) (bool, error) {
+	panic("implement me")
+}
+
 // GenesisTime represents a static past date - JAN 01 2000.
 var GenesisTime = time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Unix()
 
