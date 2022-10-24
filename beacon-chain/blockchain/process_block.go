@@ -200,16 +200,15 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		"postState.Finalization": gwatCommon.HashArrayFromBytes(postState.Eth1Data().Finalization),
 	}).Info("==== savePostStateInfo ====")
 
-	if s.isSync(s.ctx) {
-		log.WithError(errSyncIsRunning).Warn("!!!!!! onBlock: skip head update")
-		return errSyncIsRunning
-	}
-	isValidCandidates, err := s.ValidateBlockCandidates(signed.Block())
-	if !isValidCandidates || err != nil {
-		log.WithError(err).WithField(
-			"slotCandidates", isValidCandidates,
-		).Warn("!!!!!! onBlock: validation of candidates failed")
-		return errBadSpineCandidates
+	//TODO check only gwat sync
+	if !s.isSync(s.ctx) {
+        isValidCandidates, err := s.ValidateBlockCandidates(signed.Block())
+        if !isValidCandidates || err != nil {
+            log.WithError(err).WithField(
+                "slotCandidates", isValidCandidates,
+            ).Warn("!!!!!! onBlock: validation of candidates failed")
+            return errBadSpineCandidates
+        }
 	}
 
 	// If slasher is configured, forward the attestations in the block via
