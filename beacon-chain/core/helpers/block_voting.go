@@ -57,7 +57,6 @@ func BlockVotingsCalcFinalization(ctx context.Context, state state.BeaconState, 
 			}
 			// if provided enough support for slot adds data as separated item
 			if CountAttestationsVotes(atts) >= uint64(minSupport) {
-				//supportedVotes = append(supportedVotes, ethpb.CopyBlockVoting(bv))
 				supportedVotes = append(supportedVotes, BlockVotingCopy(bv))
 			}
 		}

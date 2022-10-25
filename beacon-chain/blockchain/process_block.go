@@ -114,16 +114,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		}).Error("onBlock error")
 		return err
 	}
-
-	//// todo test no-belatrix
-	//preStateVersion, preStateHeader, err := getStateVersionAndPayload(preState)
-	//if err != nil {
-	//	return err
-	//}
-	//// todo test no-belatrix
-
 	postState, err := transition.ExecuteStateTransition(ctx, preState, signed)
-
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"block.slot": signed.Block().Slot(),
@@ -137,40 +128,12 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		"postBlockVoting": len(postState.BlockVoting()),
 	}).Info("State transition executed")
 
-	//// todo test no-belatrix
-	//postStateVersion, postStateHeader, err := getStateVersionAndPayload(postState)
-	//if err != nil {
-	//	return err
-	//}
-	//isValidPayload, err := s.notifyNewPayload(ctx, preStateVersion, postStateVersion, preStateHeader, postStateHeader, signed)
-	//if err != nil {
-	//	return errors.Wrap(err, "could not verify new payload")
-	//}
-	//if !isValidPayload {
-	//	candidate, err := s.optimisticCandidateBlock(ctx, b)
-	//	if err != nil {
-	//		return errors.Wrap(err, "could not check if block is optimistic candidate")
-	//	}
-	//	if !candidate {
-	//		return errNotOptimisticCandidate
-	//	}
-	//}
-	//// todo test no-belatrix
-
 	if err := s.insertBlockAndAttestationsToForkChoiceStore(ctx, signed.Block(), blockRoot, postState); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"block.slot": signed.Block().Slot(),
 		}).Error("onBlock error")
 		return errors.Wrapf(err, "could not insert block %d to fork choice store", signed.Block().Slot())
 	}
-
-	//// todo test no-belatrix
-	//if isValidPayload {
-	//	if err := s.cfg.ForkChoiceStore.SetOptimisticToValid(ctx, blockRoot); err != nil {
-	//		return errors.Wrap(err, "could not set optimistic block to valid")
-	//	}
-	//}
-	//// todo test no-belatrix
 
 	// We add a proposer score boost to fork choice for the block root if applicable, right after
 	// running a successful state transition for the block.
@@ -200,15 +163,14 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		"postState.Finalization": gwatCommon.HashArrayFromBytes(postState.Eth1Data().Finalization),
 	}).Info("==== savePostStateInfo ====")
 
-	//TODO check only gwat sync
 	if !s.isSync(s.ctx) {
-        isValidCandidates, err := s.ValidateBlockCandidates(signed.Block())
-        if !isValidCandidates || err != nil {
-            log.WithError(err).WithField(
-                "slotCandidates", isValidCandidates,
-            ).Warn("!!!!!! onBlock: validation of candidates failed")
-            return errBadSpineCandidates
-        }
+		isValidCandidates, err := s.ValidateBlockCandidates(signed.Block())
+		if !isValidCandidates || err != nil {
+			log.WithError(err).WithField(
+				"slotCandidates", isValidCandidates,
+			).Warn("!!!!!! onBlock: validation of candidates failed")
+			return errBadSpineCandidates
+		}
 	}
 
 	// If slasher is configured, forward the attestations in the block via
@@ -317,7 +279,6 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	//if _, err := s.notifyForkchoiceUpdate(ctx, headState, headBlock.Block(), headRoot, bytesutil.ToBytes32(finalized.Root)); err != nil {
 	//	return err
 	//}
-	//// todo test no-belatrix
 
 	if err := s.saveHead(ctx, headRoot, headBlock, headState); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
@@ -339,21 +300,6 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		"CurrentSlot":              s.CurrentSlot(),
 		"BlockSlot":                signed.Block().Slot(),
 	}).Info("On block sync status")
-
-	//// TODO наверное можно удалить
-	//if !s.isSync(s.ctx) {
-	//	// TODO подумать об отправке финализации в живат тут
-	//	// TOD0 кешировать финализированную цепочку
-	//	//calculate sequence of finalization spines
-	//	finSpines, err := s.CalculateFinalizationSpinesByBlockRoot(blockRoot)
-	//	if err != nil {
-	//		log.WithError(err).WithFields(logrus.Fields{
-	//			"block.slot": signed.Block().Slot(),
-	//		}).Info("<<<< CalculateFinalizationSpinesByBlockRoot >>>>> 99999")
-	//		return errors.Wrap(err, "could not calculate finalization spines")
-	//	}
-	//	s.setCacheFinalisation(finSpines)
-	//}
 
 	if err := s.pruneCanonicalAttsFromPool(ctx, blockRoot, signed); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{

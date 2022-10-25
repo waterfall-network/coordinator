@@ -106,7 +106,6 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 		lvtHash, err := vs.Eth1BlockFetcher.BlockHashByHeight(ctx, lastBlockByLatestValidTime.Number)
 		if err != nil {
 			log.WithError(err).Error("Could not get hash of last block by latest valid time")
-			//return vs.randomETH1DataVote(ctx)
 			prevEth1Data := vs.HeadFetcher.HeadETH1Data()
 			candidates := vs.HeadFetcher.GetCacheCandidates()
 			return &ethpb.Eth1Data{

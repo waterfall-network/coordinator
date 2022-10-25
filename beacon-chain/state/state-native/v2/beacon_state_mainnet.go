@@ -58,28 +58,3 @@ func (b *BeaconState) SetBlockVoting(val []*ethpb.BlockVoting) error {
 	//TODO implement me
 	panic("implement me")
 }
-
-func (b *BeaconState) AppendBlockVoting(val *ethpb.BlockVoting) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (b *BeaconState) AddBlockVoting(root []byte, totalAttrs uint64, candidates []byte) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (b *BeaconState) RemoveBlockVoting(roots [][]byte) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (b *BeaconState) AppendBlockVotingAtt(val *ethpb.Attestation) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (b *BeaconState) IsBlockVotingExists(root []byte) bool {
-	//TODO implement me
-	panic("implement me")
-}

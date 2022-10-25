@@ -126,6 +126,7 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 	}
 
 	// TODO вернуть хедРуут тот который считаем валидным
+	// TODO вернуть хедРуут тот который считаем валидным
 	res = &ethpb.AttestationData{
 		Slot:            req.Slot,
 		CommitteeIndex:  req.CommitteeIndex,

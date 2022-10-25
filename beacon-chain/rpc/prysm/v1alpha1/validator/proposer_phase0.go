@@ -3,7 +3,6 @@ package validator
 import (
 	"context"
 	"fmt"
-	gwatCommon "github.com/waterfall-foundation/gwat/common"
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
@@ -17,6 +16,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	"go.opencensus.io/trace"
 )
 

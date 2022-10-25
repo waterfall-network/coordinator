@@ -170,10 +170,6 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 					candidates, err := s.cfg.ExecutionEngineCaller.ExecutionDagSync(s.ctx, syncParams)
 					if err != nil {
 						log.WithError(err).Error("Error while execute finalization procedure")
-						//if err.Error() == "got an unexpected error: synchronization" {
-						//	log.Warn("******* Start head sync procedure (spawnProcessAttestationsRoutine) ******")
-						//	go s.runHeadSync(s.ctx)
-						//}
 					} else {
 						s.setCacheCandidates(candidates)
 						s.setCandidatesActual(true)

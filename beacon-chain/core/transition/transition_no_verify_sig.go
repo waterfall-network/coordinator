@@ -324,23 +324,6 @@ func ProcessBlockForStateRoot(
 		return nil, errors.Wrap(err, "could not process block header")
 	}
 
-	//// todo test no-belatrix
-	//enabled, err := b.IsExecutionEnabled(state, blk.Body())
-	//if err != nil {
-	//	return nil, errors.Wrap(err, "could not check if execution is enabled")
-	//}
-	//if enabled {
-	//	payload, err := blk.Body().ExecutionPayload()
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	state, err = b.ProcessPayload(state, payload)
-	//	if err != nil {
-	//		return nil, errors.Wrap(err, "could not process execution payload")
-	//	}
-	//}
-	//// todo test no-belatrix
-
 	state, err = b.ProcessRandaoNoVerify(state, signed.Block().Body().RandaoReveal())
 	if err != nil {
 		log.WithError(

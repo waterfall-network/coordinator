@@ -38,19 +38,11 @@ func ProcessBlockVoting(ctx context.Context, beaconState state.BeaconState, sign
 	//add item of block voting for the current block
 	if len(candidates) > 0 {
 		blockVoting = addBlockVoting(blockVoting, beaconBlock.ParentRoot(), uint64(beaconBlock.Slot()-1), candidates)
-		//if err := beaconState.AddBlockVoting(beaconBlock.ParentRoot(), 0, candidates); err != nil {
-		//	return nil, err
-		//}
 	}
 
 	//append attestations of the current block to block voting
 	for _, att := range attestations {
 		blockVoting = appendBlockVotingAtt(blockVoting, att)
-		//if beaconState.IsBlockVotingExists(att.Data.GetBeaconBlockRoot()) {
-		//	if err := beaconState.AppendBlockVotingAtt(att); err != nil {
-		//		return nil, err
-		//	}
-		//}
 	}
 
 	log.WithFields(logrus.Fields{
@@ -83,9 +75,6 @@ func ProcessBlockVoting(ctx context.Context, beaconState state.BeaconState, sign
 	// removes BlockVoting with completely finalized candidates
 	deprecatedRoots := getBlockVotingsDeprecatedRoots(blockVoting, finalization)
 	blockVoting = removeBlockVoting(blockVoting, deprecatedRoots)
-	//if err := beaconState.RemoveBlockVoting(deprecatedRoots); err != nil {
-	//	return nil, err
-	//}
 
 	log.WithFields(logrus.Fields{
 		"BlockVoting":      len(blockVoting),
@@ -118,15 +107,6 @@ func ProcessBlockVoting(ctx context.Context, beaconState state.BeaconState, sign
 	if err := beaconState.SetBlockVoting(blockVoting); err != nil {
 		return nil, err
 	}
-	//if err := beaconState.SetBlockVoting([]*ethpb.BlockVoting{}); err != nil {
-	//	return nil, err
-	//}
-	//for _, bv := range blockVoting {
-	//	if err := beaconState.AppendBlockVoting(bv); err != nil {
-	//		return nil, err
-	//	}
-	//}
-
 	return beaconState, nil
 }
 
@@ -138,7 +118,6 @@ func getBlockVotingsDeprecatedRoots(blockVoting []*ethpb.BlockVoting, finalizati
 		if len(candidates) > 0 {
 			lastCandidat := candidates[len(candidates)-1]
 			if finalization.IndexOf(lastCandidat) > -1 {
-				//roots = append(roots, bv.GetRoot())
 				mapRoots[gwatCommon.BytesToHash(bv.GetRoot())] = bv.GetRoot()
 			}
 		}
