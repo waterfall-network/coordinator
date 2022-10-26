@@ -96,7 +96,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 
 	log.WithFields(logrus.Fields{
 		"block.slot": signed.Block().Slot(),
-		"ParentRoot": signed.Block().ParentRoot(),
+		"ParentRoot": fmt.Sprintf("%#x", signed.Block().ParentRoot()),
 	}).Info("<<< onBlock:START >>> ")
 
 	if err := helpers.BeaconBlockIsNil(signed); err != nil {
