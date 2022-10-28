@@ -154,7 +154,7 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 				headState := s.headState(s.ctx)
 				curEpoch := slots.ToEpoch(s.CurrentSlot())
 				stateNextEpoch := slots.ToEpoch(headState.Slot()) + 1
-				if curEpoch <= stateNextEpoch && !s.isSync(s.ctx) {
+				if curEpoch <= stateNextEpoch && !s.isSync() {
 					creators, err := s.GetCurrentCreators()
 					if err != nil {
 						log.WithError(err).Errorf("Could not compute creators assignments: %v", err)

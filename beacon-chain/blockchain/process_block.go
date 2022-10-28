@@ -164,7 +164,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		"postState.Finalization": gwatCommon.HashArrayFromBytes(postState.Eth1Data().Finalization),
 	}).Info("==== savePostStateInfo ====")
 
-	if !s.isSync(s.ctx) {
+	if !s.isSync() {
 		isValidCandidates, err := s.ValidateBlockCandidates(signed.Block())
 		if !isValidCandidates || err != nil {
 			log.WithError(err).WithField(
@@ -295,8 +295,8 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	}).Info("==== saveHead ====")
 
 	log.WithFields(logrus.Fields{
-		"condition":                s.CurrentSlot() == signed.Block().Slot() && !s.isSync(s.ctx),
-		"isSync":                   s.isSync(s.ctx),
+		"condition":                s.CurrentSlot() == signed.Block().Slot() && !s.isSync(),
+		"isSync":                   s.isSync(),
 		"CurrentSlot == BlockSlot": s.CurrentSlot() == signed.Block().Slot(),
 		"CurrentSlot":              s.CurrentSlot(),
 		"BlockSlot":                signed.Block().Slot(),

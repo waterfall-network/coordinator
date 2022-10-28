@@ -21,7 +21,7 @@ import (
 	gwatTypes "github.com/waterfall-foundation/gwat/core/types"
 )
 
-func (s *Service) IsInitSync(ctx context.Context) bool {
+func (s *Service) IsInitSync() bool {
 	return s.isInitSynchronizing
 }
 
@@ -32,7 +32,7 @@ func (s *Service) IsInitSync(ctx context.Context) bool {
 // Step 2 - Head Sync (main procedure) to sync both sides from finalized epoch to head
 // and make sure of the consistence of nodes.
 func (s *Service) HeadSync(ctx context.Context, force bool) error {
-	if !force && s.IsInitSync(ctx) {
+	if !force && s.IsInitSync() {
 		return nil
 	}
 	ctx, cancel := context.WithCancel(ctx)

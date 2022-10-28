@@ -101,8 +101,8 @@ func (s *Service) Start() {
 		return
 	}
 
-	s.cfg.Chain.SetHeadSyncFn(s.ctx, s.HeadSync)
-	s.cfg.Chain.SetIsSyncFn(s.ctx, s.IsInitSync)
+	s.cfg.Chain.SetHeadSyncFn(s.HeadSync)
+	s.cfg.Chain.SetIsSyncFn(s.IsInitSync)
 
 	currentSlot := slots.Since(genesis)
 	if slots.ToEpoch(currentSlot) == 0 {

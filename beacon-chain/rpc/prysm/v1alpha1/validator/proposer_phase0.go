@@ -92,7 +92,11 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 	ctx, span := trace.StartSpan(ctx, "ProposerServer.buildPhase0BlockData")
 	defer span.End()
 
-	if vs.SyncChecker.Syncing() {
+	if vs.SyncChecker.Syncing() || vs.SyncChecker.IsInitSync() {
+		log.WithError(fmt.Errorf("syncing to latest head, not ready to respond")).WithFields(logrus.Fields{
+			"IsInitSync": vs.SyncChecker.IsInitSync(),
+			"Syncing":    vs.SyncChecker.Syncing(),
+		}).Warn("Proposing skipped (synchronizing)")
 		return nil, fmt.Errorf("syncing to latest head, not ready to respond")
 	}
 
