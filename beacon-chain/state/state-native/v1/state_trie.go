@@ -135,6 +135,7 @@ func (b *BeaconState) Copy() state.BeaconState {
 		previousEpochAttestations: b.previousEpochAttestations,
 		currentEpochAttestations:  b.currentEpochAttestations,
 		eth1DataVotes:             b.eth1DataVotes,
+		blockVoting:               b.blockVoting,
 
 		// Large arrays, increases over time.
 		balances:        b.balances,

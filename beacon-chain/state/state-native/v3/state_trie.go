@@ -137,6 +137,7 @@ func (b *BeaconState) Copy() state.BeaconState {
 		blockRoots:    b.blockRoots,
 		slashings:     b.slashings,
 		eth1DataVotes: b.eth1DataVotes,
+		blockVoting:   b.blockVoting,
 
 		// Large arrays, increases over time.
 		validators:                 b.validators,

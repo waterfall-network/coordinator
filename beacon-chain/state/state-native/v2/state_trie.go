@@ -135,6 +135,7 @@ func (b *BeaconState) Copy() state.BeaconState {
 		randaoMixes:   b.randaoMixes,
 		slashings:     b.slashings,
 		eth1DataVotes: b.eth1DataVotes,
+		blockVoting:   b.blockVoting,
 
 		// Large arrays, increases over time.
 		historicalRoots:            b.historicalRoots,

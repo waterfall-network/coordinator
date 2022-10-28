@@ -411,33 +411,51 @@ func getStateVersionAndPayload(st state.BeaconState) (int, *ethpb.ExecutionPaylo
 	return preStateVersion, preStateHeader, nil
 }
 
-func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlock,
-	blockRoots [][32]byte) ([]*ethpb.Checkpoint, []*ethpb.Checkpoint, error) {
+func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlock, blockRoots [][32]byte) ([]*ethpb.Checkpoint, []*ethpb.Checkpoint, error) {
 	ctx, span := trace.StartSpan(ctx, "blockChain.onBlockBatch")
 	defer span.End()
 
 	if len(blks) == 0 || len(blockRoots) == 0 {
+		log.WithFields(logrus.Fields{
+			"len(blks) == 0":       len(blks) == 0,
+			"len(blockRoots) == 0": len(blockRoots) == 0,
+		}).Error(">>>>> onBlockBatch error")
 		return nil, nil, errors.New("no blocks provided")
 	}
 
 	if len(blks) != len(blockRoots) {
+		log.WithError(errWrongBlockCount).WithFields(logrus.Fields{
+			"len(blks) != len(blockRoots)": len(blks) != len(blockRoots),
+		}).Error(">>>>> onBlockBatch error")
 		return nil, nil, errWrongBlockCount
 	}
 
 	if err := helpers.BeaconBlockIsNil(blks[0]); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"blks[0]": blks[0],
+		}).Error(">>>>> onBlockBatch error")
 		return nil, nil, err
 	}
 	b := blks[0].Block()
 
 	// Retrieve incoming block's pre state.
 	if err := s.verifyBlkPreState(ctx, b); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"verifyBlkPreState()": "fail",
+		}).Error(">>>>> onBlockBatch error")
 		return nil, nil, err
 	}
 	preState, err := s.cfg.StateGen.StateByRootInitialSync(ctx, bytesutil.ToBytes32(b.ParentRoot()))
 	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"StateByRootInitialSync": "fail",
+		}).Error(">>>>> onBlockBatch error")
 		return nil, nil, err
 	}
 	if preState == nil || preState.IsNil() {
+		log.WithError(fmt.Errorf("nil pre state for slot %d", b.Slot())).WithFields(logrus.Fields{
+			"preState == nil || preState.IsNil()": preState == nil || preState.IsNil(),
+		}).Error(">>>>> onBlockBatch error")
 		return nil, nil, fmt.Errorf("nil pre state for slot %d", b.Slot())
 	}
 
@@ -448,26 +466,15 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 		PublicKeys: []bls.PublicKey{},
 		Messages:   [][32]byte{},
 	}
-	type versionAndHeader struct {
-		version int
-		header  *ethpb.ExecutionPayloadHeader
-	}
-	preVersionAndHeaders := make([]*versionAndHeader, len(blks))
-	postVersionAndHeaders := make([]*versionAndHeader, len(blks))
 	var set *bls.SignatureBatch
 	boundaries := make(map[[32]byte]state.BeaconState)
 	for i, b := range blks {
-		v, h, err := getStateVersionAndPayload(preState)
-		if err != nil {
-			return nil, nil, err
-		}
-		preVersionAndHeaders[i] = &versionAndHeader{
-			version: v,
-			header:  h,
-		}
 
 		set, preState, err = transition.ExecuteStateTransitionNoVerifyAnySig(ctx, preState, b)
 		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"ExecuteStateTransitionNoVerifyAnySig": "fail",
+			}).Error(">>>>> onBlockBatch error")
 			return nil, nil, err
 		}
 		// Save potential boundary states.
@@ -477,53 +484,30 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 		jCheckpoints[i] = preState.CurrentJustifiedCheckpoint()
 		fCheckpoints[i] = preState.FinalizedCheckpoint()
 
-		v, h, err = getStateVersionAndPayload(preState)
-		if err != nil {
-			return nil, nil, err
-		}
-		postVersionAndHeaders[i] = &versionAndHeader{
-			version: v,
-			header:  h,
-		}
 		sigSet.Join(set)
 	}
 	verify, err := sigSet.Verify()
 	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"Verify()": "fail",
+			"verify":   verify,
+		}).Error(">>>>> onBlockBatch error")
 		return nil, nil, err
 	}
 	if !verify {
+		log.WithError(errors.New("batch block signature verification failed")).WithFields(logrus.Fields{
+			"Verify()": "fail",
+			"verify":   verify,
+		}).Error(">>>>> onBlockBatch error")
 		return nil, nil, errors.New("batch block signature verification failed")
 	}
 
 	// blocks have been verified, add them to forkchoice and call the engine
 	for i, b := range blks {
 		s.saveInitSyncBlock(blockRoots[i], b)
-		isValidPayload, err := s.notifyNewPayload(ctx,
-			preVersionAndHeaders[i].version,
-			postVersionAndHeaders[i].version,
-			preVersionAndHeaders[i].header,
-			postVersionAndHeaders[i].header, b)
-
-		if err != nil {
-			return nil, nil, err
-		}
-		if !isValidPayload {
-			candidate, err := s.optimisticCandidateBlock(ctx, b.Block())
-			if err != nil {
-				return nil, nil, errors.Wrap(err, "could not check if block is optimistic candidate")
-			}
-			if !candidate {
-				return nil, nil, errNotOptimisticCandidate
-			}
-		}
 
 		if err := s.insertBlockToForkChoiceStore(ctx, b.Block(), blockRoots[i], fCheckpoints[i], jCheckpoints[i]); err != nil {
 			return nil, nil, err
-		}
-		if isValidPayload {
-			if err := s.cfg.ForkChoiceStore.SetOptimisticToValid(ctx, blockRoots[i]); err != nil {
-				return nil, nil, errors.Wrap(err, "could not set optimistic block to valid")
-			}
 		}
 
 		if _, err := s.notifyForkchoiceUpdate(ctx, preState, b.Block(), blockRoots[i], bytesutil.ToBytes32(fCheckpoints[i].Root)); err != nil {
@@ -533,6 +517,9 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 
 	for r, st := range boundaries {
 		if err := s.cfg.StateGen.SaveState(ctx, r, st); err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"s.cfg.StateGen.SaveState:boundaries": "fail",
+			}).Error(">>>>> onBlockBatch error")
 			return nil, nil, err
 		}
 	}
@@ -540,9 +527,15 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 	lastB := blks[len(blks)-1]
 	lastBR := blockRoots[len(blockRoots)-1]
 	if err := s.cfg.StateGen.SaveState(ctx, lastBR, preState); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"StateByRootInitialSync:lastBR": "fail",
+		}).Error(">>>>> onBlockBatch error")
 		return nil, nil, err
 	}
 	if err := s.saveHeadNoDB(ctx, lastB, lastBR, preState); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"saveHeadNoDB": "fail",
+		}).Error(">>>>> onBlockBatch error")
 		return nil, nil, err
 	}
 	return fCheckpoints, jCheckpoints, nil
