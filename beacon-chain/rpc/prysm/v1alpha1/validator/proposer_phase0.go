@@ -37,16 +37,18 @@ func (vs *Server) getPhase0BeaconBlock(ctx context.Context, req *ethpb.BlockRequ
 	ctx, span := trace.StartSpan(ctx, "ProposerServer.getPhase0BeaconBlock")
 	defer span.End()
 	blkData, err := vs.buildPhase0BlockData(ctx, req)
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"req": req,
+		}).Error("#### build-Altair-BeaconBlock: could not build block data ###")
+		return nil, fmt.Errorf("could not build block data: %v", err)
+	}
 
-	log.WithError(err).WithFields(logrus.Fields{
+	log.WithFields(logrus.Fields{
 		"req.slot":             req.Slot,
 		"blkData.Finalization": gwatCommon.HashArrayFromBytes(blkData.Eth1Data.Finalization),
 		"blkData.Candidates":   gwatCommon.HashArrayFromBytes(blkData.Eth1Data.Candidates),
 	}).Info("#### get-Phase0Beacon-Block ###")
-
-	if err != nil {
-		return nil, fmt.Errorf("could not build block data: %v", err)
-	}
 
 	// Use zero hash as stub for state root to compute later.
 	stateRoot := params.BeaconConfig().ZeroHash[:]
