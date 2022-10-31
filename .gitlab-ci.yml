@@ -17,7 +17,8 @@ coordinator-build:
     - mkdir -p ./dist
     - bazel version
     - cp runtime/version/version.go /tmp/version.go
-    - sed -i "s|\u2692|${CI_COMMIT_SHORT_SHA}|g" runtime/version/version.go
+    - sed -i "s/\\\u2692/${CI_COMMIT_SHORT_SHA}/g" runtime/version/version.go
+    - cat runtime/version/version.go
     - wget -O eth2deposit-cli-256ea21-linux-amd64.tar.gz https://github.com/ethereum/eth2.0-deposit-cli/releases/download/v1.2.0/eth2deposit-cli-256ea21-linux-amd64.tar.gz
     - tar -xvf eth2deposit-cli-256ea21-linux-amd64.tar.gz
     - cp eth2deposit-cli-256ea21-linux-amd64/deposit ./dist/prysm-deposit
