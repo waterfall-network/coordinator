@@ -216,7 +216,7 @@ func (s *Service) notifyEngineIfChangedHead(ctx context.Context, newHeadRoot [32
 	log.WithFields(logrus.Fields{
 		"oldHeadRoot": fmt.Sprintf("%#x", s.headRoot()),
 		"newHeadRoot": fmt.Sprintf("%#x", newHeadRoot),
-	}).Debug("Head changed due to attestations")
+	}).Info("Head changed due to attestations")
 
 	if !s.hasBlockInInitSyncOrDB(ctx, newHeadRoot) {
 		return // We don't have the block, don't notify the engine and update head.

@@ -38,7 +38,7 @@ func (s *Service) processPendingBlocksQueue() {
 	async.RunEvery(s.ctx, processPendingBlocksPeriod, func() {
 		locker.Lock()
 		if err := s.processPendingBlocks(s.ctx); err != nil {
-			log.WithError(err).Debug("Could not process pending blocks")
+			log.WithError(err).Warn("Could not process pending blocks")
 		}
 		locker.Unlock()
 	})

@@ -164,16 +164,6 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		"postState.Finalization": gwatCommon.HashArrayFromBytes(postState.Eth1Data().Finalization),
 	}).Info("==== savePostStateInfo ====")
 
-	if !s.isSync() {
-		isValidCandidates, err := s.ValidateBlockCandidates(signed.Block())
-		if !isValidCandidates || err != nil {
-			log.WithError(err).WithField(
-				"slotCandidates", isValidCandidates,
-			).Warn("!!!!!! onBlock: validation of candidates failed")
-			return errBadSpineCandidates
-		}
-	}
-
 	// If slasher is configured, forward the attestations in the block via
 	// an event feed for processing.
 	if features.Get().EnableSlasher {
