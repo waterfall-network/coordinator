@@ -16,6 +16,8 @@ coordinator-build:
   script:
     - mkdir -p ./dist
     - bazel version
+    - cp runtime/version/version.go /tmp/version.go
+    - sed -i "s|\u2692|${$CI_COMMIT_SHORT_SHA}|g" runtime/version/version.go
     - wget -O eth2deposit-cli-256ea21-linux-amd64.tar.gz https://github.com/ethereum/eth2.0-deposit-cli/releases/download/v1.2.0/eth2deposit-cli-256ea21-linux-amd64.tar.gz
     - tar -xvf eth2deposit-cli-256ea21-linux-amd64.tar.gz
     - cp eth2deposit-cli-256ea21-linux-amd64/deposit ./dist/prysm-deposit
@@ -27,6 +29,7 @@ coordinator-build:
     - cp ./bazel-bin/tools/bootnode/bootnode_/bootnode ./dist/prysm-bootnode
     - bazel build //tools/genesis-state-gen --config=release
     - cp ./bazel-bin/tools/genesis-state-gen/genesis-state-gen_/genesis-state-gen ./dist/prysm-genesis-generate
+    - cp -r /tmp/version.go runtime/version/version.go
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     paths:
