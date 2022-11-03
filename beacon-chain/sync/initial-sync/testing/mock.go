@@ -9,6 +9,11 @@ type Sync struct {
 	IsSynced      bool
 }
 
+func (s *Sync) IsInitSync() bool {
+	//TODO implement me
+	panic("implement me")
+}
+
 // Syncing --
 func (s *Sync) Syncing() bool {
 	return s.IsSyncing

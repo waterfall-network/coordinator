@@ -254,8 +254,8 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	headState, err := s.cfg.StateGen.StateByRoot(ctx, headRoot)
 
 	log.WithError(err).WithFields(logrus.Fields{
-		"block.slot": signed.Block().Slot(),
-		//"postBlockVoting": helpers.PrintBlockVotingArr(postState.BlockVoting()),
+		"block.slot":             signed.Block().Slot(),
+		"headRoot":               fmt.Sprintf("%#x", headRoot),
 		"headState.Finalization": gwatCommon.HashArrayFromBytes(headState.Eth1Data().Finalization),
 	}).Info("==== StateByRoot ====")
 
@@ -376,6 +376,19 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 			}
 		}()
 
+	}
+
+	if !s.isSync() {
+		isValidCandidates, err := s.ValidateBlockCandidates(headBlock.Block())
+		if !isValidCandidates || err != nil {
+			log.WithError(err).WithField(
+				"slotCandidates", isValidCandidates,
+			).Warn("!!!!!! onBlock: validation of candidates failed")
+		}
+		if isValidCandidates {
+			//cache valid data
+			s.setValidatedBlockInfo(headRoot[:], postState.Slot())
+		}
 	}
 
 	defer reportAttestationInclusion(b)

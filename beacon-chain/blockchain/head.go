@@ -172,18 +172,6 @@ func (s *Service) saveHead(ctx context.Context, headRoot [32]byte, headBlock blo
 		reorgCount.Inc()
 	}
 
-	// TODO move to get attestation data
-	if !s.isSync() {
-		isValidCandidates, err := s.ValidateBlockCandidates(headBlock.Block())
-		if !isValidCandidates || err != nil {
-			log.WithError(err).WithField(
-				"slotCandidates", isValidCandidates,
-			).Warn("!!!!!! onBlock: validation of candidates failed")
-			//return nil
-			return errBadSpineCandidates
-		}
-	}
-
 	// Cache the new head info.
 	s.setHead(headRoot, headBlock, headState)
 

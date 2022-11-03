@@ -10,13 +10,28 @@ import (
 )
 
 type spineData struct {
-	candidates gwatCommon.HashArray
-	actual     bool
-
-	finalization gwatCommon.HashArray
-	lastFinHash  gwatCommon.Hash
-	lastFinSlot  types.Slot
+	candidates    gwatCommon.HashArray
+	actual        bool
+	lastValidRoot []byte
+	lastValidSlot types.Slot
 	sync.RWMutex
+}
+
+// setValidatedBlockInfo cashes info of the latest success validated block.
+func (s *Service) setValidatedBlockInfo(lastValidRoot []byte, lastValidSlot types.Slot) {
+	s.spineData.RLock()
+	defer s.spineData.RUnlock()
+
+	s.spineData.lastValidRoot = lastValidRoot
+	s.spineData.lastValidSlot = lastValidSlot
+}
+
+// GetValidatedBlockInfo returns info of the latest success validated block.
+func (s *Service) GetValidatedBlockInfo() ([]byte, types.Slot) {
+	s.spineData.RLock()
+	defer s.spineData.RUnlock()
+
+	return s.spineData.lastValidRoot, s.spineData.lastValidSlot
 }
 
 // setCacheCandidates cashes current candidates.

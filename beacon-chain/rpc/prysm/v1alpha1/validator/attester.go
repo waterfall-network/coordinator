@@ -1,11 +1,13 @@
 package validator
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 
 	types "github.com/prysmaticlabs/eth2-types"
+	"github.com/sirupsen/logrus"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/cache"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/core/feed"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/operation"
@@ -17,6 +19,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	"github.com/waterfall-foundation/coordinator/time/slots"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -96,6 +99,60 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 			return nil, status.Errorf(codes.Internal, "Could not get historical head state: %v", err)
 		}
 	}
+
+	//validate candidates in state
+	validatedRoot, validatedSlot := vs.HeadFetcher.GetValidatedBlockInfo()
+
+	log.WithFields(logrus.Fields{
+		"slot":                                  headState.Slot(),
+		"headRoot":                              fmt.Sprintf("%#x", headRoot),
+		"validatedRoot":                         fmt.Sprintf("%#x", validatedRoot),
+		"validatedSlot":                         validatedSlot,
+		"!bytes.Equal(headRoot, validatedRoot)": !bytes.Equal(headRoot, validatedRoot),
+	}).Warn("**** GetAttestationData: candidates validation by cache 000")
+
+	if !bytes.Equal(headRoot, validatedRoot) {
+		// gwat validation
+		candidates := gwatCommon.HashArrayFromBytes(headState.Eth1Data().Candidates)
+		log.WithFields(logrus.Fields{
+			"slot":            headState.Slot(),
+			"headRoot":        fmt.Sprintf("%#x", headRoot),
+			"validatedRoot":   fmt.Sprintf("%#x", validatedRoot),
+			"validatedSlot":   validatedSlot,
+			"blockCandidates": candidates,
+		}).Warn("**** GetAttestationData: candidates validation by gwat 111")
+
+		if len(candidates) > 0 {
+			isValidCandidates, err := vs.ExecutionEngineCaller.ExecutionDagValidateSpines(ctx, candidates)
+			if !isValidCandidates || err != nil {
+				log.WithError(err).WithFields(logrus.Fields{
+					"isValidCandidates": isValidCandidates,
+					"candidates":        candidates,
+				}).Warn("**** GetAttestationData: candidates validation by gwat failed")
+
+				//if the latest validated block info is acceptable use it
+				if len(validatedRoot) == 32 && validatedSlot <= req.Slot {
+					headRoot = validatedRoot
+					headState, err = vs.StateGen.StateByRoot(ctx, bytesutil.ToBytes32(headRoot))
+					if err != nil {
+						log.WithError(status.Errorf(codes.Internal, "Could not get lastValidRoot state: %v", err)).WithFields(logrus.Fields{
+							"slotCandidates": isValidCandidates,
+							"candidates":     candidates,
+						}).Error("**** GetAttestationData: candidates validation by gwat failed")
+						return nil, status.Errorf(codes.Internal, "Could not get lastValidRoot state: %v", err)
+					}
+				} else {
+
+					log.WithError(status.Errorf(codes.Internal, "Could not define acceptable attestation data")).WithFields(logrus.Fields{
+						"slotCandidates": isValidCandidates,
+						"candidates":     candidates,
+					}).Error("**** GetAttestationData: candidates validation by gwat failed")
+					return nil, status.Errorf(codes.Internal, "Could not define acceptable attestation data")
+				}
+			}
+		}
+	}
+
 	if headState == nil || headState.IsNil() {
 		return nil, status.Error(codes.Internal, "Could not lookup parent state from head.")
 	}
