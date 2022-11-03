@@ -65,6 +65,7 @@ type HeadFetcher interface {
 	GetCacheCandidates() gwatCommon.HashArray
 	AreCandidatesActual() bool
 	GetValidatedBlockInfo() ([]byte, types.Slot)
+	SetValidatedBlockInfo([]byte, types.Slot)
 }
 
 // ForkFetcher retrieves the current fork information of the Ethereum beacon chain.

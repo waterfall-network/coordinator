@@ -17,8 +17,8 @@ type spineData struct {
 	sync.RWMutex
 }
 
-// setValidatedBlockInfo cashes info of the latest success validated block.
-func (s *Service) setValidatedBlockInfo(lastValidRoot []byte, lastValidSlot types.Slot) {
+// SetValidatedBlockInfo cashes info of the latest success validated block.
+func (s *Service) SetValidatedBlockInfo(lastValidRoot []byte, lastValidSlot types.Slot) {
 	s.spineData.RLock()
 	defer s.spineData.RUnlock()
 

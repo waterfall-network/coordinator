@@ -378,19 +378,6 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 
 	}
 
-	if !s.isSync() {
-		isValidCandidates, err := s.ValidateBlockCandidates(headBlock.Block())
-		if !isValidCandidates || err != nil {
-			log.WithError(err).WithField(
-				"slotCandidates", isValidCandidates,
-			).Warn("!!!!!! onBlock: validation of candidates failed")
-		}
-		if isValidCandidates {
-			//cache valid data
-			s.setValidatedBlockInfo(headRoot[:], postState.Slot())
-		}
-	}
-
 	defer reportAttestationInclusion(b)
 
 	return s.handleEpochBoundary(ctx, postState)
