@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
+	gwatTypes "github.com/waterfall-foundation/gwat/core/types"
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
@@ -170,6 +172,42 @@ func (s *Service) saveHead(ctx context.Context, headRoot [32]byte, headBlock blo
 		}
 
 		reorgCount.Inc()
+	}
+
+	//// TODO отправить финализацию в живот (finalization  взять из этого стейта)
+	// TODO если живат векрнул ошибка финализации - прервать и вернуть ошибку
+	if !s.isSync() {
+
+		slot := uint64(headState.Slot())
+		headState.Eth1Data().GetFinalization()
+
+		creators, err := s.GetCurrentCreators()
+		if err != nil {
+			log.WithError(err).Errorf("Could not compute creators assignments: %v", err)
+		}
+		finalizing := gwatCommon.HashArrayFromBytes(headState.Eth1Data().Finalization)
+		//finalizing = gwatCommon.HashArrayFromBytes(s.head.block.Block().Body().Eth1Data().GetFinalization())
+		syncParams := &gwatTypes.ConsensusInfo{
+			Slot:       slot,
+			Creators:   creators,
+			Finalizing: finalizing,
+		}
+
+		resp, err := s.cfg.ExecutionEngineCaller.ExecutionDagFinalize(ctx, syncParams)
+		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"finalizing": finalizing,
+				"resp":       resp,
+			}).Warn("!!!!!! saveHead: finalization failed")
+			//return nil
+			return errors.Wrap(err, "finalization failed")
+		}
+
+		log.WithFields(logrus.Fields{
+			"finalizing": finalizing,
+			"resp":       resp,
+		}).Info("save head: finalization success")
+
 	}
 
 	// Cache the new head info.
