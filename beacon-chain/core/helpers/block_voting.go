@@ -29,7 +29,7 @@ func BlockVotingsCalcFinalization(ctx context.Context, state state.BeaconState, 
 		tabPriority     = mapPriority{}
 		tabVoting       = mapVoting{}
 		tabCandidates   = mapCandidates{}
-		slotsToConfirm  = 3
+		slotsToConfirm  = 5
 		badVotes        = []*ethpb.BlockVoting{}
 	)
 	for _, bv := range blockVotings {
@@ -58,6 +58,7 @@ func BlockVotingsCalcFinalization(ctx context.Context, state state.BeaconState, 
 			// if provided enough support for slot adds data as separated item
 			if CountAttestationsVotes(atts) >= uint64(minSupport) {
 				supportedVotes = append(supportedVotes, BlockVotingCopy(bv))
+				break
 			}
 		}
 	}
@@ -162,7 +163,11 @@ func BlockVotingMinSupport(ctx context.Context, state state.BeaconState, slot ty
 	for _, cmt := range committees {
 		slotAtts += len(cmt)
 	}
-	return int(math.Ceil((float64(slotAtts) / 100) * float64(minSupport))), nil
+	val := int(math.Ceil((float64(slotAtts)/100)*float64(minSupport))) + 1
+	if val > slotAtts {
+		return slotAtts, nil
+	}
+	return val, nil
 }
 
 // BlockVotingCountVotes counts votes of BlockVoting

@@ -123,7 +123,6 @@ func (s *Service) broadcastAttestation(ctx context.Context, subnet uint64, att *
 			}
 			return errors.New("failed to find peers for subnet")
 		}(); err != nil {
-			//todo ???
 			//log.WithError(err).Error("Failed to find peers")
 			tracing.AnnotateError(span, err)
 		}
@@ -180,7 +179,6 @@ func (s *Service) broadcastSyncCommittee(ctx context.Context, subnet uint64, sMs
 			}
 			return errors.New("failed to find peers for subnet")
 		}(); err != nil {
-			//todo ???
 			//log.WithError(err).Error("Failed to find peers")
 			tracing.AnnotateError(span, err)
 		}
@@ -188,7 +186,6 @@ func (s *Service) broadcastSyncCommittee(ctx context.Context, subnet uint64, sMs
 	// In the event our sync message is outdated and beyond the
 	// acceptable threshold, we exit early and do not broadcast it.
 	if err := altair.ValidateSyncMessageTime(sMsg.Slot, s.genesisTime, params.BeaconNetworkConfig().MaximumGossipClockDisparity); err != nil {
-		//todo ???
 		//log.Warnf("Sync Committee Message is too old to broadcast, discarding it. %v", err)
 		return
 	}

@@ -162,7 +162,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		"block.slot": signed.Block().Slot(),
 		//"postBlockVoting": helpers.PrintBlockVotingArr(postState.BlockVoting()),
 		"postState.Finalization": gwatCommon.HashArrayFromBytes(postState.Eth1Data().Finalization),
-	}).Info("==== savePostStateInfo ====")
+	}).Info("onBlock: save post state")
 
 	// If slasher is configured, forward the attestations in the block via
 	// an event feed for processing.
@@ -239,7 +239,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		"block.slot": signed.Block().Slot(),
 		//"postBlockVoting": helpers.PrintBlockVotingArr(postState.BlockVoting()),
 		"headState.Finalization": gwatCommon.HashArrayFromBytes(s.head.state.Eth1Data().Finalization),
-	}).Info("==== updateHead ====")
+	}).Info("onBlock: update head")
 
 	if err != nil {
 		log.WithError(err).Warn("Could not update head")
@@ -257,7 +257,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		"block.slot":             signed.Block().Slot(),
 		"headRoot":               fmt.Sprintf("%#x", headRoot),
 		"headState.Finalization": gwatCommon.HashArrayFromBytes(headState.Eth1Data().Finalization),
-	}).Info("==== StateByRoot ====")
+	}).Info("onBlock: get state by root")
 
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
@@ -282,7 +282,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		"block.slot": signed.Block().Slot(),
 		//"postBlockVoting": helpers.PrintBlockVotingArr(postState.BlockVoting()),
 		"headState.Finalization": gwatCommon.HashArrayFromBytes(s.head.state.Eth1Data().Finalization),
-	}).Info("==== saveHead ====")
+	}).Info("onBlock: save head")
 
 	log.WithFields(logrus.Fields{
 		"condition":                s.CurrentSlot() == signed.Block().Slot() && !s.isSync(),

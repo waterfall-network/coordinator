@@ -35,7 +35,7 @@ func processRewardsAndPenaltiesPrecomputeWrapper(t *testing.T, st state.BeaconSt
 	vp, bp, err = precompute.ProcessAttestations(ctx, st, vp, bp)
 	require.NoError(t, err)
 
-	log.Info("*** process rewards and penalties *** Wrapper", "st.slot", st.Slot())
+	log.Info("process rewards and penalties (wrapper)", "st.slot", st.Slot())
 
 	st, err = precompute.ProcessRewardsAndPenaltiesPrecompute(st, bp, vp, precompute.AttestationsDelta, precompute.ProposersDelta)
 	require.NoError(t, err, "Could not process reward")

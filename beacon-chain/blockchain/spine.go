@@ -4,7 +4,6 @@ import (
 	"sync"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/sirupsen/logrus"
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
 	gwatCommon "github.com/waterfall-foundation/gwat/common"
 )
@@ -67,12 +66,6 @@ func (s *Service) AreCandidatesActual() bool {
 // ValidateBlockCandidates validate new block candidates.
 func (s *Service) ValidateBlockCandidates(block block.BeaconBlock) (bool, error) {
 	blCandidates := gwatCommon.HashArrayFromBytes(block.Body().Eth1Data().Candidates)
-
-	log.WithFields(logrus.Fields{
-		"slot":            block.Slot(),
-		"blockCandidates": blCandidates,
-	}).Info("**** Blocks Candidates Validation v2 ****")
-
 	if len(blCandidates) == 0 {
 		return true, nil
 	}

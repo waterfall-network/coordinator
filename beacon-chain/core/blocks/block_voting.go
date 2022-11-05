@@ -27,14 +27,6 @@ func ProcessBlockVoting(ctx context.Context, beaconState state.BeaconState, sign
 	candidates := beaconBlock.Body().Eth1Data().GetCandidates()
 	blockVoting := helpers.BlockVotingArrCopy(beaconState.BlockVoting())
 
-	//todo rm
-	if len(blockVoting) > 160 {
-		log.WithFields(logrus.Fields{
-			"blockSlot":   signed.Block().Slot(),
-			"BlockVoting": helpers.PrintBlockVotingArr(blockVoting),
-		}).Error("********** ProcessBlockVoting ********** len(blockVoting) > 160")
-	}
-
 	//add item of block voting for the current block
 	if len(candidates) > 0 {
 		blockVoting = addBlockVoting(blockVoting, beaconBlock.ParentRoot(), uint64(beaconBlock.Slot()-1), candidates)
@@ -48,7 +40,7 @@ func ProcessBlockVoting(ctx context.Context, beaconState state.BeaconState, sign
 	log.WithFields(logrus.Fields{
 		"len(blockVoting)": len(blockVoting),
 		"BlockVoting":      helpers.PrintBlockVotingArr(blockVoting),
-	}).Info("********** ProcessBlockVoting ********** 2222")
+	}).Info("Block Voting processing")
 
 	//calculation of finalization sequence
 	finalization, err := helpers.BlockVotingsCalcFinalization(ctx, beaconState, blockVoting, lastFinSpine)
@@ -68,19 +60,9 @@ func ProcessBlockVoting(ctx context.Context, beaconState state.BeaconState, sign
 		return nil, err
 	}
 
-	log.WithFields(logrus.Fields{
-		"len(blockVoting)": len(blockVoting),
-	}).Info("********** ProcessBlockVoting ********** 0022-999999")
-
 	// removes BlockVoting with completely finalized candidates
 	deprecatedRoots := getBlockVotingsDeprecatedRoots(blockVoting, finalization)
 	blockVoting = removeBlockVoting(blockVoting, deprecatedRoots)
-
-	log.WithFields(logrus.Fields{
-		"BlockVoting":      len(blockVoting),
-		"StateBlockVoting": len(beaconState.BlockVoting()),
-		"deprecatedRoots":  fmt.Sprintf("%#x", deprecatedRoots),
-	}).Info("********** ProcessBlockVoting ********** 4444")
 
 	// if it's a new epoch - removes stale BlockVoting.
 	if slots.IsEpochStart(beaconBlock.Slot()) {
@@ -95,7 +77,7 @@ func ProcessBlockVoting(ctx context.Context, beaconState state.BeaconState, sign
 			"BlockVoting":      len(blockVoting),
 			"StateBlockVoting": len(beaconState.BlockVoting()),
 			"staleRoots":       fmt.Sprintf("%#x", staleRoots),
-		}).Info("********** ProcessBlockVoting ********** 5555 new epoch:removes stale")
+		}).Info("Block Voting processing: removes stale at new epoch")
 
 	}
 
