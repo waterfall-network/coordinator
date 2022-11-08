@@ -29,7 +29,7 @@ func BlockVotingsCalcFinalization(ctx context.Context, state state.BeaconState, 
 		tabPriority     = mapPriority{}
 		tabVoting       = mapVoting{}
 		tabCandidates   = mapCandidates{}
-		slotsToConfirm  = 5
+		slotsToConfirm  = params.BeaconConfig().VotingRequiredSlots
 		badVotes        = []*ethpb.BlockVoting{}
 	)
 	for _, bv := range blockVotings {
@@ -66,6 +66,8 @@ func BlockVotingsCalcFinalization(ctx context.Context, state state.BeaconState, 
 	log.WithFields(log.Fields{
 		"total-BlockVoting":     len(blockVotings),
 		"supported-BlockVoting": len(supportedVotes),
+		"VotingRequiredSlots":   params.BeaconConfig().VotingRequiredSlots,
+		"SecondsPerSlot":        params.BeaconConfig().SecondsPerSlot,
 	}).Warn("VOTING INFO >>>>")
 
 	// handle supported votes

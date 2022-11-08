@@ -68,6 +68,7 @@ var appFlags = []cli.Flag{
 	flags.Eth1HeaderReqLimit,
 	flags.MinPeersPerSubnet,
 	flags.SuggestedFeeRecipient,
+	flags.VotingRequiredSlots,
 	cmd.EnableBackupWebhookFlag,
 	cmd.BackupWebhookOutputDir,
 	cmd.MinimalConfigFlag,

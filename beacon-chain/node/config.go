@@ -79,6 +79,11 @@ func configureEth1Config(cliCtx *cli.Context) {
 		c.DepositContractAddress = cliCtx.String(flags.DepositContractFlag.Name)
 		params.OverrideBeaconConfig(c)
 	}
+	if cliCtx.IsSet(flags.VotingRequiredSlots.Name) {
+		c := params.BeaconConfig()
+		c.VotingRequiredSlots = cliCtx.Int(flags.VotingRequiredSlots.Name)
+		params.OverrideBeaconConfig(c)
+	}
 }
 
 func configureNetwork(cliCtx *cli.Context) {

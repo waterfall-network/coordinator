@@ -121,6 +121,9 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	Eth1FollowDistance:         16,
 	SafeSlotsToUpdateJustified: 8,
 
+	//BlockVoting slots
+	VotingRequiredSlots: 3,
+
 	// Fork choice algorithm constants.
 	ProposerScoreBoost: 70,
 	IntervalsPerSlot:   3,

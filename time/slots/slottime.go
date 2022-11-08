@@ -138,7 +138,7 @@ func VerifyTime(genesisTime uint64, slot types.Slot, timeTolerance time.Duration
 	diff := slotTime.Sub(currentTime)
 
 	if diff > timeTolerance {
-		return fmt.Errorf("could not process slot from the future, slot time %s > current time %s", slotTime, currentTime)
+		return fmt.Errorf("could not process slot from the future, slot time %s > current time %s (timeTolerance=%s)", slotTime, currentTime, timeTolerance)
 	}
 	return nil
 }
