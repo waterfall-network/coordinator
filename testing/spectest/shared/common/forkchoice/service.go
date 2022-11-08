@@ -22,7 +22,7 @@ import (
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
 	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/gwat/common"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	"github.com/waterfall-foundation/gwat/common/hexutil"
 	gwatTypes "github.com/waterfall-foundation/gwat/core/types"
 )
@@ -72,22 +72,22 @@ type engineMock struct {
 	powBlocks map[[32]byte]*ethpb.PowBlock
 }
 
-func (m *engineMock) ExecutionDagSync(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (common.HashArray, error) {
+func (m *engineMock) ExecutionDagSync(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (gwatCommon.HashArray, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (m *engineMock) ExecutionDagFinalize(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (*map[string]string, error) {
+func (m *engineMock) ExecutionDagFinalize(ctx context.Context, syncParams *gwatCommon.HashArray) error {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (m *engineMock) ExecutionDagGetCandidates(ctx context.Context, slot types.Slot) (common.HashArray, error) {
+func (m *engineMock) ExecutionDagGetCandidates(ctx context.Context, slot types.Slot) (gwatCommon.HashArray, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (m *engineMock) GetHeaderByHash(ctx context.Context, hash common.Hash) (*gwatTypes.Header, error) {
+func (m *engineMock) GetHeaderByHash(ctx context.Context, hash gwatCommon.Hash) (*gwatTypes.Header, error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -115,7 +115,7 @@ func (m *engineMock) ExchangeTransitionConfiguration(context.Context, *pb.Transi
 	return nil
 }
 
-func (m *engineMock) ExecutionBlockByHash(_ context.Context, hash common.Hash) (*pb.ExecutionBlock, error) {
+func (m *engineMock) ExecutionBlockByHash(_ context.Context, hash gwatCommon.Hash) (*pb.ExecutionBlock, error) {
 	b, ok := m.powBlocks[bytesutil.ToBytes32(hash.Bytes())]
 	if !ok {
 		return nil, nil

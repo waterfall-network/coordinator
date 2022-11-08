@@ -61,7 +61,7 @@ func (m *POWChain) ExecutionDagSync(ctx context.Context, syncParams *gwatTypes.C
 	return candidates, err
 }
 
-func (m *POWChain) ExecutionDagFinalize(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (*map[string]string, error) {
+func (m *POWChain) ExecutionDagFinalize(ctx context.Context, syncParams *gwatCommon.HashArray) error {
 	//TODO implement me
 	panic("implement me")
 }

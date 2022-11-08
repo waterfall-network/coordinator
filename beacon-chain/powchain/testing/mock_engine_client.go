@@ -41,7 +41,7 @@ func (e *EngineClient) ExecutionDagGetCandidates(ctx context.Context, slot types
 	panic("implement me")
 }
 
-func (e *EngineClient) ExecutionDagFinalize(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (*map[string]string, error) {
+func (e *EngineClient) ExecutionDagFinalize(ctx context.Context, syncParams *gwatCommon.HashArray) error {
 	panic("implement me")
 }
 

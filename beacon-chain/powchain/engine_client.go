@@ -59,7 +59,7 @@ type EngineCaller interface {
 	GetTerminalBlockHash(ctx context.Context) ([]byte, bool, error)
 
 	ExecutionDagSync(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (gwatCommon.HashArray, error)
-	ExecutionDagFinalize(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (*map[string]string, error)
+	ExecutionDagFinalize(ctx context.Context, syncParams *gwatCommon.HashArray) error
 	ExecutionDagGetCandidates(ctx context.Context, slot types.Slot) (gwatCommon.HashArray, error)
 	ExecutionDagHeadSyncReady(ctx context.Context, params *gwatTypes.ConsensusInfo) (bool, error)
 	ExecutionDagValidateSpines(ctx context.Context, params gwatCommon.HashArray) (bool, error)

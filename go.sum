@@ -1378,8 +1378,8 @@ github.com/valyala/fasttemplate v1.0.1/go.mod h1:UQGH1tvbgY+Nz5t2n7tXsz52dQxojPU
 github.com/valyala/fasttemplate v1.2.1/go.mod h1:KHLXt3tVN2HBp8eijSv/kGJopbvo7S+qRAEEKiv+SiQ=
 github.com/viant/assertly v0.4.8/go.mod h1:aGifi++jvCrUaklKEKT0BU95igDNaqkvz+49uaYMPRU=
 github.com/viant/toolbox v0.24.0/go.mod h1:OxMCG57V0PXuIP2HNQrtJf2CjqdmbrOx5EkMILuUhzM=
-github.com/waterfall-foundation/gwat v0.5.9 h1:n/sxYjV+MgCGY0wnoGhClCbOlmdNasD4ipvkixV3IIU=
-github.com/waterfall-foundation/gwat v0.5.9/go.mod h1:jYjEIR3Y1ejKJwvPgqFOuZbx4g0mNOWjeMMIHfyPzFA=
+github.com/waterfall-foundation/gwat v0.6.2 h1:edQy5zCWHAiR51A8qYjCcpyx/nm0axwh10NGxSRz2lk=
+github.com/waterfall-foundation/gwat v0.6.2/go.mod h1:jYjEIR3Y1ejKJwvPgqFOuZbx4g0mNOWjeMMIHfyPzFA=
 github.com/wealdtech/go-bytesutil v1.1.1 h1:ocEg3Ke2GkZ4vQw5lp46rmO+pfqCCTgq35gqOy8JKVc=
 github.com/wealdtech/go-bytesutil v1.1.1/go.mod h1:jENeMqeTEU8FNZyDFRVc7KqBdRKSnJ9CCh26TcuNb9s=
 github.com/wealdtech/go-eth2-types/v2 v2.5.2 h1:tiA6T88M6XQIbrV5Zz53l1G5HtRERcxQfmET225V4Ls=

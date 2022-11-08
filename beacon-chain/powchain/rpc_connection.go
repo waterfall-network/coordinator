@@ -7,11 +7,13 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"github.com/waterfall-foundation/coordinator/config/params"
 	contracts "github.com/waterfall-foundation/coordinator/contracts/deposit"
 	"github.com/waterfall-foundation/coordinator/io/logs"
 	"github.com/waterfall-foundation/coordinator/network"
 	"github.com/waterfall-foundation/coordinator/network/authorization"
+	gwatTypes "github.com/waterfall-foundation/gwat/core/types"
 	"github.com/waterfall-foundation/gwat/ethclient"
 	gethRPC "github.com/waterfall-foundation/gwat/rpc"
 )
@@ -74,6 +76,17 @@ func (s *Service) pollConnectionStatus(ctx context.Context) {
 				currClient.Close()
 			}
 			log.Infof("Connected to new endpoint: %s", logs.MaskCredentialsLogging(s.cfg.currHttpEndpoint.Url))
+			// send gwat current slot info
+			slotInfo := &gwatTypes.SlotInfo{
+				GenesisTime:    s.chainStartData.GenesisTime,
+				SecondsPerSlot: params.BeaconConfig().SecondsPerSlot,
+				SlotsPerEpoch:  uint64(params.BeaconConfig().SlotsPerEpoch),
+			}
+			isSet, err := s.ExecutionDagSyncSlotInfo(ctx, slotInfo)
+			log.WithError(err).WithFields(logrus.Fields{
+				"isSet":    isSet,
+				"slotInfo": slotInfo,
+			}).Info("sync slot info")
 			return
 		case <-s.ctx.Done():
 			log.Debug("Received cancelled context,closing existing powchain service")
