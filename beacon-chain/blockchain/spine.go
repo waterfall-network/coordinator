@@ -9,8 +9,6 @@ import (
 )
 
 type spineData struct {
-	candidates    gwatCommon.HashArray
-	actual        bool
 	lastValidRoot []byte
 	lastValidSlot types.Slot
 	sync.RWMutex
@@ -31,36 +29,6 @@ func (s *Service) GetValidatedBlockInfo() ([]byte, types.Slot) {
 	defer s.spineData.RUnlock()
 
 	return s.spineData.lastValidRoot, s.spineData.lastValidSlot
-}
-
-// setCacheCandidates cashes current candidates.
-func (s *Service) setCacheCandidates(candidates gwatCommon.HashArray) {
-	s.spineData.RLock()
-	defer s.spineData.RUnlock()
-
-	s.spineData.candidates = candidates.Copy()
-}
-
-// GetCacheCandidates returns current candidates.
-func (s *Service) GetCacheCandidates() gwatCommon.HashArray {
-	s.spineData.RLock()
-	defer s.spineData.RUnlock()
-
-	return s.spineData.candidates.Copy()
-}
-
-// setCacheCandidates cashes current candidates.
-func (s *Service) setCandidatesActual(actual bool) {
-	s.spineData.RLock()
-	defer s.spineData.RUnlock()
-	s.spineData.actual = actual
-}
-
-// GetCacheCandidates returns current candidates.
-func (s *Service) AreCandidatesActual() bool {
-	s.spineData.RLock()
-	defer s.spineData.RUnlock()
-	return s.spineData.actual
 }
 
 // ValidateBlockCandidates validate new block candidates.

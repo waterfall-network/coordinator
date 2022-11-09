@@ -146,7 +146,6 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 					log.WithError(err).Error("Could not process new slot")
 					return
 				}
-				s.setCandidatesActual(false)
 				var (
 					slot       = uint64(s.CurrentSlot())
 					finalizing gwatCommon.HashArray
@@ -160,24 +159,19 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 						log.WithError(err).Errorf("Could not compute creators assignments: %v", err)
 					}
 					finalizing = gwatCommon.HashArrayFromBytes(headState.Eth1Data().Finalization)
-					//finalizing = gwatCommon.HashArrayFromBytes(s.head.block.Block().Body().Eth1Data().GetFinalization())
 					syncParams := &gwatTypes.ConsensusInfo{
 						Slot:       slot,
 						Creators:   creators,
 						Finalizing: finalizing,
 					}
 
-					candidates, err := s.cfg.ExecutionEngineCaller.ExecutionDagSync(s.ctx, syncParams)
+					_, err = s.cfg.ExecutionEngineCaller.ExecutionDagSync(s.ctx, syncParams)
 					if err != nil {
 						log.WithError(err).Error("Error while execute finalization procedure")
-					} else {
-						s.setCacheCandidates(candidates)
-						s.setCandidatesActual(true)
 					}
 					log.WithError(err).WithFields(logrus.Fields{
 						"slot":         slot,
 						"finalization": gwatCommon.HashArrayFromBytes(headState.Eth1Data().Finalization),
-						"candidates":   s.GetCacheCandidates(),
 					}).Info("gwat dag sync")
 				}
 

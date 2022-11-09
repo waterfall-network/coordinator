@@ -26,7 +26,6 @@ import (
 	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
-	gwatCommon "github.com/waterfall-foundation/gwat/common"
 )
 
 var ErrNilState = errors.New("nil state")
@@ -63,16 +62,6 @@ type ChainService struct {
 	Genesis                     time.Time
 	ForkChoiceStore             forkchoice.ForkChoicer
 	ReceiveBlockMockErr         error
-}
-
-func (s *ChainService) AreCandidatesActual() bool {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *ChainService) GetCacheCandidates() gwatCommon.HashArray {
-	//TODO implement me
-	panic("implement me")
 }
 
 // ForkChoicer mocks the same method in the chain service
