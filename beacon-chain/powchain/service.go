@@ -72,8 +72,6 @@ var (
 	logPeriod = 1 * time.Minute
 	// threshold of how old we will accept an eth1 node's head to be.
 	eth1Threshold = 20 * time.Minute
-	// error when eth1 node is too far behind.
-	errFarBehind = errors.Errorf("eth1 head is more than %s behind from current wall clock time", eth1Threshold.String())
 )
 
 // ChainStartFetcher retrieves information pertaining to the chain start event
@@ -635,15 +633,17 @@ func (s *Service) run(done <-chan struct{}) {
 		case <-done:
 			s.isRunning = false
 			s.runError = nil
-			s.rpcClient.Close()
+			if s.rpcClient != nil {
+				s.rpcClient.Close()
+			}
 			s.updateConnectedETH1(false)
-			log.Debug("Context closed, exiting goroutine")
+			log.Info("Context closed, exiting goroutine")
 			return
 		case <-s.headTicker.C:
 			head, err := s.eth1DataFetcher.HeaderByNumber(s.ctx, nil)
 			if err != nil {
 				s.pollConnectionStatus(s.ctx)
-				log.WithError(err).Debug("Could not fetch latest eth1 header")
+				log.WithError(err).Error("Could not fetch latest eth1 header")
 				continue
 			}
 			s.processBlockHeader(head)

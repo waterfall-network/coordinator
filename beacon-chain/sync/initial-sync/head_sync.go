@@ -57,6 +57,13 @@ func (s *Service) execHeadSyncReady(ctx context.Context) error {
 	log.WithField("HeadSyncReadyIntervalMs", fmt.Sprintf("%d", params.BeaconConfig().HeadSyncReadyIntervalMs)).Info("Head sync readiness starts ...")
 
 	for {
+		select {
+		case <-ticker.C:
+		case <-ctx.Done():
+			log.Info("Head sync readiness: context closed, exiting routine")
+			return nil
+		}
+
 		checkpoint := s.cfg.Chain.CurrentJustifiedCheckpt()
 		if checkpoint == nil {
 			log.Error("Head sync readiness: no checkpoint")
@@ -70,7 +77,10 @@ func (s *Service) execHeadSyncReady(ctx context.Context) error {
 
 		cpState, err := s.cfg.StateGen.StateByRoot(ctx, cpRoot)
 		if err != nil {
-			log.WithField("cpState", cpState).WithError(err).Error("Head sync readiness: error")
+			log.WithFields(logrus.Fields{
+				"checkpoint.Root": fmt.Sprintf("%x", checkpoint.Root),
+				"cpState":         cpState,
+			}).WithError(err).Error("Head sync readiness: error")
 			continue
 		}
 
@@ -111,12 +121,6 @@ func (s *Service) execHeadSyncReady(ctx context.Context) error {
 		if isReady {
 			s.headSyncCp = checkpoint
 			log.WithFields(logFields).Info("Head sync readiness: success")
-			return nil
-		}
-		select {
-		case <-ticker.C:
-		case <-ctx.Done():
-			log.Debug("Head sync readiness: context closed, exiting routine")
 			return nil
 		}
 	}
