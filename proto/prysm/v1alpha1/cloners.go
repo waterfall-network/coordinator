@@ -19,6 +19,19 @@ func CopyETH1Data(data *Eth1Data) *Eth1Data {
 	}
 }
 
+// CopyBlockVoting copies the provided BlockVoting object.
+func CopyBlockVoting(data *BlockVoting) *BlockVoting {
+	if data == nil {
+		return nil
+	}
+	return &BlockVoting{
+		Root:           bytesutil.SafeCopyBytes(data.Root),
+		TotalAttesters: data.TotalAttesters,
+		Candidates:     bytesutil.SafeCopyBytes(data.Candidates),
+		Attestations:   CopyAttestations(data.Attestations),
+	}
+}
+
 // CopyPendingAttestationSlice copies the provided slice of pending attestation objects.
 func CopyPendingAttestationSlice(input []*PendingAttestation) []*PendingAttestation {
 	if input == nil {

@@ -65,6 +65,7 @@ func InitializeFromProtoUnsafe(st *ethpb.BeaconState) (state.BeaconState, error)
 		historicalRoots:             hRoots,
 		eth1Data:                    st.Eth1Data,
 		eth1DataVotes:               st.Eth1DataVotes,
+		blockVoting:                 st.BlockVoting,
 		eth1DepositIndex:            st.Eth1DepositIndex,
 		validators:                  st.Validators,
 		balances:                    st.Balances,
@@ -107,6 +108,7 @@ func InitializeFromProtoUnsafe(st *ethpb.BeaconState) (state.BeaconState, error)
 	b.sharedFieldReferences[validators] = stateutil.NewRef(1)
 	b.sharedFieldReferences[balances] = stateutil.NewRef(1)
 	b.sharedFieldReferences[historicalRoots] = stateutil.NewRef(1)
+	b.sharedFieldReferences[blockVoting] = stateutil.NewRef(1)
 
 	state.StateCount.Inc()
 	return b, nil
@@ -133,6 +135,7 @@ func (b *BeaconState) Copy() state.BeaconState {
 		previousEpochAttestations: b.previousEpochAttestations,
 		currentEpochAttestations:  b.currentEpochAttestations,
 		eth1DataVotes:             b.eth1DataVotes,
+		blockVoting:               b.blockVoting,
 
 		// Large arrays, increases over time.
 		balances:        b.balances,
@@ -363,6 +366,20 @@ func (b *BeaconState) rootSelector(ctx context.Context, field types.FieldIndex) 
 			return b.stateFieldLeaves[field].TrieRoot()
 		}
 		return b.recomputeFieldTrie(field, b.eth1DataVotes)
+	case blockVoting:
+		if b.rebuildTrie[field] {
+			err := b.resetFieldTrie(
+				field,
+				b.blockVoting,
+				fieldparams.BlockVotingLength,
+			)
+			if err != nil {
+				return [32]byte{}, err
+			}
+			delete(b.rebuildTrie, field)
+			return b.stateFieldLeaves[field].TrieRoot()
+		}
+		return b.recomputeFieldTrie(field, b.blockVoting)
 	case validators:
 		if b.rebuildTrie[field] {
 			err := b.resetFieldTrie(field, b.validators, fieldparams.ValidatorRegistryLimit)

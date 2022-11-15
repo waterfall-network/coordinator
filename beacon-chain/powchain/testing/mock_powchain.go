@@ -61,7 +61,7 @@ func (m *POWChain) ExecutionDagSync(ctx context.Context, syncParams *gwatTypes.C
 	return candidates, err
 }
 
-func (m *POWChain) ExecutionDagFinalize(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (*map[string]string, error) {
+func (m *POWChain) ExecutionDagFinalize(ctx context.Context, syncParams *gwatCommon.HashArray) error {
 	//TODO implement me
 	panic("implement me")
 }
@@ -79,6 +79,10 @@ func (m *POWChain) ExecutionDagHeadSyncReady(ctx context.Context, params *gwatTy
 }
 
 func (m *POWChain) ExecutionDagHeadSync(ctx context.Context, params []gwatTypes.ConsensusInfo) (bool, error) {
+	panic("implement me")
+}
+
+func (m *POWChain) ExecutionDagValidateSpines(ctx context.Context, params gwatCommon.HashArray) (bool, error) {
 	panic("implement me")
 }
 

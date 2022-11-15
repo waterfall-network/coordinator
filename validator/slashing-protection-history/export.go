@@ -185,7 +185,7 @@ func signedBlocksByPubKey(ctx context.Context, validatorDB db.Database, pubKey [
 	signedBlocks := make([]*format.SignedBlock, 0)
 	for _, proposal := range proposalHistory {
 		if ctx.Err() != nil {
-			return nil, errors.Wrap(err, "context canceled")
+			return nil, errors.Wrap(err, "context canceled (blocks by pubKey)")
 		}
 		signingRootHex, err := rootToHexString(proposal.SigningRoot)
 		if err != nil {

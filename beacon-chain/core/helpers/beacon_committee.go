@@ -234,6 +234,47 @@ func CommitteeAssignments(
 	return validatorIndexToCommittee, proposerIndexToSlots, nil
 }
 
+// CalcSlotCommitteesIndexes calculate array of committees
+// of attesters assignment for the given slot.
+func CalcSlotCommitteesIndexes(
+	ctx context.Context,
+	state state.BeaconState,
+	slot types.Slot,
+) (committees [][]types.ValidatorIndex, err error) {
+	epoch := slots.ToEpoch(slot)
+	nextEpoch := time.NextEpoch(state)
+	if epoch > nextEpoch {
+		return committees, fmt.Errorf(
+			"epoch %d (slot %d) can't be greater than next epoch %d",
+			epoch,
+			slot,
+			nextEpoch,
+		)
+	}
+	// If previous proposer indices computation is outside if current proposal epoch range,
+	// we need to reset state slot back to start slot so that we can compute the correct committees.
+	currentProposalEpoch := epoch < nextEpoch
+	if !currentProposalEpoch {
+		if err = state.SetSlot(state.Slot() - params.BeaconConfig().SlotsPerEpoch); err != nil {
+			return committees, err
+		}
+	}
+	activeValidatorIndices, err := ActiveValidatorIndices(ctx, state, epoch)
+	if err != nil {
+		return committees, err
+	}
+	numCommitteesPerSlot := SlotCommitteeCount(uint64(len(activeValidatorIndices)))
+	for j := uint64(0); j < numCommitteesPerSlot; j++ {
+		// Compute committees.
+		committee, err := BeaconCommitteeFromState(ctx, state, slot, types.CommitteeIndex(j) /*committee index*/)
+		if err != nil {
+			return committees, err
+		}
+		committees = append(committees, committee)
+	}
+	return committees, nil
+}
+
 // CalcCreatorsAssignments calculates creators assignments for epoch-param and next epoch.
 func CalcCreatorsAssignments(
 	ctx context.Context,

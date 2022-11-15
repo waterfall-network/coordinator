@@ -159,6 +159,14 @@ func ComputeFieldRootsWithHasherPhase0(ctx context.Context, state *ethpb.BeaconS
 		return nil, errors.Wrap(err, "could not compute finalized checkpoint merkleization")
 	}
 	fieldRoots[20] = finalRoot[:]
+
+	// BlockVoting slice root.
+	blockVotingHashTreeRoot, err := blockVotingRoot(state.BlockVoting)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not compute blockVoting merkleization")
+	}
+	fieldRoots[21] = blockVotingHashTreeRoot[:]
+
 	return fieldRoots, nil
 }
 
@@ -308,26 +316,33 @@ func ComputeFieldRootsWithHasherAltair(ctx context.Context, state *ethpb.BeaconS
 	}
 	fieldRoots[20] = finalRoot[:]
 
+	// BlockVoting slice root.
+	blockVotingHashTreeRoot, err := blockVotingRoot(state.BlockVoting)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not compute blockVoting merkleization")
+	}
+	fieldRoots[21] = blockVotingHashTreeRoot[:]
+
 	// Inactivity scores root.
 	inactivityScoresRoot, err := Uint64ListRootWithRegistryLimit(state.InactivityScores)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute inactivityScoreRoot")
 	}
-	fieldRoots[21] = inactivityScoresRoot[:]
+	fieldRoots[22] = inactivityScoresRoot[:]
 
 	// Current sync committee root.
 	currentSyncCommitteeRoot, err := SyncCommitteeRoot(state.CurrentSyncCommittee)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute sync committee merkleization")
 	}
-	fieldRoots[22] = currentSyncCommitteeRoot[:]
+	fieldRoots[23] = currentSyncCommitteeRoot[:]
 
 	// Next sync committee root.
 	nextSyncCommitteeRoot, err := SyncCommitteeRoot(state.NextSyncCommittee)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute sync committee merkleization")
 	}
-	fieldRoots[23] = nextSyncCommitteeRoot[:]
+	fieldRoots[24] = nextSyncCommitteeRoot[:]
 
 	return fieldRoots, nil
 }
@@ -478,33 +493,40 @@ func ComputeFieldRootsWithHasherBellatrix(ctx context.Context, state *ethpb.Beac
 	}
 	fieldRoots[20] = finalRoot[:]
 
+	// BlockVoting slice root.
+	blockVotingHashTreeRoot, err := blockVotingRoot(state.BlockVoting)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not compute blockVoting merkleization")
+	}
+	fieldRoots[21] = blockVotingHashTreeRoot[:]
+
 	// Inactivity scores root.
 	inactivityScoresRoot, err := Uint64ListRootWithRegistryLimit(state.InactivityScores)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute inactivityScoreRoot")
 	}
-	fieldRoots[21] = inactivityScoresRoot[:]
+	fieldRoots[22] = inactivityScoresRoot[:]
 
 	// Current sync committee root.
 	currentSyncCommitteeRoot, err := SyncCommitteeRoot(state.CurrentSyncCommittee)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute sync committee merkleization")
 	}
-	fieldRoots[22] = currentSyncCommitteeRoot[:]
+	fieldRoots[23] = currentSyncCommitteeRoot[:]
 
 	// Next sync committee root.
 	nextSyncCommitteeRoot, err := SyncCommitteeRoot(state.NextSyncCommittee)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute sync committee merkleization")
 	}
-	fieldRoots[23] = nextSyncCommitteeRoot[:]
+	fieldRoots[24] = nextSyncCommitteeRoot[:]
 
 	// Execution payload root.
 	executionPayloadRoot, err := state.LatestExecutionPayloadHeader.HashTreeRoot()
 	if err != nil {
 		return nil, err
 	}
-	fieldRoots[24] = executionPayloadRoot[:]
+	fieldRoots[25] = executionPayloadRoot[:]
 
 	return fieldRoots, nil
 }

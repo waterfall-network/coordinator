@@ -146,7 +146,6 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 					log.WithError(err).Error("Could not process new slot")
 					return
 				}
-
 				var (
 					slot       = uint64(s.CurrentSlot())
 					finalizing gwatCommon.HashArray
@@ -154,29 +153,26 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 				headState := s.headState(s.ctx)
 				curEpoch := slots.ToEpoch(s.CurrentSlot())
 				stateNextEpoch := slots.ToEpoch(headState.Slot()) + 1
-				if curEpoch <= stateNextEpoch && !s.isSync(s.ctx) {
+				if curEpoch <= stateNextEpoch && !s.isSync() {
 					creators, err := s.GetCurrentCreators()
 					if err != nil {
 						log.WithError(err).Errorf("Could not compute creators assignments: %v", err)
 					}
 					finalizing = gwatCommon.HashArrayFromBytes(headState.Eth1Data().Finalization)
-					//finalizing = gwatCommon.HashArrayFromBytes(s.head.block.Block().Body().Eth1Data().GetFinalization())
 					syncParams := &gwatTypes.ConsensusInfo{
 						Slot:       slot,
 						Creators:   creators,
 						Finalizing: finalizing,
 					}
 
-					candidates, err := s.cfg.ExecutionEngineCaller.ExecutionDagSync(s.ctx, syncParams)
+					_, err = s.cfg.ExecutionEngineCaller.ExecutionDagSync(s.ctx, syncParams)
 					if err != nil {
 						log.WithError(err).Error("Error while execute finalization procedure")
-						//if err.Error() == "got an unexpected error: synchronization" {
-						//	log.Warn("******* Start head sync procedure (spawnProcessAttestationsRoutine) ******")
-						//	go s.runHeadSync(s.ctx)
-						//}
-					} else {
-						s.setCacheCandidates(candidates)
 					}
+					log.WithError(err).WithFields(logrus.Fields{
+						"slot":         slot,
+						"finalization": gwatCommon.HashArrayFromBytes(headState.Eth1Data().Finalization),
+					}).Info("gwat dag sync")
 				}
 
 				// Continue when there's no fork choice attestation, there's nothing to process and update head.
@@ -214,7 +210,7 @@ func (s *Service) notifyEngineIfChangedHead(ctx context.Context, newHeadRoot [32
 	log.WithFields(logrus.Fields{
 		"oldHeadRoot": fmt.Sprintf("%#x", s.headRoot()),
 		"newHeadRoot": fmt.Sprintf("%#x", newHeadRoot),
-	}).Debug("Head changed due to attestations")
+	}).Info("Head changed due to attestations")
 
 	if !s.hasBlockInInitSyncOrDB(ctx, newHeadRoot) {
 		return // We don't have the block, don't notify the engine and update head.

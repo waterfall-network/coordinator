@@ -41,7 +41,7 @@ func (e *EngineClient) ExecutionDagGetCandidates(ctx context.Context, slot types
 	panic("implement me")
 }
 
-func (e *EngineClient) ExecutionDagFinalize(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (*map[string]string, error) {
+func (e *EngineClient) ExecutionDagFinalize(ctx context.Context, syncParams *gwatCommon.HashArray) error {
 	panic("implement me")
 }
 
@@ -50,6 +50,10 @@ func (e *EngineClient) ExecutionDagHeadSyncReady(ctx context.Context, params *gw
 }
 
 func (e *EngineClient) ExecutionDagHeadSync(ctx context.Context, params []gwatTypes.ConsensusInfo) (bool, error) {
+	panic("implement me")
+}
+
+func (e *EngineClient) ExecutionDagValidateSpines(ctx context.Context, params gwatCommon.HashArray) (bool, error) {
 	panic("implement me")
 }
 

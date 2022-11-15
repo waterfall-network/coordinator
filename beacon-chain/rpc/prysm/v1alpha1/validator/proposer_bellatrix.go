@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/sirupsen/logrus"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/core/transition/interop"
 	"github.com/waterfall-foundation/coordinator/config/params"
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
@@ -47,6 +48,11 @@ func (vs *Server) getBellatrixBeaconBlock(ctx context.Context, req *ethpb.BlockR
 		return nil, err
 	}
 	stateRoot, err := vs.computeStateRoot(ctx, wsb)
+
+	log.WithError(err).WithFields(logrus.Fields{
+		"block.slot": wsb.Block().Slot(),
+	}).Info("<<<< getBellatrixBeaconBlock:computeStateRoot >>>>> 6666666")
+
 	if err != nil {
 		interop.WriteBlockToDisk(wsb, true /*failed*/)
 		return nil, fmt.Errorf("could not compute state root: %v", err)

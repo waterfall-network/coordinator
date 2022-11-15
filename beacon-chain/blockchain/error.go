@@ -21,5 +21,5 @@ var (
 	// errBadSpineCandidates block has an invalid spine candidates
 	errBadSpineCandidates = errors.New("block is not suitable for spyne candidates sync")
 	// errRetrievingSpine block has an invalid spine candidates
-	errRetrievingSpineFailed = errors.New("retrieving spine data failed")
+	errSyncIsRunning = errors.New("sync is running")
 )

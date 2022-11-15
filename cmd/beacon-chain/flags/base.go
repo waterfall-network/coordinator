@@ -211,4 +211,10 @@ var (
 		Usage: "Post bellatrix, this address will receive the transaction fees produced by any blocks from this node. Default to junk whilst bellatrix is in development state. Validator client can override this value through the preparebeaconproposer api.",
 		Value: fieldparams.EthBurnAddressHex,
 	}
+	// VotingRequiredSlots defines a flag to set the slots number required to accept spines sequence.
+	VotingRequiredSlots = &cli.IntFlag{
+		Name:  "voting-required-slots",
+		Usage: "Sets the slots number required for voiting to accept spines sequence.",
+		Value: 3,
+	}
 )

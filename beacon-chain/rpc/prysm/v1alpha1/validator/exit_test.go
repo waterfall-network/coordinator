@@ -28,7 +28,7 @@ func TestProposeExit_Notification(t *testing.T) {
 
 	deposits, keys, err := util.DeterministicDepositsAndKeys(params.BeaconConfig().MinGenesisActiveValidatorCount)
 	require.NoError(t, err)
-	beaconState, err := transition.GenesisBeaconState(ctx, deposits, 0, &ethpb.Eth1Data{Candidates: make([]byte, 0), Candidates: make([]byte, 0), BlockHash: make([]byte, 32)})
+	beaconState, err := transition.GenesisBeaconState(ctx, deposits, 0, &ethpb.Eth1Data{Candidates: make([]byte, 0), Finalization: make([]byte, 0), BlockHash: make([]byte, 32)})
 	require.NoError(t, err)
 	epoch := types.Epoch(2048)
 	require.NoError(t, beaconState.SetSlot(params.BeaconConfig().SlotsPerEpoch.Mul(uint64(epoch))))

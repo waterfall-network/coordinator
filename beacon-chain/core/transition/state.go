@@ -141,7 +141,7 @@ func OptimizedGenesisBeaconState(genesisTime uint64, preState state.BeaconState,
 			Epoch: 0,
 			Root:  params.BeaconConfig().ZeroHash[:],
 		},
-		JustificationBits: []byte{0, 0, 0, 0},
+		JustificationBits: preState.JustificationBits(),
 		FinalizedCheckpoint: &ethpb.Checkpoint{
 			Epoch: 0,
 			Root:  params.BeaconConfig().ZeroHash[:],
@@ -165,7 +165,8 @@ func OptimizedGenesisBeaconState(genesisTime uint64, preState state.BeaconState,
 			Candidates:   eth1Data.GetCandidates(),
 			Finalization: eth1Data.GetFinalization(),
 		},
-		Eth1DataVotes:    []*ethpb.Eth1Data{},
+		Eth1DataVotes:    make([]*ethpb.Eth1Data, 0),
+		BlockVoting:      make([]*ethpb.BlockVoting, 0),
 		Eth1DepositIndex: 0,
 	}
 
@@ -210,12 +211,13 @@ func EmptyGenesisState() (state.BeaconState, error) {
 
 		JustificationBits:         []byte{0},
 		HistoricalRoots:           [][]byte{},
-		CurrentEpochAttestations:  []*ethpb.PendingAttestation{},
-		PreviousEpochAttestations: []*ethpb.PendingAttestation{},
+		CurrentEpochAttestations:  make([]*ethpb.PendingAttestation, 0),
+		PreviousEpochAttestations: make([]*ethpb.PendingAttestation, 0),
 
 		// Eth1 data.
 		Eth1Data:         &ethpb.Eth1Data{},
-		Eth1DataVotes:    []*ethpb.Eth1Data{},
+		Eth1DataVotes:    make([]*ethpb.Eth1Data, 0),
+		BlockVoting:      make([]*ethpb.BlockVoting, 0),
 		Eth1DepositIndex: 0,
 	}
 	return v1.InitializeFromProto(state)

@@ -24,6 +24,10 @@ const (
 	ExecutionDagHeadSyncReadyMethod = "dag_headSyncReady"
 	//ExecutionDagHeadSyncMethod request string for JSON-RPC of dag api.
 	ExecutionDagHeadSyncMethod = "dag_headSync"
+	//ExecutionDagSyncSlotInfoMethod request string for JSON-RPC of dag api.
+	ExecutionDagSyncSlotInfoMethod = "dag_syncSlotInfo"
+	//ExecutionDagValidateSpinesMethod request string for JSON-RPC of dag api.
+	ExecutionDagValidateSpinesMethod = "dag_validateSpines"
 )
 
 // ExecutionDagSync executing following procedures:
@@ -57,25 +61,25 @@ func (s *Service) ExecutionDagSync(ctx context.Context, syncParams *gwatTypes.Co
 
 // ExecutionDagFinalize executing finalisation procedure
 // by calling dag_finalize via JSON-RPC.
-func (s *Service) ExecutionDagFinalize(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (*map[string]string, error) {
+func (s *Service) ExecutionDagFinalize(ctx context.Context, spines *gwatCommon.HashArray) error {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagFinalize")
 	defer span.End()
 	result := &gwatTypes.FinalizationResult{}
 
 	if s.rpcClient == nil {
-		return result.Info, fmt.Errorf("Rpc Client not init")
+		return fmt.Errorf("Rpc Client not init")
 	}
 
 	err := s.rpcClient.CallContext(
 		ctx,
 		result,
 		ExecutionDagFinalizeMethod,
-		syncParams,
+		spines,
 	)
 	if result.Error != nil {
 		err = errors.New(*result.Error)
 	}
-	return result.Info, handleDagRPCError(err)
+	return handleDagRPCError(err)
 }
 
 // ExecutionDagGetCandidates executing consensus procedure
@@ -142,6 +146,54 @@ func (s *Service) ExecutionDagHeadSync(ctx context.Context, params []gwatTypes.C
 
 	if err != nil {
 		log.WithError(err).Error("ExecutionDagHeadSync")
+	}
+
+	return result, handleDagRPCError(err)
+}
+
+// ExecutionDagSyncSlotInfo executing sync slot info procedure
+// by calling dag_syncSlotInfo via JSON-RPC.
+func (s *Service) ExecutionDagSyncSlotInfo(ctx context.Context, params *gwatTypes.SlotInfo) (bool, error) {
+	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagSyncSlotInfo")
+	defer span.End()
+	result := false
+
+	if s.rpcClient == nil {
+		return result, fmt.Errorf("Rpc Client not init")
+	}
+	err := s.rpcClient.CallContext(
+		ctx,
+		&result,
+		ExecutionDagSyncSlotInfoMethod,
+		params,
+	)
+
+	if err != nil {
+		log.WithError(err).Error("ExecutionDagSyncSlotInfo")
+	}
+
+	return result, handleDagRPCError(err)
+}
+
+// ExecutionDagValidateSpines executing spines validation
+// by calling dag_headSync via JSON-RPC.
+func (s *Service) ExecutionDagValidateSpines(ctx context.Context, params gwatCommon.HashArray) (bool, error) {
+	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagValidateSpines")
+	defer span.End()
+	result := false
+
+	if s.rpcClient == nil {
+		return result, fmt.Errorf("Rpc Client not init")
+	}
+	err := s.rpcClient.CallContext(
+		ctx,
+		&result,
+		ExecutionDagValidateSpinesMethod,
+		params,
+	)
+
+	if err != nil {
+		log.WithError(err).Error("ExecutionDagValidateSpines")
 	}
 
 	return result, handleDagRPCError(err)

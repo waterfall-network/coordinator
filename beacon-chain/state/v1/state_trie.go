@@ -75,6 +75,7 @@ func InitializeFromProtoUnsafe(st *ethpb.BeaconState) (state.BeaconState, error)
 	b.sharedFieldReferences[validators] = stateutil.NewRef(1)
 	b.sharedFieldReferences[balances] = stateutil.NewRef(1)
 	b.sharedFieldReferences[historicalRoots] = stateutil.NewRef(1)
+	b.sharedFieldReferences[blockVoting] = stateutil.NewRef(1)
 
 	state.StateCount.Inc()
 	return b, nil
@@ -104,6 +105,7 @@ func (b *BeaconState) Copy() state.BeaconState {
 			CurrentEpochAttestations:  b.state.CurrentEpochAttestations,
 			Slashings:                 b.state.Slashings,
 			Eth1DataVotes:             b.state.Eth1DataVotes,
+			BlockVoting:               b.state.BlockVoting,
 
 			// Large arrays, increases over time.
 			Validators:      b.state.Validators,
@@ -326,6 +328,20 @@ func (b *BeaconState) rootSelector(ctx context.Context, field types.FieldIndex) 
 			return b.stateFieldLeaves[field].TrieRoot()
 		}
 		return b.recomputeFieldTrie(field, b.state.Eth1DataVotes)
+	case blockVoting:
+		if b.rebuildTrie[field] {
+			err := b.resetFieldTrie(
+				field,
+				b.state.BlockVoting,
+				fieldparams.BlockVotingLength,
+			)
+			if err != nil {
+				return [32]byte{}, err
+			}
+			delete(b.rebuildTrie, field)
+			return b.stateFieldLeaves[field].TrieRoot()
+		}
+		return b.recomputeFieldTrie(field, b.state.BlockVoting)
 	case validators:
 		if b.rebuildTrie[field] {
 			err := b.resetFieldTrie(field, b.state.Validators, fieldparams.ValidatorRegistryLimit)

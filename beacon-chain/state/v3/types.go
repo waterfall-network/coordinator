@@ -21,6 +21,7 @@ func init() {
 
 	// Initialize the composite arrays.
 	fieldMap[types.Eth1DataVotes] = types.CompositeArray
+	fieldMap[types.BlockVoting] = types.CompositeArray
 	fieldMap[types.Validators] = types.CompositeArray
 	fieldMap[types.Balances] = types.CompressedArray
 }
@@ -52,6 +53,7 @@ const (
 	currentSyncCommittee           = types.CurrentSyncCommittee
 	nextSyncCommittee              = types.NextSyncCommittee
 	latestExecutionPayloadHeader   = types.LatestExecutionPayloadHeader
+	blockVoting                    = types.BlockVoting
 )
 
 // fieldMap keeps track of each field
@@ -61,6 +63,8 @@ var fieldMap map[types.FieldIndex]types.DataType
 // ErrNilInnerState returns when the inner state is nil and no copy set or get
 // operations can be performed on state.
 var ErrNilInnerState = errors.New("nil inner state")
+
+var ErrBlockVotingNotFound = errors.New("blockVoting root not found")
 
 // BeaconState defines a struct containing utilities for the eth2 chain state, defining
 // getters and setters for its respective values and helpful functions such as HashTreeRoot().

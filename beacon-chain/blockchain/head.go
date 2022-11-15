@@ -21,12 +21,16 @@ import (
 	ethpbv1 "github.com/waterfall-foundation/coordinator/proto/eth/v1"
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
 	"github.com/waterfall-foundation/coordinator/time/slots"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	"go.opencensus.io/trace"
 )
 
 // UpdateAndSaveHeadWithBalances updates the beacon state head after getting justified balanced from cache.
 // This function is only used in spec-tests, it does save the head after updating it.
 func (s *Service) UpdateAndSaveHeadWithBalances(ctx context.Context) error {
+
+	log.Info("UpdateAndSaveHeadWithBalances >>>>> 0")
+
 	cp := s.store.JustifiedCheckpt()
 	if cp == nil {
 		return errors.New("no justified checkpoint")
@@ -48,6 +52,8 @@ func (s *Service) UpdateAndSaveHeadWithBalances(ctx context.Context) error {
 	if err != nil {
 		return errors.Wrap(err, "could not retrieve head state in DB")
 	}
+	log.Info("UpdateAndSaveHeadWithBalances >>>>> 11111")
+
 	return s.saveHead(ctx, headRoot, headBlock, headState)
 }
 
@@ -167,6 +173,22 @@ func (s *Service) saveHead(ctx context.Context, headRoot [32]byte, headBlock blo
 		reorgCount.Inc()
 	}
 
+	if !s.isSync() {
+		finalizing := gwatCommon.HashArrayFromBytes(headState.Eth1Data().Finalization)
+		err = s.cfg.ExecutionEngineCaller.ExecutionDagFinalize(ctx, &finalizing)
+		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"finalizing": finalizing,
+			}).Warn("saveHead: finalization failed")
+			return errors.Wrap(err, "finalization failed")
+		}
+
+		log.WithFields(logrus.Fields{
+			"finalizing": finalizing,
+		}).Info("save head: finalization success")
+
+	}
+
 	// Cache the new head info.
 	s.setHead(headRoot, headBlock, headState)
 
@@ -209,6 +231,17 @@ func (s *Service) saveHeadNoDB(ctx context.Context, b block.SignedBeaconBlock, r
 func (s *Service) setHead(root [32]byte, block block.SignedBeaconBlock, state state.BeaconState) {
 	s.headLock.Lock()
 	defer s.headLock.Unlock()
+
+	stRoot, err := state.HashTreeRoot(s.ctx)
+	if err != nil {
+
+	}
+	log.WithError(err).WithFields(logrus.Fields{
+		"block.Slot":   block.Block().Slot(),
+		"block.Parent": fmt.Sprintf("%#x", block.Block().ParentRoot()),
+		"state.Slot":   state.Slot(),
+		"state.Root":   fmt.Sprintf("%#x", stRoot),
+	}).Info("setHead >>>>> 11111")
 
 	// This does a full copy of the block and state.
 	s.head = &head{

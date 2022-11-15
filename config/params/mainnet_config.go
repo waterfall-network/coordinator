@@ -121,6 +121,9 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	Eth1FollowDistance:         16,
 	SafeSlotsToUpdateJustified: 8,
 
+	//BlockVoting slots
+	VotingRequiredSlots: 3,
+
 	// Fork choice algorithm constants.
 	ProposerScoreBoost: 70,
 	IntervalsPerSlot:   3,
@@ -193,9 +196,10 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	GenesisCountdownInterval:       time.Minute,
 	ConfigName:                     ConfigNames[Mainnet],
 	PresetBase:                     "mainnet",
-	BeaconStateFieldCount:          21,
-	BeaconStateAltairFieldCount:    24,
-	BeaconStateBellatrixFieldCount: 25,
+	BeaconStateFieldCount:          21 + 1,
+	BeaconStateAltairFieldCount:    24 + 1,
+	BeaconStateBellatrixFieldCount: 25 + 1,
+	BlockVotingMinSupportPrc:       66,
 
 	// Slasher related values.
 	WeakSubjectivityPeriod:          54000,

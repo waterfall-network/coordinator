@@ -62,3 +62,25 @@ func (b *BeaconState) Eth1DepositIndex() uint64 {
 
 	return b.eth1DepositIndex
 }
+
+// BlockVoting .
+func (b *BeaconState) BlockVoting() []*ethpb.BlockVoting {
+	if b.blockVoting == nil {
+		return nil
+	}
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+	return b.blockVotingVal()
+}
+
+// blockVotingVal.
+func (b *BeaconState) blockVotingVal() []*ethpb.BlockVoting {
+	if b.blockVoting == nil {
+		return nil
+	}
+	res := make([]*ethpb.BlockVoting, len(b.blockVoting))
+	for i := 0; i < len(res); i++ {
+		res[i] = ethpb.CopyBlockVoting(b.blockVoting[i])
+	}
+	return res
+}

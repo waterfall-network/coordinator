@@ -5,6 +5,7 @@ go_library(
     srcs = [
         "attestation.go",
         "attester_slashing.go",
+        "block_voting.go",
         "deposit.go",
         "eth1_data.go",
         "exit.go",
@@ -29,6 +30,7 @@ go_library(
         "//beacon-chain/core/time:go_default_library",
         "//beacon-chain/core/validators:go_default_library",
         "//beacon-chain/state:go_default_library",
+        "//beacon-chain/state/stateutil:go_default_library",
         "//config/fieldparams:go_default_library",
         "//config/params:go_default_library",
         "//container/slice:go_default_library",
@@ -54,6 +56,7 @@ go_library(
         "@io_opencensus_go//trace:go_default_library",
         "@org_golang_google_protobuf//proto:go_default_library",
         "@com_github_prysmaticlabs_go_bitfield//:go_default_library",
+        "@com_github_waterfall_foundation_gwat//common:go_default_library",
     ],
 )
 

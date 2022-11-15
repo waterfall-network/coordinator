@@ -16,7 +16,6 @@ import (
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
 	"github.com/waterfall-foundation/coordinator/time/slots"
-	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	"go.opencensus.io/trace"
 )
 
@@ -62,8 +61,8 @@ type HeadFetcher interface {
 	HeadSyncCommitteeFetcher
 	HeadDomainFetcher
 	ForkChoicer() forkchoice.ForkChoicer
-	GetCacheCandidates() gwatCommon.HashArray
-	GetCacheFinalization() gwatCommon.HashArray
+	GetValidatedBlockInfo() ([]byte, types.Slot)
+	SetValidatedBlockInfo([]byte, types.Slot)
 }
 
 // ForkFetcher retrieves the current fork information of the Ethereum beacon chain.

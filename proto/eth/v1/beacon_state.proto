@@ -46,6 +46,7 @@ message BeaconState {
   Eth1Data eth1_data = 3001;
   repeated Eth1Data eth1_data_votes = 3002 [(ethereum.eth.ext.ssz_max) = "eth1_data_votes.size"];
   uint64 eth1_deposit_index = 3003;
+  repeated BlockVoting block_voting = 3004 [(ethereum.eth.ext.ssz_max) = "block_voting.size"];
 
   // Registry [4001-5000]
   repeated Validator validators = 4001 [(ethereum.eth.ext.ssz_max) = "1099511627776"];
@@ -67,6 +68,18 @@ message BeaconState {
   Checkpoint previous_justified_checkpoint = 8002;
   Checkpoint current_justified_checkpoint = 8003;
   Checkpoint finalized_checkpoint = 8004;
+}
+
+message BlockVoting {
+  // 32 byte merkle tree root of the ssz encoded block.
+  bytes root = 1 [(ethereum.eth.ext.ssz_size) = "32"];
+  // total numbers of attesters (committee length)
+  uint64 total_attesters = 2;
+  // The 32 byte array of hashes presented sequence of the GWAT spines candidates.
+  // ssz_max = 32 * 128
+  bytes candidates = 3 [(ethereum.eth.ext.ssz_max) = "4096"];
+  // block attestations
+  repeated Attestation attestations = 4 [(ethereum.eth.ext.ssz_max) = "128"];
 }
 
 message PendingAttestation {

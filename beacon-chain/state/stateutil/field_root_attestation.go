@@ -60,3 +60,51 @@ func pendingAttestationRoot(hasher ssz.HashFn, att *ethpb.PendingAttestation) ([
 	}
 	return PendingAttRootWithHasher(hasher, att)
 }
+
+// dedup removes duplicate attestations (ones with the same bits set on).
+// Important: not only exact duplicates are removed, but proper subsets are removed too
+// (their known bits are redundant and are already contained in their supersets).
+func Dedup(a []*ethpb.Attestation) ([]*ethpb.Attestation, error) {
+	if len(a) < 2 {
+		return a, nil
+	}
+	attsByDataRoot := make(map[[32]byte][]*ethpb.Attestation, len(a))
+	for _, att := range a {
+		attDataRoot, err := att.Data.HashTreeRoot()
+		if err != nil {
+			continue
+		}
+		attsByDataRoot[attDataRoot] = append(attsByDataRoot[attDataRoot], att)
+	}
+
+	uniqAtts := make([]*ethpb.Attestation, 0, len(a))
+	for _, atts := range attsByDataRoot {
+		for i := 0; i < len(atts); i++ {
+			a := atts[i]
+			for j := i + 1; j < len(atts); j++ {
+				b := atts[j]
+				if c, err := a.AggregationBits.Contains(b.AggregationBits); err != nil {
+					return nil, err
+				} else if c {
+					// a contains b, b is redundant.
+					atts[j] = atts[len(atts)-1]
+					atts[len(atts)-1] = nil
+					atts = atts[:len(atts)-1]
+					j--
+				} else if c, err := b.AggregationBits.Contains(a.AggregationBits); err != nil {
+					return nil, err
+				} else if c {
+					// b contains a, a is redundant.
+					atts[i] = atts[len(atts)-1]
+					atts[len(atts)-1] = nil
+					atts = atts[:len(atts)-1]
+					i--
+					break
+				}
+			}
+		}
+		uniqAtts = append(uniqAtts, atts...)
+	}
+
+	return uniqAtts, nil
+}

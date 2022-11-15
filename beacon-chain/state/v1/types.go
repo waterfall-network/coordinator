@@ -24,6 +24,7 @@ func init() {
 
 	// Initialize the composite arrays.
 	fieldMap[types.Eth1DataVotes] = types.CompositeArray
+	fieldMap[types.BlockVoting] = types.CompositeArray
 	fieldMap[types.Validators] = types.CompositeArray
 	fieldMap[types.PreviousEpochAttestations] = types.CompositeArray
 	fieldMap[types.CurrentEpochAttestations] = types.CompositeArray
@@ -37,6 +38,8 @@ var fieldMap map[types.FieldIndex]types.DataType
 // ErrNilInnerState returns when the inner state is nil and no copy set or get
 // operations can be performed on state.
 var ErrNilInnerState = errors.New("nil inner state")
+
+var ErrBlockVotingNotFound = errors.New("blockVoting root not found")
 
 // BeaconState defines a struct containing utilities for the Ethereum Beacon Chain state, defining
 // getters and setters for its respective values and helpful functions such as HashTreeRoot().
@@ -75,4 +78,5 @@ const (
 	previousJustifiedCheckpoint = types.PreviousJustifiedCheckpoint
 	currentJustifiedCheckpoint  = types.CurrentJustifiedCheckpoint
 	finalizedCheckpoint         = types.FinalizedCheckpoint
+	blockVoting                 = types.BlockVoting
 )

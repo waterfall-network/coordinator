@@ -66,6 +66,7 @@ func InitializeFromProtoUnsafe(st *ethpb.BeaconStateBellatrix) (state.BeaconStat
 		eth1Data:                     st.Eth1Data,
 		eth1DataVotes:                st.Eth1DataVotes,
 		eth1DepositIndex:             st.Eth1DepositIndex,
+		blockVoting:                  st.BlockVoting,
 		validators:                   st.Validators,
 		balances:                     st.Balances,
 		randaoMixes:                  &mixes,
@@ -113,6 +114,7 @@ func InitializeFromProtoUnsafe(st *ethpb.BeaconStateBellatrix) (state.BeaconStat
 	b.sharedFieldReferences[inactivityScores] = stateutil.NewRef(1) // New in Altair.
 	b.sharedFieldReferences[historicalRoots] = stateutil.NewRef(1)
 	b.sharedFieldReferences[latestExecutionPayloadHeader] = stateutil.NewRef(1) // New in Bellatrix.
+	b.sharedFieldReferences[blockVoting] = stateutil.NewRef(1)
 	state.StateCount.Inc()
 	return b, nil
 }
@@ -135,6 +137,7 @@ func (b *BeaconState) Copy() state.BeaconState {
 		blockRoots:    b.blockRoots,
 		slashings:     b.slashings,
 		eth1DataVotes: b.eth1DataVotes,
+		blockVoting:   b.blockVoting,
 
 		// Large arrays, increases over time.
 		validators:                 b.validators,
@@ -367,6 +370,20 @@ func (b *BeaconState) rootSelector(field types.FieldIndex) ([32]byte, error) {
 			return b.stateFieldLeaves[field].TrieRoot()
 		}
 		return b.recomputeFieldTrie(field, b.eth1DataVotes)
+	case blockVoting:
+		if b.rebuildTrie[field] {
+			err := b.resetFieldTrie(
+				field,
+				b.blockVoting,
+				fieldparams.BlockVotingLength,
+			)
+			if err != nil {
+				return [32]byte{}, err
+			}
+			delete(b.rebuildTrie, field)
+			return b.stateFieldLeaves[field].TrieRoot()
+		}
+		return b.recomputeFieldTrie(field, b.blockVoting)
 	case validators:
 		if b.rebuildTrie[field] {
 			err := b.resetFieldTrie(field, b.validators, fieldparams.ValidatorRegistryLimit)

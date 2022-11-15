@@ -30,7 +30,8 @@ func TestStateFieldIndexes(t *testing.T) {
 	assert.Equal(t, FieldIndex(18), PreviousJustifiedCheckpoint)
 	assert.Equal(t, FieldIndex(19), CurrentJustifiedCheckpoint)
 	assert.Equal(t, FieldIndex(20), FinalizedCheckpoint)
-	assert.Equal(t, FieldIndex(21), InactivityScores)
-	assert.Equal(t, FieldIndex(22), CurrentSyncCommittee)
-	assert.Equal(t, FieldIndex(23), NextSyncCommittee)
+	assert.Equal(t, FieldIndex(21), BlockVoting)
+	assert.Equal(t, FieldIndex(22), InactivityScores)
+	assert.Equal(t, FieldIndex(23), CurrentSyncCommittee)
+	assert.Equal(t, FieldIndex(24), NextSyncCommittee)
 }

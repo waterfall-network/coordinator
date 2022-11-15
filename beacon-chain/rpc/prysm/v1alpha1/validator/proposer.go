@@ -38,31 +38,25 @@ func (vs *Server) GetBeaconBlock(ctx context.Context, req *ethpb.BlockRequest) (
 	ctx, span := trace.StartSpan(ctx, "ProposerServer.GetBeaconBlock")
 	defer span.End()
 	span.AddAttributes(trace.Int64Attribute("slot", int64(req.Slot)))
+
+	log.WithFields(logrus.Fields{
+		"vs.SyncChecker.IsInitSync()": vs.SyncChecker.IsInitSync(),
+		"vs.SyncChecker.Syncing()":    vs.SyncChecker.Syncing(),
+	}).Warn("^^^^^^^PROPESER START (()GetBeaconBlock())^^^^^^^^")
+
 	if slots.ToEpoch(req.Slot) < params.BeaconConfig().AltairForkEpoch {
 		blk, err := vs.getPhase0BeaconBlock(ctx, req)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "Could not fetch phase0 beacon block: %v", err)
 		}
 		return &ethpb.GenericBeaconBlock{Block: &ethpb.GenericBeaconBlock_Phase0{Phase0: blk}}, nil
-	} else if slots.ToEpoch(req.Slot) < params.BeaconConfig().BellatrixForkEpoch {
-		blk, err := vs.getAltairBeaconBlock(ctx, req)
-		if err != nil {
-			return nil, status.Errorf(codes.Internal, "Could not fetch Altair beacon block: %v", err)
-		}
-		return &ethpb.GenericBeaconBlock{Block: &ethpb.GenericBeaconBlock_Altair{Altair: blk}}, nil
 	}
 
-	// An optimistic validator MUST NOT produce a block (i.e., sign across the DOMAIN_BEACON_PROPOSER domain).
-	if err := vs.optimisticStatus(ctx); err != nil {
-		return nil, err
-	}
-
-	blk, err := vs.getBellatrixBeaconBlock(ctx, req)
+	blk, err := vs.getAltairBeaconBlock(ctx, req)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Could not fetch Bellatrix beacon block: %v", err)
+		return nil, status.Errorf(codes.Internal, "Could not fetch Altair beacon block: %v", err)
 	}
-
-	return &ethpb.GenericBeaconBlock{Block: &ethpb.GenericBeaconBlock_Bellatrix{Bellatrix: blk}}, nil
+	return &ethpb.GenericBeaconBlock{Block: &ethpb.GenericBeaconBlock_Altair{Altair: blk}}, nil
 }
 
 // GetBlock is called by a proposer during its assigned slot to request a block to sign
@@ -184,6 +178,9 @@ func (vs *Server) computeStateRoot(ctx context.Context, block block.SignedBeacon
 		return nil, errors.Wrapf(err, "could not calculate state root at slot %d", beaconState.Slot())
 	}
 
-	log.WithField("beaconStateRoot", fmt.Sprintf("%#x", root)).Debugf("Computed state root")
+	log.WithField(
+		"beaconStateRoot", fmt.Sprintf("%#x", root),
+	).Info("--------- PROPOSER: Computed state root")
+	//).Info("Computed state root")
 	return root[:], nil
 }

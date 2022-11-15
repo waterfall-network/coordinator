@@ -45,8 +45,8 @@ import (
 
 // SyncSrv interface to treat sync functionality.
 type SyncSrv interface {
-	SetHeadSyncFn(ctx context.Context, fn func(context.Context, bool) error)
-	SetIsSyncFn(ctx context.Context, fn func(context.Context) bool)
+	SetHeadSyncFn(fn func(context.Context, bool) error)
+	SetIsSyncFn(fn func() bool)
 }
 
 // headSyncMinEpochsAfterCheckpoint defines how many epochs should elapse after known finalization
@@ -75,7 +75,7 @@ type Service struct {
 	wsVerifier            *WeakSubjectivityVerifier
 	store                 *store.Store
 	fnHeadSync            func(context.Context, bool) error
-	fnIsSync              func(context.Context) bool
+	fnIsSync              func() bool
 }
 
 // config options for the service.
@@ -202,14 +202,14 @@ func (s *Service) StartFromSavedState(saved state.BeaconState) error {
 	}
 	s.store = store.New(justified, finalized)
 
-	var f f.ForkChoicer
+	var fc f.ForkChoicer
 	fRoot := bytesutil.ToBytes32(finalized.Root)
 	if features.Get().EnableForkChoiceDoublyLinkedTree {
-		f = doublylinkedtree.New(justified.Epoch, finalized.Epoch)
+		fc = doublylinkedtree.New(justified.Epoch, finalized.Epoch)
 	} else {
-		f = protoarray.New(justified.Epoch, finalized.Epoch, fRoot)
+		fc = protoarray.New(justified.Epoch, finalized.Epoch, fRoot)
 	}
-	s.cfg.ForkChoiceStore = f
+	s.cfg.ForkChoiceStore = fc
 	fb, err := s.cfg.BeaconDB.Block(s.ctx, s.ensureRootNotZeros(fRoot))
 	if err != nil {
 		return errors.Wrap(err, "could not get finalized checkpoint block")
@@ -222,7 +222,7 @@ func (s *Service) StartFromSavedState(saved state.BeaconState) error {
 		return errors.Wrap(err, "could not get execution payload hash")
 	}
 	fSlot := fb.Block().Slot()
-	if err := f.InsertOptimisticBlock(s.ctx, fSlot, fRoot, params.BeaconConfig().ZeroHash,
+	if err := fc.InsertOptimisticBlock(s.ctx, fSlot, fRoot, params.BeaconConfig().ZeroHash,
 		payloadHash, justified.Epoch, finalized.Epoch); err != nil {
 		return errors.Wrap(err, "could not insert finalized block to forkchoice")
 	}
@@ -232,7 +232,7 @@ func (s *Service) StartFromSavedState(saved state.BeaconState) error {
 		return errors.Wrap(err, "could not get last validated checkpoint")
 	}
 	if bytes.Equal(finalized.Root, lastValidatedCheckpoint.Root) {
-		if err := f.SetOptimisticToValid(s.ctx, fRoot); err != nil {
+		if err := fc.SetOptimisticToValid(s.ctx, fRoot); err != nil {
 			return errors.Wrap(err, "could not set finalized block as validated")
 		}
 	}
@@ -517,7 +517,7 @@ func (s *Service) hasBlock(ctx context.Context, root [32]byte) bool {
 	return s.cfg.BeaconDB.HasBlock(ctx, root)
 }
 
-func (s *Service) SetHeadSyncFn(ctx context.Context, fn func(context.Context, bool) error) {
+func (s *Service) SetHeadSyncFn(fn func(context.Context, bool) error) {
 	s.fnHeadSync = fn
 }
 
@@ -531,15 +531,15 @@ func (s *Service) runHeadSync(ctx context.Context) {
 	}
 }
 
-func (s *Service) SetIsSyncFn(ctx context.Context, fn func(context.Context) bool) {
+func (s *Service) SetIsSyncFn(fn func() bool) {
 	s.fnIsSync = fn
 }
 
-func (s *Service) isSync(ctx context.Context) bool {
+func (s *Service) isSync() bool {
 	if s.fnHeadSync == nil {
 		return false
 	}
-	return s.fnIsSync(ctx)
+	return s.fnIsSync()
 }
 
 func spawnCountdownIfPreGenesis(ctx context.Context, genesisTime time.Time, db db.HeadAccessDatabase) {

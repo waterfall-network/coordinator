@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	types "github.com/prysmaticlabs/eth2-types"
+	"github.com/sirupsen/logrus"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/core/transition/interop"
 	"github.com/waterfall-foundation/coordinator/config/params"
 	"github.com/waterfall-foundation/coordinator/crypto/bls"
@@ -12,6 +13,7 @@ import (
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	synccontribution "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/attestation/aggregation/sync_contribution"
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	"go.opencensus.io/trace"
 )
 
@@ -20,8 +22,17 @@ func (vs *Server) buildAltairBeaconBlock(ctx context.Context, req *ethpb.BlockRe
 	defer span.End()
 	blkData, err := vs.buildPhase0BlockData(ctx, req)
 	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"req": req,
+		}).Error("#### build-Altair-BeaconBlock: could not build block data ###")
 		return nil, fmt.Errorf("could not build block data: %v", err)
 	}
+
+	log.WithError(err).WithFields(logrus.Fields{
+		"req.slot":             req.Slot,
+		"blkData.Finalization": gwatCommon.HashArrayFromBytes(blkData.Eth1Data.Finalization),
+		"blkData.Candidates":   gwatCommon.HashArrayFromBytes(blkData.Eth1Data.Candidates),
+	}).Info("#### build-Altair-BeaconBlock ###")
 
 	// Use zero hash as stub for state root to compute later.
 	stateRoot := params.BeaconConfig().ZeroHash[:]
@@ -67,6 +78,11 @@ func (vs *Server) getAltairBeaconBlock(ctx context.Context, req *ethpb.BlockRequ
 		return nil, err
 	}
 	stateRoot, err := vs.computeStateRoot(ctx, wsb)
+
+	log.WithError(err).WithFields(logrus.Fields{
+		"block.slot": wsb.Block().Slot(),
+	}).Info("<<<< getAltairBeaconBlock:computeStateRoot >>>>> 1111111")
+
 	if err != nil {
 		interop.WriteBlockToDisk(wsb, true /*failed*/)
 		return nil, fmt.Errorf("could not compute state root: %v", err)

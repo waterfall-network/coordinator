@@ -26,6 +26,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
 	"github.com/waterfall-foundation/coordinator/runtime/version"
 	"github.com/waterfall-foundation/coordinator/time/slots"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	"go.opencensus.io/trace"
 )
 
@@ -92,64 +93,47 @@ var initialSyncBlockCacheSize = uint64(2 * params.BeaconConfig().SlotsPerEpoch)
 func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, blockRoot [32]byte) error {
 	ctx, span := trace.StartSpan(ctx, "blockChain.onBlock")
 	defer span.End()
+
+	log.WithFields(logrus.Fields{
+		"block.slot": signed.Block().Slot(),
+		"ParentRoot": fmt.Sprintf("%#x", signed.Block().ParentRoot()),
+		"\u2692":     version.BuildId,
+	}).Info("<<< onBlock:START >>> ")
+
 	if err := helpers.BeaconBlockIsNil(signed); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+		}).Error("onBlock error")
 		return err
 	}
 	b := signed.Block()
 
 	preState, err := s.getBlockPreState(ctx, b)
 	if err != nil {
-		return err
-	}
-
-	preStateVersion, preStateHeader, err := getStateVersionAndPayload(preState)
-	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+		}).Error("onBlock error")
 		return err
 	}
 	postState, err := transition.ExecuteStateTransition(ctx, preState, signed)
 	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+		}).Error("onBlock error")
 		return err
-	}
-	postStateVersion, postStateHeader, err := getStateVersionAndPayload(postState)
-	if err != nil {
-		return err
-	}
-	isValidPayload, err := s.notifyNewPayload(ctx, preStateVersion, postStateVersion, preStateHeader, postStateHeader, signed)
-	if err != nil {
-		return errors.Wrap(err, "could not verify new payload")
-	}
-	if !isValidPayload {
-		candidate, err := s.optimisticCandidateBlock(ctx, b)
-		if err != nil {
-			return errors.Wrap(err, "could not check if block is optimistic candidate")
-		}
-		if !candidate {
-			return errNotOptimisticCandidate
-		}
 	}
 
-	if s.CurrentSlot() == signed.Block().Slot() && !s.isSync(s.ctx) {
-		isValidCandidates, err := s.ValidateBlockCandidates(signed.Block())
-		if err != nil {
-			log.WithError(err).WithField("slotCandidates", isValidCandidates).Warn("on Block: could not verify new new block candidates")
-			//if err.Error() == "got an unexpected error: synchronization" {
-			//	log.Warn("******* Start head sync procedure (onBlock) ******")
-			//	go s.runHeadSync(s.ctx)
-			//}
-		} else {
-			if !isValidCandidates {
-				return errBadSpineCandidates
-			}
-		}
-	}
+	log.WithError(err).WithFields(logrus.Fields{
+		"block.slot": signed.Block().Slot(),
+		//"postBlockVoting": helpers.PrintBlockVotingArr(postState.BlockVoting()),
+		"postBlockVoting": len(postState.BlockVoting()),
+	}).Info("State transition executed")
 
 	if err := s.insertBlockAndAttestationsToForkChoiceStore(ctx, signed.Block(), blockRoot, postState); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+		}).Error("onBlock error")
 		return errors.Wrapf(err, "could not insert block %d to fork choice store", signed.Block().Slot())
-	}
-	if isValidPayload {
-		if err := s.cfg.ForkChoiceStore.SetOptimisticToValid(ctx, blockRoot); err != nil {
-			return errors.Wrap(err, "could not set optimistic block to valid")
-		}
 	}
 
 	// We add a proposer score boost to fork choice for the block root if applicable, right after
@@ -161,12 +145,25 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		CurrentSlot:     slots.SinceGenesis(s.genesisTime),
 		SecondsIntoSlot: secondsIntoSlot,
 	}); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+		}).Error("onBlock error")
 		return err
 	}
 
 	if err := s.savePostStateInfo(ctx, blockRoot, signed, postState, false /* reg sync */); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+		}).Error("onBlock error")
 		return err
 	}
+
+	log.WithError(err).WithFields(logrus.Fields{
+		"block.slot": signed.Block().Slot(),
+		//"postBlockVoting": helpers.PrintBlockVotingArr(postState.BlockVoting()),
+		"postState.Finalization": gwatCommon.HashArrayFromBytes(postState.Eth1Data().Finalization),
+	}).Info("onBlock: save post state")
+
 	// If slasher is configured, forward the attestations in the block via
 	// an event feed for processing.
 	if features.Get().EnableSlasher {
@@ -197,17 +194,26 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	// Update justified check point.
 	justified := s.store.JustifiedCheckpt()
 	if justified == nil {
+		log.WithError(errNilJustifiedInStore).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+		}).Error("onBlock error")
 		return errNilJustifiedInStore
 	}
 	currJustifiedEpoch := justified.Epoch
 	if postState.CurrentJustifiedCheckpoint().Epoch > currJustifiedEpoch {
 		if err := s.updateJustified(ctx, postState); err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"block.slot": signed.Block().Slot(),
+			}).Error("onBlock error")
 			return err
 		}
 	}
 
 	finalized := s.store.FinalizedCheckpt()
 	if finalized == nil {
+		log.WithError(errNilFinalizedInStore).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+		}).Error("onBlock error")
 		return errNilFinalizedInStore
 	}
 	newFinalized := postState.FinalizedCheckpointEpoch() > finalized.Epoch
@@ -221,28 +227,75 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	balances, err := s.justifiedBalances.get(ctx, bytesutil.ToBytes32(justified.Root))
 	if err != nil {
 		msg := fmt.Sprintf("could not read balances for state w/ justified checkpoint %#x", justified.Root)
+		log.WithError(err).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+			"message":    msg,
+		}).Error("onBlock error")
 		return errors.Wrap(err, msg)
 	}
 	headRoot, err := s.updateHead(ctx, balances)
+
+	log.WithError(err).WithFields(logrus.Fields{
+		"block.slot": signed.Block().Slot(),
+		//"postBlockVoting": helpers.PrintBlockVotingArr(postState.BlockVoting()),
+		"headState.Finalization": gwatCommon.HashArrayFromBytes(s.head.state.Eth1Data().Finalization),
+	}).Info("onBlock: update head")
+
 	if err != nil {
 		log.WithError(err).Warn("Could not update head")
 	}
 	headBlock, err := s.cfg.BeaconDB.Block(ctx, headRoot)
 	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+		}).Error("onBlock error")
 		return err
 	}
 	headState, err := s.cfg.StateGen.StateByRoot(ctx, headRoot)
+
+	log.WithError(err).WithFields(logrus.Fields{
+		"block.slot":             signed.Block().Slot(),
+		"headRoot":               fmt.Sprintf("%#x", headRoot),
+		"headState.Finalization": gwatCommon.HashArrayFromBytes(headState.Eth1Data().Finalization),
+	}).Info("onBlock: get state by root")
+
 	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+		}).Error("onBlock error")
 		return err
 	}
-	if _, err := s.notifyForkchoiceUpdate(ctx, headState, headBlock.Block(), headRoot, bytesutil.ToBytes32(finalized.Root)); err != nil {
-		return err
-	}
+
+	//// todo test no-belatrix
+	//if _, err := s.notifyForkchoiceUpdate(ctx, headState, headBlock.Block(), headRoot, bytesutil.ToBytes32(finalized.Root)); err != nil {
+	//	return err
+	//}
+
 	if err := s.saveHead(ctx, headRoot, headBlock, headState); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+		}).Error("onBlock error could not save head")
 		return errors.Wrap(err, "could not save head")
 	}
 
+	log.WithError(err).WithFields(logrus.Fields{
+		"block.slot": signed.Block().Slot(),
+		//"postBlockVoting": helpers.PrintBlockVotingArr(postState.BlockVoting()),
+		"headState.Finalization": gwatCommon.HashArrayFromBytes(s.head.state.Eth1Data().Finalization),
+	}).Info("onBlock: save head")
+
+	log.WithFields(logrus.Fields{
+		"condition":                s.CurrentSlot() == signed.Block().Slot() && !s.isSync(),
+		"isSync":                   s.isSync(),
+		"CurrentSlot == BlockSlot": s.CurrentSlot() == signed.Block().Slot(),
+		"CurrentSlot":              s.CurrentSlot(),
+		"BlockSlot":                signed.Block().Slot(),
+	}).Info("On block sync status")
+
 	if err := s.pruneCanonicalAttsFromPool(ctx, blockRoot, signed); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+		}).Error("onBlock error")
 		return err
 	}
 
@@ -272,6 +325,9 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	// Save justified check point to db.
 	if postState.CurrentJustifiedCheckpoint().Epoch > currJustifiedEpoch {
 		if err := s.cfg.BeaconDB.SaveJustifiedCheckpoint(ctx, postState.CurrentJustifiedCheckpoint()); err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"block.slot": signed.Block().Slot(),
+			}).Error("onBlock error")
 			return err
 		}
 	}
@@ -279,14 +335,23 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	// Update finalized check point.
 	if newFinalized {
 		if err := s.updateFinalized(ctx, postState.FinalizedCheckpoint()); err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"block.slot": signed.Block().Slot(),
+			}).Error("onBlock error")
 			return err
 		}
 		fRoot := bytesutil.ToBytes32(postState.FinalizedCheckpoint().Root)
 		if err := s.cfg.ForkChoiceStore.Prune(ctx, fRoot); err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"block.slot": signed.Block().Slot(),
+			}).Error("onBlock error could not prune proto array fork choice nodes")
 			return errors.Wrap(err, "could not prune proto array fork choice nodes")
 		}
 		isOptimistic, err := s.cfg.ForkChoiceStore.IsOptimistic(fRoot)
 		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"block.slot": signed.Block().Slot(),
+			}).Error("onBlock error could not check if node is optimistically synced")
 			return errors.Wrap(err, "could not check if node is optimistically synced")
 		}
 		go func() {
@@ -315,23 +380,6 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 
 	defer reportAttestationInclusion(b)
 
-	log.WithFields(logrus.Fields{
-		"condition":                s.CurrentSlot() == signed.Block().Slot() && !s.isSync(s.ctx),
-		"isSync":                   s.isSync(s.ctx),
-		"CurrentSlot == BlockSlot": s.CurrentSlot() == signed.Block().Slot(),
-		"CurrentSlot":              s.CurrentSlot(),
-		"BlockSlot":                signed.Block().Slot(),
-	}).Error("On block sync status")
-
-	if s.CurrentSlot() == signed.Block().Slot() && !s.isSync(s.ctx) {
-		//calculate sequence of finalization spines
-		finSpines, err := s.CalculateFinalizationSpinesByBlockRoot(blockRoot)
-		if err != nil {
-			return errors.Wrap(err, "could not calculate finalization spines")
-		}
-		s.setCacheFinalisation(finSpines)
-	}
-
 	return s.handleEpochBoundary(ctx, postState)
 }
 
@@ -353,33 +401,51 @@ func getStateVersionAndPayload(st state.BeaconState) (int, *ethpb.ExecutionPaylo
 	return preStateVersion, preStateHeader, nil
 }
 
-func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlock,
-	blockRoots [][32]byte) ([]*ethpb.Checkpoint, []*ethpb.Checkpoint, error) {
+func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlock, blockRoots [][32]byte) ([]*ethpb.Checkpoint, []*ethpb.Checkpoint, error) {
 	ctx, span := trace.StartSpan(ctx, "blockChain.onBlockBatch")
 	defer span.End()
 
 	if len(blks) == 0 || len(blockRoots) == 0 {
+		log.WithFields(logrus.Fields{
+			"len(blks) == 0":       len(blks) == 0,
+			"len(blockRoots) == 0": len(blockRoots) == 0,
+		}).Error(">>>>> onBlockBatch error")
 		return nil, nil, errors.New("no blocks provided")
 	}
 
 	if len(blks) != len(blockRoots) {
+		log.WithError(errWrongBlockCount).WithFields(logrus.Fields{
+			"len(blks) != len(blockRoots)": len(blks) != len(blockRoots),
+		}).Error(">>>>> onBlockBatch error")
 		return nil, nil, errWrongBlockCount
 	}
 
 	if err := helpers.BeaconBlockIsNil(blks[0]); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"blks[0]": blks[0],
+		}).Error(">>>>> onBlockBatch error")
 		return nil, nil, err
 	}
 	b := blks[0].Block()
 
 	// Retrieve incoming block's pre state.
 	if err := s.verifyBlkPreState(ctx, b); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"verifyBlkPreState()": "fail",
+		}).Error(">>>>> onBlockBatch error")
 		return nil, nil, err
 	}
 	preState, err := s.cfg.StateGen.StateByRootInitialSync(ctx, bytesutil.ToBytes32(b.ParentRoot()))
 	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"StateByRootInitialSync": "fail",
+		}).Error(">>>>> onBlockBatch error")
 		return nil, nil, err
 	}
 	if preState == nil || preState.IsNil() {
+		log.WithError(fmt.Errorf("nil pre state for slot %d", b.Slot())).WithFields(logrus.Fields{
+			"preState == nil || preState.IsNil()": preState == nil || preState.IsNil(),
+		}).Error(">>>>> onBlockBatch error")
 		return nil, nil, fmt.Errorf("nil pre state for slot %d", b.Slot())
 	}
 
@@ -390,26 +456,15 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 		PublicKeys: []bls.PublicKey{},
 		Messages:   [][32]byte{},
 	}
-	type versionAndHeader struct {
-		version int
-		header  *ethpb.ExecutionPayloadHeader
-	}
-	preVersionAndHeaders := make([]*versionAndHeader, len(blks))
-	postVersionAndHeaders := make([]*versionAndHeader, len(blks))
 	var set *bls.SignatureBatch
 	boundaries := make(map[[32]byte]state.BeaconState)
 	for i, b := range blks {
-		v, h, err := getStateVersionAndPayload(preState)
-		if err != nil {
-			return nil, nil, err
-		}
-		preVersionAndHeaders[i] = &versionAndHeader{
-			version: v,
-			header:  h,
-		}
 
 		set, preState, err = transition.ExecuteStateTransitionNoVerifyAnySig(ctx, preState, b)
 		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"ExecuteStateTransitionNoVerifyAnySig": "fail",
+			}).Error(">>>>> onBlockBatch error")
 			return nil, nil, err
 		}
 		// Save potential boundary states.
@@ -419,53 +474,30 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 		jCheckpoints[i] = preState.CurrentJustifiedCheckpoint()
 		fCheckpoints[i] = preState.FinalizedCheckpoint()
 
-		v, h, err = getStateVersionAndPayload(preState)
-		if err != nil {
-			return nil, nil, err
-		}
-		postVersionAndHeaders[i] = &versionAndHeader{
-			version: v,
-			header:  h,
-		}
 		sigSet.Join(set)
 	}
 	verify, err := sigSet.Verify()
 	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"Verify()": "fail",
+			"verify":   verify,
+		}).Error(">>>>> onBlockBatch error")
 		return nil, nil, err
 	}
 	if !verify {
+		log.WithError(errors.New("batch block signature verification failed")).WithFields(logrus.Fields{
+			"Verify()": "fail",
+			"verify":   verify,
+		}).Error(">>>>> onBlockBatch error")
 		return nil, nil, errors.New("batch block signature verification failed")
 	}
 
 	// blocks have been verified, add them to forkchoice and call the engine
 	for i, b := range blks {
 		s.saveInitSyncBlock(blockRoots[i], b)
-		isValidPayload, err := s.notifyNewPayload(ctx,
-			preVersionAndHeaders[i].version,
-			postVersionAndHeaders[i].version,
-			preVersionAndHeaders[i].header,
-			postVersionAndHeaders[i].header, b)
-
-		if err != nil {
-			return nil, nil, err
-		}
-		if !isValidPayload {
-			candidate, err := s.optimisticCandidateBlock(ctx, b.Block())
-			if err != nil {
-				return nil, nil, errors.Wrap(err, "could not check if block is optimistic candidate")
-			}
-			if !candidate {
-				return nil, nil, errNotOptimisticCandidate
-			}
-		}
 
 		if err := s.insertBlockToForkChoiceStore(ctx, b.Block(), blockRoots[i], fCheckpoints[i], jCheckpoints[i]); err != nil {
 			return nil, nil, err
-		}
-		if isValidPayload {
-			if err := s.cfg.ForkChoiceStore.SetOptimisticToValid(ctx, blockRoots[i]); err != nil {
-				return nil, nil, errors.Wrap(err, "could not set optimistic block to valid")
-			}
 		}
 
 		if _, err := s.notifyForkchoiceUpdate(ctx, preState, b.Block(), blockRoots[i], bytesutil.ToBytes32(fCheckpoints[i].Root)); err != nil {
@@ -475,6 +507,9 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 
 	for r, st := range boundaries {
 		if err := s.cfg.StateGen.SaveState(ctx, r, st); err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"s.cfg.StateGen.SaveState:boundaries": "fail",
+			}).Error(">>>>> onBlockBatch error")
 			return nil, nil, err
 		}
 	}
@@ -482,9 +517,15 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 	lastB := blks[len(blks)-1]
 	lastBR := blockRoots[len(blockRoots)-1]
 	if err := s.cfg.StateGen.SaveState(ctx, lastBR, preState); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"StateByRootInitialSync:lastBR": "fail",
+		}).Error(">>>>> onBlockBatch error")
 		return nil, nil, err
 	}
 	if err := s.saveHeadNoDB(ctx, lastB, lastBR, preState); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"saveHeadNoDB": "fail",
+		}).Error(">>>>> onBlockBatch error")
 		return nil, nil, err
 	}
 	return fCheckpoints, jCheckpoints, nil

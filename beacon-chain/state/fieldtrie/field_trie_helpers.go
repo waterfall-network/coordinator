@@ -101,6 +101,17 @@ func fieldConverters(field types.FieldIndex, indices []uint64, elements interfac
 				reflect.TypeOf([]*ethpb.Eth1Data{}).Name(), reflect.TypeOf(elements).Name())
 		}
 		return handleEth1DataSlice(val, indices, convertAll)
+	case types.BlockVoting:
+		val, ok := elements.([]*ethpb.BlockVoting)
+		if !ok {
+			return nil, errors.Errorf("Wanted type of %v but got %v   VAL: %v, elements %s",
+				reflect.TypeOf([]*ethpb.BlockVoting{}).Name(),
+				reflect.TypeOf(elements).Name(),
+				val,
+				reflect.TypeOf(elements).String(),
+			)
+		}
+		return handleBlockVotingSlice(val, indices, convertAll)
 	case types.Validators:
 		val, ok := elements.([]*ethpb.Validator)
 		if !ok {
@@ -250,6 +261,45 @@ func handleEth1DataSlice(val []*ethpb.Eth1Data, indices []uint64, convertAll boo
 		for _, idx := range indices {
 			if idx > uint64(len(val))-1 {
 				return nil, fmt.Errorf("index %d greater than number of items in eth1 data slice %d", idx, len(val))
+			}
+			err := rootCreator(val[idx])
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	return roots, nil
+}
+
+// handleBlockVotingSlice processes a list of BlockVoting and indices into the appropriate roots.
+func handleBlockVotingSlice(val []*ethpb.BlockVoting, indices []uint64, convertAll bool) ([][32]byte, error) {
+	length := len(indices)
+	if convertAll {
+		length = len(val)
+	}
+	roots := make([][32]byte, 0, length)
+	hasher := hash.CustomSHA256Hasher()
+	rootCreator := func(input *ethpb.BlockVoting) error {
+		newRoot, err := stateutil.BlockVotingDataRootWithHasher(hasher, input)
+		if err != nil {
+			return err
+		}
+		roots = append(roots, newRoot)
+		return nil
+	}
+	if convertAll {
+		for i := range val {
+			err := rootCreator(val[i])
+			if err != nil {
+				return nil, err
+			}
+		}
+		return roots, nil
+	}
+	if len(val) > 0 {
+		for _, idx := range indices {
+			if idx > uint64(len(val))-1 {
+				return nil, fmt.Errorf("index %d greater than number of items in block voting data slice %d", idx, len(val))
 			}
 			err := rootCreator(val[idx])
 			if err != nil {

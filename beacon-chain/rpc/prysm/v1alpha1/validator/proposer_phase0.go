@@ -6,6 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
+	"github.com/sirupsen/logrus"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/core/blocks"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/core/transition"
@@ -15,6 +16,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
+	gwatCommon "github.com/waterfall-foundation/gwat/common"
 	"go.opencensus.io/trace"
 )
 
@@ -36,8 +38,17 @@ func (vs *Server) getPhase0BeaconBlock(ctx context.Context, req *ethpb.BlockRequ
 	defer span.End()
 	blkData, err := vs.buildPhase0BlockData(ctx, req)
 	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"req": req,
+		}).Error("#### build-Altair-BeaconBlock: could not build block data ###")
 		return nil, fmt.Errorf("could not build block data: %v", err)
 	}
+
+	log.WithFields(logrus.Fields{
+		"req.slot":             req.Slot,
+		"blkData.Finalization": gwatCommon.HashArrayFromBytes(blkData.Eth1Data.Finalization),
+		"blkData.Candidates":   gwatCommon.HashArrayFromBytes(blkData.Eth1Data.Candidates),
+	}).Info("#### get-Phase0Beacon-Block ###")
 
 	// Use zero hash as stub for state root to compute later.
 	stateRoot := params.BeaconConfig().ZeroHash[:]
@@ -65,6 +76,11 @@ func (vs *Server) getPhase0BeaconBlock(ctx context.Context, req *ethpb.BlockRequ
 		return nil, err
 	}
 	stateRoot, err = vs.computeStateRoot(ctx, wsb)
+
+	log.WithError(err).WithFields(logrus.Fields{
+		"block.slot": wsb.Block().Slot(),
+	}).Info("<<<< getPhase0BeaconBlock:computeStateRoot >>>>> 000000")
+
 	if err != nil {
 		interop.WriteBlockToDisk(wsb, true /*failed*/)
 		return nil, errors.Wrap(err, "could not compute state root")
@@ -78,7 +94,11 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 	ctx, span := trace.StartSpan(ctx, "ProposerServer.buildPhase0BlockData")
 	defer span.End()
 
-	if vs.SyncChecker.Syncing() {
+	if vs.SyncChecker.Syncing() || vs.SyncChecker.IsInitSync() {
+		log.WithError(fmt.Errorf("syncing to latest head, not ready to respond")).WithFields(logrus.Fields{
+			"IsInitSync": vs.SyncChecker.IsInitSync(),
+			"Syncing":    vs.SyncChecker.Syncing(),
+		}).Warn("Proposing skipped (synchronizing)")
 		return nil, fmt.Errorf("syncing to latest head, not ready to respond")
 	}
 
@@ -102,6 +122,16 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 	if err != nil {
 		return nil, fmt.Errorf("could not get ETH1 data: %v", err)
 	}
+
+	//retrieving of gwat candidates
+	const CandidatesСutoffSlots = 2
+	candidates, err := vs.ExecutionEngineCaller.ExecutionDagGetCandidates(ctx, req.Slot-CandidatesСutoffSlots)
+	eth1Data.Candidates = candidates.ToBytes()
+	log.WithError(fmt.Errorf("could not get gwat candidates: %v", err)).WithFields(logrus.Fields{
+		"req.Slot":    req.Slot,
+		"cutoff.Slot": req.Slot - CandidatesСutoffSlots,
+		"candidates":  candidates,
+	}).Info(">>>>> build block data: retrieving of gwat candidates")
 
 	deposits, atts, err := vs.packDepositsAndAttestations(ctx, head, eth1Data)
 	if err != nil {

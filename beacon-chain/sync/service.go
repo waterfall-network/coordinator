@@ -233,18 +233,18 @@ func (s *Service) registerHandlers() {
 	defer stateSub.Unsubscribe()
 	for {
 		select {
-		case event := <-stateChannel:
-			switch event.Type {
+		case evt := <-stateChannel:
+			switch evt.Type {
 			case statefeed.Initialized:
-				data, ok := event.Data.(*statefeed.InitializedData)
+				data, ok := evt.Data.(*statefeed.InitializedData)
 				if !ok {
 					log.Error("Event feed data is not type *statefeed.InitializedData")
 					return
 				}
 				startTime := data.StartTime
-				log.WithField("starttime", startTime).Debug("Received state initialized event")
+				log.WithField("starttime", startTime).Debug("Received state initialized evt")
 
-				// Register respective rpc handlers at state initialized event.
+				// Register respective rpc handlers at state initialized evt.
 				s.registerRPCHandlers()
 				// Wait for chainstart in separate routine.
 				go func() {
@@ -255,12 +255,12 @@ func (s *Service) registerHandlers() {
 					s.markForChainStart()
 				}()
 			case statefeed.Synced:
-				_, ok := event.Data.(*statefeed.SyncedData)
+				_, ok := evt.Data.(*statefeed.SyncedData)
 				if !ok {
 					log.Error("Event feed data is not type *statefeed.SyncedData")
 					return
 				}
-				// Register respective pubsub handlers at state synced event.
+				// Register respective pubsub handlers at state synced evt.
 				digest, err := s.currentForkDigest()
 				if err != nil {
 					log.WithError(err).Error("Could not retrieve current fork digest")
@@ -294,4 +294,5 @@ type Checker interface {
 	Synced() bool
 	Status() error
 	Resync() error
+	IsInitSync() bool
 }
