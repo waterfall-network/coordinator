@@ -174,19 +174,40 @@ func (s *Service) saveHead(ctx context.Context, headRoot [32]byte, headBlock blo
 	}
 
 	if !s.isSync() {
-		finalizing := gwatCommon.HashArrayFromBytes(headState.Eth1Data().Finalization)
-		err = s.cfg.ExecutionEngineCaller.ExecutionDagFinalize(ctx, &finalizing)
+		cp := headState.CurrentJustifiedCheckpoint()
+		cpState, err := s.cfg.StateGen.StateByRoot(ctx, bytesutil.ToBytes32(cp.Root))
 		if err != nil {
-			log.WithError(err).WithFields(logrus.Fields{
-				"finalizing": finalizing,
-			}).Warn("saveHead: finalization failed")
-			return errors.Wrap(err, "finalization failed")
+			log.WithError(errors.Wrapf(err, "could not get checkpoint state for epoch=%d root=%x", cp.Epoch, cp.GetRoot())).Error("save head")
+			return errors.Wrapf(err, "could not get checkpoint state for epoch=%d root=%x", cp.Epoch, cp.GetRoot())
+		}
+		if cpState == nil || cpState.IsNil() {
+			log.WithError(errors.Wrapf(err, "checkpoint's state not found for epoch=%d root=%x", cp.Epoch, cp.GetRoot())).Error("save head")
+			return errors.Wrapf(err, "checkpoint's state not found for epoch=%d root=%x", cp.Epoch, cp.GetRoot())
 		}
 
-		log.WithFields(logrus.Fields{
-			"finalizing": finalizing,
-		}).Info("save head: finalization success")
+		cpFin := gwatCommon.HashArrayFromBytes(cpState.Eth1Data().Finalization)
+		finalizing := gwatCommon.HashArrayFromBytes(headState.Eth1Data().Finalization)
+		skip := finalizing.IsEqualTo(cpFin)
 
+		log.WithError(err).WithFields(logrus.Fields{
+			"skip":              skip,
+			"cp.Finalization":   cpFin,
+			"head.Finalization": finalizing,
+		}).Info("cpState: finalization")
+
+		if !skip {
+			err = s.cfg.ExecutionEngineCaller.ExecutionDagFinalize(ctx, &finalizing)
+			if err != nil {
+				log.WithError(err).WithFields(logrus.Fields{
+					"finalizing": finalizing,
+				}).Warn("saveHead: finalization failed")
+				return errors.Wrap(err, "finalization failed")
+			}
+
+			log.WithFields(logrus.Fields{
+				"finalized": finalizing,
+			}).Info("save head: finalization success")
+		}
 	}
 
 	// Cache the new head info.
