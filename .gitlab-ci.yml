@@ -3,7 +3,7 @@ before_script:
   - apt-get update -y
   - apt-get install cmake git libssl-dev libgmp-dev libtinfo5 libprotoc-dev wget -y
   - npm install -g @bazel/bazelisk
-  - echo "$GITCONFIG" > ~/.gitconfig
+  - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.waterfall.network/".insteadOf https://gitlab.waterfall.network/
   - echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
 
 coordinator-build:
