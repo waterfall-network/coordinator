@@ -95,8 +95,8 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 
 	// Gwei value constants.
 	MinDepositAmount:          1 * 1e9,
-	MaxEffectiveBalance:       32 * 1e9,
-	EjectionBalance:           16 * 1e9,
+	MaxEffectiveBalance:       32 * 1e9 * 1000,
+	EjectionBalance:           16 * 1e9 * 1000,
 	EffectiveBalanceIncrement: 1 * 1e9,
 
 	// Initial value constants.
