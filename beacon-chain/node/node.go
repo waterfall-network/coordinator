@@ -109,6 +109,7 @@ type BeaconNode struct {
 	blockchainFlagOpts      []blockchain.Option
 	GenesisInitializer      genesis.Initializer
 	CheckpointInitializer   checkpoint.Initializer
+	GenesisSszPath          string
 }
 
 // New creates a new node instance, sets up configuration options, and registers
@@ -346,6 +347,7 @@ func (b *BeaconNode) startDB(cliCtx *cli.Context, depositAddress string) error {
 
 	d, err := db.NewDB(b.ctx, dbPath, &kv.Config{
 		InitialMMapSize: cliCtx.Int(cmd.BoltMMapInitialSizeFlag.Name),
+		GenesisSszPath:  b.GenesisSszPath,
 	})
 	if err != nil {
 		return err
@@ -370,6 +372,7 @@ func (b *BeaconNode) startDB(cliCtx *cli.Context, depositAddress string) error {
 		}
 		d, err = db.NewDB(b.ctx, dbPath, &kv.Config{
 			InitialMMapSize: cliCtx.Int(cmd.BoltMMapInitialSizeFlag.Name),
+			GenesisSszPath:  b.GenesisSszPath,
 		})
 		if err != nil {
 			return errors.Wrap(err, "could not create new database")

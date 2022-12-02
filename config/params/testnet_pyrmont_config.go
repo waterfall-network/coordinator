@@ -37,7 +37,7 @@ func PyrmontConfig() *BeaconChainConfig {
 	cfg.SecondsPerETH1Block = 14
 	cfg.DepositChainID = 337733
 	cfg.DepositNetworkID = 337733
-	cfg.DepositContractAddress = "0xf30097f8c858c1f6b0c6efe72240319efa65b825"
+	cfg.DepositContractAddress = "0x282630916603531E25a075A4fe21c2B612a50105"
 	cfg.InitializeForkSchedule()
 	return cfg
 }

@@ -2,6 +2,7 @@ package genesis
 
 import (
 	_ "embed"
+	"fmt"
 
 	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
 	v1 "github.com/waterfall-foundation/coordinator/beacon-chain/state/v1"
@@ -15,10 +16,17 @@ var (
 )
 
 // State returns a copy of the genesis state from a hardcoded value.
-func State(name string) (state.BeaconState, error) {
-	switch name {
+func State(netName, genesisPath string) (state.BeaconState, error) {
+	switch netName {
 	case params.ConfigNames[params.Mainnet]:
-		return load(mainnetRawSSZCompressed)
+		if genesisPath == "" {
+			// todo activate load mainnetRawSSZCompressed after implemented
+			if false {
+				return load(mainnetRawSSZCompressed)
+			}
+			return nil, fmt.Errorf("mainnet raw genesis is not installed. Use cmd param `--genesis-state` to define path to genesis.ssz")
+		}
+		return nil, nil
 	default:
 		// No state found.
 		return nil, nil

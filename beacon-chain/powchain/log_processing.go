@@ -102,6 +102,12 @@ func (s *Service) ProcessLog(ctx context.Context, depositLog gethTypes.Log) erro
 // in the contract.
 func (s *Service) ProcessDepositLog(ctx context.Context, depositLog gethTypes.Log) error {
 	pubkey, withdrawalCredentials, amount, signature, merkleTreeIndex, err := contracts.UnpackDepositLogData(depositLog.Data)
+
+	log.WithError(err).WithFields(logrus.Fields{
+		"amount": bytesutil.FromBytes8(amount),
+		"pubkey": fmt.Sprintf("%#x", pubkey),
+	}).Info("Processing deposit")
+
 	if err != nil {
 		return errors.Wrap(err, "Could not unpack log")
 	}
@@ -179,7 +185,7 @@ func (s *Service) ProcessDepositLog(ctx context.Context, depositLog gethTypes.Lo
 			"eth1Block":       depositLog.BlockNumber,
 			"publicKey":       fmt.Sprintf("%#x", depositData.PublicKey),
 			"merkleTreeIndex": index,
-		}).Debug("Deposit registered from deposit contract")
+		}).Info("Deposit registered from deposit contract")
 		validDepositsCount.Inc()
 		// Notify users what is going on, from time to time.
 		if !s.chainStartData.Chainstarted {
@@ -192,7 +198,7 @@ func (s *Service) ProcessDepositLog(ctx context.Context, depositLog gethTypes.Lo
 				log.WithFields(logrus.Fields{
 					"deposits":          deposits,
 					"genesisValidators": valCount,
-				}).Info("Processing deposits from Ethereum 1 chain")
+				}).Info("Processing deposits")
 			}
 		}
 	} else {

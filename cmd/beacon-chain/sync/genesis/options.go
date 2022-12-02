@@ -44,6 +44,7 @@ func BeaconNodeOptions(c *cli.Context) (node.Option, error) {
 	}
 
 	return func(node *node.BeaconNode) (err error) {
+		node.GenesisSszPath = statePath
 		node.GenesisInitializer, err = genesis.NewFileInitializer(statePath)
 		if err != nil {
 			return errors.Wrap(err, "error preparing to initialize genesis db state from local ssz files")
