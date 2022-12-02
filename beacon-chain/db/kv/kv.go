@@ -71,6 +71,7 @@ var blockedBuckets = [][]byte{
 // Config for the bolt db kv store.
 type Config struct {
 	InitialMMapSize int
+	GenesisSszPath  string
 }
 
 // Store defines an implementation of the Prysm Database interface
@@ -82,6 +83,7 @@ type Store struct {
 	validatorEntryCache *ristretto.Cache
 	stateSummaryCache   *stateSummaryCache
 	ctx                 context.Context
+	genesisSszPath      string
 }
 
 // KVStoreDatafilePath is the canonical construction of a full
@@ -158,6 +160,7 @@ func NewKVStore(ctx context.Context, dirPath string, config *Config) (*Store, er
 		validatorEntryCache: validatorCache,
 		stateSummaryCache:   newStateSummaryCache(),
 		ctx:                 ctx,
+		genesisSszPath:      config.GenesisSszPath,
 	}
 	start = time.Now()
 	log.Infof("Updating DB and creating buckets...")

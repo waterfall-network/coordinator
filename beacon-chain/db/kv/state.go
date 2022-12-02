@@ -65,7 +65,7 @@ func (s *Store) GenesisState(ctx context.Context) (state.BeaconState, error) {
 	ctx, span := trace.StartSpan(ctx, "BeaconDB.GenesisState")
 	defer span.End()
 
-	cached, err := genesis.State(params.BeaconConfig().ConfigName)
+	cached, err := genesis.State(params.BeaconConfig().ConfigName, s.genesisSszPath)
 	if err != nil {
 		tracing.AnnotateError(span, err)
 		return nil, err

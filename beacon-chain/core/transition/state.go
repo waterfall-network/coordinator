@@ -118,11 +118,11 @@ func OptimizedGenesisBeaconState(genesisTime uint64, preState state.BeaconState,
 		GenesisValidatorsRoot: genesisValidatorsRoot[:],
 
 		Fork: &ethpb.Fork{
-			//PreviousVersion: params.BeaconConfig().GenesisForkVersion,
-			//CurrentVersion:  params.BeaconConfig().GenesisForkVersion,
-			PreviousVersion: params.PyrmontConfig().GenesisForkVersion,
-			CurrentVersion:  params.PyrmontConfig().GenesisForkVersion,
-			Epoch:           0,
+			PreviousVersion: params.BeaconConfig().GenesisForkVersion,
+			CurrentVersion:  params.BeaconConfig().GenesisForkVersion,
+			//PreviousVersion: params.PyrmontConfig().GenesisForkVersion,
+			//CurrentVersion:  params.PyrmontConfig().GenesisForkVersion,
+			Epoch: 0,
 		},
 
 		// Validator registry fields.

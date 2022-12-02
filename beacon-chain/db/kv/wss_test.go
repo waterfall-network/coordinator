@@ -21,7 +21,7 @@ func TestSaveOrigin(t *testing.T) {
 	ctx := context.Background()
 	db := setupDB(t)
 
-	st, err := genesis.State(params.Mainnet.String())
+	st, err := genesis.State(params.Mainnet.String(), "")
 	require.NoError(t, err)
 
 	sb, err := st.MarshalSSZ()
