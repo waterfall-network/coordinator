@@ -156,6 +156,9 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 				"candidates":     candidates,
 			}).Error("GetAttestationData: candidates validation by gwat failed")
 		}
+		if ctx.Err() == context.Canceled {
+			return nil, status.Errorf(codes.Internal, "%v", ctx.Err())
+		}
 		// try previous slot
 		headRoot, err = helpers.BlockRootAtSlot(headState, headState.Slot()-1)
 		if err != nil {
