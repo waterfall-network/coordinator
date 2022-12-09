@@ -77,10 +77,6 @@ func ExecuteStateTransition(
 		if err != nil {
 			log.WithError(err).Error("*** ExecuteStateTransition: get set err BLOCK ***")
 		}
-		rSet, err := b.RandaoSignatureBatch(ctx, state, signed.Block().Body().RandaoReveal())
-		if err != nil {
-			log.WithError(err).Error("*** ExecuteStateTransition: get set err RANDAO ***")
-		}
 		aSet, err := b.AttestationSignatureBatch(ctx, state, signed.Block().Body().Attestations())
 		if err != nil {
 			log.WithError(err).Error("*** ExecuteStateTransition: get set err ATTESTATION ***")
@@ -93,15 +89,6 @@ func ExecuteStateTransition(
 			}).Warn("*** ExecuteStateTransition: signature invalid BLOCK ***")
 		} else {
 			log.Warn("*** ExecuteStateTransition: signature==nil BLOCK ***")
-		}
-		if rSet != nil {
-			valid, err := rSet.Verify()
-			log.WithError(err).WithFields(logrus.Fields{
-				"valid":                valid,
-				"len(bSet.Signatures)": len(rSet.Signatures),
-			}).Warn("*** ExecuteStateTransition: signature invalid RANDAO ***")
-		} else {
-			log.Warn("*** ExecuteStateTransition: signature==nil RANDAO ***")
 		}
 		if aSet != nil {
 			valid, err := aSet.Verify()
