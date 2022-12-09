@@ -10,8 +10,10 @@ import (
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
+	"github.com/sirupsen/logrus"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/cache"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/core/altair"
+	b "github.com/waterfall-foundation/coordinator/beacon-chain/core/blocks"
 	e "github.com/waterfall-foundation/coordinator/beacon-chain/core/epoch"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/core/epoch/precompute"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/core/execution"
@@ -69,6 +71,49 @@ func ExecuteStateTransition(
 		return nil, errors.Wrap(err, "could not batch verify signature")
 	}
 	if !valid {
+
+		//TODO RM tmp log ^^^^^^^^^^
+		bSet, err := b.BlockSignatureBatch(state, signed.Block().ProposerIndex(), signed.Signature(), signed.Block().HashTreeRoot)
+		if err != nil {
+			log.WithError(err).Error("*** ExecuteStateTransition: get set err BLOCK ***")
+		}
+		rSet, err := b.RandaoSignatureBatch(ctx, state, signed.Block().Body().RandaoReveal())
+		if err != nil {
+			log.WithError(err).Error("*** ExecuteStateTransition: get set err RANDAO ***")
+		}
+		aSet, err := b.AttestationSignatureBatch(ctx, state, signed.Block().Body().Attestations())
+		if err != nil {
+			log.WithError(err).Error("*** ExecuteStateTransition: get set err ATTESTATION ***")
+		}
+		if bSet != nil {
+			valid, err := bSet.Verify()
+			log.WithError(err).WithFields(logrus.Fields{
+				"valid":                valid,
+				"len(bSet.Signatures)": len(bSet.Signatures),
+			}).Warn("*** ExecuteStateTransition: signature invalid BLOCK ***")
+		} else {
+			log.Warn("*** ExecuteStateTransition: signature==nil BLOCK ***")
+		}
+		if rSet != nil {
+			valid, err := rSet.Verify()
+			log.WithError(err).WithFields(logrus.Fields{
+				"valid":                valid,
+				"len(bSet.Signatures)": len(rSet.Signatures),
+			}).Warn("*** ExecuteStateTransition: signature invalid RANDAO ***")
+		} else {
+			log.Warn("*** ExecuteStateTransition: signature==nil RANDAO ***")
+		}
+		if aSet != nil {
+			valid, err := aSet.Verify()
+			log.WithError(err).WithFields(logrus.Fields{
+				"valid":                valid,
+				"len(bSet.Signatures)": len(aSet.Signatures),
+			}).Warn("*** ExecuteStateTransition: signature invalid ATTESTATION ***")
+		} else {
+			log.Warn("*** ExecuteStateTransition: signature==nil ATTESTATION ***")
+		}
+		//TODO RM tmp log ^^^^^^^^^^
+
 		return nil, errors.New("signature in block failed to verify")
 	}
 
