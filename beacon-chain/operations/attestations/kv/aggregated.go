@@ -99,6 +99,7 @@ func (c *AttCaches) SaveAggregatedAttestation(att *ethpb.Attestation) error {
 	if !helpers.IsAggregated(att) {
 		return errors.New("attestation is not aggregated")
 	}
+	// checks already has same attestation
 	has, err := c.HasAggregatedAttestation(att)
 	if err != nil {
 		return err
@@ -122,6 +123,7 @@ func (c *AttCaches) SaveAggregatedAttestation(att *ethpb.Attestation) error {
 	copiedAtt := ethpb.CopyAttestation(att)
 	c.aggregatedAttLock.Lock()
 	defer c.aggregatedAttLock.Unlock()
+	// get current aggregated attestation for same att.Data (by Data hash)
 	atts, ok := c.aggregatedAtt[r]
 	if !ok {
 		atts := []*ethpb.Attestation{copiedAtt}

@@ -61,14 +61,17 @@ func ProcessAttestationNoVerifySignature(
 	if err != nil {
 		return nil, fmt.Errorf("att slot %d can't be greater than state slot %d", att.Data.Slot, beaconState.Slot())
 	}
+	//participatedFlags: map[uint8]bool{sourceFlagIndex: true, targetFlagIndex: true, headFlagIndex: true,}
 	participatedFlags, err := AttestationParticipationFlagIndices(beaconState, att.Data, delay)
 	if err != nil {
 		return nil, err
 	}
+	// validator indexes of committee
 	committee, err := helpers.BeaconCommitteeFromState(ctx, beaconState, att.Data.Slot, att.Data.CommitteeIndex)
 	if err != nil {
 		return nil, err
 	}
+	// aggregated validator indexes
 	indices, err := attestation.AttestingIndices(att.AggregationBits, committee)
 	if err != nil {
 		return nil, err

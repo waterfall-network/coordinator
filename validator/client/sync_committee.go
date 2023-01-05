@@ -81,7 +81,7 @@ func (v *validator) SubmitSyncCommitteeMessage(ctx context.Context, slot types.S
 		"slot":           msg.Slot,
 		"blockRoot":      fmt.Sprintf("%#x", bytesutil.Trunc(msg.BlockRoot)),
 		"validatorIndex": msg.ValidatorIndex,
-	}).Info("Submitted new sync message")
+	}).Debug("Submitted new sync message")
 }
 
 // SubmitSignedContributionAndProof submits the signed sync committee contribution and proof to the beacon chain.
@@ -171,7 +171,7 @@ func (v *validator) SubmitSignedContributionAndProof(ctx context.Context, slot t
 			"subcommitteeIndex": contributionAndProof.Contribution.SubcommitteeIndex,
 			"aggregatorIndex":   contributionAndProof.AggregatorIndex,
 			"bitsCount":         contributionAndProof.Contribution.AggregationBits.Count(),
-		}).Info("Submitted new sync contribution and proof")
+		}).Debug("Submitted new sync contribution and proof")
 	}
 }
 
