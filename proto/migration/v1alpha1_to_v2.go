@@ -107,10 +107,10 @@ func BeaconStateAltairToProto(altairState state.BeaconStateAltair) (*ethpbv2.Bea
 			}
 		}
 		resultBlockVoting[i] = &ethpbv1.BlockVoting{
-			Root:           bytesutil.SafeCopyBytes(vote.Root),
-			TotalAttesters: vote.TotalAttesters,
-			Candidates:     bytesutil.SafeCopyBytes(vote.Candidates),
-			Attestations:   attestations,
+			Root:         bytesutil.SafeCopyBytes(vote.Root),
+			Slot:         vote.Slot,
+			Candidates:   bytesutil.SafeCopyBytes(vote.Candidates),
+			Attestations: attestations,
 		}
 	}
 	resultValidators := make([]*ethpbv1.Validator, len(sourceValidators))
@@ -253,10 +253,10 @@ func BeaconStateBellatrixToProto(st state.BeaconStateBellatrix) (*ethpbv2.Beacon
 			}
 		}
 		resultBlockVoting[i] = &ethpbv1.BlockVoting{
-			Root:           bytesutil.SafeCopyBytes(vote.Root),
-			TotalAttesters: vote.TotalAttesters,
-			Candidates:     bytesutil.SafeCopyBytes(vote.Candidates),
-			Attestations:   attestations,
+			Root:         bytesutil.SafeCopyBytes(vote.Root),
+			Slot:         vote.Slot,
+			Candidates:   bytesutil.SafeCopyBytes(vote.Candidates),
+			Attestations: attestations,
 		}
 	}
 	resultValidators := make([]*ethpbv1.Validator, len(sourceValidators))

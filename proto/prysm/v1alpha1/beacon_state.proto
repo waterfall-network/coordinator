@@ -244,8 +244,8 @@ message BeaconStateBellatrix {
 message BlockVoting {
   // 32 byte merkle tree root of the ssz encoded block.
   bytes root = 1 [(ethereum.eth.ext.ssz_size) = "32"];
-  // total numbers of attesters (committee length)
-  uint64 total_attesters = 2;
+  // slot
+  uint64 slot = 2 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Slot"];
   // The 32 byte array of hashes presented sequence of the GWAT spines candidates.
   // ssz_max = 32 * 128
   bytes candidates = 3 [(ethereum.eth.ext.ssz_max) = "4096"];

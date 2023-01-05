@@ -25,12 +25,12 @@ func BlockVotingsCalcFinalization(ctx context.Context, state state.BeaconState, 
 	var (
 		blockVotings    = BlockVotingArrCopy(blockVotingArr)
 		supportedVotes  = make([]*ethpb.BlockVoting, 0)
-		candidatesParts = [][]gwatCommon.HashArray{}
+		candidatesParts = make([][]gwatCommon.HashArray, 0)
 		tabPriority     = mapPriority{}
 		tabVoting       = mapVoting{}
 		tabCandidates   = mapCandidates{}
 		slotsToConfirm  = params.BeaconConfig().VotingRequiredSlots
-		badVotes        = []*ethpb.BlockVoting{}
+		badVotes        = make([]*ethpb.BlockVoting, 0)
 	)
 	for _, bv := range blockVotings {
 		// candidates must be uniq
@@ -119,7 +119,7 @@ func BlockVotingsCalcFinalization(ctx context.Context, state state.BeaconState, 
 	}
 
 	//sort by priority
-	priorities := []int{}
+	priorities := make([]int, 0)
 	for p := range tabPriority {
 		priorities = append(priorities, p)
 	}
@@ -172,7 +172,7 @@ func BlockVotingMinSupport(ctx context.Context, state state.BeaconState, slot ty
 	return val, nil
 }
 
-// BlockVotingCountVotes counts votes of BlockVoting
+// CountAttestationsVotes counts votes of BlockVoting
 func CountAttestationsVotes(attestations []*ethpb.Attestation) uint64 {
 	count := uint64(0)
 	for _, att := range attestations {
@@ -185,7 +185,6 @@ func CountAttestationsVotes(attestations []*ethpb.Attestation) uint64 {
 	return count
 }
 
-// BlockVotingCopy
 func BlockVotingCopy(vote *ethpb.BlockVoting) *ethpb.BlockVoting {
 	attestations := make([]*ethpb.Attestation, len(vote.Attestations))
 	for i, att := range vote.Attestations {
@@ -208,14 +207,13 @@ func BlockVotingCopy(vote *ethpb.BlockVoting) *ethpb.BlockVoting {
 		}
 	}
 	return &ethpb.BlockVoting{
-		Root:           bytesutil.SafeCopyBytes(vote.Root),
-		TotalAttesters: vote.TotalAttesters,
-		Candidates:     bytesutil.SafeCopyBytes(vote.Candidates),
-		Attestations:   attestations,
+		Root:         bytesutil.SafeCopyBytes(vote.Root),
+		Slot:         vote.Slot,
+		Candidates:   bytesutil.SafeCopyBytes(vote.Candidates),
+		Attestations: attestations,
 	}
 }
 
-// BlockVotingArrCopy
 func BlockVotingArrCopy(votes []*ethpb.BlockVoting) []*ethpb.BlockVoting {
 	cpy := make([]*ethpb.BlockVoting, len(votes))
 	for i, vote := range votes {
@@ -224,7 +222,7 @@ func BlockVotingArrCopy(votes []*ethpb.BlockVoting) []*ethpb.BlockVoting {
 	return cpy
 }
 
-// BlockVotingArrSort put BlockVoting array to order to calculate state hash.
+// BlockVotingArrStateOrder put BlockVoting array to order to calculate state hash.
 func BlockVotingArrStateOrder(votes []*ethpb.BlockVoting) ([]*ethpb.BlockVoting, error) {
 	var err error
 	cpyAttOrd := make([]*ethpb.BlockVoting, len(votes))
@@ -320,7 +318,7 @@ func PrintBlockVoting(blockVoting *ethpb.BlockVoting) string {
 	str := "{"
 	str += fmt.Sprintf("root: \"%#x\",", blockVoting.Root)
 	str += fmt.Sprintf("candidates: %s,", candStr)
-	str += fmt.Sprintf("totalAttesters: %d,", blockVoting.GetTotalAttesters())
+	str += fmt.Sprintf("slot: %d,", blockVoting.GetSlot())
 	str += fmt.Sprintf("attestations: [")
 	for i, att := range blockVoting.Attestations {
 		str += "{"

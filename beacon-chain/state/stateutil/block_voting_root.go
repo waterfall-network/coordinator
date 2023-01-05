@@ -37,9 +37,9 @@ func BlockVotingDataRootWithHasher(hasher ssz.HashFn, blockVoting *ethpb.BlockVo
 	if len(blockVoting.Root) > 0 {
 		fieldRoots[0] = bytesutil.ToBytes32(blockVoting.Root)
 	}
-	totalAttestersBuf := make([]byte, 8)
-	binary.LittleEndian.PutUint64(totalAttestersBuf, blockVoting.TotalAttesters)
-	fieldRoots[1] = bytesutil.ToBytes32(totalAttestersBuf)
+	slotBuf := make([]byte, 8)
+	binary.LittleEndian.PutUint64(slotBuf, uint64(blockVoting.Slot))
+	fieldRoots[1] = bytesutil.ToBytes32(slotBuf)
 
 	if finLen > 0 {
 		for i := 0; i < finChunks; i++ {
