@@ -28,8 +28,8 @@ import (
 	_ "github.com/waterfall-foundation/coordinator/runtime/maxprocs"
 	"github.com/waterfall-foundation/coordinator/runtime/tos"
 	"github.com/waterfall-foundation/coordinator/runtime/version"
-	gethlog "github.com/waterfall-foundation/gwat/log"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
+	gethlog "gitlab.waterfall.network/waterfall/protocol/gwat/log"
 )
 
 var appFlags = []cli.Flag{

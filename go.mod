@@ -77,7 +77,6 @@ require (
 	github.com/tyler-smith/go-bip39 v1.1.0
 	github.com/urfave/cli/v2 v2.3.0
 	github.com/uudashr/gocognit v1.0.5
-	github.com/waterfall-foundation/gwat v0.6.2
 	github.com/wealdtech/go-bytesutil v1.1.1
 	github.com/wealdtech/go-eth2-util v1.6.3
 	github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4 v1.1.3
@@ -227,6 +226,7 @@ require (
 	github.com/wealdtech/go-eth2-types/v2 v2.5.2 // indirect
 	github.com/whyrusleeping/multiaddr-filter v0.0.0-20160516205228-e903e4adabd7 // indirect
 	github.com/whyrusleeping/timecache v0.0.0-20160911033111-cfcb2f1abfee // indirect
+	gitlab.waterfall.network/waterfall/protocol/gwat v0.6.4 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.7.0 // indirect
 	go.uber.org/zap v1.19.0 // indirect
@@ -276,4 +276,4 @@ replace github.com/grpc-ecosystem/grpc-gateway/v2 => github.com/prysmaticlabs/gr
 
 replace github.com/ferranbt/fastssz => github.com/prysmaticlabs/fastssz v0.0.0-20220110145812-fafb696cae88
 
-//replace github.com/waterfall-foundation/gwat => /home/mezin/go/src/gwat
+//replace gitlab.waterfall.network/waterfall/protocol/gwat => /home/mezin/go/src/gwat

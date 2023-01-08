@@ -29,7 +29,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/testing/require"
 	"github.com/waterfall-foundation/coordinator/testing/util"
 	prysmTime "github.com/waterfall-foundation/coordinator/time"
-	"github.com/waterfall-foundation/gwat/p2p/enr"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enr"
 )
 
 func TestProcessPendingAtts_NoBlockRequestBlock(t *testing.T) {

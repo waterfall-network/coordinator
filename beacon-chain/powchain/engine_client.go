@@ -14,11 +14,11 @@ import (
 	"github.com/waterfall-foundation/coordinator/config/params"
 	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
 	pb "github.com/waterfall-foundation/coordinator/proto/engine/v1"
-	"github.com/waterfall-foundation/gwat/common"
-	gwatCommon "github.com/waterfall-foundation/gwat/common"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
-	gwatTypes "github.com/waterfall-foundation/gwat/core/types"
-	"github.com/waterfall-foundation/gwat/rpc"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
+	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/rpc"
 	"go.opencensus.io/trace"
 )
 

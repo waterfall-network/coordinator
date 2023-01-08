@@ -38,14 +38,14 @@ import (
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	prysmTime "github.com/waterfall-foundation/coordinator/time"
 	"github.com/waterfall-foundation/coordinator/time/slots"
-	ethereum "github.com/waterfall-foundation/gwat"
-	"github.com/waterfall-foundation/gwat/accounts/abi/bind"
-	"github.com/waterfall-foundation/gwat/common"
-	gwatCommon "github.com/waterfall-foundation/gwat/common"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
-	gwatTypes "github.com/waterfall-foundation/gwat/core/types"
-	"github.com/waterfall-foundation/gwat/ethclient"
-	gethRPC "github.com/waterfall-foundation/gwat/rpc"
+	ethereum "gitlab.waterfall.network/waterfall/protocol/gwat"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/abi/bind"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
+	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/ethclient"
+	gethRPC "gitlab.waterfall.network/waterfall/protocol/gwat/rpc"
 )
 
 var (

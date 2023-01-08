@@ -23,7 +23,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/validator/accounts/wallet"
 	"github.com/waterfall-foundation/coordinator/validator/client"
 	"github.com/waterfall-foundation/coordinator/validator/keymanager"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )

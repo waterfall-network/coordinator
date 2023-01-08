@@ -3803,20 +3803,6 @@ def prysm_deps():
         sum = "h1:6+hBz+qvs0JOrrNhhmR7lFxo5sINxBCGXrdtl/UvroE=",
         version = "v1.0.0",
     )
-    go_repository(
-        name = "com_github_waterfall_foundation_gwat",
-        build_directives = [
-            "gazelle:resolve go github.com/karalabe/usb @prysm//third_party/usb:go_default_library",
-        ],
-        importpath = "github.com/waterfall-foundation/gwat",
-        sum = "h1:edQy5zCWHAiR51A8qYjCcpyx/nm0axwh10NGxSRz2lk=",
-        version = "v0.6.2",
-
-        ## to use local repo comment `sum` & `version`, and uncomment follows below
-        #vcs = "git",
-        #remote = "file:///home/mezin/go/src/gwat",
-        #tag = "v0.6.2",
-    )
 
     go_repository(
         name = "com_github_wealdtech_go_bytesutil",
@@ -4351,6 +4337,21 @@ def prysm_deps():
         sum = "h1:7uVkIFmeBqHfdjD+gZwtXXI+RODJ2Wc4O7MPEh/QiW4=",
         version = "v1.3.0",
     )
+    go_repository(
+        name = "network_waterfall_gitlab_waterfall_protocol_gwat",
+        build_directives = [
+            "gazelle:resolve go github.com/karalabe/usb @prysm//third_party/usb:go_default_library",
+        ],
+        importpath = "gitlab.waterfall.network/waterfall/protocol/gwat",
+        sum = "h1:UGhe80yJ3sFbKSgmxsD0oEp2tAdnbzjRSw/2RoZwvVo=",
+        version = "v0.6.4",
+
+        ## to use local repo comment `sum` & `version`, and uncomment follows below
+        #vcs = "git",
+        #remote = "file:///home/mezin/go/src/gwat",
+        #tag = "v0.6.4",
+    )
+
     go_repository(
         name = "org_apache_git_thrift_git",
         importpath = "git.apache.org/thrift.git",

@@ -5,7 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 	validatorpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/validator-client"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 )
 
 // GetBlockSignRequest maps the request for signing type BLOCK.

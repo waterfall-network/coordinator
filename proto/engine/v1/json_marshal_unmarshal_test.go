@@ -10,7 +10,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
 	enginev1 "github.com/waterfall-foundation/coordinator/proto/engine/v1"
 	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 )
 
 func TestJsonMarshalUnmarshal(t *testing.T) {

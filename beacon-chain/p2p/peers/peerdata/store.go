@@ -11,7 +11,7 @@ import (
 	ma "github.com/multiformats/go-multiaddr"
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/metadata"
-	"github.com/waterfall-foundation/gwat/p2p/enr"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enr"
 )
 
 var (

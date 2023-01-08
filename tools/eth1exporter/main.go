@@ -16,9 +16,9 @@ import (
 
 	"github.com/sirupsen/logrus"
 	_ "github.com/waterfall-foundation/coordinator/runtime/maxprocs"
-	"github.com/waterfall-foundation/gwat/common"
-	"github.com/waterfall-foundation/gwat/ethclient"
-	"github.com/waterfall-foundation/gwat/params"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/ethclient"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/params"
 )
 
 var (

@@ -20,7 +20,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/runtime/interop"
 	e2e "github.com/waterfall-foundation/coordinator/testing/endtoend/params"
 	e2etypes "github.com/waterfall-foundation/coordinator/testing/endtoend/types"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 	"gopkg.in/yaml.v2"
 )
 

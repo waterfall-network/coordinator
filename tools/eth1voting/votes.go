@@ -7,7 +7,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
 	v1alpha1 "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
-	"github.com/waterfall-foundation/gwat/crypto"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/crypto"
 )
 
 type votes struct {

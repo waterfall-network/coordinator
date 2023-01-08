@@ -26,10 +26,10 @@ import (
 	e2e "github.com/waterfall-foundation/coordinator/testing/endtoend/params"
 	e2etypes "github.com/waterfall-foundation/coordinator/testing/endtoend/types"
 	"github.com/waterfall-foundation/coordinator/testing/util"
-	"github.com/waterfall-foundation/gwat/accounts/abi/bind"
-	"github.com/waterfall-foundation/gwat/accounts/keystore"
-	"github.com/waterfall-foundation/gwat/ethclient"
-	"github.com/waterfall-foundation/gwat/rpc"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/abi/bind"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/keystore"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/ethclient"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/rpc"
 )
 
 const depositGasLimit = 4000000

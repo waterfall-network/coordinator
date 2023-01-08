@@ -14,7 +14,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/validator/accounts/iface"
 	"github.com/waterfall-foundation/coordinator/validator/accounts/wallet"
 	remote_web3signer "github.com/waterfall-foundation/coordinator/validator/keymanager/remote-web3signer"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 )
 
 func init() {

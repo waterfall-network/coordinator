@@ -15,9 +15,9 @@ import (
 	"github.com/waterfall-foundation/coordinator/config/params"
 	"github.com/waterfall-foundation/coordinator/runtime/version"
 	"github.com/waterfall-foundation/coordinator/time/slots"
-	"github.com/waterfall-foundation/gwat/p2p/discover"
-	"github.com/waterfall-foundation/gwat/p2p/enode"
-	"github.com/waterfall-foundation/gwat/p2p/enr"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/discover"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enode"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enr"
 )
 
 // Listener defines the discovery V5 network interface that is used

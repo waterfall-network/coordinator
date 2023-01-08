@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
 	"github.com/wealdtech/go-bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 )
 
 // processField calls each processor function on any field that has the matching tag set.

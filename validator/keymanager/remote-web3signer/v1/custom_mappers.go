@@ -8,7 +8,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/network/forks"
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	"github.com/waterfall-foundation/coordinator/time/slots"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 )
 
 // MapForkInfo maps the eth2.ForkInfo proto to the Web3Signer spec.

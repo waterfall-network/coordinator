@@ -9,7 +9,7 @@ import (
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/waterfall-foundation/coordinator/config/params"
 	prysmTime "github.com/waterfall-foundation/coordinator/time"
-	commonMath "github.com/waterfall-foundation/gwat/common/math"
+	commonMath "gitlab.waterfall.network/waterfall/protocol/gwat/common/math"
 )
 
 // MaxSlotBuffer specifies the max buffer given to slots from

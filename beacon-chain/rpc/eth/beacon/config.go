@@ -10,7 +10,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/config/params"
 	"github.com/waterfall-foundation/coordinator/network/forks"
 	ethpb "github.com/waterfall-foundation/coordinator/proto/eth/v1"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

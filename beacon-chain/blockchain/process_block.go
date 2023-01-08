@@ -26,7 +26,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
 	"github.com/waterfall-foundation/coordinator/runtime/version"
 	"github.com/waterfall-foundation/coordinator/time/slots"
-	gwatCommon "github.com/waterfall-foundation/gwat/common"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	"go.opencensus.io/trace"
 )
 

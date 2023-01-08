@@ -6,7 +6,7 @@ import (
 
 	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
 	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 )
 
 // PayloadIDBytes defines a custom type for Payload IDs used by the engine API

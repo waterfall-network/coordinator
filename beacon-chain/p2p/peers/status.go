@@ -44,7 +44,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/metadata"
 	prysmTime "github.com/waterfall-foundation/coordinator/time"
 	"github.com/waterfall-foundation/coordinator/time/slots"
-	"github.com/waterfall-foundation/gwat/p2p/enr"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enr"
 )
 
 const (

@@ -13,7 +13,7 @@ import (
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	synccontribution "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/attestation/aggregation/sync_contribution"
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
-	gwatCommon "github.com/waterfall-foundation/gwat/common"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	"go.opencensus.io/trace"
 )
 

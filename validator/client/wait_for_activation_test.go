@@ -25,8 +25,8 @@ import (
 	"github.com/waterfall-foundation/coordinator/validator/keymanager/derived"
 	remotekeymanagermock "github.com/waterfall-foundation/coordinator/validator/keymanager/remote/mock"
 	constant "github.com/waterfall-foundation/coordinator/validator/testing"
-	"github.com/waterfall-foundation/gwat/common"
 	util "github.com/wealdtech/go-eth2-util"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 func TestWaitActivation_ContextCanceled(t *testing.T) {

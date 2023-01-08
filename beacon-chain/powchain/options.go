@@ -8,7 +8,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stategen"
 	"github.com/waterfall-foundation/coordinator/network"
 	"github.com/waterfall-foundation/coordinator/network/authorization"
-	"github.com/waterfall-foundation/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 type Option func(s *Service) error

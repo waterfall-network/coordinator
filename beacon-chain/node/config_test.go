@@ -14,7 +14,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/config/params"
 	"github.com/waterfall-foundation/coordinator/testing/assert"
 	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 func TestConfigureHistoricalSlasher(t *testing.T) {

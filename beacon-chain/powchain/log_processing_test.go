@@ -19,8 +19,8 @@ import (
 	"github.com/waterfall-foundation/coordinator/testing/assert"
 	"github.com/waterfall-foundation/coordinator/testing/require"
 	"github.com/waterfall-foundation/coordinator/testing/util"
-	ethereum "github.com/waterfall-foundation/gwat"
-	"github.com/waterfall-foundation/gwat/common"
+	ethereum "gitlab.waterfall.network/waterfall/protocol/gwat"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 func TestProcessDepositLog_OK(t *testing.T) {

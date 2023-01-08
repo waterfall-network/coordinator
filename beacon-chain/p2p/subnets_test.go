@@ -18,9 +18,9 @@ import (
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
 	"github.com/waterfall-foundation/coordinator/testing/assert"
 	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/gwat/p2p/discover"
-	"github.com/waterfall-foundation/gwat/p2p/enode"
-	"github.com/waterfall-foundation/gwat/p2p/enr"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/discover"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enode"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enr"
 )
 
 func TestStartDiscV5_DiscoverPeersWithSubnets(t *testing.T) {

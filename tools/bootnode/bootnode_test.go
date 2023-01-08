@@ -14,8 +14,8 @@ import (
 	_ "github.com/waterfall-foundation/coordinator/runtime/maxprocs"
 	"github.com/waterfall-foundation/coordinator/testing/assert"
 	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/gwat/p2p/discover"
-	"github.com/waterfall-foundation/gwat/p2p/enode"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/discover"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enode"
 )
 
 func TestMain(m *testing.M) {

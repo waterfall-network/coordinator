@@ -22,7 +22,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
 	"github.com/waterfall-foundation/coordinator/testing/assert"
 	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/gwat/p2p/enr"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enr"
 )
 
 func TestStatus(t *testing.T) {

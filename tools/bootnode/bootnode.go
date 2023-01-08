@@ -37,11 +37,11 @@ import (
 	pb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	_ "github.com/waterfall-foundation/coordinator/runtime/maxprocs"
 	"github.com/waterfall-foundation/coordinator/runtime/version"
-	gcrypto "github.com/waterfall-foundation/gwat/crypto"
-	gethlog "github.com/waterfall-foundation/gwat/log"
-	"github.com/waterfall-foundation/gwat/p2p/discover"
-	"github.com/waterfall-foundation/gwat/p2p/enode"
-	"github.com/waterfall-foundation/gwat/p2p/enr"
+	gcrypto "gitlab.waterfall.network/waterfall/protocol/gwat/crypto"
+	gethlog "gitlab.waterfall.network/waterfall/protocol/gwat/log"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/discover"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enode"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enr"
 )
 
 var (

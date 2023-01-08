@@ -16,8 +16,8 @@ import (
 	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	"github.com/waterfall-foundation/coordinator/time/slots"
-	gwatCommon "github.com/waterfall-foundation/gwat/common"
-	gwatTypes "github.com/waterfall-foundation/gwat/core/types"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
 	"go.opencensus.io/trace"
 )
 

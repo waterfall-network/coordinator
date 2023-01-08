@@ -14,7 +14,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/monitoring/backup"
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
-	"github.com/waterfall-foundation/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 // ReadOnlyDatabase defines a struct which only has read access to database methods.

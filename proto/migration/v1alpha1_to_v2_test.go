@@ -13,8 +13,8 @@ import (
 	"github.com/waterfall-foundation/coordinator/testing/assert"
 	"github.com/waterfall-foundation/coordinator/testing/require"
 	"github.com/waterfall-foundation/coordinator/testing/util"
-	"github.com/waterfall-foundation/gwat/common"
-	gwatCommon "github.com/waterfall-foundation/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 func TestV1Alpha1SignedContributionAndProofToV2(t *testing.T) {

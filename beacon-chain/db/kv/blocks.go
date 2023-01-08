@@ -18,7 +18,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
 	"github.com/waterfall-foundation/coordinator/runtime/version"
 	"github.com/waterfall-foundation/coordinator/time/slots"
-	"github.com/waterfall-foundation/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	bolt "go.etcd.io/bbolt"
 	"go.opencensus.io/trace"
 )

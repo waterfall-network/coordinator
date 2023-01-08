@@ -22,8 +22,8 @@ import (
 	pb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/metadata"
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
-	gcrypto "github.com/waterfall-foundation/gwat/crypto"
-	"github.com/waterfall-foundation/gwat/p2p/enr"
+	gcrypto "gitlab.waterfall.network/waterfall/protocol/gwat/crypto"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enr"
 	"google.golang.org/protobuf/proto"
 )
 

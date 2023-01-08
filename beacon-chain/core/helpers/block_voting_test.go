@@ -11,7 +11,7 @@ import (
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	"github.com/waterfall-foundation/coordinator/testing/assert"
 	"github.com/waterfall-foundation/coordinator/testing/util"
-	gwatCommon "github.com/waterfall-foundation/gwat/common"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 func TestBlockVotingsCalcFinalization_finalization_OK(t *testing.T) {

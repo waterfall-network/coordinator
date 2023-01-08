@@ -17,7 +17,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/crypto/hash"
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	"github.com/waterfall-foundation/coordinator/time"
-	gwatCommon "github.com/waterfall-foundation/gwat/common"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 // GenerateGenesisState deterministically given a genesis time and number of validators.

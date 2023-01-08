@@ -13,7 +13,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/peers"
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/metadata"
-	"github.com/waterfall-foundation/gwat/p2p/enr"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enr"
 	"google.golang.org/protobuf/proto"
 )
 

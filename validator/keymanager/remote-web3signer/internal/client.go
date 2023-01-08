@@ -19,7 +19,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/crypto/bls"
 	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
 	"github.com/waterfall-foundation/coordinator/monitoring/tracing"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 	"go.opencensus.io/trace"
 )
 

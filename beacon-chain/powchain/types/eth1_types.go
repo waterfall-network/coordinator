@@ -5,8 +5,8 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	"github.com/waterfall-foundation/gwat/common"
-	gethTypes "github.com/waterfall-foundation/gwat/core/types"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	gethTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
 )
 
 // HeaderInfo specifies the block header information in the ETH 1.0 chain.

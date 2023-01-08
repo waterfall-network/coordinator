@@ -22,8 +22,8 @@ import (
 	"github.com/waterfall-foundation/coordinator/validator/accounts/wallet"
 	"github.com/waterfall-foundation/coordinator/validator/keymanager"
 	remote_web3signer "github.com/waterfall-foundation/coordinator/validator/keymanager/remote-web3signer"
-	"github.com/waterfall-foundation/gwat/common"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 )
 
 // Test that the sharding node can build with default flag values.

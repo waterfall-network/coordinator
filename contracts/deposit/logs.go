@@ -4,7 +4,7 @@ import (
 	"bytes"
 
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/gwat/accounts/abi"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/abi"
 )
 
 // UnpackDepositLogData unpacks the data from a deposit log using the ABI decoder.

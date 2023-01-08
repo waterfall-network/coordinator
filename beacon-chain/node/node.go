@@ -62,7 +62,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/runtime/debug"
 	"github.com/waterfall-foundation/coordinator/runtime/prereqs"
 	"github.com/waterfall-foundation/coordinator/runtime/version"
-	"github.com/waterfall-foundation/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 const testSkipPowFlag = "test-skip-pow"

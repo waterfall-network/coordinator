@@ -10,7 +10,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
 	"github.com/waterfall-foundation/coordinator/testing/assert"
 	"github.com/waterfall-foundation/coordinator/testing/require"
-	gwatCommon "github.com/waterfall-foundation/gwat/common"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 func TestBeaconBlockHeaderFromBlock(t *testing.T) {

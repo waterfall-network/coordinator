@@ -10,7 +10,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
 	"github.com/waterfall-foundation/coordinator/testing/require"
 	"github.com/waterfall-foundation/coordinator/testing/spectest/utils"
-	"github.com/waterfall-foundation/gwat/log"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/log"
 )
 
 // RunRewardsAndPenaltiesTests executes "epoch_processing/rewards_and_penalties" tests.

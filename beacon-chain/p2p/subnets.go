@@ -10,8 +10,8 @@ import (
 	"github.com/waterfall-foundation/coordinator/cmd/beacon-chain/flags"
 	mathutil "github.com/waterfall-foundation/coordinator/math"
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
-	"github.com/waterfall-foundation/gwat/p2p/enode"
-	"github.com/waterfall-foundation/gwat/p2p/enr"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enode"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enr"
 	"go.opencensus.io/trace"
 
 	"github.com/waterfall-foundation/coordinator/config/params"

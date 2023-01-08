@@ -13,9 +13,9 @@ import (
 	"github.com/waterfall-foundation/coordinator/io/logs"
 	"github.com/waterfall-foundation/coordinator/network"
 	"github.com/waterfall-foundation/coordinator/network/authorization"
-	gwatTypes "github.com/waterfall-foundation/gwat/core/types"
-	"github.com/waterfall-foundation/gwat/ethclient"
-	gethRPC "github.com/waterfall-foundation/gwat/rpc"
+	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/ethclient"
+	gethRPC "gitlab.waterfall.network/waterfall/protocol/gwat/rpc"
 )
 
 func (s *Service) setupExecutionClientConnections(ctx context.Context, currEndpoint network.Endpoint) error {

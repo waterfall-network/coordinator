@@ -16,7 +16,7 @@ import (
 	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
 	"github.com/waterfall-foundation/coordinator/config/params"
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 )
 
 // FillRootsNaturalOpt is meant to be used as an option when calling NewBeaconState.

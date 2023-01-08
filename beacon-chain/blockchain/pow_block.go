@@ -16,8 +16,8 @@ import (
 	enginev1 "github.com/waterfall-foundation/coordinator/proto/engine/v1"
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
 	"github.com/waterfall-foundation/coordinator/time/slots"
-	"github.com/waterfall-foundation/gwat/common"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 )
 
 // validateMergeBlock validates terminal block hash in the event of manual overrides before checking for total difficulty.

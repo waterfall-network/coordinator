@@ -10,7 +10,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
 	v1 "github.com/waterfall-foundation/coordinator/beacon-chain/state/v1"
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 // FaultyMockPOWChain defines an incorrectly functioning powchain service.

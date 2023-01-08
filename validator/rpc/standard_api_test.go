@@ -26,8 +26,8 @@ import (
 	remote_web3signer "github.com/waterfall-foundation/coordinator/validator/keymanager/remote-web3signer"
 	"github.com/waterfall-foundation/coordinator/validator/slashing-protection-history/format"
 	mocks "github.com/waterfall-foundation/coordinator/validator/testing"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
 	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 )
 
 func TestServer_ListKeystores(t *testing.T) {

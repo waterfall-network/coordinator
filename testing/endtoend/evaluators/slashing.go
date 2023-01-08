@@ -17,7 +17,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/testing/endtoend/policies"
 	e2eTypes "github.com/waterfall-foundation/coordinator/testing/endtoend/types"
 	"github.com/waterfall-foundation/coordinator/testing/util"
-	gwatCommon "github.com/waterfall-foundation/gwat/common"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )

@@ -52,8 +52,8 @@ import (
 	"github.com/waterfall-foundation/coordinator/validator/rpc"
 	validatorMiddleware "github.com/waterfall-foundation/coordinator/validator/rpc/apimiddleware"
 	"github.com/waterfall-foundation/coordinator/validator/web"
-	"github.com/waterfall-foundation/gwat/common"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 

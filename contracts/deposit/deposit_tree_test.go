@@ -10,7 +10,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/runtime/interop"
 	"github.com/waterfall-foundation/coordinator/testing/assert"
 	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/gwat/accounts/abi/bind"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/abi/bind"
 )
 
 func TestDepositTrieRoot_OK(t *testing.T) {

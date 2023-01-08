@@ -16,7 +16,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/testing/require"
 	"github.com/waterfall-foundation/coordinator/validator/keymanager/remote-web3signer/internal"
 	"github.com/waterfall-foundation/coordinator/validator/keymanager/remote-web3signer/v1/mock"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 )
 
 type MockClient struct {

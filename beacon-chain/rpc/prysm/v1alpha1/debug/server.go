@@ -15,7 +15,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stategen"
 	pbrpc "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	gethlog "github.com/waterfall-foundation/gwat/log"
+	gethlog "gitlab.waterfall.network/waterfall/protocol/gwat/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

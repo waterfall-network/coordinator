@@ -25,7 +25,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/beacon-chain/rpc/apimiddleware"
 	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 )
 
 const (

@@ -27,10 +27,10 @@ import (
 	"github.com/waterfall-foundation/coordinator/testing/require"
 	"github.com/waterfall-foundation/coordinator/testing/util"
 	"github.com/waterfall-foundation/coordinator/time/slots"
-	ethereum "github.com/waterfall-foundation/gwat"
-	"github.com/waterfall-foundation/gwat/accounts/abi/bind/backends"
-	"github.com/waterfall-foundation/gwat/common"
-	gethTypes "github.com/waterfall-foundation/gwat/core/types"
+	ethereum "gitlab.waterfall.network/waterfall/protocol/gwat"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/abi/bind/backends"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	gethTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
 )
 
 var _ ChainStartFetcher = (*Service)(nil)

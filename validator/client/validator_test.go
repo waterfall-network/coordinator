@@ -34,8 +34,8 @@ import (
 	"github.com/waterfall-foundation/coordinator/validator/keymanager"
 	"github.com/waterfall-foundation/coordinator/validator/keymanager/local"
 	remote_web3signer "github.com/waterfall-foundation/coordinator/validator/keymanager/remote-web3signer"
-	"github.com/waterfall-foundation/gwat/common"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )

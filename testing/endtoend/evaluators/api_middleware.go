@@ -18,7 +18,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/testing/endtoend/params"
 	"github.com/waterfall-foundation/coordinator/testing/endtoend/policies"
 	e2etypes "github.com/waterfall-foundation/coordinator/testing/endtoend/types"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 	"google.golang.org/grpc"
 )
 

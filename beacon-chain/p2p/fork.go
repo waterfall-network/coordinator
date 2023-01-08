@@ -12,8 +12,8 @@ import (
 	pb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	prysmTime "github.com/waterfall-foundation/coordinator/time"
 	"github.com/waterfall-foundation/coordinator/time/slots"
-	"github.com/waterfall-foundation/gwat/p2p/enode"
-	"github.com/waterfall-foundation/gwat/p2p/enr"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enode"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enr"
 )
 
 // ENR key used for Ethereum consensus-related fork data.

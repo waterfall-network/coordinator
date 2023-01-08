@@ -11,9 +11,9 @@ import (
 	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/peers"
 	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/peers/scorers"
 	pb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/gwat/crypto"
-	"github.com/waterfall-foundation/gwat/p2p/enode"
-	"github.com/waterfall-foundation/gwat/p2p/enr"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/crypto"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enode"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enr"
 )
 
 // MockPeersProvider implements PeersProvider for testing.

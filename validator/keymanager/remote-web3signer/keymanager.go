@@ -21,7 +21,7 @@ import (
 	remote_utils "github.com/waterfall-foundation/coordinator/validator/keymanager/remote-utils"
 	"github.com/waterfall-foundation/coordinator/validator/keymanager/remote-web3signer/internal"
 	v1 "github.com/waterfall-foundation/coordinator/validator/keymanager/remote-web3signer/v1"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 )
 
 // SetupConfig includes configuration values for initializing.

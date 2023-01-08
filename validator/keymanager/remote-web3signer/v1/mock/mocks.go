@@ -8,7 +8,7 @@ import (
 	eth "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
 	validatorpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/validator-client"
 	v1 "github.com/waterfall-foundation/coordinator/validator/keymanager/remote-web3signer/v1"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 )
 
 /////////////////////////////////////////////////////////////////////////////////////////////////

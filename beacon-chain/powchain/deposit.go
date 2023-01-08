@@ -7,7 +7,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/beacon-chain/core/blocks"
 	"github.com/waterfall-foundation/coordinator/config/params"
 	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 // DepositContractAddress returns the deposit contract address for the given chain.

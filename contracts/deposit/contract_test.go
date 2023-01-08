@@ -10,8 +10,8 @@ import (
 	"github.com/waterfall-foundation/coordinator/runtime/interop"
 	"github.com/waterfall-foundation/coordinator/testing/assert"
 	"github.com/waterfall-foundation/coordinator/testing/require"
-	ethereum "github.com/waterfall-foundation/gwat"
-	"github.com/waterfall-foundation/gwat/common"
+	ethereum "gitlab.waterfall.network/waterfall/protocol/gwat"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 func TestSetupRegistrationContract_OK(t *testing.T) {

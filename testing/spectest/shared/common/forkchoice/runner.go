@@ -26,7 +26,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/testing/spectest/utils"
 	"github.com/waterfall-foundation/coordinator/testing/util"
 	"github.com/waterfall-foundation/coordinator/time/slots"
-	"github.com/waterfall-foundation/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 // Run executes "forkchoice" test.

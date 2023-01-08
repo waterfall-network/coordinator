@@ -10,7 +10,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/runtime/interop"
 	"github.com/waterfall-foundation/coordinator/testing/assert"
 	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 func Test_genesisStateFromJSONValidators(t *testing.T) {
