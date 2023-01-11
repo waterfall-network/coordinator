@@ -3,41 +3,76 @@ before_script:
   - apt-get update -y
   - apt-get install cmake git libssl-dev libgmp-dev libtinfo5 libprotoc-dev wget -y
   - npm install -g @bazel/bazelisk
-  - echo "$GITCONFIG" > ~/.gitconfig
+  - echo "machine $CI_SERVER_HOST login gitlab-ci-token password $CI_JOB_TOKEN" >> ~/.netrc
+  - export GOPRIVATE=${CI_SERVER_HOST}
   - echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
+stages:
+  - build
+  - release
 
-coordinator-build:
+.job_build:
+  script: &job_build |-
+    mkdir -p ./dist
+    bazel version
+    cp runtime/version/version.go /tmp/version.go
+    sed -i "s/\\\u2692/${CI_COMMIT_SHORT_SHA}/g" runtime/version/version.go
+    bazel build //beacon-chain:beacon-chain --config=release
+    cp ./bazel-bin/cmd/beacon-chain/beacon-chain_/beacon-chain ./dist/coordinator-beacon
+    bazel build //validator:validator --config=release
+    cp ./bazel-bin/cmd/validator/validator_/validator ./dist/coordinator-validator
+    bazel build //tools/bootnode:bootnode --config=release
+    cp ./bazel-bin/tools/bootnode/bootnode_/bootnode ./dist/coordinator-bootnode
+    bazel build //tools/genesis-state-gen --config=release
+    cp ./bazel-bin/tools/genesis-state-gen/genesis-state-gen_/genesis-state-gen ./dist/coordinator-genesis
+    cp -r /tmp/version.go runtime/version/version.go
+
+build branch:
   stage: build
-#  rules:
-#    - if: '$CI_COMMIT_TAG == null'
-#      when: manual
   tags:
     - docker
-  script:
-    - mkdir -p ./dist
-    - bazel version
-    - cp runtime/version/version.go /tmp/version.go
-    - sed -i "s/\\\u2692/${CI_COMMIT_SHORT_SHA}/g" runtime/version/version.go
-    - wget -O eth2deposit-cli-256ea21-linux-amd64.tar.gz https://github.com/ethereum/eth2.0-deposit-cli/releases/download/v1.2.0/eth2deposit-cli-256ea21-linux-amd64.tar.gz
-    - tar -xvf eth2deposit-cli-256ea21-linux-amd64.tar.gz
-    - cp eth2deposit-cli-256ea21-linux-amd64/deposit ./dist/prysm-deposit
-    - bazel build //beacon-chain:beacon-chain --config=release
-    - cp ./bazel-bin/cmd/beacon-chain/beacon-chain_/beacon-chain ./dist/prysm-beacon
-    - bazel build //validator:validator --config=release
-    - cp ./bazel-bin/cmd/validator/validator_/validator ./dist/prysm-coordinator
-    - bazel build //tools/bootnode:bootnode --config=release
-    - cp ./bazel-bin/tools/bootnode/bootnode_/bootnode ./dist/prysm-bootnode
-    - bazel build //tools/genesis-state-gen --config=release
-    - cp ./bazel-bin/tools/genesis-state-gen/genesis-state-gen_/genesis-state-gen ./dist/prysm-genesis-generate
-    - cp -r /tmp/version.go runtime/version/version.go
+  rules:
+    - if: $CI_COMMIT_REF_NAME != "main" && $CI_COMMIT_TAG == null
+      when: on_success
+  script: *job_build
   artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    name: "$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME"
     paths:
-      - dist/prysm-beacon
-      - dist/prysm-coordinator
-      - dist/prysm-bootnode
-      - dist/prysm-genesis-generate
-      - dist/prysm-deposit
+      - dist/coordinator-beacon
+      - dist/coordinator-validator
+      - dist/coordinator-bootnode
+      - dist/coordinator-genesis
+
+build latest:
+  stage: build
+  tags:
+    - docker
+  rules:
+    - if: $CI_COMMIT_REF_NAME == "main"
+      when: on_success
+  script: *job_build
+  artifacts:
+    name: "$CI_PROJECT_NAME-latest"
+    paths:
+      - dist/coordinator-beacon
+      - dist/coordinator-validator
+      - dist/coordinator-bootnode
+      - dist/coordinator-genesis
+
+release tag:
+  stage: build
+  tags:
+    - docker
+  rules:
+    - if: $CI_COMMIT_TAG != null
+      when: on_success
+  script: *job_build
+  artifacts:
+    name: "$CI_PROJECT_NAME-$CI_BUILD_TAG"
+    paths:
+      - dist/coordinator-beacon
+      - dist/coordinator-validator
+      - dist/coordinator-bootnode
+      - dist/coordinator-genesis
 
 cache:
   key: bazel_cache
