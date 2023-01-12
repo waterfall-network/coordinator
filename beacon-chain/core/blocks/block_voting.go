@@ -168,6 +168,7 @@ func appendBlockVotingAtt(votes []*ethpb.BlockVoting, val *ethpb.Attestation) []
 	cpy := helpers.BlockVotingArrCopy(votes)
 	for _, itm := range cpy {
 		if bytes.Equal(itm.Root, root) {
+			//todo rollback aggregation (see commit 993e24c28f8d16f4a8d02476b114bf56f781b998) and fix init-sync
 			atts, err := stateutil.Dedup(append(itm.GetAttestations(), val))
 			if err != nil {
 				log.WithError(err).WithFields(logrus.Fields{

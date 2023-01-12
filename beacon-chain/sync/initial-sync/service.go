@@ -59,6 +59,7 @@ type Service struct {
 	creators            creatorsAssignment
 	headSyncCp          *ethpb.Checkpoint
 	isInitSynchronizing bool
+	isResync            bool
 }
 
 // NewService configures the initial sync service responsible for bringing the node up to the
@@ -111,6 +112,7 @@ func (s *Service) Start() {
 		// start head sync procedure with gwat
 		if err := s.HeadSync(s.ctx, true); err != nil {
 			if errors.Is(s.ctx.Err(), context.Canceled) {
+				log.WithField("slot", s.cfg.Chain.HeadSlot()).Warn("Head sync: context canceled (epoch 0)")
 				//return
 			} else {
 				panic(err)
@@ -139,6 +141,7 @@ func (s *Service) Start() {
 	// start head sync procedure with gwat
 	if err := s.HeadSync(s.ctx, true); err != nil {
 		if errors.Is(s.ctx.Err(), context.Canceled) {
+			log.WithField("slot", s.cfg.Chain.HeadSlot()).Warn("Head sync: context canceled")
 			//return
 		} else {
 			panic(err)
@@ -191,6 +194,9 @@ func (s *Service) Resync() error {
 	defer func() { s.synced.Set() }()                       // Reset it at the end of the method.
 	genesis := time.Unix(int64(headState.GenesisTime()), 0) // lint:ignore uintcast -- Genesis time will not exceed int64 in your lifetime.
 
+	s.isResync = true
+	defer func() { s.isResync = false }() // Reset it at the end of the method.
+
 	s.waitForMinimumPeers()
 	if err = s.roundRobinSync(genesis); err != nil {
 		log = log.WithError(err)
@@ -200,6 +206,7 @@ func (s *Service) Resync() error {
 	// start head sync procedure with gwat
 	if err := s.HeadSync(s.ctx, true); err != nil {
 		if errors.Is(s.ctx.Err(), context.Canceled) {
+			log.WithField("slot", s.cfg.Chain.HeadSlot()).Warn("Head sync: context canceled (resync)")
 			//return
 		} else {
 			panic(err)
@@ -244,12 +251,12 @@ func (s *Service) waitForStateInitialization() {
 					log.Error("Event feed data is not type *statefeed.InitializedData")
 					continue
 				}
-				log.WithField("starttime", data.StartTime).Debug("Received state initialized event")
+				log.WithField("starttime", data.StartTime).Info("Received state initialized event")
 				s.genesisChan <- data.StartTime
 				return
 			}
 		case <-s.ctx.Done():
-			log.Debug("Context closed, exiting goroutine")
+			log.Info("Context closed, exiting goroutine")
 			// Send a zero time in the event we are exiting.
 			s.genesisChan <- time.Time{}
 			return

@@ -8,6 +8,7 @@ import (
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
+	"github.com/sirupsen/logrus"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/rpc"
@@ -61,25 +62,43 @@ func (s *Service) ExecutionDagSync(ctx context.Context, syncParams *gwatTypes.Co
 
 // ExecutionDagFinalize executing finalisation procedure
 // by calling dag_finalize via JSON-RPC.
-func (s *Service) ExecutionDagFinalize(ctx context.Context, spines *gwatCommon.HashArray) error {
+func (s *Service) ExecutionDagFinalize(ctx context.Context, spines gwatCommon.HashArray, baseSpine *gwatCommon.Hash) (*gwatCommon.Hash, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagFinalize")
 	defer span.End()
 	result := &gwatTypes.FinalizationResult{}
 
 	if s.rpcClient == nil {
-		return fmt.Errorf("Rpc Client not init")
+		return nil, fmt.Errorf("Rpc Client not init")
+	}
+
+	params := &gwatTypes.FinalizationParams{
+		Spines:    spines,
+		BaseSpine: baseSpine,
 	}
 
 	err := s.rpcClient.CallContext(
 		ctx,
 		result,
 		ExecutionDagFinalizeMethod,
-		spines,
+		params,
 	)
+
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"BaseSpine": params.BaseSpine.Hex(),
+			"Spines":    params.Spines,
+		}).Error("Dag Finalize")
+	}
+
 	if result.Error != nil {
 		err = errors.New(*result.Error)
 	}
-	return handleDagRPCError(err)
+
+	if result.Error != nil {
+		err = errors.New(*result.Error)
+	}
+
+	return result.LFSpine, handleDagRPCError(err)
 }
 
 // ExecutionDagGetCandidates executing consensus procedure
@@ -113,7 +132,7 @@ func (s *Service) ExecutionDagGetCandidates(ctx context.Context, slot types.Slot
 func (s *Service) ExecutionDagHeadSyncReady(ctx context.Context, params *gwatTypes.ConsensusInfo) (bool, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagHeadSyncReady")
 	defer span.End()
-	result := false
+	var result bool
 
 	if s.rpcClient == nil {
 		return result, fmt.Errorf("Rpc Client not init")
@@ -132,7 +151,7 @@ func (s *Service) ExecutionDagHeadSyncReady(ctx context.Context, params *gwatTyp
 func (s *Service) ExecutionDagHeadSync(ctx context.Context, params []gwatTypes.ConsensusInfo) (bool, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagHeadSync")
 	defer span.End()
-	result := false
+	var result bool
 
 	if s.rpcClient == nil {
 		return result, fmt.Errorf("Rpc Client not init")
@@ -156,7 +175,7 @@ func (s *Service) ExecutionDagHeadSync(ctx context.Context, params []gwatTypes.C
 func (s *Service) ExecutionDagSyncSlotInfo(ctx context.Context, params *gwatTypes.SlotInfo) (bool, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagSyncSlotInfo")
 	defer span.End()
-	result := false
+	var result bool
 
 	if s.rpcClient == nil {
 		return result, fmt.Errorf("Rpc Client not init")
@@ -180,7 +199,7 @@ func (s *Service) ExecutionDagSyncSlotInfo(ctx context.Context, params *gwatType
 func (s *Service) ExecutionDagValidateSpines(ctx context.Context, params gwatCommon.HashArray) (bool, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagValidateSpines")
 	defer span.End()
-	result := false
+	var result bool
 
 	if s.rpcClient == nil {
 		return result, fmt.Errorf("Rpc Client not init")

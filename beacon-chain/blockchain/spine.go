@@ -4,17 +4,19 @@ import (
 	"sync"
 
 	types "github.com/prysmaticlabs/eth2-types"
+	"github.com/waterfall-foundation/coordinator/config/params"
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 type spineData struct {
-	lastValidRoot []byte
-	lastValidSlot types.Slot
+	lastValidRoot   []byte
+	lastValidSlot   types.Slot
+	finalizedSpines gwatCommon.HashArray //successfully finalized spines from checkpoint
 	sync.RWMutex
 }
 
-// SetValidatedBlockInfo cashes info of the latest success validated block.
+// SetValidatedBlockInfo caches info of the latest success validated block.
 func (s *Service) SetValidatedBlockInfo(lastValidRoot []byte, lastValidSlot types.Slot) {
 	s.spineData.RLock()
 	defer s.spineData.RUnlock()
@@ -38,4 +40,61 @@ func (s *Service) ValidateBlockCandidates(block block.BeaconBlock) (bool, error)
 		return true, nil
 	}
 	return s.cfg.ExecutionEngineCaller.ExecutionDagValidateSpines(s.ctx, blCandidates)
+}
+
+// SetFinalizedSpinesCheckpoint set spine hash of checkpoint
+func (s *Service) SetFinalizedSpinesCheckpoint(cpSpine gwatCommon.Hash) {
+	s.spineData.RLock()
+	defer s.spineData.RUnlock()
+
+	finalizedSpines := make(gwatCommon.HashArray, 0, 4*params.BeaconConfig().SlotsPerEpoch)
+	isCpFound := false
+	for _, h := range s.spineData.finalizedSpines {
+		if h == cpSpine || isCpFound {
+			isCpFound = true
+			finalizedSpines = append(finalizedSpines, h)
+		}
+	}
+	if len(finalizedSpines) == 0 {
+		finalizedSpines = append(finalizedSpines, cpSpine)
+	}
+	s.spineData.finalizedSpines = finalizedSpines.Uniq()
+}
+
+// AddFinalizedSpines append finalized spines to cache
+func (s *Service) AddFinalizedSpines(finSpines gwatCommon.HashArray) {
+	s.spineData.RLock()
+	defer s.spineData.RUnlock()
+
+	if len(finSpines) == 0 {
+		return
+	}
+	firstSpine := finSpines[0]
+	finalizedSpines := make(gwatCommon.HashArray, 0, 4*params.BeaconConfig().SlotsPerEpoch)
+	for _, h := range s.spineData.finalizedSpines {
+		if h == firstSpine {
+			break
+		}
+		finalizedSpines = append(finalizedSpines, h)
+	}
+	finalizedSpines = append(finalizedSpines, finSpines...)
+	s.spineData.finalizedSpines = finalizedSpines.Uniq()
+}
+
+func (s *Service) SetFinalizedSpinesHead(headSpine gwatCommon.Hash) {
+	s.AddFinalizedSpines(gwatCommon.HashArray{headSpine})
+}
+
+func (s *Service) GetFinalizedSpines() gwatCommon.HashArray {
+	s.spineData.RLock()
+	defer s.spineData.RUnlock()
+	return s.spineData.finalizedSpines.Copy()
+}
+
+func (s *Service) ResetFinalizedSpines() {
+	s.spineData.RLock()
+	defer s.spineData.RUnlock()
+
+	finalizedSpines := make(gwatCommon.HashArray, 0, 4*params.BeaconConfig().SlotsPerEpoch)
+	s.spineData.finalizedSpines = finalizedSpines
 }

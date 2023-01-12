@@ -40,6 +40,7 @@ import (
 	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
 	prysmTime "github.com/waterfall-foundation/coordinator/time"
 	"github.com/waterfall-foundation/coordinator/time/slots"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	"go.opencensus.io/trace"
 )
 
@@ -47,6 +48,8 @@ import (
 type SyncSrv interface {
 	SetHeadSyncFn(fn func(context.Context, bool) error)
 	SetIsSyncFn(fn func() bool)
+	AddFinalizedSpines(finSpines gwatCommon.HashArray)
+	ResetFinalizedSpines()
 }
 
 // headSyncMinEpochsAfterCheckpoint defines how many epochs should elapse after known finalization

@@ -167,7 +167,7 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 
 					_, err = s.cfg.ExecutionEngineCaller.ExecutionDagSync(s.ctx, syncParams)
 					if err != nil {
-						log.WithError(err).Error("Error while execute finalization procedure")
+						log.WithError(err).Error("Error while execute dag sync procedure")
 					}
 					log.WithError(err).WithFields(logrus.Fields{
 						"slot":         slot,
