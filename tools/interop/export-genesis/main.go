@@ -5,14 +5,15 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/db"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/db/kv"
-	"github.com/waterfall-foundation/coordinator/io/file"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/kv"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/file"
 )
 
 // A basic tool to extract genesis.ssz from existing beaconchain.db.
 // ex:
-//   bazel run //tools/interop/export-genesis:export-genesis -- /tmp/data/beaconchaindata /tmp/genesis.ssz
+//
+//	bazel run //tools/interop/export-genesis:export-genesis -- /tmp/data/beaconchaindata /tmp/genesis.ssz
 func main() {
 	if len(os.Args) < 3 {
 		fmt.Println("Usage: ./main /path/to/datadir /path/to/output/genesis.ssz")

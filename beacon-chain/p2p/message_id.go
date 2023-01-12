@@ -3,25 +3,26 @@ package p2p
 import (
 	pubsub_pb "github.com/libp2p/go-libp2p-pubsub/pb"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/encoder"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/crypto/hash"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	"github.com/waterfall-foundation/coordinator/math"
-	"github.com/waterfall-foundation/coordinator/network/forks"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/encoder"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/math"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/network/forks"
 )
 
 // MsgID is a content addressable ID function.
 //
 // Ethereum Beacon Chain spec defines the message ID as:
-//    The `message-id` of a gossipsub message MUST be the following 20 byte value computed from the message data:
-//    If `message.data` has a valid snappy decompression, set `message-id` to the first 20 bytes of the `SHA256` hash of
-//    the concatenation of `MESSAGE_DOMAIN_VALID_SNAPPY` with the snappy decompressed message data,
-//    i.e. `SHA256(MESSAGE_DOMAIN_VALID_SNAPPY + snappy_decompress(message.data))[:20]`.
 //
-//    Otherwise, set `message-id` to the first 20 bytes of the `SHA256` hash of
-//    the concatenation of `MESSAGE_DOMAIN_INVALID_SNAPPY` with the raw message data,
-//    i.e. `SHA256(MESSAGE_DOMAIN_INVALID_SNAPPY + message.data)[:20]`.
+//	The `message-id` of a gossipsub message MUST be the following 20 byte value computed from the message data:
+//	If `message.data` has a valid snappy decompression, set `message-id` to the first 20 bytes of the `SHA256` hash of
+//	the concatenation of `MESSAGE_DOMAIN_VALID_SNAPPY` with the snappy decompressed message data,
+//	i.e. `SHA256(MESSAGE_DOMAIN_VALID_SNAPPY + snappy_decompress(message.data))[:20]`.
+//
+//	Otherwise, set `message-id` to the first 20 bytes of the `SHA256` hash of
+//	the concatenation of `MESSAGE_DOMAIN_INVALID_SNAPPY` with the raw message data,
+//	i.e. `SHA256(MESSAGE_DOMAIN_INVALID_SNAPPY + message.data)[:20]`.
 func MsgID(genesisValidatorsRoot []byte, pmsg *pubsub_pb.Message) string {
 	if pmsg == nil || pmsg.Data == nil || pmsg.Topic == nil {
 		// Impossible condition that should

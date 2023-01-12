@@ -3,7 +3,7 @@ package flags
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 )
 
 func TestEnableHTTPPrysmAPI(t *testing.T) {

@@ -3,7 +3,7 @@ package epoch_processing
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/testing/spectest/shared/phase0/epoch_processing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/spectest/shared/phase0/epoch_processing"
 )
 
 func TestMainnet_Phase0_EpochProcessing_Slashings(t *testing.T) {

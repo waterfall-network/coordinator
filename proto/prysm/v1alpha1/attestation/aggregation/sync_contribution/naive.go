@@ -1,9 +1,9 @@
 package sync_contribution
 
 import (
-	"github.com/waterfall-foundation/coordinator/crypto/bls"
-	v2 "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/attestation/aggregation"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
+	v2 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/attestation/aggregation"
 )
 
 // naiveSyncContributionAggregation aggregates naively, without any complex algorithms or optimizations.

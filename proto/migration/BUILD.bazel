@@ -7,7 +7,7 @@ go_library(
         "v1alpha1_to_v1.go",
         "v1alpha1_to_v2.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/proto/migration",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/migration",
     visibility = ["//visibility:public"],
     deps = [
         "//beacon-chain/state:go_default_library",
@@ -42,6 +42,6 @@ go_test(
         "//testing/util:go_default_library",
         "@com_github_prysmaticlabs_eth2_types//:go_default_library",
         "@com_github_prysmaticlabs_go_bitfield//:go_default_library",
-        "@com_github_waterfall_foundation_gwat//common:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//common:go_default_library",
     ],
 )

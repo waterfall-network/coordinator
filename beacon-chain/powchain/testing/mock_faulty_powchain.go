@@ -5,12 +5,12 @@ import (
 	"math/big"
 
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/async/event"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/powchain/types"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	v1 "github.com/waterfall-foundation/coordinator/beacon-chain/state/v1"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/async/event"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain/types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 // FaultyMockPOWChain defines an incorrectly functioning powchain service.

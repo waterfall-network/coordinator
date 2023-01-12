@@ -7,14 +7,14 @@ import (
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/blocks"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/time"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/attestation"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/attestation"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
 	"go.opencensus.io/trace"
 )
 
@@ -61,14 +61,17 @@ func ProcessAttestationNoVerifySignature(
 	if err != nil {
 		return nil, fmt.Errorf("att slot %d can't be greater than state slot %d", att.Data.Slot, beaconState.Slot())
 	}
+	//participatedFlags: map[uint8]bool{sourceFlagIndex: true, targetFlagIndex: true, headFlagIndex: true,}
 	participatedFlags, err := AttestationParticipationFlagIndices(beaconState, att.Data, delay)
 	if err != nil {
 		return nil, err
 	}
+	// validator indexes of committee
 	committee, err := helpers.BeaconCommitteeFromState(ctx, beaconState, att.Data.Slot, att.Data.CommitteeIndex)
 	if err != nil {
 		return nil, err
 	}
+	// aggregated validator indexes
 	indices, err := attestation.AttestingIndices(att.AggregationBits, committee)
 	if err != nil {
 		return nil, err
@@ -81,23 +84,24 @@ func ProcessAttestationNoVerifySignature(
 // the proposer in state.
 //
 // Spec code:
-//     # Update epoch participation flags
-//    if data.target.epoch == get_current_epoch(state):
-//        epoch_participation = state.current_epoch_participation
-//    else:
-//        epoch_participation = state.previous_epoch_participation
 //
-//    proposer_reward_numerator = 0
-//    for index in get_attesting_indices(state, data, attestation.aggregation_bits):
-//        for flag_index, weight in enumerate(PARTICIPATION_FLAG_WEIGHTS):
-//            if flag_index in participation_flag_indices and not has_flag(epoch_participation[index], flag_index):
-//                epoch_participation[index] = add_flag(epoch_participation[index], flag_index)
-//                proposer_reward_numerator += get_base_reward(state, index) * weight
+//	 # Update epoch participation flags
+//	if data.target.epoch == get_current_epoch(state):
+//	    epoch_participation = state.current_epoch_participation
+//	else:
+//	    epoch_participation = state.previous_epoch_participation
 //
-//    # Reward proposer
-//    proposer_reward_denominator = (WEIGHT_DENOMINATOR - PROPOSER_WEIGHT) * WEIGHT_DENOMINATOR // PROPOSER_WEIGHT
-//    proposer_reward = Gwei(proposer_reward_numerator // proposer_reward_denominator)
-//    increase_balance(state, get_beacon_proposer_index(state), proposer_reward)
+//	proposer_reward_numerator = 0
+//	for index in get_attesting_indices(state, data, attestation.aggregation_bits):
+//	    for flag_index, weight in enumerate(PARTICIPATION_FLAG_WEIGHTS):
+//	        if flag_index in participation_flag_indices and not has_flag(epoch_participation[index], flag_index):
+//	            epoch_participation[index] = add_flag(epoch_participation[index], flag_index)
+//	            proposer_reward_numerator += get_base_reward(state, index) * weight
+//
+//	# Reward proposer
+//	proposer_reward_denominator = (WEIGHT_DENOMINATOR - PROPOSER_WEIGHT) * WEIGHT_DENOMINATOR // PROPOSER_WEIGHT
+//	proposer_reward = Gwei(proposer_reward_numerator // proposer_reward_denominator)
+//	increase_balance(state, get_beacon_proposer_index(state), proposer_reward)
 func SetParticipationAndRewardProposer(
 	ctx context.Context,
 	beaconState state.BeaconState,
@@ -156,12 +160,13 @@ func AddValidatorFlag(flag, flagPosition uint8) (uint8, error) {
 // EpochParticipation sets and returns the proposer reward numerator and epoch participation.
 //
 // Spec code:
-//    proposer_reward_numerator = 0
-//    for index in get_attesting_indices(state, data, attestation.aggregation_bits):
-//        for flag_index, weight in enumerate(PARTICIPATION_FLAG_WEIGHTS):
-//            if flag_index in participation_flag_indices and not has_flag(epoch_participation[index], flag_index):
-//                epoch_participation[index] = add_flag(epoch_participation[index], flag_index)
-//                proposer_reward_numerator += get_base_reward(state, index) * weight
+//
+//	proposer_reward_numerator = 0
+//	for index in get_attesting_indices(state, data, attestation.aggregation_bits):
+//	    for flag_index, weight in enumerate(PARTICIPATION_FLAG_WEIGHTS):
+//	        if flag_index in participation_flag_indices and not has_flag(epoch_participation[index], flag_index):
+//	            epoch_participation[index] = add_flag(epoch_participation[index], flag_index)
+//	            proposer_reward_numerator += get_base_reward(state, index) * weight
 func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochParticipation []byte, participatedFlags map[uint8]bool, totalBalance uint64) (uint64, []byte, error) {
 	cfg := params.BeaconConfig()
 	sourceFlagIndex := cfg.TimelySourceFlagIndex
@@ -217,9 +222,10 @@ func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochPa
 // RewardProposer rewards proposer by increasing proposer's balance with input reward numerator and calculated reward denominator.
 //
 // Spec code:
-//    proposer_reward_denominator = (WEIGHT_DENOMINATOR - PROPOSER_WEIGHT) * WEIGHT_DENOMINATOR // PROPOSER_WEIGHT
-//    proposer_reward = Gwei(proposer_reward_numerator // proposer_reward_denominator)
-//    increase_balance(state, get_beacon_proposer_index(state), proposer_reward)
+//
+//	proposer_reward_denominator = (WEIGHT_DENOMINATOR - PROPOSER_WEIGHT) * WEIGHT_DENOMINATOR // PROPOSER_WEIGHT
+//	proposer_reward = Gwei(proposer_reward_numerator // proposer_reward_denominator)
+//	increase_balance(state, get_beacon_proposer_index(state), proposer_reward)
 func RewardProposer(ctx context.Context, beaconState state.BeaconState, proposerRewardNumerator uint64) error {
 	cfg := params.BeaconConfig()
 	d := (cfg.WeightDenominator - cfg.ProposerWeight) * cfg.WeightDenominator / cfg.ProposerWeight
@@ -237,31 +243,32 @@ func RewardProposer(ctx context.Context, beaconState state.BeaconState, proposer
 //
 // Spec code:
 // def get_attestation_participation_flag_indices(state: BeaconState,
-//                                               data: AttestationData,
-//                                               inclusion_delay: uint64) -> Sequence[int]:
-//    """
-//    Return the flag indices that are satisfied by an attestation.
-//    """
-//    if data.target.epoch == get_current_epoch(state):
-//        justified_checkpoint = state.current_justified_checkpoint
-//    else:
-//        justified_checkpoint = state.previous_justified_checkpoint
 //
-//    # Matching roots
-//    is_matching_source = data.source == justified_checkpoint
-//    is_matching_target = is_matching_source and data.target.root == get_block_root(state, data.target.epoch)
-//    is_matching_head = is_matching_target and data.beacon_block_root == get_block_root_at_slot(state, data.slot)
-//    assert is_matching_source
+//	                                           data: AttestationData,
+//	                                           inclusion_delay: uint64) -> Sequence[int]:
+//	"""
+//	Return the flag indices that are satisfied by an attestation.
+//	"""
+//	if data.target.epoch == get_current_epoch(state):
+//	    justified_checkpoint = state.current_justified_checkpoint
+//	else:
+//	    justified_checkpoint = state.previous_justified_checkpoint
 //
-//    participation_flag_indices = []
-//    if is_matching_source and inclusion_delay <= integer_squareroot(SLOTS_PER_EPOCH):
-//        participation_flag_indices.append(TIMELY_SOURCE_FLAG_INDEX)
-//    if is_matching_target and inclusion_delay <= SLOTS_PER_EPOCH:
-//        participation_flag_indices.append(TIMELY_TARGET_FLAG_INDEX)
-//    if is_matching_head and inclusion_delay == MIN_ATTESTATION_INCLUSION_DELAY:
-//        participation_flag_indices.append(TIMELY_HEAD_FLAG_INDEX)
+//	# Matching roots
+//	is_matching_source = data.source == justified_checkpoint
+//	is_matching_target = is_matching_source and data.target.root == get_block_root(state, data.target.epoch)
+//	is_matching_head = is_matching_target and data.beacon_block_root == get_block_root_at_slot(state, data.slot)
+//	assert is_matching_source
 //
-//    return participation_flag_indices
+//	participation_flag_indices = []
+//	if is_matching_source and inclusion_delay <= integer_squareroot(SLOTS_PER_EPOCH):
+//	    participation_flag_indices.append(TIMELY_SOURCE_FLAG_INDEX)
+//	if is_matching_target and inclusion_delay <= SLOTS_PER_EPOCH:
+//	    participation_flag_indices.append(TIMELY_TARGET_FLAG_INDEX)
+//	if is_matching_head and inclusion_delay == MIN_ATTESTATION_INCLUSION_DELAY:
+//	    participation_flag_indices.append(TIMELY_HEAD_FLAG_INDEX)
+//
+//	return participation_flag_indices
 func AttestationParticipationFlagIndices(beaconState state.BeaconStateAltair, data *ethpb.AttestationData, delay types.Slot) (map[uint8]bool, error) {
 	currEpoch := time.CurrentEpoch(beaconState)
 	var justifiedCheckpt *ethpb.Checkpoint
@@ -303,9 +310,10 @@ func AttestationParticipationFlagIndices(beaconState state.BeaconStateAltair, da
 // MatchingStatus returns the matching statues for attestation data's source target and head.
 //
 // Spec code:
-//    is_matching_source = data.source == justified_checkpoint
-//    is_matching_target = is_matching_source and data.target.root == get_block_root(state, data.target.epoch)
-//    is_matching_head = is_matching_target and data.beacon_block_root == get_block_root_at_slot(state, data.slot)
+//
+//	is_matching_source = data.source == justified_checkpoint
+//	is_matching_target = is_matching_source and data.target.root == get_block_root(state, data.target.epoch)
+//	is_matching_head = is_matching_target and data.beacon_block_root == get_block_root_at_slot(state, data.slot)
 func MatchingStatus(beaconState state.BeaconState, data *ethpb.AttestationData, cp *ethpb.Checkpoint) (matchedSrc, matchedTgt, matchedHead bool, err error) {
 	matchedSrc = attestation.CheckPointIsEqual(data.Source, cp)
 

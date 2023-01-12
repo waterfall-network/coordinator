@@ -23,7 +23,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 )
 
 func TestFeedPanics(t *testing.T) {

@@ -10,7 +10,7 @@ go_library(
         "getters_validator.go",
         "setters_participation.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/beacon-chain/state/testing",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/testing",
     visibility = ["//beacon-chain/state:__subpackages__"],
     deps = [
         "//beacon-chain/state:go_default_library",

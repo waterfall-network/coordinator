@@ -7,11 +7,11 @@ import (
 
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/go-bitfield"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/util"
-	gwatCommon "github.com/waterfall-foundation/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 func TestBlockVotingsCalcFinalization_finalization_OK(t *testing.T) {
@@ -63,8 +63,8 @@ func TestBlockVotingsCalcFinalization_finalization_OK(t *testing.T) {
 
 	blobVotings := []*ethpb.BlockVoting{
 		{
-			Root:           root_0[:],
-			TotalAttesters: 8,
+			Root: root_0[:],
+			Slot: 8,
 			Candidates: gwatCommon.HashArray{
 				gwatCommon.Hash{0xff, 0x02},
 				gwatCommon.Hash{0xff, 0x01},
@@ -79,8 +79,8 @@ func TestBlockVotingsCalcFinalization_finalization_OK(t *testing.T) {
 			Attestations: atts_0,
 		},
 		{
-			Root:           root_1[:],
-			TotalAttesters: 8,
+			Root: root_1[:],
+			Slot: 8,
 			Candidates: gwatCommon.HashArray{
 				gwatCommon.Hash{0xff, 0x03},
 				gwatCommon.Hash{0xff, 0x02},
@@ -96,8 +96,8 @@ func TestBlockVotingsCalcFinalization_finalization_OK(t *testing.T) {
 			Attestations: atts_1,
 		},
 		{
-			Root:           root_2[:],
-			TotalAttesters: 8,
+			Root: root_2[:],
+			Slot: 8,
 			Candidates: gwatCommon.HashArray{
 
 				gwatCommon.Hash{0x11, 0x11},
@@ -165,8 +165,8 @@ func TestBlockVotingsCalcFinalization_fin_after_3_slots(t *testing.T) {
 
 	blobVotings := []*ethpb.BlockVoting{
 		{
-			Root:           root_0[:],
-			TotalAttesters: 5,
+			Root: root_0[:],
+			Slot: 5,
 			Candidates: gwatCommon.HashArray{
 				gwatCommon.Hash{0x11, 0x11},
 			}.ToBytes(),
@@ -208,8 +208,8 @@ func TestBlockVotingsCalcFinalization_fin_after_3_slots_v2(t *testing.T) {
 
 	blobVotings := []*ethpb.BlockVoting{
 		{
-			Root:           root_0[:],
-			TotalAttesters: 5,
+			Root: root_0[:],
+			Slot: 5,
 			Candidates: gwatCommon.HashArray{
 				gwatCommon.Hash{0x11, 0x11},
 				gwatCommon.Hash{0x11, 0x22},
@@ -217,8 +217,8 @@ func TestBlockVotingsCalcFinalization_fin_after_3_slots_v2(t *testing.T) {
 			Attestations: atts_0,
 		},
 		{
-			Root:           root_0[:],
-			TotalAttesters: 6,
+			Root: root_0[:],
+			Slot: 6,
 			Candidates: gwatCommon.HashArray{
 				gwatCommon.Hash{0x11, 0x11},
 				gwatCommon.Hash{0x11, 0x22},
@@ -226,8 +226,8 @@ func TestBlockVotingsCalcFinalization_fin_after_3_slots_v2(t *testing.T) {
 			Attestations: atts_0,
 		},
 		{
-			Root:           root_0[:],
-			TotalAttesters: 7,
+			Root: root_0[:],
+			Slot: 7,
 			Candidates: gwatCommon.HashArray{
 				gwatCommon.Hash{0x11, 0x11},
 				gwatCommon.Hash{0x11, 0x22},
@@ -377,8 +377,8 @@ func TestBlockVotingArrSort(t *testing.T) {
 	})
 
 	bv_0 := &ethpb.BlockVoting{
-		Root:           root_0[:],
-		TotalAttesters: 5,
+		Root: root_0[:],
+		Slot: 5,
 		Candidates: gwatCommon.HashArray{
 			gwatCommon.Hash{0x11, 0x11},
 			gwatCommon.Hash{0x11, 0x22},
@@ -386,8 +386,8 @@ func TestBlockVotingArrSort(t *testing.T) {
 		Attestations: atts_0,
 	}
 	bv_1 := &ethpb.BlockVoting{
-		Root:           root_0[:],
-		TotalAttesters: 6,
+		Root: root_0[:],
+		Slot: 6,
 		Candidates: gwatCommon.HashArray{
 			gwatCommon.Hash{0x11, 0x11},
 			gwatCommon.Hash{0x11, 0x22},
@@ -395,8 +395,8 @@ func TestBlockVotingArrSort(t *testing.T) {
 		Attestations: atts_0,
 	}
 	bv_2 := &ethpb.BlockVoting{
-		Root:           root_0[:],
-		TotalAttesters: 7,
+		Root: root_0[:],
+		Slot: 7,
 		Candidates: gwatCommon.HashArray{
 			gwatCommon.Hash{0x11, 0x11},
 			gwatCommon.Hash{0x11, 0x22},
@@ -523,8 +523,8 @@ func TestBlockVotingArrStateOrder(t *testing.T) {
 	}
 
 	bv_0 := &ethpb.BlockVoting{
-		Root:           root_0[:],
-		TotalAttesters: 5,
+		Root: root_0[:],
+		Slot: 5,
 		Candidates: gwatCommon.HashArray{
 			gwatCommon.Hash{0x11, 0x11},
 			gwatCommon.Hash{0x11, 0x22},
@@ -532,8 +532,8 @@ func TestBlockVotingArrStateOrder(t *testing.T) {
 		Attestations: testAtts,
 	}
 	bv_1 := &ethpb.BlockVoting{
-		Root:           root_0[:],
-		TotalAttesters: 6,
+		Root: root_0[:],
+		Slot: 6,
 		Candidates: gwatCommon.HashArray{
 			gwatCommon.Hash{0x11, 0x11},
 			gwatCommon.Hash{0x11, 0x22},
@@ -541,8 +541,8 @@ func TestBlockVotingArrStateOrder(t *testing.T) {
 		Attestations: atts_0,
 	}
 	bv_2 := &ethpb.BlockVoting{
-		Root:           root_0[:],
-		TotalAttesters: 7,
+		Root: root_0[:],
+		Slot: 7,
 		Candidates: gwatCommon.HashArray{
 			gwatCommon.Hash{0x11, 0x11},
 			gwatCommon.Hash{0x11, 0x22},
@@ -583,8 +583,8 @@ func TestBlockVotingArrStateOrder_attEmpty(t *testing.T) {
 	root_0 := gwatCommon.BytesToHash([]byte("root-0--------------------------"))
 
 	bv_0 := &ethpb.BlockVoting{
-		Root:           root_0[:],
-		TotalAttesters: 5,
+		Root: root_0[:],
+		Slot: 5,
 		Candidates: gwatCommon.HashArray{
 			gwatCommon.Hash{0x11, 0x11},
 			gwatCommon.Hash{0x11, 0x22},
@@ -592,8 +592,8 @@ func TestBlockVotingArrStateOrder_attEmpty(t *testing.T) {
 		//Attestations: []*ethpb.Attestation{},
 	}
 	bv_1 := &ethpb.BlockVoting{
-		Root:           root_0[:],
-		TotalAttesters: 6,
+		Root: root_0[:],
+		Slot: 6,
 		Candidates: gwatCommon.HashArray{
 			gwatCommon.Hash{0x11, 0x11},
 			gwatCommon.Hash{0x11, 0x22},
@@ -601,8 +601,8 @@ func TestBlockVotingArrStateOrder_attEmpty(t *testing.T) {
 		Attestations: []*ethpb.Attestation{},
 	}
 	bv_2 := &ethpb.BlockVoting{
-		Root:           root_0[:],
-		TotalAttesters: 7,
+		Root: root_0[:],
+		Slot: 7,
 		Candidates: gwatCommon.HashArray{
 			gwatCommon.Hash{0x11, 0x11},
 			gwatCommon.Hash{0x11, 0x22},

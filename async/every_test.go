@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/waterfall-foundation/coordinator/async"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/async"
 )
 
 func TestEveryRuns(t *testing.T) {

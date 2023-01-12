@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/waterfall-foundation/coordinator/network/authorization"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/network/authorization"
 )
 
 // Endpoint is an endpoint with authorization data.

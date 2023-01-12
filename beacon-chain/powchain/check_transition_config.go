@@ -9,13 +9,13 @@ import (
 
 	"github.com/holiman/uint256"
 	"github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/blocks"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/feed"
-	statefeed "github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/state"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/network"
-	pb "github.com/waterfall-foundation/coordinator/proto/engine/v1"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed"
+	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/network"
+	pb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/engine/v1"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 )
 
 var (
@@ -28,7 +28,7 @@ var (
 // Checks the transition configuration between Prysm and the connected execution node to ensure
 // there are no differences in terminal block difficulty and block hash.
 // If there are any discrepancies, we must log errors to ensure users can resolve
-//the problem and be ready for the merge transition.
+// the problem and be ready for the merge transition.
 func (s *Service) checkTransitionConfiguration(
 	ctx context.Context, blockNotifications chan *feed.Event,
 ) {

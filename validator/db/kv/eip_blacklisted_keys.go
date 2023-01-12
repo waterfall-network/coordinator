@@ -3,7 +3,7 @@ package kv
 import (
 	"context"
 
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 	bolt "go.etcd.io/bbolt"
 	"go.opencensus.io/trace"
 )

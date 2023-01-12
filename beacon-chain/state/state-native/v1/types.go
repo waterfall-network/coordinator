@@ -1,9 +1,9 @@
 package v1
 
 import (
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state/types"
-	"github.com/waterfall-foundation/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 )
 
 // Ensure type BeaconState below implements BeaconState interface.

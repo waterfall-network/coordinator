@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 )
 
 func Test_uint64FromString(t *testing.T) {

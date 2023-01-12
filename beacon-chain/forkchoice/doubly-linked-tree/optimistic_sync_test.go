@@ -4,23 +4,22 @@ import (
 	"context"
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 // We test the algorithm to update a node from SYNCING to INVALID
 // We start with the same diagram as above:
 //
-//                E -- F
-//               /
-//         C -- D
-//        /      \
-//  A -- B        G -- H -- I
-//        \        \
-//         J        -- K -- L
+//	              E -- F
+//	             /
+//	       C -- D
+//	      /      \
+//	A -- B        G -- H -- I
+//	      \        \
+//	       J        -- K -- L
 //
 // And every block in the Fork choice is optimistic.
-//
 func TestPruneInvalid(t *testing.T) {
 	tests := []struct {
 		root             [32]byte // the root of the new INVALID block

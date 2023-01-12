@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	pbrpc "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	pbrpc "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

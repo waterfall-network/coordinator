@@ -9,9 +9,9 @@ import (
 	"testing"
 
 	"github.com/sirupsen/logrus/hooks/test"
-	"github.com/waterfall-foundation/coordinator/api/grpc"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/api/grpc"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 type testRequestContainer struct {

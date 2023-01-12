@@ -10,14 +10,14 @@ import (
 
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/pkg/errors"
-	grpcutil "github.com/waterfall-foundation/coordinator/api/grpc"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/peers"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/peers/peerdata"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/eth/v1"
-	"github.com/waterfall-foundation/coordinator/proto/migration"
-	eth "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/runtime/version"
+	grpcutil "gitlab.waterfall.network/waterfall/protocol/coordinator/api/grpc"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers/peerdata"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/migration"
+	eth "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -277,12 +277,13 @@ func (ns *Server) GetSyncStatus(ctx context.Context, _ *emptypb.Empty) (*ethpb.S
 
 // GetHealth returns node health status in http status codes. Useful for load balancers.
 // Response Usage:
-//    "200":
-//      description: Node is ready
-//    "206":
-//      description: Node is syncing but can serve incomplete data
-//    "503":
-//      description: Node not initialized or having issues
+//
+//	"200":
+//	  description: Node is ready
+//	"206":
+//	  description: Node is syncing but can serve incomplete data
+//	"503":
+//	  description: Node not initialized or having issues
 func (ns *Server) GetHealth(ctx context.Context, _ *emptypb.Empty) (*emptypb.Empty, error) {
 	ctx, span := trace.StartSpan(ctx, "node.GetHealth")
 	defer span.End()

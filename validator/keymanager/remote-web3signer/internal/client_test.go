@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager/remote-web3signer/internal"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager/remote-web3signer/internal"
 )
 
 // mockTransport is the mock Transport object

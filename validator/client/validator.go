@@ -19,29 +19,29 @@ import (
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/async/event"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/altair"
-	"github.com/waterfall-foundation/coordinator/config/features"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	validator_service_config "github.com/waterfall-foundation/coordinator/config/validator/service"
-	"github.com/waterfall-foundation/coordinator/crypto/hash"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
-	"github.com/waterfall-foundation/coordinator/time/slots"
-	accountsiface "github.com/waterfall-foundation/coordinator/validator/accounts/iface"
-	"github.com/waterfall-foundation/coordinator/validator/accounts/wallet"
-	"github.com/waterfall-foundation/coordinator/validator/client/iface"
-	vdb "github.com/waterfall-foundation/coordinator/validator/db"
-	"github.com/waterfall-foundation/coordinator/validator/db/kv"
-	"github.com/waterfall-foundation/coordinator/validator/graffiti"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager/local"
-	remote_web3signer "github.com/waterfall-foundation/coordinator/validator/keymanager/remote-web3signer"
-	"github.com/waterfall-foundation/gwat/common"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/async/event"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/altair"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	validator_service_config "gitlab.waterfall.network/waterfall/protocol/coordinator/config/validator/service"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
+	accountsiface "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/accounts/iface"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/accounts/wallet"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/client/iface"
+	vdb "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/db"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/db/kv"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/graffiti"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager/local"
+	remote_web3signer "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager/remote-web3signer"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 	"go.opencensus.io/trace"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -264,7 +264,7 @@ func (v *validator) WaitForChainStart(ctx context.Context) error {
 				log.Errorf("The genesis validators root received from the beacon node does not match what is in " +
 					"your validator database. This could indicate that this is a database meant for another network. If " +
 					"you were previously running this validator database on another network, please run --clear-db to " +
-					"clear the database. If not, please file an issue at https://github.com/waterfall-foundation/coordinator/issues")
+					"clear the database. If not, please file an issue at https://gitlab.waterfall.network/waterfall/protocol/coordinator/issues")
 				return fmt.Errorf(
 					"genesis validators root from beacon node (%#x) does not match root saved in validator db (%#x)",
 					chainStartRes.GenesisValidatorsRoot,
@@ -769,8 +769,9 @@ func (v *validator) isAggregator(ctx context.Context, committee []types.Validato
 //
 // Spec code:
 // def is_sync_committee_aggregator(signature: BLSSignature) -> bool:
-//    modulo = max(1, SYNC_COMMITTEE_SIZE // SYNC_COMMITTEE_SUBNET_COUNT // TARGET_AGGREGATORS_PER_SYNC_SUBCOMMITTEE)
-//    return bytes_to_uint64(hash(signature)[0:8]) % modulo == 0
+//
+//	modulo = max(1, SYNC_COMMITTEE_SIZE // SYNC_COMMITTEE_SUBNET_COUNT // TARGET_AGGREGATORS_PER_SYNC_SUBCOMMITTEE)
+//	return bytes_to_uint64(hash(signature)[0:8]) % modulo == 0
 func (v *validator) isSyncCommitteeAggregator(ctx context.Context, slot types.Slot, pubKey [fieldparams.BLSPubkeyLength]byte) (bool, error) {
 	res, err := v.validatorClient.GetSyncSubcommitteeIndex(ctx, &ethpb.SyncSubcommitteeIndexRequest{
 		PublicKey: pubKey[:],

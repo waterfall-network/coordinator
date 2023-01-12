@@ -7,26 +7,26 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/blocks"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/feed"
-	statefeed "github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/state"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
-	coreTime "github.com/waterfall-foundation/coordinator/beacon-chain/core/time"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/transition"
-	forkchoicetypes "github.com/waterfall-foundation/coordinator/beacon-chain/forkchoice/types"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/config/features"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/crypto/bls"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	"github.com/waterfall-foundation/coordinator/monitoring/tracing"
-	ethpbv1 "github.com/waterfall-foundation/coordinator/proto/eth/v1"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/attestation"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
-	"github.com/waterfall-foundation/coordinator/runtime/version"
-	"github.com/waterfall-foundation/coordinator/time/slots"
-	gwatCommon "github.com/waterfall-foundation/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed"
+	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
+	coreTime "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition"
+	forkchoicetypes "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/forkchoice/types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/tracing"
+	ethpbv1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/attestation"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	"go.opencensus.io/trace"
 )
 
@@ -44,52 +44,53 @@ var initialSyncBlockCacheSize = uint64(2 * params.BeaconConfig().SlotsPerEpoch)
 // computation in this method and methods it calls into.
 //
 // Spec pseudocode definition:
-//   def on_block(store: Store, signed_block: SignedBeaconBlock) -> None:
-//    block = signed_block.message
-//    # Parent block must be known
-//    assert block.parent_root in store.block_states
-//    # Make a copy of the state to avoid mutability issues
-//    pre_state = copy(store.block_states[block.parent_root])
-//    # Blocks cannot be in the future. If they are, their consideration must be delayed until the are in the past.
-//    assert get_current_slot(store) >= block.slot
 //
-//    # Check that block is later than the finalized epoch slot (optimization to reduce calls to get_ancestor)
-//    finalized_slot = compute_start_slot_at_epoch(store.finalized_checkpoint.epoch)
-//    assert block.slot > finalized_slot
-//    # Check block is a descendant of the finalized block at the checkpoint finalized slot
-//    assert get_ancestor(store, block.parent_root, finalized_slot) == store.finalized_checkpoint.root
+//	def on_block(store: Store, signed_block: SignedBeaconBlock) -> None:
+//	 block = signed_block.message
+//	 # Parent block must be known
+//	 assert block.parent_root in store.block_states
+//	 # Make a copy of the state to avoid mutability issues
+//	 pre_state = copy(store.block_states[block.parent_root])
+//	 # Blocks cannot be in the future. If they are, their consideration must be delayed until the are in the past.
+//	 assert get_current_slot(store) >= block.slot
 //
-//    # Check the block is valid and compute the post-state
-//    state = pre_state.copy()
-//    state_transition(state, signed_block, True)
-//    # Add new block to the store
-//    store.blocks[hash_tree_root(block)] = block
-//    # Add new state for this block to the store
-//    store.block_states[hash_tree_root(block)] = state
+//	 # Check that block is later than the finalized epoch slot (optimization to reduce calls to get_ancestor)
+//	 finalized_slot = compute_start_slot_at_epoch(store.finalized_checkpoint.epoch)
+//	 assert block.slot > finalized_slot
+//	 # Check block is a descendant of the finalized block at the checkpoint finalized slot
+//	 assert get_ancestor(store, block.parent_root, finalized_slot) == store.finalized_checkpoint.root
 //
-//    # Update justified checkpoint
-//    if state.current_justified_checkpoint.epoch > store.justified_checkpoint.epoch:
-//        if state.current_justified_checkpoint.epoch > store.best_justified_checkpoint.epoch:
-//            store.best_justified_checkpoint = state.current_justified_checkpoint
-//        if should_update_justified_checkpoint(store, state.current_justified_checkpoint):
-//            store.justified_checkpoint = state.current_justified_checkpoint
+//	 # Check the block is valid and compute the post-state
+//	 state = pre_state.copy()
+//	 state_transition(state, signed_block, True)
+//	 # Add new block to the store
+//	 store.blocks[hash_tree_root(block)] = block
+//	 # Add new state for this block to the store
+//	 store.block_states[hash_tree_root(block)] = state
 //
-//    # Update finalized checkpoint
-//    if state.finalized_checkpoint.epoch > store.finalized_checkpoint.epoch:
-//        store.finalized_checkpoint = state.finalized_checkpoint
+//	 # Update justified checkpoint
+//	 if state.current_justified_checkpoint.epoch > store.justified_checkpoint.epoch:
+//	     if state.current_justified_checkpoint.epoch > store.best_justified_checkpoint.epoch:
+//	         store.best_justified_checkpoint = state.current_justified_checkpoint
+//	     if should_update_justified_checkpoint(store, state.current_justified_checkpoint):
+//	         store.justified_checkpoint = state.current_justified_checkpoint
 //
-//        # Potentially update justified if different from store
-//        if store.justified_checkpoint != state.current_justified_checkpoint:
-//            # Update justified if new justified is later than store justified
-//            if state.current_justified_checkpoint.epoch > store.justified_checkpoint.epoch:
-//                store.justified_checkpoint = state.current_justified_checkpoint
-//                return
+//	 # Update finalized checkpoint
+//	 if state.finalized_checkpoint.epoch > store.finalized_checkpoint.epoch:
+//	     store.finalized_checkpoint = state.finalized_checkpoint
 //
-//            # Update justified if store justified is not in chain with finalized checkpoint
-//            finalized_slot = compute_start_slot_at_epoch(store.finalized_checkpoint.epoch)
-//            ancestor_at_finalized_slot = get_ancestor(store, store.justified_checkpoint.root, finalized_slot)
-//            if ancestor_at_finalized_slot != store.finalized_checkpoint.root:
-//                store.justified_checkpoint = state.current_justified_checkpoint
+//	     # Potentially update justified if different from store
+//	     if store.justified_checkpoint != state.current_justified_checkpoint:
+//	         # Update justified if new justified is later than store justified
+//	         if state.current_justified_checkpoint.epoch > store.justified_checkpoint.epoch:
+//	             store.justified_checkpoint = state.current_justified_checkpoint
+//	             return
+//
+//	         # Update justified if store justified is not in chain with finalized checkpoint
+//	         finalized_slot = compute_start_slot_at_epoch(store.finalized_checkpoint.epoch)
+//	         ancestor_at_finalized_slot = get_ancestor(store, store.justified_checkpoint.root, finalized_slot)
+//	         if ancestor_at_finalized_slot != store.finalized_checkpoint.root:
+//	             store.justified_checkpoint = state.current_justified_checkpoint
 func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, blockRoot [32]byte) error {
 	ctx, span := trace.StartSpan(ctx, "blockChain.onBlock")
 	defer span.End()

@@ -11,10 +11,10 @@ import (
 
 	"github.com/pkg/errors"
 	blst "github.com/supranational/blst/bindings/go"
-	"github.com/waterfall-foundation/coordinator/config/features"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/crypto/bls/common"
-	"github.com/waterfall-foundation/coordinator/crypto/rand"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls/common"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/rand"
 )
 
 var dst = []byte("BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_POP_")
@@ -84,8 +84,9 @@ func MultipleSignaturesFromBytes(multiSigs [][]byte) ([]common.Signature, error)
 //
 // In IETF draft BLS specification:
 // Verify(PK, message, signature) -> VALID or INVALID: a verification
-//      algorithm that outputs VALID if signature is a valid signature of
-//      message under public key PK, and INVALID otherwise.
+//
+//	algorithm that outputs VALID if signature is a valid signature of
+//	message under public key PK, and INVALID otherwise.
 //
 // In the Ethereum proof of stake specification:
 // def Verify(PK: BLSPubkey, message: Bytes, signature: BLSSignature) -> bool
@@ -105,10 +106,11 @@ func (s *Signature) Verify(pubKey common.PublicKey, msg []byte) bool {
 //
 // In IETF draft BLS specification:
 // AggregateVerify((PK_1, message_1), ..., (PK_n, message_n),
-//      signature) -> VALID or INVALID: an aggregate verification
-//      algorithm that outputs VALID if signature is a valid aggregated
-//      signature for a collection of public keys and messages, and
-//      outputs INVALID otherwise.
+//
+//	signature) -> VALID or INVALID: an aggregate verification
+//	algorithm that outputs VALID if signature is a valid aggregated
+//	signature for a collection of public keys and messages, and
+//	outputs INVALID otherwise.
 //
 // In the Ethereum proof of stake specification:
 // def AggregateVerify(pairs: Sequence[PK: BLSPubkey, message: Bytes], signature: BLSSignature) -> bool
@@ -139,9 +141,10 @@ func (s *Signature) AggregateVerify(pubKeys []common.PublicKey, msgs [][32]byte)
 //
 // In IETF draft BLS specification:
 // FastAggregateVerify(PK_1, ..., PK_n, message, signature) -> VALID
-//      or INVALID: a verification algorithm for the aggregate of multiple
-//      signatures on the same message.  This function is faster than
-//      AggregateVerify.
+//
+//	or INVALID: a verification algorithm for the aggregate of multiple
+//	signatures on the same message.  This function is faster than
+//	AggregateVerify.
 //
 // In the Ethereum proof of stake specification:
 // def FastAggregateVerify(PKs: Sequence[BLSPubkey], message: Bytes, signature: BLSSignature) -> bool
@@ -164,12 +167,13 @@ func (s *Signature) FastAggregateVerify(pubKeys []common.PublicKey, msg [32]byte
 //
 // Spec code:
 // def eth2_fast_aggregate_verify(pubkeys: Sequence[BLSPubkey], message: Bytes32, signature: BLSSignature) -> bool:
-//    """
-//    Wrapper to ``bls.FastAggregateVerify`` accepting the ``G2_POINT_AT_INFINITY`` signature when ``pubkeys`` is empty.
-//    """
-//    if len(pubkeys) == 0 and signature == G2_POINT_AT_INFINITY:
-//        return True
-//    return bls.FastAggregateVerify(pubkeys, message, signature)
+//
+//	"""
+//	Wrapper to ``bls.FastAggregateVerify`` accepting the ``G2_POINT_AT_INFINITY`` signature when ``pubkeys`` is empty.
+//	"""
+//	if len(pubkeys) == 0 and signature == G2_POINT_AT_INFINITY:
+//	    return True
+//	return bls.FastAggregateVerify(pubkeys, message, signature)
 func (s *Signature) Eth2FastAggregateVerify(pubKeys []common.PublicKey, msg [32]byte) bool {
 	if features.Get().SkipBLSVerify {
 		return true

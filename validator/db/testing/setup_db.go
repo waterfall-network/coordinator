@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/validator/db/iface"
-	"github.com/waterfall-foundation/coordinator/validator/db/kv"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/db/iface"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/db/kv"
 )
 
 // SetupDB instantiates and returns a DB instance for the validator client.

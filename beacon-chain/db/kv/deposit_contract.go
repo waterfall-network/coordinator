@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/waterfall-foundation/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	bolt "go.etcd.io/bbolt"
 	"go.opencensus.io/trace"
 )

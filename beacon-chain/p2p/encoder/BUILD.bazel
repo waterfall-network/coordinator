@@ -8,7 +8,7 @@ go_library(
         "ssz.go",
         "varint.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/beacon-chain/p2p/encoder",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/encoder",
     visibility = [
         "//beacon-chain:__subpackages__",
     ],

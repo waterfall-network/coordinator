@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"text/template"
 
-	"github.com/waterfall-foundation/coordinator/io/file"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/file"
 )
 
 var (

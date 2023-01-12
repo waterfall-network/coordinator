@@ -8,9 +8,9 @@ import (
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
-	gwatCommon "github.com/waterfall-foundation/gwat/common"
-	gwatTypes "github.com/waterfall-foundation/gwat/core/types"
-	"github.com/waterfall-foundation/gwat/rpc"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/rpc"
 )
 
 const (

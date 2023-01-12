@@ -6,7 +6,7 @@ go_library(
         "events.go",
         "notifier.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/state",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state",
     visibility = [
         "//beacon-chain:__subpackages__",
         "//testing/slasher/simulator:__subpackages__",

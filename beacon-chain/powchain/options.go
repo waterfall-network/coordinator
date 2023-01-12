@@ -1,14 +1,14 @@
 package powchain
 
 import (
-	"github.com/waterfall-foundation/coordinator/beacon-chain/cache/depositcache"
-	statefeed "github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/state"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/db"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stategen"
-	"github.com/waterfall-foundation/coordinator/network"
-	"github.com/waterfall-foundation/coordinator/network/authorization"
-	"github.com/waterfall-foundation/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache/depositcache"
+	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/network"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/network/authorization"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 type Option func(s *Service) error

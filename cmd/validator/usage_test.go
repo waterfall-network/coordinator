@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/urfave/cli/v2"
-	"github.com/waterfall-foundation/coordinator/config/features"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 )
 
 func TestAllFlagsExistInHelp(t *testing.T) {

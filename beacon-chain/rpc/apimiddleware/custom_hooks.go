@@ -11,10 +11,10 @@ import (
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/waterfall-foundation/coordinator/api/gateway/apimiddleware"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	ethpbv2 "github.com/waterfall-foundation/coordinator/proto/eth/v2"
-	"github.com/waterfall-foundation/coordinator/time/slots"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/api/gateway/apimiddleware"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	ethpbv2 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v2"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 )
 
 // https://ethereum.github.io/beacon-apis/#/Validator/prepareBeaconProposer expects posting a top-level array.

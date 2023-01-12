@@ -10,7 +10,7 @@ import (
 	"github.com/libp2p/go-libp2p-core/protocol"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/monitoring/tracing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/tracing"
 	"go.opencensus.io/trace"
 )
 

@@ -1,7 +1,7 @@
 package deposit
 
 import (
-	"github.com/waterfall-foundation/gwat/accounts/abi/bind"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/abi/bind"
 )
 
 // NewDepositContractcallFromBoundContract creates a new instance of DepositContractCaller, bound to

@@ -6,11 +6,11 @@ import (
 	"time"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	prysmTime "github.com/waterfall-foundation/coordinator/time"
-	"github.com/waterfall-foundation/coordinator/validator/client/iface"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	prysmTime "gitlab.waterfall.network/waterfall/protocol/coordinator/time"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/client/iface"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager"
 )
 
 var _ iface.Validator = (*FakeValidator)(nil)

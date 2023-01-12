@@ -9,7 +9,7 @@ go_library(
         "server.go",
         "state.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/beacon-chain/rpc/prysm/v1alpha1/debug",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc/prysm/v1alpha1/debug",
     visibility = ["//beacon-chain:__subpackages__"],
     deps = [
         "//beacon-chain/blockchain:go_default_library",
@@ -23,7 +23,7 @@ go_library(
         "//encoding/bytesutil:go_default_library",
         "//proto/prysm/v1alpha1:go_default_library",
         "//proto/prysm/v1alpha1/attestation:go_default_library",
-        "@com_github_waterfall_foundation_gwat//log:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//log:go_default_library",
         "@com_github_ipfs_go_log_v2//:go_default_library",
         "@com_github_libp2p_go_libp2p_core//network:go_default_library",
         "@com_github_libp2p_go_libp2p_core//peer:go_default_library",

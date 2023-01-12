@@ -5,12 +5,12 @@ import (
 	"math"
 
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/testing/endtoend/helpers"
-	e2e "github.com/waterfall-foundation/coordinator/testing/endtoend/params"
-	"github.com/waterfall-foundation/coordinator/testing/endtoend/policies"
-	"github.com/waterfall-foundation/coordinator/testing/endtoend/types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/helpers"
+	e2e "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/policies"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/types"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )

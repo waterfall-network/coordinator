@@ -5,8 +5,8 @@ import (
 	stdmath "math"
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/math"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/math"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 func TestIntegerSquareRoot(t *testing.T) {

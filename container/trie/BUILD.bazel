@@ -6,7 +6,7 @@ go_library(
         "sparse_merkle.go",
         "zerohashes.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/container/trie",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/container/trie",
     visibility = ["//visibility:public"],
     deps = [
         "//crypto/hash:go_default_library",
@@ -30,6 +30,6 @@ go_test(
         "//proto/prysm/v1alpha1:go_default_library",
         "//testing/assert:go_default_library",
         "//testing/require:go_default_library",
-        "@com_github_waterfall_foundation_gwat//accounts/abi/bind:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//accounts/abi/bind:go_default_library",
     ],
 )

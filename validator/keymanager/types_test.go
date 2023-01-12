@@ -5,13 +5,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager/derived"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager/local"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager/remote"
-	remote_web3signer "github.com/waterfall-foundation/coordinator/validator/keymanager/remote-web3signer"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager/derived"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager/local"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager/remote"
+	remote_web3signer "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager/remote-web3signer"
 )
 
 var (

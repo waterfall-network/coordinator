@@ -7,10 +7,10 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
-	"github.com/waterfall-foundation/coordinator/cmd"
-	"github.com/waterfall-foundation/coordinator/io/file"
-	"github.com/waterfall-foundation/coordinator/io/prompt"
-	"github.com/waterfall-foundation/coordinator/validator/db/kv"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/file"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/prompt"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/db/kv"
 )
 
 const dbExistsYesNoPrompt = "A database file already exists in the target directory. " +

@@ -7,7 +7,7 @@ go_library(
         "error.go",
         "interface.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/crypto/bls/common",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls/common",
     visibility = [
         "//crypto/bls:__subpackages__",
         "//testing:__subpackages__",

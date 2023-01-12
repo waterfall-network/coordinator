@@ -1,6 +1,6 @@
 package slashings
 
-import "github.com/waterfall-foundation/coordinator/config/params"
+import "gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 
 // SigningRootsDiffer verifies that an incoming vs. existing attestation has a different signing root.
 // If the existing signing root is empty, then we consider an attestation as different always.

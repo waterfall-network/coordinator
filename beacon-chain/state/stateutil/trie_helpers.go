@@ -5,12 +5,12 @@ import (
 	"encoding/binary"
 
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/config/features"
-	"github.com/waterfall-foundation/coordinator/container/trie"
-	"github.com/waterfall-foundation/coordinator/crypto/hash"
-	"github.com/waterfall-foundation/coordinator/crypto/hash/htr"
-	"github.com/waterfall-foundation/coordinator/encoding/ssz"
-	"github.com/waterfall-foundation/coordinator/math"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/container/trie"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash/htr"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/math"
 )
 
 // ReturnTrieLayer returns the representation of a merkle trie when

@@ -11,9 +11,9 @@ import (
 	sync "sync"
 
 	github_com_prysmaticlabs_eth2_types "github.com/prysmaticlabs/eth2-types"
-	v11 "github.com/waterfall-foundation/coordinator/proto/engine/v1"
-	_ "github.com/waterfall-foundation/coordinator/proto/eth/ext"
-	v1 "github.com/waterfall-foundation/coordinator/proto/eth/v1"
+	v11 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/engine/v1"
+	_ "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/ext"
+	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )

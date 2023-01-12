@@ -11,7 +11,7 @@ name = "go"
 enabled = true
 
 [analyzers.meta]
-import_paths = ["github.com/waterfall-foundation/coordinator"]
+import_paths = ["gitlab.waterfall.network/waterfall/protocol/coordinator"]
 
 [[analyzers]]
 name = "test-coverage"

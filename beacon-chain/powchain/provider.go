@@ -4,8 +4,8 @@ import (
 	"encoding/base64"
 	"strings"
 
-	"github.com/waterfall-foundation/coordinator/network"
-	"github.com/waterfall-foundation/coordinator/network/authorization"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/network"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/network/authorization"
 )
 
 // HttpEndpoint extracts an httputils.Endpoint from the provider parameter.

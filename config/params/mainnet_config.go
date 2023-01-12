@@ -4,7 +4,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 )
 
 // MainnetConfig returns the configuration to be used in the main network.
@@ -94,10 +94,10 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	HysteresisUpwardMultiplier:     5,
 
 	// Gwei value constants.
-	MinDepositAmount:          1 * 1e9,
-	MaxEffectiveBalance:       32 * 1e9 * 1000,
-	EjectionBalance:           16 * 1e9 * 1000,
-	EffectiveBalanceIncrement: 1 * 1e9,
+	MinDepositAmount:          1000 * 1e9,
+	MaxEffectiveBalance:       32000 * 1e9,
+	EjectionBalance:           16000 * 1e9,
+	EffectiveBalanceIncrement: 1000 * 1e9,
 
 	// Initial value constants.
 	BLSWithdrawalPrefixByte: byte(0),

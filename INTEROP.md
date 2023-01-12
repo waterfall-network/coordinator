@@ -5,7 +5,7 @@ This README details how to setup Prysm for interop testing for usage with other 
 ## Installation & Setup
 
 1. Install [Bazel](https://docs.bazel.build/versions/master/install.html) **(Recommended)**
-2. `git clone https://github.com/waterfall-foundation/coordinator && cd prysm`
+2. `git clone https://gitlab.waterfall.network/waterfall/protocol/coordinator && cd prysm`
 3. `bazel build //...`
 
 ## Starting from Genesis

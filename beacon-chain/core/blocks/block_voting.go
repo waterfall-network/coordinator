@@ -6,14 +6,15 @@ import (
 	"errors"
 	"fmt"
 
+	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stateutil"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
-	"github.com/waterfall-foundation/coordinator/time/slots"
-	gwatCommon "github.com/waterfall-foundation/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stateutil"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 // ProcessBlockVoting is an operation performed on each beacon block
@@ -29,7 +30,7 @@ func ProcessBlockVoting(ctx context.Context, beaconState state.BeaconState, sign
 
 	//add item of block voting for the current block
 	if len(candidates) > 0 {
-		blockVoting = addBlockVoting(blockVoting, beaconBlock.ParentRoot(), uint64(beaconBlock.Slot()-1), candidates)
+		blockVoting = addBlockVoting(blockVoting, beaconBlock.ParentRoot(), beaconBlock.Slot()-1, candidates)
 	}
 
 	//append attestations of the current block to block voting
@@ -70,7 +71,7 @@ func ProcessBlockVoting(ctx context.Context, beaconState state.BeaconState, sign
 		if err != nil {
 			return nil, err
 		}
-		staleRoots := getBlockVotingRootsLtSlot(blockVoting, uint64(cpSlot))
+		staleRoots := getBlockVotingRootsLtSlot(blockVoting, cpSlot)
 		blockVoting = removeBlockVoting(blockVoting, staleRoots)
 
 		log.WithFields(logrus.Fields{
@@ -113,10 +114,10 @@ func getBlockVotingsDeprecatedRoots(blockVoting []*ethpb.BlockVoting, finalizati
 	return roots
 }
 
-func getBlockVotingRootsLtSlot(blockVoting []*ethpb.BlockVoting, slot uint64) [][]byte {
+func getBlockVotingRootsLtSlot(blockVoting []*ethpb.BlockVoting, slot types.Slot) [][]byte {
 	mapRoots := map[gwatCommon.Hash][]byte{}
 	for _, bv := range blockVoting {
-		if bv.TotalAttesters <= slot {
+		if bv.Slot <= slot {
 			mapRoots[gwatCommon.BytesToHash(bv.GetRoot())] = bv.GetRoot()
 		}
 	}
@@ -138,21 +139,21 @@ func isBlockVotingExists(votes []*ethpb.BlockVoting, root []byte) bool {
 	return false
 }
 
-func addBlockVoting(votes []*ethpb.BlockVoting, root []byte, slot uint64, candidates []byte) []*ethpb.BlockVoting {
+func addBlockVoting(votes []*ethpb.BlockVoting, root []byte, slot types.Slot, candidates []byte) []*ethpb.BlockVoting {
 	cpy := helpers.BlockVotingArrCopy(votes)
 	if !isBlockVotingExists(cpy, root) {
 		newItem := &ethpb.BlockVoting{
-			Root:           root,
-			Attestations:   []*ethpb.Attestation{},
-			TotalAttesters: slot,
-			Candidates:     candidates,
+			Root:         root,
+			Attestations: []*ethpb.Attestation{},
+			Slot:         slot,
+			Candidates:   candidates,
 		}
 		cpy = append(cpy, newItem)
 		return cpy
 	}
 	for _, itm := range cpy {
 		if bytes.Equal(itm.Root, root) {
-			itm.TotalAttesters = slot
+			itm.Slot = slot
 			itm.Candidates = candidates
 		}
 	}
@@ -170,7 +171,7 @@ func appendBlockVotingAtt(votes []*ethpb.BlockVoting, val *ethpb.Attestation) []
 			atts, err := stateutil.Dedup(append(itm.GetAttestations(), val))
 			if err != nil {
 				log.WithError(err).WithFields(logrus.Fields{
-					"slot": itm.GetTotalAttesters(),
+					"slot": itm.GetSlot(),
 					"root": fmt.Sprintf("%#x", itm.GetRoot()),
 				}).Error("append attestation to block voting failed")
 				return votes

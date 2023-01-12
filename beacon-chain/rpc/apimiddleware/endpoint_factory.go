@@ -2,7 +2,7 @@ package apimiddleware
 
 import (
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/api/gateway/apimiddleware"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/api/gateway/apimiddleware"
 )
 
 // BeaconEndpointFactory creates endpoints used for running beacon chain API calls through the API Middleware.

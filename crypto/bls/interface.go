@@ -1,7 +1,7 @@
 package bls
 
 import (
-	"github.com/waterfall-foundation/coordinator/crypto/bls/common"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls/common"
 )
 
 // PublicKey represents a BLS public key.

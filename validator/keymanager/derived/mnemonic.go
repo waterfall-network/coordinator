@@ -6,8 +6,8 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/tyler-smith/go-bip39"
-	"github.com/waterfall-foundation/coordinator/crypto/rand"
-	"github.com/waterfall-foundation/coordinator/io/prompt"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/rand"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/prompt"
 )
 
 const confirmationText = "Confirm you have written down the recovery words somewhere safe (offline) [y|Y]"

@@ -5,10 +5,10 @@ import (
 	"math/big"
 	"time"
 
-	e2etypes "github.com/waterfall-foundation/coordinator/testing/endtoend/types"
-	"github.com/waterfall-foundation/gwat/accounts/keystore"
-	"github.com/waterfall-foundation/gwat/core/types"
-	"github.com/waterfall-foundation/gwat/ethclient"
+	e2etypes "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/types"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/keystore"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/ethclient"
 )
 
 // NetworkId is the ID of the ETH1 chain.

@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/waterfall-foundation/gwat/common"
-	gethTypes "github.com/waterfall-foundation/gwat/core/types"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	gethTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
 )
 
 func Test_headerToHeaderInfo(t *testing.T) {

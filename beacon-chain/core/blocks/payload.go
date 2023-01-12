@@ -4,18 +4,18 @@ import (
 	"bytes"
 
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/time"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	"github.com/waterfall-foundation/coordinator/encoding/ssz"
-	enginev1 "github.com/waterfall-foundation/coordinator/proto/engine/v1"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
-	"github.com/waterfall-foundation/coordinator/runtime/version"
-	"github.com/waterfall-foundation/coordinator/time/slots"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz"
+	enginev1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/engine/v1"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 )
 
 // IsMergeTransitionComplete returns true if the transition to Bellatrix has completed.
@@ -23,7 +23,8 @@ import (
 //
 // Spec code:
 // def is_merge_transition_complete(state: BeaconState) -> bool:
-//    return state.latest_execution_payload_header != ExecutionPayloadHeader()
+//
+//	return state.latest_execution_payload_header != ExecutionPayloadHeader()
 func IsMergeTransitionComplete(st state.BeaconState) (bool, error) {
 	if st == nil {
 		return false, errors.New("nil state")
@@ -55,7 +56,8 @@ func IsMergeTransitionBlockUsingPreStatePayloadHeader(h *ethpb.ExecutionPayloadH
 //
 // Spec code:
 // def is_execution_block(block: BeaconBlock) -> bool:
-//     return block.body.execution_payload != ExecutionPayload()
+//
+//	return block.body.execution_payload != ExecutionPayload()
 func IsExecutionBlock(body block.BeaconBlockBody) (bool, error) {
 	if body == nil {
 		return false, errors.New("nil block body")
@@ -76,7 +78,8 @@ func IsExecutionBlock(body block.BeaconBlockBody) (bool, error) {
 //
 // Spec code:
 // def is_execution_enabled(state: BeaconState, body: BeaconBlockBody) -> bool:
-//    return is_merge_block(state, body) or is_merge_complete(state)
+//
+//	return is_merge_block(state, body) or is_merge_complete(state)
 func IsExecutionEnabled(st state.BeaconState, body block.BeaconBlockBody) (bool, error) {
 	if st == nil || body == nil {
 		return false, errors.New("nil state or block body")
@@ -109,9 +112,10 @@ func IsPreBellatrixVersion(v int) bool {
 // These validation steps ONLY apply to post merge.
 //
 // Spec code:
-//    # Verify consistency of the parent hash with respect to the previous execution payload header
-//    if is_merge_complete(state):
-//        assert payload.parent_hash == state.latest_execution_payload_header.block_hash
+//
+//	# Verify consistency of the parent hash with respect to the previous execution payload header
+//	if is_merge_complete(state):
+//	    assert payload.parent_hash == state.latest_execution_payload_header.block_hash
 func ValidatePayloadWhenMergeCompletes(st state.BeaconState, payload *enginev1.ExecutionPayload) error {
 	complete, err := IsMergeTransitionComplete(st)
 	if err != nil {
@@ -135,10 +139,11 @@ func ValidatePayloadWhenMergeCompletes(st state.BeaconState, payload *enginev1.E
 // These validation steps apply to both pre merge and post merge.
 //
 // Spec code:
-//    # Verify random
-//    assert payload.random == get_randao_mix(state, get_current_epoch(state))
-//    # Verify timestamp
-//    assert payload.timestamp == compute_timestamp_at_slot(state, state.slot)
+//
+//	# Verify random
+//	assert payload.random == get_randao_mix(state, get_current_epoch(state))
+//	# Verify timestamp
+//	assert payload.timestamp == compute_timestamp_at_slot(state, state.slot)
 func ValidatePayload(st state.BeaconState, payload *enginev1.ExecutionPayload) error {
 	random, err := helpers.RandaoMix(st, time.CurrentEpoch(st))
 	if err != nil {
@@ -164,32 +169,33 @@ func ValidatePayload(st state.BeaconState, payload *enginev1.ExecutionPayload) e
 //
 // Spec code:
 // def process_execution_payload(state: BeaconState, payload: ExecutionPayload, execution_engine: ExecutionEngine) -> None:
-//    # Verify consistency of the parent hash with respect to the previous execution payload header
-//    if is_merge_complete(state):
-//        assert payload.parent_hash == state.latest_execution_payload_header.block_hash
-//    # Verify random
-//    assert payload.random == get_randao_mix(state, get_current_epoch(state))
-//    # Verify timestamp
-//    assert payload.timestamp == compute_timestamp_at_slot(state, state.slot)
-//    # Verify the execution payload is valid
-//    assert execution_engine.execute_payload(payload)
-//    # Cache execution payload header
-//    state.latest_execution_payload_header = ExecutionPayloadHeader(
-//        parent_hash=payload.parent_hash,
-//        FeeRecipient=payload.FeeRecipient,
-//        state_root=payload.state_root,
-//        receipt_root=payload.receipt_root,
-//        logs_bloom=payload.logs_bloom,
-//        random=payload.random,
-//        block_number=payload.block_number,
-//        gas_limit=payload.gas_limit,
-//        gas_used=payload.gas_used,
-//        timestamp=payload.timestamp,
-//        extra_data=payload.extra_data,
-//        base_fee_per_gas=payload.base_fee_per_gas,
-//        block_hash=payload.block_hash,
-//        transactions_root=hash_tree_root(payload.transactions),
-//    )
+//
+//	# Verify consistency of the parent hash with respect to the previous execution payload header
+//	if is_merge_complete(state):
+//	    assert payload.parent_hash == state.latest_execution_payload_header.block_hash
+//	# Verify random
+//	assert payload.random == get_randao_mix(state, get_current_epoch(state))
+//	# Verify timestamp
+//	assert payload.timestamp == compute_timestamp_at_slot(state, state.slot)
+//	# Verify the execution payload is valid
+//	assert execution_engine.execute_payload(payload)
+//	# Cache execution payload header
+//	state.latest_execution_payload_header = ExecutionPayloadHeader(
+//	    parent_hash=payload.parent_hash,
+//	    FeeRecipient=payload.FeeRecipient,
+//	    state_root=payload.state_root,
+//	    receipt_root=payload.receipt_root,
+//	    logs_bloom=payload.logs_bloom,
+//	    random=payload.random,
+//	    block_number=payload.block_number,
+//	    gas_limit=payload.gas_limit,
+//	    gas_used=payload.gas_used,
+//	    timestamp=payload.timestamp,
+//	    extra_data=payload.extra_data,
+//	    base_fee_per_gas=payload.base_fee_per_gas,
+//	    block_hash=payload.block_hash,
+//	    transactions_root=hash_tree_root(payload.transactions),
+//	)
 func ProcessPayload(st state.BeaconState, payload *enginev1.ExecutionPayload) (state.BeaconState, error) {
 	if err := ValidatePayloadWhenMergeCompletes(st, payload); err != nil {
 		return nil, err

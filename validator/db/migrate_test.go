@@ -5,10 +5,10 @@ import (
 	"testing"
 
 	"github.com/urfave/cli/v2"
-	"github.com/waterfall-foundation/coordinator/cmd"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	dbtest "github.com/waterfall-foundation/coordinator/validator/db/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	dbtest "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/db/testing"
 )
 
 func TestMigrateUp_NoDBFound(t *testing.T) {

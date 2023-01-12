@@ -1,17 +1,17 @@
 package sync
 
 import (
-	"github.com/waterfall-foundation/coordinator/async/event"
-	blockfeed "github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/block"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/operation"
-	statefeed "github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/state"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/db"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/operations/attestations"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/operations/slashings"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/operations/synccommittee"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/operations/voluntaryexits"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stategen"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/async/event"
+	blockfeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/block"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/operation"
+	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/attestations"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/slashings"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/synccommittee"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/voluntaryexits"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen"
 )
 
 type Option func(s *Service) error

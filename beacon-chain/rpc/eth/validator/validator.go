@@ -12,22 +12,22 @@ import (
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	log "github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/cache"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/transition"
-	rpchelpers "github.com/waterfall-foundation/coordinator/beacon-chain/rpc/eth/helpers"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	statev1 "github.com/waterfall-foundation/coordinator/beacon-chain/state/v1"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	ethpbv1 "github.com/waterfall-foundation/coordinator/proto/eth/v1"
-	ethpbv2 "github.com/waterfall-foundation/coordinator/proto/eth/v2"
-	"github.com/waterfall-foundation/coordinator/proto/migration"
-	ethpbalpha "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/time/slots"
-	"github.com/waterfall-foundation/gwat/common"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition"
+	rpchelpers "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc/eth/helpers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	statev1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	ethpbv1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
+	ethpbv2 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v2"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/migration"
+	ethpbalpha "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -195,11 +195,11 @@ func (vs *Server) GetProposerDuties(ctx context.Context, req *ethpbv1.ProposerDu
 // where `epoch` is described as `epoch // EPOCHS_PER_SYNC_COMMITTEE_PERIOD <= current_epoch // EPOCHS_PER_SYNC_COMMITTEE_PERIOD + 1`.
 //
 // Algorithm:
-//  - Get the last valid epoch. This is the last epoch of the next sync committee period.
-//  - Get the state for the requested epoch. If it's a future epoch from the current sync committee period
-//  or an epoch from the next sync committee period, then get the current state.
-//  - Get the state's current sync committee. If it's an epoch from the next sync committee period, then get the next sync committee.
-//  - Get duties.
+//   - Get the last valid epoch. This is the last epoch of the next sync committee period.
+//   - Get the state for the requested epoch. If it's a future epoch from the current sync committee period
+//     or an epoch from the next sync committee period, then get the current state.
+//   - Get the state's current sync committee. If it's an epoch from the next sync committee period, then get the next sync committee.
+//   - Get duties.
 func (vs *Server) GetSyncCommitteeDuties(ctx context.Context, req *ethpbv2.SyncCommitteeDutiesRequest) (*ethpbv2.SyncCommitteeDutiesResponse, error) {
 	ctx, span := trace.StartSpan(ctx, "validator.GetSyncCommitteeDuties")
 	defer span.End()

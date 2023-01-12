@@ -3,7 +3,7 @@ package sanity
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/testing/spectest/shared/altair/sanity"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/spectest/shared/altair/sanity"
 )
 
 func TestMinimal_Altair_Sanity_Slots(t *testing.T) {

@@ -11,7 +11,7 @@ import (
 	"github.com/libp2p/go-tcp-transport"
 	ma "github.com/multiformats/go-multiaddr"
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/runtime/version"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
 )
 
 // buildOptions for the libp2p host.

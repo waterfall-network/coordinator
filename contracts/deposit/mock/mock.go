@@ -6,14 +6,14 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/waterfall-foundation/coordinator/contracts/deposit"
-	"github.com/waterfall-foundation/gwat/accounts/abi"
-	"github.com/waterfall-foundation/gwat/accounts/abi/bind"
-	"github.com/waterfall-foundation/gwat/accounts/abi/bind/backends"
-	"github.com/waterfall-foundation/gwat/common"
-	"github.com/waterfall-foundation/gwat/core"
-	"github.com/waterfall-foundation/gwat/core/types"
-	"github.com/waterfall-foundation/gwat/crypto"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/contracts/deposit"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/abi"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/abi/bind"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/abi/bind/backends"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/core"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/crypto"
 )
 
 var (

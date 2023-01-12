@@ -1,7 +1,7 @@
 package accounts
 
 import (
-	"github.com/waterfall-foundation/coordinator/validator/keymanager"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager"
 )
 
 var (

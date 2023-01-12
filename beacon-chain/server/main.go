@@ -12,11 +12,11 @@ import (
 	"github.com/gorilla/mux"
 	joonix "github.com/joonix/log"
 	"github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/api/gateway"
-	beaconGateway "github.com/waterfall-foundation/coordinator/beacon-chain/gateway"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/rpc/apimiddleware"
-	"github.com/waterfall-foundation/coordinator/cmd/beacon-chain/flags"
-	_ "github.com/waterfall-foundation/coordinator/runtime/maxprocs"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/api/gateway"
+	beaconGateway "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/gateway"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc/apimiddleware"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/beacon-chain/flags"
+	_ "gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/maxprocs"
 )
 
 var (

@@ -11,14 +11,14 @@ import (
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	pb "github.com/waterfall-foundation/coordinator/proto/engine/v1"
-	"github.com/waterfall-foundation/gwat/common"
-	gwatCommon "github.com/waterfall-foundation/gwat/common"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
-	gwatTypes "github.com/waterfall-foundation/gwat/core/types"
-	"github.com/waterfall-foundation/gwat/rpc"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	pb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/engine/v1"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
+	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/rpc"
 	"go.opencensus.io/trace"
 )
 
@@ -193,15 +193,16 @@ func (s *Service) ExchangeTransitionConfiguration(
 //
 // Spec code:
 // def get_pow_block_at_terminal_total_difficulty(pow_chain: Dict[Hash32, PowBlock]) -> Optional[PowBlock]:
-//    # `pow_chain` abstractly represents all blocks in the PoW chain
-//    for block in pow_chain:
-//        parent = pow_chain[block.parent_hash]
-//        block_reached_ttd = block.total_difficulty >= TERMINAL_TOTAL_DIFFICULTY
-//        parent_reached_ttd = parent.total_difficulty >= TERMINAL_TOTAL_DIFFICULTY
-//        if block_reached_ttd and not parent_reached_ttd:
-//            return block
 //
-//    return None
+//	# `pow_chain` abstractly represents all blocks in the PoW chain
+//	for block in pow_chain:
+//	    parent = pow_chain[block.parent_hash]
+//	    block_reached_ttd = block.total_difficulty >= TERMINAL_TOTAL_DIFFICULTY
+//	    parent_reached_ttd = parent.total_difficulty >= TERMINAL_TOTAL_DIFFICULTY
+//	    if block_reached_ttd and not parent_reached_ttd:
+//	        return block
+//
+//	return None
 func (s *Service) GetTerminalBlockHash(ctx context.Context) ([]byte, bool, error) {
 	ttd := new(big.Int)
 	ttd.SetString(params.BeaconConfig().TerminalTotalDifficulty, 10)

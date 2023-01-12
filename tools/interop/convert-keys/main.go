@@ -11,7 +11,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/waterfall-foundation/coordinator/tools/unencrypted-keys-gen/keygen"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/tools/unencrypted-keys-gen/keygen"
 	"gopkg.in/yaml.v2"
 )
 

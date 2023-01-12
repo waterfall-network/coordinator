@@ -4,14 +4,14 @@ go_library(
     name = "go_default_library",
     testonly = True,
     srcs = ["mocks.go"],
-    importpath = "github.com/waterfall-foundation/coordinator/validator/keymanager/remote-web3signer/v1/mock",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager/remote-web3signer/v1/mock",
     visibility = ["//visibility:public"],
     deps = [
         "//config/fieldparams:go_default_library",
         "//proto/prysm/v1alpha1:go_default_library",
         "//proto/prysm/v1alpha1/validator-client:go_default_library",
         "//validator/keymanager/remote-web3signer/v1:go_default_library",
-        "@com_github_waterfall_foundation_gwat//common/hexutil:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//common/hexutil:go_default_library",
         "@com_github_prysmaticlabs_go_bitfield//:go_default_library",
     ],
 )

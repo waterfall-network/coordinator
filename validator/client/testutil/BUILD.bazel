@@ -7,7 +7,7 @@ go_library(
         "helper.go",
         "mock_validator.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/validator/client/testutil",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/client/testutil",
     visibility = ["//validator:__subpackages__"],
     deps = [
         "//config/fieldparams:go_default_library",

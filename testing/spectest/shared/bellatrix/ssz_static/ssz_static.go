@@ -6,11 +6,11 @@ import (
 	"testing"
 
 	fssz "github.com/ferranbt/fastssz"
-	v3 "github.com/waterfall-foundation/coordinator/beacon-chain/state/v3"
-	enginev1 "github.com/waterfall-foundation/coordinator/proto/engine/v1"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	common "github.com/waterfall-foundation/coordinator/testing/spectest/shared/common/ssz_static"
+	v3 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v3"
+	enginev1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/engine/v1"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	common "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/spectest/shared/common/ssz_static"
 )
 
 // RunSSZStaticTests executes "ssz_static" tests.

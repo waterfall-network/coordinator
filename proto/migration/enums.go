@@ -2,8 +2,8 @@ package migration
 
 import (
 	"github.com/pkg/errors"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/eth/v1"
-	eth "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
+	eth "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 func V1Alpha1ConnectionStateToV1(connState eth.ConnectionState) ethpb.ConnectionState {

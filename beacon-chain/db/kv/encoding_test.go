@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	testpb "github.com/waterfall-foundation/coordinator/proto/testing"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	testpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 func Test_encode_handlesNilFromFunction(t *testing.T) {

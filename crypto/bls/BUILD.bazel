@@ -9,7 +9,7 @@ go_library(
         "interface.go",
         "signature_batch.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/crypto/bls",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls",
     visibility = ["//visibility:public"],
     deps = [
         "//crypto/bls/blst:go_default_library",

@@ -10,12 +10,12 @@ import (
 
 	"github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/network"
-	_ "github.com/waterfall-foundation/coordinator/runtime/maxprocs"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/gwat/p2p/discover"
-	"github.com/waterfall-foundation/gwat/p2p/enode"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/network"
+	_ "gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/maxprocs"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/discover"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enode"
 )
 
 func TestMain(m *testing.M) {

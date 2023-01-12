@@ -13,7 +13,7 @@ go_library(
         "store.go",
         "types.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/beacon-chain/forkchoice/protoarray",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/forkchoice/protoarray",
     visibility = [
         "//beacon-chain:__subpackages__",
         "//testing/spectest:__subpackages__",

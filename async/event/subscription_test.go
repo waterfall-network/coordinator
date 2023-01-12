@@ -23,7 +23,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 var errInts = errors.New("error in subscribeInts")

@@ -7,7 +7,7 @@ import (
 
 	"contrib.go.opencensus.io/exporter/jaeger"
 	"github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/runtime/version"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
 	"go.opencensus.io/trace"
 )
 

@@ -10,19 +10,19 @@ import (
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/blocks"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/feed"
-	blockfeed "github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/block"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/transition"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/config/features"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	"github.com/waterfall-foundation/coordinator/monitoring/tracing"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
-	prysmTime "github.com/waterfall-foundation/coordinator/time"
-	"github.com/waterfall-foundation/coordinator/time/slots"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed"
+	blockfeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/block"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/tracing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
+	prysmTime "gitlab.waterfall.network/waterfall/protocol/coordinator/time"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	"go.opencensus.io/trace"
 )
 
@@ -242,16 +242,17 @@ func (s *Service) validateBeaconBlock(ctx context.Context, blk block.SignedBeaco
 
 // validateBellatrixBeaconBlock validates the block for the Bellatrix fork.
 // spec code:
-//   If the execution is enabled for the block -- i.e. is_execution_enabled(state, block.body) then validate the following:
-//      [REJECT] The block's execution payload timestamp is correct with respect to the slot --
-//      i.e. execution_payload.timestamp == compute_timestamp_at_slot(state, block.slot).
 //
-//      If exection_payload verification of block's parent by an execution node is not complete:
-//         [REJECT] The block's parent (defined by block.parent_root) passes all validation (excluding execution
-//          node verification of the block.body.execution_payload).
-//      otherwise:
-//         [IGNORE] The block's parent (defined by block.parent_root) passes all validation (including execution
-//          node verification of the block.body.execution_payload).
+//	If the execution is enabled for the block -- i.e. is_execution_enabled(state, block.body) then validate the following:
+//	   [REJECT] The block's execution payload timestamp is correct with respect to the slot --
+//	   i.e. execution_payload.timestamp == compute_timestamp_at_slot(state, block.slot).
+//
+//	   If exection_payload verification of block's parent by an execution node is not complete:
+//	      [REJECT] The block's parent (defined by block.parent_root) passes all validation (excluding execution
+//	       node verification of the block.body.execution_payload).
+//	   otherwise:
+//	      [IGNORE] The block's parent (defined by block.parent_root) passes all validation (including execution
+//	       node verification of the block.body.execution_payload).
 func (s *Service) validateBellatrixBeaconBlock(ctx context.Context, parentState state.BeaconState, blk block.BeaconBlock) error {
 	// Error if block and state are not the same version
 	if parentState.Version() != blk.Version() {

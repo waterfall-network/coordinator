@@ -8,14 +8,14 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	contracts "github.com/waterfall-foundation/coordinator/contracts/deposit"
-	"github.com/waterfall-foundation/coordinator/io/logs"
-	"github.com/waterfall-foundation/coordinator/network"
-	"github.com/waterfall-foundation/coordinator/network/authorization"
-	gwatTypes "github.com/waterfall-foundation/gwat/core/types"
-	"github.com/waterfall-foundation/gwat/ethclient"
-	gethRPC "github.com/waterfall-foundation/gwat/rpc"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	contracts "gitlab.waterfall.network/waterfall/protocol/coordinator/contracts/deposit"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/logs"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/network"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/network/authorization"
+	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/ethclient"
+	gethRPC "gitlab.waterfall.network/waterfall/protocol/gwat/rpc"
 )
 
 func (s *Service) setupExecutionClientConnections(ctx context.Context, currEndpoint network.Endpoint) error {

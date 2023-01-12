@@ -3,7 +3,7 @@ load("@prysm//tools/go:def.bzl", "go_library", "go_test")
 go_library(
     name = "go_default_library",
     srcs = ["setup_db.go"],
-    importpath = "github.com/waterfall-foundation/coordinator/validator/db/testing",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/db/testing",
     visibility = [
         "//cmd:__subpackages__",
         "//validator:__subpackages__",

@@ -2,7 +2,7 @@ package types
 
 import (
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/runtime/version"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
 )
 
 // FieldIndex represents the relevant field position in the

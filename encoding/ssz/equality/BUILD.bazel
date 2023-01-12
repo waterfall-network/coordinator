@@ -3,7 +3,7 @@ load("@prysm//tools/go:def.bzl", "go_library", "go_test")
 go_library(
     name = "go_default_library",
     srcs = ["deep_equal.go"],
-    importpath = "github.com/waterfall-foundation/coordinator/encoding/ssz/equality",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz/equality",
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_prysmaticlabs_eth2_types//:go_default_library",

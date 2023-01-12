@@ -4,7 +4,7 @@ go_library(
     name = "go_default_library",
     testonly = True,
     srcs = ["assertions.go"],
-    importpath = "github.com/waterfall-foundation/coordinator/testing/assert",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert",
     visibility = ["//visibility:public"],
     deps = [
         "//testing/assertions:go_default_library",

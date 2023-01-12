@@ -9,17 +9,17 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/blocks"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/time"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/transition"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/db/kv"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	enginev1 "github.com/waterfall-foundation/coordinator/proto/engine/v1"
-	"github.com/waterfall-foundation/coordinator/runtime/version"
-	"github.com/waterfall-foundation/coordinator/time/slots"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/kv"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	enginev1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/engine/v1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 )
 
 var (
@@ -154,14 +154,15 @@ func (vs *Server) getExecutionPayload(ctx context.Context, slot types.Slot, vIdx
 //
 // Spec code:
 // def get_terminal_pow_block(pow_chain: Dict[Hash32, PowBlock]) -> Optional[PowBlock]:
-//    if TERMINAL_BLOCK_HASH != Hash32():
-//        # Terminal block hash override takes precedence over terminal total difficulty
-//        if TERMINAL_BLOCK_HASH in pow_chain:
-//            return pow_chain[TERMINAL_BLOCK_HASH]
-//        else:
-//            return None
 //
-//    return get_pow_block_at_terminal_total_difficulty(pow_chain)
+//	if TERMINAL_BLOCK_HASH != Hash32():
+//	    # Terminal block hash override takes precedence over terminal total difficulty
+//	    if TERMINAL_BLOCK_HASH in pow_chain:
+//	        return pow_chain[TERMINAL_BLOCK_HASH]
+//	    else:
+//	        return None
+//
+//	return get_pow_block_at_terminal_total_difficulty(pow_chain)
 func (vs *Server) getTerminalBlockHashIfExists(ctx context.Context) ([]byte, bool, error) {
 	terminalBlockHash := params.BeaconConfig().TerminalBlockHash
 	// Terminal block hash override takes precedence over terminal total difficulty.
@@ -182,10 +183,11 @@ func (vs *Server) getTerminalBlockHashIfExists(ctx context.Context) ([]byte, boo
 
 // activationEpochNotReached returns true if activation epoch has not been reach.
 // Which satisfy the following conditions in spec:
-//        is_terminal_block_hash_set = TERMINAL_BLOCK_HASH != Hash32()
-//        is_activation_epoch_reached = get_current_epoch(state) >= TERMINAL_BLOCK_HASH_ACTIVATION_EPOCH
-//        if is_terminal_block_hash_set and not is_activation_epoch_reached:
-//      	return True
+//
+//	  is_terminal_block_hash_set = TERMINAL_BLOCK_HASH != Hash32()
+//	  is_activation_epoch_reached = get_current_epoch(state) >= TERMINAL_BLOCK_HASH_ACTIVATION_EPOCH
+//	  if is_terminal_block_hash_set and not is_activation_epoch_reached:
+//		return True
 func activationEpochNotReached(slot types.Slot) bool {
 	terminalBlockHashSet := bytesutil.ToBytes32(params.BeaconConfig().TerminalBlockHash.Bytes()) != [32]byte{}
 	if terminalBlockHashSet {

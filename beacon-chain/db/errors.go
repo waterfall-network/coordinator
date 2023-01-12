@@ -1,6 +1,6 @@
 package db
 
-import "github.com/waterfall-foundation/coordinator/beacon-chain/db/kv"
+import "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/kv"
 
 // ErrNotFound can be used to determine if an error from a method in the database package
 // represents a "not found" error. These often require different handling than a low-level

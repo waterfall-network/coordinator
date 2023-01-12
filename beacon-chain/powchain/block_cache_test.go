@@ -4,11 +4,11 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/powchain/types"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/gwat/common"
-	gethTypes "github.com/waterfall-foundation/gwat/core/types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain/types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	gethTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
 )
 
 func TestHashKeyFn_OK(t *testing.T) {

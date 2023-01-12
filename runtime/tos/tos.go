@@ -8,9 +8,9 @@ import (
 	"github.com/logrusorgru/aurora"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
-	"github.com/waterfall-foundation/coordinator/cmd"
-	"github.com/waterfall-foundation/coordinator/io/file"
-	"github.com/waterfall-foundation/coordinator/io/prompt"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/file"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/prompt"
 )
 
 const (
@@ -21,13 +21,13 @@ Prysmatic Labs Terms of Use
 By downloading, accessing or using the Prysm implementation (“Prysm”), you (referenced herein
 as “you” or the “user”) certify that you have read and agreed to the terms and conditions below.
 
-TERMS AND CONDITIONS: https://github.com/waterfall-foundation/coordinator/blob/master/TERMS_OF_SERVICE.md
+TERMS AND CONDITIONS: https://gitlab.waterfall.network/waterfall/protocol/coordinator/blob/master/TERMS_OF_SERVICE.md
 
 
 Type "accept" to accept this terms and conditions [accept/decline]:`
 	acceptTosPromptErrText = `could not scan text input, if you are trying to run in non-interactive environment, you
 can use the --accept-terms-of-use flag after reading the terms and conditions here: 
-https://github.com/waterfall-foundation/coordinator/blob/master/TERMS_OF_SERVICE.md`
+https://gitlab.waterfall.network/waterfall/protocol/coordinator/blob/master/TERMS_OF_SERVICE.md`
 )
 
 var (

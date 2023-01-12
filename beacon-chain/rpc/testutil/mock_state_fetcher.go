@@ -4,7 +4,7 @@ import (
 	"context"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 )
 
 // MockFetcher is a fake implementation of statefetcher.Fetcher.

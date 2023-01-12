@@ -10,10 +10,10 @@ import (
 
 	"github.com/libp2p/go-libp2p-core/crypto"
 	log "github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/io/file"
-	_ "github.com/waterfall-foundation/coordinator/runtime/maxprocs"
-	"github.com/waterfall-foundation/gwat/p2p/enode"
-	"github.com/waterfall-foundation/gwat/p2p/enr"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/file"
+	_ "gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/maxprocs"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enode"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enr"
 )
 
 var (

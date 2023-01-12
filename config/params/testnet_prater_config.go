@@ -1,7 +1,7 @@
 package params
 
 import (
-	eth1Params "github.com/waterfall-foundation/gwat/params"
+	eth1Params "gitlab.waterfall.network/waterfall/protocol/gwat/params"
 )
 
 // UsePraterNetworkConfig uses the Prater specific

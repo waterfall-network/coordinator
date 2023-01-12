@@ -1,8 +1,8 @@
 package ssz
 
 import (
-	"github.com/waterfall-foundation/coordinator/container/trie"
-	"github.com/waterfall-foundation/coordinator/crypto/hash/htr"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/container/trie"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash/htr"
 )
 
 // Merkleize.go is mostly a directly copy of the same filename from

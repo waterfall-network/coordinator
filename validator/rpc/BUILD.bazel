@@ -14,7 +14,7 @@ go_library(
         "standard_api.go",
         "wallet.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/validator/rpc",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/rpc",
     visibility = [
         "//cmd/validator:__subpackages__",
         "//validator:__subpackages__",
@@ -112,7 +112,7 @@ go_test(
         "//validator/keymanager/remote-web3signer:go_default_library",
         "//validator/slashing-protection-history/format:go_default_library",
         "//validator/testing:go_default_library",
-        "@com_github_waterfall_foundation_gwat//common/hexutil:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//common/hexutil:go_default_library",
         "@com_github_golang_jwt_jwt_v4//:go_default_library",
         "@com_github_golang_mock//gomock:go_default_library",
         "@com_github_google_uuid//:go_default_library",

@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	lru "github.com/hashicorp/golang-lru"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 )
 
 // FakeBalanceCache is a fake struct with 1 LRU cache for looking up balance by epoch.

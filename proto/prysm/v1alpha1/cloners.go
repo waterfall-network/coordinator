@@ -1,8 +1,8 @@
 package eth
 
 import (
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	enginev1 "github.com/waterfall-foundation/coordinator/proto/engine/v1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	enginev1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/engine/v1"
 )
 
 // CopyETH1Data copies the provided eth1data object.
@@ -25,10 +25,10 @@ func CopyBlockVoting(data *BlockVoting) *BlockVoting {
 		return nil
 	}
 	return &BlockVoting{
-		Root:           bytesutil.SafeCopyBytes(data.Root),
-		TotalAttesters: data.TotalAttesters,
-		Candidates:     bytesutil.SafeCopyBytes(data.Candidates),
-		Attestations:   CopyAttestations(data.Attestations),
+		Root:         bytesutil.SafeCopyBytes(data.Root),
+		Slot:         data.Slot,
+		Candidates:   bytesutil.SafeCopyBytes(data.Candidates),
+		Attestations: CopyAttestations(data.Attestations),
 	}
 }
 

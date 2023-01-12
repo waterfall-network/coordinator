@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/forkchoice/types"
-	"github.com/waterfall-foundation/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/forkchoice/types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 )
 
 // BoostProposerRoot sets the block root which should be boosted during
@@ -13,10 +13,10 @@ import (
 // proposed blocks which occur before a cutoff interval set to
 // SECONDS_PER_SLOT // INTERVALS_PER_SLOT.
 //
-//  time_into_slot = (store.time - store.genesis_time) % SECONDS_PER_SLOT
-//  is_before_attesting_interval = time_into_slot < SECONDS_PER_SLOT // INTERVALS_PER_SLOT
-//  if get_current_slot(store) == block.slot and is_before_attesting_interval:
-//      store.proposer_boost_root = hash_tree_root(block)
+//	time_into_slot = (store.time - store.genesis_time) % SECONDS_PER_SLOT
+//	is_before_attesting_interval = time_into_slot < SECONDS_PER_SLOT // INTERVALS_PER_SLOT
+//	if get_current_slot(store) == block.slot and is_before_attesting_interval:
+//	    store.proposer_boost_root = hash_tree_root(block)
 func (f *ForkChoice) BoostProposerRoot(_ context.Context, args *types.ProposerBoostRootArgs) error {
 	if args == nil {
 		return errors.New("nil function args provided to BoostProposerRoot")

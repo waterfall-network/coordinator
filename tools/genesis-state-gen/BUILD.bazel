@@ -7,7 +7,7 @@ load("@io_bazel_rules_docker//contrib:push-all.bzl", "docker_push")
 go_library(
     name = "go_default_library",
     srcs = ["main.go"],
-    importpath = "github.com/waterfall-foundation/coordinator/tools/genesis-state-gen",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/tools/genesis-state-gen",
     visibility = ["//visibility:private"],
     deps = [
         "//config/params:go_default_library",
@@ -15,7 +15,7 @@ go_library(
         "//proto/prysm/v1alpha1:go_default_library",
         "//runtime/interop:go_default_library",
         "@com_github_ghodss_yaml//:go_default_library",
-        "@com_github_waterfall_foundation_gwat//common:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//common:go_default_library",
     ],
 )
 
@@ -61,6 +61,6 @@ go_test(
         "//runtime/interop:go_default_library",
         "//testing/assert:go_default_library",
         "//testing/require:go_default_library",
-        "@com_github_waterfall_foundation_gwat//common:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//common:go_default_library",
     ],
 )

@@ -4,9 +4,9 @@ import (
 	"io"
 
 	lru "github.com/hashicorp/golang-lru"
-	"github.com/waterfall-foundation/coordinator/async/event"
-	lruwrpr "github.com/waterfall-foundation/coordinator/cache/lru"
-	"github.com/waterfall-foundation/coordinator/crypto/rand"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/async/event"
+	lruwrpr "gitlab.waterfall.network/waterfall/protocol/coordinator/cache/lru"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/rand"
 )
 
 const (

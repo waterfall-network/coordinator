@@ -3,8 +3,8 @@ package helpers
 import (
 	"errors"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/rpc/statefetcher"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stategen"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc/statefetcher"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

@@ -2,11 +2,11 @@ package migration
 
 import (
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	ethpbv1 "github.com/waterfall-foundation/coordinator/proto/eth/v1"
-	ethpbv2 "github.com/waterfall-foundation/coordinator/proto/eth/v2"
-	ethpbalpha "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	ethpbv1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
+	ethpbv2 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v2"
+	ethpbalpha "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -107,10 +107,10 @@ func BeaconStateAltairToProto(altairState state.BeaconStateAltair) (*ethpbv2.Bea
 			}
 		}
 		resultBlockVoting[i] = &ethpbv1.BlockVoting{
-			Root:           bytesutil.SafeCopyBytes(vote.Root),
-			TotalAttesters: vote.TotalAttesters,
-			Candidates:     bytesutil.SafeCopyBytes(vote.Candidates),
-			Attestations:   attestations,
+			Root:         bytesutil.SafeCopyBytes(vote.Root),
+			Slot:         vote.Slot,
+			Candidates:   bytesutil.SafeCopyBytes(vote.Candidates),
+			Attestations: attestations,
 		}
 	}
 	resultValidators := make([]*ethpbv1.Validator, len(sourceValidators))
@@ -253,10 +253,10 @@ func BeaconStateBellatrixToProto(st state.BeaconStateBellatrix) (*ethpbv2.Beacon
 			}
 		}
 		resultBlockVoting[i] = &ethpbv1.BlockVoting{
-			Root:           bytesutil.SafeCopyBytes(vote.Root),
-			TotalAttesters: vote.TotalAttesters,
-			Candidates:     bytesutil.SafeCopyBytes(vote.Candidates),
-			Attestations:   attestations,
+			Root:         bytesutil.SafeCopyBytes(vote.Root),
+			Slot:         vote.Slot,
+			Candidates:   bytesutil.SafeCopyBytes(vote.Candidates),
+			Attestations: attestations,
 		}
 	}
 	resultValidators := make([]*ethpbv1.Validator, len(sourceValidators))

@@ -3,7 +3,7 @@ package rewards
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/testing/spectest/shared/altair/rewards"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/spectest/shared/altair/rewards"
 )
 
 func TestMinimal_Altair_Rewards(t *testing.T) {

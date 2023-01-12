@@ -3,8 +3,8 @@ package slashings
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/operations/slashings/mock"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/slashings/mock"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 var (

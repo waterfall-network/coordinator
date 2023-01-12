@@ -6,7 +6,7 @@ go_library(
         "prompt.go",
         "validate.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/io/prompt",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/io/prompt",
     visibility = ["//visibility:public"],
     deps = [
         "//io/file:go_default_library",

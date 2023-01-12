@@ -8,15 +8,15 @@ import (
 
 	types "github.com/prysmaticlabs/eth2-types"
 	logTest "github.com/sirupsen/logrus/hooks/test"
-	mock "github.com/waterfall-foundation/coordinator/beacon-chain/blockchain/testing"
-	dbtest "github.com/waterfall-foundation/coordinator/beacon-chain/db/testing"
-	mockslashings "github.com/waterfall-foundation/coordinator/beacon-chain/operations/slashings/mock"
-	mockstategen "github.com/waterfall-foundation/coordinator/beacon-chain/state/stategen/mock"
-	"github.com/waterfall-foundation/coordinator/crypto/bls"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	slashersimulator "github.com/waterfall-foundation/coordinator/testing/slasher/simulator"
-	"github.com/waterfall-foundation/coordinator/testing/util"
+	mock "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain/testing"
+	dbtest "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/testing"
+	mockslashings "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/slashings/mock"
+	mockstategen "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen/mock"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	slashersimulator "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/slasher/simulator"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
 )
 
 type mockSyncChecker struct{}

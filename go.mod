@@ -1,4 +1,4 @@
-module github.com/waterfall-foundation/coordinator
+module gitlab.waterfall.network/waterfall/protocol/coordinator
 
 go 1.17
 
@@ -77,12 +77,12 @@ require (
 	github.com/tyler-smith/go-bip39 v1.1.0
 	github.com/urfave/cli/v2 v2.3.0
 	github.com/uudashr/gocognit v1.0.5
-	github.com/waterfall-foundation/gwat v0.6.2
 	github.com/wealdtech/go-bytesutil v1.1.1
 	github.com/wealdtech/go-eth2-util v1.6.3
 	github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4 v1.1.3
 	github.com/wercker/journalhook v0.0.0-20180428041537-5d0a5ae867b3
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
+	gitlab.waterfall.network/waterfall/protocol/gwat v0.6.3
 	go.etcd.io/bbolt v1.3.5
 	go.opencensus.io v0.23.0
 	go.uber.org/automaxprocs v1.3.0
@@ -276,4 +276,4 @@ replace github.com/grpc-ecosystem/grpc-gateway/v2 => github.com/prysmaticlabs/gr
 
 replace github.com/ferranbt/fastssz => github.com/prysmaticlabs/fastssz v0.0.0-20220110145812-fafb696cae88
 
-//replace github.com/waterfall-foundation/gwat => /home/mezin/go/src/gwat
+//replace gitlab.waterfall.network/waterfall/protocol/gwat => /home/mezin/go/src/gwat

@@ -6,14 +6,14 @@ import (
 	"testing"
 
 	"github.com/golang/snappy"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	v1 "github.com/waterfall-foundation/coordinator/beacon-chain/state/v1"
-	v2 "github.com/waterfall-foundation/coordinator/beacon-chain/state/v2"
-	"github.com/waterfall-foundation/coordinator/config/features"
-	v1alpha1 "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/coordinator/testing/util"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
+	v2 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v2"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
+	v1alpha1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
 	"go.etcd.io/bbolt"
 )
 

@@ -1,7 +1,7 @@
 package v2
 
 import (
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 // Eth1Data corresponding to the proof-of-work chain information stored in the beacon state.

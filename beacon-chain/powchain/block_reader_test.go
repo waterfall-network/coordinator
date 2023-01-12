@@ -6,16 +6,16 @@ import (
 	"testing"
 	"time"
 
-	dbutil "github.com/waterfall-foundation/coordinator/beacon-chain/db/testing"
-	mockPOW "github.com/waterfall-foundation/coordinator/beacon-chain/powchain/testing"
-	contracts "github.com/waterfall-foundation/coordinator/contracts/deposit"
-	"github.com/waterfall-foundation/coordinator/contracts/deposit/mock"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/gwat/common"
-	"github.com/waterfall-foundation/gwat/common/hexutil"
-	gethTypes "github.com/waterfall-foundation/gwat/core/types"
-	"github.com/waterfall-foundation/gwat/trie"
+	dbutil "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/testing"
+	mockPOW "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain/testing"
+	contracts "gitlab.waterfall.network/waterfall/protocol/coordinator/contracts/deposit"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/contracts/deposit/mock"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
+	gethTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/trie"
 )
 
 func setDefaultMocks(service *Service) *Service {

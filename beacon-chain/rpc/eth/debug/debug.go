@@ -3,12 +3,12 @@ package debug
 import (
 	"context"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/rpc/eth/helpers"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	ethpbv1 "github.com/waterfall-foundation/coordinator/proto/eth/v1"
-	ethpbv2 "github.com/waterfall-foundation/coordinator/proto/eth/v2"
-	"github.com/waterfall-foundation/coordinator/proto/migration"
-	"github.com/waterfall-foundation/coordinator/runtime/version"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc/eth/helpers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	ethpbv1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
+	ethpbv2 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v2"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/migration"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

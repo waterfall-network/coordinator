@@ -6,9 +6,9 @@ import (
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	log "github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	attaggregation "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/attestation/aggregation/attestations"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	attaggregation "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/attestation/aggregation/attestations"
 	"go.opencensus.io/trace"
 )
 
@@ -99,6 +99,7 @@ func (c *AttCaches) SaveAggregatedAttestation(att *ethpb.Attestation) error {
 	if !helpers.IsAggregated(att) {
 		return errors.New("attestation is not aggregated")
 	}
+	// checks already has same attestation
 	has, err := c.HasAggregatedAttestation(att)
 	if err != nil {
 		return err
@@ -122,6 +123,7 @@ func (c *AttCaches) SaveAggregatedAttestation(att *ethpb.Attestation) error {
 	copiedAtt := ethpb.CopyAttestation(att)
 	c.aggregatedAttLock.Lock()
 	defer c.aggregatedAttLock.Unlock()
+	// get current aggregated attestation for same att.Data (by Data hash)
 	atts, ok := c.aggregatedAtt[r]
 	if !ok {
 		atts := []*ethpb.Attestation{copiedAtt}

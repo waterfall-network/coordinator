@@ -14,10 +14,10 @@ import (
 	"time"
 
 	"github.com/ghodss/yaml"
-	"github.com/waterfall-foundation/coordinator/io/file"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/runtime/interop"
-	"github.com/waterfall-foundation/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/file"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/interop"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 // DepositDataJSON representing a json object of hex string and uint64 values for

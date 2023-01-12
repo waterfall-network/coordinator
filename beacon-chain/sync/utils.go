@@ -4,7 +4,7 @@ import (
 	"errors"
 	"sort"
 
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
 )
 
 // A type to represent beacon blocks and roots which have methods

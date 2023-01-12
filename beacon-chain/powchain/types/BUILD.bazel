@@ -3,12 +3,12 @@ load("@prysm//tools/go:def.bzl", "go_library", "go_test")
 go_library(
     name = "go_default_library",
     srcs = ["eth1_types.go"],
-    importpath = "github.com/waterfall-foundation/coordinator/beacon-chain/powchain/types",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain/types",
     visibility = ["//beacon-chain:__subpackages__"],
     deps = [
         "//encoding/bytesutil:go_default_library",
-        "@com_github_waterfall_foundation_gwat//common:go_default_library",
-        "@com_github_waterfall_foundation_gwat//core/types:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//common:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//core/types:go_default_library",
         "@com_github_pkg_errors//:go_default_library",
     ],
 )
@@ -18,7 +18,7 @@ go_test(
     srcs = ["eth1_types_test.go"],
     embed = [":go_default_library"],
     deps = [
-        "@com_github_waterfall_foundation_gwat//common:go_default_library",
-        "@com_github_waterfall_foundation_gwat//core/types:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//common:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//core/types:go_default_library",
     ],
 )

@@ -3,7 +3,7 @@ load("@prysm//tools/go:def.bzl", "go_library", "go_test")
 go_library(
     name = "go_default_library",
     srcs = ["filter.go"],
-    importpath = "github.com/waterfall-foundation/coordinator/beacon-chain/db/filters",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/filters",
     visibility = [
         "//beacon-chain:__subpackages__",
         "//tools:__subpackages__",

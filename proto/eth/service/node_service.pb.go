@@ -12,7 +12,7 @@ import (
 
 	_ "github.com/golang/protobuf/protoc-gen-go/descriptor"
 	empty "github.com/golang/protobuf/ptypes/empty"
-	v1 "github.com/waterfall-foundation/coordinator/proto/eth/v1"
+	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"

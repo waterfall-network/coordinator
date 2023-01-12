@@ -10,12 +10,12 @@ import (
 	"strings"
 	"testing"
 
-	mocks "github.com/waterfall-foundation/coordinator/beacon-chain/powchain/testing"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/gwat/common"
-	gwatCommon "github.com/waterfall-foundation/gwat/common"
-	gwatTypes "github.com/waterfall-foundation/gwat/core/types"
-	"github.com/waterfall-foundation/gwat/rpc"
+	mocks "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/rpc"
 )
 
 var (
