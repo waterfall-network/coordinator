@@ -3,10 +3,10 @@ package stateutil
 import (
 	"encoding/binary"
 
-	"github.com/waterfall-foundation/coordinator/crypto/hash"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	"github.com/waterfall-foundation/coordinator/encoding/ssz"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 // BlockHeaderRoot computes the HashTreeRoot Merkleization of

@@ -7,7 +7,7 @@ go_library(
         "metrics.go",
         "version.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/runtime/version",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version",
     visibility = ["//visibility:public"],
     x_defs = {
         "gitCommit": "{STABLE_GIT_COMMIT}",

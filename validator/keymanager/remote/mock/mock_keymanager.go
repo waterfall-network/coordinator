@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 
-	"github.com/waterfall-foundation/coordinator/async/event"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/crypto/bls"
-	ethpbservice "github.com/waterfall-foundation/coordinator/proto/eth/service"
-	validatorpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/validator-client"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/async/event"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
+	ethpbservice "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/service"
+	validatorpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/validator-client"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager"
 )
 
 // MockKeymanager --

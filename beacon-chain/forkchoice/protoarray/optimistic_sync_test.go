@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 func slicesEqual(a, b [][32]byte) bool {
@@ -59,16 +59,15 @@ func TestOptimistic_Outside_ForkChoice(t *testing.T) {
 // This tests the algorithm to update optimistic Status
 // We start with the following diagram
 //
-//                E -- F
-//               /
-//         C -- D
-//        /      \
-//  A -- B        G -- H -- I
-//        \        \
-//         J        -- K -- L
+//	              E -- F
+//	             /
+//	       C -- D
+//	      /      \
+//	A -- B        G -- H -- I
+//	      \        \
+//	       J        -- K -- L
 //
 // The Chain A -- B -- C -- D -- E is VALID.
-//
 func TestSetOptimisticToValid(t *testing.T) {
 	ctx := context.Background()
 	tests := []struct {
@@ -173,17 +172,16 @@ func TestSetOptimisticToValid(t *testing.T) {
 // We test the algorithm to update a node from SYNCING to INVALID
 // We start with the same diagram as above:
 //
-//                         E(2) -- F(1)
-//                        /
-//             C(7) -- D(6)
-//            /           \
-//  A(10) -- B(9)          G(3) -- H(1) -- I(0)
-//            \               \
-//             J(1)             -- K(1) -- L(0)
+//	                       E(2) -- F(1)
+//	                      /
+//	           C(7) -- D(6)
+//	          /           \
+//	A(10) -- B(9)          G(3) -- H(1) -- I(0)
+//	          \               \
+//	           J(1)             -- K(1) -- L(0)
 //
 // And the chain A -- B -- C -- D -- E has been fully validated. The numbers in parentheses are
 // the weights of the nodes.
-//
 func TestSetOptimisticToInvalid(t *testing.T) {
 	tests := []struct {
 		name              string   // test description

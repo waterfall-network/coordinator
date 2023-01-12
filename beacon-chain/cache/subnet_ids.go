@@ -7,9 +7,9 @@ import (
 	lru "github.com/hashicorp/golang-lru"
 	"github.com/patrickmn/go-cache"
 	types "github.com/prysmaticlabs/eth2-types"
-	lruwrpr "github.com/waterfall-foundation/coordinator/cache/lru"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/container/slice"
+	lruwrpr "gitlab.waterfall.network/waterfall/protocol/coordinator/cache/lru"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/container/slice"
 )
 
 type subnetIDs struct {

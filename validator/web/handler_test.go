@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 )
 
 func TestHandler(t *testing.T) {

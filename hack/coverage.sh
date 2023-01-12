@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-declare -a skip_coverage=("github.com/waterfall-foundation/coordinator/contracts/sharding-manager-contract"
-                          "github.com/waterfall-foundation/coordinator/contracts/validator-registration-contract")
+declare -a skip_coverage=("gitlab.waterfall.network/waterfall/protocol/coordinator/contracts/sharding-manager-contract"
+                          "gitlab.waterfall.network/waterfall/protocol/coordinator/contracts/validator-registration-contract")
 
 set -e
 echo "" > coverage.txt

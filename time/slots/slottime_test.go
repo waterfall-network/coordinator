@@ -6,10 +6,10 @@ import (
 	"time"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	prysmTime "github.com/waterfall-foundation/coordinator/time"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	prysmTime "gitlab.waterfall.network/waterfall/protocol/coordinator/time"
 )
 
 func TestSlotsSinceGenesis(t *testing.T) {

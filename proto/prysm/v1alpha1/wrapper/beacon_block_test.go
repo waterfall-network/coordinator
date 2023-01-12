@@ -3,9 +3,9 @@ package wrapper_test
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/coordinator/testing/util"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
 )
 
 func TestWrappedSignedBeaconBlock(t *testing.T) {

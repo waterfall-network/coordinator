@@ -12,11 +12,11 @@ import (
 	"strings"
 
 	"github.com/bazelbuild/rules_go/go/tools/bazel"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/io/file"
-	"github.com/waterfall-foundation/coordinator/testing/endtoend/helpers"
-	e2e "github.com/waterfall-foundation/coordinator/testing/endtoend/params"
-	e2etypes "github.com/waterfall-foundation/coordinator/testing/endtoend/types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/file"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/helpers"
+	e2e "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/params"
+	e2etypes "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/types"
 )
 
 var _ e2etypes.ComponentRunner = (*LighthouseBeaconNode)(nil)

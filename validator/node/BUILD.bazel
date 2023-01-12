@@ -29,7 +29,7 @@ go_library(
         "log.go",
         "node.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/validator/node",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/node",
     visibility = [
         "//cmd/validator:__subpackages__",
         "//validator:__subpackages__",

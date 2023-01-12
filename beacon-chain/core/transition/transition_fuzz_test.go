@@ -6,11 +6,11 @@ import (
 
 	fuzz "github.com/google/gofuzz"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/time"
-	v1 "github.com/waterfall-foundation/coordinator/beacon-chain/state/v1"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
+	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 func TestFuzzExecuteStateTransition_1000(t *testing.T) {

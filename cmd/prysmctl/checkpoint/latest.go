@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/urfave/cli/v2"
-	"github.com/waterfall-foundation/coordinator/api/client/beacon"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/api/client/beacon"
 )
 
 var latestFlags = struct {

@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/sirupsen/logrus"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 func TestMain(m *testing.M) {

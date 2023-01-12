@@ -1,5 +1,5 @@
 language: go
-go_import_path: github.com/waterfall-foundation/coordinator
+go_import_path: gitlab.waterfall.network/waterfall/protocol/coordinator
 sudo: false
 matrix:
   include:

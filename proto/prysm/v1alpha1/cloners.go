@@ -1,8 +1,8 @@
 package eth
 
 import (
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	enginev1 "github.com/waterfall-foundation/coordinator/proto/engine/v1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	enginev1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/engine/v1"
 )
 
 // CopyETH1Data copies the provided eth1data object.

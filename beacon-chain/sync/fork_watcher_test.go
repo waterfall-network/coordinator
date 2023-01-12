@@ -6,14 +6,14 @@ import (
 	"time"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/waterfall-foundation/coordinator/async/abool"
-	mockChain "github.com/waterfall-foundation/coordinator/beacon-chain/blockchain/testing"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p"
-	p2ptest "github.com/waterfall-foundation/coordinator/beacon-chain/p2p/testing"
-	mockSync "github.com/waterfall-foundation/coordinator/beacon-chain/sync/initial-sync/testing"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/network/forks"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/async/abool"
+	mockChain "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
+	p2ptest "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/testing"
+	mockSync "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/sync/initial-sync/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/network/forks"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 )
 
 func TestService_CheckForNextEpochFork(t *testing.T) {

@@ -8,8 +8,8 @@ import (
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
 	"go.opencensus.io/trace"
 )
 

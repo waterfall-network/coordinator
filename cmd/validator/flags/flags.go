@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/urfave/cli/v2"
-	field_params "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/io/file"
+	field_params "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/file"
 )
 
 const (

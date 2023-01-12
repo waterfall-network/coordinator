@@ -2,8 +2,8 @@ package wrapper
 
 import (
 	"github.com/pkg/errors"
-	eth "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
+	eth "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
 )
 
 var (

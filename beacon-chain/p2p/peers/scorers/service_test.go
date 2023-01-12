@@ -7,10 +7,10 @@ import (
 
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/peers"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/peers/scorers"
-	"github.com/waterfall-foundation/coordinator/cmd/beacon-chain/flags"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers/scorers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/beacon-chain/flags"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 )
 
 func TestScorers_Service_Init(t *testing.T) {

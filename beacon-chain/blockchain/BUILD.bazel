@@ -26,7 +26,7 @@ go_library(
         "state_balance_cache.go",
         "weak_subjectivity_checks.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/beacon-chain/blockchain",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain",
     visibility = [
         "//beacon-chain:__subpackages__",
         "//cmd/beacon-chain:__subpackages__",

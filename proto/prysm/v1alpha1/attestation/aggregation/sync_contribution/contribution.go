@@ -3,8 +3,8 @@ package sync_contribution
 import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	v2 "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/attestation/aggregation"
+	v2 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/attestation/aggregation"
 )
 
 const (

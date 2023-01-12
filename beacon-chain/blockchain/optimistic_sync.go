@@ -7,20 +7,20 @@ import (
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/blocks"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/time"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/transition"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/db/kv"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/powchain"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	enginev1 "github.com/waterfall-foundation/coordinator/proto/engine/v1"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
-	"github.com/waterfall-foundation/coordinator/time/slots"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/kv"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	enginev1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/engine/v1"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	"go.opencensus.io/trace"
 )
 
@@ -176,13 +176,14 @@ func (s *Service) notifyNewPayload(ctx context.Context, preStateVersion, postSta
 //
 // Spec pseudocode definition:
 // def is_optimistic_candidate_block(opt_store: OptimisticStore, current_slot: Slot, block: BeaconBlock) -> bool:
-//    if is_execution_block(opt_store.blocks[block.parent_root]):
-//        return True
 //
-//    if block.slot + SAFE_SLOTS_TO_IMPORT_OPTIMISTICALLY <= current_slot:
-//        return True
+//	if is_execution_block(opt_store.blocks[block.parent_root]):
+//	    return True
 //
-//    return False
+//	if block.slot + SAFE_SLOTS_TO_IMPORT_OPTIMISTICALLY <= current_slot:
+//	    return True
+//
+//	return False
 func (s *Service) optimisticCandidateBlock(ctx context.Context, blk block.BeaconBlock) (bool, error) {
 	if blk.Slot()+params.BeaconConfig().SafeSlotsToImportOptimistically <= s.CurrentSlot() {
 		return true, nil

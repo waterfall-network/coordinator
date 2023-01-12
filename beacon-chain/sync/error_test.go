@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"testing"
 
-	p2ptest "github.com/waterfall-foundation/coordinator/beacon-chain/p2p/testing"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/types"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	p2ptest "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 func TestRegularSync_generateErrorResponse(t *testing.T) {

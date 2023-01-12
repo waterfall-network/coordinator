@@ -8,8 +8,8 @@ import (
 
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/go-bitfield"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 // BeaconState has read and write access to beacon state methods.

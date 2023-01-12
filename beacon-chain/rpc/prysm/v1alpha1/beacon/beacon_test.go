@@ -3,8 +3,8 @@ package beacon
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/cmd/beacon-chain/flags"
-	"github.com/waterfall-foundation/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/beacon-chain/flags"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 )
 
 func TestMain(m *testing.M) {

@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/libp2p/go-libp2p-core/peer"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/peers/peerdata"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers/peerdata"
 )
 
 var _ Scorer = (*BadResponsesScorer)(nil)

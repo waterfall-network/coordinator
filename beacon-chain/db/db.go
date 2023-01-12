@@ -5,7 +5,7 @@ package db
 import (
 	"context"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/db/kv"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/kv"
 )
 
 // NewDB initializes a new DB.

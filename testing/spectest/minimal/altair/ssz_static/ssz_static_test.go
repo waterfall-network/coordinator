@@ -3,7 +3,7 @@ package ssz_static
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/testing/spectest/shared/altair/ssz_static"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/spectest/shared/altair/ssz_static"
 )
 
 func TestMinimal_Altair_SSZStatic(t *testing.T) {

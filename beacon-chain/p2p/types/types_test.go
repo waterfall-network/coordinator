@@ -4,9 +4,9 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 func TestBeaconBlockByRootsReq_Limit(t *testing.T) {

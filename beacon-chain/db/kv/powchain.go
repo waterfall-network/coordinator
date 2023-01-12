@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/waterfall-foundation/coordinator/monitoring/tracing"
-	v2 "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/tracing"
+	v2 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	bolt "go.etcd.io/bbolt"
 	"go.opencensus.io/trace"
 	"google.golang.org/protobuf/proto"

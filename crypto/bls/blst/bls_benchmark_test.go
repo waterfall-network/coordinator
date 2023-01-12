@@ -7,9 +7,9 @@ package blst_test
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/crypto/bls/blst"
-	"github.com/waterfall-foundation/coordinator/crypto/bls/common"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls/blst"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls/common"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 func BenchmarkSignature_Verify(b *testing.B) {

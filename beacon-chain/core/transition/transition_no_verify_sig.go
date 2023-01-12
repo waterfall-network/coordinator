@@ -7,16 +7,16 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/altair"
-	b "github.com/waterfall-foundation/coordinator/beacon-chain/core/blocks"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/transition/interop"
-	v "github.com/waterfall-foundation/coordinator/beacon-chain/core/validators"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/crypto/bls"
-	"github.com/waterfall-foundation/coordinator/monitoring/tracing"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
-	"github.com/waterfall-foundation/coordinator/runtime/version"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/altair"
+	b "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition/interop"
+	v "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/validators"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/tracing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	"go.opencensus.io/trace"
 )
@@ -30,18 +30,19 @@ import (
 // This method also modifies the passed in state.
 //
 // Spec pseudocode definition:
-//  def state_transition(state: BeaconState, signed_block: SignedBeaconBlock, validate_result: bool=True) -> None:
-//    block = signed_block.message
-//    # Process slots (including those with no blocks) since block
-//    process_slots(state, block.slot)
-//    # Verify signature
-//    if validate_result:
-//        assert verify_block_signature(state, signed_block)
-//    # Process block
-//    process_block(state, block)
-//    # Verify state root
-//    if validate_result:
-//        assert block.state_root == hash_tree_root(state)
+//
+//	def state_transition(state: BeaconState, signed_block: SignedBeaconBlock, validate_result: bool=True) -> None:
+//	  block = signed_block.message
+//	  # Process slots (including those with no blocks) since block
+//	  process_slots(state, block.slot)
+//	  # Verify signature
+//	  if validate_result:
+//	      assert verify_block_signature(state, signed_block)
+//	  # Process block
+//	  process_block(state, block)
+//	  # Verify state root
+//	  if validate_result:
+//	      assert block.state_root == hash_tree_root(state)
 func ExecuteStateTransitionNoVerifyAnySig(
 	ctx context.Context,
 	state state.BeaconState,
@@ -94,18 +95,19 @@ func ExecuteStateTransitionNoVerifyAnySig(
 // This is used for proposer to compute state root before proposing a new block, and this does not modify state.
 //
 // Spec pseudocode definition:
-//  def state_transition(state: BeaconState, signed_block: SignedBeaconBlock, validate_result: bool=True) -> None:
-//    block = signed_block.message
-//    # Process slots (including those with no blocks) since block
-//    process_slots(state, block.slot)
-//    # Verify signature
-//    if validate_result:
-//        assert verify_block_signature(state, signed_block)
-//    # Process block
-//    process_block(state, block)
-//    # Verify state root
-//    if validate_result:
-//        assert block.state_root == hash_tree_root(state)
+//
+//	def state_transition(state: BeaconState, signed_block: SignedBeaconBlock, validate_result: bool=True) -> None:
+//	  block = signed_block.message
+//	  # Process slots (including those with no blocks) since block
+//	  process_slots(state, block.slot)
+//	  # Verify signature
+//	  if validate_result:
+//	      assert verify_block_signature(state, signed_block)
+//	  # Process block
+//	  process_block(state, block)
+//	  # Verify state root
+//	  if validate_result:
+//	      assert block.state_root == hash_tree_root(state)
 func CalculateStateRoot(
 	ctx context.Context,
 	state state.BeaconState,
@@ -150,11 +152,11 @@ func CalculateStateRoot(
 //
 // Spec pseudocode definition:
 //
-//  def process_block(state: BeaconState, block: BeaconBlock) -> None:
-//    process_block_header(state, block)
-//    process_randao(state, block.body)
-//    process_eth1_data(state, block.body)
-//    process_operations(state, block.body)
+//	def process_block(state: BeaconState, block: BeaconBlock) -> None:
+//	  process_block_header(state, block)
+//	  process_randao(state, block.body)
+//	  process_eth1_data(state, block.body)
+//	  process_operations(state, block.body)
 func ProcessBlockNoVerifyAnySig(
 	ctx context.Context,
 	state state.BeaconState,
@@ -218,19 +220,19 @@ func ProcessBlockNoVerifyAnySig(
 //
 // Spec pseudocode definition:
 //
-//  def process_operations(state: BeaconState, body: BeaconBlockBody) -> None:
-//    # Verify that outstanding deposits are processed up to the maximum number of deposits
-//    assert len(body.deposits) == min(MAX_DEPOSITS, state.eth1_data.deposit_count - state.eth1_deposit_index)
+//	def process_operations(state: BeaconState, body: BeaconBlockBody) -> None:
+//	  # Verify that outstanding deposits are processed up to the maximum number of deposits
+//	  assert len(body.deposits) == min(MAX_DEPOSITS, state.eth1_data.deposit_count - state.eth1_deposit_index)
 //
-//    def for_ops(operations: Sequence[Any], fn: Callable[[BeaconState, Any], None]) -> None:
-//        for operation in operations:
-//            fn(state, operation)
+//	  def for_ops(operations: Sequence[Any], fn: Callable[[BeaconState, Any], None]) -> None:
+//	      for operation in operations:
+//	          fn(state, operation)
 //
-//    for_ops(body.proposer_slashings, process_proposer_slashing)
-//    for_ops(body.attester_slashings, process_attester_slashing)
-//    for_ops(body.attestations, process_attestation)
-//    for_ops(body.deposits, process_deposit)
-//    for_ops(body.voluntary_exits, process_voluntary_exit)
+//	  for_ops(body.proposer_slashings, process_proposer_slashing)
+//	  for_ops(body.attester_slashings, process_attester_slashing)
+//	  for_ops(body.attestations, process_attestation)
+//	  for_ops(body.deposits, process_deposit)
+//	  for_ops(body.voluntary_exits, process_voluntary_exit)
 func ProcessOperationsNoVerifyAttsSigs(
 	ctx context.Context,
 	state state.BeaconState,
@@ -269,13 +271,14 @@ func ProcessOperationsNoVerifyAttsSigs(
 //
 // Spec pseudocode definition:
 // def process_block(state: BeaconState, block: BeaconBlock) -> None:
-//    process_block_header(state, block)
-//    if is_execution_enabled(state, block.body):
-//        process_execution_payload(state, block.body.execution_payload, EXECUTION_ENGINE)  # [New in Bellatrix]
-//    process_randao(state, block.body)
-//    process_eth1_data(state, block.body)
-//    process_operations(state, block.body)
-//    process_sync_aggregate(state, block.body.sync_aggregate)
+//
+//	process_block_header(state, block)
+//	if is_execution_enabled(state, block.body):
+//	    process_execution_payload(state, block.body.execution_payload, EXECUTION_ENGINE)  # [New in Bellatrix]
+//	process_randao(state, block.body)
+//	process_eth1_data(state, block.body)
+//	process_operations(state, block.body)
+//	process_sync_aggregate(state, block.body.sync_aggregate)
 func ProcessBlockForStateRoot(
 	ctx context.Context,
 	state state.BeaconState,

@@ -2,7 +2,7 @@ package v1
 
 import (
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stateutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stateutil"
 )
 
 // SetStateRoots for the beacon state. Updates the state roots

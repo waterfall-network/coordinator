@@ -12,10 +12,10 @@ import (
 	"github.com/gorilla/mux"
 	logTest "github.com/sirupsen/logrus/hooks/test"
 	"github.com/urfave/cli/v2"
-	"github.com/waterfall-foundation/coordinator/api/gateway/apimiddleware"
-	"github.com/waterfall-foundation/coordinator/cmd/beacon-chain/flags"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/api/gateway/apimiddleware"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/beacon-chain/flags"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 type mockEndpointFactory struct {

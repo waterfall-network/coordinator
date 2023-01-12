@@ -8,14 +8,14 @@ import (
 
 	libp2pcore "github.com/libp2p/go-libp2p-core"
 	"github.com/libp2p/go-libp2p-core/network"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/transition"
-	prysmP2P "github.com/waterfall-foundation/coordinator/beacon-chain/p2p"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/encoder"
-	p2ptest "github.com/waterfall-foundation/coordinator/beacon-chain/p2p/testing"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/coordinator/testing/util"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition"
+	prysmP2P "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/encoder"
+	p2ptest "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/testing"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
 )
 
 func init() {

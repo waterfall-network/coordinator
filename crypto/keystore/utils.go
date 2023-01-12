@@ -25,8 +25,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/waterfall-foundation/coordinator/crypto/bls"
-	prysmTime "github.com/waterfall-foundation/coordinator/time"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
+	prysmTime "gitlab.waterfall.network/waterfall/protocol/coordinator/time"
 )
 
 func aesCTRXOR(key, inText, iv []byte) ([]byte, error) {

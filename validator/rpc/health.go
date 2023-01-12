@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	pb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	validatorpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/validator-client"
-	"github.com/waterfall-foundation/coordinator/runtime/version"
+	pb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	validatorpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/validator-client"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"

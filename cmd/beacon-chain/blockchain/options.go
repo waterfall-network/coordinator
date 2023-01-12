@@ -2,10 +2,10 @@ package blockchaincmd
 
 import (
 	"github.com/urfave/cli/v2"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/blockchain"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
-	"github.com/waterfall-foundation/coordinator/cmd"
-	"github.com/waterfall-foundation/coordinator/cmd/beacon-chain/flags"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/beacon-chain/flags"
 )
 
 // FlagOptions for blockchain service flag configurations.

@@ -4,9 +4,9 @@ import (
 	"context"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/waterfall-foundation/coordinator/config/features"
-	"github.com/waterfall-foundation/coordinator/container/slice"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/container/slice"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

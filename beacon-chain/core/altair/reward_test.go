@@ -5,11 +5,11 @@ import (
 	"testing"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/altair"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/coordinator/testing/util"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/altair"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
 )
 
 func Test_BaseReward(t *testing.T) {

@@ -3,9 +3,9 @@ package attestations
 import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/crypto/bls"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/attestation/aggregation"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/attestation/aggregation"
 )
 
 // attList represents list of attestations, defined for easier en masse operations (filtering, sorting).
@@ -27,11 +27,11 @@ var ErrInvalidAttestationCount = errors.New("invalid number of attestations")
 // Aggregation occurs in-place i.e. contents of input array will be modified. Should you need to
 // preserve input attestations, clone them before aggregating:
 //
-//   clonedAtts := make([]*ethpb.Attestation, len(atts))
-//   for i, a := range atts {
-//       clonedAtts[i] = stateTrie.CopyAttestation(a)
-//   }
-//   aggregatedAtts, err := attaggregation.Aggregate(clonedAtts)
+//	clonedAtts := make([]*ethpb.Attestation, len(atts))
+//	for i, a := range atts {
+//	    clonedAtts[i] = stateTrie.CopyAttestation(a)
+//	}
+//	aggregatedAtts, err := attaggregation.Aggregate(clonedAtts)
 func Aggregate(atts []*ethpb.Attestation) ([]*ethpb.Attestation, error) {
 	return MaxCoverAttestationAggregation(atts)
 }

@@ -2,7 +2,7 @@ package flags
 
 import (
 	"github.com/urfave/cli/v2"
-	"github.com/waterfall-foundation/coordinator/cmd"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd"
 )
 
 // GlobalFlags specifies all the global flags for the

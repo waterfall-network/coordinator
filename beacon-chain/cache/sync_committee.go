@@ -9,8 +9,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"k8s.io/client-go/tools/cache"
 )
 

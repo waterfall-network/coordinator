@@ -4,13 +4,13 @@ import (
 	"testing"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	mock "github.com/waterfall-foundation/coordinator/beacon-chain/blockchain/testing"
-	dbtest "github.com/waterfall-foundation/coordinator/beacon-chain/db/testing"
-	mockstategen "github.com/waterfall-foundation/coordinator/beacon-chain/state/stategen/mock"
-	"github.com/waterfall-foundation/coordinator/crypto/bls"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/coordinator/testing/util"
+	mock "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain/testing"
+	dbtest "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/testing"
+	mockstategen "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen/mock"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
 )
 
 func setupService(t *testing.T, params *Parameters) *Simulator {

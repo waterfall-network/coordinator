@@ -3,8 +3,8 @@ package v2
 import (
 	"context"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stateutil"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stateutil"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 // computeFieldRoots returns the hash tree root computations of every field in

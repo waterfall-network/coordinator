@@ -2,8 +2,8 @@ package v3
 
 import (
 	types "github.com/prysmaticlabs/eth2-types"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/runtime/version"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
 )
 
 // GenesisTime of the beacon state as a uint64.

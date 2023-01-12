@@ -3,7 +3,7 @@ package protoarray
 import (
 	"context"
 
-	"github.com/waterfall-foundation/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 )
 
 // IsOptimistic returns true if this node is optimistically synced

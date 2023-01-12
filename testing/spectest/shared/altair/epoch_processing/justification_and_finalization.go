@@ -5,11 +5,11 @@ import (
 	"path"
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/altair"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/epoch/precompute"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/coordinator/testing/spectest/utils"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/altair"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/epoch/precompute"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/spectest/utils"
 )
 
 // RunJustificationAndFinalizationTests executes "epoch_processing/justification_and_finalization" tests.

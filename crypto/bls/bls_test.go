@@ -3,8 +3,8 @@ package bls
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/crypto/bls/common"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls/common"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 func TestDisallowZeroSecretKeys(t *testing.T) {

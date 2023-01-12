@@ -9,13 +9,13 @@ import (
 	"testing"
 
 	"github.com/bazelbuild/rules_go/go/tools/bazel"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/io/file"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/coordinator/testing/util"
-	history "github.com/waterfall-foundation/coordinator/validator/slashing-protection-history"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/file"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
+	history "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/slashing-protection-history"
 )
 
 type eip3076TestCase struct {

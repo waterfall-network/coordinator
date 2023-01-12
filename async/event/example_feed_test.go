@@ -19,7 +19,7 @@ package event_test
 import (
 	"fmt"
 
-	"github.com/waterfall-foundation/coordinator/async/event"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/async/event"
 )
 
 func ExampleFeed_acknowledgedEvents() {

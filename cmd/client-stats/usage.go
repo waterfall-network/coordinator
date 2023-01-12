@@ -6,8 +6,8 @@ import (
 	"sort"
 
 	"github.com/urfave/cli/v2"
-	"github.com/waterfall-foundation/coordinator/cmd"
-	"github.com/waterfall-foundation/coordinator/cmd/client-stats/flags"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/client-stats/flags"
 )
 
 var appHelpTemplate = `NAME:

@@ -5,7 +5,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
-	"github.com/waterfall-foundation/coordinator/cmd/prysmctl/checkpoint"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/prysmctl/checkpoint"
 )
 
 var prysmctlCommands []*cli.Command

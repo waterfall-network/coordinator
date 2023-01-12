@@ -6,16 +6,16 @@ import (
 
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/altair"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/attestation"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
-	"github.com/waterfall-foundation/coordinator/runtime/version"
-	"github.com/waterfall-foundation/coordinator/time/slots"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/altair"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/attestation"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 )
 
 // canUpdateAttestedValidator returns true if the validator is tracked and if the

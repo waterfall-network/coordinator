@@ -6,7 +6,7 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/waterfall-foundation/coordinator/contracts/deposit"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/contracts/deposit"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/abi"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/abi/bind"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/abi/bind/backends"

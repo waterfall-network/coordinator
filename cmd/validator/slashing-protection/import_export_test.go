@@ -8,15 +8,15 @@ import (
 	"testing"
 
 	"github.com/urfave/cli/v2"
-	"github.com/waterfall-foundation/coordinator/cmd"
-	"github.com/waterfall-foundation/coordinator/cmd/validator/flags"
-	"github.com/waterfall-foundation/coordinator/io/file"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/coordinator/validator/db/kv"
-	dbTest "github.com/waterfall-foundation/coordinator/validator/db/testing"
-	"github.com/waterfall-foundation/coordinator/validator/slashing-protection-history/format"
-	mocks "github.com/waterfall-foundation/coordinator/validator/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/validator/flags"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/file"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/db/kv"
+	dbTest "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/db/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/slashing-protection-history/format"
+	mocks "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/testing"
 )
 
 func setupCliCtx(

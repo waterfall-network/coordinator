@@ -1,8 +1,8 @@
 package node
 
 import (
-	"github.com/waterfall-foundation/coordinator/beacon-chain/blockchain"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/powchain"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain"
 )
 
 // Option for beacon node configuration.

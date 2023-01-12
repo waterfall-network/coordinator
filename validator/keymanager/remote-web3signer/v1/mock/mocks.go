@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"github.com/prysmaticlabs/go-bitfield"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	eth "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	validatorpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/validator-client"
-	v1 "github.com/waterfall-foundation/coordinator/validator/keymanager/remote-web3signer/v1"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	eth "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	validatorpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/validator-client"
+	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager/remote-web3signer/v1"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 )
 

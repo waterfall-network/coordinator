@@ -2,7 +2,7 @@ package stategen
 
 import (
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 )
 
 var ErrNotInCache = errors.New("state not found in cache")

@@ -4,10 +4,10 @@ import (
 	"encoding/binary"
 
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	"github.com/waterfall-foundation/coordinator/encoding/ssz"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 // PendingAttRootWithHasher describes a method from which the hash tree root

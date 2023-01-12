@@ -8,9 +8,9 @@ import (
 
 	fssz "github.com/ferranbt/fastssz"
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/encoding/ssz"
-	pb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz"
+	pb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 func FuzzUint64Root(f *testing.F) {

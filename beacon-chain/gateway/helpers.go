@@ -2,10 +2,10 @@ package gateway
 
 import (
 	gwruntime "github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"github.com/waterfall-foundation/coordinator/api/gateway"
-	"github.com/waterfall-foundation/coordinator/cmd/beacon-chain/flags"
-	ethpbservice "github.com/waterfall-foundation/coordinator/proto/eth/service"
-	ethpbalpha "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/api/gateway"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/beacon-chain/flags"
+	ethpbservice "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/service"
+	ethpbalpha "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 

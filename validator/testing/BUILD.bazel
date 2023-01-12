@@ -9,7 +9,7 @@ go_library(
         "mock_slasher.go",
         "protection_history.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/validator/testing",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/testing",
     visibility = [
         "//cmd:__subpackages__",
         "//validator:__subpackages__",

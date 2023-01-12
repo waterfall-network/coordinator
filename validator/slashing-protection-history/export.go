@@ -8,12 +8,12 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	"github.com/waterfall-foundation/coordinator/monitoring/progress"
-	"github.com/waterfall-foundation/coordinator/validator/db"
-	"github.com/waterfall-foundation/coordinator/validator/slashing-protection-history/format"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/progress"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/db"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/slashing-protection-history/format"
 )
 
 // ExportStandardProtectionJSON extracts all slashing protection data from a validator database

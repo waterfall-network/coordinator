@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/cache"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/crypto/hash"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 )
 
 // SkipSlotCache exists for the unlikely scenario that is a large gap between the head state and

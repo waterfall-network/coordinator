@@ -5,9 +5,9 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/network"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/network"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 func TestExternalIPv4(t *testing.T) {

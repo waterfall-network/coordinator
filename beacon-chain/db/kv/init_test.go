@@ -1,7 +1,7 @@
 package kv
 
 import (
-	"github.com/waterfall-foundation/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 )
 
 func init() {

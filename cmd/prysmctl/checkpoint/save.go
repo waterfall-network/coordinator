@@ -7,7 +7,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
-	"github.com/waterfall-foundation/coordinator/api/client/beacon"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/api/client/beacon"
 )
 
 var saveFlags = struct {

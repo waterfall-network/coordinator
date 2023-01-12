@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/crypto/hash"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 func TestStore_GraffitiOrderedIndex_ReadAndWrite(t *testing.T) {

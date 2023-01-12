@@ -9,7 +9,7 @@ go_library(
         "service.go",
         "types.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/beacon-chain/operations/slashings",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/slashings",
     visibility = [
         "//beacon-chain:__subpackages__",
         "//testing/endtoend:__subpackages__",

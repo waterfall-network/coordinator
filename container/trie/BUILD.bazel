@@ -6,7 +6,7 @@ go_library(
         "sparse_merkle.go",
         "zerohashes.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/container/trie",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/container/trie",
     visibility = ["//visibility:public"],
     deps = [
         "//crypto/hash:go_default_library",

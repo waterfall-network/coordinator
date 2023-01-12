@@ -3,7 +3,7 @@ package metadata
 import (
 	ssz "github.com/ferranbt/fastssz"
 	"github.com/prysmaticlabs/go-bitfield"
-	pb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	pb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 // Metadata returns the interface of a p2p metadata type.

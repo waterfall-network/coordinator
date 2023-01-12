@@ -6,12 +6,12 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/config/params"
-	ev "github.com/waterfall-foundation/coordinator/testing/endtoend/evaluators"
-	"github.com/waterfall-foundation/coordinator/testing/endtoend/helpers"
-	e2eParams "github.com/waterfall-foundation/coordinator/testing/endtoend/params"
-	"github.com/waterfall-foundation/coordinator/testing/endtoend/types"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	ev "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/evaluators"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/helpers"
+	e2eParams "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 func TestEndToEnd_MainnetConfig(t *testing.T) {

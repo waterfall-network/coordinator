@@ -6,7 +6,7 @@ package types
 import (
 	ssz "github.com/ferranbt/fastssz"
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 )
 
 const rootLength = 32

@@ -8,8 +8,8 @@ import (
 
 	"github.com/ghodss/yaml"
 	blst "github.com/supranational/blst/bindings/go"
-	"github.com/waterfall-foundation/coordinator/testing/bls/utils"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/bls/utils"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 func TestHashToG2(t *testing.T) {

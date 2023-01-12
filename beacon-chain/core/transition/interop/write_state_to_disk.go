@@ -5,9 +5,9 @@ import (
 	"os"
 	"path"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/config/features"
-	"github.com/waterfall-foundation/coordinator/io/file"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/file"
 )
 
 // WriteStateToDisk as a state ssz. Writes to temp directory. Debug!

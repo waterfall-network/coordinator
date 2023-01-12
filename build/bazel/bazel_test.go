@@ -3,7 +3,7 @@ package bazel_test
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/build/bazel"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/build/bazel"
 )
 
 func TestBuildWithBazel(t *testing.T) {

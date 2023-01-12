@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 func TestDeterministicGenesisStateBellatrix(t *testing.T) {

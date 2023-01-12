@@ -9,13 +9,13 @@ import (
 	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p-core/peer"
 	ma "github.com/multiformats/go-multiaddr"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/peers"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/peers/peerdata"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/peers/scorers"
-	mockp2p "github.com/waterfall-foundation/coordinator/beacon-chain/p2p/testing"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/eth/v1"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers/peerdata"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers/scorers"
+	mockp2p "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/testing"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 func TestPeer_AtMaxLimit(t *testing.T) {

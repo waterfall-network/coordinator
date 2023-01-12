@@ -5,7 +5,7 @@ import (
 	"math/big"
 	"time"
 
-	e2etypes "github.com/waterfall-foundation/coordinator/testing/endtoend/types"
+	e2etypes "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/types"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/keystore"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/ethclient"

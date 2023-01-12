@@ -3,9 +3,9 @@ package db
 import (
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
-	"github.com/waterfall-foundation/coordinator/cmd"
-	"github.com/waterfall-foundation/coordinator/runtime/tos"
-	validatordb "github.com/waterfall-foundation/coordinator/validator/db"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/tos"
+	validatordb "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/db"
 )
 
 var log = logrus.WithField("prefix", "db")

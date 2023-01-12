@@ -6,15 +6,15 @@ import (
 	"testing"
 
 	"github.com/tyler-smith/go-bip39"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/crypto/bls"
-	"github.com/waterfall-foundation/coordinator/crypto/rand"
-	validatorpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/validator-client"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	mock "github.com/waterfall-foundation/coordinator/validator/accounts/testing"
-	constant "github.com/waterfall-foundation/coordinator/validator/testing"
 	util "github.com/wealdtech/go-eth2-util"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/rand"
+	validatorpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/validator-client"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	mock "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/accounts/testing"
+	constant "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/testing"
 )
 
 const (

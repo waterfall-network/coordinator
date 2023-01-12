@@ -4,11 +4,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state/genesis"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/coordinator/testing/util"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/genesis"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
 )
 
 func TestSaveOrigin(t *testing.T) {

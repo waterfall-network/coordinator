@@ -17,11 +17,11 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	eth "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	e2e "github.com/waterfall-foundation/coordinator/testing/endtoend/params"
-	e2etypes "github.com/waterfall-foundation/coordinator/testing/endtoend/types"
-	"github.com/waterfall-foundation/coordinator/time/slots"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	eth "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	e2e "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/params"
+	e2etypes "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 )

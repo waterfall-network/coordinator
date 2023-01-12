@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
-	butil "github.com/waterfall-foundation/coordinator/encoding/bytesutil"
 	"github.com/wealdtech/go-bytesutil"
+	butil "gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 )
 
 // HandleURLParameters processes URL parameters, allowing parameterized URLs to be safely and correctly proxied to grpc-gateway.

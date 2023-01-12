@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"path"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/io/file"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/file"
 	bolt "go.etcd.io/bbolt"
 	"go.opencensus.io/trace"
 )

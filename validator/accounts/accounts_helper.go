@@ -7,8 +7,8 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/crypto/bls"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
 )
 
 func filterPublicKeysFromUserInput(

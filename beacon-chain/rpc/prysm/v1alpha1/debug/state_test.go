@@ -6,16 +6,16 @@ import (
 	"testing"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	mock "github.com/waterfall-foundation/coordinator/beacon-chain/blockchain/testing"
-	dbTest "github.com/waterfall-foundation/coordinator/beacon-chain/db/testing"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stategen"
-	mockstategen "github.com/waterfall-foundation/coordinator/beacon-chain/state/stategen/mock"
-	pbrpc "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/coordinator/testing/util"
+	mock "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain/testing"
+	dbTest "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen"
+	mockstategen "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen/mock"
+	pbrpc "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
 )
 
 func addDefaultReplayerBuilder(s *Server, h stategen.HistoryAccessor) {

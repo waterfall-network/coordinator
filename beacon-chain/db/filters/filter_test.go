@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 )
 
 func TestQueryFilter_ChainsCorrectly(t *testing.T) {

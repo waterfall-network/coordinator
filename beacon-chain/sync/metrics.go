@@ -7,12 +7,12 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/cache"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p"
-	"github.com/waterfall-foundation/coordinator/cmd/beacon-chain/flags"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	pb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/time/slots"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/beacon-chain/flags"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	pb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 )
 
 var (

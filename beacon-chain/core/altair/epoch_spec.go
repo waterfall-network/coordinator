@@ -4,20 +4,21 @@ import (
 	"context"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/time"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 )
 
 // ProcessSyncCommitteeUpdates  processes sync client committee updates for the beacon state.
 //
 // Spec code:
 // def process_sync_committee_updates(state: BeaconState) -> None:
-//    next_epoch = get_current_epoch(state) + Epoch(1)
-//    if next_epoch % EPOCHS_PER_SYNC_COMMITTEE_PERIOD == 0:
-//        state.current_sync_committee = state.next_sync_committee
-//        state.next_sync_committee = get_next_sync_committee(state)
+//
+//	next_epoch = get_current_epoch(state) + Epoch(1)
+//	if next_epoch % EPOCHS_PER_SYNC_COMMITTEE_PERIOD == 0:
+//	    state.current_sync_committee = state.next_sync_committee
+//	    state.next_sync_committee = get_next_sync_committee(state)
 func ProcessSyncCommitteeUpdates(ctx context.Context, beaconState state.BeaconStateAltair) (state.BeaconStateAltair, error) {
 	nextEpoch := time.NextEpoch(beaconState)
 	if nextEpoch%params.BeaconConfig().EpochsPerSyncCommitteePeriod == 0 {
@@ -46,8 +47,9 @@ func ProcessSyncCommitteeUpdates(ctx context.Context, beaconState state.BeaconSt
 //
 // Spec code:
 // def process_participation_flag_updates(state: BeaconState) -> None:
-//    state.previous_epoch_participation = state.current_epoch_participation
-//    state.current_epoch_participation = [ParticipationFlags(0b0000_0000) for _ in range(len(state.validators))]
+//
+//	state.previous_epoch_participation = state.current_epoch_participation
+//	state.current_epoch_participation = [ParticipationFlags(0b0000_0000) for _ in range(len(state.validators))]
 func ProcessParticipationFlagUpdates(beaconState state.BeaconStateAltair) (state.BeaconStateAltair, error) {
 	c, err := beaconState.CurrentEpochParticipation()
 	if err != nil {

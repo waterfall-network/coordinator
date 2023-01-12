@@ -4,13 +4,13 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
-	coreHelper "github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	wrapperv2 "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
-	"github.com/waterfall-foundation/coordinator/testing/endtoend/helpers"
-	"github.com/waterfall-foundation/coordinator/testing/endtoend/policies"
-	"github.com/waterfall-foundation/coordinator/testing/endtoend/types"
-	"github.com/waterfall-foundation/coordinator/time/slots"
+	coreHelper "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	wrapperv2 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/helpers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/policies"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	"google.golang.org/grpc"
 )
 

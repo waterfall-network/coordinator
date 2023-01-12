@@ -7,10 +7,10 @@ import (
 	"testing"
 
 	"github.com/pborman/uuid"
-	"github.com/waterfall-foundation/coordinator/crypto/bls"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 func TestStoreAndGetKey(t *testing.T) {

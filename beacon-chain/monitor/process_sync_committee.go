@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
 )
 
 // processSyncCommitteeContribution logs the event when tracked validators' aggregated sync contribution has been processed.

@@ -8,16 +8,16 @@ import (
 
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/go-bitfield"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/time"
-	v1 "github.com/waterfall-foundation/coordinator/beacon-chain/state/v1"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/container/slice"
-	"github.com/waterfall-foundation/coordinator/crypto/hash"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/coordinator/time/slots"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
+	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/container/slice"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 )
 
 func TestComputeCommittee_WithoutCache(t *testing.T) {

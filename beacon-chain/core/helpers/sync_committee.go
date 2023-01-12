@@ -8,12 +8,12 @@ import (
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	log "github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/cache"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/time"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	"github.com/waterfall-foundation/coordinator/time/slots"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 )
 
 var (

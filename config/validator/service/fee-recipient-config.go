@@ -1,7 +1,7 @@
 package validator_service_config
 
 import (
-	field_params "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	field_params "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 

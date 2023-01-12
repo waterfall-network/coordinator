@@ -21,12 +21,12 @@ import (
 	"path"
 
 	"github.com/tyler-smith/go-bip39"
-	"github.com/waterfall-foundation/coordinator/io/file"
-	"github.com/waterfall-foundation/coordinator/validator/accounts/wallet"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager/derived"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager/local"
 	util "github.com/wealdtech/go-eth2-util"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/file"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/accounts/wallet"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager/derived"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager/local"
 )
 
 var (

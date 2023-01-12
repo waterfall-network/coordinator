@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"k8s.io/client-go/tools/cache"
 )
 

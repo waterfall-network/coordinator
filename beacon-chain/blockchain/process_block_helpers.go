@@ -7,15 +7,15 @@ import (
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	mathutil "github.com/waterfall-foundation/coordinator/math"
-	"github.com/waterfall-foundation/coordinator/monitoring/tracing"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
-	"github.com/waterfall-foundation/coordinator/time/slots"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	mathutil "gitlab.waterfall.network/waterfall/protocol/coordinator/math"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/tracing"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	"go.opencensus.io/trace"
 )
 
@@ -146,21 +146,22 @@ func (s *Service) verifyBlkFinalizedSlot(b block.BeaconBlock) error {
 //
 // Spec code:
 // def should_update_justified_checkpoint(store: Store, new_justified_checkpoint: Checkpoint) -> bool:
-//    """
-//    To address the bouncing attack, only update conflicting justified
-//    checkpoints in the fork choice if in the early slots of the epoch.
-//    Otherwise, delay incorporation of new justified checkpoint until next epoch boundary.
 //
-//    See https://ethresear.ch/t/prevention-of-bouncing-attack-on-ffg/6114 for more detailed analysis and discussion.
-//    """
-//    if compute_slots_since_epoch_start(get_current_slot(store)) < SAFE_SLOTS_TO_UPDATE_JUSTIFIED:
-//        return True
+//	"""
+//	To address the bouncing attack, only update conflicting justified
+//	checkpoints in the fork choice if in the early slots of the epoch.
+//	Otherwise, delay incorporation of new justified checkpoint until next epoch boundary.
 //
-//    justified_slot = compute_start_slot_at_epoch(store.justified_checkpoint.epoch)
-//    if not get_ancestor(store, new_justified_checkpoint.root, justified_slot) == store.justified_checkpoint.root:
-//        return False
+//	See https://ethresear.ch/t/prevention-of-bouncing-attack-on-ffg/6114 for more detailed analysis and discussion.
+//	"""
+//	if compute_slots_since_epoch_start(get_current_slot(store)) < SAFE_SLOTS_TO_UPDATE_JUSTIFIED:
+//	    return True
 //
-//    return True
+//	justified_slot = compute_start_slot_at_epoch(store.justified_checkpoint.epoch)
+//	if not get_ancestor(store, new_justified_checkpoint.root, justified_slot) == store.justified_checkpoint.root:
+//	    return False
+//
+//	return True
 func (s *Service) shouldUpdateCurrentJustified(ctx context.Context, newJustifiedCheckpt *ethpb.Checkpoint) (bool, error) {
 	ctx, span := trace.StartSpan(ctx, "blockChain.shouldUpdateCurrentJustified")
 	defer span.End()
@@ -267,15 +268,16 @@ func (s *Service) updateFinalized(ctx context.Context, cp *ethpb.Checkpoint) err
 // ancestor returns the block root of an ancestry block from the input block root.
 //
 // Spec pseudocode definition:
-//   def get_ancestor(store: Store, root: Root, slot: Slot) -> Root:
-//    block = store.blocks[root]
-//    if block.slot > slot:
-//        return get_ancestor(store, block.parent_root, slot)
-//    elif block.slot == slot:
-//        return root
-//    else:
-//        # root is older than queried slot, thus a skip slot. Return most recent root prior to slot
-//        return root
+//
+//	def get_ancestor(store: Store, root: Root, slot: Slot) -> Root:
+//	 block = store.blocks[root]
+//	 if block.slot > slot:
+//	     return get_ancestor(store, block.parent_root, slot)
+//	 elif block.slot == slot:
+//	     return root
+//	 else:
+//	     # root is older than queried slot, thus a skip slot. Return most recent root prior to slot
+//	     return root
 func (s *Service) ancestor(ctx context.Context, root []byte, slot types.Slot) ([]byte, error) {
 	ctx, span := trace.StartSpan(ctx, "blockChain.ancestor")
 	defer span.End()

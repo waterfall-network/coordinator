@@ -11,11 +11,11 @@ import (
 	"time"
 
 	"github.com/r3labs/sse"
-	"github.com/waterfall-foundation/coordinator/api/gateway/apimiddleware"
-	"github.com/waterfall-foundation/coordinator/api/grpc"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/rpc/eth/events"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/api/gateway/apimiddleware"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/api/grpc"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc/eth/events"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 type testSSZResponseJson struct {

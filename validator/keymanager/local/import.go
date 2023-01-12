@@ -10,10 +10,10 @@ import (
 	"github.com/k0kubun/go-ansi"
 	"github.com/pkg/errors"
 	"github.com/schollz/progressbar/v3"
-	"github.com/waterfall-foundation/coordinator/crypto/bls"
-	ethpbservice "github.com/waterfall-foundation/coordinator/proto/eth/service"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager"
 	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
+	ethpbservice "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/service"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager"
 )
 
 // ImportKeystores into the local keymanager from an external source.

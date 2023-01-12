@@ -6,7 +6,7 @@ go_library(
         "doc.go",
         "interfaces.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/beacon-chain/forkchoice",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/forkchoice",
     visibility = [
         "//beacon-chain:__subpackages__",
         "//testing/spectest:__subpackages__",

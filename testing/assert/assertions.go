@@ -2,7 +2,7 @@ package assert
 
 import (
 	"github.com/sirupsen/logrus/hooks/test"
-	"github.com/waterfall-foundation/coordinator/testing/assertions"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assertions"
 )
 
 // Equal compares values using comparison operator.

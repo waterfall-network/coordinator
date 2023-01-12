@@ -15,7 +15,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/runtime"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime"
 )
 
 var log = logrus.WithField("prefix", "prometheus")

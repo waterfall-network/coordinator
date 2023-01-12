@@ -7,8 +7,8 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/powchain/types"
-	"github.com/waterfall-foundation/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain/types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	gethTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
 	"k8s.io/client-go/tools/cache"

@@ -3,9 +3,9 @@ package gateway
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/api/gateway"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/api/gateway"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 func TestDefaultConfig(t *testing.T) {

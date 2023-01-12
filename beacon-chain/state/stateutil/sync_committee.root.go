@@ -1,11 +1,11 @@
 package stateutil
 
 import (
-	"github.com/waterfall-foundation/coordinator/config/features"
-	"github.com/waterfall-foundation/coordinator/crypto/hash"
-	"github.com/waterfall-foundation/coordinator/crypto/hash/htr"
-	"github.com/waterfall-foundation/coordinator/encoding/ssz"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash/htr"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 // SyncCommitteeRoot computes the HashTreeRoot Merkleization of a commitee root.

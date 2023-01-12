@@ -3,9 +3,9 @@ package helpers
 import (
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/eth/v1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
 )
 
 // ValidatorStatus returns a validator's status at the given epoch.

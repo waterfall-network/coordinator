@@ -7,30 +7,30 @@ import (
 	fastssz "github.com/ferranbt/fastssz"
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/blocks"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/crypto/hash"
-	"github.com/waterfall-foundation/coordinator/crypto/rand"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/time/slots"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/rand"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 // eth1DataMajorityVote determines the appropriate eth1data for a block proposal using
 // an algorithm called Voting with the Majority. The algorithm works as follows:
-//  - Determine the timestamp for the start slot for the eth1 voting period.
-//  - Determine the earliest and latest timestamps that a valid block can have.
-//  - Determine the first block not before the earliest timestamp. This block is the lower bound.
-//  - Determine the last block not after the latest timestamp. This block is the upper bound.
-//  - If the last block is too early, use current eth1data from the beacon state.
-//  - Filter out votes on unknown blocks and blocks which are outside of the range determined by the lower and upper bounds.
-//  - If no blocks are left after filtering votes, use eth1data from the latest valid block.
-//  - Otherwise:
-//    - Determine the vote with the highest count. Prefer the vote with the highest eth1 block height in the event of a tie.
-//    - This vote's block is the eth1 block to use for the block proposal.
+//   - Determine the timestamp for the start slot for the eth1 voting period.
+//   - Determine the earliest and latest timestamps that a valid block can have.
+//   - Determine the first block not before the earliest timestamp. This block is the lower bound.
+//   - Determine the last block not after the latest timestamp. This block is the upper bound.
+//   - If the last block is too early, use current eth1data from the beacon state.
+//   - Filter out votes on unknown blocks and blocks which are outside of the range determined by the lower and upper bounds.
+//   - If no blocks are left after filtering votes, use eth1data from the latest valid block.
+//   - Otherwise:
+//   - Determine the vote with the highest count. Prefer the vote with the highest eth1 block height in the event of a tie.
+//   - This vote's block is the eth1 block to use for the block proposal.
 func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.BeaconState) (*ethpb.Eth1Data, error) {
 	ctx, cancel := context.WithTimeout(ctx, eth1dataTimeout)
 	defer cancel()

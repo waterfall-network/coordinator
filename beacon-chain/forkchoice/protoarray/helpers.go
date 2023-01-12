@@ -3,8 +3,8 @@ package protoarray
 import (
 	"context"
 
-	"github.com/waterfall-foundation/coordinator/config/params"
-	pmath "github.com/waterfall-foundation/coordinator/math"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	pmath "gitlab.waterfall.network/waterfall/protocol/coordinator/math"
 	"go.opencensus.io/trace"
 )
 

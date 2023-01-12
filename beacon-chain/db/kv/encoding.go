@@ -7,7 +7,7 @@ import (
 
 	fastssz "github.com/ferranbt/fastssz"
 	"github.com/golang/snappy"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"go.opencensus.io/trace"
 	"google.golang.org/protobuf/proto"
 )

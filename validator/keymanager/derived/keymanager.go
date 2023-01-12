@@ -6,15 +6,15 @@ import (
 
 	"github.com/logrusorgru/aurora"
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/async/event"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/crypto/bls"
-	ethpbservice "github.com/waterfall-foundation/coordinator/proto/eth/service"
-	validatorpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/validator-client"
-	"github.com/waterfall-foundation/coordinator/validator/accounts/iface"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager/local"
 	util "github.com/wealdtech/go-eth2-util"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/async/event"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
+	ethpbservice "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/service"
+	validatorpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/validator-client"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/accounts/iface"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager/local"
 )
 
 const (

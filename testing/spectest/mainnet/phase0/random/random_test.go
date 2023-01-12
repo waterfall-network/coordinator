@@ -3,8 +3,8 @@ package random
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/config/features"
-	"github.com/waterfall-foundation/coordinator/testing/spectest/shared/phase0/sanity"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/spectest/shared/phase0/sanity"
 )
 
 func TestMain(m *testing.M) {

@@ -5,45 +5,46 @@ import (
 	"errors"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/signing"
-	p2pType "github.com/waterfall-foundation/coordinator/beacon-chain/p2p/types"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/crypto/bls"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/time/slots"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/signing"
+	p2pType "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 )
 
 // ProcessSyncAggregate verifies sync committee aggregate signature signing over the previous slot block root.
 //
 // Spec code:
 // def process_sync_aggregate(state: BeaconState, sync_aggregate: SyncAggregate) -> None:
-//    # Verify sync committee aggregate signature signing over the previous slot block root
-//    committee_pubkeys = state.current_sync_committee.pubkeys
-//    participant_pubkeys = [pubkey for pubkey, bit in zip(committee_pubkeys, sync_aggregate.sync_committee_bits) if bit]
-//    previous_slot = max(state.slot, Slot(1)) - Slot(1)
-//    domain = get_domain(state, DOMAIN_SYNC_COMMITTEE, compute_epoch_at_slot(previous_slot))
-//    signing_root = compute_signing_root(get_block_root_at_slot(state, previous_slot), domain)
-//    assert eth2_fast_aggregate_verify(participant_pubkeys, signing_root, sync_aggregate.sync_committee_signature)
 //
-//    # Compute participant and proposer rewards
-//    total_active_increments = get_total_active_balance(state) // EFFECTIVE_BALANCE_INCREMENT
-//    total_base_rewards = Gwei(get_base_reward_per_increment(state) * total_active_increments)
-//    max_participant_rewards = Gwei(total_base_rewards * SYNC_REWARD_WEIGHT // WEIGHT_DENOMINATOR // SLOTS_PER_EPOCH)
-//    participant_reward = Gwei(max_participant_rewards // SYNC_COMMITTEE_SIZE)
-//    proposer_reward = Gwei(participant_reward * PROPOSER_WEIGHT // (WEIGHT_DENOMINATOR - PROPOSER_WEIGHT))
+//	# Verify sync committee aggregate signature signing over the previous slot block root
+//	committee_pubkeys = state.current_sync_committee.pubkeys
+//	participant_pubkeys = [pubkey for pubkey, bit in zip(committee_pubkeys, sync_aggregate.sync_committee_bits) if bit]
+//	previous_slot = max(state.slot, Slot(1)) - Slot(1)
+//	domain = get_domain(state, DOMAIN_SYNC_COMMITTEE, compute_epoch_at_slot(previous_slot))
+//	signing_root = compute_signing_root(get_block_root_at_slot(state, previous_slot), domain)
+//	assert eth2_fast_aggregate_verify(participant_pubkeys, signing_root, sync_aggregate.sync_committee_signature)
 //
-//    # Apply participant and proposer rewards
-//    all_pubkeys = [v.pubkey for v in state.validators]
-//    committee_indices = [ValidatorIndex(all_pubkeys.index(pubkey)) for pubkey in state.current_sync_committee.pubkeys]
-//    for participant_index, participation_bit in zip(committee_indices, sync_aggregate.sync_committee_bits):
-//        if participation_bit:
-//            increase_balance(state, participant_index, participant_reward)
-//            increase_balance(state, get_beacon_proposer_index(state), proposer_reward)
-//        else:
-//            decrease_balance(state, participant_index, participant_reward)
+//	# Compute participant and proposer rewards
+//	total_active_increments = get_total_active_balance(state) // EFFECTIVE_BALANCE_INCREMENT
+//	total_base_rewards = Gwei(get_base_reward_per_increment(state) * total_active_increments)
+//	max_participant_rewards = Gwei(total_base_rewards * SYNC_REWARD_WEIGHT // WEIGHT_DENOMINATOR // SLOTS_PER_EPOCH)
+//	participant_reward = Gwei(max_participant_rewards // SYNC_COMMITTEE_SIZE)
+//	proposer_reward = Gwei(participant_reward * PROPOSER_WEIGHT // (WEIGHT_DENOMINATOR - PROPOSER_WEIGHT))
+//
+//	# Apply participant and proposer rewards
+//	all_pubkeys = [v.pubkey for v in state.validators]
+//	committee_indices = [ValidatorIndex(all_pubkeys.index(pubkey)) for pubkey in state.current_sync_committee.pubkeys]
+//	for participant_index, participation_bit in zip(committee_indices, sync_aggregate.sync_committee_bits):
+//	    if participation_bit:
+//	        increase_balance(state, participant_index, participant_reward)
+//	        increase_balance(state, get_beacon_proposer_index(state), proposer_reward)
+//	    else:
+//	        decrease_balance(state, participant_index, participant_reward)
 func ProcessSyncAggregate(ctx context.Context, s state.BeaconStateAltair, sync *ethpb.SyncAggregate) (state.BeaconStateAltair, error) {
 	votedKeys, votedIndices, didntVoteIndices, err := FilterSyncCommitteeVotes(s, sync)
 	if err != nil {

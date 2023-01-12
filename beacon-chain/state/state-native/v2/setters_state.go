@@ -2,9 +2,9 @@ package v2
 
 import (
 	"github.com/pkg/errors"
-	customtypes "github.com/waterfall-foundation/coordinator/beacon-chain/state/state-native/custom-types"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stateutil"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	customtypes "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/state-native/custom-types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stateutil"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 )
 
 // SetStateRoots for the beacon state. Updates the state roots

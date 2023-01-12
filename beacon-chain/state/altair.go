@@ -1,6 +1,6 @@
 package state
 
-import ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+import ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 
 // BeaconStateAltair has read and write access to beacon state methods.
 type BeaconStateAltair interface {

@@ -3,7 +3,7 @@ load("@prysm//tools/go:def.bzl", "go_library", "go_test")
 go_library(
     name = "go_default_library",
     srcs = ["bytes.go"],
-    importpath = "github.com/waterfall-foundation/coordinator/encoding/bytesutil",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil",
     visibility = ["//visibility:public"],
     deps = [
         "//config/fieldparams:go_default_library",

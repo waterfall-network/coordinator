@@ -2,11 +2,11 @@ package migration
 
 import (
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	ethpbv1 "github.com/waterfall-foundation/coordinator/proto/eth/v1"
-	ethpbv2 "github.com/waterfall-foundation/coordinator/proto/eth/v2"
-	ethpbalpha "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	ethpbv1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
+	ethpbv2 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v2"
+	ethpbalpha "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"google.golang.org/protobuf/proto"
 )
 

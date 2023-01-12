@@ -5,14 +5,14 @@ import (
 	"testing"
 
 	"github.com/prysmaticlabs/go-bitfield"
-	mock "github.com/waterfall-foundation/coordinator/beacon-chain/blockchain/testing"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/operations/attestations"
-	lruwrpr "github.com/waterfall-foundation/coordinator/cache/lru"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/coordinator/testing/util"
+	mock "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/attestations"
+	lruwrpr "gitlab.waterfall.network/waterfall/protocol/coordinator/cache/lru"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
 )
 
 func TestBeaconAggregateProofSubscriber_CanSaveAggregatedAttestation(t *testing.T) {

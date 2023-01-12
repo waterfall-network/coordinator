@@ -6,10 +6,10 @@ import (
 
 	"github.com/libp2p/go-libp2p-core/peer"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/peers/peerdata"
-	p2ptypes "github.com/waterfall-foundation/coordinator/beacon-chain/p2p/types"
-	pb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/time"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers/peerdata"
+	p2ptypes "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/types"
+	pb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time"
 )
 
 var _ Scorer = (*PeerStatusScorer)(nil)

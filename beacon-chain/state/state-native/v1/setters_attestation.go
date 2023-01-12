@@ -3,9 +3,9 @@ package v1
 import (
 	"fmt"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stateutil"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stateutil"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 // RotateAttestations sets the previous epoch attestations to the current epoch attestations and

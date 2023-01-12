@@ -1,5 +1,5 @@
 package db
 
-import "github.com/waterfall-foundation/coordinator/beacon-chain/db/kv"
+import "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/kv"
 
 var _ Database = (*kv.Store)(nil)

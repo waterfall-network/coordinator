@@ -6,7 +6,7 @@ go_library(
         "log.go",
         "wallet.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/validator/accounts/wallet",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/accounts/wallet",
     visibility = [
         "//tools:__subpackages__",
         "//validator:__subpackages__",

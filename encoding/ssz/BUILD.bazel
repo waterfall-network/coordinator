@@ -8,7 +8,7 @@ go_library(
         "htrutils.go",
         "merkleize.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/encoding/ssz",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz",
     visibility = ["//visibility:public"],
     deps = [
         "//config/features:go_default_library",

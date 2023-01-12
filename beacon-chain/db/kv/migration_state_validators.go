@@ -7,9 +7,9 @@ import (
 
 	"github.com/golang/snappy"
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/config/features"
-	"github.com/waterfall-foundation/coordinator/monitoring/progress"
-	v1alpha1 "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/progress"
+	v1alpha1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 	bolt "go.etcd.io/bbolt"
 )

@@ -19,7 +19,7 @@ for ((i = 0; i < ${#mocks[@]}; i++)); do
     file=${mocks[i]% *};
     interfaces=${mocks[i]#* };
     echo "generating $file for interfaces: $interfaces";
-    GO11MODULE=on mockgen -package=mock -destination="$file" github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1 "$interfaces"
+    GO11MODULE=on mockgen -package=mock -destination="$file" gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1 "$interfaces"
 done
 
 goimports -w "$mock_path/."

@@ -10,7 +10,7 @@ import (
 
 	"github.com/d4l3k/messagediff"
 	"github.com/sirupsen/logrus/hooks/test"
-	"github.com/waterfall-foundation/coordinator/encoding/ssz/equality"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz/equality"
 	"google.golang.org/protobuf/proto"
 )
 

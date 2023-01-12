@@ -7,7 +7,7 @@ go_library(
         "sync.go",
         "validator_status.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/beacon-chain/rpc/eth/helpers",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc/eth/helpers",
     visibility = ["//beacon-chain/rpc/eth:__subpackages__"],
     deps = [
         "//api/grpc:go_default_library",

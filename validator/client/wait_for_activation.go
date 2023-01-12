@@ -6,14 +6,14 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	"github.com/waterfall-foundation/coordinator/math"
-	"github.com/waterfall-foundation/coordinator/monitoring/tracing"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/time/slots"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager/remote"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/math"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/tracing"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager/remote"
 	"go.opencensus.io/trace"
 )
 

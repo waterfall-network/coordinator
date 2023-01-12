@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/network/forks"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/eth/v1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/network/forks"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc/codes"

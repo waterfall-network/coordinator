@@ -9,10 +9,10 @@ import (
 	"fmt"
 
 	blst "github.com/supranational/blst/bindings/go"
-	"github.com/waterfall-foundation/coordinator/config/features"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/crypto/bls/common"
-	"github.com/waterfall-foundation/coordinator/crypto/rand"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls/common"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/rand"
 )
 
 // bls12SecretKey used in the BLS signature scheme.
@@ -70,7 +70,8 @@ func IsZero(sKey []byte) bool {
 //
 // In IETF draft BLS specification:
 // Sign(SK, message) -> signature: a signing algorithm that generates
-//      a deterministic signature given a secret key SK and a message.
+//
+//	a deterministic signature given a secret key SK and a message.
 //
 // In Ethereum proof of stake specification:
 // def Sign(SK: int, message: Bytes) -> BLSSignature

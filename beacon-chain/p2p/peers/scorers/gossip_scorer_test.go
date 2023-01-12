@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/peers"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/peers/scorers"
-	pbrpc "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers/scorers"
+	pbrpc "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 )
 
 func TestScorers_Gossip_Score(t *testing.T) {

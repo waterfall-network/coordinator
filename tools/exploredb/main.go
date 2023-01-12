@@ -21,11 +21,11 @@ import (
 	types "github.com/prysmaticlabs/eth2-types"
 	log "github.com/sirupsen/logrus"
 	"github.com/status-im/keycard-go/hexutils"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/db/kv"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/kv"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	bolt "go.etcd.io/bbolt"
 )
 

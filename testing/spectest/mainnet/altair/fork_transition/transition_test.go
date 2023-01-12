@@ -3,7 +3,7 @@ package fork_transition
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/testing/spectest/shared/altair/fork"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/spectest/shared/altair/fork"
 )
 
 func TestMainnet_Altair_Transition(t *testing.T) {

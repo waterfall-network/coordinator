@@ -4,10 +4,10 @@ import (
 	_ "embed"
 	"fmt"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	v1 "github.com/waterfall-foundation/coordinator/beacon-chain/state/v1"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 var (

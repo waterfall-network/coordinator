@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 )
 
 type fieldType int

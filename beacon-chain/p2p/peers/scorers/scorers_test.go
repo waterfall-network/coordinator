@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/peers/scorers"
-	"github.com/waterfall-foundation/coordinator/cmd/beacon-chain/flags"
-	"github.com/waterfall-foundation/coordinator/config/features"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers/scorers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/beacon-chain/flags"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 )
 
 func TestMain(m *testing.M) {

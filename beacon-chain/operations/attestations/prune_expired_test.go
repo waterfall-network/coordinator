@@ -6,14 +6,14 @@ import (
 	"time"
 
 	"github.com/prysmaticlabs/go-bitfield"
-	"github.com/waterfall-foundation/coordinator/async"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/coordinator/testing/util"
-	prysmTime "github.com/waterfall-foundation/coordinator/time"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/async"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
+	prysmTime "gitlab.waterfall.network/waterfall/protocol/coordinator/time"
 )
 
 func TestPruneExpired_Ticker(t *testing.T) {

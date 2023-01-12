@@ -6,12 +6,12 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
-	"github.com/waterfall-foundation/coordinator/cmd"
-	"github.com/waterfall-foundation/coordinator/cmd/validator/flags"
-	"github.com/waterfall-foundation/coordinator/io/file"
-	"github.com/waterfall-foundation/coordinator/validator/accounts/userprompt"
-	"github.com/waterfall-foundation/coordinator/validator/db/kv"
-	slashingprotection "github.com/waterfall-foundation/coordinator/validator/slashing-protection-history"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/validator/flags"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/file"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/accounts/userprompt"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/db/kv"
+	slashingprotection "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/slashing-protection-history"
 )
 
 // Reads an input slashing protection EIP-3076

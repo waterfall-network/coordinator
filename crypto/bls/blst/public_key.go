@@ -8,11 +8,11 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
-	lruwrpr "github.com/waterfall-foundation/coordinator/cache/lru"
-	"github.com/waterfall-foundation/coordinator/config/features"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/crypto/bls/common"
+	lruwrpr "gitlab.waterfall.network/waterfall/protocol/coordinator/cache/lru"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls/common"
 )
 
 var maxKeys = 1000000

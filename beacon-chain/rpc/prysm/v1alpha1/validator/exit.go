@@ -3,11 +3,11 @@ package validator
 import (
 	"context"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/blocks"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/feed"
-	opfeed "github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/operation"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed"
+	opfeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/operation"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

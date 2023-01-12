@@ -2,8 +2,8 @@ package stateutil
 
 import (
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/crypto/hash"
-	"github.com/waterfall-foundation/coordinator/encoding/ssz"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz"
 )
 
 func arraysRoot(input [][]byte, length uint64) ([32]byte, error) {

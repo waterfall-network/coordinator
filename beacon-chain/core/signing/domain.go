@@ -3,20 +3,21 @@ package signing
 import (
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/waterfall-foundation/coordinator/crypto/bls"
-	eth "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
+	eth "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 // Domain returns the domain version for BLS private key to sign and verify.
 //
 // Spec pseudocode definition:
-//  def get_domain(state: BeaconState, domain_type: DomainType, epoch: Epoch=None) -> Domain:
-//    """
-//    Return the signature domain (fork version concatenated with domain type) of a message.
-//    """
-//    epoch = get_current_epoch(state) if epoch is None else epoch
-//    fork_version = state.fork.previous_version if epoch < state.fork.epoch else state.fork.current_version
-//    return compute_domain(domain_type, fork_version, state.genesis_validators_root)
+//
+//	def get_domain(state: BeaconState, domain_type: DomainType, epoch: Epoch=None) -> Domain:
+//	  """
+//	  Return the signature domain (fork version concatenated with domain type) of a message.
+//	  """
+//	  epoch = get_current_epoch(state) if epoch is None else epoch
+//	  fork_version = state.fork.previous_version if epoch < state.fork.epoch else state.fork.current_version
+//	  return compute_domain(domain_type, fork_version, state.genesis_validators_root)
 func Domain(fork *eth.Fork, epoch types.Epoch, domainType [bls.DomainByteLength]byte, genesisRoot []byte) ([]byte, error) {
 	if fork == nil {
 		return []byte{}, errors.New("nil fork or domain type")

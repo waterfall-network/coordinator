@@ -6,11 +6,11 @@ import (
 	"testing"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	dbtest "github.com/waterfall-foundation/coordinator/validator/db/testing"
-	"github.com/waterfall-foundation/coordinator/validator/slashing-protection-history/format"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	dbtest "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/db/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/slashing-protection-history/format"
 )
 
 func TestExportStandardProtectionJSON_EmptyGenesisRoot(t *testing.T) {

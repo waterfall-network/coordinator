@@ -10,12 +10,12 @@ import (
 	libp2pcore "github.com/libp2p/go-libp2p-core"
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/protocol"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p"
-	p2ptypes "github.com/waterfall-foundation/coordinator/beacon-chain/p2p/types"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/monitoring/tracing"
-	"github.com/waterfall-foundation/coordinator/time"
-	"github.com/waterfall-foundation/coordinator/time/slots"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
+	p2ptypes "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/tracing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	"go.opencensus.io/trace"
 )
 

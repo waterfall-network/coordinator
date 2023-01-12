@@ -18,11 +18,11 @@ import (
 	"github.com/logrusorgru/aurora"
 	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
-	"github.com/waterfall-foundation/coordinator/crypto/bls"
-	"github.com/waterfall-foundation/coordinator/io/file"
-	"github.com/waterfall-foundation/coordinator/io/prompt"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager"
 	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/file"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/prompt"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager"
 )
 
 var (

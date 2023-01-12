@@ -5,17 +5,17 @@ import (
 	"testing"
 
 	logTest "github.com/sirupsen/logrus/hooks/test"
-	mock "github.com/waterfall-foundation/coordinator/beacon-chain/blockchain/testing"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/signing"
-	dbtest "github.com/waterfall-foundation/coordinator/beacon-chain/db/testing"
-	slashingsmock "github.com/waterfall-foundation/coordinator/beacon-chain/operations/slashings/mock"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stategen"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/crypto/bls"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/coordinator/testing/util"
+	mock "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/signing"
+	dbtest "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/testing"
+	slashingsmock "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/slashings/mock"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
 )
 
 func TestService_processAttesterSlashings(t *testing.T) {

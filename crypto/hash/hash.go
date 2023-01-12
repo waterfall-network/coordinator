@@ -10,7 +10,7 @@ import (
 	fastssz "github.com/ferranbt/fastssz"
 	"github.com/minio/highwayhash"
 	"github.com/minio/sha256-simd"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"golang.org/x/crypto/sha3"
 	"google.golang.org/protobuf/proto"
 )

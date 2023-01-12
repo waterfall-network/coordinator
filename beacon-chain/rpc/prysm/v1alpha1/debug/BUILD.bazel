@@ -9,7 +9,7 @@ go_library(
         "server.go",
         "state.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/beacon-chain/rpc/prysm/v1alpha1/debug",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc/prysm/v1alpha1/debug",
     visibility = ["//beacon-chain:__subpackages__"],
     deps = [
         "//beacon-chain/blockchain:go_default_library",

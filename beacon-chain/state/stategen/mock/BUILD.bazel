@@ -7,7 +7,7 @@ go_library(
         "mock.go",
         "replayer.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/beacon-chain/state/stategen/mock",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen/mock",
     visibility = ["//visibility:public"],
     deps = [
         "//beacon-chain/state:go_default_library",

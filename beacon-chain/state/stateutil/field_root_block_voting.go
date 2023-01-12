@@ -2,8 +2,8 @@ package stateutil
 
 import (
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/encoding/ssz"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 // BlockVotingRoot computes the HashTreeRoot Merkleization of

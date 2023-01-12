@@ -25,7 +25,7 @@ import "proto/prysm/v1alpha1/sync_committee.proto";
 import "proto/prysm/v1alpha1/attestation.proto";
 
 option csharp_namespace = "Ethereum.Eth.V1";
-option go_package = "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1;eth";
+option go_package = "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1;eth";
 option java_multiple_files = true;
 option java_outer_classname = "ValidatorProto";
 option java_package = "org.ethereum.eth.v1alpha1";

@@ -8,14 +8,14 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/crypto/bls"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	ethpbservice "github.com/waterfall-foundation/coordinator/proto/eth/service"
-	validatorpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/validator-client"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager/remote-web3signer/internal"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager/remote-web3signer/v1/mock"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	ethpbservice "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/service"
+	validatorpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/validator-client"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager/remote-web3signer/internal"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager/remote-web3signer/v1/mock"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 )
 

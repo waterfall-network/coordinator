@@ -7,12 +7,12 @@ import (
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	types "github.com/prysmaticlabs/eth2-types"
-	grpcutil "github.com/waterfall-foundation/coordinator/api/grpc"
-	chainmock "github.com/waterfall-foundation/coordinator/beacon-chain/blockchain/testing"
-	syncmock "github.com/waterfall-foundation/coordinator/beacon-chain/sync/initial-sync/testing"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/coordinator/testing/util"
+	grpcutil "gitlab.waterfall.network/waterfall/protocol/coordinator/api/grpc"
+	chainmock "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain/testing"
+	syncmock "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/sync/initial-sync/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
 	"google.golang.org/grpc"
 )
 

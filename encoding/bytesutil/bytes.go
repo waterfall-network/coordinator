@@ -9,7 +9,7 @@ import (
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 )
 
 var hexRegex = regexp.MustCompile("^0x[0-9a-fA-F]+$")

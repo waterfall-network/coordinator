@@ -3,9 +3,9 @@ package blocks_test
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/blocks"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 )
 
 func TestGenesisBlock_InitializedCorrectly(t *testing.T) {

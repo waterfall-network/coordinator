@@ -4,10 +4,10 @@
 package node
 
 import (
-	"github.com/waterfall-foundation/coordinator/beacon-chain/blockchain"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/db"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/sync"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/sync"
 	"google.golang.org/grpc"
 )
 

@@ -8,9 +8,9 @@ import (
 
 	"github.com/libp2p/go-libp2p-core/peer"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
-	prysmTime "github.com/waterfall-foundation/coordinator/time"
-	"github.com/waterfall-foundation/coordinator/time/slots"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
+	prysmTime "gitlab.waterfall.network/waterfall/protocol/coordinator/time"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 )
 
 const (

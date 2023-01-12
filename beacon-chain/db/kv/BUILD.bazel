@@ -28,7 +28,7 @@ go_library(
         "validated_checkpoint.go",
         "wss.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/beacon-chain/db/kv",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/kv",
     visibility = [
         "//beacon-chain:__subpackages__",
         "//tools:__subpackages__",

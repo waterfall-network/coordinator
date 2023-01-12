@@ -6,7 +6,7 @@ go_library(
         "node.go",
         "server.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/beacon-chain/rpc/eth/node",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc/eth/node",
     visibility = ["//beacon-chain:__subpackages__"],
     deps = [
         "//api/grpc:go_default_library",

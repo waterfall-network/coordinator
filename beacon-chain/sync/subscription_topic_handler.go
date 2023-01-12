@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
 )
 
 // This is a subscription topic handler that is used to handle basic

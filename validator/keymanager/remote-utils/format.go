@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/logrusorgru/aurora"
-	"github.com/waterfall-foundation/coordinator/validator/accounts/petnames"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/accounts/petnames"
 )
 
 // DisplayRemotePublicKeys prints remote public keys to stdout.

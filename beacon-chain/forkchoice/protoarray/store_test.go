@@ -5,10 +5,10 @@ import (
 	"testing"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 func TestStore_PruneThreshold(t *testing.T) {
@@ -428,8 +428,9 @@ func TestStore_Prune_MoreThanOnce(t *testing.T) {
 
 // This unit tests starts with a simple branch like this
 //
-//       - 1
+//   - 1
 //     /
+//
 // -- 0 -- 2
 //
 // And we finalize 1. As a result only 1 should survive
@@ -487,17 +488,15 @@ func TestStore_Prune_NoDanglingBranch(t *testing.T) {
 }
 
 // This test starts with the following branching diagram
-/// We start with the following diagram
+// / We start with the following diagram
 //
-//                E -- F
-//               /
-//         C -- D
-//        /      \
-//  A -- B        G -- H -- I
-//        \        \
-//         J        -- K -- L
-//
-//
+//	              E -- F
+//	             /
+//	       C -- D
+//	      /      \
+//	A -- B        G -- H -- I
+//	      \        \
+//	       J        -- K -- L
 func TestStore_PruneBranched(t *testing.T) {
 	ctx := context.Background()
 

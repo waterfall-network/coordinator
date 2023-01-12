@@ -8,14 +8,14 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
-	"github.com/waterfall-foundation/coordinator/cmd/validator/flags"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	"github.com/waterfall-foundation/coordinator/io/prompt"
-	ethpbservice "github.com/waterfall-foundation/coordinator/proto/eth/service"
-	"github.com/waterfall-foundation/coordinator/validator/accounts/iface"
-	"github.com/waterfall-foundation/coordinator/validator/accounts/userprompt"
-	"github.com/waterfall-foundation/coordinator/validator/accounts/wallet"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/validator/flags"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/prompt"
+	ethpbservice "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/service"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/accounts/iface"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/accounts/userprompt"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/accounts/wallet"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager"
 )
 
 // DeleteAccountCli deletes the accounts that the user requests to be deleted from the wallet.
@@ -100,7 +100,7 @@ func DeleteAccountCli(cliCtx *cli.Context) error {
 	log.WithField("publicKeys", allAccountStr).Warn(
 		"Attempted to delete accounts. IMPORTANT: please run `validator accounts list` to ensure " +
 			"the public keys are indeed deleted. If they are still there, please file an issue at " +
-			"https://github.com/waterfall-foundation/coordinator/issues/new")
+			"https://gitlab.waterfall.network/waterfall/protocol/coordinator/issues/new")
 	return nil
 }
 

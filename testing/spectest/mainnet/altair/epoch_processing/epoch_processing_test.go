@@ -3,7 +3,7 @@ package epoch_processing
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/config/features"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 )
 
 func TestMain(m *testing.M) {

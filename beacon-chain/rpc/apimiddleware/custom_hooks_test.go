@@ -11,12 +11,12 @@ import (
 	"testing"
 
 	"github.com/gogo/protobuf/types"
-	"github.com/waterfall-foundation/coordinator/api/gateway/apimiddleware"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	ethpbv2 "github.com/waterfall-foundation/coordinator/proto/eth/v2"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/coordinator/time/slots"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/api/gateway/apimiddleware"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	ethpbv2 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v2"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 )
 
 func TestWrapAttestationArray(t *testing.T) {

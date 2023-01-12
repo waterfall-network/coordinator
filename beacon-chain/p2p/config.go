@@ -1,8 +1,8 @@
 package p2p
 
 import (
-	statefeed "github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/state"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/db"
+	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 )
 
 // Config for the p2p service. These parameters are set from application level flags

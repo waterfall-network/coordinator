@@ -6,7 +6,7 @@ go_library(
         "feed.go",
         "subscription.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/async/event",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/async/event",
     visibility = ["//visibility:public"],
     deps = ["//time/mclock:go_default_library"],
 )

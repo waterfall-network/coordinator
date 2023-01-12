@@ -6,10 +6,10 @@ import (
 	"context"
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/db"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/db/iface"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/db/kv"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/db/slasherkv"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/iface"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/kv"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/slasherkv"
 )
 
 // SetupDB instantiates and returns database backed by key value store.

@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/golang/protobuf/ptypes/empty"
-	pbrpc "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	pbrpc "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 // GetForkChoice returns a fork choice store.

@@ -3,7 +3,7 @@ package logs
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 func TestStreamServer_BackfillsMessages(t *testing.T) {

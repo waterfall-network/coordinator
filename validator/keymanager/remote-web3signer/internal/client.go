@@ -15,10 +15,10 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/crypto/bls"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	"github.com/waterfall-foundation/coordinator/monitoring/tracing"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/tracing"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 	"go.opencensus.io/trace"
 )

@@ -17,7 +17,7 @@ go_library(
         "slashing.go",
         "validator.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/testing/endtoend/evaluators",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/evaluators",
     visibility = ["//testing/endtoend:__subpackages__"],
     deps = [
         "//beacon-chain/core/helpers:go_default_library",

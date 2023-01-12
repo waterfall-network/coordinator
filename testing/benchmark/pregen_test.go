@@ -3,7 +3,7 @@ package benchmark
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 func TestPreGenFullBlock(t *testing.T) {

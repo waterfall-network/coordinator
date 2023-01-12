@@ -3,7 +3,7 @@ package slasher
 import (
 	"sync"
 
-	slashertypes "github.com/waterfall-foundation/coordinator/beacon-chain/slasher/types"
+	slashertypes "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/slasher/types"
 )
 
 // Struct for handling a thread-safe list of indexed attestation wrappers.

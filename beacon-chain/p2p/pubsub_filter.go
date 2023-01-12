@@ -7,9 +7,9 @@ import (
 	"github.com/libp2p/go-libp2p-core/peer"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
 	pubsubpb "github.com/libp2p/go-libp2p-pubsub/pb"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/encoder"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/network/forks"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/encoder"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/network/forks"
 )
 
 var _ pubsub.SubscriptionFilter = (*Service)(nil)

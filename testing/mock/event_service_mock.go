@@ -10,8 +10,8 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	gateway "github.com/grpc-ecosystem/grpc-gateway/v2/proto/gateway"
-	service "github.com/waterfall-foundation/coordinator/proto/eth/service"
-	v1 "github.com/waterfall-foundation/coordinator/proto/eth/v1"
+	service "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/service"
+	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
 	grpc "google.golang.org/grpc"
 	metadata "google.golang.org/grpc/metadata"
 )

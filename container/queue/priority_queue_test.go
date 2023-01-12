@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 // Ensure we satisfy the heap.Interface

@@ -4,7 +4,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 )
 
 // MainnetConfig returns the configuration to be used in the main network.

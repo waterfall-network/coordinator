@@ -1,13 +1,13 @@
 package validator
 
 import (
-	"github.com/waterfall-foundation/coordinator/async/event"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/blocks"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/feed"
-	blockfeed "github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/block"
-	statefeed "github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/state"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/runtime/version"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/async/event"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed"
+	blockfeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/block"
+	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

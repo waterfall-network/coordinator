@@ -4,13 +4,13 @@ import (
 	"fmt"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/crypto/bls"
-	"github.com/waterfall-foundation/coordinator/crypto/rand"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	"github.com/waterfall-foundation/coordinator/validator/db/kv"
-	"github.com/waterfall-foundation/coordinator/validator/slashing-protection-history/format"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/rand"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/db/kv"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/slashing-protection-history/format"
 )
 
 // MockSlashingProtectionJSON creates a mock, full slashing protection JSON struct

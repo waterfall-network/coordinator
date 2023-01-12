@@ -1,7 +1,7 @@
 package v3
 
 import (
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stateutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stateutil"
 )
 
 // SetPreviousParticipationBits for the beacon state. Updates the entire

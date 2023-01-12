@@ -5,9 +5,9 @@ import (
 	"reflect"
 	"testing"
 
-	enginev1 "github.com/waterfall-foundation/coordinator/proto/engine/v1"
-	v1alpha1 "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
+	enginev1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/engine/v1"
+	v1alpha1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 )
 
 func TestCopyETH1Data(t *testing.T) {
