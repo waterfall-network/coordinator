@@ -64,6 +64,16 @@ type ChainService struct {
 	ReceiveBlockMockErr         error
 }
 
+func (s *ChainService) GetValidatedBlockInfo() ([]byte, types.Slot) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *ChainService) SetValidatedBlockInfo(i []byte, slot types.Slot) {
+	//TODO implement me
+	panic("implement me")
+}
+
 // ForkChoicer mocks the same method in the chain service
 func (s *ChainService) ForkChoicer() forkchoice.ForkChoicer {
 	return s.ForkChoiceStore
