@@ -1,4 +1,4 @@
-module github.com/waterfall-foundation/coordinator
+module gitlab.waterfall.network/waterfall/protocol/coordinator
 
 go 1.17
 

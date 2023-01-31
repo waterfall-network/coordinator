@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/api/client/beacon"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/db"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/api/client/beacon"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 )
 
 // APIInitializer manages initializing the beacon node using checkpoint sync, retrieving the checkpoint state and root

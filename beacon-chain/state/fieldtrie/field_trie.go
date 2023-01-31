@@ -5,9 +5,9 @@ import (
 	"sync"
 
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stateutil"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state/types"
-	pmath "github.com/waterfall-foundation/coordinator/math"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stateutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/types"
+	pmath "gitlab.waterfall.network/waterfall/protocol/coordinator/math"
 )
 
 // FieldTrie is the representation of the representative

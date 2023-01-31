@@ -12,7 +12,7 @@ go_library(
         "headers.go",
         ":site_data",  # keep
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/validator/web",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/web",
     visibility = [
         "//api/gateway:__pkg__",
         "//validator:__subpackages__",

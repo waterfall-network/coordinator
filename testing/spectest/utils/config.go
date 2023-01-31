@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 )
 
 // SetConfig sets the global params for spec tests depending on the option chosen.

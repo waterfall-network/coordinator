@@ -10,7 +10,7 @@ go_library(
         "password_reader.go",
         "wrap_flags.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/cmd",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/cmd",
     visibility = ["//visibility:public"],
     deps = [
         "//config/fieldparams:go_default_library",

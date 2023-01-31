@@ -14,10 +14,10 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	types "github.com/prysmaticlabs/eth2-types"
-	lruwrpr "github.com/waterfall-foundation/coordinator/cache/lru"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/container/slice"
-	mathutil "github.com/waterfall-foundation/coordinator/math"
+	lruwrpr "gitlab.waterfall.network/waterfall/protocol/coordinator/cache/lru"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/container/slice"
+	mathutil "gitlab.waterfall.network/waterfall/protocol/coordinator/math"
 )
 
 const (

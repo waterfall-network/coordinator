@@ -8,7 +8,7 @@ import (
 
 	types "github.com/prysmaticlabs/eth2-types"
 	log "github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/math"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/math"
 	"gopkg.in/yaml.v2"
 )
 

@@ -1,20 +1,20 @@
 package blockchain
 
 import (
-	"github.com/waterfall-foundation/coordinator/async/event"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/cache"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/cache/depositcache"
-	statefeed "github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/state"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/db"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/forkchoice"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/operations/attestations"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/operations/slashings"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/operations/voluntaryexits"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/powchain"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stategen"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/async/event"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache/depositcache"
+	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/forkchoice"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/attestations"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/slashings"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/voluntaryexits"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 type Option func(s *Service) error

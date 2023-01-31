@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 // setupDB instantiates and returns a Store instance.

@@ -6,9 +6,9 @@ package events
 import (
 	"context"
 
-	blockfeed "github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/block"
-	opfeed "github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/operation"
-	statefeed "github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/state"
+	blockfeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/block"
+	opfeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/operation"
+	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
 )
 
 // Server defines a server implementation of the gRPC events service,

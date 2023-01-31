@@ -5,11 +5,11 @@ import (
 	"math/big"
 	"testing"
 
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	enginev1 "github.com/waterfall-foundation/coordinator/proto/engine/v1"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	enginev1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/engine/v1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 )
 

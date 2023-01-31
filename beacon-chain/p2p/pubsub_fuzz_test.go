@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/encoder"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/encoder"
 )
 
 func FuzzMsgID(f *testing.F) {

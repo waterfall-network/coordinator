@@ -3,8 +3,8 @@ package mock
 import (
 	"context"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 // PoolMock is a fake implementation of PoolManager.

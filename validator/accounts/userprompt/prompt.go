@@ -9,10 +9,10 @@ import (
 	"github.com/manifoldco/promptui"
 	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
-	"github.com/waterfall-foundation/coordinator/cmd/validator/flags"
-	"github.com/waterfall-foundation/coordinator/io/file"
-	"github.com/waterfall-foundation/coordinator/io/prompt"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager/remote"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/validator/flags"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/file"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/prompt"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager/remote"
 )
 
 const (

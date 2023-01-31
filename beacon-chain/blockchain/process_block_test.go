@@ -10,30 +10,30 @@ import (
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
-	mock "github.com/waterfall-foundation/coordinator/beacon-chain/blockchain/testing"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/cache/depositcache"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/blocks"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/transition"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/db"
-	testDB "github.com/waterfall-foundation/coordinator/beacon-chain/db/testing"
-	doublylinkedtree "github.com/waterfall-foundation/coordinator/beacon-chain/forkchoice/doubly-linked-tree"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/forkchoice/protoarray"
-	forkchoicetypes "github.com/waterfall-foundation/coordinator/beacon-chain/forkchoice/types"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stategen"
-	v1 "github.com/waterfall-foundation/coordinator/beacon-chain/state/v1"
-	"github.com/waterfall-foundation/coordinator/config/features"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
-	"github.com/waterfall-foundation/coordinator/runtime/version"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/coordinator/testing/util"
-	prysmTime "github.com/waterfall-foundation/coordinator/time"
+	mock "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache/depositcache"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
+	testDB "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/testing"
+	doublylinkedtree "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/forkchoice/doubly-linked-tree"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/forkchoice/protoarray"
+	forkchoicetypes "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/forkchoice/types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen"
+	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
+	prysmTime "gitlab.waterfall.network/waterfall/protocol/coordinator/time"
 )
 
 func TestStore_OnBlock_ProtoArray(t *testing.T) {
@@ -1013,9 +1013,13 @@ func TestFillForkChoiceMissingBlocks_FilterFinalized_DoublyLinkedTree(t *testing
 }
 
 // blockTree1 constructs the following tree:
-//    /- B1
+//
+//	/- B1
+//
 // B0           /- B5 - B7
-//    \- B3 - B4 - B6 - B8
+//
+//	\- B3 - B4 - B6 - B8
+//
 // (B1, and B3 are all from the same slots)
 func blockTree1(t *testing.T, beaconDB db.Database, genesisRoot []byte) ([][]byte, error) {
 	genesisRoot = bytesutil.PadTo(genesisRoot, 32)

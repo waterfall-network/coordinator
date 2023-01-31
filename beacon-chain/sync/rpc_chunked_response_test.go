@@ -4,14 +4,14 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/blockchain"
-	mock "github.com/waterfall-foundation/coordinator/beacon-chain/blockchain/testing"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/signing"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain"
+	mock "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/signing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 func TestExtractBlockDataType(t *testing.T) {

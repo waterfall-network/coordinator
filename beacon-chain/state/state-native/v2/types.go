@@ -1,8 +1,8 @@
 package v2
 
 import (
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state/types"
-	"github.com/waterfall-foundation/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 )
 
 func init() {

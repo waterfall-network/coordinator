@@ -3,7 +3,7 @@ load("@prysm//tools/go:def.bzl", "go_library")
 go_library(
     name = "go_default_library",
     srcs = ["fee-recipient-config.go"],
-    importpath = "github.com/waterfall-foundation/coordinator/config/validator/service",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/config/validator/service",
     visibility = ["//visibility:public"],
     deps = [
         "//config/fieldparams:go_default_library",

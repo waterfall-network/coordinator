@@ -3,7 +3,7 @@ package params_test
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 )
 
 func TestPraterConfigMatchesUpstreamYaml(t *testing.T) {

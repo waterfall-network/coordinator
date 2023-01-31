@@ -5,10 +5,10 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
-	"github.com/waterfall-foundation/coordinator/validator/accounts/userprompt"
-	"github.com/waterfall-foundation/coordinator/validator/accounts/wallet"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager/remote"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/accounts/userprompt"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/accounts/wallet"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager/remote"
 )
 
 // EditWalletConfigurationCli for a user's on-disk wallet, being able to change

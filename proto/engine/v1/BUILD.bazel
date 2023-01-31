@@ -41,7 +41,7 @@ go_proto_library(
     compilers = [
         "@com_github_prysmaticlabs_protoc_gen_go_cast//:go_cast_grpc",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/proto/engine/v1",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/engine/v1",
     proto = ":proto",
     visibility = ["//visibility:public"],
     deps = [
@@ -64,7 +64,7 @@ go_library(
     embed = [
         ":go_proto",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/proto/engine/v1",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/engine/v1",
     visibility = ["//visibility:public"],
     deps = [
         "//proto/eth/ext:go_default_library",

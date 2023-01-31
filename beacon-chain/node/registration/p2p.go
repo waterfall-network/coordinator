@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 
 	"github.com/urfave/cli/v2"
-	"github.com/waterfall-foundation/coordinator/cmd"
-	"github.com/waterfall-foundation/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gopkg.in/yaml.v2"
 )
 

@@ -4,12 +4,12 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/transition/interop"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/powchain"
-	"github.com/waterfall-foundation/coordinator/config/features"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition/interop"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
 	"google.golang.org/protobuf/proto"
 )
 

@@ -4,7 +4,7 @@ import (
 	"time"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/waterfall-foundation/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 )
 
 // MockGenesisTimeFetcher is a fake implementation of the blockchain.TimeFetcher

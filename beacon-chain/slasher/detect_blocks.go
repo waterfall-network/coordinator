@@ -5,8 +5,8 @@ import (
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
-	slashertypes "github.com/waterfall-foundation/coordinator/beacon-chain/slasher/types"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	slashertypes "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/slasher/types"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"go.opencensus.io/trace"
 )
 

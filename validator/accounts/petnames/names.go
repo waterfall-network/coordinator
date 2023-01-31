@@ -3,8 +3,8 @@ package petnames
 import (
 	"strings"
 
-	"github.com/waterfall-foundation/coordinator/crypto/hash"
-	"github.com/waterfall-foundation/coordinator/crypto/rand"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/rand"
 )
 
 var (

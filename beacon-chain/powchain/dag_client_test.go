@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	mocks "github.com/waterfall-foundation/coordinator/beacon-chain/powchain/testing"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	mocks "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"

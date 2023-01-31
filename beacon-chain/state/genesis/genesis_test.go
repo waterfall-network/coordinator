@@ -3,8 +3,8 @@ package genesis_test
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state/genesis"
-	"github.com/waterfall-foundation/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/genesis"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 )
 
 func TestGenesisState(t *testing.T) {

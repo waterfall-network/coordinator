@@ -13,14 +13,14 @@ import (
 	"github.com/sirupsen/logrus"
 	logTest "github.com/sirupsen/logrus/hooks/test"
 	"github.com/urfave/cli/v2"
-	"github.com/waterfall-foundation/coordinator/cmd/validator/flags"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/coordinator/validator/accounts/wallet"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager/local"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager/remote"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/validator/flags"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/accounts/wallet"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager/local"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager/remote"
 )
 
 const (

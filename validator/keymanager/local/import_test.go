@@ -7,13 +7,13 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/waterfall-foundation/coordinator/crypto/bls"
-	ethpbservice "github.com/waterfall-foundation/coordinator/proto/eth/service"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	mock "github.com/waterfall-foundation/coordinator/validator/accounts/testing"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager"
 	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
+	ethpbservice "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/service"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	mock "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/accounts/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager"
 )
 
 const password = "secretPassw0rd$1999"

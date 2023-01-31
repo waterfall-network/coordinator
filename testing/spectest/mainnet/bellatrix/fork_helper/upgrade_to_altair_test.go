@@ -3,7 +3,7 @@ package fork_helper
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/testing/spectest/shared/bellatrix/fork"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/spectest/shared/bellatrix/fork"
 )
 
 func TestMainnet_Bellatrix_UpgradeToBellatrix(t *testing.T) {

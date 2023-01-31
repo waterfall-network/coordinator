@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 )
 
 const vIdLength = 8

@@ -3,8 +3,8 @@ package uintcast_test
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/build/bazel"
-	"github.com/waterfall-foundation/coordinator/tools/analyzers/uintcast"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/build/bazel"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/tools/analyzers/uintcast"
 	"golang.org/x/tools/go/analysis/analysistest"
 )
 

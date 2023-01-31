@@ -9,13 +9,13 @@ import (
 	joonix "github.com/joonix/log"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
-	"github.com/waterfall-foundation/coordinator/cmd"
-	"github.com/waterfall-foundation/coordinator/cmd/client-stats/flags"
-	"github.com/waterfall-foundation/coordinator/io/logs"
-	"github.com/waterfall-foundation/coordinator/monitoring/clientstats"
-	"github.com/waterfall-foundation/coordinator/monitoring/journald"
-	"github.com/waterfall-foundation/coordinator/runtime/version"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/client-stats/flags"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/logs"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/clientstats"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/journald"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
 )
 
 var appFlags = []cli.Flag{

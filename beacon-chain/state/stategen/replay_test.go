@@ -4,18 +4,18 @@ import (
 	"context"
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/blocks"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/db"
-	testDB "github.com/waterfall-foundation/coordinator/beacon-chain/db/testing"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
-	"github.com/waterfall-foundation/coordinator/runtime/version"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/coordinator/testing/util"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
+	testDB "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -347,8 +347,9 @@ func TestLoadBlocks_BadStart(t *testing.T) {
 
 // tree1 constructs the following tree:
 // B0 - B1 - - B3 -- B5
-//        \- B2 -- B4 -- B6 ----- B8
-//                         \- B7
+//
+//	\- B2 -- B4 -- B6 ----- B8
+//	                 \- B7
 func tree1(t *testing.T, beaconDB db.Database, genesisRoot []byte) ([][32]byte, []*ethpb.SignedBeaconBlock, error) {
 	b0 := util.NewBeaconBlock()
 	b0.Block.Slot = 0
@@ -436,10 +437,11 @@ func tree1(t *testing.T, beaconDB db.Database, genesisRoot []byte) ([][32]byte, 
 
 // tree2 constructs the following tree:
 // B0 - B1
-//        \- B2
-//        \- B2
-//        \- B2
-//        \- B2 -- B3
+//
+//	\- B2
+//	\- B2
+//	\- B2
+//	\- B2 -- B3
 func tree2(t *testing.T, beaconDB db.Database, genesisRoot []byte) ([][32]byte, []*ethpb.SignedBeaconBlock, error) {
 	b0 := util.NewBeaconBlock()
 	b0.Block.Slot = 0
@@ -518,10 +520,11 @@ func tree2(t *testing.T, beaconDB db.Database, genesisRoot []byte) ([][32]byte, 
 
 // tree3 constructs the following tree:
 // B0 - B1
-//        \- B2
-//        \- B2
-//        \- B2
-//        \- B2
+//
+//	\- B2
+//	\- B2
+//	\- B2
+//	\- B2
 func tree3(t *testing.T, beaconDB db.Database, genesisRoot []byte) ([][32]byte, []*ethpb.SignedBeaconBlock, error) {
 	b0 := util.NewBeaconBlock()
 	b0.Block.Slot = 0
@@ -594,10 +597,11 @@ func tree3(t *testing.T, beaconDB db.Database, genesisRoot []byte) ([][32]byte, 
 
 // tree4 constructs the following tree:
 // B0
-//   \- B2
-//   \- B2
-//   \- B2
-//   \- B2
+//
+//	\- B2
+//	\- B2
+//	\- B2
+//	\- B2
 func tree4(t *testing.T, beaconDB db.Database, genesisRoot []byte) ([][32]byte, []*ethpb.SignedBeaconBlock, error) {
 	b0 := util.NewBeaconBlock()
 	b0.Block.Slot = 0

@@ -16,7 +16,7 @@ go_library(
         "wallet_edit.go",
         "wallet_recover.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/validator/accounts",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/accounts",
     visibility = [
         "//cmd/validator:__subpackages__",
         "//validator:__pkg__",

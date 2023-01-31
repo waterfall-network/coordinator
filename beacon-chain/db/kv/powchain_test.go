@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	v2 "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	v2 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 func TestStore_SavePowchainData(t *testing.T) {

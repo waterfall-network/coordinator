@@ -3,7 +3,7 @@ package testing
 import (
 	"context"
 
-	eth "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	eth "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 // MockProtector mocks the protector.

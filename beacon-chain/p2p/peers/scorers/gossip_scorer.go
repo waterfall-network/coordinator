@@ -2,8 +2,8 @@ package scorers
 
 import (
 	"github.com/libp2p/go-libp2p-core/peer"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/peers/peerdata"
-	pbrpc "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers/peerdata"
+	pbrpc "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 var _ Scorer = (*GossipScorer)(nil)

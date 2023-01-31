@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 )
 
 // RandaoMixes of block proposers on the beacon chain.

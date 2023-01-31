@@ -6,10 +6,10 @@ import (
 	"time"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	forkchoicetypes "github.com/waterfall-foundation/coordinator/beacon-chain/forkchoice/types"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	forkchoicetypes "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/forkchoice/types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 // Simple, ex-ante attack mitigation using proposer boost.

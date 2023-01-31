@@ -10,9 +10,9 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/monitoring/prometheus"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/prometheus"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 const addr = "127.0.0.1:8989"

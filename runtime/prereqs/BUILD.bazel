@@ -3,7 +3,7 @@ load("@prysm//tools/go:def.bzl", "go_library", "go_test")
 go_library(
     name = "go_default_library",
     srcs = ["prereq.go"],
-    importpath = "github.com/waterfall-foundation/coordinator/runtime/prereqs",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/prereqs",
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_pkg_errors//:go_default_library",

@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	fssz "github.com/ferranbt/fastssz"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 )
 
 var _ fssz.HashRoot = (BlockRoots)([fieldparams.BlockRootsLength][32]byte{})

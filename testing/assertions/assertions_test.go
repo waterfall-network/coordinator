@@ -8,11 +8,11 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/sirupsen/logrus/hooks/test"
-	eth "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	testpb "github.com/waterfall-foundation/coordinator/proto/testing"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/assertions"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	eth "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	testpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assertions"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 

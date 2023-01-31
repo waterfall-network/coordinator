@@ -5,18 +5,18 @@ import (
 	"errors"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/signing"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/time"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/contracts/deposit"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	"github.com/waterfall-foundation/coordinator/monitoring/tracing"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/runtime/version"
-	"github.com/waterfall-foundation/coordinator/time/slots"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/signing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/contracts/deposit"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/tracing"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -30,13 +30,14 @@ var errParticipation = status.Errorf(codes.Internal, "Failed to obtain epoch par
 
 // ValidatorStatus returns the validator status of the current epoch.
 // The status response can be one of the following:
-//  DEPOSITED - validator's deposit has been recognized by Ethereum 1, not yet recognized by Ethereum.
-//  PENDING - validator is in Ethereum's activation queue.
-//  ACTIVE - validator is active.
-//  EXITING - validator has initiated an an exit request, or has dropped below the ejection balance and is being kicked out.
-//  EXITED - validator is no longer validating.
-//  SLASHING - validator has been kicked out due to meeting a slashing condition.
-//  UNKNOWN_STATUS - validator does not have a known status in the network.
+//
+//	DEPOSITED - validator's deposit has been recognized by Ethereum 1, not yet recognized by Ethereum.
+//	PENDING - validator is in Ethereum's activation queue.
+//	ACTIVE - validator is active.
+//	EXITING - validator has initiated an an exit request, or has dropped below the ejection balance and is being kicked out.
+//	EXITED - validator is no longer validating.
+//	SLASHING - validator has been kicked out due to meeting a slashing condition.
+//	UNKNOWN_STATUS - validator does not have a known status in the network.
 func (vs *Server) ValidatorStatus(
 	ctx context.Context,
 	req *ethpb.ValidatorStatusRequest,

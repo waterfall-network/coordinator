@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 )
 
 func TestHistoricalRoots_Casting(t *testing.T) {

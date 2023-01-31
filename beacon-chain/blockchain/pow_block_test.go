@@ -7,17 +7,17 @@ import (
 	"testing"
 
 	"github.com/holiman/uint256"
-	testDB "github.com/waterfall-foundation/coordinator/beacon-chain/db/testing"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/forkchoice/protoarray"
-	mocks "github.com/waterfall-foundation/coordinator/beacon-chain/powchain/testing"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stategen"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	enginev1 "github.com/waterfall-foundation/coordinator/proto/engine/v1"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	testDB "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/forkchoice/protoarray"
+	mocks "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	enginev1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/engine/v1"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 func Test_validTerminalPowBlock(t *testing.T) {

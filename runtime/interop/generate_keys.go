@@ -5,12 +5,12 @@ import (
 	"math/big"
 	"sync"
 
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/async"
-	"github.com/waterfall-foundation/coordinator/crypto/bls"
-	"github.com/waterfall-foundation/coordinator/crypto/hash"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/async"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
 )
 
 const (

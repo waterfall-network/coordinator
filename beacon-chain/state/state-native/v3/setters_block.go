@@ -3,10 +3,10 @@ package v3
 import (
 	"fmt"
 
-	customtypes "github.com/waterfall-foundation/coordinator/beacon-chain/state/state-native/custom-types"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stateutil"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	customtypes "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/state-native/custom-types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stateutil"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 // SetLatestBlockHeader in the beacon state.

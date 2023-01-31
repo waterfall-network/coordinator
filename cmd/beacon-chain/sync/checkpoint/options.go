@@ -5,8 +5,8 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/node"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/sync/checkpoint"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/node"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/sync/checkpoint"
 )
 
 var (

@@ -6,11 +6,11 @@ import (
 
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
-	slashertypes "github.com/waterfall-foundation/coordinator/beacon-chain/slasher/types"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/container/slice"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	slashertypes "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/slasher/types"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/container/slice"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 // Group a list of attestations into batches by validator chunk index.

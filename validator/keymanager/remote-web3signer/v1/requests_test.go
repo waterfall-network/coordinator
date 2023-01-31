@@ -4,10 +4,10 @@ import (
 	"reflect"
 	"testing"
 
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	validatorpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/validator-client"
-	v1 "github.com/waterfall-foundation/coordinator/validator/keymanager/remote-web3signer/v1"
-	mock "github.com/waterfall-foundation/coordinator/validator/keymanager/remote-web3signer/v1/mock"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	validatorpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/validator-client"
+	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager/remote-web3signer/v1"
+	mock "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager/remote-web3signer/v1/mock"
 )
 
 func TestGetAggregateAndProofSignRequest(t *testing.T) {

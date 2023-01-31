@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/waterfall-foundation/coordinator/monitoring/clientstats"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/clientstats"
 )
 
 type BeaconNodeStatsUpdater interface {

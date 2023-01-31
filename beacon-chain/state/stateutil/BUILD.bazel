@@ -20,7 +20,7 @@ go_library(
         "validator_map_handler.go",
         "validator_root.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/beacon-chain/state/stateutil",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stateutil",
     visibility = [
         "//beacon-chain:__subpackages__",
         "//proto/migration:__subpackages__",

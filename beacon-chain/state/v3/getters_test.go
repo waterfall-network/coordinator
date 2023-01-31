@@ -4,10 +4,10 @@ import (
 	"runtime/debug"
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	testtmpl "github.com/waterfall-foundation/coordinator/beacon-chain/state/testing"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	testtmpl "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/testing"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 func TestBeaconState_SlotDataRace(t *testing.T) {

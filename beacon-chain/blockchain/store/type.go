@@ -3,19 +3,20 @@ package store
 import (
 	"sync"
 
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 // Store is defined in the fork choice consensus spec for tracking current time and various versions of checkpoints.
 //
 // Spec code:
 // class Store(object):
-//    time: uint64
-//    genesis_time: uint64
-//    justified_checkpoint: Checkpoint
-//    finalized_checkpoint: Checkpoint
-//    best_justified_checkpoint: Checkpoint
-//    proposerBoostRoot: Root
+//
+//	time: uint64
+//	genesis_time: uint64
+//	justified_checkpoint: Checkpoint
+//	finalized_checkpoint: Checkpoint
+//	best_justified_checkpoint: Checkpoint
+//	proposerBoostRoot: Root
 type Store struct {
 	justifiedCheckpt     *ethpb.Checkpoint
 	finalizedCheckpt     *ethpb.Checkpoint

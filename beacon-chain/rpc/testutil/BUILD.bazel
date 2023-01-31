@@ -8,7 +8,7 @@ go_library(
         "mock_powchain_info_fetcher.go",
         "mock_state_fetcher.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/beacon-chain/rpc/testutil",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc/testutil",
     visibility = ["//beacon-chain:__subpackages__"],
     deps = [
         "//beacon-chain/state:go_default_library",

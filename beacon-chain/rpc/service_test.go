@@ -9,11 +9,11 @@ import (
 
 	"github.com/sirupsen/logrus"
 	logTest "github.com/sirupsen/logrus/hooks/test"
-	mock "github.com/waterfall-foundation/coordinator/beacon-chain/blockchain/testing"
-	mockPOW "github.com/waterfall-foundation/coordinator/beacon-chain/powchain/testing"
-	mockSync "github.com/waterfall-foundation/coordinator/beacon-chain/sync/initial-sync/testing"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	mock "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain/testing"
+	mockPOW "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain/testing"
+	mockSync "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/sync/initial-sync/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 func init() {

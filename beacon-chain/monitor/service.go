@@ -8,15 +8,15 @@ import (
 
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/async/event"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/blockchain"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/feed"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/operation"
-	statefeed "github.com/waterfall-foundation/coordinator/beacon-chain/core/feed/state"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stategen"
-	"github.com/waterfall-foundation/coordinator/time/slots"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/async/event"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/operation"
+	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 )
 
 var (

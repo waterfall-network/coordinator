@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/testing/endtoend/helpers"
-	e2e "github.com/waterfall-foundation/coordinator/testing/endtoend/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/helpers"
+	e2e "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/params"
 )
 
 // TracingSink to capture HTTP requests from opentracing pushes. This is meant

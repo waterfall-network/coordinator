@@ -1,11 +1,11 @@
-/**
- * Block tree graph viz
- *
- * Given a DB, start slot and end slot. This tool computes the graphviz data
- * needed to construct the block tree in graphviz data format. Then one can paste
- * the data in a Graph rendering engine (ie. http://www.webgraphviz.com/) to see the visual format.
-
- */
+/*
+*
+  - Block tree graph viz
+    *
+  - Given a DB, start slot and end slot. This tool computes the graphviz data
+  - needed to construct the block tree in graphviz data format. Then one can paste
+  - the data in a Graph rendering engine (ie. http://www.webgraphviz.com/) to see the visual format.
+*/
 package main
 
 import (
@@ -17,10 +17,10 @@ import (
 
 	"github.com/emicklei/dot"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/db"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/db/filters"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/db/kv"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/filters"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/kv"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 )
 
 var (

@@ -3,7 +3,7 @@ load("@prysm//tools/go:def.bzl", "go_library", "go_test")
 go_library(
     name = "go_default_library",
     srcs = ["epoch_processing.go"],
-    importpath = "github.com/waterfall-foundation/coordinator/beacon-chain/core/epoch",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/epoch",
     visibility = [
         "//beacon-chain:__subpackages__",
         "//testing/spectest:__subpackages__",

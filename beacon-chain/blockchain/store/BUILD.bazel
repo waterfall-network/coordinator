@@ -8,7 +8,7 @@ go_library(
         "setter_getter.go",
         "type.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/beacon-chain/blockchain/store",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain/store",
     visibility = ["//beacon-chain:__subpackages__"],
     deps = ["//proto/prysm/v1alpha1:go_default_library"],
 )

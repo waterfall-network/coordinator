@@ -7,7 +7,7 @@ go_library(
         "log.go",
         "mnemonic.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/validator/keymanager/derived",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager/derived",
     visibility = [
         "//tools:__subpackages__",
         "//validator:__subpackages__",

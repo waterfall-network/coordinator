@@ -7,7 +7,7 @@ go_library(
         "shuffle.go",
         "shuffle_test_format.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/testing/spectest/shared/phase0/shuffling/core/shuffle",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/spectest/shared/phase0/shuffling/core/shuffle",
     visibility = ["//testing/spectest:__subpackages__"],
     deps = [
         "//beacon-chain/core/helpers:go_default_library",

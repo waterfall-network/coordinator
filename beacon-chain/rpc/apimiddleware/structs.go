@@ -3,8 +3,8 @@ package apimiddleware
 import (
 	"strings"
 
-	"github.com/waterfall-foundation/coordinator/api/gateway/apimiddleware"
-	ethpbv2 "github.com/waterfall-foundation/coordinator/proto/eth/v2"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/api/gateway/apimiddleware"
+	ethpbv2 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v2"
 )
 
 // genesisResponseJson is used in /beacon/genesis API endpoint.

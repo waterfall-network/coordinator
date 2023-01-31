@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/waterfall-foundation/coordinator/async/event"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/async/event"
 )
 
 // This example demonstrates how SubscriptionScope can be used to control the lifetime of

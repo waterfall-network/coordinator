@@ -14,7 +14,7 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/waterfall-foundation/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 )
 
 func main() {

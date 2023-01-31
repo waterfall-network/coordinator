@@ -1,6 +1,6 @@
 package common
 
-import fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
+import fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 
 // ZeroSecretKey represents a zero secret key.
 var ZeroSecretKey = [32]byte{}

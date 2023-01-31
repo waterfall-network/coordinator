@@ -3,7 +3,7 @@ package synccommittee
 import (
 	"sync"
 
-	"github.com/waterfall-foundation/coordinator/container/queue"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/container/queue"
 )
 
 // Store defines the caches for various sync committee objects

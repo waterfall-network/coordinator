@@ -13,13 +13,13 @@ import (
 	"strings"
 
 	"github.com/bazelbuild/rules_go/go/tools/bazel"
-	cmdshared "github.com/waterfall-foundation/coordinator/cmd"
-	"github.com/waterfall-foundation/coordinator/cmd/beacon-chain/flags"
-	"github.com/waterfall-foundation/coordinator/config/features"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/testing/endtoend/helpers"
-	e2e "github.com/waterfall-foundation/coordinator/testing/endtoend/params"
-	e2etypes "github.com/waterfall-foundation/coordinator/testing/endtoend/types"
+	cmdshared "gitlab.waterfall.network/waterfall/protocol/coordinator/cmd"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/beacon-chain/flags"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/helpers"
+	e2e "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/params"
+	e2etypes "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/types"
 )
 
 var _ e2etypes.ComponentRunner = (*BeaconNode)(nil)

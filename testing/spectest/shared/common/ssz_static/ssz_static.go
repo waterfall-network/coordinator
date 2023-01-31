@@ -8,9 +8,9 @@ import (
 
 	fssz "github.com/ferranbt/fastssz"
 	"github.com/golang/snappy"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/coordinator/testing/spectest/utils"
-	"github.com/waterfall-foundation/coordinator/testing/util"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/spectest/utils"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
 )
 
 // RunSSZStaticTests executes "ssz_static" tests for the given fork of phase using the provided

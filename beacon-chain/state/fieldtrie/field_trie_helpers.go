@@ -6,15 +6,15 @@ import (
 	"reflect"
 
 	"github.com/pkg/errors"
-	customtypes "github.com/waterfall-foundation/coordinator/beacon-chain/state/state-native/custom-types"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stateutil"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state/types"
-	"github.com/waterfall-foundation/coordinator/crypto/hash"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	"github.com/waterfall-foundation/coordinator/encoding/ssz"
-	pmath "github.com/waterfall-foundation/coordinator/math"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/runtime/version"
+	customtypes "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/state-native/custom-types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stateutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz"
+	pmath "gitlab.waterfall.network/waterfall/protocol/coordinator/math"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
 )
 
 // ProofFromMerkleLayers creates a proof starting at the leaf index of the state Merkle layers.

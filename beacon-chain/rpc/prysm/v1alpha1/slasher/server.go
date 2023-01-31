@@ -3,7 +3,7 @@
 package slasher
 
 import (
-	slasherservice "github.com/waterfall-foundation/coordinator/beacon-chain/slasher"
+	slasherservice "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/slasher"
 )
 
 // Server defines a server implementation of the gRPC slasher service.

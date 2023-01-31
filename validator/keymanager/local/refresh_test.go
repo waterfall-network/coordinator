@@ -6,13 +6,13 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/waterfall-foundation/coordinator/async/event"
-	"github.com/waterfall-foundation/coordinator/crypto/bls"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	mock "github.com/waterfall-foundation/coordinator/validator/accounts/testing"
 	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/async/event"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	mock "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/accounts/testing"
 )
 
 func TestLocalKeymanager_reloadAccountsFromKeystore_MismatchedNumKeys(t *testing.T) {

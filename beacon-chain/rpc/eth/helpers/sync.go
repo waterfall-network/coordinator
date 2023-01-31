@@ -5,10 +5,10 @@ import (
 	"strconv"
 
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/api/grpc"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/blockchain"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/sync"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/api/grpc"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/sync"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

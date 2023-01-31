@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	bolt "go.etcd.io/bbolt"
 )
 

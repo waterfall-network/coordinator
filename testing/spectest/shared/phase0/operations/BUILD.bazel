@@ -12,7 +12,7 @@ go_library(
         "proposer_slashing.go",
         "voluntary_exit.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/testing/spectest/shared/phase0/operations",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/spectest/shared/phase0/operations",
     visibility = ["//testing/spectest:__subpackages__"],
     deps = [
         "//beacon-chain/core/blocks:go_default_library",

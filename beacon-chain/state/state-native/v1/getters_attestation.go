@@ -1,7 +1,7 @@
 package v1
 
 import (
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 // PreviousEpochAttestations corresponding to blocks on the beacon chain.

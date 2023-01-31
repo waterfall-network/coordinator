@@ -5,10 +5,10 @@ import (
 	"errors"
 	"testing"
 
-	testDB "github.com/waterfall-foundation/coordinator/beacon-chain/db/testing"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/forkchoice/protoarray"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stategen"
+	testDB "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/forkchoice/protoarray"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen"
 )
 
 func testServiceOptsWithDB(t *testing.T) []Option {

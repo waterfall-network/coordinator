@@ -3,7 +3,7 @@ package stateutil_test
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state/stateutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stateutil"
 )
 
 func BenchmarkUint64ListRootWithRegistryLimit(b *testing.B) {

@@ -10,10 +10,10 @@ import (
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/protocol"
 	swarm "github.com/libp2p/go-libp2p-swarm"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p"
-	p2ptest "github.com/waterfall-foundation/coordinator/beacon-chain/p2p/testing"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/util"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
+	p2ptest "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
 )
 
 func TestContextWrite_NoWrites(t *testing.T) {

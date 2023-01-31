@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	_ "github.com/waterfall-foundation/coordinator/runtime/maxprocs"
+	_ "gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/maxprocs"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/ethclient"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/params"

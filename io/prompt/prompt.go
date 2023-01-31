@@ -12,7 +12,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
-	"github.com/waterfall-foundation/coordinator/io/file"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/file"
 	"golang.org/x/crypto/ssh/terminal"
 )
 

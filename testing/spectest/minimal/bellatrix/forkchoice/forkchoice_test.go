@@ -3,9 +3,9 @@ package forkchoice
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/config/features"
-	"github.com/waterfall-foundation/coordinator/runtime/version"
-	"github.com/waterfall-foundation/coordinator/testing/spectest/shared/common/forkchoice"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/spectest/shared/common/forkchoice"
 )
 
 func TestMinimal_Bellatrix_Forkchoice(t *testing.T) {

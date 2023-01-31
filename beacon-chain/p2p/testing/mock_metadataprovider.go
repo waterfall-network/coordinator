@@ -1,7 +1,7 @@
 package testing
 
 import (
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/metadata"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/metadata"
 )
 
 // MockMetadataProvider is a fake implementation of the MetadataProvider interface.

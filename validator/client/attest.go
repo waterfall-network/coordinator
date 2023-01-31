@@ -11,20 +11,20 @@ import (
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/go-bitfield"
 	"github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/async"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/signing"
-	"github.com/waterfall-foundation/coordinator/config/features"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/crypto/hash"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	"github.com/waterfall-foundation/coordinator/monitoring/tracing"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/block"
-	validatorpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/validator-client"
-	prysmTime "github.com/waterfall-foundation/coordinator/time"
-	"github.com/waterfall-foundation/coordinator/time/slots"
-	"github.com/waterfall-foundation/coordinator/validator/client/iface"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/async"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/signing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/tracing"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
+	validatorpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/validator-client"
+	prysmTime "gitlab.waterfall.network/waterfall/protocol/coordinator/time"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/client/iface"
 	"go.opencensus.io/trace"
 )
 
@@ -247,8 +247,9 @@ func (v *validator) saveAttesterIndexToData(data *ethpb.AttestationData, index t
 }
 
 // waitOneThirdOrValidBlock waits until (a) or (b) whichever comes first:
-//   (a) the validator has received a valid block that is the same slot as input slot
-//   (b) one-third of the slot has transpired (SECONDS_PER_SLOT / 3 seconds after the start of slot)
+//
+//	(a) the validator has received a valid block that is the same slot as input slot
+//	(b) one-third of the slot has transpired (SECONDS_PER_SLOT / 3 seconds after the start of slot)
 func (v *validator) waitOneThirdOrValidBlock(ctx context.Context, slot types.Slot) {
 	ctx, span := trace.StartSpan(ctx, "validator.waitOneThirdOrValidBlock")
 	defer span.End()

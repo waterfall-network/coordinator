@@ -3,6 +3,6 @@ load("@prysm//tools/go:def.bzl", "go_library")
 go_library(
     name = "go_default_library",
     srcs = ["authorization_method.go"],
-    importpath = "github.com/waterfall-foundation/coordinator/network/authorization",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/network/authorization",
     visibility = ["//visibility:public"],
 )

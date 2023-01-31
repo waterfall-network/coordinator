@@ -3,9 +3,9 @@ package v3
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	testtmpl "github.com/waterfall-foundation/coordinator/beacon-chain/state/testing"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	testtmpl "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/testing"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 func TestBeaconState_SlotDataRace(t *testing.T) {

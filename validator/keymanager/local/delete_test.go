@@ -8,13 +8,13 @@ import (
 	"testing"
 
 	logTest "github.com/sirupsen/logrus/hooks/test"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
-	ethpbservice "github.com/waterfall-foundation/coordinator/proto/eth/service"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	mock "github.com/waterfall-foundation/coordinator/validator/accounts/testing"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager"
 	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	ethpbservice "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/service"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	mock "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/accounts/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager"
 )
 
 func TestLocalKeymanager_DeleteKeystores(t *testing.T) {

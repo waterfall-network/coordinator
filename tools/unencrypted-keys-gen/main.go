@@ -5,9 +5,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/waterfall-foundation/coordinator/crypto/bls"
-	"github.com/waterfall-foundation/coordinator/runtime/interop"
-	"github.com/waterfall-foundation/coordinator/tools/unencrypted-keys-gen/keygen"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/interop"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/tools/unencrypted-keys-gen/keygen"
 )
 
 var (

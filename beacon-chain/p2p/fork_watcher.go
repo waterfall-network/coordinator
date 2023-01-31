@@ -1,9 +1,9 @@
 package p2p
 
 import (
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p/encoder"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/time/slots"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/encoder"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 )
 
 // A background routine which listens for new and upcoming forks and

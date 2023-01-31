@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/prysmaticlabs/go-bitfield"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	aggtesting "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/attestation/aggregation/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	aggtesting "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/attestation/aggregation/testing"
 )
 
 func BenchmarkMaxCoverProblem_MaxCover(b *testing.B) {

@@ -7,7 +7,7 @@ go_library(
         "log.go",
         "options.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/api/gateway",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/api/gateway",
     visibility = [
         "//beacon-chain:__subpackages__",
         "//validator:__subpackages__",

@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/async"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/async"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 var input [][]byte

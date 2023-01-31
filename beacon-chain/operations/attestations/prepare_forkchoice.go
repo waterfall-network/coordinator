@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/prysmaticlabs/go-bitfield"
-	"github.com/waterfall-foundation/coordinator/crypto/hash"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	attaggregation "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/attestation/aggregation/attestations"
-	"github.com/waterfall-foundation/coordinator/time/slots"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	attaggregation "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/attestation/aggregation/attestations"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	"go.opencensus.io/trace"
 )
 

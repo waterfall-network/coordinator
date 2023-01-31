@@ -3,7 +3,7 @@ package nop
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/build/bazel"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/build/bazel"
 	"golang.org/x/tools/go/analysis/analysistest"
 )
 

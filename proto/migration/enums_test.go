@@ -3,8 +3,8 @@ package migration
 import (
 	"testing"
 
-	v1 "github.com/waterfall-foundation/coordinator/proto/eth/v1"
-	eth "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
+	eth "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 func TestV1Alpha1ConnectionStateToV1(t *testing.T) {

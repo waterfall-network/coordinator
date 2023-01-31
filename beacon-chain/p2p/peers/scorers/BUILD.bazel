@@ -9,7 +9,7 @@ go_library(
         "peer_status.go",
         "service.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/beacon-chain/p2p/peers/scorers",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers/scorers",
     visibility = ["//beacon-chain:__subpackages__"],
     deps = [
         "//beacon-chain/p2p/peers/peerdata:go_default_library",

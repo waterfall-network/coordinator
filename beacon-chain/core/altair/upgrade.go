@@ -3,65 +3,66 @@ package altair
 import (
 	"context"
 
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/helpers"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/time"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/state"
-	statealtair "github.com/waterfall-foundation/coordinator/beacon-chain/state/v2"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/attestation"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	statealtair "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v2"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/attestation"
 )
 
 // UpgradeToAltair updates input state to return the version Altair state.
 //
 // Spec code:
 // def upgrade_to_altair(pre: phase0.BeaconState) -> BeaconState:
-//    epoch = phase0.get_current_epoch(pre)
-//    post = BeaconState(
-//        # Versioning
-//        genesis_time=pre.genesis_time,
-//        genesis_validators_root=pre.genesis_validators_root,
-//        slot=pre.slot,
-//        fork=Fork(
-//            previous_version=pre.fork.current_version,
-//            current_version=ALTAIR_FORK_VERSION,
-//            epoch=epoch,
-//        ),
-//        # History
-//        latest_block_header=pre.latest_block_header,
-//        block_roots=pre.block_roots,
-//        state_roots=pre.state_roots,
-//        historical_roots=pre.historical_roots,
-//        # Eth1
-//        eth1_data=pre.eth1_data,
-//        eth1_data_votes=pre.eth1_data_votes,
-//        eth1_deposit_index=pre.eth1_deposit_index,
-//        # Registry
-//        validators=pre.validators,
-//        balances=pre.balances,
-//        # Randomness
-//        randao_mixes=pre.randao_mixes,
-//        # Slashings
-//        slashings=pre.slashings,
-//        # Participation
-//        previous_epoch_participation=[ParticipationFlags(0b0000_0000) for _ in range(len(pre.validators))],
-//        current_epoch_participation=[ParticipationFlags(0b0000_0000) for _ in range(len(pre.validators))],
-//        # Finality
-//        justification_bits=pre.justification_bits,
-//        previous_justified_checkpoint=pre.previous_justified_checkpoint,
-//        current_justified_checkpoint=pre.current_justified_checkpoint,
-//        finalized_checkpoint=pre.finalized_checkpoint,
-//        # Inactivity
-//        inactivity_scores=[uint64(0) for _ in range(len(pre.validators))],
-//    )
-//    # Fill in previous epoch participation from the pre state's pending attestations
-//    translate_participation(post, pre.previous_epoch_attestations)
 //
-//    # Fill in sync committees
-//    # Note: A duplicate committee is assigned for the current and next committee at the fork boundary
-//    post.current_sync_committee = get_next_sync_committee(post)
-//    post.next_sync_committee = get_next_sync_committee(post)
-//    return post
+//	epoch = phase0.get_current_epoch(pre)
+//	post = BeaconState(
+//	    # Versioning
+//	    genesis_time=pre.genesis_time,
+//	    genesis_validators_root=pre.genesis_validators_root,
+//	    slot=pre.slot,
+//	    fork=Fork(
+//	        previous_version=pre.fork.current_version,
+//	        current_version=ALTAIR_FORK_VERSION,
+//	        epoch=epoch,
+//	    ),
+//	    # History
+//	    latest_block_header=pre.latest_block_header,
+//	    block_roots=pre.block_roots,
+//	    state_roots=pre.state_roots,
+//	    historical_roots=pre.historical_roots,
+//	    # Eth1
+//	    eth1_data=pre.eth1_data,
+//	    eth1_data_votes=pre.eth1_data_votes,
+//	    eth1_deposit_index=pre.eth1_deposit_index,
+//	    # Registry
+//	    validators=pre.validators,
+//	    balances=pre.balances,
+//	    # Randomness
+//	    randao_mixes=pre.randao_mixes,
+//	    # Slashings
+//	    slashings=pre.slashings,
+//	    # Participation
+//	    previous_epoch_participation=[ParticipationFlags(0b0000_0000) for _ in range(len(pre.validators))],
+//	    current_epoch_participation=[ParticipationFlags(0b0000_0000) for _ in range(len(pre.validators))],
+//	    # Finality
+//	    justification_bits=pre.justification_bits,
+//	    previous_justified_checkpoint=pre.previous_justified_checkpoint,
+//	    current_justified_checkpoint=pre.current_justified_checkpoint,
+//	    finalized_checkpoint=pre.finalized_checkpoint,
+//	    # Inactivity
+//	    inactivity_scores=[uint64(0) for _ in range(len(pre.validators))],
+//	)
+//	# Fill in previous epoch participation from the pre state's pending attestations
+//	translate_participation(post, pre.previous_epoch_attestations)
+//
+//	# Fill in sync committees
+//	# Note: A duplicate committee is assigned for the current and next committee at the fork boundary
+//	post.current_sync_committee = get_next_sync_committee(post)
+//	post.next_sync_committee = get_next_sync_committee(post)
+//	return post
 func UpgradeToAltair(ctx context.Context, state state.BeaconState) (state.BeaconStateAltair, error) {
 	epoch := time.CurrentEpoch(state)
 
@@ -127,17 +128,18 @@ func UpgradeToAltair(ctx context.Context, state state.BeaconState) (state.Beacon
 //
 // Spec code:
 // def translate_participation(state: BeaconState, pending_attestations: Sequence[phase0.PendingAttestation]) -> None:
-//    for attestation in pending_attestations:
-//        data = attestation.data
-//        inclusion_delay = attestation.inclusion_delay
-//        # Translate attestation inclusion info to flag indices
-//        participation_flag_indices = get_attestation_participation_flag_indices(state, data, inclusion_delay)
 //
-//        # Apply flags to all attesting validators
-//        epoch_participation = state.previous_epoch_participation
-//        for index in get_attesting_indices(state, data, attestation.aggregation_bits):
-//            for flag_index in participation_flag_indices:
-//                epoch_participation[index] = add_flag(epoch_participation[index], flag_index)
+//	for attestation in pending_attestations:
+//	    data = attestation.data
+//	    inclusion_delay = attestation.inclusion_delay
+//	    # Translate attestation inclusion info to flag indices
+//	    participation_flag_indices = get_attestation_participation_flag_indices(state, data, inclusion_delay)
+//
+//	    # Apply flags to all attesting validators
+//	    epoch_participation = state.previous_epoch_participation
+//	    for index in get_attesting_indices(state, data, attestation.aggregation_bits):
+//	        for flag_index in participation_flag_indices:
+//	            epoch_participation[index] = add_flag(epoch_participation[index], flag_index)
 func TranslateParticipation(ctx context.Context, state state.BeaconStateAltair, atts []*ethpb.PendingAttestation) (state.BeaconStateAltair, error) {
 	epochParticipation, err := state.PreviousEpochParticipation()
 	if err != nil {

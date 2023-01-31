@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"github.com/urfave/cli/v2"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/config/params"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 )
 
 // Flags is a struct to represent which features the client will perform on runtime.

@@ -6,12 +6,12 @@ import (
 	"sort"
 
 	"github.com/urfave/cli/v2"
-	"github.com/waterfall-foundation/coordinator/cmd"
-	"github.com/waterfall-foundation/coordinator/cmd/beacon-chain/flags"
-	"github.com/waterfall-foundation/coordinator/cmd/beacon-chain/sync/checkpoint"
-	"github.com/waterfall-foundation/coordinator/cmd/beacon-chain/sync/genesis"
-	"github.com/waterfall-foundation/coordinator/config/features"
-	"github.com/waterfall-foundation/coordinator/runtime/debug"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/beacon-chain/flags"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/beacon-chain/sync/checkpoint"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/beacon-chain/sync/genesis"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/debug"
 )
 
 var appHelpTemplate = `NAME:

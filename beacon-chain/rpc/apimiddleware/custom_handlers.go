@@ -12,9 +12,9 @@ import (
 	"strings"
 
 	"github.com/r3labs/sse"
-	"github.com/waterfall-foundation/coordinator/api/gateway/apimiddleware"
-	"github.com/waterfall-foundation/coordinator/api/grpc"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/rpc/eth/events"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/api/gateway/apimiddleware"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/api/grpc"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc/eth/events"
 )
 
 type sszConfig struct {

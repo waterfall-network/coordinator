@@ -26,8 +26,8 @@ import (
 	"path/filepath"
 
 	"github.com/pborman/uuid"
-	"github.com/waterfall-foundation/coordinator/crypto/bls"
-	"github.com/waterfall-foundation/coordinator/io/file"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/file"
 )
 
 const (

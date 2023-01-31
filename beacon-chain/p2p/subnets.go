@@ -7,15 +7,15 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/go-bitfield"
-	"github.com/waterfall-foundation/coordinator/cmd/beacon-chain/flags"
-	mathutil "github.com/waterfall-foundation/coordinator/math"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/wrapper"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/beacon-chain/flags"
+	mathutil "gitlab.waterfall.network/waterfall/protocol/coordinator/math"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enode"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enr"
 	"go.opencensus.io/trace"
 
-	"github.com/waterfall-foundation/coordinator/config/params"
-	pb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	pb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 var attestationSubnetCount = params.BeaconNetworkConfig().AttestationSubnetCount

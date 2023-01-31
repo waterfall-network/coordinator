@@ -5,12 +5,12 @@ import (
 	"testing"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	v1 "github.com/waterfall-foundation/coordinator/beacon-chain/state/v1"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/eth/v1"
-	"github.com/waterfall-foundation/coordinator/proto/migration"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/migration"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 func Test_ValidatorStatus(t *testing.T) {

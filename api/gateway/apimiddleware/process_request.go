@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/api/grpc"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/api/grpc"
 )
 
 // DeserializeRequestBodyIntoContainer deserializes the request's body into an endpoint-specific struct.

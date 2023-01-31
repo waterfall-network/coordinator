@@ -4,9 +4,9 @@ import (
 	"encoding/binary"
 
 	"github.com/pkg/errors"
-	fieldparams "github.com/waterfall-foundation/coordinator/config/fieldparams"
-	"github.com/waterfall-foundation/coordinator/crypto/hash"
-	"github.com/waterfall-foundation/coordinator/encoding/ssz"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz"
 )
 
 // ParticipationBitsRoot computes the HashTreeRoot merkleization of

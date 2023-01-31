@@ -13,9 +13,9 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	prombolt "github.com/prysmaticlabs/prombbolt"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/db/iface"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/io/file"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/iface"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/file"
 	bolt "go.etcd.io/bbolt"
 )
 

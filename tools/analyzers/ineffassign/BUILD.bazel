@@ -6,7 +6,7 @@ go_library(
         "analyzer.go",
         "ineffassign.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/tools/analyzers/ineffassign",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/tools/analyzers/ineffassign",
     visibility = ["//visibility:public"],
     deps = [
         "@org_golang_x_tools//go/analysis:go_default_library",

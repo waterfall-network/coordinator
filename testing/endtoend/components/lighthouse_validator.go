@@ -13,14 +13,14 @@ import (
 	"github.com/bazelbuild/rules_go/go/tools/bazel"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/io/file"
-	"github.com/waterfall-foundation/coordinator/runtime/interop"
-	"github.com/waterfall-foundation/coordinator/testing/endtoend/helpers"
-	e2e "github.com/waterfall-foundation/coordinator/testing/endtoend/params"
-	e2etypes "github.com/waterfall-foundation/coordinator/testing/endtoend/types"
-	"github.com/waterfall-foundation/coordinator/validator/keymanager"
 	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/file"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/interop"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/helpers"
+	e2e "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/params"
+	e2etypes "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager"
 )
 
 var _ e2etypes.ComponentRunner = (*LighthouseValidatorNode)(nil)

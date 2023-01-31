@@ -11,10 +11,10 @@ import (
 	ma "github.com/multiformats/go-multiaddr"
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/go-bitfield"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/cache"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/runtime/version"
-	"github.com/waterfall-foundation/coordinator/time/slots"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/discover"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enode"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enr"
@@ -255,14 +255,14 @@ func (s *Service) startDiscoveryV5(
 // filterPeer validates each node that we retrieve from our dht. We
 // try to ascertain that the peer can be a valid protocol peer.
 // Validity Conditions:
-// 1) The local node is still actively looking for peers to
-//    connect to.
-// 2) Peer has a valid IP and TCP port set in their enr.
-// 3) Peer hasn't been marked as 'bad'
-// 4) Peer is not currently active or connected.
-// 5) Peer is ready to receive incoming connections.
-// 6) Peer's fork digest in their ENR matches that of
-// 	  our localnodes.
+//  1. The local node is still actively looking for peers to
+//     connect to.
+//  2. Peer has a valid IP and TCP port set in their enr.
+//  3. Peer hasn't been marked as 'bad'
+//  4. Peer is not currently active or connected.
+//  5. Peer is ready to receive incoming connections.
+//  6. Peer's fork digest in their ENR matches that of
+//     our localnodes.
 func (s *Service) filterPeer(node *enode.Node) bool {
 	// Ignore nil node entries passed in.
 	if node == nil {

@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/sirupsen/logrus"
-	"github.com/waterfall-foundation/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 )
 
 func addLogWriter(w io.Writer) {

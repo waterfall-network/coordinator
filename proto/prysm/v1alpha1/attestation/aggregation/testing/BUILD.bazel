@@ -4,7 +4,7 @@ go_library(
     name = "go_default_library",
     testonly = True,
     srcs = ["bitlistutils.go"],
-    importpath = "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/attestation/aggregation/testing",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/attestation/aggregation/testing",
     visibility = ["//visibility:public"],
     deps = [
         "//crypto/bls:go_default_library",

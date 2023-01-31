@@ -3,7 +3,7 @@ package random
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/testing/spectest/shared/phase0/sanity"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/spectest/shared/phase0/sanity"
 )
 
 func TestMinimal_Phase0_Random(t *testing.T) {

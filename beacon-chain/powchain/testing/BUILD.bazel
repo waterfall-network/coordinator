@@ -8,7 +8,7 @@ go_library(
         "mock_faulty_powchain.go",
         "mock_powchain.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/beacon-chain/powchain/testing",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain/testing",
     visibility = [
         "//beacon-chain:__subpackages__",
     ],

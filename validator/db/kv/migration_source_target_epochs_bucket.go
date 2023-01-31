@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 
-	"github.com/waterfall-foundation/coordinator/monitoring/progress"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/progress"
 	bolt "go.etcd.io/bbolt"
 )
 

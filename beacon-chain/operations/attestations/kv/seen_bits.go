@@ -4,7 +4,7 @@ import (
 	"github.com/patrickmn/go-cache"
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/go-bitfield"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 func (c *AttCaches) insertSeenBit(att *ethpb.Attestation) error {

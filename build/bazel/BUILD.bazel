@@ -7,7 +7,7 @@ go_library(
         "bazel.go",
         "data_path.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/build/bazel",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/build/bazel",
     visibility = ["//visibility:public"],
     deps = [
         "//testing/require:go_default_library",

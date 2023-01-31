@@ -9,7 +9,7 @@ import (
 	"github.com/bazelbuild/rules_go/go/tools/bazel"
 	"github.com/ghodss/yaml"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 var json = jsoniter.Config{

@@ -3,9 +3,9 @@ package sync
 import (
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/pkg/errors"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/blockchain"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/core/signing"
-	"github.com/waterfall-foundation/coordinator/beacon-chain/p2p"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/signing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
 )
 
 // Specifies the fixed size context length.

@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/bazelbuild/rules_go/go/tools/bazel"
-	"github.com/waterfall-foundation/coordinator/config/params"
-	"github.com/waterfall-foundation/coordinator/testing/endtoend/components"
-	e2eparams "github.com/waterfall-foundation/coordinator/testing/endtoend/params"
-	"github.com/waterfall-foundation/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/components"
+	e2eparams "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
 func TestWeb3RemoteSigner_StartsAndReturnsPublicKeys(t *testing.T) {

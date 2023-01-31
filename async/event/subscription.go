@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/waterfall-foundation/coordinator/time/mclock"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/mclock"
 )
 
 // waitQuotient is divided against the max backoff time, in order to have N requests based on the full

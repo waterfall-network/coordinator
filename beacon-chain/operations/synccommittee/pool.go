@@ -2,7 +2,7 @@ package synccommittee
 
 import (
 	types "github.com/prysmaticlabs/eth2-types"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 var _ = Pool(&Store{})

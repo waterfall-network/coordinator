@@ -6,7 +6,7 @@ go_library(
         "//config:mainnet": ["mainnet.go"],
         "//config:minimal": ["minimal.go"],
     }),
-    importpath = "github.com/waterfall-foundation/coordinator/config/fieldparams",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams",
     visibility = ["//visibility:public"],
 )
 

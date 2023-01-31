@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/golang/snappy"
-	"github.com/waterfall-foundation/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 )
 
 func TestSszNetworkEncoder_BufferedReader(t *testing.T) {

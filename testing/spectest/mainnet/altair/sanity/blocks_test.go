@@ -3,7 +3,7 @@ package sanity
 import (
 	"testing"
 
-	"github.com/waterfall-foundation/coordinator/testing/spectest/shared/altair/sanity"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/spectest/shared/altair/sanity"
 )
 
 func TestMainnet_Altair_Sanity_Blocks(t *testing.T) {

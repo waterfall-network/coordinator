@@ -6,7 +6,7 @@ go_library(
         "logutil.go",
         "stream.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/io/logs",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/io/logs",
     visibility = ["//visibility:public"],
     deps = [
         "//async/event:go_default_library",

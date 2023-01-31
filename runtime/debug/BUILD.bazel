@@ -15,7 +15,7 @@ go_library(
         ":use_cgosymbolizer": ["cgo_symbolizer.go"],
         "//conditions:default": [],
     }),
-    importpath = "github.com/waterfall-foundation/coordinator/runtime/debug",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/debug",
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_fjl_memsize//memsizeui:go_default_library",

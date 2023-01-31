@@ -2,9 +2,9 @@ package wrapper
 
 import (
 	"github.com/prysmaticlabs/go-bitfield"
-	pb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	"github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/metadata"
-	"github.com/waterfall-foundation/coordinator/runtime/version"
+	pb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/metadata"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
 	"google.golang.org/protobuf/proto"
 )
 

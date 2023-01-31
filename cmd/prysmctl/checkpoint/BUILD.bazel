@@ -7,7 +7,7 @@ go_library(
         "latest.go",
         "save.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/cmd/prysmctl/checkpoint",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/prysmctl/checkpoint",
     visibility = ["//visibility:public"],
     deps = [
         "//api/client/beacon:go_default_library",

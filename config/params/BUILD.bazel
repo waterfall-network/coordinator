@@ -17,7 +17,7 @@ go_library(
         "testutils.go",
         "values.go",
     ],
-    importpath = "github.com/waterfall-foundation/coordinator/config/params",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/config/params",
     visibility = ["//visibility:public"],
     deps = [
         "//config/fieldparams:go_default_library",

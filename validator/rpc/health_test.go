@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/ptypes/empty"
-	ethpb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1"
-	pb "github.com/waterfall-foundation/coordinator/proto/prysm/v1alpha1/validator-client"
-	"github.com/waterfall-foundation/coordinator/testing/require"
-	"github.com/waterfall-foundation/coordinator/validator/client"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	pb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/validator-client"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/client"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 

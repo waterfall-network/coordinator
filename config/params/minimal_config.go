@@ -3,7 +3,7 @@ package params
 import (
 	"math"
 
-	"github.com/waterfall-foundation/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 )
 
 // UseMinimalConfig for beacon chain services.
