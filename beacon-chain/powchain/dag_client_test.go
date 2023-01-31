@@ -44,8 +44,10 @@ func TestDagClient_IPC(t *testing.T) {
 		want, ok := fix["ExecutionFinalize"].(*gwatTypes.FinalizationResult)
 		require.Equal(t, true, ok)
 
+		baseSpine := common.HexToHash("0x351cd65f6e74ff61322d16c4a808bdce69c30410b3965fbbf188c46fa44da545")
 		hash_1 := common.HexToHash("0xa659fcd4ed3f3ad9cd43ab36eb29080a4655328fe16f045962afab1d66a5da09")
-		err := srv.ExecutionDagFinalize(ctx, &gwatCommon.HashArray{hash_1})
+		lfSpine, err := srv.ExecutionDagFinalize(ctx, gwatCommon.HashArray{hash_1}, &baseSpine)
+		require.DeepEqual(t, hash_1.Hex(), lfSpine.Hex())
 		require.ErrorContains(t, *want.Error, err)
 	})
 	t.Run(ExecutionDagSyncMethod, func(t *testing.T) {
@@ -132,8 +134,9 @@ func TestDagClient_HTTP(t *testing.T) {
 		require.DeepEqual(t, want.Candidates, resp)
 	})
 	t.Run(ExecutionDagFinalizeMethod, func(t *testing.T) {
+		baseSpine := common.HexToHash("0x351cd65f6e74ff61322d16c4a808bdce69c30410b3965fbbf188c46fa44da545")
 		hash_1 := common.HexToHash("0xa659fcd4ed3f3ad9cd43ab36eb29080a4655328fe16f045962afab1d66a5da09")
-		arg := &gwatCommon.HashArray{hash_1}
+		spines := gwatCommon.HashArray{hash_1}
 		want, ok := fix["ExecutionFinalize"].(*gwatTypes.FinalizationResult)
 		require.Equal(t, true, ok)
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -146,7 +149,7 @@ func TestDagClient_HTTP(t *testing.T) {
 			jsonRequestString := string(enc)
 			// We expect the JSON string RPC request contains the right arguments.
 			//sArgs, _ := arg.MarshalJSON()
-			sArgs := "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"dag_finalize\",\"params\":[[\"0xa659fcd4ed3f3ad9cd43ab36eb29080a4655328fe16f045962afab1d66a5da09\"]]}"
+			sArgs := "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"dag_finalize\",\"params\":[{\"spines\":[\"0xa659fcd4ed3f3ad9cd43ab36eb29080a4655328fe16f045962afab1d66a5da09\"],\"baseSpine\":\"0x351cd65f6e74ff61322d16c4a808bdce69c30410b3965fbbf188c46fa44da545\"}]}"
 			//t.Logf("=========== %v", jsonRequestString)
 			//t.Logf("=========== %v", fmt.Sprintf("%s", sArgs))
 			require.Equal(t, true, strings.Contains(
@@ -171,8 +174,9 @@ func TestDagClient_HTTP(t *testing.T) {
 		service.rpcClient = rpcClient
 
 		// We call the RPC method via HTTP and expect a proper result.
-		err = service.ExecutionDagFinalize(ctx, arg)
+		lfSpine, err := service.ExecutionDagFinalize(ctx, spines, &baseSpine)
 		require.ErrorContains(t, *want.Error, err)
+		require.DeepEqual(t, hash_1.Hex(), lfSpine.Hex())
 	})
 	t.Run(ExecutionDagSyncMethod, func(t *testing.T) {
 		hash_1 := common.HexToHash("0xa659fcd4ed3f3ad9cd43ab36eb29080a4655328fe16f045962afab1d66a5da09")
@@ -334,7 +338,8 @@ func dagFixtures() map[string]interface{} {
 
 	finErr := "test error"
 	executionFinalize := &gwatTypes.FinalizationResult{
-		Error: &finErr,
+		Error:   &finErr,
+		LFSpine: &hash_1,
 	}
 
 	executionSync := &gwatTypes.ConsensusResult{
@@ -377,7 +382,7 @@ func (*testDagEngineService) GetCandidates(
 }
 
 func (*testDagEngineService) Finalize(
-	_ context.Context, _ *gwatCommon.HashArray,
+	_ context.Context, _ *gwatTypes.FinalizationParams,
 ) *gwatTypes.FinalizationResult {
 	fix := dagFixtures()
 	item, ok := fix["ExecutionFinalize"].(*gwatTypes.FinalizationResult)

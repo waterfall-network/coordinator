@@ -77,7 +77,7 @@ func (m *engineMock) ExecutionDagSync(ctx context.Context, syncParams *gwatTypes
 	panic("implement me")
 }
 
-func (m *engineMock) ExecutionDagFinalize(ctx context.Context, syncParams *gwatCommon.HashArray) error {
+func (m *engineMock) ExecutionDagFinalize(ctx context.Context, spines gwatCommon.HashArray, baseSpine *gwatCommon.Hash) (*gwatCommon.Hash, error) {
 	//TODO implement me
 	panic("implement me")
 }

@@ -22,7 +22,7 @@ import (
 )
 
 func (s *Service) IsInitSync() bool {
-	return s.isInitSynchronizing
+	return s.isInitSynchronizing || s.isResync
 }
 
 // headSync implements head-sync procedure with gwat node.
@@ -35,6 +35,12 @@ func (s *Service) HeadSync(ctx context.Context, force bool) error {
 	if !force && s.IsInitSync() {
 		return nil
 	}
+
+	log.WithFields(logrus.Fields{
+		"ctx.Err()": ctx.Err(),
+		"ctx":       ctx,
+	}).Warn("????????  HeadSync : ctx ??????????????")
+
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -145,6 +151,8 @@ func (s *Service) execHeadSync(ctx context.Context) error {
 		"checkpoint.Root":  fmt.Sprintf("%x", s.headSyncCp.Root),
 		"checkpoint.Epoch": s.headSyncCp.Epoch,
 		"cpState.Slot":     cpState.Slot(),
+		"ctx":              ctx,
+		"ctx.Canceled":     errors.Is(s.ctx.Err(), context.Canceled),
 	}).Info("Head sync main: checkpoint")
 
 	startSlot := cpState.Slot()
@@ -207,7 +215,7 @@ func (s *Service) execHeadSync(ctx context.Context) error {
 				log.WithField("state", cpState).WithError(err).Error("Head sync main: state error")
 				return err
 			}
-			log.WithField("state", cpState).Info("Head sync main: next epoche")
+			log.WithField("nilState", cpState == nil).Info("Head sync main: next epoche")
 		}
 		bState := cpState
 		if bState == nil {
@@ -257,6 +265,23 @@ func (s *Service) execHeadSync(ctx context.Context) error {
 		log.WithFields(logFields).WithError(err).Error("Head sync main: error")
 	}
 	if isReady {
+		//sort data by slots
+		dataBySlots := map[uint64]gwatTypes.ConsensusInfo{}
+		spineSlots := gwatCommon.SorterAskU64{}
+		for _, d := range syncParams {
+			sl := d.Slot
+			dataBySlots[sl] = d
+			spineSlots = append(spineSlots, sl)
+		}
+		sort.Sort(spineSlots)
+		//set finalized spine cache
+		s.cfg.Chain.ResetFinalizedSpines()
+		for _, slot := range spineSlots {
+			sp := dataBySlots[slot]
+			if len(sp.Finalizing) > 0 {
+				s.cfg.Chain.AddFinalizedSpines(sp.Finalizing)
+			}
+		}
 		log.WithFields(logFields).Info("Head sync main: success")
 		return nil
 	}

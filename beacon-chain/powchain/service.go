@@ -102,7 +102,7 @@ type POWBlockFetcher interface {
 
 	ExecutionDagSync(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (gwatCommon.HashArray, error)
 	ExecutionDagGetCandidates(ctx context.Context, slot ethTypes.Slot) (gwatCommon.HashArray, error)
-	ExecutionDagFinalize(ctx context.Context, syncParams *gwatCommon.HashArray) error
+	ExecutionDagFinalize(ctx context.Context, spines gwatCommon.HashArray, baseSpine *gwatCommon.Hash) (*gwatCommon.Hash, error)
 }
 
 // Chain defines a standard interface for the powchain service in Prysm.
@@ -457,9 +457,11 @@ func (s *Service) processBlockHeader(header *gwatTypes.Header) {
 	s.latestEth1Data.BlockHash = header.Hash().Bytes()
 	s.latestEth1Data.BlockTime = header.Time
 	log.WithFields(logrus.Fields{
+		"slot":        header.Slot,
+		"height":      header.Height,
 		"blockNumber": s.latestEth1Data.BlockHeight,
 		"blockHash":   hexutil.Encode(s.latestEth1Data.BlockHash),
-	}).Debug("Latest eth1 chain event")
+	}).Info("Latest eth1 chain event")
 }
 
 // batchRequestHeaders requests the block range specified in the arguments. Instead of requesting
