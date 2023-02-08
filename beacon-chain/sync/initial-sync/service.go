@@ -194,9 +194,6 @@ func (s *Service) Resync() error {
 	defer func() { s.synced.Set() }()                       // Reset it at the end of the method.
 	genesis := time.Unix(int64(headState.GenesisTime()), 0) // lint:ignore uintcast -- Genesis time will not exceed int64 in your lifetime.
 
-	//s.cfg.Chain.SetHeadSyncFn(s.HeadSync)
-	//s.cfg.Chain.SetIsSyncFn(s.IsInitSync)
-
 	s.isResync = true
 	defer func() { s.isResync = false }() // Reset it at the end of the method.
 
