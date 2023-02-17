@@ -316,7 +316,8 @@ func TestMapBeaconBlockAltair(t *testing.T) {
 								Proof: [][]byte{[]byte("A")},
 								Data: &ethpb.Deposit_Data{
 									PublicKey:             make([]byte, fieldparams.BLSPubkeyLength),
-									WithdrawalCredentials: make([]byte, 32),
+									CreatorAddress:        make([]byte, 20),
+									WithdrawalCredentials: make([]byte, 20),
 									Amount:                0,
 									Signature:             make([]byte, fieldparams.BLSSignatureLength),
 								},
@@ -452,7 +453,8 @@ func TestMapBeaconBlockBody(t *testing.T) {
 							Proof: [][]byte{[]byte("A")},
 							Data: &ethpb.Deposit_Data{
 								PublicKey:             make([]byte, fieldparams.BLSPubkeyLength),
-								WithdrawalCredentials: make([]byte, 32),
+								CreatorAddress:        make([]byte, 20),
+								WithdrawalCredentials: make([]byte, 20),
 								Amount:                0,
 								Signature:             make([]byte, fieldparams.BLSSignatureLength),
 							},

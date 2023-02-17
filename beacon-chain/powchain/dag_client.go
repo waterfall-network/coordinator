@@ -10,6 +10,7 @@ import (
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/rpc"
 )
@@ -29,6 +30,8 @@ const (
 	ExecutionDagSyncSlotInfoMethod = "dag_syncSlotInfo"
 	//ExecutionDagValidateSpinesMethod request string for JSON-RPC of dag api.
 	ExecutionDagValidateSpinesMethod = "dag_validateSpines"
+	//ExecutionDepositCountMethod request string for JSON-RPC of validator api.
+	ExecutionDepositCountMethod = "validator_depositCount"
 )
 
 // ExecutionDagSync executing following procedures:
@@ -238,6 +241,36 @@ func (s *Service) GetHeaderByNumber(ctx context.Context, nr *big.Int) (*gwatType
 	}
 	header, err := s.eth1DataFetcher.HeaderByNumber(ctx, nr)
 	return header, handleDagRPCError(err)
+}
+
+// GetDepositCount retrieves current gwat deposit count
+func (s *Service) GetDepositCount(ctx context.Context) (uint64, error) {
+	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.GetDepositCount")
+	defer span.End()
+	//var result uint64
+	var result string
+
+	if s.rpcClient == nil {
+		return 0, fmt.Errorf("Rpc Client not init")
+	}
+	err := s.rpcClient.CallContext(
+		ctx,
+		&result,
+		ExecutionDepositCountMethod,
+		nil,
+	)
+	if err != nil {
+		log.WithError(err).Error("GetDepositCount")
+	}
+
+	count, err := hexutil.DecodeUint64(result)
+	log.WithError(err).WithField(
+		"result", result,
+	).WithField(
+		"uint", count,
+	).Error("GetDepositCount")
+
+	return count, handleDagRPCError(err)
 }
 
 // handleDagRPCError errors received from the RPC server according to the specification.

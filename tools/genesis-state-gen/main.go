@@ -23,11 +23,12 @@ import (
 // DepositDataJSON representing a json object of hex string and uint64 values for
 // validators on Ethereum. This file can be generated using the official eth2.0-deposit-cli.
 type DepositDataJSON struct {
-	PubKey                string `json:"pubkey"`
-	Amount                uint64 `json:"amount"`
-	WithdrawalCredentials string `json:"withdrawal_credentials"`
-	DepositDataRoot       string `json:"deposit_data_root"`
-	Signature             string `json:"signature"`
+	PubKey            string `json:"pubkey"`
+	Amount            uint64 `json:"amount"`
+	CreatorAddress    string `json:"creator_address"`
+	WithdrawalAddress string `json:"withdrawal_address"`
+	DepositDataRoot   string `json:"deposit_data_root"`
+	Signature         string `json:"signature"`
 }
 
 var (
@@ -175,7 +176,11 @@ func depositJSONToDepositData(input *DepositDataJSON) (depositData *ethpb.Deposi
 	if err != nil {
 		return
 	}
-	withdrawalbytes, err := hex.DecodeString(strings.TrimPrefix(input.WithdrawalCredentials, "0x"))
+	creatorbytes, err := hex.DecodeString(strings.TrimPrefix(input.CreatorAddress, "0x"))
+	if err != nil {
+		return
+	}
+	withdrawalbytes, err := hex.DecodeString(strings.TrimPrefix(input.WithdrawalAddress, "0x"))
 	if err != nil {
 		return
 	}
@@ -189,6 +194,7 @@ func depositJSONToDepositData(input *DepositDataJSON) (depositData *ethpb.Deposi
 	}
 	depositData = &ethpb.Deposit_Data{
 		PublicKey:             pubKeyBytes,
+		CreatorAddress:        creatorbytes,
 		WithdrawalCredentials: withdrawalbytes,
 		Amount:                input.Amount,
 		Signature:             signatureBytes,

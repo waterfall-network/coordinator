@@ -66,6 +66,13 @@ func TestReadOnlyValidator_WithdrawalCredentials(t *testing.T) {
 	assert.DeepEqual(t, creds, v.WithdrawalCredentials())
 }
 
+func TestReadOnlyValidator_CreatorAddress(t *testing.T) {
+	creds := []byte{0xFA, 0xCC}
+	v, err := v1.NewValidator(&ethpb.Validator{CreatorAddress: creds})
+	require.NoError(t, err)
+	assert.DeepEqual(t, creds, v.CreatorAddress())
+}
+
 func TestReadOnlyValidator_Slashed(t *testing.T) {
 	slashed := true
 	v, err := v1.NewValidator(&ethpb.Validator{Slashed: slashed})

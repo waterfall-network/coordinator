@@ -917,7 +917,8 @@ type DepositMessage struct {
 	unknownFields protoimpl.UnknownFields
 
 	PublicKey             []byte `protobuf:"bytes,1,opt,name=public_key,json=publicKey,proto3" json:"public_key,omitempty" spec-name:"pubkey" ssz-size:"48"`
-	WithdrawalCredentials []byte `protobuf:"bytes,2,opt,name=withdrawal_credentials,json=withdrawalCredentials,proto3" json:"withdrawal_credentials,omitempty" ssz-size:"32"`
+	CreatorAddress        []byte `protobuf:"bytes,2,opt,name=creator_address,json=creatorAddress,proto3" json:"creator_address,omitempty" ssz-size:"20"`
+	WithdrawalCredentials []byte `protobuf:"bytes,2,opt,name=withdrawal_credentials,json=withdrawalCredentials,proto3" json:"withdrawal_credentials,omitempty" ssz-size:"20"`
 	Amount                uint64 `protobuf:"varint,3,opt,name=amount,proto3" json:"amount,omitempty"`
 }
 
@@ -963,6 +964,13 @@ func (x *DepositMessage) GetPublicKey() []byte {
 func (x *DepositMessage) GetWithdrawalCredentials() []byte {
 	if x != nil {
 		return x.WithdrawalCredentials
+	}
+	return nil
+}
+
+func (x *DepositMessage) GetCreatorAddress() []byte {
+	if x != nil {
+		return x.CreatorAddress
 	}
 	return nil
 }

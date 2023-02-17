@@ -189,6 +189,7 @@ func ProcessDeposit(beaconState state.BeaconState, deposit *ethpb.Deposit, verif
 		}
 		if err := beaconState.AppendValidator(&ethpb.Validator{
 			PublicKey:                  pubKey,
+			CreatorAddress:             deposit.Data.CreatorAddress,
 			WithdrawalCredentials:      deposit.Data.WithdrawalCredentials,
 			ActivationEligibilityEpoch: params.BeaconConfig().FarFutureEpoch,
 			ActivationEpoch:            params.BeaconConfig().FarFutureEpoch,
@@ -266,6 +267,7 @@ func verifyDepositDataWithDomain(ctx context.Context, deps []*ethpb.Deposit, dom
 		sigs[i] = dep.Data.Signature
 		depositMessage := &ethpb.DepositMessage{
 			PublicKey:             dep.Data.PublicKey,
+			CreatorAddress:        dep.Data.CreatorAddress,
 			WithdrawalCredentials: dep.Data.WithdrawalCredentials,
 			Amount:                dep.Data.Amount,
 		}

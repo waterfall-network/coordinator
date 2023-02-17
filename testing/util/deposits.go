@@ -12,7 +12,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/container/trie"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/interop"
@@ -169,11 +168,12 @@ func signedDeposit(
 	withdrawalKey []byte,
 	balance uint64,
 ) (*ethpb.Deposit, error) {
-	withdrawalCreds := hash.Hash(withdrawalKey)
-	withdrawalCreds[0] = params.BeaconConfig().BLSWithdrawalPrefixByte
+	withdrawalCreds := gwatCommon.BytesToAddress(withdrawalKey)
+	creatorAddr := gwatCommon.BytesToAddress(withdrawalKey)
 	depositMessage := &ethpb.DepositMessage{
 		PublicKey:             publicKey,
 		Amount:                balance,
+		CreatorAddress:        creatorAddr[:],
 		WithdrawalCredentials: withdrawalCreds[:],
 	}
 
@@ -193,6 +193,7 @@ func signedDeposit(
 	depositData := &ethpb.Deposit_Data{
 		PublicKey:             publicKey,
 		Amount:                balance,
+		CreatorAddress:        creatorAddr[:],
 		WithdrawalCredentials: withdrawalCreds[:],
 		Signature:             secretKey.Sign(sigRoot[:]).Marshal(),
 	}
@@ -340,12 +341,13 @@ func DeterministicDepositsAndKeysSameValidator(numDeposits uint64) ([]*ethpb.Dep
 
 		// Create the new deposits and add them to the trie. Always use the first validator to create deposit
 		for i := uint64(0); i < numRequired; i++ {
-			withdrawalCreds := hash.Hash(publicKeys[1].Marshal())
-			withdrawalCreds[0] = params.BeaconConfig().BLSWithdrawalPrefixByte
+			withdrawalCreds := gwatCommon.BytesToAddress(publicKeys[1].Marshal())
+			creatorAddr := gwatCommon.BytesToAddress(publicKeys[1].Marshal())
 
 			depositMessage := &ethpb.DepositMessage{
 				PublicKey:             publicKeys[1].Marshal(),
 				Amount:                params.BeaconConfig().MaxEffectiveBalance,
+				CreatorAddress:        creatorAddr[:],
 				WithdrawalCredentials: withdrawalCreds[:],
 			}
 
@@ -365,6 +367,7 @@ func DeterministicDepositsAndKeysSameValidator(numDeposits uint64) ([]*ethpb.Dep
 			depositData := &ethpb.Deposit_Data{
 				PublicKey:             depositMessage.PublicKey,
 				Amount:                depositMessage.Amount,
+				CreatorAddress:        depositMessage.CreatorAddress,
 				WithdrawalCredentials: depositMessage.WithdrawalCredentials,
 				Signature:             secretKeys[1].Sign(sigRoot[:]).Marshal(),
 			}

@@ -70,6 +70,14 @@ func (v readOnlyValidator) PublicKey() [fieldparams.BLSPubkeyLength]byte {
 	return pubkey
 }
 
+// CreatorAddress returns the Creator Address of the
+// read only validator.
+func (v readOnlyValidator) CreatorAddress() []byte {
+	bytes := make([]byte, len(v.validator.CreatorAddress))
+	copy(bytes, v.validator.CreatorAddress)
+	return bytes
+}
+
 // WithdrawalCredentials returns the withdrawal credentials of the
 // read only validator.
 func (v readOnlyValidator) WithdrawalCredentials() []byte {

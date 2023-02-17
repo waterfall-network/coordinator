@@ -325,8 +325,7 @@ func CalcCreatorsAssignments(
 				log.WithError(err).Errorf("Get validator data failed: index=%v", inx)
 				continue
 			}
-			// Withdrawal address uses as gwat coinbase
-			address := gwatCommon.BytesToAddress(validator.WithdrawalCredentials()[12:])
+			address := gwatCommon.BytesToAddress(validator.CreatorAddress())
 			// skip already added
 			for _, addr := range creatorsAssig[val.AttesterSlot] {
 				if address == addr {

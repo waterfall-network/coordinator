@@ -27,6 +27,7 @@ func ValidatorFieldRoots(hasher ssz.HashFn, validator *ethpb.Validator) ([][32]b
 	var fieldRoots [][32]byte
 	if validator != nil {
 		pubkey := bytesutil.ToBytes48(validator.PublicKey)
+		creatorAddr := bytesutil.ToBytes32(validator.CreatorAddress)
 		withdrawCreds := bytesutil.ToBytes32(validator.WithdrawalCredentials)
 		effectiveBalanceBuf := [32]byte{}
 		binary.LittleEndian.PutUint64(effectiveBalanceBuf[:8], validator.EffectiveBalance)
@@ -54,7 +55,7 @@ func ValidatorFieldRoots(hasher ssz.HashFn, validator *ethpb.Validator) ([][32]b
 		if err != nil {
 			return [][32]byte{}, err
 		}
-		fieldRoots = [][32]byte{pubKeyRoot, withdrawCreds, effectiveBalanceBuf, slashBuf, activationEligibilityBuf,
+		fieldRoots = [][32]byte{pubKeyRoot, creatorAddr, withdrawCreds, effectiveBalanceBuf, slashBuf, activationEligibilityBuf,
 			activationBuf, exitBuf, withdrawalBuf}
 	}
 	return fieldRoots, nil

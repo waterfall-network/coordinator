@@ -535,6 +535,7 @@ type depositJson struct {
 
 type deposit_DataJson struct {
 	PublicKey             string `json:"pubkey" hex:"true"`
+	CreatorAddress        string `json:"creator_address" hex:"true"`
 	WithdrawalCredentials string `json:"withdrawal_credentials" hex:"true"`
 	Amount                string `json:"amount"`
 	Signature             string `json:"signature" hex:"true"`
@@ -682,6 +683,7 @@ type validatorContainerJson struct {
 
 type validatorJson struct {
 	PublicKey                  string `json:"pubkey" hex:"true"`
+	CreatorAddress             string `json:"creator_address" hex:"true"`
 	WithdrawalCredentials      string `json:"withdrawal_credentials" hex:"true"`
 	EffectiveBalance           string `json:"effective_balance"`
 	Slashed                    bool   `json:"slashed"`
