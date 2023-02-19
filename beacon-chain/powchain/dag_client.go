@@ -31,7 +31,7 @@ const (
 	//ExecutionDagValidateSpinesMethod request string for JSON-RPC of dag api.
 	ExecutionDagValidateSpinesMethod = "dag_validateSpines"
 	//ExecutionDepositCountMethod request string for JSON-RPC of validator api.
-	ExecutionDepositCountMethod = "validator_depositCount"
+	ExecutionDepositCountMethod = "wat_validator_DepositCount"
 )
 
 // ExecutionDagSync executing following procedures:
