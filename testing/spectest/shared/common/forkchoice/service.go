@@ -72,7 +72,17 @@ type engineMock struct {
 	powBlocks map[[32]byte]*ethpb.PowBlock
 }
 
-func (m *engineMock) ExecutionDagSync(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (gwatCommon.HashArray, error) {
+func (m *engineMock) ExecutionDagHeadSyncReady(ctx context.Context, params *gwatTypes.ConsensusInfo) (bool, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *engineMock) ExecutionDagValidateSpines(ctx context.Context, params gwatCommon.HashArray) (bool, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *engineMock) ExecutionDagHeadSync(ctx context.Context, params []gwatTypes.ConsensusInfo) (bool, error) {
 	//TODO implement me
 	panic("implement me")
 }

@@ -51,16 +51,6 @@ func (m *POWChain) ExecutionDagGetCandidates(ctx context.Context, slot ethTypes.
 	return candidates, err
 }
 
-func (m *POWChain) ExecutionDagSync(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (gwatCommon.HashArray, error) {
-	var err error
-	candidates := make(gwatCommon.HashArray, len(m.HashesByHeight))
-	for _, val := range m.HashesByHeight {
-		h := common.BytesToHash(val)
-		candidates = append(candidates, h)
-	}
-	return candidates, err
-}
-
 func (m *POWChain) ExecutionDagFinalize(ctx context.Context, spines gwatCommon.HashArray, baseSpine *gwatCommon.Hash) (*gwatCommon.Hash, error) {
 	//TODO implement me
 	panic("implement me")
