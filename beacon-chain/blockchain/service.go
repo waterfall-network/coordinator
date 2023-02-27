@@ -79,6 +79,7 @@ type Service struct {
 	store                 *store.Store
 	fnHeadSync            func(context.Context, bool) error
 	fnIsSync              func() bool
+	newHeadCh             chan *head
 }
 
 // config options for the service.
@@ -117,6 +118,7 @@ func NewService(ctx context.Context, opts ...Option) (*Service, error) {
 		cfg:                  &config{},
 		store:                &store.Store{},
 		spineData:            spineData{},
+		newHeadCh:            make(chan *head),
 	}
 	for _, opt := range opts {
 		if err := opt(srv); err != nil {
@@ -134,6 +136,9 @@ func NewService(ctx context.Context, opts ...Option) (*Service, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	srv.spawnProcessDagFinalize()
+
 	return srv, nil
 }
 
