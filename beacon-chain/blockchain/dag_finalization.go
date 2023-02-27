@@ -1,6 +1,7 @@
 package blockchain
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 
@@ -19,13 +20,38 @@ import (
 func (s *Service) spawnProcessDagFinalize() {
 	go func() {
 		for {
+			var headRoot []byte
 			select {
 			case <-s.ctx.Done():
 				log.Info("process dag finalize: context done")
 				return
 			case newHead := <-s.newHeadCh:
+				if bytes.Equal(headRoot, newHead.root[:]) {
+					log.Info("process dag finalize: skip (head duplicated)")
+					continue
+				}
+				headRoot = bytesutil.SafeCopyBytes(newHead.root[:])
+				var (
+					lastFinalized gwatCommon.Hash
+					lastSpine     gwatCommon.Hash
+				)
+				finalizedSpines := s.GetFinalizedSpines()
+				if len(finalizedSpines) > 0 {
+					lastFinalized = finalizedSpines[len(finalizedSpines)-1]
+				}
+				finalization := gwatCommon.HashArrayFromBytes(newHead.state.Eth1Data().Finalization)
+				if len(finalization) > 0 {
+					lastSpine = finalization[len(finalization)-1]
+				}
+				if lastFinalized == lastSpine {
+					log.Info("process dag finalize: skip (no updates)")
+					continue
+				}
+
 				err := s.processDagFinalization(newHead.block, newHead.state)
 				if err != nil {
+					// reset if failed
+					headRoot = bytesutil.SafeCopyBytes(params.BeaconConfig().ZeroHash[:])
 					log.WithError(err).WithFields(logrus.Fields{
 						"newHead.root": fmt.Sprintf("%#x", newHead.root),
 						"newHead.slot": newHead.slot,
