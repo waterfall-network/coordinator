@@ -40,7 +40,7 @@ func (vs *Server) getPhase0BeaconBlock(ctx context.Context, req *ethpb.BlockRequ
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"req": req,
-		}).Error("#### build-Altair-BeaconBlock: could not build block data ###")
+		}).Error("#### build-Phase0-BeaconBlock: could not build block data ###")
 		return nil, fmt.Errorf("could not build block data: %v", err)
 	}
 
