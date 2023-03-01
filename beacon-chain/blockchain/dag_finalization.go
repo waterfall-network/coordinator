@@ -13,6 +13,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
 	"go.opencensus.io/trace"
 )
 
@@ -23,11 +24,11 @@ func (s *Service) spawnProcessDagFinalize() {
 			var headRoot []byte
 			select {
 			case <-s.ctx.Done():
-				log.Info("process dag finalize: context done")
+				log.Info("dag finalization: context done")
 				return
 			case newHead := <-s.newHeadCh:
 				if bytes.Equal(headRoot, newHead.root[:]) {
-					log.Info("process dag finalize: skip (head duplicated)")
+					log.Info("dag finalization: skip (head duplicated)")
 					continue
 				}
 				headRoot = bytesutil.SafeCopyBytes(newHead.root[:])
@@ -44,7 +45,7 @@ func (s *Service) spawnProcessDagFinalize() {
 					lastSpine = finalization[len(finalization)-1]
 				}
 				if lastFinalized == lastSpine {
-					log.Info("process dag finalize: skip (no updates)")
+					log.Info("dag finalization: skip (no updates)")
 					continue
 				}
 
@@ -55,7 +56,7 @@ func (s *Service) spawnProcessDagFinalize() {
 					log.WithError(err).WithFields(logrus.Fields{
 						"newHead.root": fmt.Sprintf("%#x", newHead.root),
 						"newHead.slot": newHead.slot,
-					}).Error("process dag finalize: failed")
+					}).Error("dag finalization: failed")
 				}
 			}
 		}
@@ -73,11 +74,11 @@ func (s *Service) processDagFinalization(headBlock block.SignedBeaconBlock, head
 		cp := headState.CurrentJustifiedCheckpoint()
 		cpState, err := s.cfg.StateGen.StateByRoot(ctx, bytesutil.ToBytes32(cp.Root))
 		if err != nil {
-			log.WithError(errors.Wrapf(err, "could not get checkpoint state for epoch=%d root=%x", cp.Epoch, cp.GetRoot())).Error("process dag finalize")
+			log.WithError(errors.Wrapf(err, "could not get checkpoint state for epoch=%d root=%x", cp.Epoch, cp.GetRoot())).Error("dag finalization")
 			return errors.Wrapf(err, "could not get checkpoint state for epoch=%d root=%x", cp.Epoch, cp.GetRoot())
 		}
 		if cpState == nil || cpState.IsNil() {
-			log.WithError(errors.Wrapf(err, "checkpoint's state not found for epoch=%d root=%x", cp.Epoch, cp.GetRoot())).Error("process dag finalize")
+			log.WithError(errors.Wrapf(err, "checkpoint's state not found for epoch=%d root=%x", cp.Epoch, cp.GetRoot())).Error("dag finalization")
 			return errors.Wrapf(err, "checkpoint's state not found for epoch=%d root=%x", cp.Epoch, cp.GetRoot())
 		}
 
@@ -85,25 +86,32 @@ func (s *Service) processDagFinalization(headBlock block.SignedBeaconBlock, head
 		headFin := gwatCommon.HashArrayFromBytes(headState.Eth1Data().Finalization)
 		skip := headFin.IsEqualTo(cpFin)
 		if !skip {
-			baseSpine, finalizing, err := s.collectFinalizationParams(ctx, headBlock, headState)
+			params, err := s.collectFinalizationParams(ctx, headBlock, headState)
 			if err != nil {
 				log.WithError(err).WithFields(logrus.Fields{
-					"finalizing": finalizing,
-					"baseSpine":  baseSpine.Hex(),
-				}).Warn("saveHead: get finalization params failed")
-				return errors.Wrap(err, "saveHead: get finalization params failed")
+					"params.Spines":           params.Spines,
+					"params.BaseSpine":        params.BaseSpine.Hex(),
+					"checkpoint":              params.Checkpoint.Epoch,
+					"params.Checkpoint.Spine": params.Checkpoint.Spine,
+				}).Warn("dag finalization: get finalization params failed")
+				return errors.Wrap(err, "dag finalization: get finalization params failed")
 			}
 
-			lfSpine, err := s.cfg.ExecutionEngineCaller.ExecutionDagFinalize(ctx, finalizing, &baseSpine)
-			fSeq := append(gwatCommon.HashArray{baseSpine}, finalizing...)
+			finRes, err := s.cfg.ExecutionEngineCaller.ExecutionDagFinalize(ctx, params)
+			baseSpine := params.BaseSpine
+			finalizing := params.Spines
+			lfSpine := finRes.LFSpine
+			fSeq := append(gwatCommon.HashArray{*baseSpine}, finalizing...)
 			if err != nil || lfSpine == nil {
 
 				log.WithError(err).WithFields(logrus.Fields{
-					"finalizing": finalizing,
-					"baseSpine":  baseSpine.Hex(),
-					"lfSpine":    lfSpine,
-				}).Warn("saveHead: finalization failed")
-				return errors.Wrap(err, "saveHead: gwat finalization failed")
+					"params.Spines":           params.Spines,
+					"params.BaseSpine":        params.BaseSpine.Hex(),
+					"checkpoint":              params.Checkpoint.Epoch,
+					"params.Checkpoint.Spine": params.Checkpoint.Spine,
+					"lfSpine":                 lfSpine.Hex(),
+				}).Warn("dag finalization: finalization failed")
+				return errors.Wrap(err, "dag finalization: gwat finalization failed")
 			}
 			for _, h := range fSeq {
 				finalizedSeq = append(finalizedSeq, h)
@@ -116,10 +124,10 @@ func (s *Service) processDagFinalization(headBlock block.SignedBeaconBlock, head
 				err = errors.New("lf spine is invalid")
 				log.WithError(err).WithFields(logrus.Fields{
 					"finalizationSeq": fSeq,
-					"lfSpine":         *lfSpine,
+					"lfSpine":         lfSpine.Hex(),
 					"isValid":         fSeq.Has(*lfSpine),
-				}).Warn("saveHead: finalization failed")
-				return errors.Wrap(err, "saveHead: gwat finalization failed")
+				}).Warn("dag finalization: finalization failed")
+				return errors.Wrap(err, "dag finalization: gwat finalization failed")
 			}
 
 			log.WithFields(logrus.Fields{
@@ -129,7 +137,7 @@ func (s *Service) processDagFinalization(headBlock block.SignedBeaconBlock, head
 				"finalizationSeq":  fSeq,
 				"finalizedSeq":     finalizedSeq,
 				"isFullyFinalized": fSeq.IsEqualTo(finalizedSeq),
-			}).Info("process dag finalize: finalization success")
+			}).Info("dag finalization: finalization success")
 		}
 	}
 
@@ -137,11 +145,11 @@ func (s *Service) processDagFinalization(headBlock block.SignedBeaconBlock, head
 	cpFin := headState.FinalizedCheckpoint()
 	cpState, err := s.cfg.StateGen.StateByRoot(ctx, bytesutil.ToBytes32(cpFin.Root))
 	if err != nil {
-		log.WithError(errors.Wrapf(err, "Cache finalized spines: could not get checkpoint state for epoch=%d root=%x", cpFin.Epoch, cpFin.GetRoot())).Error("process dag finalize")
+		log.WithError(errors.Wrapf(err, "Cache finalized spines: could not get checkpoint state for epoch=%d root=%x", cpFin.Epoch, cpFin.GetRoot())).Error("dag finalization")
 		return errors.Wrapf(err, "Cache finalized spines: could not get checkpoint state for epoch=%d root=%x", cpFin.Epoch, cpFin.GetRoot())
 	}
 	if cpState == nil || cpState.IsNil() {
-		log.WithError(errors.Wrapf(err, "Cache finalized spines: checkpoint's state not found for epoch=%d root=%x", cpFin.Epoch, cpFin.GetRoot())).Error("process dag finalize")
+		log.WithError(errors.Wrapf(err, "Cache finalized spines: checkpoint's state not found for epoch=%d root=%x", cpFin.Epoch, cpFin.GetRoot())).Error("dag finalization")
 		return errors.Wrapf(err, "Cache finalized spines: checkpoint's state not found for epoch=%d root=%x", cpFin.Epoch, cpFin.GetRoot())
 	}
 	cpFinSeq := gwatCommon.HashArrayFromBytes(cpState.Eth1Data().Finalization)
@@ -158,15 +166,26 @@ func (s *Service) collectFinalizationParams(
 	ctx context.Context,
 	headBlock block.SignedBeaconBlock,
 	headState state.BeaconState,
-) (baseSpine gwatCommon.Hash, finalizationSeq gwatCommon.HashArray, err error) {
+) (*gwatTypes.FinalizationParams, error) {
 	if headState == nil || headState.IsNil() {
-		return baseSpine, finalizationSeq, errors.New("Collect finalization params: nil head state received")
+		return nil, errors.New("Collect finalization params: nil head state received")
 	}
-	//update checkpoint of FinalizedSpines cache
+	var (
+		baseSpine       gwatCommon.Hash
+		finalizationSeq gwatCommon.HashArray
+		err             error
+	)
+
+	// get request gwat checkpoint
 	checkpoint := headState.FinalizedCheckpoint()
+	cpFinalized, err := s.getRequestGwatCheckpoint(ctx, headState)
+	if err != nil {
+		return nil, err
+	}
+
 	cpSlot, err := slots.EpochStart(checkpoint.Epoch)
 	if err != nil {
-		return baseSpine, finalizationSeq, err
+		return nil, err
 	}
 	finalizedSpines := s.GetFinalizedSpines()
 	var currRoot [32]byte
@@ -197,31 +216,72 @@ func (s *Service) collectFinalizationParams(
 		//set next block root as current
 		currRoot = bytesutil.ToBytes32(currBlock.Block().ParentRoot())
 		if currRoot == params.BeaconConfig().ZeroHash {
-			return baseSpine, finalizationSeq, nil
+			return &gwatTypes.FinalizationParams{
+				Spines:        finalizationSeq,
+				BaseSpine:     &baseSpine,
+				Checkpoint:    cpFinalized,
+				ValidatorSync: nil,
+			}, nil
 		}
 		//set next block as current
 		currBlock, err = s.cfg.BeaconDB.Block(s.ctx, currRoot)
 		if err != nil {
-			return baseSpine, finalizationSeq, err
+			return nil, err
 		}
 		//set next state as current
 		currState, err = s.cfg.StateGen.StateByRoot(ctx, currRoot)
 		if err != nil {
 			err = errors.Wrapf(err, "could not get parent state for root=%x", currRoot)
 			log.WithError(err).Error("Collect finalization params")
-			return baseSpine, finalizationSeq, err
+			return nil, err
 		}
 		if currState == nil || currState.IsNil() {
 			err = errors.Errorf("retrieved nil parent state for root=%x", currRoot)
 			log.WithError(err).Error("Collect finalization params")
-			return baseSpine, finalizationSeq, err
+			return nil, err
 		}
 		// if reach finalized checkpoint slot
 		if currBlock.Block().Slot() < cpSlot {
 			err = errors.New("Collect finalization params: failed")
 			log.WithError(err).Error("Collect finalization params")
-			return baseSpine, finalizationSeq, err
+			return nil, err
 		}
 	}
-	return baseSpine, finalizationSeq, nil
+	return &gwatTypes.FinalizationParams{
+		Spines:        finalizationSeq,
+		BaseSpine:     &baseSpine,
+		Checkpoint:    cpFinalized,
+		ValidatorSync: nil,
+	}, nil
+}
+
+// getRequestGwatCheckpoint create gwatTypes.Checkpoint param to call gwat finalization api.
+func (s *Service) getRequestGwatCheckpoint(
+	ctx context.Context,
+	headState state.BeaconState,
+) (cpFinalized *gwatTypes.Checkpoint, err error) {
+	if headState == nil || headState.IsNil() {
+		return cpFinalized, errors.New("Collect finalization params: nil head state received")
+	}
+	checkpoint := headState.FinalizedCheckpoint()
+	//check cached
+	if cp := s.GetCachedGwatCheckpoint(checkpoint.Root); cp != nil {
+		return cp, nil
+	}
+	// create
+	cpRoot := bytesutil.ToBytes32(checkpoint.Root)
+	cpState, err := s.cfg.StateGen.StateByRoot(ctx, cpRoot)
+	if err != nil {
+		return cpFinalized, err
+	}
+
+	finalization := gwatCommon.HashArrayFromBytes(cpState.Eth1Data().Finalization)
+	cpFinalized = &gwatTypes.Checkpoint{
+		Epoch: uint64(checkpoint.Epoch),
+		Root:  gwatCommon.BytesToHash(checkpoint.Root),
+		Spine: finalization[len(finalization)-1], // use last spine
+	}
+	s.CacheGwatCheckpoint(cpFinalized)
+
+	return cpFinalized, nil
 }

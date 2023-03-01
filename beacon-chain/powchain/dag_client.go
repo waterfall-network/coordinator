@@ -65,18 +65,13 @@ func (s *Service) ExecutionDagSync(ctx context.Context, syncParams *gwatTypes.Co
 
 // ExecutionDagFinalize executing finalisation procedure
 // by calling dag_finalize via JSON-RPC.
-func (s *Service) ExecutionDagFinalize(ctx context.Context, spines gwatCommon.HashArray, baseSpine *gwatCommon.Hash) (*gwatCommon.Hash, error) {
+func (s *Service) ExecutionDagFinalize(ctx context.Context, params *gwatTypes.FinalizationParams) (*gwatTypes.FinalizationResult, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagFinalize")
 	defer span.End()
 	result := &gwatTypes.FinalizationResult{}
 
 	if s.rpcClient == nil {
 		return nil, fmt.Errorf("Rpc Client not init")
-	}
-
-	params := &gwatTypes.FinalizationParams{
-		Spines:    spines,
-		BaseSpine: baseSpine,
 	}
 
 	err := s.rpcClient.CallContext(
@@ -101,7 +96,7 @@ func (s *Service) ExecutionDagFinalize(ctx context.Context, spines gwatCommon.Ha
 		err = errors.New(*result.Error)
 	}
 
-	return result.LFSpine, handleDagRPCError(err)
+	return result, handleDagRPCError(err)
 }
 
 // ExecutionDagGetCandidates executing consensus procedure

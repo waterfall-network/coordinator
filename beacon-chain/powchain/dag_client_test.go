@@ -46,8 +46,14 @@ func TestDagClient_IPC(t *testing.T) {
 
 		baseSpine := common.HexToHash("0x351cd65f6e74ff61322d16c4a808bdce69c30410b3965fbbf188c46fa44da545")
 		hash_1 := common.HexToHash("0xa659fcd4ed3f3ad9cd43ab36eb29080a4655328fe16f045962afab1d66a5da09")
-		lfSpine, err := srv.ExecutionDagFinalize(ctx, gwatCommon.HashArray{hash_1}, &baseSpine)
-		require.DeepEqual(t, hash_1.Hex(), lfSpine.Hex())
+		params := &gwatTypes.FinalizationParams{
+			Spines:        gwatCommon.HashArray{hash_1},
+			BaseSpine:     &baseSpine,
+			Checkpoint:    nil,
+			ValidatorSync: nil,
+		}
+		res, err := srv.ExecutionDagFinalize(ctx, params)
+		require.DeepEqual(t, hash_1.Hex(), res.LFSpine.Hex())
 		require.ErrorContains(t, *want.Error, err)
 	})
 	t.Run(ExecutionDagSyncMethod, func(t *testing.T) {
@@ -149,7 +155,10 @@ func TestDagClient_HTTP(t *testing.T) {
 			jsonRequestString := string(enc)
 			// We expect the JSON string RPC request contains the right arguments.
 			//sArgs, _ := arg.MarshalJSON()
-			sArgs := "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"dag_finalize\",\"params\":[{\"spines\":[\"0xa659fcd4ed3f3ad9cd43ab36eb29080a4655328fe16f045962afab1d66a5da09\"],\"baseSpine\":\"0x351cd65f6e74ff61322d16c4a808bdce69c30410b3965fbbf188c46fa44da545\"}]}"
+			sArgs := "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"dag_finalize\",\"params\":[" +
+				"{\"spines\":[\"0xa659fcd4ed3f3ad9cd43ab36eb29080a4655328fe16f045962afab1d66a5da09\"]," +
+				"\"baseSpine\":\"0x351cd65f6e74ff61322d16c4a808bdce69c30410b3965fbbf188c46fa44da545\"," +
+				"\"checkpoint\":null,\"validatorSync\":null}]}"
 			//t.Logf("=========== %v", jsonRequestString)
 			//t.Logf("=========== %v", fmt.Sprintf("%s", sArgs))
 			require.Equal(t, true, strings.Contains(
@@ -173,10 +182,17 @@ func TestDagClient_HTTP(t *testing.T) {
 		service := &Service{}
 		service.rpcClient = rpcClient
 
+		params := &gwatTypes.FinalizationParams{
+			Spines:        spines,
+			BaseSpine:     &baseSpine,
+			Checkpoint:    nil,
+			ValidatorSync: nil,
+		}
+
 		// We call the RPC method via HTTP and expect a proper result.
-		lfSpine, err := service.ExecutionDagFinalize(ctx, spines, &baseSpine)
+		res, err := service.ExecutionDagFinalize(ctx, params)
 		require.ErrorContains(t, *want.Error, err)
-		require.DeepEqual(t, hash_1.Hex(), lfSpine.Hex())
+		require.DeepEqual(t, hash_1.Hex(), res.LFSpine.Hex())
 	})
 	t.Run(ExecutionDagSyncMethod, func(t *testing.T) {
 		hash_1 := common.HexToHash("0xa659fcd4ed3f3ad9cd43ab36eb29080a4655328fe16f045962afab1d66a5da09")

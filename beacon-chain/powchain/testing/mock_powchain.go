@@ -61,7 +61,7 @@ func (m *POWChain) ExecutionDagSync(ctx context.Context, syncParams *gwatTypes.C
 	return candidates, err
 }
 
-func (m *POWChain) ExecutionDagFinalize(ctx context.Context, spines gwatCommon.HashArray, baseSpine *gwatCommon.Hash) (*gwatCommon.Hash, error) {
+func (m *POWChain) ExecutionDagFinalize(ctx context.Context, finParams *gwatTypes.FinalizationParams) (*gwatTypes.FinalizationResult, error) {
 	//TODO implement me
 	panic("implement me")
 }
