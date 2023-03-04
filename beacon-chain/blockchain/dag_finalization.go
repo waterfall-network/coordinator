@@ -4,9 +4,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"math/big"
 
 	"github.com/pkg/errors"
+	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
@@ -109,10 +112,21 @@ func (s *Service) processDagFinalization(headBlock block.SignedBeaconBlock, head
 					"params.BaseSpine":        params.BaseSpine.Hex(),
 					"checkpoint":              params.Checkpoint.Epoch,
 					"params.Checkpoint.Spine": params.Checkpoint.Spine,
-					"lfSpine":                 lfSpine.Hex(),
+					"lfSpine":                 fmt.Sprintf("%#x", lfSpine),
 				}).Warn("dag finalization: finalization failed")
 				return errors.Wrap(err, "dag finalization: gwat finalization failed")
 			}
+
+			// cache coordinated checkpoint
+			if finRes.CpEpoch != nil && finRes.CpRoot != nil {
+				s.CacheGwatCoordinatedState(&gwatTypes.Checkpoint{
+					Epoch: *finRes.CpEpoch,
+					Root:  *finRes.CpRoot,
+					// todo ???
+					Spine: params.Checkpoint.Spine,
+				})
+			}
+
 			for _, h := range fSeq {
 				finalizedSeq = append(finalizedSeq, h)
 				if h == *lfSpine {
@@ -171,19 +185,67 @@ func (s *Service) collectFinalizationParams(
 		return nil, errors.New("Collect finalization params: nil head state received")
 	}
 	var (
+		cpFinalized     *gwatTypes.Checkpoint
 		baseSpine       gwatCommon.Hash
 		finalizationSeq gwatCommon.HashArray
 		err             error
 	)
 
-	// get request gwat checkpoint
-	checkpoint := headState.FinalizedCheckpoint()
-	cpFinalized, err := s.getRequestGwatCheckpoint(ctx, headState)
+	fcp := headState.FinalizedCheckpoint()
+
+	// collect validator sync data
+	coordState := s.GetCachedGwatCoordinatedState()
+	if coordState == nil {
+		finRes, err := s.cfg.ExecutionEngineCaller.ExecutionDagCoordinatedState(ctx)
+		if err != nil || finRes.LFSpine == nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"CpEpoch": finRes.CpEpoch,
+				"CpRoot":  fmt.Sprintf("%#x", finRes.CpRoot),
+				"LFSpine": fmt.Sprintf("%#x", finRes.LFSpine),
+			}).Warn("dag finalization: finalization failed")
+
+			//todo rm after implementation of DagCoordinatedState api
+			cpEpoch := uint64(fcp.Epoch)
+			cpRoot := gwatCommon.BytesToHash(fcp.Root)
+			finRes = &gwatTypes.FinalizationResult{
+				CpEpoch: &cpEpoch,
+				CpRoot:  &cpRoot,
+			}
+
+			//todo uncomment after implementation of DagCoordinatedState api
+			//return nil, errors.Wrap(err, "get dag coordinated state failed")
+		}
+		// cache coordinated checkpoint
+		if finRes.CpEpoch != nil && finRes.CpRoot != nil {
+			s.CacheGwatCoordinatedState(&gwatTypes.Checkpoint{
+				Epoch: *finRes.CpEpoch,
+				Root:  *finRes.CpRoot,
+				// todo
+				//Spine: cpFinalized.Spine,
+			})
+			coordState = s.GetCachedGwatCoordinatedState()
+		}
+	}
+
+	// collect validator sync data
+	// TODO: cache of result
+	if coordState == nil {
+		coordState = &gwatTypes.Checkpoint{Epoch: 0}
+	}
+	valSyncData, err := collectValidatorSyncData(ctx, headState, coordState.Epoch)
 	if err != nil {
 		return nil, err
 	}
 
-	cpSlot, err := slots.EpochStart(checkpoint.Epoch)
+	// TODO: implementation of synchronization required
+
+	// get request gwat checkpoint param
+	cpFinalized, err = s.getRequestGwatCheckpoint(ctx, headState)
+	if err != nil {
+		return nil, err
+	}
+
+	cpSlot, err := slots.EpochStart(types.Epoch(coordState.Epoch))
 	if err != nil {
 		return nil, err
 	}
@@ -217,10 +279,10 @@ func (s *Service) collectFinalizationParams(
 		currRoot = bytesutil.ToBytes32(currBlock.Block().ParentRoot())
 		if currRoot == params.BeaconConfig().ZeroHash {
 			return &gwatTypes.FinalizationParams{
-				Spines:        finalizationSeq,
-				BaseSpine:     &baseSpine,
-				Checkpoint:    cpFinalized,
-				ValidatorSync: nil,
+				Spines:      finalizationSeq,
+				BaseSpine:   &baseSpine,
+				Checkpoint:  cpFinalized,
+				ValSyncData: valSyncData,
 			}, nil
 		}
 		//set next block as current
@@ -248,10 +310,10 @@ func (s *Service) collectFinalizationParams(
 		}
 	}
 	return &gwatTypes.FinalizationParams{
-		Spines:        finalizationSeq,
-		BaseSpine:     &baseSpine,
-		Checkpoint:    cpFinalized,
-		ValidatorSync: nil,
+		Spines:      finalizationSeq,
+		BaseSpine:   &baseSpine,
+		Checkpoint:  cpFinalized,
+		ValSyncData: valSyncData,
 	}, nil
 }
 
@@ -284,4 +346,52 @@ func (s *Service) getRequestGwatCheckpoint(
 	s.CacheGwatCheckpoint(cpFinalized)
 
 	return cpFinalized, nil
+}
+
+// collectValidatorSyncData collect data for ValSyncData param to call gwat finalization api.
+func collectValidatorSyncData(ctx context.Context, state state.BeaconState, from uint64) ([]*gwatTypes.ValidatorSync, error) {
+	var validatorSyncData []*gwatTypes.ValidatorSync
+	fromEpoch := types.Epoch(from)
+	currentEpoch := time.CurrentEpoch(state)
+	vals := state.Validators()
+
+	for idx, validator := range vals {
+		// activation
+		if validator.ActivationEpoch > fromEpoch && validator.ActivationEpoch <= currentEpoch {
+			validatorSyncData = append(validatorSyncData, &gwatTypes.ValidatorSync{
+				OpType:    gwatTypes.Activation,
+				ProcEpoch: uint64(validator.ActivationEpoch),
+				Index:     uint64(idx),
+				Creator:   gwatCommon.BytesToAddress(validator.CreatorAddress),
+				Amount:    nil,
+			})
+		}
+		// exit
+		if validator.ExitEpoch > fromEpoch && validator.ExitEpoch <= currentEpoch {
+			validatorSyncData = append(validatorSyncData, &gwatTypes.ValidatorSync{
+				OpType:    gwatTypes.Exit,
+				ProcEpoch: uint64(validator.ExitEpoch),
+				Index:     uint64(idx),
+				Creator:   gwatCommon.BytesToAddress(validator.CreatorAddress),
+				Amount:    nil,
+			})
+		}
+		// withdrawal
+		if validator.WithdrawableEpoch > fromEpoch && validator.WithdrawableEpoch <= currentEpoch {
+			balAtIdx, err := state.BalanceAtIndex(types.ValidatorIndex(idx))
+			if err != nil {
+				return nil, err
+			}
+			//gwei to wei
+			amt := new(big.Int).Mul(new(big.Int).SetUint64(balAtIdx), new(big.Int).SetUint64(1000000000))
+			validatorSyncData = append(validatorSyncData, &gwatTypes.ValidatorSync{
+				OpType:    gwatTypes.Withdrawal,
+				ProcEpoch: uint64(validator.WithdrawableEpoch),
+				Index:     uint64(idx),
+				Creator:   gwatCommon.BytesToAddress(validator.CreatorAddress),
+				Amount:    amt,
+			})
+		}
+	}
+	return validatorSyncData, nil
 }

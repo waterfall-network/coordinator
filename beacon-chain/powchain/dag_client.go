@@ -22,6 +22,8 @@ const (
 	ExecutionDagGetCandidatesMethod = "dag_getCandidates"
 	//ExecutionDagFinalizeMethod request string for JSON-RPC of dag api.
 	ExecutionDagFinalizeMethod = "dag_finalize"
+	//ExecutionDagCoordinatedStateMethod request string for JSON-RPC of dag api.
+	ExecutionDagCoordinatedStateMethod = "dag_coordinatedState"
 	//ExecutionDagHeadSyncReadyMethod request string for JSON-RPC of dag api.
 	ExecutionDagHeadSyncReadyMethod = "dag_headSyncReady"
 	//ExecutionDagHeadSyncMethod request string for JSON-RPC of dag api.
@@ -86,6 +88,38 @@ func (s *Service) ExecutionDagFinalize(ctx context.Context, params *gwatTypes.Fi
 			"BaseSpine": params.BaseSpine.Hex(),
 			"Spines":    params.Spines,
 		}).Error("Dag Finalize")
+	}
+
+	if result.Error != nil {
+		err = errors.New(*result.Error)
+	}
+
+	if result.Error != nil {
+		err = errors.New(*result.Error)
+	}
+
+	return result, handleDagRPCError(err)
+}
+
+// ExecutionDagCoordinatedState executing procedure to retrieve gwat coordinated state
+// by calling dag_finalize via JSON-RPC.
+func (s *Service) ExecutionDagCoordinatedState(ctx context.Context) (*gwatTypes.FinalizationResult, error) {
+	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.DagCoordinatedState")
+	defer span.End()
+	result := &gwatTypes.FinalizationResult{}
+
+	if s.rpcClient == nil {
+		return nil, fmt.Errorf("Rpc Client not init")
+	}
+
+	err := s.rpcClient.CallContext(
+		ctx,
+		result,
+		ExecutionDagCoordinatedStateMethod,
+	)
+
+	if err != nil {
+		log.WithError(err).Error("Dag Coordinated State")
 	}
 
 	if result.Error != nil {

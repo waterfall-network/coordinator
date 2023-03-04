@@ -60,6 +60,7 @@ type EngineCaller interface {
 
 	ExecutionDagSync(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (gwatCommon.HashArray, error)
 	ExecutionDagFinalize(ctx context.Context, finParams *gwatTypes.FinalizationParams) (*gwatTypes.FinalizationResult, error)
+	ExecutionDagCoordinatedState(ctx context.Context) (*gwatTypes.FinalizationResult, error)
 	ExecutionDagGetCandidates(ctx context.Context, slot types.Slot) (gwatCommon.HashArray, error)
 	ExecutionDagHeadSyncReady(ctx context.Context, params *gwatTypes.ConsensusInfo) (bool, error)
 	ExecutionDagValidateSpines(ctx context.Context, params gwatCommon.HashArray) (bool, error)

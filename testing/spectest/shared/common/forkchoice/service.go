@@ -97,6 +97,11 @@ func (m *engineMock) ExecutionDagFinalize(ctx context.Context, finParams *gwatTy
 	panic("implement me")
 }
 
+func (m *engineMock) ExecutionDagCoordinatedState(ctx context.Context) (*gwatTypes.FinalizationResult, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (m *engineMock) ExecutionDagGetCandidates(ctx context.Context, slot types.Slot) (gwatCommon.HashArray, error) {
 	//TODO implement me
 	panic("implement me")

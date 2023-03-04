@@ -16,6 +16,7 @@ type spineData struct {
 	lastValidSlot   types.Slot
 	finalizedSpines gwatCommon.HashArray  //successfully finalized spines from checkpoint
 	gwatCheckpoint  *gwatTypes.Checkpoint //cache for current finalization request checkpoint param
+	coordState      *gwatTypes.Checkpoint //cache for current gwat coordinated state
 	sync.RWMutex
 }
 
@@ -120,4 +121,20 @@ func (s *Service) GetCachedGwatCheckpoint(cpRoot []byte) *gwatTypes.Checkpoint {
 		return s.spineData.gwatCheckpoint
 	}
 	return nil
+}
+
+// CacheGwatCoordinatedState caches the current gwat coordinated state.
+func (s *Service) CacheGwatCoordinatedState(coordState *gwatTypes.Checkpoint) {
+	s.spineData.RLock()
+	defer s.spineData.RUnlock()
+
+	s.spineData.coordState = coordState
+}
+
+// GetCachedGwatCoordinatedState returns the currently cached gwat coordinated state.
+func (s *Service) GetCachedGwatCoordinatedState() *gwatTypes.Checkpoint {
+	s.spineData.RLock()
+	defer s.spineData.RUnlock()
+
+	return s.spineData.coordState
 }

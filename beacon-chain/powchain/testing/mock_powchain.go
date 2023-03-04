@@ -66,6 +66,11 @@ func (m *POWChain) ExecutionDagFinalize(ctx context.Context, finParams *gwatType
 	panic("implement me")
 }
 
+func (m *POWChain) ExecutionDagCoordinatedState(ctx context.Context) (*gwatTypes.FinalizationResult, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (m *POWChain) GetHeaderByHash(ctx context.Context, hash gwatCommon.Hash) (*gwatTypes.Header, error) {
 	panic("implement me")
 }

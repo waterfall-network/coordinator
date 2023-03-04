@@ -103,6 +103,7 @@ type POWBlockFetcher interface {
 	ExecutionDagSync(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (gwatCommon.HashArray, error)
 	ExecutionDagGetCandidates(ctx context.Context, slot ethTypes.Slot) (gwatCommon.HashArray, error)
 	ExecutionDagFinalize(ctx context.Context, finParams *gwatTypes.FinalizationParams) (*gwatTypes.FinalizationResult, error)
+	ExecutionDagCoordinatedState(ctx context.Context) (*gwatTypes.FinalizationResult, error)
 }
 
 // Chain defines a standard interface for the powchain service in Prysm.

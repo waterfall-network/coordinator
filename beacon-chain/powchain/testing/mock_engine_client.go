@@ -45,6 +45,10 @@ func (e *EngineClient) ExecutionDagFinalize(ctx context.Context, finParams *gwat
 	panic("implement me")
 }
 
+func (e *EngineClient) ExecutionDagCoordinatedState(ctx context.Context) (*gwatTypes.FinalizationResult, error) {
+	panic("implement me")
+}
+
 func (e *EngineClient) ExecutionDagHeadSyncReady(ctx context.Context, params *gwatTypes.ConsensusInfo) (bool, error) {
 	panic("implement me")
 }
