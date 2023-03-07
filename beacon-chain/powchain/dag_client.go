@@ -16,8 +16,6 @@ import (
 )
 
 const (
-	//ExecutionDagSyncMethod request string for JSON-RPC of dag api.
-	ExecutionDagSyncMethod = "dag_sync"
 	//ExecutionDagGetCandidatesMethod request string for JSON-RPC of dag api.
 	ExecutionDagGetCandidatesMethod = "dag_getCandidates"
 	//ExecutionDagFinalizeMethod request string for JSON-RPC of dag api.
@@ -35,35 +33,6 @@ const (
 	//ExecutionDepositCountMethod request string for JSON-RPC of validator api.
 	ExecutionDepositCountMethod = "wat_validator_DepositCount"
 )
-
-// ExecutionDagSync executing following procedures:
-// - finalisation
-// - get candidates
-// - block creation
-// by calling dag_sync via JSON-RPC.
-func (s *Service) ExecutionDagSync(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (gwatCommon.HashArray, error) {
-	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagSync")
-	defer span.End()
-	result := &gwatTypes.ConsensusResult{}
-
-	if s.rpcClient == nil {
-		return result.Candidates, fmt.Errorf("Rpc Client not init")
-	}
-
-	err := s.rpcClient.CallContext(
-		ctx,
-		result,
-		ExecutionDagSyncMethod,
-		syncParams,
-	)
-	if result.Error != nil {
-		err = errors.New(*result.Error)
-	}
-	if result.Candidates == nil {
-		result.Candidates = gwatCommon.HashArray{}
-	}
-	return result.Candidates, handleDagRPCError(err)
-}
 
 // ExecutionDagFinalize executing finalisation procedure
 // by calling dag_finalize via JSON-RPC.
