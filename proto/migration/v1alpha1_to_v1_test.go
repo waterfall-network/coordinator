@@ -399,6 +399,7 @@ func Test_BlockInterfaceToV1Block(t *testing.T) {
 func Test_V1Alpha1ValidatorToV1(t *testing.T) {
 	v1Alpha1Validator := &ethpbalpha.Validator{
 		PublicKey:                  []byte("pubkey"),
+		CreatorAddress:             []byte("creator"),
 		WithdrawalCredentials:      []byte("withdraw"),
 		EffectiveBalance:           99,
 		Slashed:                    true,
@@ -411,6 +412,7 @@ func Test_V1Alpha1ValidatorToV1(t *testing.T) {
 	v1Validator := V1Alpha1ValidatorToV1(v1Alpha1Validator)
 	require.NotNil(t, v1Validator)
 	assert.DeepEqual(t, []byte("pubkey"), v1Validator.Pubkey)
+	assert.DeepEqual(t, []byte("creator"), v1Validator.CreatorAddress)
 	assert.DeepEqual(t, []byte("withdraw"), v1Validator.WithdrawalCredentials)
 	assert.Equal(t, uint64(99), v1Validator.EffectiveBalance)
 	assert.Equal(t, true, v1Validator.Slashed)
@@ -423,6 +425,7 @@ func Test_V1Alpha1ValidatorToV1(t *testing.T) {
 func Test_V1ValidatorToV1Alpha1(t *testing.T) {
 	v1Validator := &ethpbv1.Validator{
 		Pubkey:                     []byte("pubkey"),
+		CreatorAddress:             []byte("creator"),
 		WithdrawalCredentials:      []byte("withdraw"),
 		EffectiveBalance:           99,
 		Slashed:                    true,
@@ -435,6 +438,7 @@ func Test_V1ValidatorToV1Alpha1(t *testing.T) {
 	v1Alpha1Validator := V1ValidatorToV1Alpha1(v1Validator)
 	require.NotNil(t, v1Alpha1Validator)
 	assert.DeepEqual(t, []byte("pubkey"), v1Alpha1Validator.PublicKey)
+	assert.DeepEqual(t, []byte("creator"), v1Alpha1Validator.CreatorAddress)
 	assert.DeepEqual(t, []byte("withdraw"), v1Alpha1Validator.WithdrawalCredentials)
 	assert.Equal(t, uint64(99), v1Alpha1Validator.EffectiveBalance)
 	assert.Equal(t, true, v1Alpha1Validator.Slashed)
@@ -517,7 +521,8 @@ func TestBeaconStateToProto(t *testing.T) {
 		state.Eth1DepositIndex = 8
 		state.Validators = []*ethpbalpha.Validator{{
 			PublicKey:                  bytesutil.PadTo([]byte("publickey"), 48),
-			WithdrawalCredentials:      bytesutil.PadTo([]byte("withdrawalcredentials"), 32),
+			CreatorAddress:             bytesutil.PadTo([]byte("withdrawalcredential"), 20),
+			WithdrawalCredentials:      bytesutil.PadTo([]byte("withdrawalcredential"), 20),
 			EffectiveBalance:           9,
 			Slashed:                    true,
 			ActivationEligibilityEpoch: 10,
@@ -629,7 +634,8 @@ func TestBeaconStateToProto(t *testing.T) {
 	resultValidator := result.Validators[0]
 	require.NotNil(t, resultValidator)
 	assert.DeepEqual(t, bytesutil.PadTo([]byte("publickey"), 48), resultValidator.Pubkey)
-	assert.DeepEqual(t, bytesutil.PadTo([]byte("withdrawalcredentials"), 32), resultValidator.WithdrawalCredentials)
+	assert.DeepEqual(t, bytesutil.PadTo([]byte("withdrawalcredential"), 20), resultValidator.CreatorAddress)
+	assert.DeepEqual(t, bytesutil.PadTo([]byte("withdrawalcredential"), 20), resultValidator.WithdrawalCredentials)
 	assert.Equal(t, uint64(9), resultValidator.EffectiveBalance)
 	assert.Equal(t, true, resultValidator.Slashed)
 	assert.Equal(t, types.Epoch(10), resultValidator.ActivationEligibilityEpoch)

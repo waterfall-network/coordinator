@@ -28,7 +28,8 @@ func setupService(t *testing.T, params *Parameters) *Simulator {
 		privKeys[types.ValidatorIndex(valIdx)] = privKey
 		validators[valIdx] = &ethpb.Validator{
 			PublicKey:             privKey.PublicKey().Marshal(),
-			WithdrawalCredentials: make([]byte, 32),
+			CreatorAddress:        make([]byte, 20),
+			WithdrawalCredentials: make([]byte, 20),
 		}
 	}
 	err = beaconState.SetValidators(validators)

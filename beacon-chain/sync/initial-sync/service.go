@@ -75,6 +75,10 @@ func NewService(ctx context.Context, cfg *Config) *Service {
 		counter:      ratecounter.NewRateCounter(counterSeconds * time.Second),
 		genesisChan:  make(chan time.Time),
 	}
+
+	s.cfg.Chain.SetHeadSyncFn(s.HeadSync)
+	s.cfg.Chain.SetIsSyncFn(s.IsInitSync)
+
 	go s.waitForStateInitialization()
 	return s
 }
@@ -101,10 +105,6 @@ func (s *Service) Start() {
 		log.WithField("genesisTime", genesis).Info("Genesis time has not arrived - not syncing")
 		return
 	}
-
-	s.cfg.Chain.SetHeadSyncFn(s.HeadSync)
-	s.cfg.Chain.SetIsSyncFn(s.IsInitSync)
-
 	currentSlot := slots.Since(genesis)
 	if slots.ToEpoch(currentSlot) == 0 {
 		log.WithField("genesisTime", genesis).Info("Chain started within the last epoch - not syncing")

@@ -275,6 +275,7 @@ func withCompareListAttestations(beaconNodeIdx int, conn *grpc.ClientConn) error
 func withCompareValidators(beaconNodeIdx int, conn *grpc.ClientConn) error {
 	type validatorJSON struct {
 		PublicKey                  string `json:"publicKey"`
+		CreatorAddress             string `json:"creatorAddress"`
 		WithdrawalCredentials      string `json:"withdrawalCredentials"`
 		EffectiveBalance           string `json:"effectiveBalance"`
 		Slashed                    bool   `json:"slashed"`

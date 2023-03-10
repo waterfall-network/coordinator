@@ -246,7 +246,8 @@ func TestBeaconStateAltairToProto(t *testing.T) {
 		state.Eth1DepositIndex = 8
 		state.Validators = []*ethpbalpha.Validator{{
 			PublicKey:                  bytesutil.PadTo([]byte("publickey"), 48),
-			WithdrawalCredentials:      bytesutil.PadTo([]byte("withdrawalcredentials"), 32),
+			CreatorAddress:             bytesutil.PadTo([]byte("withdrawalcredential"), 20),
+			WithdrawalCredentials:      bytesutil.PadTo([]byte("withdrawalcredential"), 20),
 			EffectiveBalance:           9,
 			Slashed:                    true,
 			ActivationEligibilityEpoch: 10,
@@ -332,7 +333,8 @@ func TestBeaconStateAltairToProto(t *testing.T) {
 	resultValidator := result.Validators[0]
 	require.NotNil(t, resultValidator)
 	assert.DeepEqual(t, bytesutil.PadTo([]byte("publickey"), 48), resultValidator.Pubkey)
-	assert.DeepEqual(t, bytesutil.PadTo([]byte("withdrawalcredentials"), 32), resultValidator.WithdrawalCredentials)
+	assert.DeepEqual(t, bytesutil.PadTo([]byte("withdrawalcredential"), 20), resultValidator.CreatorAddress)
+	assert.DeepEqual(t, bytesutil.PadTo([]byte("withdrawalcredential"), 20), resultValidator.WithdrawalCredentials)
 	assert.Equal(t, uint64(9), resultValidator.EffectiveBalance)
 	assert.Equal(t, true, resultValidator.Slashed)
 	assert.Equal(t, types.Epoch(10), resultValidator.ActivationEligibilityEpoch)
@@ -411,7 +413,8 @@ func TestBeaconStateBellatrixToProto(t *testing.T) {
 		state.Eth1DepositIndex = 8
 		state.Validators = []*ethpbalpha.Validator{{
 			PublicKey:                  bytesutil.PadTo([]byte("publickey"), 48),
-			WithdrawalCredentials:      bytesutil.PadTo([]byte("withdrawalcredentials"), 32),
+			CreatorAddress:             bytesutil.PadTo([]byte("withdrawalcredentials"), 20),
+			WithdrawalCredentials:      bytesutil.PadTo([]byte("withdrawalcredentials"), 20),
 			EffectiveBalance:           9,
 			Slashed:                    true,
 			ActivationEligibilityEpoch: 10,
@@ -513,7 +516,8 @@ func TestBeaconStateBellatrixToProto(t *testing.T) {
 	resultValidator := result.Validators[0]
 	require.NotNil(t, resultValidator)
 	assert.DeepEqual(t, bytesutil.PadTo([]byte("publickey"), 48), resultValidator.Pubkey)
-	assert.DeepEqual(t, bytesutil.PadTo([]byte("withdrawalcredentials"), 32), resultValidator.WithdrawalCredentials)
+	assert.DeepEqual(t, bytesutil.PadTo([]byte("withdrawalcredential"), 20), resultValidator.CreatorAddress)
+	assert.DeepEqual(t, bytesutil.PadTo([]byte("withdrawalcredential"), 20), resultValidator.WithdrawalCredentials)
 	assert.Equal(t, uint64(9), resultValidator.EffectiveBalance)
 	assert.Equal(t, true, resultValidator.Slashed)
 	assert.Equal(t, types.Epoch(10), resultValidator.ActivationEligibilityEpoch)

@@ -315,7 +315,8 @@ func TestStore_SaveCheckpointState(t *testing.T) {
 	require.NoError(t, err)
 	val := &ethpb.Validator{
 		PublicKey:             bytesutil.PadTo([]byte("foo"), 48),
-		WithdrawalCredentials: bytesutil.PadTo([]byte("bar"), fieldparams.RootLength),
+		CreatorAddress:        bytesutil.PadTo([]byte("bar"), fieldparams.AddressLength),
+		WithdrawalCredentials: bytesutil.PadTo([]byte("bar"), fieldparams.AddressLength),
 	}
 	err = s.SetValidators([]*ethpb.Validator{val})
 	require.NoError(t, err)

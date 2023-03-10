@@ -169,11 +169,14 @@ message DepositMessage {
   // 48 byte BLS public key of the validator.
   bytes public_key = 1 [(ethereum.eth.ext.ssz_size) = "48", (ethereum.eth.ext.spec_name) = "pubkey"];
 
-  // A 32 byte hash of the withdrawal address public key.
-  bytes withdrawal_credentials = 2 [(ethereum.eth.ext.ssz_size) = "32"];
+  // A 20 byte of the creator address public key.
+  bytes creator_address = 2 [(ethereum.eth.ext.ssz_size) = "20"];
+
+  // A 20 byte of the withdrawal address public key.
+  bytes withdrawal_credentials = 3 [(ethereum.eth.ext.ssz_size) = "20"];
 
   // Deposit amount in gwei.
-  uint64 amount = 3;
+  uint64 amount = 4;
 }
 
 // SyncCommittee serves as committees to facilitate light client syncing to beacon chain.

@@ -5,6 +5,7 @@ go_library(
     srcs = [
         "creators.go",
         "chain_info.go",
+        "dag_finalization.go",
         "error.go",
         "head.go",
         "head_sync_committee_info.go",

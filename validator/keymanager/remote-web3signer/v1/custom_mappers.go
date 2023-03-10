@@ -258,6 +258,9 @@ func MapDeposit(deposit *ethpb.Deposit) (*Deposit, error) {
 			PublicKey: hexutil.Encode(
 				deposit.Data.PublicKey,
 			),
+			CreatorAddress: hexutil.Encode(
+				deposit.Data.CreatorAddress,
+			),
 			WithdrawalCredentials: hexutil.Encode(
 				deposit.Data.WithdrawalCredentials,
 			),

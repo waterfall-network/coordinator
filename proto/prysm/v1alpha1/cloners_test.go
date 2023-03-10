@@ -532,6 +532,7 @@ func genSignedBeaconBlockHeader() *v1alpha1.SignedBeaconBlockHeader {
 func genDepositData() *v1alpha1.Deposit_Data {
 	return &v1alpha1.Deposit_Data{
 		PublicKey:             bytes(),
+		CreatorAddress:        bytes(),
 		WithdrawalCredentials: bytes(),
 		Amount:                20000,
 		Signature:             bytes(),
