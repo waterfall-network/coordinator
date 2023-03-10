@@ -6,7 +6,6 @@ import (
 
 	"github.com/pkg/errors"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/async/event"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain/types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
@@ -41,11 +40,6 @@ func (_ *FaultyMockPOWChain) BlockHashByHeight(_ context.Context, _ *big.Int) (c
 // BlockTimeByHeight --
 func (_ *FaultyMockPOWChain) BlockTimeByHeight(_ context.Context, _ *big.Int) (uint64, error) {
 	return 0, errors.New("failed")
-}
-
-// BlockByTimestamp --
-func (_ *FaultyMockPOWChain) BlockByTimestamp(_ context.Context, _ uint64) (*types.HeaderInfo, error) {
-	return &types.HeaderInfo{Number: big.NewInt(0)}, nil
 }
 
 // ChainStartEth1Data --

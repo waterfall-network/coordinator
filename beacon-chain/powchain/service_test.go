@@ -514,12 +514,6 @@ func TestNewService_EarliestVotingBlock(t *testing.T) {
 	conf.Eth1FollowDistance = 50
 	params.OverrideBeaconConfig(conf)
 
-	// Genesis not set
-	followBlock := uint64(2000)
-	blk, err := web3Service.determineEarliestVotingBlock(context.Background(), followBlock)
-	require.NoError(t, err)
-	assert.Equal(t, followBlock-conf.Eth1FollowDistance, blk, "unexpected earliest voting block")
-
 	// Genesis is set.
 
 	numToForward := 1500
@@ -537,12 +531,6 @@ func TestNewService_EarliestVotingBlock(t *testing.T) {
 	web3Service.latestEth1Data.BlockHeight = testAcc.Backend.Blockchain().GetLastFinalizedHeader().Nr()
 	web3Service.latestEth1Data.BlockTime = testAcc.Backend.Blockchain().GetLastFinalizedHeader().Time
 	web3Service.chainStartData.GenesisTime = currTime
-
-	// With a current slot of zero, only request follow_blocks behind.
-	blk, err = web3Service.determineEarliestVotingBlock(context.Background(), followBlock)
-	require.NoError(t, err)
-	assert.Equal(t, followBlock-conf.Eth1FollowDistance, blk, "unexpected earliest voting block")
-
 }
 
 func TestNewService_Eth1HeaderRequLimit(t *testing.T) {
