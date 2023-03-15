@@ -4,15 +4,11 @@ import (
 	"context"
 	"fmt"
 	"sort"
-	"sync"
 	"time"
 
 	"github.com/pkg/errors"
-	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/filters"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
@@ -96,15 +92,8 @@ func (s *Service) execHeadSyncReady(ctx context.Context) error {
 			"cpState.Slot":     cpState.Slot(),
 		}).Info("Head sync readiness: checkpoint")
 
-		creators, err := s.GetCreators(ctx, cpState, cpState.Slot())
-		if err != nil {
-			log.WithField("cpState", cpState).WithError(err).Error("Head sync readiness: error (get creators)")
-			continue
-		}
-
 		syncParam := &gwatTypes.ConsensusInfo{
 			Slot:       uint64(cpState.Slot()),
-			Creators:   creators,
 			Finalizing: gwatCommon.HashArrayFromBytes(cpState.Eth1Data().Finalization),
 		}
 
@@ -235,16 +224,9 @@ func (s *Service) execHeadSync(ctx context.Context) error {
 			}
 		}
 
-		creators, err := s.GetCreators(ctx, bState, slot)
-		if err != nil {
-			log.WithField("slot", slot).WithError(err).Error("Head sync main: error (get head creators)")
-			return err
-		}
-
 		syncParams = append(syncParams,
 			gwatTypes.ConsensusInfo{
 				Slot:       uint64(slot),
-				Creators:   creators,
 				Finalizing: gwatCommon.HashArrayFromBytes(b.Block().Body().Eth1Data().Finalization),
 			},
 		)
@@ -287,33 +269,6 @@ func (s *Service) execHeadSync(ctx context.Context) error {
 	}
 
 	return nil
-}
-
-// This defines the current chain service's view of creators.
-type creatorsAssignment struct {
-	assignment map[types.Slot][]gwatCommon.Address // creators' assignment by slot.
-	lock       sync.RWMutex
-}
-
-// GetCreators returns creators assignments for current slot.
-func (s *Service) GetCreators(ctx context.Context, state state.BeaconState, slot types.Slot) ([]gwatCommon.Address, error) {
-	s.creators.lock.RLock()
-	defer s.creators.lock.RUnlock()
-
-	// retrieve creators assignments from cache
-	if s.creators.assignment != nil && s.creators.assignment[slot] != nil {
-		return s.creators.assignment[slot], nil
-	}
-
-	// calculate creators assignments
-	epoch := slots.ToEpoch(slot)
-	creatorsAssig, err := helpers.CalcCreatorsAssignments(ctx, state, epoch)
-	if err != nil {
-		return []gwatCommon.Address{}, err
-	}
-	//cache result
-	s.creators.assignment = creatorsAssig
-	return s.creators.assignment[slot], nil
 }
 
 func (s *Service) retrieveGenesisBlock(ctx context.Context) (block.SignedBeaconBlock, [32]byte, error) {

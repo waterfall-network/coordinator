@@ -64,7 +64,6 @@ type Service struct {
 	cancel      context.CancelFunc
 	genesisTime time.Time
 	spineData   spineData
-	creators    creatorsAssignment
 	head        *head
 	headLock    sync.RWMutex
 	// originBlockRoot is the genesis root, or weak subjectivity checkpoint root, depending on how the node is initialized

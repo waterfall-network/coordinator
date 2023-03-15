@@ -56,7 +56,6 @@ type Service struct {
 	chainStarted        *abool.AtomicBool
 	counter             *ratecounter.RateCounter
 	genesisChan         chan time.Time
-	creators            creatorsAssignment
 	headSyncCp          *ethpb.Checkpoint
 	isInitSynchronizing bool
 	isResync            bool

@@ -3,7 +3,6 @@ load("@prysm//tools/go:def.bzl", "go_library", "go_test")
 go_library(
     name = "go_default_library",
     srcs = [
-        "creators.go",
         "chain_info.go",
         "dag_finalization.go",
         "error.go",
