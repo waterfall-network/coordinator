@@ -17,11 +17,8 @@ import (
 	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/beacon-chain/flags"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
-	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime"
 	prysmTime "gitlab.waterfall.network/waterfall/protocol/coordinator/time"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
@@ -33,32 +30,26 @@ var _ runtime.Service = (*Service)(nil)
 type blockchainService interface {
 	blockchain.BlockReceiver
 	blockchain.ChainInfoFetcher
-	blockchain.SyncSrv
 }
 
 // Config to set up the initial sync service.
 type Config struct {
-	P2P                   p2p.P2P
-	DB                    db.ReadOnlyDatabase
-	Chain                 blockchainService
-	StateNotifier         statefeed.Notifier
-	BlockNotifier         blockfeed.Notifier
-	ExecutionEngineCaller powchain.EngineCaller
-	StateGen              *stategen.State
+	P2P           p2p.P2P
+	DB            db.ReadOnlyDatabase
+	Chain         blockchainService
+	StateNotifier statefeed.Notifier
+	BlockNotifier blockfeed.Notifier
 }
 
 // Service service.
 type Service struct {
-	cfg                 *Config
-	ctx                 context.Context
-	cancel              context.CancelFunc
-	synced              *abool.AtomicBool
-	chainStarted        *abool.AtomicBool
-	counter             *ratecounter.RateCounter
-	genesisChan         chan time.Time
-	headSyncCp          *ethpb.Checkpoint
-	isInitSynchronizing bool
-	isResync            bool
+	cfg          *Config
+	ctx          context.Context
+	cancel       context.CancelFunc
+	synced       *abool.AtomicBool
+	chainStarted *abool.AtomicBool
+	counter      *ratecounter.RateCounter
+	genesisChan  chan time.Time
 }
 
 // NewService configures the initial sync service responsible for bringing the node up to the
@@ -74,20 +65,12 @@ func NewService(ctx context.Context, cfg *Config) *Service {
 		counter:      ratecounter.NewRateCounter(counterSeconds * time.Second),
 		genesisChan:  make(chan time.Time),
 	}
-
-	s.cfg.Chain.SetHeadSyncFn(s.HeadSync)
-	s.cfg.Chain.SetIsSyncFn(s.IsInitSync)
-
 	go s.waitForStateInitialization()
 	return s
 }
 
 // Start the initial sync service.
 func (s *Service) Start() {
-	s.isInitSynchronizing = true
-	defer func() {
-		s.isInitSynchronizing = false
-	}()
 	// Wait for state initialized event.
 	genesis := <-s.genesisChan
 	if genesis.IsZero() {
@@ -107,17 +90,6 @@ func (s *Service) Start() {
 	currentSlot := slots.Since(genesis)
 	if slots.ToEpoch(currentSlot) == 0 {
 		log.WithField("genesisTime", genesis).Info("Chain started within the last epoch - not syncing")
-
-		// start head sync procedure with gwat
-		if err := s.HeadSync(s.ctx, true); err != nil {
-			if errors.Is(s.ctx.Err(), context.Canceled) {
-				log.WithField("slot", s.cfg.Chain.HeadSlot()).Warn("Head sync: context canceled (epoch 0)")
-				//return
-			} else {
-				panic(err)
-			}
-		}
-
 		s.markSynced(genesis)
 		return
 	}
@@ -132,21 +104,10 @@ func (s *Service) Start() {
 	s.waitForMinimumPeers()
 	if err := s.roundRobinSync(genesis); err != nil {
 		if errors.Is(s.ctx.Err(), context.Canceled) {
-			//return
-		} else {
-			panic(err)
+			return
 		}
+		panic(err)
 	}
-	// start head sync procedure with gwat
-	if err := s.HeadSync(s.ctx, true); err != nil {
-		if errors.Is(s.ctx.Err(), context.Canceled) {
-			log.WithField("slot", s.cfg.Chain.HeadSlot()).Warn("Head sync: context canceled")
-			//return
-		} else {
-			panic(err)
-		}
-	}
-
 	log.Infof("Synced up to slot %d", s.cfg.Chain.HeadSlot())
 	s.markSynced(genesis)
 }
@@ -193,25 +154,11 @@ func (s *Service) Resync() error {
 	defer func() { s.synced.Set() }()                       // Reset it at the end of the method.
 	genesis := time.Unix(int64(headState.GenesisTime()), 0) // lint:ignore uintcast -- Genesis time will not exceed int64 in your lifetime.
 
-	s.isResync = true
-	defer func() { s.isResync = false }() // Reset it at the end of the method.
-
 	s.waitForMinimumPeers()
 	if err = s.roundRobinSync(genesis); err != nil {
 		log = log.WithError(err)
 	}
 	log.WithField("slot", s.cfg.Chain.HeadSlot()).Info("Resync attempt complete")
-
-	// start head sync procedure with gwat
-	if err := s.HeadSync(s.ctx, true); err != nil {
-		if errors.Is(s.ctx.Err(), context.Canceled) {
-			log.WithField("slot", s.cfg.Chain.HeadSlot()).Warn("Head sync: context canceled (resync)")
-			//return
-		} else {
-			panic(err)
-		}
-	}
-
 	return nil
 }
 

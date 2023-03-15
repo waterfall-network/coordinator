@@ -294,5 +294,4 @@ type Checker interface {
 	Synced() bool
 	Status() error
 	Resync() error
-	IsInitSync() bool
 }

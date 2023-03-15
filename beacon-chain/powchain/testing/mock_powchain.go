@@ -67,14 +67,6 @@ func (m *POWChain) GetHeaderByNumber(ctx context.Context, nr *big.Int) (*gwatTyp
 	panic("implement me")
 }
 
-func (m *POWChain) ExecutionDagHeadSyncReady(ctx context.Context, params *gwatTypes.ConsensusInfo) (bool, error) {
-	panic("implement me")
-}
-
-func (m *POWChain) ExecutionDagHeadSync(ctx context.Context, params []gwatTypes.ConsensusInfo) (bool, error) {
-	panic("implement me")
-}
-
 func (m *POWChain) ExecutionDagValidateSpines(ctx context.Context, params gwatCommon.HashArray) (bool, error) {
 	panic("implement me")
 }

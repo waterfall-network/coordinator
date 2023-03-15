@@ -40,8 +40,7 @@ func (vs *Server) GetBeaconBlock(ctx context.Context, req *ethpb.BlockRequest) (
 	span.AddAttributes(trace.Int64Attribute("slot", int64(req.Slot)))
 
 	log.WithFields(logrus.Fields{
-		"vs.SyncChecker.IsInitSync()": vs.SyncChecker.IsInitSync(),
-		"vs.SyncChecker.Syncing()":    vs.SyncChecker.Syncing(),
+		"vs.SyncChecker.Syncing()": vs.SyncChecker.Syncing(),
 	}).Warn("^^^^^^^PROPESER START (()GetBeaconBlock())^^^^^^^^")
 
 	if slots.ToEpoch(req.Slot) < params.BeaconConfig().AltairForkEpoch {
