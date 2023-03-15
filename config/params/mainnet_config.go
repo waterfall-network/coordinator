@@ -118,7 +118,8 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	ShardCommitteePeriod:             256,
 	MinEpochsToInactivityPenalty:     4,
 	//Eth1FollowDistance:               2048,
-	Eth1FollowDistance:         16,
+	//Eth1FollowDistance:         16,
+	Eth1FollowDistance:         64,
 	SafeSlotsToUpdateJustified: 8,
 
 	//BlockVoting slots

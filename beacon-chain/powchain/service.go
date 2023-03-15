@@ -201,7 +201,8 @@ func NewService(ctx context.Context, opts ...Option) (*Service, error) {
 		},
 		lastReceivedMerkleIndex: -1,
 		preGenesisState:         genState,
-		headTicker:              time.NewTicker(time.Duration(params.BeaconConfig().SecondsPerETH1Block) * time.Second),
+		//headTicker:              time.NewTicker(time.Duration(params.BeaconConfig().SecondsPerETH1Block) * time.Second),
+		headTicker: time.NewTicker(time.Duration(params.BeaconConfig().SecondsPerSlot) * time.Second),
 	}
 
 	for _, opt := range opts {
