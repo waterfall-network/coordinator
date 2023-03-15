@@ -126,12 +126,21 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 	//retrieving of gwat candidates
 	const CandidatesСutoffSlots = 2
 	candidates, err := vs.ExecutionEngineCaller.ExecutionDagGetCandidates(ctx, req.Slot-CandidatesСutoffSlots)
-	eth1Data.Candidates = candidates.ToBytes()
-	log.WithError(fmt.Errorf("could not get gwat candidates: %v", err)).WithFields(logrus.Fields{
-		"req.Slot":    req.Slot,
-		"cutoff.Slot": req.Slot - CandidatesСutoffSlots,
-		"candidates":  candidates,
-	}).Info(">>>>> build block data: retrieving of gwat candidates")
+	// todo handle err
+	if err != nil {
+		log.WithError(fmt.Errorf("could not get gwat candidates: %v", err)).WithFields(logrus.Fields{
+			"req.Slot":    req.Slot,
+			"cutoff.Slot": req.Slot - CandidatesСutoffSlots,
+			"candidates":  candidates,
+		}).Error("build block data: retrieving of gwat candidates failed")
+	} else {
+		eth1Data.Candidates = candidates.ToBytes()
+		log.WithFields(logrus.Fields{
+			"req.Slot":    req.Slot,
+			"cutoff.Slot": req.Slot - CandidatesСutoffSlots,
+			"candidates":  candidates,
+		}).Info("build block data: retrieving of gwat candidates")
+	}
 
 	deposits, atts, err := vs.packDepositsAndAttestations(ctx, head, eth1Data)
 	if err != nil {
