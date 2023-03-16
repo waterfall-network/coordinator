@@ -282,7 +282,7 @@ func AttestationsDelta(beaconState state.BeaconState, bal *precompute.Balance, v
 	}
 
 	for i, v := range vals {
-		rewards[i], penalties[i], err = attestationDelta(bal, v, baseRewardMultiplier, inactivityDenominator, leak)
+		rewards[i], penalties[i], err = attestationDelta(bal, v, baseRewardMultiplier, inactivityDenominator, leak, numOfVals)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -295,7 +295,7 @@ func attestationDelta(
 	bal *precompute.Balance,
 	val *precompute.Validator,
 	baseRewardMultiplier, inactivityDenominator uint64,
-	inactivityLeak bool) (reward, penalty uint64, err error) {
+	inactivityLeak bool, validatorsNum int) (reward, penalty uint64, err error) {
 	eligible := val.IsActivePrevEpoch || (val.IsSlashed && !val.IsWithdrawableCurrentEpoch)
 	// Per spec `ActiveCurrentEpoch` can't be 0 to process attestation delta.
 	if !eligible || bal.ActiveCurrentEpoch == 0 {
@@ -305,7 +305,7 @@ func attestationDelta(
 	cfg := params.BeaconConfig()
 	increment := cfg.EffectiveBalanceIncrement
 	effectiveBalance := val.CurrentEpochEffectiveBalance
-	baseReward := (effectiveBalance / increment) * baseRewardMultiplier
+	baseReward := calcBaseReward(cfg, validatorsNum, cfg.MaxCommitteesPerSlot, cfg.MaxValidatorsPerCommittee, cfg.BaseRewardMultiplier)
 	activeIncrement := bal.ActiveCurrentEpoch / increment
 
 	weightDenominator := cfg.WeightDenominator
