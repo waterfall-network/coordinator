@@ -5,10 +5,9 @@ import (
 	"time"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
-
 	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 // BeaconChainConfig contains constant configs for node to participate in beacon chain.
