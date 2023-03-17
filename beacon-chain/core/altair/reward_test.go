@@ -1,10 +1,12 @@
 package altair_test
 
 import (
+	"fmt"
 	"math"
 	"testing"
 
 	types "github.com/prysmaticlabs/eth2-types"
+
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/altair"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
@@ -187,6 +189,132 @@ func Test_BaseRewardPerIncrement(t *testing.T) {
 				require.ErrorContains(t, tt.errString, err)
 				return
 			}
+			require.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func Test_CalculateBaseReward(t *testing.T) {
+	cfg := params.MinimalSpecConfig()
+	noCache := "no_cache"
+	fmt.Print(noCache)
+
+	tests := []struct {
+		name                   string
+		validatorsNum          int
+		committeesNum          uint64
+		membersPerCommitteeNum uint64
+		rewardMultiplier       float64
+		want                   uint64
+	}{
+		{
+			name:                   "base reward when 2048 validators and 4 committees with 2048 members each",
+			validatorsNum:          2048,
+			committeesNum:          4,
+			membersPerCommitteeNum: 2048,
+			rewardMultiplier:       2.0,
+			want:                   1_227_274,
+		},
+		{
+			name:                   "base reward when 2048 validators and 4 committees with 128 members each",
+			validatorsNum:          2048,
+			committeesNum:          4,
+			membersPerCommitteeNum: 128,
+			rewardMultiplier:       2.0,
+			want:                   19_636_389,
+		},
+		{
+			name:                   "base reward when 2048 validators and 4 committees with 512 members each",
+			validatorsNum:          2048,
+			committeesNum:          4,
+			membersPerCommitteeNum: 512,
+			rewardMultiplier:       2.0,
+			want:                   4_909_097,
+		},
+		{
+			name:                   "base reward when 2048 validators and 64 committees with 2048 members each",
+			validatorsNum:          2048,
+			committeesNum:          64,
+			membersPerCommitteeNum: 2048,
+			rewardMultiplier:       2.0,
+			want:                   76_704,
+		},
+		{
+			name:                   "base reward when 2048 validators and 64 committees with 128 members each",
+			validatorsNum:          2048,
+			committeesNum:          64,
+			membersPerCommitteeNum: 128,
+			rewardMultiplier:       2.0,
+			want:                   1_227_274,
+		},
+		{
+			name:                   "base reward when 300000 validators and 4 committees with 2048 members each",
+			validatorsNum:          300_000,
+			committeesNum:          4,
+			membersPerCommitteeNum: 2048,
+			rewardMultiplier:       2.0,
+			want:                   14_853_791,
+		},
+		{
+			name:                   "base reward when 300000 validators and 64 committees with 2048 members each",
+			validatorsNum:          300_000,
+			committeesNum:          4,
+			membersPerCommitteeNum: 2048,
+			rewardMultiplier:       2.0,
+			want:                   14_853_791,
+		},
+		{
+			name:                   "base reward when 300000 validators and 64 committees with 128 members each",
+			validatorsNum:          300_000,
+			committeesNum:          64,
+			membersPerCommitteeNum: 128,
+			rewardMultiplier:       2.0,
+			want:                   14_853_791,
+		},
+		{
+			name:                   "base reward when 1 validator and 4 committees with 2048 members each",
+			validatorsNum:          1,
+			committeesNum:          4,
+			membersPerCommitteeNum: 2048,
+			rewardMultiplier:       2.0,
+			want:                   27_119,
+		},
+		{
+			name:                   "base reward when 1 validator and 64 committees with 2048 members each",
+			validatorsNum:          1,
+			committeesNum:          64,
+			membersPerCommitteeNum: 2048,
+			rewardMultiplier:       2.0,
+			want:                   1_694,
+		},
+		{
+			name:                   "base reward when 1 validator and 64 committees with 128 members each",
+			validatorsNum:          1,
+			committeesNum:          64,
+			membersPerCommitteeNum: 128,
+			rewardMultiplier:       2.0,
+			want:                   27_119,
+		},
+		{
+			name:                   "base reward when 2048 validators and 64 committees with 128 members each with reward multiplier 1.0",
+			validatorsNum:          2048,
+			committeesNum:          64,
+			membersPerCommitteeNum: 128,
+			rewardMultiplier:       1.0,
+			want:                   2_454_548,
+		},
+		{
+			name:                   "base reward when 2048 validators and 64 committees with 128 members each with reward multiplier 0.5",
+			validatorsNum:          2048,
+			committeesNum:          64,
+			membersPerCommitteeNum: 128,
+			rewardMultiplier:       0.5,
+			want:                   4_909_097,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := altair.CalculateBaseReward(cfg, tt.validatorsNum, tt.committeesNum, tt.membersPerCommitteeNum, tt.rewardMultiplier)
 			require.Equal(t, tt.want, got)
 		})
 	}

@@ -36,7 +36,7 @@ func MinimalSpecConfig() *BeaconChainConfig {
 	minimalConfig.BLSWithdrawalPrefixByte = byte(0)
 
 	// Time parameters
-	minimalConfig.SecondsPerSlot = 6
+	minimalConfig.SecondsPerSlot = 4 // align with mainnet config
 	minimalConfig.MinAttestationInclusionDelay = 1
 	minimalConfig.SlotsPerEpoch = 8
 	minimalConfig.SqrRootSlotsPerEpoch = 2

@@ -5,6 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
+
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
@@ -63,7 +64,7 @@ func BaseRewardPerIncrement(activeBalance uint64) (uint64, error) {
 	return cfg.EffectiveBalanceIncrement * cfg.BaseRewardFactor / math.IntegerSquareRoot(activeBalance), nil
 }
 
-func calcBaseReward(config *params.BeaconChainConfig, validatorsNum int, commiteesNum uint64, membersPerCommiteeNum uint64, rewardMultiplier float64) uint64 {
+func CalculateBaseReward(config *params.BeaconChainConfig, validatorsNum int, committeesNum uint64, membersPerCommitteeNum uint64, rewardMultiplier float64) uint64 {
 	var (
 		secondsInYear = 60 * 60 * 24 * 365.25 // Number of seconds in year
 	)
@@ -73,6 +74,6 @@ func calcBaseReward(config *params.BeaconChainConfig, validatorsNum int, commite
 		float64(config.MaxEffectiveBalance) *
 		regularMath.Sqrt(float64(uint64(validatorsNum)*config.OptValidatorsNum)) // v in formula
 	rewardPerBlock := annualMintedCoins / numOfSlotsPerYear // Wi-th in formula
-	baseReward := rewardPerBlock / rewardMultiplier * float64(commiteesNum) * float64(membersPerCommiteeNum)
+	baseReward := rewardPerBlock / (rewardMultiplier * float64(committeesNum) * float64(membersPerCommitteeNum))
 	return uint64(baseReward)
 }

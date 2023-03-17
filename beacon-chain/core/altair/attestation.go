@@ -170,6 +170,7 @@ func AddValidatorFlag(flag, flagPosition uint8) (uint8, error) {
 func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochParticipation []byte, participatedFlags map[uint8]bool, totalBalance uint64) (uint64, []byte, error) {
 	cfg := params.BeaconConfig()
 	numOfVals := beaconState.NumValidators()
+	committeesPerSlot := helpers.SlotCommitteeCount(uint64(numOfVals))
 	sourceFlagIndex := cfg.TimelySourceFlagIndex
 	targetFlagIndex := cfg.TimelyTargetFlagIndex
 	headFlagIndex := cfg.TimelyHeadFlagIndex
@@ -178,7 +179,7 @@ func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochPa
 		if index >= uint64(len(epochParticipation)) {
 			return 0, nil, fmt.Errorf("index %d exceeds participation length %d", index, len(epochParticipation))
 		}
-		br := calcBaseReward(cfg, numOfVals, cfg.MaxCommitteesPerSlot, cfg.MaxValidatorsPerCommittee, cfg.BaseRewardMultiplier)
+		br := CalculateBaseReward(cfg, numOfVals, committeesPerSlot, cfg.TargetCommitteeSize, cfg.BaseRewardMultiplier)
 		has, err := HasValidatorFlag(epochParticipation[index], sourceFlagIndex)
 		if err != nil {
 			return 0, nil, err

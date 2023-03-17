@@ -305,7 +305,8 @@ func attestationDelta(
 	cfg := params.BeaconConfig()
 	increment := cfg.EffectiveBalanceIncrement
 	effectiveBalance := val.CurrentEpochEffectiveBalance
-	baseReward := calcBaseReward(cfg, validatorsNum, cfg.MaxCommitteesPerSlot, cfg.MaxValidatorsPerCommittee, cfg.BaseRewardMultiplier)
+	committeesPerSlot := helpers.SlotCommitteeCount(uint64(validatorsNum))
+	baseReward := CalculateBaseReward(cfg, validatorsNum, committeesPerSlot, cfg.TargetCommitteeSize, cfg.BaseRewardMultiplier)
 	activeIncrement := bal.ActiveCurrentEpoch / increment
 
 	weightDenominator := cfg.WeightDenominator
