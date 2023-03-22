@@ -219,7 +219,7 @@ func (s *Service) GetDepositCount(ctx context.Context) (uint64, error) {
 		"result", result,
 	).WithField(
 		"uint", count,
-	).Error("GetDepositCount")
+	).Info("Get deposit count")
 
 	return count, handleDagRPCError(err)
 }

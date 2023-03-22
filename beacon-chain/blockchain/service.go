@@ -46,6 +46,7 @@ import (
 
 // SyncSrv interface to treat sync functionality.
 type SyncSrv interface {
+	SetIsSyncFn(fn func() bool)
 	AddFinalizedSpines(finSpines gwatCommon.HashArray)
 	ResetFinalizedSpines()
 }
@@ -74,7 +75,9 @@ type Service struct {
 	justifiedBalances     *stateBalanceCache
 	wsVerifier            *WeakSubjectivityVerifier
 	store                 *store.Store
+	fnIsSync              func() bool
 	newHeadCh             chan *head
+	isGwatSyncing         bool
 }
 
 // config options for the service.
@@ -131,9 +134,6 @@ func NewService(ctx context.Context, opts ...Option) (*Service, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	srv.spawnProcessDagFinalize()
-
 	return srv, nil
 }
 
@@ -151,6 +151,7 @@ func (s *Service) Start() {
 		}
 	}
 	s.spawnProcessAttestationsRoutine(s.cfg.StateNotifier.StateFeed())
+	go s.initGwatSync()
 }
 
 // Stop the blockchain service's main event loop and associated goroutines.
@@ -177,6 +178,25 @@ func (s *Service) Status() error {
 		return fmt.Errorf("too many goroutines %d", runtime.NumGoroutine())
 	}
 	return nil
+}
+
+func (s *Service) SetIsSyncFn(fn func() bool) {
+	s.fnIsSync = fn
+}
+
+func (s *Service) isSynchronizing() bool {
+	if s.fnIsSync == nil {
+		return false
+	}
+	return s.fnIsSync()
+}
+
+func (s *Service) IsSynced() bool {
+	return !s.isSynchronizing()
+}
+
+func (s *Service) IsGwatSynchronizing() bool {
+	return s.isGwatSyncing
 }
 
 func (s *Service) StartFromSavedState(saved state.BeaconState) error {
@@ -518,15 +538,6 @@ func (s *Service) hasBlock(ctx context.Context, root [32]byte) bool {
 	}
 
 	return s.cfg.BeaconDB.HasBlock(ctx, root)
-}
-
-////todo
-func (s *Service) isSync() bool {
-	panic("isSync: implement me")
-	//if s.fnHeadSync == nil {
-	//	return false
-	//}
-	//return s.fnIsSync()
 }
 
 func spawnCountdownIfPreGenesis(ctx context.Context, genesisTime time.Time, db db.HeadAccessDatabase) {

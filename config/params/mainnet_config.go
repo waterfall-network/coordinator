@@ -146,7 +146,7 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	//SecondsPerETH1Block: 14,
 	SecondsPerETH1Block: 4,
 
-	HeadSyncReadyIntervalMs: 1000,
+	GwatSyncIntervalMs: 1000,
 
 	// State list length constants.
 	EpochsPerHistoricalVector: 65536,

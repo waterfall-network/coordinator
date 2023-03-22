@@ -63,6 +63,7 @@ type HeadFetcher interface {
 	ForkChoicer() forkchoice.ForkChoicer
 	GetValidatedBlockInfo() ([]byte, types.Slot)
 	SetValidatedBlockInfo([]byte, types.Slot)
+	IsGwatSynchronizing() bool
 }
 
 // ForkFetcher retrieves the current fork information of the Ethereum beacon chain.

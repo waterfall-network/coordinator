@@ -30,6 +30,7 @@ var _ runtime.Service = (*Service)(nil)
 type blockchainService interface {
 	blockchain.BlockReceiver
 	blockchain.ChainInfoFetcher
+	blockchain.SyncSrv
 }
 
 // Config to set up the initial sync service.
@@ -65,6 +66,9 @@ func NewService(ctx context.Context, cfg *Config) *Service {
 		counter:      ratecounter.NewRateCounter(counterSeconds * time.Second),
 		genesisChan:  make(chan time.Time),
 	}
+
+	s.cfg.Chain.SetIsSyncFn(s.Syncing)
+
 	go s.waitForStateInitialization()
 	return s
 }

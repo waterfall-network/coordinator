@@ -64,7 +64,7 @@ type BeaconChainConfig struct {
 	SafeSlotsToUpdateJustified       types.Slot  `yaml:"SAFE_SLOTS_TO_UPDATE_JUSTIFIED" spec:"true"`      // SafeSlotsToUpdateJustified is the minimal slots needed to update justified check point.
 	SafeSlotsToImportOptimistically  types.Slot  `yaml:"SAFE_SLOTS_TO_IMPORT_OPTIMISTICALLY" spec:"true"` // SafeSlotsToImportOptimistically is the minimal number of slots to wait before importing optimistically a pre-merge block
 	SecondsPerETH1Block              uint64      `yaml:"SECONDS_PER_ETH1_BLOCK" spec:"true"`              // SecondsPerETH1Block is the approximate time for a single eth1 block to be produced.
-	HeadSyncReadyIntervalMs          uint64      `yaml:"HEAD_SYNC_READY_INTERVAL" spec:"true"`            // HeadSyncReadyInterval is the interval (ms) of head-sync-ready check.
+	GwatSyncIntervalMs               uint64      `yaml:"GWAT_SYNC_INTERVAL" spec:"true"`                  // GwatSyncIntervalMs is the interval (ms) of attempts to start gwat sync process.
 	VotingRequiredSlots              int         `yaml:"VOTING_REQUIRED_SLOTS" spec:"true"`               // VotingRequiredSlots defines the slots number required to accept spines sequence.
 
 	// Fork choice algorithm constants.
