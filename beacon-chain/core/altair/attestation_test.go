@@ -314,6 +314,11 @@ func TestValidatorFlag_Has(t *testing.T) {
 			expected: []uint8{params.BeaconConfig().TimelyHeadFlagIndex},
 		},
 		{
+			name:     "voting",
+			set:      8,
+			expected: []uint8{params.BeaconConfig().DAGTimelyVotingFlagIndex},
+		},
+		{
 			name:     "source, target",
 			set:      3,
 			expected: []uint8{params.BeaconConfig().TimelySourceFlagIndex, params.BeaconConfig().TimelyTargetFlagIndex},
@@ -332,6 +337,11 @@ func TestValidatorFlag_Has(t *testing.T) {
 			name:     "source, target, head",
 			set:      7,
 			expected: []uint8{params.BeaconConfig().TimelySourceFlagIndex, params.BeaconConfig().TimelyTargetFlagIndex, params.BeaconConfig().TimelyHeadFlagIndex},
+		},
+		{
+			name:     "source, target, head, voting",
+			set:      15,
+			expected: []uint8{params.BeaconConfig().TimelySourceFlagIndex, params.BeaconConfig().TimelyTargetFlagIndex, params.BeaconConfig().TimelyHeadFlagIndex, params.BeaconConfig().DAGTimelyVotingFlagIndex},
 		},
 	}
 
@@ -435,6 +445,7 @@ func TestSetParticipationAndRewardProposer(t *testing.T) {
 	sourceFlagIndex := cfg.TimelySourceFlagIndex
 	targetFlagIndex := cfg.TimelyTargetFlagIndex
 	headFlagIndex := cfg.TimelyHeadFlagIndex
+	voteFlagIndex := cfg.DAGTimelyVotingFlagIndex
 	tests := []struct {
 		name                string
 		indices             []uint64
@@ -449,6 +460,7 @@ func TestSetParticipationAndRewardProposer(t *testing.T) {
 				sourceFlagIndex: false,
 				targetFlagIndex: false,
 				headFlagIndex:   false,
+				voteFlagIndex:   false,
 			},
 			wantedParticipation: []byte{0, 0, 0, 0, 0, 0, 0, 0},
 			wantedBalance:       32_000_000_000_000,
@@ -458,6 +470,7 @@ func TestSetParticipationAndRewardProposer(t *testing.T) {
 				sourceFlagIndex: false,
 				targetFlagIndex: false,
 				headFlagIndex:   false,
+				voteFlagIndex:   false,
 			},
 			wantedParticipation: []byte{0, 0, 0, 0, 0, 0, 0, 0},
 			wantedBalance:       32_000_000_000_000,
@@ -467,27 +480,30 @@ func TestSetParticipationAndRewardProposer(t *testing.T) {
 				sourceFlagIndex: true,
 				targetFlagIndex: true,
 				headFlagIndex:   false,
+				voteFlagIndex:   false,
 			},
 			wantedParticipation: []byte{3, 3, 3, 3, 0, 0, 0, 0},
-			wantedBalance:       32_000_028_051_985,
+			wantedBalance:       32_000_000_350_649,
 		},
 		{name: "all participated with some flags",
 			indices: []uint64{0, 1, 2, 3, 4, 5, 6, 7}, epochParticipation: []byte{0, 0, 0, 0, 0, 0, 0, 0}, participatedFlags: map[uint8]bool{
 				sourceFlagIndex: true,
 				targetFlagIndex: false,
 				headFlagIndex:   false,
+				voteFlagIndex:   false,
 			},
 			wantedParticipation: []byte{1, 1, 1, 1, 1, 1, 1, 1},
-			wantedBalance:       32_000_019_636_389,
+			wantedBalance:       32_000_000_350_649,
 		},
 		{name: "all participated with all flags",
 			indices: []uint64{0, 1, 2, 3, 4, 5, 6, 7}, epochParticipation: []byte{0, 0, 0, 0, 0, 0, 0, 0}, participatedFlags: map[uint8]bool{
 				sourceFlagIndex: true,
 				targetFlagIndex: true,
 				headFlagIndex:   true,
+				voteFlagIndex:   true,
 			},
-			wantedParticipation: []byte{7, 7, 7, 7, 7, 7, 7, 7},
-			wantedBalance:       32_000_075_740_360,
+			wantedParticipation: []byte{15, 15, 15, 15, 15, 15, 15, 15},
+			wantedBalance:       32_000_001_402_599,
 		},
 	}
 	for _, test := range tests {
@@ -532,6 +548,7 @@ func TestEpochParticipation(t *testing.T) {
 	sourceFlagIndex := cfg.TimelySourceFlagIndex
 	targetFlagIndex := cfg.TimelyTargetFlagIndex
 	headFlagIndex := cfg.TimelyHeadFlagIndex
+	votingFlagIndex := cfg.DAGTimelyVotingFlagIndex
 	tests := []struct {
 		name                     string
 		indices                  []uint64
@@ -545,6 +562,7 @@ func TestEpochParticipation(t *testing.T) {
 				sourceFlagIndex: false,
 				targetFlagIndex: false,
 				headFlagIndex:   false,
+				votingFlagIndex: false,
 			},
 			wantedNumerator:          0,
 			wantedEpochParticipation: []byte{0, 0, 0, 0, 0, 0, 0, 0},
@@ -554,6 +572,7 @@ func TestEpochParticipation(t *testing.T) {
 				sourceFlagIndex: false,
 				targetFlagIndex: false,
 				headFlagIndex:   false,
+				votingFlagIndex: false,
 			},
 			wantedNumerator:          0,
 			wantedEpochParticipation: []byte{0, 0, 0, 0, 0, 0, 0, 0},
@@ -563,8 +582,9 @@ func TestEpochParticipation(t *testing.T) {
 				sourceFlagIndex: true,
 				targetFlagIndex: true,
 				headFlagIndex:   false,
+				votingFlagIndex: false,
 			},
-			wantedNumerator:          12_567_289_440,
+			wantedNumerator:          157_091_112,
 			wantedEpochParticipation: []byte{3, 3, 3, 3, 0, 0, 0, 0},
 		},
 		{name: "all participated with some flags",
@@ -572,8 +592,9 @@ func TestEpochParticipation(t *testing.T) {
 				sourceFlagIndex: true,
 				targetFlagIndex: false,
 				headFlagIndex:   false,
+				votingFlagIndex: false,
 			},
-			wantedNumerator:          8_797_102_608,
+			wantedNumerator:          157_091_112,
 			wantedEpochParticipation: []byte{1, 1, 1, 1, 1, 1, 1, 1},
 		},
 		{name: "all participated with all flags",
@@ -581,9 +602,10 @@ func TestEpochParticipation(t *testing.T) {
 				sourceFlagIndex: true,
 				targetFlagIndex: true,
 				headFlagIndex:   true,
+				votingFlagIndex: true,
 			},
-			wantedNumerator:          33_931_681_488,
-			wantedEpochParticipation: []byte{7, 7, 7, 7, 7, 7, 7, 7},
+			wantedNumerator:          628_364_448,
+			wantedEpochParticipation: []byte{15, 15, 15, 15, 15, 15, 15, 15},
 		},
 	}
 	for _, test := range tests {
@@ -626,6 +648,7 @@ func TestAttestationParticipationFlagIndices(t *testing.T) {
 	sourceFlagIndex := cfg.TimelySourceFlagIndex
 	targetFlagIndex := cfg.TimelyTargetFlagIndex
 	headFlagIndex := cfg.TimelyHeadFlagIndex
+	votingFlagIndex := cfg.DAGTimelyVotingFlagIndex
 
 	tests := []struct {
 		name                 string
@@ -643,8 +666,10 @@ func TestAttestationParticipationFlagIndices(t *testing.T) {
 				Source: &ethpb.Checkpoint{Root: params.BeaconConfig().ZeroHash[:]},
 				Target: &ethpb.Checkpoint{},
 			},
-			inputDelay:           params.BeaconConfig().SlotsPerEpoch,
-			participationIndices: map[uint8]bool{},
+			inputDelay: params.BeaconConfig().SlotsPerEpoch,
+			participationIndices: map[uint8]bool{
+				votingFlagIndex: false,
+			},
 		},
 		{
 			name: "participated source",
@@ -658,6 +683,7 @@ func TestAttestationParticipationFlagIndices(t *testing.T) {
 			inputDelay: types.Slot(math.IntegerSquareRoot(uint64(cfg.SlotsPerEpoch)) - 1),
 			participationIndices: map[uint8]bool{
 				sourceFlagIndex: true,
+				votingFlagIndex: false,
 			},
 		},
 		{
@@ -673,6 +699,7 @@ func TestAttestationParticipationFlagIndices(t *testing.T) {
 			participationIndices: map[uint8]bool{
 				sourceFlagIndex: true,
 				targetFlagIndex: true,
+				votingFlagIndex: false,
 			},
 		},
 		{
@@ -690,6 +717,7 @@ func TestAttestationParticipationFlagIndices(t *testing.T) {
 				sourceFlagIndex: true,
 				targetFlagIndex: true,
 				headFlagIndex:   true,
+				votingFlagIndex: true,
 			},
 		},
 	}

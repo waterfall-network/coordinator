@@ -158,6 +158,7 @@ func ProcessEpochParticipation(
 	targetIdx := cfg.TimelyTargetFlagIndex
 	sourceIdx := cfg.TimelySourceFlagIndex
 	headIdx := cfg.TimelyHeadFlagIndex
+	votingIdx := cfg.DAGTimelyVotingFlagIndex
 	for i, b := range cp {
 		has, err := HasValidatorFlag(b, sourceIdx)
 		if err != nil {
@@ -197,6 +198,13 @@ func ProcessEpochParticipation(
 			vals[i].IsPrevEpochTargetAttester = true
 		}
 		has, err = HasValidatorFlag(b, headIdx)
+		if err != nil {
+			return nil, nil, err
+		}
+		if has && vals[i].IsActivePrevEpoch {
+			vals[i].IsPrevEpochHeadAttester = true
+		}
+		has, err = HasValidatorFlag(b, votingIdx)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -303,42 +311,45 @@ func attestationDelta(
 	}
 
 	cfg := params.BeaconConfig()
-	increment := cfg.EffectiveBalanceIncrement
 	effectiveBalance := val.CurrentEpochEffectiveBalance
 	committeesPerSlot := helpers.SlotCommitteeCount(uint64(validatorsNum))
 	baseReward := CalculateBaseReward(cfg, validatorsNum, committeesPerSlot, cfg.TargetCommitteeSize, cfg.BaseRewardMultiplier)
-	activeIncrement := bal.ActiveCurrentEpoch / increment
 
 	weightDenominator := cfg.WeightDenominator
-	srcWeight := cfg.TimelySourceWeight
-	tgtWeight := cfg.TimelyTargetWeight
-	headWeight := cfg.TimelyHeadWeight
+	srcWeight := cfg.DAGTimelySourceWeight
+	tgtWeight := cfg.DAGTimelyTargetWeight
+	headWeight := cfg.DAGTimelyHeadWeight
+	votingWeight := cfg.DAGTimelyVotingWeight
 	reward, penalty = uint64(0), uint64(0)
 	// Process source reward / penalty
 	if val.IsPrevEpochSourceAttester && !val.IsSlashed {
 		if !inactivityLeak {
-			n := baseReward * srcWeight * (bal.PrevEpochAttested / increment)
-			reward += n / (activeIncrement * weightDenominator)
+			reward += uint64(float64(baseReward) * srcWeight)
 		}
 	} else {
-		penalty += baseReward * srcWeight / weightDenominator
+		penalty += uint64(float64(baseReward)*srcWeight) / weightDenominator
 	}
 
 	// Process target reward / penalty
 	if val.IsPrevEpochTargetAttester && !val.IsSlashed {
 		if !inactivityLeak {
-			n := baseReward * tgtWeight * (bal.PrevEpochTargetAttested / increment)
-			reward += n / (activeIncrement * weightDenominator)
+			reward += uint64(float64(baseReward) * tgtWeight)
 		}
 	} else {
-		penalty += baseReward * tgtWeight / weightDenominator
+		penalty += uint64(float64(baseReward)*tgtWeight) / weightDenominator
 	}
 
 	// Process head reward / penalty
 	if val.IsPrevEpochHeadAttester && !val.IsSlashed {
 		if !inactivityLeak {
-			n := baseReward * headWeight * (bal.PrevEpochHeadAttested / increment)
-			reward += n / (activeIncrement * weightDenominator)
+			reward += uint64(float64(baseReward) * headWeight)
+		}
+	}
+
+	// Process timely voting reward / penalty
+	if val.IsPrevEpochHeadAttester && !val.IsSlashed {
+		if !inactivityLeak {
+			reward += uint64(float64(baseReward) * votingWeight)
 		}
 	}
 

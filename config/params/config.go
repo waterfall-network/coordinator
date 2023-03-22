@@ -161,6 +161,9 @@ type BeaconChainConfig struct {
 	TimelyTargetFlagIndex uint8 `yaml:"TIMELY_TARGET_FLAG_INDEX" spec:"true"` // TimelyTargetFlagIndex is the target flag position of the participation bits.
 	TimelyHeadFlagIndex   uint8 `yaml:"TIMELY_HEAD_FLAG_INDEX" spec:"true"`   // TimelyHeadFlagIndex is the head flag position of the participation bits.
 
+	// DAG participation flag indices
+	DAGTimelyVotingFlagIndex uint8 `yaml:"DAG_TIMELY_VOTING_FLAG_INDEX" spec:"true"` // DAGTimelyVotingFlagIndex is the voting flag position of the participation bits.
+
 	// Incentivization weights.
 	TimelySourceWeight uint64 `yaml:"TIMELY_SOURCE_WEIGHT" spec:"true"` // TimelySourceWeight is the factor of how much source rewards receives.
 	TimelyTargetWeight uint64 `yaml:"TIMELY_TARGET_WEIGHT" spec:"true"` // TimelyTargetWeight is the factor of how much target rewards receives.
@@ -168,6 +171,12 @@ type BeaconChainConfig struct {
 	SyncRewardWeight   uint64 `yaml:"SYNC_REWARD_WEIGHT" spec:"true"`   // SyncRewardWeight is the factor of how much sync committee rewards receives.
 	WeightDenominator  uint64 `yaml:"WEIGHT_DENOMINATOR" spec:"true"`   // WeightDenominator accounts for total rewards denomination.
 	ProposerWeight     uint64 `yaml:"PROPOSER_WEIGHT" spec:"true"`      // ProposerWeight is the factor of how much proposer rewards receives.
+
+	// DAG Incentivization weights
+	DAGTimelySourceWeight float64 `yaml:"DAG_TIMELY_SOURCE_WEIGHT" spec:"true"` // DAGTimelySourceWeight is the factor of how much source rewards receives.
+	DAGTimelyTargetWeight float64 `yaml:"DAG_TIMELY_TARGET_WEIGHT" spec:"true"` // DAGTimelyTargetWeight is the factor of how much target rewards receives.
+	DAGTimelyHeadWeight   float64 `yaml:"DAG_TIMELY_HEAD_WEIGHT" spec:"true"`   // DAGTimelyHeadWeight is the factor of how much head rewards receives.
+	DAGTimelyVotingWeight float64 `yaml:"DAG_TIMELY_VOTING_WEIGHT" spec:"true"` // DAGTimelyVotingWeight is the factor of how much timely voting rewards receives.
 
 	// Validator related.
 	TargetAggregatorsPerSyncSubcommittee uint64 `yaml:"TARGET_AGGREGATORS_PER_SYNC_SUBCOMMITTEE" spec:"true"` // TargetAggregatorsPerSyncSubcommittee for aggregating in sync committee.

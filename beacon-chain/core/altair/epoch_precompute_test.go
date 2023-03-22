@@ -232,9 +232,9 @@ func TestAttestationsDelta(t *testing.T) {
 	// Last index should have 0 penalty.
 	require.Equal(t, uint64(0), penalties[len(penalties)-1])
 
-	want := []uint64{0, 569_502, 1_274_600, 1_464_434}
+	want := []uint64{0, 867_814, 1_735_628, 3_471_256}
 	require.DeepEqual(t, want, rewards)
-	want = []uint64{2_169_534, 1_410_197, 0, 0}
+	want = []uint64{27_118, 13_559, 0, 0}
 	require.DeepEqual(t, want, penalties)
 }
 
@@ -263,9 +263,9 @@ func TestAttestationsDeltaBellatrix(t *testing.T) {
 	// Last index should have 0 penalty.
 	require.Equal(t, uint64(0), penalties[len(penalties)-1])
 
-	want := []uint64{0, 939146, 2101898, 2414946}
+	want := []uint64{0, 867_814, 1_735_628, 3_471_256}
 	require.DeepEqual(t, want, rewards)
-	want = []uint64{3577700, 2325505, 0, 0}
+	want = []uint64{27_118, 13_559, 0, 0}
 	require.DeepEqual(t, want, penalties)
 }
 

@@ -228,6 +228,9 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	TimelyTargetFlagIndex: 1,
 	TimelyHeadFlagIndex:   2,
 
+	// DAG Participation flag indices.
+	DAGTimelyVotingFlagIndex: 3,
+
 	// Incentivization weight values.
 	TimelySourceWeight: 14,
 	TimelyTargetWeight: 26,
@@ -235,6 +238,12 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	SyncRewardWeight:   2,
 	ProposerWeight:     8,
 	WeightDenominator:  64,
+
+	// DAG Incentivization weight values.
+	DAGTimelySourceWeight: 0.25,
+	DAGTimelyTargetWeight: 0.25,
+	DAGTimelyHeadWeight:   0.25,
+	DAGTimelyVotingWeight: 0.25,
 
 	// Validator related values.
 	TargetAggregatorsPerSyncSubcommittee: 16,

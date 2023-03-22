@@ -174,6 +174,7 @@ func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochPa
 	sourceFlagIndex := cfg.TimelySourceFlagIndex
 	targetFlagIndex := cfg.TimelyTargetFlagIndex
 	headFlagIndex := cfg.TimelyHeadFlagIndex
+	votingFlagIndex := cfg.DAGTimelyVotingFlagIndex
 	proposerRewardNumerator := uint64(0)
 	for _, index := range indices {
 		if index >= uint64(len(epochParticipation)) {
@@ -189,7 +190,7 @@ func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochPa
 			if err != nil {
 				return 0, nil, err
 			}
-			proposerRewardNumerator += br * cfg.TimelySourceWeight
+			proposerRewardNumerator += uint64(float64(br) * cfg.DAGTimelySourceWeight)
 		}
 		has, err = HasValidatorFlag(epochParticipation[index], targetFlagIndex)
 		if err != nil {
@@ -200,7 +201,7 @@ func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochPa
 			if err != nil {
 				return 0, nil, err
 			}
-			proposerRewardNumerator += br * cfg.TimelyTargetWeight
+			proposerRewardNumerator += uint64(float64(br) * cfg.DAGTimelyTargetWeight)
 		}
 		has, err = HasValidatorFlag(epochParticipation[index], headFlagIndex)
 		if err != nil {
@@ -211,7 +212,18 @@ func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochPa
 			if err != nil {
 				return 0, nil, err
 			}
-			proposerRewardNumerator += br * cfg.TimelyHeadWeight
+			proposerRewardNumerator += uint64(float64(br) * cfg.DAGTimelyHeadWeight)
+		}
+		has, err = HasValidatorFlag(epochParticipation[index], votingFlagIndex)
+		if err != nil {
+			return 0, nil, err
+		}
+		if participatedFlags[headFlagIndex] && !has {
+			epochParticipation[index], err = AddValidatorFlag(epochParticipation[index], votingFlagIndex)
+			if err != nil {
+				return 0, nil, err
+			}
+			proposerRewardNumerator += uint64(float64(br) * cfg.DAGTimelyVotingWeight)
 		}
 	}
 
@@ -290,6 +302,7 @@ func AttestationParticipationFlagIndices(beaconState state.BeaconStateAltair, da
 	sourceFlagIndex := cfg.TimelySourceFlagIndex
 	targetFlagIndex := cfg.TimelyTargetFlagIndex
 	headFlagIndex := cfg.TimelyHeadFlagIndex
+	votingFlagIndex := cfg.DAGTimelyVotingFlagIndex
 	slotsPerEpoch := cfg.SlotsPerEpoch
 	sqtRootSlots := cfg.SqrRootSlotsPerEpoch
 	if matchedSrc && delay <= sqtRootSlots {
@@ -303,6 +316,10 @@ func AttestationParticipationFlagIndices(beaconState state.BeaconStateAltair, da
 	if matchedSrcTgtHead && delay == cfg.MinAttestationInclusionDelay {
 		participatedFlags[headFlagIndex] = true
 	}
+	// Participated in attestation in timely manner for source, target and head
+	participatedFlags[votingFlagIndex] = participatedFlags[sourceFlagIndex] &&
+		participatedFlags[targetFlagIndex] &&
+		participatedFlags[headFlagIndex]
 	return participatedFlags, nil
 }
 
