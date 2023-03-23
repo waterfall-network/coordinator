@@ -23,12 +23,13 @@ func TestBeaconState_AppendBalanceWithTrie(t *testing.T) {
 	vals := make([]*ethpb.Validator, 0, count)
 	bals := make([]uint64, 0, count)
 	for i := uint64(1); i < count; i++ {
-		someRoot := [fieldparams.RootLength]byte{}
+		someRoot := [fieldparams.AddressLength]byte{}
 		someKey := [fieldparams.BLSPubkeyLength]byte{}
 		copy(someRoot[:], strconv.Itoa(int(i)))
 		copy(someKey[:], strconv.Itoa(int(i)))
 		vals = append(vals, &ethpb.Validator{
 			PublicKey:                  someKey[:],
+			CreatorAddress:             someRoot[:],
 			WithdrawalCredentials:      someRoot[:],
 			EffectiveBalance:           params.BeaconConfig().MaxEffectiveBalance,
 			Slashed:                    false,
@@ -154,12 +155,13 @@ func createState(count uint64) *ethpb.BeaconStateAltair {
 	vals := make([]*ethpb.Validator, 0, count)
 	bals := make([]uint64, 0, count)
 	for i := uint64(0); i < count; i++ {
-		someRoot := [32]byte{}
+		someRoot := [20]byte{}
 		someKey := [fieldparams.BLSPubkeyLength]byte{}
 		copy(someRoot[:], strconv.Itoa(int(i)))
 		copy(someKey[:], strconv.Itoa(int(i)))
 		vals = append(vals, &ethpb.Validator{
 			PublicKey:                  someKey[:],
+			CreatorAddress:             someRoot[:],
 			WithdrawalCredentials:      someRoot[:],
 			EffectiveBalance:           params.BeaconConfig().MaxEffectiveBalance,
 			Slashed:                    false,

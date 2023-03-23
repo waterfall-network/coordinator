@@ -389,7 +389,8 @@ func populateValidators(cfg *params.BeaconChainConfig, st state.BeaconState, val
 	for i := uint64(0); i < valCount; i++ {
 		validators[i] = &ethpb.Validator{
 			PublicKey:             make([]byte, cfg.BLSPubkeyLength),
-			WithdrawalCredentials: make([]byte, 32),
+			CreatorAddress:        make([]byte, 20),
+			WithdrawalCredentials: make([]byte, 20),
 			EffectiveBalance:      avgBalance * 1e9,
 			ExitEpoch:             cfg.FarFutureEpoch,
 		}

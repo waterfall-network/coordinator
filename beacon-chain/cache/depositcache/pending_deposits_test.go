@@ -35,7 +35,8 @@ func TestRemovePendingDeposit_OK(t *testing.T) {
 	proof2[0] = bytesutil.PadTo([]byte{'A'}, 32)
 	data := &ethpb.Deposit_Data{
 		PublicKey:             make([]byte, 48),
-		WithdrawalCredentials: make([]byte, 32),
+		CreatorAddress:        make([]byte, 20),
+		WithdrawalCredentials: make([]byte, 20),
 		Amount:                0,
 		Signature:             make([]byte, 96),
 	}
@@ -65,7 +66,8 @@ func TestPendingDeposit_RoundTrip(t *testing.T) {
 	proof[0] = bytesutil.PadTo([]byte{'A'}, 32)
 	data := &ethpb.Deposit_Data{
 		PublicKey:             make([]byte, 48),
-		WithdrawalCredentials: make([]byte, 32),
+		CreatorAddress:        make([]byte, 20),
+		WithdrawalCredentials: make([]byte, 20),
 		Amount:                0,
 		Signature:             make([]byte, 96),
 	}

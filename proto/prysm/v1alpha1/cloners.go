@@ -305,6 +305,7 @@ func CopyDepositData(depData *Deposit_Data) *Deposit_Data {
 	}
 	return &Deposit_Data{
 		PublicKey:             bytesutil.SafeCopyBytes(depData.PublicKey),
+		CreatorAddress:        bytesutil.SafeCopyBytes(depData.CreatorAddress),
 		WithdrawalCredentials: bytesutil.SafeCopyBytes(depData.WithdrawalCredentials),
 		Amount:                depData.Amount,
 		Signature:             bytesutil.SafeCopyBytes(depData.Signature),
@@ -341,10 +342,13 @@ func CopySignedVoluntaryExit(exit *SignedVoluntaryExit) *SignedVoluntaryExit {
 func CopyValidator(val *Validator) *Validator {
 	pubKey := make([]byte, len(val.PublicKey))
 	copy(pubKey, val.PublicKey)
+	creatorAddress := make([]byte, len(val.CreatorAddress))
+	copy(creatorAddress, val.CreatorAddress)
 	withdrawalCreds := make([]byte, len(val.WithdrawalCredentials))
 	copy(withdrawalCreds, val.WithdrawalCredentials)
 	return &Validator{
 		PublicKey:                  pubKey,
+		CreatorAddress:             creatorAddress,
 		WithdrawalCredentials:      withdrawalCreds,
 		EffectiveBalance:           val.EffectiveBalance,
 		Slashed:                    val.Slashed,

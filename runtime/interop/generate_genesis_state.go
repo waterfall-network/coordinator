@@ -151,6 +151,7 @@ func depositDataFromKeys(privKeys []bls.SecretKey, pubKeys []bls.PublicKey) ([]*
 func createDepositData(privKey bls.SecretKey, pubKey bls.PublicKey) (*ethpb.Deposit_Data, error) {
 	depositMessage := &ethpb.DepositMessage{
 		PublicKey:             pubKey.Marshal(),
+		CreatorAddress:        withdrawalCredentialsHash(pubKey.Marshal()),
 		WithdrawalCredentials: withdrawalCredentialsHash(pubKey.Marshal()),
 		Amount:                params.BeaconConfig().MaxEffectiveBalance,
 	}
@@ -168,6 +169,7 @@ func createDepositData(privKey bls.SecretKey, pubKey bls.PublicKey) (*ethpb.Depo
 	}
 	di := &ethpb.Deposit_Data{
 		PublicKey:             depositMessage.PublicKey,
+		CreatorAddress:        depositMessage.CreatorAddress,
 		WithdrawalCredentials: depositMessage.WithdrawalCredentials,
 		Amount:                depositMessage.Amount,
 		Signature:             privKey.Sign(root[:]).Marshal(),
@@ -175,7 +177,7 @@ func createDepositData(privKey bls.SecretKey, pubKey bls.PublicKey) (*ethpb.Depo
 	return di, nil
 }
 
-// withdrawalCredentialsHash forms a 32 byte hash of the withdrawal public
+// withdrawalCredentialsHash forms a 20 byte hash of the withdrawal public
 // address.
 //
 // The specification is as follows:
@@ -186,5 +188,5 @@ func createDepositData(privKey bls.SecretKey, pubKey bls.PublicKey) (*ethpb.Depo
 // where withdrawal_credentials is of type bytes32.
 func withdrawalCredentialsHash(pubKey []byte) []byte {
 	h := hash.Hash(pubKey)
-	return append([]byte{blsWithdrawalPrefixByte}, h[1:]...)[:32]
+	return append([]byte{blsWithdrawalPrefixByte}, h[1:]...)[:20]
 }

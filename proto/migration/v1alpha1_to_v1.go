@@ -307,6 +307,7 @@ func V1Alpha1ValidatorToV1(v1Alpha1Validator *ethpbalpha.Validator) *ethpbv1.Val
 	}
 	return &ethpbv1.Validator{
 		Pubkey:                     v1Alpha1Validator.PublicKey,
+		CreatorAddress:             v1Alpha1Validator.CreatorAddress,
 		WithdrawalCredentials:      v1Alpha1Validator.WithdrawalCredentials,
 		EffectiveBalance:           v1Alpha1Validator.EffectiveBalance,
 		Slashed:                    v1Alpha1Validator.Slashed,
@@ -324,6 +325,7 @@ func V1ValidatorToV1Alpha1(v1Validator *ethpbv1.Validator) *ethpbalpha.Validator
 	}
 	return &ethpbalpha.Validator{
 		PublicKey:                  v1Validator.Pubkey,
+		CreatorAddress:             v1Validator.CreatorAddress,
 		WithdrawalCredentials:      v1Validator.WithdrawalCredentials,
 		EffectiveBalance:           v1Validator.EffectiveBalance,
 		Slashed:                    v1Validator.Slashed,
@@ -384,6 +386,7 @@ func BeaconStateToProto(state state.BeaconState) (*ethpbv1.BeaconState, error) {
 	for i, validator := range sourceValidators {
 		resultValidators[i] = &ethpbv1.Validator{
 			Pubkey:                     bytesutil.SafeCopyBytes(validator.PublicKey),
+			CreatorAddress:             bytesutil.SafeCopyBytes(validator.CreatorAddress),
 			WithdrawalCredentials:      bytesutil.SafeCopyBytes(validator.WithdrawalCredentials),
 			EffectiveBalance:           validator.EffectiveBalance,
 			Slashed:                    validator.Slashed,

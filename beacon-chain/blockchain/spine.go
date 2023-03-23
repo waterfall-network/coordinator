@@ -1,18 +1,22 @@
 package blockchain
 
 import (
+	"bytes"
 	"sync"
 
 	types "github.com/prysmaticlabs/eth2-types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
 )
 
 type spineData struct {
 	lastValidRoot   []byte
 	lastValidSlot   types.Slot
-	finalizedSpines gwatCommon.HashArray //successfully finalized spines from checkpoint
+	finalizedSpines gwatCommon.HashArray  //successfully finalized spines from checkpoint
+	gwatCheckpoint  *gwatTypes.Checkpoint //cache for current finalization request checkpoint param
+	coordState      *gwatTypes.Checkpoint //cache for current gwat coordinated state
 	sync.RWMutex
 }
 
@@ -97,4 +101,40 @@ func (s *Service) ResetFinalizedSpines() {
 
 	finalizedSpines := make(gwatCommon.HashArray, 0, 4*params.BeaconConfig().SlotsPerEpoch)
 	s.spineData.finalizedSpines = finalizedSpines
+}
+
+// CacheGwatCheckpoint caches the current gwat checkpoint.
+func (s *Service) CacheGwatCheckpoint(gwatCheckpoint *gwatTypes.Checkpoint) {
+	s.spineData.RLock()
+	defer s.spineData.RUnlock()
+
+	s.spineData.gwatCheckpoint = gwatCheckpoint
+}
+
+// GetCachedGwatCheckpoint returns the currently cached gwat checkpoint.
+func (s *Service) GetCachedGwatCheckpoint(cpRoot []byte) *gwatTypes.Checkpoint {
+	s.spineData.RLock()
+	defer s.spineData.RUnlock()
+
+	cp := s.spineData.gwatCheckpoint
+	if cp != nil && bytes.Equal(cp.Root.Bytes(), cpRoot) {
+		return s.spineData.gwatCheckpoint
+	}
+	return nil
+}
+
+// CacheGwatCoordinatedState caches the current gwat coordinated state.
+func (s *Service) CacheGwatCoordinatedState(coordState *gwatTypes.Checkpoint) {
+	s.spineData.RLock()
+	defer s.spineData.RUnlock()
+
+	s.spineData.coordState = coordState
+}
+
+// GetCachedGwatCoordinatedState returns the currently cached gwat coordinated state.
+func (s *Service) GetCachedGwatCoordinatedState() *gwatTypes.Checkpoint {
+	s.spineData.RLock()
+	defer s.spineData.RUnlock()
+
+	return s.spineData.coordState
 }

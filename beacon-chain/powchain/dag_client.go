@@ -10,17 +10,18 @@ import (
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/rpc"
 )
 
 const (
-	//ExecutionDagSyncMethod request string for JSON-RPC of dag api.
-	ExecutionDagSyncMethod = "dag_sync"
 	//ExecutionDagGetCandidatesMethod request string for JSON-RPC of dag api.
 	ExecutionDagGetCandidatesMethod = "dag_getCandidates"
 	//ExecutionDagFinalizeMethod request string for JSON-RPC of dag api.
 	ExecutionDagFinalizeMethod = "dag_finalize"
+	//ExecutionDagCoordinatedStateMethod request string for JSON-RPC of dag api.
+	ExecutionDagCoordinatedStateMethod = "dag_coordinatedState"
 	//ExecutionDagHeadSyncReadyMethod request string for JSON-RPC of dag api.
 	ExecutionDagHeadSyncReadyMethod = "dag_headSyncReady"
 	//ExecutionDagHeadSyncMethod request string for JSON-RPC of dag api.
@@ -29,51 +30,19 @@ const (
 	ExecutionDagSyncSlotInfoMethod = "dag_syncSlotInfo"
 	//ExecutionDagValidateSpinesMethod request string for JSON-RPC of dag api.
 	ExecutionDagValidateSpinesMethod = "dag_validateSpines"
+	//ExecutionDepositCountMethod request string for JSON-RPC of validator api.
+	ExecutionDepositCountMethod = "wat_validator_DepositCount"
 )
-
-// ExecutionDagSync executing following procedures:
-// - finalisation
-// - get candidates
-// - block creation
-// by calling dag_sync via JSON-RPC.
-func (s *Service) ExecutionDagSync(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (gwatCommon.HashArray, error) {
-	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagSync")
-	defer span.End()
-	result := &gwatTypes.ConsensusResult{}
-
-	if s.rpcClient == nil {
-		return result.Candidates, fmt.Errorf("Rpc Client not init")
-	}
-
-	err := s.rpcClient.CallContext(
-		ctx,
-		result,
-		ExecutionDagSyncMethod,
-		syncParams,
-	)
-	if result.Error != nil {
-		err = errors.New(*result.Error)
-	}
-	if result.Candidates == nil {
-		result.Candidates = gwatCommon.HashArray{}
-	}
-	return result.Candidates, handleDagRPCError(err)
-}
 
 // ExecutionDagFinalize executing finalisation procedure
 // by calling dag_finalize via JSON-RPC.
-func (s *Service) ExecutionDagFinalize(ctx context.Context, spines gwatCommon.HashArray, baseSpine *gwatCommon.Hash) (*gwatCommon.Hash, error) {
+func (s *Service) ExecutionDagFinalize(ctx context.Context, params *gwatTypes.FinalizationParams) (*gwatTypes.FinalizationResult, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagFinalize")
 	defer span.End()
 	result := &gwatTypes.FinalizationResult{}
 
 	if s.rpcClient == nil {
 		return nil, fmt.Errorf("Rpc Client not init")
-	}
-
-	params := &gwatTypes.FinalizationParams{
-		Spines:    spines,
-		BaseSpine: baseSpine,
 	}
 
 	err := s.rpcClient.CallContext(
@@ -98,7 +67,39 @@ func (s *Service) ExecutionDagFinalize(ctx context.Context, spines gwatCommon.Ha
 		err = errors.New(*result.Error)
 	}
 
-	return result.LFSpine, handleDagRPCError(err)
+	return result, handleDagRPCError(err)
+}
+
+// ExecutionDagCoordinatedState executing procedure to retrieve gwat coordinated state
+// by calling dag_finalize via JSON-RPC.
+func (s *Service) ExecutionDagCoordinatedState(ctx context.Context) (*gwatTypes.FinalizationResult, error) {
+	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.DagCoordinatedState")
+	defer span.End()
+	result := &gwatTypes.FinalizationResult{}
+
+	if s.rpcClient == nil {
+		return nil, fmt.Errorf("Rpc Client not init")
+	}
+
+	err := s.rpcClient.CallContext(
+		ctx,
+		result,
+		ExecutionDagCoordinatedStateMethod,
+	)
+
+	if err != nil {
+		log.WithError(err).Error("Dag Coordinated State")
+	}
+
+	if result.Error != nil {
+		err = errors.New(*result.Error)
+	}
+
+	if result.Error != nil {
+		err = errors.New(*result.Error)
+	}
+
+	return result, handleDagRPCError(err)
 }
 
 // ExecutionDagGetCandidates executing consensus procedure
@@ -238,6 +239,36 @@ func (s *Service) GetHeaderByNumber(ctx context.Context, nr *big.Int) (*gwatType
 	}
 	header, err := s.eth1DataFetcher.HeaderByNumber(ctx, nr)
 	return header, handleDagRPCError(err)
+}
+
+// GetDepositCount retrieves current gwat deposit count
+func (s *Service) GetDepositCount(ctx context.Context) (uint64, error) {
+	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.GetDepositCount")
+	defer span.End()
+	//var result uint64
+	var result string
+
+	if s.rpcClient == nil {
+		return 0, fmt.Errorf("Rpc Client not init")
+	}
+	err := s.rpcClient.CallContext(
+		ctx,
+		&result,
+		ExecutionDepositCountMethod,
+		nil,
+	)
+	if err != nil {
+		log.WithError(err).Error("GetDepositCount")
+	}
+
+	count, err := hexutil.DecodeUint64(result)
+	log.WithError(err).WithField(
+		"result", result,
+	).WithField(
+		"uint", count,
+	).Error("GetDepositCount")
+
+	return count, handleDagRPCError(err)
 }
 
 // handleDagRPCError errors received from the RPC server according to the specification.

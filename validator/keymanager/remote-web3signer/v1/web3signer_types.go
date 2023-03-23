@@ -220,6 +220,7 @@ type Deposit struct {
 // DepositData Prysm uses Deposit_data instead of DepositData which is inconsistent naming
 type DepositData struct {
 	PublicKey             string `json:"pubkey"`
+	CreatorAddress        string `json:"creator_address"`
 	WithdrawalCredentials string `json:"withdrawal_credentials"`
 	Amount                string `json:"amount"` /* uint64 */
 	Signature             string `json:"signature"`
