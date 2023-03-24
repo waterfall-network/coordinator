@@ -741,7 +741,7 @@ func collectValidatorSyncData(ctx context.Context, state state.BeaconState, from
 		// activation
 		if validator.ActivationEpoch > fromEpoch && validator.ActivationEpoch <= currentEpoch {
 			validatorSyncData = append(validatorSyncData, &gwatTypes.ValidatorSync{
-				OpType:    gwatTypes.Activation,
+				OpType:    gwatTypes.Activate,
 				ProcEpoch: uint64(validator.ActivationEpoch),
 				Index:     uint64(idx),
 				Creator:   gwatCommon.BytesToAddress(validator.CreatorAddress),
@@ -751,7 +751,7 @@ func collectValidatorSyncData(ctx context.Context, state state.BeaconState, from
 		// exit
 		if validator.ExitEpoch > fromEpoch && validator.ExitEpoch <= currentEpoch {
 			validatorSyncData = append(validatorSyncData, &gwatTypes.ValidatorSync{
-				OpType:    gwatTypes.Exit,
+				OpType:    gwatTypes.Deactivate,
 				ProcEpoch: uint64(validator.ExitEpoch),
 				Index:     uint64(idx),
 				Creator:   gwatCommon.BytesToAddress(validator.CreatorAddress),
@@ -767,7 +767,7 @@ func collectValidatorSyncData(ctx context.Context, state state.BeaconState, from
 			//gwei to wei
 			amt := new(big.Int).Mul(new(big.Int).SetUint64(balAtIdx), new(big.Int).SetUint64(1000000000))
 			validatorSyncData = append(validatorSyncData, &gwatTypes.ValidatorSync{
-				OpType:    gwatTypes.Withdrawal,
+				OpType:    gwatTypes.UpdateBalance,
 				ProcEpoch: uint64(validator.WithdrawableEpoch),
 				Index:     uint64(idx),
 				Creator:   gwatCommon.BytesToAddress(validator.CreatorAddress),
