@@ -623,6 +623,7 @@ func (b *BeaconNode) registerPOWChainService() error {
 		powchain.WithStateGen(b.stateGen),
 		powchain.WithBeaconNodeStatsUpdater(bs),
 		powchain.WithFinalizedStateAtStartup(b.finalizedStateAtStartUp),
+		powchain.WithExitPool(b.exitPool),
 	)
 	web3Service, err := powchain.NewService(b.ctx, opts...)
 	if err != nil {

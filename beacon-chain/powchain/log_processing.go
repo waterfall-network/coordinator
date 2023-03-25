@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed"
 	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
@@ -14,18 +15,14 @@ import (
 	coreState "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition"
 	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	prysmTime "gitlab.waterfall.network/waterfall/protocol/coordinator/time"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	gwat "gitlab.waterfall.network/waterfall/protocol/gwat"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
 	gwatVal "gitlab.waterfall.network/waterfall/protocol/gwat/validator"
-)
-
-var (
-	depositEventSignature = hash.HashKeccak256([]byte("DepositEvent(bytes,bytes,bytes,bytes,bytes)"))
 )
 
 const eth1DataSavingInterval = 1000
@@ -82,7 +79,7 @@ func (s *Service) ProcessLog(ctx context.Context, depositLog gwatTypes.Log) erro
 	s.processingLock.RLock()
 	defer s.processingLock.RUnlock()
 	// Process logs according to their event signature.
-	if depositLog.Topics[0] == depositEventSignature {
+	if depositLog.Topics[0] == gwatVal.EvtDepositLogSignature {
 		if err := s.ProcessDepositLog(ctx, depositLog); err != nil {
 			return errors.Wrap(err, "Could not process deposit log")
 		}
@@ -91,7 +88,49 @@ func (s *Service) ProcessLog(ctx context.Context, depositLog gwatTypes.Log) erro
 		}
 		return nil
 	}
+	if depositLog.Topics[0] == gwatVal.EvtExitReqLogSignature {
+		if err := s.ProcessExitLog(ctx, depositLog); err != nil {
+			return errors.Wrap(err, "Could not process exit log")
+		}
+		return nil
+	}
 	log.WithField("signature", fmt.Sprintf("%#x", depositLog.Topics[0])).Debug("Not a valid event signature")
+	return nil
+}
+
+func (s *Service) ProcessExitLog(ctx context.Context, exitLog gwatTypes.Log) error {
+	pubkey, creatorAddr, valIndex, exitEpoch, err := gwatVal.UnpackExitRequestLogData(exitLog.Data)
+
+	log.WithError(err).WithFields(logrus.Fields{
+		"valIndex":    valIndex,
+		"exitEpoch":   exitEpoch,
+		"pubkey":      fmt.Sprintf("%#x", pubkey),
+		"creatorAddr": fmt.Sprintf("%#x", creatorAddr),
+	}).Info("Processing exit")
+
+	if err != nil {
+		return errors.Wrap(err, "Could not unpack log")
+	}
+
+	totalSecondsPassed := uint64(prysmTime.Now().Unix()) - s.cfg.finalizedStateAtStartup.GenesisTime()
+	currentEpoch := types.Epoch(uint64(totalSecondsPassed) / uint64(params.BeaconConfig().SlotsPerEpoch.Mul(params.BeaconConfig().SecondsPerSlot)))
+
+	if exitEpoch != nil && *exitEpoch > uint64(currentEpoch) {
+		currentEpoch = types.Epoch(*exitEpoch)
+	}
+
+	exit := &ethpb.VoluntaryExit{Epoch: currentEpoch, ValidatorIndex: types.ValidatorIndex(valIndex)}
+
+	// add tx data as sig
+	adddata := make([]byte, 0, 96)
+	adddata = append(adddata, pubkey.Bytes()...)
+	adddata = append(adddata, exitLog.TxHash.Bytes()...)
+	adddata = append(adddata, bytesutil.ToBytes(exitLog.BlockNumber, 8)...)
+	adddata = append(adddata, bytesutil.ToBytes(uint64(exitLog.TxIndex), 8)...)
+	signedExit := &ethpb.SignedVoluntaryExit{Exit: exit, Signature: adddata}
+
+	s.cfg.exitPool.InsertVoluntaryExitByGwat(s.ctx, signedExit)
+
 	return nil
 }
 
