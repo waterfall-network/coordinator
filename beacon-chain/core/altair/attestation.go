@@ -168,9 +168,13 @@ func AddValidatorFlag(flag, flagPosition uint8) (uint8, error) {
 //	            epoch_participation[index] = add_flag(epoch_participation[index], flag_index)
 //	            proposer_reward_numerator += get_base_reward(state, index) * weight
 func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochParticipation []byte, participatedFlags map[uint8]bool, totalBalance uint64) (uint64, []byte, error) {
+	ctx := context.Background()
 	cfg := params.BeaconConfig()
-	numOfVals := beaconState.NumValidators()
-	committeesPerSlot := helpers.SlotCommitteeCount(uint64(numOfVals))
+	numOfValidators := beaconState.NumValidators() // N in formula, number of registered validators
+	activeValidatorsForSlot, err := helpers.ActiveValidatorForSlotCount(ctx, beaconState, beaconState.Slot())
+	if err != nil || activeValidatorsForSlot == 0 {
+		activeValidatorsForSlot = cfg.MaxCommitteesPerSlot * cfg.TargetCommitteeSize
+	}
 	sourceFlagIndex := cfg.TimelySourceFlagIndex
 	targetFlagIndex := cfg.TimelyTargetFlagIndex
 	headFlagIndex := cfg.TimelyHeadFlagIndex
@@ -180,7 +184,7 @@ func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochPa
 		if index >= uint64(len(epochParticipation)) {
 			return 0, nil, fmt.Errorf("index %d exceeds participation length %d", index, len(epochParticipation))
 		}
-		br := CalculateBaseReward(cfg, numOfVals, committeesPerSlot, cfg.TargetCommitteeSize, cfg.BaseRewardMultiplier)
+		br := CalculateBaseReward(cfg, numOfValidators, activeValidatorsForSlot, cfg.BaseRewardMultiplier)
 		has, err := HasValidatorFlag(epochParticipation[index], sourceFlagIndex)
 		if err != nil {
 			return 0, nil, err
@@ -238,9 +242,7 @@ func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochPa
 //	proposer_reward = Gwei(proposer_reward_numerator // proposer_reward_denominator)
 //	increase_balance(state, get_beacon_proposer_index(state), proposer_reward)
 func RewardProposer(ctx context.Context, beaconState state.BeaconState, proposerRewardNumerator uint64) error {
-	cfg := params.BeaconConfig()
-	d := (cfg.WeightDenominator - cfg.ProposerWeight) * cfg.WeightDenominator / cfg.ProposerWeight
-	proposerReward := proposerRewardNumerator / d
+	proposerReward := proposerRewardNumerator
 	i, err := helpers.BeaconProposerIndex(ctx, beaconState)
 	if err != nil {
 		return err

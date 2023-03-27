@@ -483,7 +483,7 @@ func TestSetParticipationAndRewardProposer(t *testing.T) {
 				voteFlagIndex:   false,
 			},
 			wantedParticipation: []byte{3, 3, 3, 3, 0, 0, 0, 0},
-			wantedBalance:       32_000_000_350_649,
+			wantedBalance:       32_000_314_182_232,
 		},
 		{name: "all participated with some flags",
 			indices: []uint64{0, 1, 2, 3, 4, 5, 6, 7}, epochParticipation: []byte{0, 0, 0, 0, 0, 0, 0, 0}, participatedFlags: map[uint8]bool{
@@ -493,7 +493,7 @@ func TestSetParticipationAndRewardProposer(t *testing.T) {
 				voteFlagIndex:   false,
 			},
 			wantedParticipation: []byte{1, 1, 1, 1, 1, 1, 1, 1},
-			wantedBalance:       32_000_000_350_649,
+			wantedBalance:       32_000_314_182_232,
 		},
 		{name: "all participated with all flags",
 			indices: []uint64{0, 1, 2, 3, 4, 5, 6, 7}, epochParticipation: []byte{0, 0, 0, 0, 0, 0, 0, 0}, participatedFlags: map[uint8]bool{
@@ -503,7 +503,7 @@ func TestSetParticipationAndRewardProposer(t *testing.T) {
 				voteFlagIndex:   true,
 			},
 			wantedParticipation: []byte{15, 15, 15, 15, 15, 15, 15, 15},
-			wantedBalance:       32_000_001_402_599,
+			wantedBalance:       32_001_256_728_928,
 		},
 	}
 	for _, test := range tests {
@@ -584,7 +584,7 @@ func TestEpochParticipation(t *testing.T) {
 				headFlagIndex:   false,
 				votingFlagIndex: false,
 			},
-			wantedNumerator:          157_091_112,
+			wantedNumerator:          314_182_232,
 			wantedEpochParticipation: []byte{3, 3, 3, 3, 0, 0, 0, 0},
 		},
 		{name: "all participated with some flags",
@@ -594,7 +594,7 @@ func TestEpochParticipation(t *testing.T) {
 				headFlagIndex:   false,
 				votingFlagIndex: false,
 			},
-			wantedNumerator:          157_091_112,
+			wantedNumerator:          314_182_232,
 			wantedEpochParticipation: []byte{1, 1, 1, 1, 1, 1, 1, 1},
 		},
 		{name: "all participated with all flags",
@@ -604,7 +604,7 @@ func TestEpochParticipation(t *testing.T) {
 				headFlagIndex:   true,
 				votingFlagIndex: true,
 			},
-			wantedNumerator:          628_364_448,
+			wantedNumerator:          1_256_728_928,
 			wantedEpochParticipation: []byte{15, 15, 15, 15, 15, 15, 15, 15},
 		},
 	}
@@ -625,11 +625,11 @@ func TestRewardProposer(t *testing.T) {
 		rewardNumerator uint64
 		want            uint64
 	}{
-		{rewardNumerator: 1, want: 32_000_000_000_000},
-		{rewardNumerator: 10_000, want: 32_000_000_000_022},
-		{rewardNumerator: 1_000_000, want: 32_000_000_002_254},
-		{rewardNumerator: 1_000_000_000, want: 32_000_002_234_396},
-		{rewardNumerator: 1_000_000_000_000, want: 32_002_234_377_253},
+		{rewardNumerator: 1, want: 32_000_000_000_001},
+		{rewardNumerator: 10_000, want: 32_000_000_010_001},
+		{rewardNumerator: 1_000_000, want: 32_000_001_010_001},
+		{rewardNumerator: 1_000_000_000, want: 32_001_001_010_001},
+		{rewardNumerator: 1_000_000_000_000, want: 33_001_001_010_001},
 	}
 	for _, test := range tests {
 		require.NoError(t, altair.RewardProposer(context.Background(), beaconState, test.rewardNumerator))

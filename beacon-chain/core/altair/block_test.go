@@ -247,13 +247,13 @@ func Test_ApplySyncRewardsPenalties(t *testing.T) {
 		[]types.ValidatorIndex{2, 3}) // didn't vote
 	require.NoError(t, err)
 	balances := beaconState.Balances()
-	require.Equal(t, uint64(32000000988), balances[0])
+	require.Equal(t, uint64(32_000_000_031_250), balances[0])
 	require.Equal(t, balances[0], balances[1])
-	require.Equal(t, uint64(31999999012), balances[2])
+	require.Equal(t, uint64(31_999_999_968_750), balances[2])
 	require.Equal(t, balances[2], balances[3])
 	proposerIndex, err := helpers.BeaconProposerIndex(context.Background(), beaconState)
 	require.NoError(t, err)
-	require.Equal(t, uint64(32000000282), balances[proposerIndex])
+	require.Equal(t, uint64(32_000_000_008_928), balances[proposerIndex])
 }
 
 func Test_SyncRewards(t *testing.T) {
@@ -281,29 +281,29 @@ func Test_SyncRewards(t *testing.T) {
 		{
 			name:                  "active balance is 1eth",
 			activeBalance:         params.BeaconConfig().EffectiveBalanceIncrement,
-			wantProposerReward:    0,
-			wantParticipantReward: 3,
+			wantProposerReward:    17,
+			wantParticipantReward: 122,
 			errString:             "",
 		},
 		{
 			name:                  "active balance is 32eth",
 			activeBalance:         params.BeaconConfig().MaxEffectiveBalance,
-			wantProposerReward:    3,
-			wantParticipantReward: 21,
+			wantProposerReward:    98,
+			wantParticipantReward: 690,
 			errString:             "",
 		},
 		{
 			name:                  "active balance is 32eth * 1m validators",
 			activeBalance:         params.BeaconConfig().MaxEffectiveBalance * 1e9,
-			wantProposerReward:    62780,
-			wantParticipantReward: 439463,
+			wantProposerReward:    63_703,
+			wantParticipantReward: 445_921,
 			errString:             "",
 		},
 		{
 			name:                  "active balance is max uint64",
 			activeBalance:         math.MaxUint64,
-			wantProposerReward:    70368,
-			wantParticipantReward: 492581,
+			wantProposerReward:    74_897,
+			wantParticipantReward: 524_282,
 			errString:             "",
 		},
 	}

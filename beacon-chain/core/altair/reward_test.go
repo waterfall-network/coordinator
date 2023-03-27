@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	types "github.com/prysmaticlabs/eth2-types"
-
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/altair"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
@@ -314,7 +313,7 @@ func Test_CalculateBaseReward(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := altair.CalculateBaseReward(cfg, tt.validatorsNum, tt.committeesNum, tt.membersPerCommitteeNum, tt.rewardMultiplier)
+			got := altair.CalculateBaseReward(cfg, tt.validatorsNum, tt.committeesNum*tt.membersPerCommitteeNum, tt.rewardMultiplier)
 			require.Equal(t, tt.want, got)
 		})
 	}

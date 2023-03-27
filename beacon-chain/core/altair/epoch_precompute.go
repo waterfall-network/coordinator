@@ -277,6 +277,12 @@ func AttestationsDelta(beaconState state.BeaconState, bal *precompute.Balance, v
 	baseRewardMultiplier := increment * factor / math.IntegerSquareRoot(bal.ActiveCurrentEpoch)
 	leak := helpers.IsInInactivityLeak(prevEpoch, finalizedEpoch)
 
+	ctx := context.Background()
+	activeValidatorsForSlot, err := helpers.ActiveValidatorForSlotCount(ctx, beaconState, beaconState.Slot())
+	if err != nil || activeValidatorsForSlot == 0 {
+		activeValidatorsForSlot = cfg.MaxCommitteesPerSlot * cfg.TargetCommitteeSize
+	}
+
 	// Modified in Altair and Bellatrix.
 	var inactivityDenominator uint64
 	bias := cfg.InactivityScoreBias
@@ -290,7 +296,7 @@ func AttestationsDelta(beaconState state.BeaconState, bal *precompute.Balance, v
 	}
 
 	for i, v := range vals {
-		rewards[i], penalties[i], err = attestationDelta(bal, v, baseRewardMultiplier, inactivityDenominator, leak, numOfVals)
+		rewards[i], penalties[i], err = attestationDelta(bal, v, baseRewardMultiplier, inactivityDenominator, leak, numOfVals, activeValidatorsForSlot)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -303,7 +309,7 @@ func attestationDelta(
 	bal *precompute.Balance,
 	val *precompute.Validator,
 	baseRewardMultiplier, inactivityDenominator uint64,
-	inactivityLeak bool, validatorsNum int) (reward, penalty uint64, err error) {
+	inactivityLeak bool, validatorsNum int, activeValidatorsFroSlot uint64) (reward, penalty uint64, err error) {
 	eligible := val.IsActivePrevEpoch || (val.IsSlashed && !val.IsWithdrawableCurrentEpoch)
 	// Per spec `ActiveCurrentEpoch` can't be 0 to process attestation delta.
 	if !eligible || bal.ActiveCurrentEpoch == 0 {
@@ -312,8 +318,7 @@ func attestationDelta(
 
 	cfg := params.BeaconConfig()
 	effectiveBalance := val.CurrentEpochEffectiveBalance
-	committeesPerSlot := helpers.SlotCommitteeCount(uint64(validatorsNum))
-	baseReward := CalculateBaseReward(cfg, validatorsNum, committeesPerSlot, cfg.TargetCommitteeSize, cfg.BaseRewardMultiplier)
+	baseReward := CalculateBaseReward(cfg, validatorsNum, activeValidatorsFroSlot, cfg.BaseRewardMultiplier)
 
 	weightDenominator := cfg.WeightDenominator
 	srcWeight := cfg.DAGTimelySourceWeight
