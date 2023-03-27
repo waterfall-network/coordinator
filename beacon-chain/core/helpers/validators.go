@@ -3,7 +3,6 @@ package helpers
 import (
 	"bytes"
 	"context"
-	"fmt"
 
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
