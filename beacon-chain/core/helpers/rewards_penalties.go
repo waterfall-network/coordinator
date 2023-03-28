@@ -138,6 +138,11 @@ func DecreaseBalance(state state.BeaconState, idx types.ValidatorIndex, delta ui
 	return state.UpdateBalancesAtIndex(idx, DecreaseBalanceWithVal(balAtIdx, delta))
 }
 
+// ResetBalance set zero balance
+func ResetBalance(state state.BeaconState, idx types.ValidatorIndex) error {
+	return state.UpdateBalancesAtIndex(idx, 0)
+}
+
 // DecreaseBalanceWithVal decreases validator with the given 'index' balance by 'delta' in Gwei.
 // This method is flattened version of the spec method, taking in the raw balance and returning
 // the post balance.
