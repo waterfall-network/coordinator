@@ -824,7 +824,7 @@ func (s *Service) initCoordinatedState(ctx context.Context) error {
 		return errors.Wrap(err, "Init coordinated state: get dag coordinated state failed")
 	}
 	// if gwat at genesis state
-	if coordState.CpRoot == nil || coordState.CpEpoch == nil {
+	if coordState.CpRoot == nil || coordState.CpEpoch == nil || *coordState.CpRoot == (gwatCommon.Hash{}) {
 		coordCp, err = s.createGenesisCoordinatedCheckpoint(ctx)
 		if err != nil {
 			log.WithError(err).Error("Init coordinated state: create genesis state failed")
