@@ -246,7 +246,8 @@ func TestVerifyIndexedAttestation_OK(t *testing.T) {
 		validators[i] = &ethpb.Validator{
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			PublicKey:             keys[i].PublicKey().Marshal(),
-			WithdrawalCredentials: make([]byte, 32),
+			CreatorAddress:        make([]byte, 20),
+			WithdrawalCredentials: make([]byte, 20),
 		}
 	}
 
@@ -395,7 +396,8 @@ func TestVerifyAttestations_HandlesPlannedFork(t *testing.T) {
 		validators[i] = &ethpb.Validator{
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			PublicKey:             keys[i].PublicKey().Marshal(),
-			WithdrawalCredentials: make([]byte, 32),
+			CreatorAddress:        make([]byte, 20),
+			WithdrawalCredentials: make([]byte, 20),
 		}
 	}
 
@@ -459,7 +461,8 @@ func TestRetrieveAttestationSignatureSet_VerifiesMultipleAttestations(t *testing
 		validators[i] = &ethpb.Validator{
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			PublicKey:             keys[i].PublicKey().Marshal(),
-			WithdrawalCredentials: make([]byte, 32),
+			CreatorAddress:        make([]byte, 20),
+			WithdrawalCredentials: make([]byte, 20),
 		}
 	}
 
@@ -522,7 +525,8 @@ func TestRetrieveAttestationSignatureSet_AcrossFork(t *testing.T) {
 		validators[i] = &ethpb.Validator{
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			PublicKey:             keys[i].PublicKey().Marshal(),
-			WithdrawalCredentials: make([]byte, 32),
+			CreatorAddress:        make([]byte, 20),
+			WithdrawalCredentials: make([]byte, 20),
 		}
 	}
 

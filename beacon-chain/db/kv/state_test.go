@@ -713,7 +713,8 @@ func validators(limit int) []*ethpb.Validator {
 		binary.LittleEndian.PutUint64(pubKey, rand.Uint64())
 		val := &ethpb.Validator{
 			PublicKey:                  pubKey,
-			WithdrawalCredentials:      bytesutil.ToBytes(rand.Uint64(), 32),
+			CreatorAddress:             bytesutil.ToBytes(rand.Uint64(), 20),
+			WithdrawalCredentials:      bytesutil.ToBytes(rand.Uint64(), 20),
 			EffectiveBalance:           rand.Uint64(),
 			Slashed:                    i%2 != 0,
 			ActivationEligibilityEpoch: types.Epoch(rand.Uint64()),

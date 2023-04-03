@@ -193,18 +193,6 @@ func ProcessBlockNoVerifyAnySig(
 		return nil, nil, errors.Wrap(err, "could not retrieve attestation signature set")
 	}
 
-	//TODO RM tmp log ^^^^^^^^^^
-	if rSet != nil {
-		valid, err := rSet.Verify()
-		log.WithError(err).WithFields(logrus.Fields{
-			"valid":                valid,
-			"len(bSet.Signatures)": len(rSet.Signatures),
-		}).Warn("*** ExecuteStateTransition: signature invalid RANDAO ***")
-	} else {
-		log.Warn("*** ExecuteStateTransition: signature==nil RANDAO ***")
-	}
-	//TODO RM tmp log ^^^^^^^^^^
-
 	// Merge beacon block, randao and attestations signatures into a set.
 	set := bls.NewSet()
 	set.Join(bSet).Join(rSet).Join(aSet)

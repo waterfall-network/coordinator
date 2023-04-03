@@ -24,6 +24,7 @@ import (
 
 type validatorJson struct {
 	PublicKey                  string `json:"pubkey"`
+	CreatorAddress             string `json:"creator_address"`
 	WithdrawalCredentials      string `json:"withdrawal_credentials"`
 	EffectiveBalance           string `json:"effective_balance"`
 	Slashed                    bool   `json:"slashed"`

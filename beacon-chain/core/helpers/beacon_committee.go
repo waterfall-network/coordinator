@@ -11,7 +11,6 @@ import (
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/go-bitfield"
-	log "github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
@@ -22,7 +21,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/math"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
-	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 var (
@@ -276,70 +274,6 @@ func CalcSlotCommitteesIndexes(
 		committees = append(committees, committee)
 	}
 	return committees, nil
-}
-
-// CalcCreatorsAssignments calculates creators assignments for epoch-param and next epoch.
-func CalcCreatorsAssignments(
-	ctx context.Context,
-	state state.BeaconState,
-	epoch types.Epoch,
-) (map[types.Slot][]gwatCommon.Address, error) {
-	// calculate creators assignments
-	creatorsAssig := make(map[types.Slot][]gwatCommon.Address, params.BeaconConfig().SlotsPerEpoch)
-	slotAssigIndexes := make(map[types.Slot][]types.ValidatorIndex, params.BeaconConfig().SlotsPerEpoch)
-
-	validatorIndexToCommittee, _, err := CommitteeAssignments(ctx, state, epoch)
-	if err != nil {
-		return map[types.Slot][]gwatCommon.Address{}, err
-	}
-
-	vIxs := ValidatorIndexList{}
-	for inx, _ := range validatorIndexToCommittee {
-		vIxs = append(vIxs, inx)
-	}
-	sort.Sort(vIxs)
-	for _, inx := range vIxs {
-		val := validatorIndexToCommittee[inx]
-
-		if slotAssigIndexes[val.AttesterSlot] == nil {
-			slotAssigIndexes[val.AttesterSlot] = []types.ValidatorIndex{}
-		}
-		if creatorsAssig[val.AttesterSlot] == nil {
-			creatorsAssig[val.AttesterSlot] = []gwatCommon.Address{}
-		}
-		//check index in slot
-		isCreator := false
-		for i, vix := range val.Committee {
-			if i >= int(params.BeaconConfig().MaxCreatorsPerSlot) {
-				break
-			}
-			if inx == vix {
-				isCreator = true
-			}
-		}
-		if isCreator {
-			slotAssigIndexes[val.AttesterSlot] = append(slotAssigIndexes[val.AttesterSlot], inx)
-			// retrieve and set creator address
-			validator, err := state.ValidatorAtIndexReadOnly(inx)
-			if err != nil {
-				log.WithError(err).Errorf("Get validator data failed: index=%v", inx)
-				continue
-			}
-			// Withdrawal address uses as gwat coinbase
-			address := gwatCommon.BytesToAddress(validator.WithdrawalCredentials()[12:])
-			// skip already added
-			for _, addr := range creatorsAssig[val.AttesterSlot] {
-				if address == addr {
-					isCreator = false
-					break
-				}
-			}
-			if isCreator {
-				creatorsAssig[val.AttesterSlot] = gwatCommon.SortAddresses(append(creatorsAssig[val.AttesterSlot], address))
-			}
-		}
-	}
-	return creatorsAssig, nil
 }
 
 // VerifyBitfieldLength verifies that a bitfield length matches the given committee size.

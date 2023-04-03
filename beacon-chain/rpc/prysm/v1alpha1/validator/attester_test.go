@@ -49,7 +49,8 @@ func TestProposeAttestation_OK(t *testing.T) {
 	for i := 0; i < len(validators); i++ {
 		validators[i] = &ethpb.Validator{
 			PublicKey:             make([]byte, 48),
-			WithdrawalCredentials: make([]byte, 32),
+			CreatorAddress:        make([]byte, 20),
+			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			EffectiveBalance:      params.BeaconConfig().MaxEffectiveBalance,
 		}

@@ -31,13 +31,14 @@ func TestMarshalDepositWithProof(t *testing.T) {
 	proof, err := m.MerkleProof(2)
 	require.NoError(t, err)
 	require.Equal(t, len(proof), int(params.BeaconConfig().DepositContractTreeDepth)+1)
-	someRoot := [32]byte{1, 2, 3, 4}
+	someRoot := [20]byte{1, 2, 3, 4}
 	someSig := [96]byte{1, 2, 3, 4}
 	someKey := [fieldparams.BLSPubkeyLength]byte{1, 2, 3, 4}
 	dep := &ethpb.Deposit{
 		Proof: proof,
 		Data: &ethpb.Deposit_Data{
 			PublicKey:             someKey[:],
+			CreatorAddress:        someRoot[:],
 			WithdrawalCredentials: someRoot[:],
 			Amount:                32,
 			Signature:             someSig[:],

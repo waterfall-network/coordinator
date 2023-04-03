@@ -16,8 +16,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
-	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
-	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
 	"go.opencensus.io/trace"
 )
 
@@ -145,34 +143,6 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 				if err := s.NewSlot(s.ctx, s.CurrentSlot()); err != nil {
 					log.WithError(err).Error("Could not process new slot")
 					return
-				}
-				var (
-					slot       = uint64(s.CurrentSlot())
-					finalizing gwatCommon.HashArray
-				)
-				headState := s.headState(s.ctx)
-				curEpoch := slots.ToEpoch(s.CurrentSlot())
-				stateNextEpoch := slots.ToEpoch(headState.Slot()) + 1
-				if curEpoch <= stateNextEpoch && !s.isSync() {
-					creators, err := s.GetCurrentCreators()
-					if err != nil {
-						log.WithError(err).Errorf("Could not compute creators assignments: %v", err)
-					}
-					finalizing = gwatCommon.HashArrayFromBytes(headState.Eth1Data().Finalization)
-					syncParams := &gwatTypes.ConsensusInfo{
-						Slot:       slot,
-						Creators:   creators,
-						Finalizing: finalizing,
-					}
-
-					_, err = s.cfg.ExecutionEngineCaller.ExecutionDagSync(s.ctx, syncParams)
-					if err != nil {
-						log.WithError(err).Error("Error while execute dag sync procedure")
-					}
-					log.WithError(err).WithFields(logrus.Fields{
-						"slot":         slot,
-						"finalization": gwatCommon.HashArrayFromBytes(headState.Eth1Data().Finalization),
-					}).Info("gwat dag sync")
 				}
 
 				// Continue when there's no fork choice attestation, there's nothing to process and update head.

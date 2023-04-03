@@ -190,7 +190,8 @@ func GetMockSignRequest(t string) *validatorpb.SignRequest {
 								Proof: [][]byte{[]byte("A")},
 								Data: &eth.Deposit_Data{
 									PublicKey:             make([]byte, fieldparams.BLSPubkeyLength),
-									WithdrawalCredentials: make([]byte, 32),
+									CreatorAddress:        make([]byte, 20),
+									WithdrawalCredentials: make([]byte, 20),
 									Amount:                0,
 									Signature:             make([]byte, fieldparams.BLSSignatureLength),
 								},
@@ -304,7 +305,8 @@ func GetMockSignRequest(t string) *validatorpb.SignRequest {
 								Proof: [][]byte{[]byte("A")},
 								Data: &eth.Deposit_Data{
 									PublicKey:             make([]byte, fieldparams.BLSPubkeyLength),
-									WithdrawalCredentials: make([]byte, 32),
+									CreatorAddress:        make([]byte, 20),
+									WithdrawalCredentials: make([]byte, 20),
 									Amount:                0,
 									Signature:             make([]byte, fieldparams.BLSSignatureLength),
 								},
@@ -635,7 +637,8 @@ func MockBeaconBlockAltair() *v1.BeaconBlockAltair {
 					Proof: []string{"0x41"},
 					Data: &v1.DepositData{
 						PublicKey:             hexutil.Encode(make([]byte, fieldparams.BLSPubkeyLength)),
-						WithdrawalCredentials: hexutil.Encode(make([]byte, 32)),
+						CreatorAddress:        hexutil.Encode(make([]byte, 20)),
+						WithdrawalCredentials: hexutil.Encode(make([]byte, 20)),
 						Amount:                "0",
 						Signature:             hexutil.Encode(make([]byte, fieldparams.BLSSignatureLength)),
 					},
@@ -706,7 +709,8 @@ func MockBeaconBlockBody() *v1.BeaconBlockBody {
 				Proof: []string{"0x41"},
 				Data: &v1.DepositData{
 					PublicKey:             hexutil.Encode(make([]byte, fieldparams.BLSPubkeyLength)),
-					WithdrawalCredentials: hexutil.Encode(make([]byte, 32)),
+					CreatorAddress:        hexutil.Encode(make([]byte, 20)),
+					WithdrawalCredentials: hexutil.Encode(make([]byte, 20)),
 					Amount:                "0",
 					Signature:             hexutil.Encode(make([]byte, fieldparams.BLSSignatureLength)),
 				},

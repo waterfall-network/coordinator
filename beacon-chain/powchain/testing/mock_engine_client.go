@@ -33,23 +33,15 @@ type EngineClient struct {
 	TerminalBlockHashExists bool
 }
 
-func (e *EngineClient) ExecutionDagSync(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (gwatCommon.HashArray, error) {
-	panic("implement me")
-}
-
 func (e *EngineClient) ExecutionDagGetCandidates(ctx context.Context, slot types.Slot) (gwatCommon.HashArray, error) {
 	panic("implement me")
 }
 
-func (e *EngineClient) ExecutionDagFinalize(ctx context.Context, spines gwatCommon.HashArray, baseSpine *gwatCommon.Hash) (*gwatCommon.Hash, error) {
+func (e *EngineClient) ExecutionDagFinalize(ctx context.Context, finParams *gwatTypes.FinalizationParams) (*gwatTypes.FinalizationResult, error) {
 	panic("implement me")
 }
 
-func (e *EngineClient) ExecutionDagHeadSyncReady(ctx context.Context, params *gwatTypes.ConsensusInfo) (bool, error) {
-	panic("implement me")
-}
-
-func (e *EngineClient) ExecutionDagHeadSync(ctx context.Context, params []gwatTypes.ConsensusInfo) (bool, error) {
+func (e *EngineClient) ExecutionDagCoordinatedState(ctx context.Context) (*gwatTypes.FinalizationResult, error) {
 	panic("implement me")
 }
 

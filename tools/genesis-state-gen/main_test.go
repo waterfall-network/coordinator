@@ -43,11 +43,12 @@ func createGenesisDepositData(t *testing.T, numKeys int) []*DepositDataJSON {
 		dataRoot, err := dataList[i].HashTreeRoot()
 		require.NoError(t, err)
 		jsonData[i] = &DepositDataJSON{
-			PubKey:                fmt.Sprintf("%#x", dataList[i].PublicKey),
-			Amount:                dataList[i].Amount,
-			WithdrawalCredentials: fmt.Sprintf("%#x", dataList[i].WithdrawalCredentials),
-			DepositDataRoot:       fmt.Sprintf("%#x", dataRoot),
-			Signature:             fmt.Sprintf("%#x", dataList[i].Signature),
+			PubKey:            fmt.Sprintf("%#x", dataList[i].PublicKey),
+			Amount:            dataList[i].Amount,
+			CreatorAddress:    fmt.Sprintf("%#x", dataList[i].CreatorAddress),
+			WithdrawalAddress: fmt.Sprintf("%#x", dataList[i].WithdrawalCredentials),
+			DepositDataRoot:   fmt.Sprintf("%#x", dataRoot),
+			Signature:         fmt.Sprintf("%#x", dataList[i].Signature),
 		}
 	}
 	return jsonData

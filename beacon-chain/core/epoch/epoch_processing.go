@@ -308,6 +308,20 @@ func ProcessEffectiveBalanceUpdates(state state.BeaconState) (state.BeaconState,
 	return state, nil
 }
 
+func ProcessWithdrawal(state state.BeaconState) (state.BeaconState, error) {
+	currentEpoch := time.CurrentEpoch(state)
+	err := state.ApplyToEveryValidator(func(idx int, val *ethpb.Validator) (bool, *ethpb.Validator, error) {
+		if val.WithdrawableEpoch == currentEpoch {
+			if err := helpers.ResetBalance(state, types.ValidatorIndex(idx)); err != nil {
+				return false, val, err
+			}
+			return true, val, nil
+		}
+		return false, val, nil
+	})
+	return state, err
+}
+
 // ProcessSlashingsReset processes the total slashing balances updates during epoch processing.
 //
 // Spec pseudocode definition:
@@ -439,6 +453,11 @@ func ProcessFinalUpdates(state state.BeaconState) (state.BeaconState, error) {
 	state, err = ProcessSlashingsReset(state)
 	if err != nil {
 		return nil, err
+	}
+
+	state, err = ProcessWithdrawal(state)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not process withdrawal")
 	}
 
 	// Set RANDAO mix.

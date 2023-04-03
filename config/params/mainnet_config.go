@@ -79,7 +79,6 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	GenesisDelay:             300, // 5 min.
 
 	// Misc constant.
-	MaxCreatorsPerSlot:             4,
 	TargetCommitteeSize:            128,
 	MaxValidatorsPerCommittee:      2048,
 	MaxCommitteesPerSlot:           64,
@@ -114,11 +113,13 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	//EpochsPerEth1VotingPeriod:        64,
 	EpochsPerEth1VotingPeriod:        4,
 	SlotsPerHistoricalRoot:           8192,
-	MinValidatorWithdrawabilityDelay: 256,
-	ShardCommitteePeriod:             256,
+	WithdrawalBalanceLockPeriod:      4,
+	MinValidatorWithdrawabilityDelay: 4, // orig val: 256
+	ShardCommitteePeriod:             4, // orig val: 256:epochs a validator must participate before exiting.
 	MinEpochsToInactivityPenalty:     4,
 	//Eth1FollowDistance:               2048,
-	Eth1FollowDistance:         16,
+	Eth1FollowDistance: 16,
+	//Eth1FollowDistance:         64,
 	SafeSlotsToUpdateJustified: 8,
 
 	//BlockVoting slots
@@ -146,7 +147,7 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	//SecondsPerETH1Block: 14,
 	SecondsPerETH1Block: 4,
 
-	HeadSyncReadyIntervalMs: 1000,
+	GwatSyncIntervalMs: 1000,
 
 	// State list length constants.
 	EpochsPerHistoricalVector: 65536,

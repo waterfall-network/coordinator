@@ -206,7 +206,8 @@ func Test_processQueuedAttestations(t *testing.T) {
 				privKeys[i] = privKey
 				validators[i] = &ethpb.Validator{
 					PublicKey:             privKey.PublicKey().Marshal(),
-					WithdrawalCredentials: make([]byte, 32),
+					CreatorAddress:        make([]byte, 20),
+					WithdrawalCredentials: make([]byte, 20),
 				}
 			}
 			err = beaconState.SetValidators(validators)

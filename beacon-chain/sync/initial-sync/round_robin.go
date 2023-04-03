@@ -146,10 +146,16 @@ func (s *Service) processFetchedDataRegSync(
 		if err := s.processBlock(ctx, genesis, blk, blockReceiver); err != nil {
 			switch {
 			case errors.Is(err, errBlockAlreadyProcessed):
-				log.WithError(err).Debug("Block is not processed")
+				log.WithError(err).WithFields(logrus.Fields{
+					"slot":       blk.Block().Slot(),
+					"ParentRoot": fmt.Sprintf("%#x", blk.Block().ParentRoot()),
+				}).Error("Block is not processed")
 				invalidBlocks++
 			case errors.Is(err, errParentDoesNotExist):
-				log.WithError(err).Debug("Block is not processed")
+				log.WithError(err).WithFields(logrus.Fields{
+					"slot":       blk.Block().Slot(),
+					"ParentRoot": fmt.Sprintf("%#x", blk.Block().ParentRoot()),
+				}).Error("Block is not processed")
 				invalidBlocks++
 			default:
 				log.WithError(err).Warn("Block is not processed")
