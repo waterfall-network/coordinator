@@ -113,12 +113,13 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	//EpochsPerEth1VotingPeriod:        64,
 	EpochsPerEth1VotingPeriod:        4,
 	SlotsPerHistoricalRoot:           8192,
+	WithdrawalBalanceLockPeriod:      4,
 	MinValidatorWithdrawabilityDelay: 4, // orig val: 256
 	ShardCommitteePeriod:             4, // orig val: 256:epochs a validator must participate before exiting.
 	MinEpochsToInactivityPenalty:     4,
 	//Eth1FollowDistance:               2048,
-	//Eth1FollowDistance:         16,
-	Eth1FollowDistance:         64,
+	Eth1FollowDistance: 16,
+	//Eth1FollowDistance:         64,
 	SafeSlotsToUpdateJustified: 8,
 
 	//BlockVoting slots

@@ -95,6 +95,10 @@ func TotalActiveBalance(s state.ReadOnlyBeaconState) (uint64, error) {
 //	  """
 //	  state.balances[index] += delta
 func IncreaseBalance(state state.BeaconState, idx types.ValidatorIndex, delta uint64) error {
+	isLocked, err := IsWithdrawBalanceLocked(state, idx)
+	if err != nil || isLocked {
+		return err
+	}
 	balAtIdx, err := state.BalanceAtIndex(idx)
 	if err != nil {
 		return err
@@ -131,11 +135,25 @@ func IncreaseBalanceWithVal(currBalance, delta uint64) (uint64, error) {
 //	  """
 //	  state.balances[index] = 0 if delta > state.balances[index] else state.balances[index] - delta
 func DecreaseBalance(state state.BeaconState, idx types.ValidatorIndex, delta uint64) error {
+	isLocked, err := IsWithdrawBalanceLocked(state, idx)
+	if err != nil || isLocked {
+		return err
+	}
 	balAtIdx, err := state.BalanceAtIndex(idx)
 	if err != nil {
 		return err
 	}
 	return state.UpdateBalancesAtIndex(idx, DecreaseBalanceWithVal(balAtIdx, delta))
+}
+
+func IsWithdrawBalanceLocked(state state.BeaconState, idx types.ValidatorIndex) (bool, error) {
+	val, err := state.ValidatorAtIndexReadOnly(idx)
+	if err != nil {
+		return false, err
+	}
+	stateEpoche := slots.ToEpoch(state.Slot())
+	lockEpoch := val.WithdrawableEpoch() - params.BeaconConfig().WithdrawalBalanceLockPeriod
+	return stateEpoche >= lockEpoch && stateEpoche < val.WithdrawableEpoch(), nil
 }
 
 // ResetBalance set zero balance

@@ -10,6 +10,7 @@ import (
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
@@ -745,10 +746,10 @@ func (s *Service) getRequestGwatCheckpoint(
 }
 
 // collectValidatorSyncData collect data for ValSyncData param to call gwat finalization api.
-func collectValidatorSyncData(ctx context.Context, state state.BeaconState) ([]*gwatTypes.ValidatorSync, error) {
+func collectValidatorSyncData(ctx context.Context, st state.BeaconState) ([]*gwatTypes.ValidatorSync, error) {
 	var validatorSyncData []*gwatTypes.ValidatorSync
-	currentEpoch := slots.ToEpoch(state.Slot())
-	vals := state.Validators()
+	currentEpoch := slots.ToEpoch(st.Slot())
+	vals := st.Validators()
 	ffepoch := params.BeaconConfig().FarFutureEpoch
 
 	for idx, validator := range vals {
@@ -782,8 +783,12 @@ func collectValidatorSyncData(ctx context.Context, state state.BeaconState) ([]*
 			}).Info("Exit params")
 		}
 		// withdrawal
-		if validator.WithdrawableEpoch < ffepoch && validator.WithdrawableEpoch > 0 && validator.WithdrawableEpoch > currentEpoch && currentEpoch > validator.ExitEpoch {
-			balAtIdx, err := state.BalanceAtIndex(types.ValidatorIndex(idx))
+		isWitdrowalPeriod, err := helpers.IsWithdrawBalanceLocked(st, types.ValidatorIndex(idx))
+		if err != nil {
+			return nil, err
+		}
+		if isWitdrowalPeriod {
+			balAtIdx, err := st.BalanceAtIndex(types.ValidatorIndex(idx))
 			if err != nil {
 				return nil, err
 			}
@@ -801,7 +806,7 @@ func collectValidatorSyncData(ctx context.Context, state state.BeaconState) ([]*
 			validatorSyncData = append(validatorSyncData, vsd)
 
 			log.WithFields(logrus.Fields{
-				"currState.Slot": state.Slot(),
+				"currState.Slot": st.Slot(),
 				"OpType":         vsd.OpType,
 				"ProcEpoch":      vsd.ProcEpoch,
 				"Index":          vsd.Index,
