@@ -33,6 +33,7 @@ go_library(
         "//beacon-chain/core/helpers:go_default_library",
         "//beacon-chain/core/transition:go_default_library",
         "//beacon-chain/db:go_default_library",
+        "//beacon-chain/operations/voluntaryexits:go_default_library",
         "//beacon-chain/powchain/types:go_default_library",
         "//beacon-chain/state:go_default_library",
         "//beacon-chain/state/state-native/v1:go_default_library",

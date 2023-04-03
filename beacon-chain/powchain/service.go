@@ -23,6 +23,7 @@ import (
 	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/voluntaryexits"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	nativev1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/state-native/v1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen"
@@ -130,6 +131,7 @@ type config struct {
 	depositContractAddr     common.Address
 	beaconDB                db.HeadAccessDatabase
 	depositCache            *depositcache.DepositCache
+	exitPool                voluntaryexits.PoolManager
 	stateNotifier           statefeed.Notifier
 	stateGen                *stategen.State
 	eth1HeaderReqLimit      uint64
@@ -201,7 +203,8 @@ func NewService(ctx context.Context, opts ...Option) (*Service, error) {
 		},
 		lastReceivedMerkleIndex: -1,
 		preGenesisState:         genState,
-		headTicker:              time.NewTicker(time.Duration(params.BeaconConfig().SecondsPerETH1Block) * time.Second),
+		//headTicker:              time.NewTicker(time.Duration(params.BeaconConfig().SecondsPerETH1Block) * time.Second),
+		headTicker: time.NewTicker(time.Duration(params.BeaconConfig().SecondsPerSlot) * time.Second),
 	}
 
 	for _, opt := range opts {

@@ -45,14 +45,6 @@ func (e *EngineClient) ExecutionDagCoordinatedState(ctx context.Context) (*gwatT
 	panic("implement me")
 }
 
-func (e *EngineClient) ExecutionDagHeadSyncReady(ctx context.Context, params *gwatTypes.ConsensusInfo) (bool, error) {
-	panic("implement me")
-}
-
-func (e *EngineClient) ExecutionDagHeadSync(ctx context.Context, params []gwatTypes.ConsensusInfo) (bool, error) {
-	panic("implement me")
-}
-
 func (e *EngineClient) ExecutionDagValidateSpines(ctx context.Context, params gwatCommon.HashArray) (bool, error) {
 	panic("implement me")
 }

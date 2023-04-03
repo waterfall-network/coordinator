@@ -28,8 +28,10 @@ func (s *Service) BlockExists(ctx context.Context, hash common.Hash) (bool, *big
 		if err != nil {
 			return false, nil, err
 		}
-		span.AddAttributes(trace.BoolAttribute("blockCacheHit", true))
-		return true, hdrInfo.Number, nil
+		if hdrInfo.Number.Uint64() > 0 {
+			span.AddAttributes(trace.BoolAttribute("blockCacheHit", true))
+			return true, hdrInfo.Number, nil
+		}
 	}
 	span.AddAttributes(trace.BoolAttribute("blockCacheHit", false))
 	header, err := s.eth1DataFetcher.HeaderByHash(ctx, hash)

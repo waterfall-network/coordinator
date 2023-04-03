@@ -10,7 +10,6 @@ go_library(
         "blocks_queue_utils.go",
         "fsm.go",
         "log.go",
-        "head_sync.go",
         "round_robin.go",
         "service.go",
     ],

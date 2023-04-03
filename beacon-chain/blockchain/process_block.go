@@ -286,8 +286,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	}).Info("onBlock: save head")
 
 	log.WithFields(logrus.Fields{
-		"condition":                s.CurrentSlot() == signed.Block().Slot() && !s.isSync(),
-		"isSync":                   s.isSync(),
+		"IsSynced":                 s.IsSynced(),
 		"CurrentSlot == BlockSlot": s.CurrentSlot() == signed.Block().Slot(),
 		"CurrentSlot":              s.CurrentSlot(),
 		"BlockSlot":                signed.Block().Slot(),
@@ -377,6 +376,9 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 			}
 		}()
 
+		if err := s.onFinCpUpdHandleGwatSyncParam(ctx, postState.FinalizedCheckpoint()); err != nil {
+			return err
+		}
 	}
 
 	defer reportAttestationInclusion(b)
@@ -410,21 +412,21 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 		log.WithFields(logrus.Fields{
 			"len(blks) == 0":       len(blks) == 0,
 			"len(blockRoots) == 0": len(blockRoots) == 0,
-		}).Error(">>>>> onBlockBatch error")
+		}).Error("Block batch handling error")
 		return nil, nil, errors.New("no blocks provided")
 	}
 
 	if len(blks) != len(blockRoots) {
 		log.WithError(errWrongBlockCount).WithFields(logrus.Fields{
 			"len(blks) != len(blockRoots)": len(blks) != len(blockRoots),
-		}).Error(">>>>> onBlockBatch error")
+		}).Error("Block batch handling error")
 		return nil, nil, errWrongBlockCount
 	}
 
 	if err := helpers.BeaconBlockIsNil(blks[0]); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"blks[0]": blks[0],
-		}).Error(">>>>> onBlockBatch error")
+		}).Error("Block batch handling error")
 		return nil, nil, err
 	}
 	b := blks[0].Block()
@@ -433,20 +435,20 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 	if err := s.verifyBlkPreState(ctx, b); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"verifyBlkPreState()": "fail",
-		}).Error(">>>>> onBlockBatch error")
+		}).Error("Block batch handling error")
 		return nil, nil, err
 	}
 	preState, err := s.cfg.StateGen.StateByRootInitialSync(ctx, bytesutil.ToBytes32(b.ParentRoot()))
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"StateByRootInitialSync": "fail",
-		}).Error(">>>>> onBlockBatch error")
+		}).Error("Block batch handling error")
 		return nil, nil, err
 	}
 	if preState == nil || preState.IsNil() {
 		log.WithError(fmt.Errorf("nil pre state for slot %d", b.Slot())).WithFields(logrus.Fields{
 			"preState == nil || preState.IsNil()": preState == nil || preState.IsNil(),
-		}).Error(">>>>> onBlockBatch error")
+		}).Error("Block batch handling error")
 		return nil, nil, fmt.Errorf("nil pre state for slot %d", b.Slot())
 	}
 
@@ -465,7 +467,7 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 		if err != nil {
 			log.WithError(err).WithFields(logrus.Fields{
 				"ExecuteStateTransitionNoVerifyAnySig": "fail",
-			}).Error(">>>>> onBlockBatch error")
+			}).Error("Block batch handling error")
 			return nil, nil, err
 		}
 		// Save potential boundary states.
@@ -482,14 +484,14 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 		log.WithError(err).WithFields(logrus.Fields{
 			"Verify()": "fail",
 			"verify":   verify,
-		}).Error(">>>>> onBlockBatch error")
+		}).Error("Block batch handling error")
 		return nil, nil, err
 	}
 	if !verify {
 		log.WithError(errors.New("batch block signature verification failed")).WithFields(logrus.Fields{
 			"Verify()": "fail",
 			"verify":   verify,
-		}).Error(">>>>> onBlockBatch error")
+		}).Error("Block batch handling error")
 		return nil, nil, errors.New("batch block signature verification failed")
 	}
 
@@ -510,7 +512,7 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 		if err := s.cfg.StateGen.SaveState(ctx, r, st); err != nil {
 			log.WithError(err).WithFields(logrus.Fields{
 				"s.cfg.StateGen.SaveState:boundaries": "fail",
-			}).Error(">>>>> onBlockBatch error")
+			}).Error("Block batch handling error")
 			return nil, nil, err
 		}
 	}
@@ -520,13 +522,13 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 	if err := s.cfg.StateGen.SaveState(ctx, lastBR, preState); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"StateByRootInitialSync:lastBR": "fail",
-		}).Error(">>>>> onBlockBatch error")
+		}).Error("Block batch handling error")
 		return nil, nil, err
 	}
 	if err := s.saveHeadNoDB(ctx, lastB, lastBR, preState); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"saveHeadNoDB": "fail",
-		}).Error(">>>>> onBlockBatch error")
+		}).Error("Block batch handling error")
 		return nil, nil, err
 	}
 	return fCheckpoints, jCheckpoints, nil
@@ -573,6 +575,9 @@ func (s *Service) handleBlockAfterBatchVerify(ctx context.Context, signed block.
 		}
 		s.store.SetPrevFinalizedCheckpt(finalized)
 		s.store.SetFinalizedCheckpt(fCheckpoint)
+		if err := s.onFinCpUpdHandleGwatSyncParam(ctx, fCheckpoint); err != nil {
+			return err
+		}
 	}
 	return nil
 }

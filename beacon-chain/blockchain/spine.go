@@ -2,9 +2,11 @@ package blockchain
 
 import (
 	"bytes"
+	"fmt"
 	"sync"
 
 	types "github.com/prysmaticlabs/eth2-types"
+	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
@@ -39,6 +41,13 @@ func (s *Service) GetValidatedBlockInfo() ([]byte, types.Slot) {
 
 // ValidateBlockCandidates validate new block candidates.
 func (s *Service) ValidateBlockCandidates(block block.BeaconBlock) (bool, error) {
+	if s.IsGwatSynchronizing() {
+		log.WithError(fmt.Errorf("spines: GWAT synchronization process is running, not ready to respond")).WithFields(logrus.Fields{
+			"Syncing": s.IsGwatSynchronizing(),
+		}).Warn("Proposing skipped (synchronizing)")
+		return false, fmt.Errorf("spines: GWAT synchronization process is running, not ready to respond")
+	}
+
 	blCandidates := gwatCommon.HashArrayFromBytes(block.Body().Eth1Data().Candidates)
 	if len(blCandidates) == 0 {
 		return true, nil

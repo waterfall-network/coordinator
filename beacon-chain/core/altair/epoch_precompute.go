@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
+	types "github.com/prysmaticlabs/eth2-types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/epoch/precompute"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
@@ -242,6 +243,14 @@ func ProcessRewardsAndPenaltiesPrecompute(
 
 	balances := beaconState.Balances()
 	for i := 0; i < numOfVals; i++ {
+		isLocked, err := helpers.IsWithdrawBalanceLocked(beaconState, types.ValidatorIndex(i))
+		if err != nil {
+			return nil, err
+		}
+		if isLocked {
+			continue
+		}
+
 		vals[i].BeforeEpochTransitionBalance = balances[i]
 
 		// Compute the post balance of the validator after accounting for the

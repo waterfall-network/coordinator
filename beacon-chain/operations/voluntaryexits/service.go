@@ -18,6 +18,7 @@ import (
 type PoolManager interface {
 	PendingExits(state state.ReadOnlyBeaconState, slot types.Slot, noLimit bool) []*ethpb.SignedVoluntaryExit
 	InsertVoluntaryExit(ctx context.Context, state state.ReadOnlyBeaconState, exit *ethpb.SignedVoluntaryExit)
+	InsertVoluntaryExitByGwat(ctx context.Context, exit *ethpb.SignedVoluntaryExit)
 	MarkIncluded(exit *ethpb.SignedVoluntaryExit)
 }
 
@@ -92,6 +93,43 @@ func (p *Pool) InsertVoluntaryExit(ctx context.Context, state state.ReadOnlyBeac
 		v.ExitEpoch() != params.BeaconConfig().FarFutureEpoch {
 		return
 	}
+
+	// Insert into pending list and sort.
+	p.pending = append(p.pending, exit)
+	sort.Slice(p.pending, func(i, j int) bool {
+		return p.pending[i].Exit.ValidatorIndex < p.pending[j].Exit.ValidatorIndex
+	})
+}
+
+// InsertVoluntaryExit into the pool. This method is a no-op if the pending exit already exists,
+// or the validator is already exited.
+func (p *Pool) InsertVoluntaryExitByGwat(ctx context.Context, exit *ethpb.SignedVoluntaryExit) {
+	_, span := trace.StartSpan(ctx, "exitPool.InsertVoluntaryExit")
+	defer span.End()
+	p.lock.Lock()
+	defer p.lock.Unlock()
+
+	// Prevent malformed messages from being inserted.
+	if exit == nil || exit.Exit == nil {
+		return
+	}
+
+	existsInPending, index := existsInList(p.pending, exit.Exit.ValidatorIndex)
+	// If the item exists in the pending list and includes a more favorable, earlier
+	// exit epoch, we replace it in the pending list. If it exists but the prior condition is false,
+	// we simply return.
+	if existsInPending {
+		if exit.Exit.Epoch < p.pending[index].Exit.Epoch {
+			p.pending[index] = exit
+		}
+		return
+	}
+
+	//// Has the validator been exited already?
+	//if v, err := state.ValidatorAtIndexReadOnly(exit.Exit.ValidatorIndex); err != nil ||
+	//	v.ExitEpoch() != params.BeaconConfig().FarFutureEpoch {
+	//	return
+	//}
 
 	// Insert into pending list and sort.
 	p.pending = append(p.pending, exit)

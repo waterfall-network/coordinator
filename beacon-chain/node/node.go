@@ -623,6 +623,7 @@ func (b *BeaconNode) registerPOWChainService() error {
 		powchain.WithStateGen(b.stateGen),
 		powchain.WithBeaconNodeStatsUpdater(bs),
 		powchain.WithFinalizedStateAtStartup(b.finalizedStateAtStartUp),
+		powchain.WithExitPool(b.exitPool),
 	)
 	web3Service, err := powchain.NewService(b.ctx, opts...)
 	if err != nil {
@@ -674,19 +675,13 @@ func (b *BeaconNode) registerInitialSyncService() error {
 	if err := b.services.FetchService(&chainService); err != nil {
 		return err
 	}
-	var web3Service *powchain.Service
-	if err := b.services.FetchService(&web3Service); err != nil {
-		return err
-	}
 
 	is := initialsync.NewService(b.ctx, &initialsync.Config{
-		DB:                    b.db,
-		Chain:                 chainService,
-		P2P:                   b.fetchP2P(),
-		StateNotifier:         b,
-		BlockNotifier:         b,
-		ExecutionEngineCaller: web3Service,
-		StateGen:              b.stateGen,
+		DB:            b.db,
+		Chain:         chainService,
+		P2P:           b.fetchP2P(),
+		StateNotifier: b,
+		BlockNotifier: b,
 	})
 	return b.services.RegisterService(is)
 }

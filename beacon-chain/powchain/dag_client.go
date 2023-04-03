@@ -22,10 +22,6 @@ const (
 	ExecutionDagFinalizeMethod = "dag_finalize"
 	//ExecutionDagCoordinatedStateMethod request string for JSON-RPC of dag api.
 	ExecutionDagCoordinatedStateMethod = "dag_coordinatedState"
-	//ExecutionDagHeadSyncReadyMethod request string for JSON-RPC of dag api.
-	ExecutionDagHeadSyncReadyMethod = "dag_headSyncReady"
-	//ExecutionDagHeadSyncMethod request string for JSON-RPC of dag api.
-	ExecutionDagHeadSyncMethod = "dag_headSync"
 	//ExecutionDagSyncSlotInfoMethod request string for JSON-RPC of dag api.
 	ExecutionDagSyncSlotInfoMethod = "dag_syncSlotInfo"
 	//ExecutionDagValidateSpinesMethod request string for JSON-RPC of dag api.
@@ -128,49 +124,6 @@ func (s *Service) ExecutionDagGetCandidates(ctx context.Context, slot types.Slot
 	return result.Candidates, handleDagRPCError(err)
 }
 
-// ExecutionDagHeadSyncReady executing head sync ready procedure
-// by calling dag_headSyncReady via JSON-RPC.
-func (s *Service) ExecutionDagHeadSyncReady(ctx context.Context, params *gwatTypes.ConsensusInfo) (bool, error) {
-	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagHeadSyncReady")
-	defer span.End()
-	var result bool
-
-	if s.rpcClient == nil {
-		return result, fmt.Errorf("Rpc Client not init")
-	}
-	err := s.rpcClient.CallContext(
-		ctx,
-		&result,
-		ExecutionDagHeadSyncReadyMethod,
-		params,
-	)
-	return result, handleDagRPCError(err)
-}
-
-// ExecutionDagHeadSync executing head sync procedure
-// by calling dag_headSync via JSON-RPC.
-func (s *Service) ExecutionDagHeadSync(ctx context.Context, params []gwatTypes.ConsensusInfo) (bool, error) {
-	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagHeadSync")
-	defer span.End()
-	var result bool
-
-	if s.rpcClient == nil {
-		return result, fmt.Errorf("Rpc Client not init")
-	}
-	err := s.rpcClient.CallContext(
-		ctx,
-		&result,
-		ExecutionDagHeadSyncMethod,
-		params,
-	)
-
-	if err != nil {
-		log.WithError(err).Error("ExecutionDagHeadSync")
-	}
-
-	return result, handleDagRPCError(err)
-}
-
 // ExecutionDagSyncSlotInfo executing sync slot info procedure
 // by calling dag_syncSlotInfo via JSON-RPC.
 func (s *Service) ExecutionDagSyncSlotInfo(ctx context.Context, params *gwatTypes.SlotInfo) (bool, error) {
@@ -196,7 +149,7 @@ func (s *Service) ExecutionDagSyncSlotInfo(ctx context.Context, params *gwatType
 }
 
 // ExecutionDagValidateSpines executing spines validation
-// by calling dag_headSync via JSON-RPC.
+// by calling dag_validateSpines via JSON-RPC.
 func (s *Service) ExecutionDagValidateSpines(ctx context.Context, params gwatCommon.HashArray) (bool, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagValidateSpines")
 	defer span.End()
@@ -266,7 +219,7 @@ func (s *Service) GetDepositCount(ctx context.Context) (uint64, error) {
 		"result", result,
 	).WithField(
 		"uint", count,
-	).Error("GetDepositCount")
+	).Info("Get deposit count")
 
 	return count, handleDagRPCError(err)
 }

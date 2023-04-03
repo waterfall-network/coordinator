@@ -94,12 +94,17 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 	ctx, span := trace.StartSpan(ctx, "ProposerServer.buildPhase0BlockData")
 	defer span.End()
 
-	if vs.SyncChecker.Syncing() || vs.SyncChecker.IsInitSync() {
+	if vs.SyncChecker.Syncing() {
 		log.WithError(fmt.Errorf("syncing to latest head, not ready to respond")).WithFields(logrus.Fields{
-			"IsInitSync": vs.SyncChecker.IsInitSync(),
-			"Syncing":    vs.SyncChecker.Syncing(),
+			"Syncing": vs.SyncChecker.Syncing(),
 		}).Warn("Proposing skipped (synchronizing)")
 		return nil, fmt.Errorf("syncing to latest head, not ready to respond")
+	}
+	if vs.HeadFetcher.IsGwatSynchronizing() {
+		log.WithError(fmt.Errorf("GWAT synchronization process is running, not ready to respond")).WithFields(logrus.Fields{
+			"Syncing": vs.HeadFetcher.IsGwatSynchronizing(),
+		}).Warn("Proposing skipped (synchronizing)")
+		return nil, fmt.Errorf("GWAT synchronization process is running, not ready to respond")
 	}
 
 	// Retrieve the parent block as the current head of the canonical chain.
@@ -126,12 +131,22 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 	//retrieving of gwat candidates
 	const CandidatesСutoffSlots = 2
 	candidates, err := vs.ExecutionEngineCaller.ExecutionDagGetCandidates(ctx, req.Slot-CandidatesСutoffSlots)
-	eth1Data.Candidates = candidates.ToBytes()
-	log.WithError(fmt.Errorf("could not get gwat candidates: %v", err)).WithFields(logrus.Fields{
-		"req.Slot":    req.Slot,
-		"cutoff.Slot": req.Slot - CandidatesСutoffSlots,
-		"candidates":  candidates,
-	}).Info(">>>>> build block data: retrieving of gwat candidates")
+	if err != nil {
+		errWrap := fmt.Errorf("could not get gwat candidates: %v", err)
+		log.WithError(errWrap).WithFields(logrus.Fields{
+			"req.Slot":    req.Slot,
+			"cutoff.Slot": req.Slot - CandidatesСutoffSlots,
+			"candidates":  candidates,
+		}).Error("build block data: retrieving of gwat candidates failed")
+		return nil, errWrap
+	} else {
+		eth1Data.Candidates = candidates.ToBytes()
+		log.WithFields(logrus.Fields{
+			"req.Slot":    req.Slot,
+			"cutoff.Slot": req.Slot - CandidatesСutoffSlots,
+			"candidates":  candidates,
+		}).Info("build block data: retrieving of gwat candidates")
+	}
 
 	deposits, atts, err := vs.packDepositsAndAttestations(ctx, head, eth1Data)
 	if err != nil {
