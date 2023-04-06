@@ -77,7 +77,9 @@ func ProcessAttestationNoVerifySignature(
 		return nil, err
 	}
 
-	return SetParticipationAndRewardProposer(ctx, beaconState, att.Data.Target.Epoch, indices, participatedFlags, totalBalance)
+	includedVotesNumber := att.GetAggregationBits().Count()
+
+	return SetParticipationAndRewardProposer(ctx, beaconState, att.Data.Target.Epoch, indices, participatedFlags, totalBalance, includedVotesNumber)
 }
 
 // SetParticipationAndRewardProposer retrieves and sets the epoch participation bits in state. Based on the epoch participation, it rewards
@@ -107,13 +109,13 @@ func SetParticipationAndRewardProposer(
 	beaconState state.BeaconState,
 	targetEpoch types.Epoch,
 	indices []uint64,
-	participatedFlags map[uint8]bool, totalBalance uint64) (state.BeaconState, error) {
+	participatedFlags map[uint8]bool, totalBalance uint64, includedVotesNumber uint64) (state.BeaconState, error) {
 	var proposerRewardNumerator uint64
 	currentEpoch := time.CurrentEpoch(beaconState)
 	var stateErr error
 	if targetEpoch == currentEpoch {
 		stateErr = beaconState.ModifyCurrentParticipationBits(func(val []byte) ([]byte, error) {
-			propRewardNum, epochParticipation, err := EpochParticipation(beaconState, indices, val, participatedFlags, totalBalance)
+			propRewardNum, epochParticipation, err := EpochParticipation(beaconState, indices, val, participatedFlags, totalBalance, includedVotesNumber)
 			if err != nil {
 				return nil, err
 			}
@@ -122,7 +124,7 @@ func SetParticipationAndRewardProposer(
 		})
 	} else {
 		stateErr = beaconState.ModifyPreviousParticipationBits(func(val []byte) ([]byte, error) {
-			propRewardNum, epochParticipation, err := EpochParticipation(beaconState, indices, val, participatedFlags, totalBalance)
+			propRewardNum, epochParticipation, err := EpochParticipation(beaconState, indices, val, participatedFlags, totalBalance, includedVotesNumber)
 			if err != nil {
 				return nil, err
 			}
@@ -167,7 +169,7 @@ func AddValidatorFlag(flag, flagPosition uint8) (uint8, error) {
 //	        if flag_index in participation_flag_indices and not has_flag(epoch_participation[index], flag_index):
 //	            epoch_participation[index] = add_flag(epoch_participation[index], flag_index)
 //	            proposer_reward_numerator += get_base_reward(state, index) * weight
-func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochParticipation []byte, participatedFlags map[uint8]bool, totalBalance uint64) (uint64, []byte, error) {
+func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochParticipation []byte, participatedFlags map[uint8]bool, totalBalance uint64, includedVotesNumber uint64) (uint64, []byte, error) {
 	ctx := context.Background()
 	cfg := params.BeaconConfig()
 	numOfValidators := beaconState.NumValidators() // N in formula, number of registered validators
@@ -175,16 +177,16 @@ func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochPa
 	if err != nil || activeValidatorsForSlot == 0 {
 		activeValidatorsForSlot = cfg.MaxCommitteesPerSlot * cfg.TargetCommitteeSize
 	}
+	br := CalculateBaseReward(cfg, numOfValidators, activeValidatorsForSlot, cfg.BaseRewardMultiplier)
 	sourceFlagIndex := cfg.TimelySourceFlagIndex
 	targetFlagIndex := cfg.TimelyTargetFlagIndex
 	headFlagIndex := cfg.TimelyHeadFlagIndex
 	votingFlagIndex := cfg.DAGTimelyVotingFlagIndex
-	proposerRewardNumerator := uint64(0)
+	proposerReward := uint64(0)
 	for _, index := range indices {
 		if index >= uint64(len(epochParticipation)) {
 			return 0, nil, fmt.Errorf("index %d exceeds participation length %d", index, len(epochParticipation))
 		}
-		br := CalculateBaseReward(cfg, numOfValidators, activeValidatorsForSlot, cfg.BaseRewardMultiplier)
 		has, err := HasValidatorFlag(epochParticipation[index], sourceFlagIndex)
 		if err != nil {
 			return 0, nil, err
@@ -194,7 +196,7 @@ func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochPa
 			if err != nil {
 				return 0, nil, err
 			}
-			proposerRewardNumerator += uint64(float64(br) * cfg.DAGTimelySourceWeight)
+			proposerReward += uint64(float64(br) * (cfg.DAGTimelySourceWeight / 2))
 		}
 		has, err = HasValidatorFlag(epochParticipation[index], targetFlagIndex)
 		if err != nil {
@@ -205,7 +207,7 @@ func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochPa
 			if err != nil {
 				return 0, nil, err
 			}
-			proposerRewardNumerator += uint64(float64(br) * cfg.DAGTimelyTargetWeight)
+			proposerReward += uint64(float64(br) * (cfg.DAGTimelyTargetWeight / 2))
 		}
 		has, err = HasValidatorFlag(epochParticipation[index], headFlagIndex)
 		if err != nil {
@@ -216,7 +218,7 @@ func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochPa
 			if err != nil {
 				return 0, nil, err
 			}
-			proposerRewardNumerator += uint64(float64(br) * cfg.DAGTimelyHeadWeight)
+			proposerReward += uint64(float64(br) * (cfg.DAGTimelyHeadWeight / 2))
 		}
 		has, err = HasValidatorFlag(epochParticipation[index], votingFlagIndex)
 		if err != nil {
@@ -227,11 +229,14 @@ func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochPa
 			if err != nil {
 				return 0, nil, err
 			}
-			proposerRewardNumerator += uint64(float64(br) * cfg.DAGTimelyVotingWeight)
+			proposerReward += uint64(float64(br) * (cfg.DAGTimelyVotingWeight / 2))
 		}
 	}
 
-	return proposerRewardNumerator, epochParticipation, nil
+	// add reward for votes included in the block
+	proposerReward += RewardForBlockVotes(br, includedVotesNumber)
+
+	return proposerReward, epochParticipation, nil
 }
 
 // RewardProposer rewards proposer by increasing proposer's balance with input reward numerator and calculated reward denominator.
@@ -249,6 +254,12 @@ func RewardProposer(ctx context.Context, beaconState state.BeaconState, proposer
 	}
 
 	return helpers.IncreaseBalance(beaconState, i, proposerReward)
+}
+
+// RewardForBlockVotes rewards proposer by increasing proposer's balance with input reward.
+// Block leader gets 1/8 of base reward v for each included vote in the block
+func RewardForBlockVotes(baseReward uint64, includedVotesNumber uint64) uint64 {
+	return uint64(float64(baseReward)*0.125) * includedVotesNumber
 }
 
 // AttestationParticipationFlagIndices retrieves a map of attestation scoring based on Altair's participation flag indices.

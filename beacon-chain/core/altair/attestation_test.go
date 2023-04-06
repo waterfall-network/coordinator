@@ -473,7 +473,7 @@ func TestSetParticipationAndRewardProposer(t *testing.T) {
 				voteFlagIndex:   false,
 			},
 			wantedParticipation: []byte{0, 0, 0, 0, 0, 0, 0, 0},
-			wantedBalance:       32_000_000_000_000,
+			wantedBalance:       32_000_314_182_224,
 		},
 		{name: "some participated with some flags",
 			indices: []uint64{0, 1, 2, 3}, epochParticipation: []byte{0, 0, 0, 0, 0, 0, 0, 0}, participatedFlags: map[uint8]bool{
@@ -483,7 +483,7 @@ func TestSetParticipationAndRewardProposer(t *testing.T) {
 				voteFlagIndex:   false,
 			},
 			wantedParticipation: []byte{3, 3, 3, 3, 0, 0, 0, 0},
-			wantedBalance:       32_000_314_182_232,
+			wantedBalance:       32_000_471_273_336,
 		},
 		{name: "all participated with some flags",
 			indices: []uint64{0, 1, 2, 3, 4, 5, 6, 7}, epochParticipation: []byte{0, 0, 0, 0, 0, 0, 0, 0}, participatedFlags: map[uint8]bool{
@@ -493,7 +493,7 @@ func TestSetParticipationAndRewardProposer(t *testing.T) {
 				voteFlagIndex:   false,
 			},
 			wantedParticipation: []byte{1, 1, 1, 1, 1, 1, 1, 1},
-			wantedBalance:       32_000_314_182_232,
+			wantedBalance:       32_000_785_455_560,
 		},
 		{name: "all participated with all flags",
 			indices: []uint64{0, 1, 2, 3, 4, 5, 6, 7}, epochParticipation: []byte{0, 0, 0, 0, 0, 0, 0, 0}, participatedFlags: map[uint8]bool{
@@ -503,7 +503,7 @@ func TestSetParticipationAndRewardProposer(t *testing.T) {
 				voteFlagIndex:   true,
 			},
 			wantedParticipation: []byte{15, 15, 15, 15, 15, 15, 15, 15},
-			wantedBalance:       32_001_256_728_928,
+			wantedBalance:       32_001_256_728_896,
 		},
 	}
 	for _, test := range tests {
@@ -520,7 +520,7 @@ func TestSetParticipationAndRewardProposer(t *testing.T) {
 
 			b, err := helpers.TotalActiveBalance(beaconState)
 			require.NoError(t, err)
-			st, err := altair.SetParticipationAndRewardProposer(context.Background(), beaconState, test.epoch, test.indices, test.participatedFlags, b)
+			st, err := altair.SetParticipationAndRewardProposer(context.Background(), beaconState, test.epoch, test.indices, test.participatedFlags, b, uint64(len(test.indices)*4))
 			require.NoError(t, err)
 
 			i, err := helpers.BeaconProposerIndex(context.Background(), st)
@@ -574,7 +574,7 @@ func TestEpochParticipation(t *testing.T) {
 				headFlagIndex:   false,
 				votingFlagIndex: false,
 			},
-			wantedNumerator:          0,
+			wantedNumerator:          314_182_224,
 			wantedEpochParticipation: []byte{0, 0, 0, 0, 0, 0, 0, 0},
 		},
 		{name: "some participated with some flags",
@@ -584,7 +584,7 @@ func TestEpochParticipation(t *testing.T) {
 				headFlagIndex:   false,
 				votingFlagIndex: false,
 			},
-			wantedNumerator:          314_182_232,
+			wantedNumerator:          471_273_336,
 			wantedEpochParticipation: []byte{3, 3, 3, 3, 0, 0, 0, 0},
 		},
 		{name: "all participated with some flags",
@@ -594,7 +594,7 @@ func TestEpochParticipation(t *testing.T) {
 				headFlagIndex:   false,
 				votingFlagIndex: false,
 			},
-			wantedNumerator:          314_182_232,
+			wantedNumerator:          785_455_560,
 			wantedEpochParticipation: []byte{1, 1, 1, 1, 1, 1, 1, 1},
 		},
 		{name: "all participated with all flags",
@@ -604,14 +604,14 @@ func TestEpochParticipation(t *testing.T) {
 				headFlagIndex:   true,
 				votingFlagIndex: true,
 			},
-			wantedNumerator:          1_256_728_928,
+			wantedNumerator:          1_256_728_896,
 			wantedEpochParticipation: []byte{15, 15, 15, 15, 15, 15, 15, 15},
 		},
 	}
 	for _, test := range tests {
 		b, err := helpers.TotalActiveBalance(beaconState)
 		require.NoError(t, err)
-		n, p, err := altair.EpochParticipation(beaconState, test.indices, test.epochParticipation, test.participatedFlags, b)
+		n, p, err := altair.EpochParticipation(beaconState, test.indices, test.epochParticipation, test.participatedFlags, b, uint64(len(test.indices)*4))
 		require.NoError(t, err)
 		require.Equal(t, test.wantedNumerator, n)
 		require.DeepSSZEqual(t, test.wantedEpochParticipation, p)
