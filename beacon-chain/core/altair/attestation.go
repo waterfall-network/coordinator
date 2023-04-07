@@ -7,15 +7,16 @@ import (
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"go.opencensus.io/trace"
+
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
-	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/attestation"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
-	"go.opencensus.io/trace"
 )
 
 // ProcessAttestationsNoVerifySignature applies processing operations to a block's inner attestation
@@ -257,9 +258,9 @@ func RewardProposer(ctx context.Context, beaconState state.BeaconState, proposer
 }
 
 // RewardForBlockVotes rewards proposer by increasing proposer's balance with input reward.
-// Block leader gets 1/8 of base reward v for each included vote in the block
+// Block leader gets 1/4 of base reward v for each included vote in the block
 func RewardForBlockVotes(baseReward uint64, includedVotesNumber uint64) uint64 {
-	return uint64(float64(baseReward)*0.125) * includedVotesNumber
+	return uint64(float64(baseReward)*0.25) * includedVotesNumber
 }
 
 // AttestationParticipationFlagIndices retrieves a map of attestation scoring based on Altair's participation flag indices.
