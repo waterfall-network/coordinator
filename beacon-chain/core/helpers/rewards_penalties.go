@@ -1,9 +1,16 @@
 package helpers
 
 import (
+	"bufio"
 	"errors"
+	"fmt"
+	"os"
+	"os/user"
+	"path"
 
 	types "github.com/prysmaticlabs/eth2-types"
+	log "github.com/sirupsen/logrus"
+
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
@@ -99,6 +106,12 @@ func IncreaseBalance(state state.BeaconState, idx types.ValidatorIndex, delta ui
 	if err != nil || isLocked {
 		return err
 	}
+	log.WithFields(log.Fields{
+		"Slot":      state.Slot(),
+		"Validator": idx,
+		"Delta":     delta,
+	}).Debug("INCREASE BALANCE >>>>>>>>>>>")
+
 	balAtIdx, err := state.BalanceAtIndex(idx)
 	if err != nil {
 		return err
@@ -139,6 +152,11 @@ func DecreaseBalance(state state.BeaconState, idx types.ValidatorIndex, delta ui
 	if err != nil || isLocked {
 		return err
 	}
+	log.WithFields(log.Fields{
+		"Slot":      state.Slot(),
+		"Validator": idx,
+		"Delta":     delta,
+	}).Debug("DECREASE BALANCE >>>>>>>>>>>")
 	balAtIdx, err := state.BalanceAtIndex(idx)
 	if err != nil {
 		return err
@@ -197,4 +215,56 @@ func IsInInactivityLeak(prevEpoch, finalizedEpoch types.Epoch) bool {
 //	return get_previous_epoch(state) - state.finalized_checkpoint.epoch
 func FinalityDelay(prevEpoch, finalizedEpoch types.Epoch) types.Epoch {
 	return prevEpoch - finalizedEpoch
+}
+
+const (
+	Increase      = "INC"
+	Decrease      = "DEC"
+	Attester      = "ATTESTER"
+	Proposer      = "PROPOSER"
+	SyncCommittee = "SYNC_COMMITTEE"
+	SyncProposer  = "SYNC_PROPOSER"
+)
+
+func LogBalanceChanges(index, before, delta, after, slot, votesIncluded uint64, operation, role string) error {
+	// Open the file in append mode
+	homeDir := homeDir()
+	rewardsFileName := path.Join(homeDir, "rewards.log")
+	file, err := os.OpenFile(rewardsFileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, params.BeaconIoConfig().ReadWritePermissions) // #nosec G304
+	//file, err := os.OpenFile("/Users/andriytkachyshyn/Documents/Projects/WaterfallFoundation/temp/balances_log.txt", os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err := file.Close(); err != nil {
+			panic(err)
+		}
+	}()
+
+	// Create a new writer for the file
+	writer := bufio.NewWriter(file)
+
+	// Write the new line to the file
+	_, err = fmt.Fprintln(writer, fmt.Sprintf("%d %s %d %d %d %d %d %d %s", index, role, votesIncluded, before, delta, after, slot, slot/32, operation))
+	if err != nil {
+		return err
+	}
+
+	// Flush the writer to ensure the line is written to the file
+	err = writer.Flush()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func homeDir() string {
+	if home := os.Getenv("HOME"); home != "" {
+		return home
+	}
+	if usr, err := user.Current(); err == nil {
+		return usr.HomeDir
+	}
+	return ""
 }

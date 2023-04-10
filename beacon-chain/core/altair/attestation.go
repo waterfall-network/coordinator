@@ -7,6 +7,7 @@ import (
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
+	log "github.com/sirupsen/logrus"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"go.opencensus.io/trace"
 
@@ -78,7 +79,7 @@ func ProcessAttestationNoVerifySignature(
 		return nil, err
 	}
 
-	includedVotesNumber := att.GetAggregationBits().Count()
+	includedVotesNumber := helpers.CountAttestationsVotes([]*ethpb.Attestation{att})
 
 	return SetParticipationAndRewardProposer(ctx, beaconState, att.Data.Target.Epoch, indices, participatedFlags, totalBalance, includedVotesNumber)
 }
@@ -137,7 +138,23 @@ func SetParticipationAndRewardProposer(
 		return nil, stateErr
 	}
 
+	i, err := helpers.BeaconProposerIndex(ctx, beaconState)
+	if err != nil {
+		return nil, err
+	}
+	balAtIdx, err := beaconState.BalanceAtIndex(i)
+	if err != nil {
+		return nil, err
+	}
 	if err := RewardProposer(ctx, beaconState, proposerRewardNumerator); err != nil {
+		return nil, err
+	}
+	newBalAtIdx, err := beaconState.BalanceAtIndex(i)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := helpers.LogBalanceChanges(uint64(i), balAtIdx, proposerRewardNumerator, newBalAtIdx, uint64(beaconState.Slot()), includedVotesNumber, helpers.Increase, helpers.Proposer); err != nil {
 		return nil, err
 	}
 
@@ -188,6 +205,13 @@ func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochPa
 		if index >= uint64(len(epochParticipation)) {
 			return 0, nil, fmt.Errorf("index %d exceeds participation length %d", index, len(epochParticipation))
 		}
+		log.WithFields(log.Fields{
+			"Slot":             beaconState.Slot(),
+			"Validator":        index,
+			"NumValidators":    numOfValidators,
+			"ActiveValidators": activeValidatorsForSlot,
+			"BaseReward":       br,
+		}).Debug("BASE REWARD >>>>>>>>>>>>>")
 		has, err := HasValidatorFlag(epochParticipation[index], sourceFlagIndex)
 		if err != nil {
 			return 0, nil, err
@@ -254,11 +278,16 @@ func RewardProposer(ctx context.Context, beaconState state.BeaconState, proposer
 		return err
 	}
 
+	log.WithFields(log.Fields{
+		"Slot":           beaconState.Slot(),
+		"Proposer":       i,
+		"ProposerReward": proposerReward,
+	}).Debug("REWARD PROPOSER >>>>>>>>>>>>>")
 	return helpers.IncreaseBalance(beaconState, i, proposerReward)
 }
 
 // RewardForBlockVotes rewards proposer by increasing proposer's balance with input reward.
-// Block leader gets 1/4 of base reward v for each included vote in the block
+// Block leader gets 1/8 of base reward v for each included vote in the block
 func RewardForBlockVotes(baseReward uint64, includedVotesNumber uint64) uint64 {
 	return uint64(float64(baseReward)*0.25) * includedVotesNumber
 }

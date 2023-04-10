@@ -5,6 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
+	log "github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/epoch/precompute"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
@@ -255,11 +256,29 @@ func ProcessRewardsAndPenaltiesPrecompute(
 
 		// Compute the post balance of the validator after accounting for the
 		// attester and proposer rewards and penalties.
+		log.WithFields(log.Fields{
+			"Slot":              beaconState.Slot(),
+			"Validator":         i,
+			"AttestationReward": attsRewards[i],
+		}).Debug("ATTESTATION REWARD >>>>>>>>>>>")
+		before := balances[i]
 		balances[i], err = helpers.IncreaseBalanceWithVal(balances[i], attsRewards[i])
 		if err != nil {
 			return nil, err
 		}
+		if err = helpers.LogBalanceChanges(uint64(i), before, attsRewards[i], balances[i], uint64(beaconState.Slot()), 0, helpers.Increase, helpers.Attester); err != nil {
+			return nil, err
+		}
+		log.WithFields(log.Fields{
+			"Slot":               beaconState.Slot(),
+			"Validator":          i,
+			"AttestationPenalty": attsPenalties[i],
+		}).Debug("ATTESTATION PENALTY >>>>>>>>>>>")
+		before = balances[i]
 		balances[i] = helpers.DecreaseBalanceWithVal(balances[i], attsPenalties[i])
+		if err = helpers.LogBalanceChanges(uint64(i), before, attsPenalties[i], balances[i], uint64(beaconState.Slot()), 0, helpers.Decrease, helpers.Attester); err != nil {
+			return nil, err
+		}
 
 		vals[i].AfterEpochTransitionBalance = balances[i]
 	}
@@ -376,6 +395,18 @@ func attestationDelta(
 		}
 		penalty += n / inactivityDenominator
 	}
+
+	log.WithFields(log.Fields{
+		"NumValidators":             validatorsNum,
+		"ActiveValidators":          activeValidatorsFroSlot,
+		"BaseReward":                baseReward,
+		"Reward":                    reward,
+		"Penalty":                   penalty,
+		"IsPrevEpochSourceAttester": val.IsPrevEpochSourceAttester,
+		"IsPrevEpochTargetAttester": val.IsPrevEpochTargetAttester,
+		"IsSlashed":                 val.IsSlashed,
+		"inactivityLeak":            inactivityLeak,
+	}).Debug("ATTESTATION BASE REWARD >>>>>>>>>>>")
 
 	return reward, penalty, nil
 }
