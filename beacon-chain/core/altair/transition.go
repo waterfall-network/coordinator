@@ -99,6 +99,10 @@ func ProcessEpoch(ctx context.Context, state state.BeaconState) (state.BeaconSta
 	if err != nil {
 		return nil, err
 	}
+	state, err = e.ProcessWithdrawal(state)
+	if err != nil {
+		return nil, err
+	}
 	state, err = e.ProcessRandaoMixesReset(state)
 	if err != nil {
 		return nil, err

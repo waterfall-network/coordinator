@@ -195,6 +195,8 @@ func NewKVStore(ctx context.Context, dirPath string, config *Config) (*Store, er
 			migrationsBucket,
 
 			feeRecipientBucket,
+			// gwat sync params
+			gwatSyncParamBucket,
 		)
 	}); err != nil {
 		log.WithField("elapsed", time.Since(start)).Error("Failed to update db and create buckets")

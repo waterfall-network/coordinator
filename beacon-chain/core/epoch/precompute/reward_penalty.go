@@ -43,6 +43,14 @@ func ProcessRewardsAndPenaltiesPrecompute(
 	}
 	validatorBals := state.Balances()
 	for i := 0; i < numOfVals; i++ {
+		isLocked, err := helpers.IsWithdrawBalanceLocked(state, types.ValidatorIndex(i))
+		if err != nil {
+			return nil, err
+		}
+		if isLocked {
+			continue
+		}
+
 		vp[i].BeforeEpochTransitionBalance = validatorBals[i]
 
 		// Compute the post balance of the validator after accounting for the

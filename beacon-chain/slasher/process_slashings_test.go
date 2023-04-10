@@ -31,7 +31,8 @@ func TestService_processAttesterSlashings(t *testing.T) {
 	validators := make([]*ethpb.Validator, 1)
 	validators[0] = &ethpb.Validator{
 		PublicKey:             privKey.PublicKey().Marshal(),
-		WithdrawalCredentials: make([]byte, 32),
+		CreatorAddress:        make([]byte, 20),
+		WithdrawalCredentials: make([]byte, 20),
 		EffectiveBalance:      params.BeaconConfig().MaxEffectiveBalance,
 	}
 	err = beaconState.SetValidators(validators)
@@ -138,7 +139,8 @@ func TestService_processProposerSlashings(t *testing.T) {
 	validators := make([]*ethpb.Validator, 1)
 	validators[0] = &ethpb.Validator{
 		PublicKey:             privKey.PublicKey().Marshal(),
-		WithdrawalCredentials: make([]byte, 32),
+		CreatorAddress:        make([]byte, 20),
+		WithdrawalCredentials: make([]byte, 20),
 		EffectiveBalance:      params.BeaconConfig().MaxEffectiveBalance,
 	}
 	err = beaconState.SetValidators(validators)

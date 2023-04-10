@@ -85,6 +85,7 @@ type ReadOnlyValidator interface {
 	WithdrawableEpoch() types.Epoch
 	ExitEpoch() types.Epoch
 	PublicKey() [fieldparams.BLSPubkeyLength]byte
+	CreatorAddress() []byte
 	WithdrawalCredentials() []byte
 	Slashed() bool
 	IsNil() bool

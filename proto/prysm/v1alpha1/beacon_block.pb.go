@@ -1992,7 +1992,8 @@ type Deposit_Data struct {
 	unknownFields protoimpl.UnknownFields
 
 	PublicKey             []byte `protobuf:"bytes,1,opt,name=public_key,json=publicKey,proto3" json:"public_key,omitempty" spec-name:"pubkey" ssz-size:"48"`
-	WithdrawalCredentials []byte `protobuf:"bytes,2,opt,name=withdrawal_credentials,json=withdrawalCredentials,proto3" json:"withdrawal_credentials,omitempty" ssz-size:"32"`
+	CreatorAddress        []byte `protobuf:"bytes,2,opt,name=creator_address,json=creatorAddress,proto3" json:"creator_address,omitempty" ssz-size:"20"`
+	WithdrawalCredentials []byte `protobuf:"bytes,2,opt,name=withdrawal_credentials,json=withdrawalCredentials,proto3" json:"withdrawal_credentials,omitempty" ssz-size:"20"`
 	Amount                uint64 `protobuf:"varint,3,opt,name=amount,proto3" json:"amount,omitempty"`
 	Signature             []byte `protobuf:"bytes,4,opt,name=signature,proto3" json:"signature,omitempty" ssz-size:"96"`
 }
@@ -2039,6 +2040,13 @@ func (x *Deposit_Data) GetPublicKey() []byte {
 func (x *Deposit_Data) GetWithdrawalCredentials() []byte {
 	if x != nil {
 		return x.WithdrawalCredentials
+	}
+	return nil
+}
+
+func (x *Deposit_Data) GetCreatorAddress() []byte {
+	if x != nil {
+		return x.CreatorAddress
 	}
 	return nil
 }

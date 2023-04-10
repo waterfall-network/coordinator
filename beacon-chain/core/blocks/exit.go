@@ -7,12 +7,13 @@ import (
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/signing"
 	v "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/validators"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 // ValidatorAlreadyExitedMsg defines a message saying that a validator has already exited.
@@ -58,9 +59,12 @@ func ProcessVoluntaryExits(
 		if err != nil {
 			return nil, err
 		}
-		if err := VerifyExitAndSignature(val, beaconState.Slot(), beaconState.Fork(), exit, beaconState.GenesisValidatorsRoot()); err != nil {
+		if err := VerifyExitData(val, beaconState.Slot(), beaconState.Fork(), exit, beaconState); err != nil {
 			return nil, errors.Wrapf(err, "could not verify exit %d", idx)
 		}
+		//if err := VerifyExitAndSignature(val, beaconState.Slot(), beaconState.Fork(), exit, beaconState.GenesisValidatorsRoot()); err != nil {
+		//	return nil, errors.Wrapf(err, "could not verify exit %d", idx)
+		//}
 		beaconState, err = v.InitiateValidatorExit(ctx, beaconState, exit.Exit.ValidatorIndex)
 		if err != nil {
 			return nil, err
@@ -105,15 +109,58 @@ func VerifyExitAndSignature(
 	if err := verifyExitConditions(validator, currentSlot, exit); err != nil {
 		return err
 	}
-	domain, err := signing.Domain(fork, exit.Epoch, params.BeaconConfig().DomainVoluntaryExit, genesisRoot)
-	if err != nil {
+	//domain, err := signing.Domain(fork, exit.Epoch, params.BeaconConfig().DomainVoluntaryExit, genesisRoot)
+	//if err != nil {
+	//	return err
+	//}
+	//valPubKey := validator.PublicKey()
+	//if err := signing.VerifySigningRoot(exit, valPubKey[:], signed.Signature, domain); err != nil {
+	//	return signing.ErrSigFailedToVerify
+	//}
+	return nil
+}
+
+func VerifyExitData(
+	validator state.ReadOnlyValidator,
+	currentSlot types.Slot,
+	fork *ethpb.Fork,
+	signed *ethpb.SignedVoluntaryExit,
+	beaconState state.BeaconState,
+) error {
+	if signed == nil || signed.Exit == nil {
+		return errors.New("nil exit")
+	}
+
+	exit := signed.Exit
+	if err := verifyExitConditions(validator, currentSlot, exit); err != nil {
 		return err
 	}
-	valPubKey := validator.PublicKey()
-	if err := signing.VerifySigningRoot(exit, valPubKey[:], signed.Signature, domain); err != nil {
-		return signing.ErrSigFailedToVerify
-	}
 	return nil
+}
+
+func ParseExitSigData(
+	signed *ethpb.SignedVoluntaryExit,
+) (pubkey [48]byte, txHash [32]byte, blockNr uint64, txIndex uint64, err error) {
+	data := signed.Signature
+	if len(data) != 96 {
+		err = errors.New("parse exit: bad data len")
+		return
+	}
+
+	uint64Len := len(gwatCommon.Uint64ToBytes(0))
+
+	pubkey = bytesutil.ToBytes48(data[:48])
+	offset := 48
+
+	txHash = bytesutil.ToBytes32(data[offset : offset+32])
+	offset += 32
+
+	blockNr = bytesutil.FromBytes8(data[offset : offset+uint64Len])
+	offset += uint64Len
+
+	txIndex = bytesutil.FromBytes8(data[offset : offset+uint64Len])
+
+	return
 }
 
 // verifyExitConditions implements the spec defined validation for voluntary exits(excluding signatures).

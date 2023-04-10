@@ -111,7 +111,8 @@ func TestWaitForActivation_ValidatorOriginallyExists(t *testing.T) {
 				ActivationEpoch:       0,
 				ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 				PublicKey:             pubKey1,
-				WithdrawalCredentials: make([]byte, 32),
+				CreatorAddress:        make([]byte, 20),
+				WithdrawalCredentials: make([]byte, 20),
 			},
 		},
 	}
@@ -120,7 +121,8 @@ func TestWaitForActivation_ValidatorOriginallyExists(t *testing.T) {
 	require.NoError(t, err, "Could not get signing root")
 	depData := &ethpb.Deposit_Data{
 		PublicKey:             pubKey1,
-		WithdrawalCredentials: bytesutil.PadTo([]byte("hey"), 32),
+		CreatorAddress:        bytesutil.PadTo([]byte("hey"), 20),
+		WithdrawalCredentials: bytesutil.PadTo([]byte("hey"), 20),
 		Signature:             make([]byte, 96),
 	}
 	domain, err := signing.ComputeDomain(params.BeaconConfig().DomainDeposit, nil, nil)

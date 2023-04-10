@@ -152,7 +152,8 @@ func TestServer_ListValidatorBalances_DefaultResponse_NoArchive(t *testing.T) {
 	for i := 0; i < numItems; i++ {
 		validators[i] = &ethpb.Validator{
 			PublicKey:             pubKey(uint64(i)),
-			WithdrawalCredentials: make([]byte, 32),
+			CreatorAddress:        make([]byte, 20),
+			WithdrawalCredentials: make([]byte, 20),
 		}
 		balances[i] = params.BeaconConfig().MaxEffectiveBalance
 		balancesResponse[i] = &ethpb.ValidatorBalances_Balance{
@@ -539,7 +540,8 @@ func TestServer_ListValidators_OnlyActiveValidators(t *testing.T) {
 		if i%2 == 0 {
 			val := &ethpb.Validator{
 				PublicKey:             pubKey,
-				WithdrawalCredentials: make([]byte, 32),
+				CreatorAddress:        make([]byte, 20),
+				WithdrawalCredentials: make([]byte, 20),
 				ActivationEpoch:       0,
 				ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			}
@@ -551,7 +553,8 @@ func TestServer_ListValidators_OnlyActiveValidators(t *testing.T) {
 		} else {
 			validators[i] = &ethpb.Validator{
 				PublicKey:             pubKey,
-				WithdrawalCredentials: make([]byte, 32),
+				CreatorAddress:        make([]byte, 20),
+				WithdrawalCredentials: make([]byte, 20),
 				ActivationEpoch:       0,
 				ExitEpoch:             0,
 			}
@@ -604,7 +607,8 @@ func TestServer_ListValidators_InactiveInTheMiddle(t *testing.T) {
 		if i%2 == 0 {
 			val := &ethpb.Validator{
 				PublicKey:             pubKey,
-				WithdrawalCredentials: make([]byte, 32),
+				CreatorAddress:        make([]byte, 20),
+				WithdrawalCredentials: make([]byte, 20),
 				ActivationEpoch:       0,
 				ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			}
@@ -616,7 +620,8 @@ func TestServer_ListValidators_InactiveInTheMiddle(t *testing.T) {
 		} else {
 			validators[i] = &ethpb.Validator{
 				PublicKey:             pubKey,
-				WithdrawalCredentials: make([]byte, 32),
+				CreatorAddress:        make([]byte, 20),
+				WithdrawalCredentials: make([]byte, 20),
 				ActivationEpoch:       0,
 				ExitEpoch:             0,
 			}
@@ -847,21 +852,24 @@ func TestServer_ListValidators_Pagination(t *testing.T) {
 					{
 						Validator: &ethpb.Validator{
 							PublicKey:             pubKey(3),
-							WithdrawalCredentials: make([]byte, 32),
+							CreatorAddress:        make([]byte, 20),
+							WithdrawalCredentials: make([]byte, 20),
 						},
 						Index: 3,
 					},
 					{
 						Validator: &ethpb.Validator{
 							PublicKey:             pubKey(4),
-							WithdrawalCredentials: make([]byte, 32),
+							CreatorAddress:        make([]byte, 20),
+							WithdrawalCredentials: make([]byte, 20),
 						},
 						Index: 4,
 					},
 					{
 						Validator: &ethpb.Validator{
 							PublicKey:             pubKey(5),
-							WithdrawalCredentials: make([]byte, 32),
+							CreatorAddress:        make([]byte, 20),
+							WithdrawalCredentials: make([]byte, 20),
 						},
 						Index: 5,
 					},
@@ -874,35 +882,40 @@ func TestServer_ListValidators_Pagination(t *testing.T) {
 					{
 						Validator: &ethpb.Validator{
 							PublicKey:             pubKey(50),
-							WithdrawalCredentials: make([]byte, 32),
+							CreatorAddress:        make([]byte, 20),
+							WithdrawalCredentials: make([]byte, 20),
 						},
 						Index: 50,
 					},
 					{
 						Validator: &ethpb.Validator{
 							PublicKey:             pubKey(51),
-							WithdrawalCredentials: make([]byte, 32),
+							CreatorAddress:        make([]byte, 20),
+							WithdrawalCredentials: make([]byte, 20),
 						},
 						Index: 51,
 					},
 					{
 						Validator: &ethpb.Validator{
 							PublicKey:             pubKey(52),
-							WithdrawalCredentials: make([]byte, 32),
+							CreatorAddress:        make([]byte, 20),
+							WithdrawalCredentials: make([]byte, 20),
 						},
 						Index: 52,
 					},
 					{
 						Validator: &ethpb.Validator{
 							PublicKey:             pubKey(53),
-							WithdrawalCredentials: make([]byte, 32),
+							CreatorAddress:        make([]byte, 20),
+							WithdrawalCredentials: make([]byte, 20),
 						},
 						Index: 53,
 					},
 					{
 						Validator: &ethpb.Validator{
 							PublicKey:             pubKey(54),
-							WithdrawalCredentials: make([]byte, 32),
+							CreatorAddress:        make([]byte, 20),
+							WithdrawalCredentials: make([]byte, 20),
 						},
 						Index: 54,
 					},
@@ -915,7 +928,8 @@ func TestServer_ListValidators_Pagination(t *testing.T) {
 					{
 						Validator: &ethpb.Validator{
 							PublicKey:             pubKey(99),
-							WithdrawalCredentials: make([]byte, 32),
+							CreatorAddress:        make([]byte, 20),
+							WithdrawalCredentials: make([]byte, 20),
 						},
 						Index: 99,
 					},
@@ -928,14 +942,16 @@ func TestServer_ListValidators_Pagination(t *testing.T) {
 					{
 						Validator: &ethpb.Validator{
 							PublicKey:             pubKey(0),
-							WithdrawalCredentials: make([]byte, 32),
+							CreatorAddress:        make([]byte, 20),
+							WithdrawalCredentials: make([]byte, 20),
 						},
 						Index: 0,
 					},
 					{
 						Validator: &ethpb.Validator{
 							PublicKey:             pubKey(1),
-							WithdrawalCredentials: make([]byte, 32),
+							CreatorAddress:        make([]byte, 20),
+							WithdrawalCredentials: make([]byte, 20),
 						},
 						Index: 1,
 					},
@@ -1108,7 +1124,8 @@ func TestServer_ListValidators_ProcessHeadStateSlots(t *testing.T) {
 		validators[i] = &ethpb.Validator{
 			ActivationEpoch:       0,
 			PublicKey:             make([]byte, 48),
-			WithdrawalCredentials: make([]byte, 32),
+			CreatorAddress:        make([]byte, 20),
+			WithdrawalCredentials: make([]byte, 20),
 			EffectiveBalance:      params.BeaconConfig().MaxEffectiveBalance,
 		}
 		balances[i] = params.BeaconConfig().MaxEffectiveBalance
@@ -1165,7 +1182,8 @@ func TestServer_GetValidator(t *testing.T) {
 		validators[i] = &ethpb.Validator{
 			ActivationEpoch:       i,
 			PublicKey:             pubKey(uint64(i)),
-			WithdrawalCredentials: make([]byte, 32),
+			CreatorAddress:        make([]byte, 20),
+			WithdrawalCredentials: make([]byte, 20),
 		}
 	}
 
@@ -1275,7 +1293,8 @@ func TestServer_GetValidatorActiveSetChanges(t *testing.T) {
 			ActivationEpoch:       activationEpoch,
 			PublicKey:             pubKey(uint64(i)),
 			EffectiveBalance:      balance,
-			WithdrawalCredentials: make([]byte, 32),
+			CreatorAddress:        make([]byte, 20),
+			WithdrawalCredentials: make([]byte, 20),
 			WithdrawableEpoch:     withdrawableEpoch,
 			Slashed:               slashed,
 			ExitEpoch:             exitEpoch,
@@ -1345,19 +1364,22 @@ func TestServer_GetValidatorQueue_PendingActivation(t *testing.T) {
 				ActivationEpoch:            helpers.ActivationExitEpoch(0),
 				ActivationEligibilityEpoch: 3,
 				PublicKey:                  pubKey(3),
-				WithdrawalCredentials:      make([]byte, 32),
+				CreatorAddress:             make([]byte, 20),
+				WithdrawalCredentials:      make([]byte, 20),
 			},
 			{
 				ActivationEpoch:            helpers.ActivationExitEpoch(0),
 				ActivationEligibilityEpoch: 2,
 				PublicKey:                  pubKey(2),
-				WithdrawalCredentials:      make([]byte, 32),
+				CreatorAddress:             make([]byte, 20),
+				WithdrawalCredentials:      make([]byte, 20),
 			},
 			{
 				ActivationEpoch:            helpers.ActivationExitEpoch(0),
 				ActivationEligibilityEpoch: 1,
 				PublicKey:                  pubKey(1),
-				WithdrawalCredentials:      make([]byte, 32),
+				CreatorAddress:             make([]byte, 20),
+				WithdrawalCredentials:      make([]byte, 20),
 			},
 		},
 		FinalizedCheckpoint: &ethpb.Checkpoint{
@@ -1445,21 +1467,24 @@ func TestServer_GetValidatorQueue_PendingExit(t *testing.T) {
 				ExitEpoch:             4,
 				WithdrawableEpoch:     3,
 				PublicKey:             pubKey(3),
-				WithdrawalCredentials: make([]byte, 32),
+				CreatorAddress:        make([]byte, 20),
+				WithdrawalCredentials: make([]byte, 20),
 			},
 			{
 				ActivationEpoch:       0,
 				ExitEpoch:             4,
 				WithdrawableEpoch:     2,
 				PublicKey:             pubKey(2),
-				WithdrawalCredentials: make([]byte, 32),
+				CreatorAddress:        make([]byte, 20),
+				WithdrawalCredentials: make([]byte, 20),
 			},
 			{
 				ActivationEpoch:       0,
 				ExitEpoch:             4,
 				WithdrawableEpoch:     1,
 				PublicKey:             pubKey(1),
-				WithdrawalCredentials: make([]byte, 32),
+				CreatorAddress:        make([]byte, 20),
+				WithdrawalCredentials: make([]byte, 20),
 			},
 		},
 		FinalizedCheckpoint: &ethpb.Checkpoint{
@@ -1530,7 +1555,8 @@ func TestServer_GetValidatorParticipation_CurrentAndPrevEpoch(t *testing.T) {
 	for i := 0; i < len(validators); i++ {
 		validators[i] = &ethpb.Validator{
 			PublicKey:             bytesutil.ToBytes(uint64(i), 48),
-			WithdrawalCredentials: make([]byte, 32),
+			CreatorAddress:        make([]byte, 20),
+			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			EffectiveBalance:      params.BeaconConfig().MaxEffectiveBalance,
 		}
@@ -1614,7 +1640,8 @@ func TestServer_GetValidatorParticipation_OrphanedUntilGenesis(t *testing.T) {
 	for i := 0; i < len(validators); i++ {
 		validators[i] = &ethpb.Validator{
 			PublicKey:             bytesutil.ToBytes(uint64(i), 48),
-			WithdrawalCredentials: make([]byte, 32),
+			CreatorAddress:        make([]byte, 20),
+			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			EffectiveBalance:      params.BeaconConfig().MaxEffectiveBalance,
 		}
@@ -2200,7 +2227,8 @@ func setupValidators(t testing.TB, _ db.Database, count int) ([]*ethpb.Validator
 		balances[i] = uint64(i)
 		validators = append(validators, &ethpb.Validator{
 			PublicKey:             pubKey,
-			WithdrawalCredentials: make([]byte, 32),
+			CreatorAddress:        make([]byte, 20),
+			WithdrawalCredentials: make([]byte, 20),
 		})
 	}
 	s, err := util.NewBeaconState()

@@ -23,7 +23,7 @@ import (
 	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain/types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/voluntaryexits"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	nativev1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/state-native/v1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen"
@@ -37,7 +37,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/network"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	prysmTime "gitlab.waterfall.network/waterfall/protocol/coordinator/time"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	ethereum "gitlab.waterfall.network/waterfall/protocol/gwat"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/abi/bind"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
@@ -95,14 +94,13 @@ type ChainInfoFetcher interface {
 // POWBlockFetcher defines a struct that can retrieve mainchain blocks.
 type POWBlockFetcher interface {
 	BlockTimeByHeight(ctx context.Context, height *big.Int) (uint64, error)
-	BlockByTimestamp(ctx context.Context, time uint64) (*types.HeaderInfo, error)
 	BlockHashByHeight(ctx context.Context, height *big.Int) (common.Hash, error)
 	BlockExists(ctx context.Context, hash common.Hash) (bool, *big.Int, error)
 	BlockExistsWithCache(ctx context.Context, hash common.Hash) (bool, *big.Int, error)
 
-	ExecutionDagSync(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (gwatCommon.HashArray, error)
 	ExecutionDagGetCandidates(ctx context.Context, slot ethTypes.Slot) (gwatCommon.HashArray, error)
-	ExecutionDagFinalize(ctx context.Context, spines gwatCommon.HashArray, baseSpine *gwatCommon.Hash) (*gwatCommon.Hash, error)
+	ExecutionDagFinalize(ctx context.Context, finParams *gwatTypes.FinalizationParams) (*gwatTypes.FinalizationResult, error)
+	ExecutionDagCoordinatedState(ctx context.Context) (*gwatTypes.FinalizationResult, error)
 }
 
 // Chain defines a standard interface for the powchain service in Prysm.
@@ -133,6 +131,7 @@ type config struct {
 	depositContractAddr     common.Address
 	beaconDB                db.HeadAccessDatabase
 	depositCache            *depositcache.DepositCache
+	exitPool                voluntaryexits.PoolManager
 	stateNotifier           statefeed.Notifier
 	stateGen                *stategen.State
 	eth1HeaderReqLimit      uint64
@@ -204,7 +203,8 @@ func NewService(ctx context.Context, opts ...Option) (*Service, error) {
 		},
 		lastReceivedMerkleIndex: -1,
 		preGenesisState:         genState,
-		headTicker:              time.NewTicker(time.Duration(params.BeaconConfig().SecondsPerETH1Block) * time.Second),
+		//headTicker:              time.NewTicker(time.Duration(params.BeaconConfig().SecondsPerETH1Block) * time.Second),
+		headTicker: time.NewTicker(time.Duration(params.BeaconConfig().SecondsPerSlot) * time.Second),
 	}
 
 	for _, opt := range opts {
@@ -600,12 +600,6 @@ func (s *Service) initPOWService() {
 				errorLogger(err, "Unable to process past deposit contract logs")
 				continue
 			}
-			// Cache eth1 headers from our voting period.
-			if err := s.cacheHeadersForEth1DataVote(ctx); err != nil {
-				s.retryExecutionClientConnection(ctx, err)
-				errorLogger(err, "Unable to cache headers for execution client votes")
-				continue
-			}
 			// Handle edge case with embedded genesis state by fetching genesis header to determine
 			// its height.
 			if s.chainStartData.Chainstarted && s.chainStartData.GenesisBlock != 0 {
@@ -689,52 +683,6 @@ func (s *Service) logTillChainStart(ctx context.Context) {
 	}
 
 	log.WithFields(fields).Info("Currently waiting for chainstart")
-}
-
-// cacheHeadersForEth1DataVote makes sure that voting for eth1data after startup utilizes cached headers
-// instead of making multiple RPC requests to the ETH1 endpoint.
-func (s *Service) cacheHeadersForEth1DataVote(ctx context.Context) error {
-	// Find the end block to request from.
-	end, err := s.followBlockHeight(ctx)
-	if err != nil {
-		return err
-	}
-	start, err := s.determineEarliestVotingBlock(ctx, end)
-	if err != nil {
-		return err
-	}
-	// We call batchRequestHeaders for its header caching side-effect, so we don't need the return value.
-	_, err = s.batchRequestHeaders(start, end)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// determines the earliest voting block from which to start caching all our previous headers from.
-func (s *Service) determineEarliestVotingBlock(ctx context.Context, followBlock uint64) (uint64, error) {
-	genesisTime := s.chainStartData.GenesisTime
-	currSlot := slots.CurrentSlot(genesisTime)
-
-	// In the event genesis has not occurred yet, we just request go back follow_distance blocks.
-	if genesisTime == 0 || currSlot == 0 {
-		earliestBlk := uint64(0)
-		if followBlock > params.BeaconConfig().Eth1FollowDistance {
-			earliestBlk = followBlock - params.BeaconConfig().Eth1FollowDistance
-		}
-		return earliestBlk, nil
-	}
-	votingTime := slots.VotingPeriodStartTime(genesisTime, currSlot)
-	followBackDist := 2 * params.BeaconConfig().SecondsPerETH1Block * params.BeaconConfig().Eth1FollowDistance
-	if followBackDist > votingTime {
-		return 0, errors.Errorf("invalid genesis time provided. %d > %d", followBackDist, votingTime)
-	}
-	earliestValidTime := votingTime - followBackDist
-	hdr, err := s.BlockByTimestamp(ctx, earliestValidTime)
-	if err != nil {
-		return 0, err
-	}
-	return hdr.Number.Uint64(), nil
 }
 
 // initializes our service from the provided eth1data object by initializing all the relevant

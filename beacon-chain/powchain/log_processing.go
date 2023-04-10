@@ -2,12 +2,12 @@ package powchain
 
 import (
 	"context"
-	"encoding/binary"
 	"fmt"
 	"math/big"
 	"time"
 
 	"github.com/pkg/errors"
+	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed"
 	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
@@ -15,19 +15,14 @@ import (
 	coreState "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition"
 	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
-	contracts "gitlab.waterfall.network/waterfall/protocol/coordinator/contracts/deposit"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	prysmTime "gitlab.waterfall.network/waterfall/protocol/coordinator/time"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
-	ethereum "gitlab.waterfall.network/waterfall/protocol/gwat"
-	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/abi/bind"
-	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
-	gethTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
-)
-
-var (
-	depositEventSignature = hash.HashKeccak256([]byte("DepositEvent(bytes,bytes,bytes,bytes,bytes)"))
+	gwat "gitlab.waterfall.network/waterfall/protocol/gwat"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
+	gwatVal "gitlab.waterfall.network/waterfall/protocol/gwat/validator"
 )
 
 const eth1DataSavingInterval = 1000
@@ -50,8 +45,8 @@ func (s *Service) Eth2GenesisPowchainInfo() (uint64, *big.Int) {
 
 // ProcessETH1Block processes the logs from the provided eth1Block.
 func (s *Service) ProcessETH1Block(ctx context.Context, blkNum uint64) error {
-	query := ethereum.FilterQuery{
-		Addresses: []common.Address{
+	query := gwat.FilterQuery{
+		Addresses: []gwatCommon.Address{
 			s.cfg.depositContractAddr,
 		},
 		FromBlock: new(big.Int).SetUint64(blkNum),
@@ -80,11 +75,11 @@ func (s *Service) ProcessETH1Block(ctx context.Context, blkNum uint64) error {
 
 // ProcessLog is the main method which handles the processing of all
 // logs from the deposit contract on the ETH1.0 chain.
-func (s *Service) ProcessLog(ctx context.Context, depositLog gethTypes.Log) error {
+func (s *Service) ProcessLog(ctx context.Context, depositLog gwatTypes.Log) error {
 	s.processingLock.RLock()
 	defer s.processingLock.RUnlock()
 	// Process logs according to their event signature.
-	if depositLog.Topics[0] == depositEventSignature {
+	if depositLog.Topics[0] == gwatVal.EvtDepositLogSignature {
 		if err := s.ProcessDepositLog(ctx, depositLog); err != nil {
 			return errors.Wrap(err, "Could not process deposit log")
 		}
@@ -93,19 +88,65 @@ func (s *Service) ProcessLog(ctx context.Context, depositLog gethTypes.Log) erro
 		}
 		return nil
 	}
+	if depositLog.Topics[0] == gwatVal.EvtExitReqLogSignature {
+		if err := s.ProcessExitLog(ctx, depositLog); err != nil {
+			return errors.Wrap(err, "Could not process exit log")
+		}
+		return nil
+	}
 	log.WithField("signature", fmt.Sprintf("%#x", depositLog.Topics[0])).Debug("Not a valid event signature")
+	return nil
+}
+
+func (s *Service) ProcessExitLog(ctx context.Context, exitLog gwatTypes.Log) error {
+	pubkey, creatorAddr, valIndex, exitEpoch, err := gwatVal.UnpackExitRequestLogData(exitLog.Data)
+
+	log.WithError(err).WithFields(logrus.Fields{
+		"valIndex":    valIndex,
+		"exitEpoch":   exitEpoch,
+		"pubkey":      fmt.Sprintf("%#x", pubkey),
+		"creatorAddr": fmt.Sprintf("%#x", creatorAddr),
+	}).Info("Processing exit")
+
+	if err != nil {
+		return errors.Wrap(err, "Could not unpack log")
+	}
+
+	totalSecondsPassed := uint64(prysmTime.Now().Unix()) - s.cfg.finalizedStateAtStartup.GenesisTime()
+	currentEpoch := types.Epoch(uint64(totalSecondsPassed) / uint64(params.BeaconConfig().SlotsPerEpoch.Mul(params.BeaconConfig().SecondsPerSlot)))
+
+	if exitEpoch != nil && *exitEpoch > uint64(currentEpoch) {
+		currentEpoch = types.Epoch(*exitEpoch)
+	}
+
+	exit := &ethpb.VoluntaryExit{Epoch: currentEpoch, ValidatorIndex: types.ValidatorIndex(valIndex)}
+
+	// add tx data as sig
+	adddata := make([]byte, 0, 96)
+	adddata = append(adddata, pubkey.Bytes()...)
+	adddata = append(adddata, exitLog.TxHash.Bytes()...)
+	adddata = append(adddata, bytesutil.ToBytes(exitLog.BlockNumber, 8)...)
+	adddata = append(adddata, bytesutil.ToBytes(uint64(exitLog.TxIndex), 8)...)
+	signedExit := &ethpb.SignedVoluntaryExit{Exit: exit, Signature: adddata}
+
+	s.cfg.exitPool.InsertVoluntaryExitByGwat(s.ctx, signedExit)
+
 	return nil
 }
 
 // ProcessDepositLog processes the log which had been received from
 // the ETH1.0 chain by trying to ascertain which participant deposited
 // in the contract.
-func (s *Service) ProcessDepositLog(ctx context.Context, depositLog gethTypes.Log) error {
-	pubkey, withdrawalCredentials, amount, signature, merkleTreeIndex, err := contracts.UnpackDepositLogData(depositLog.Data)
+func (s *Service) ProcessDepositLog(ctx context.Context, depositLog gwatTypes.Log) error {
+	pubkey, creatorAddr, withdrawalCredentials, amount, signature, depositIndex, err := gwatVal.UnpackDepositLogData(depositLog.Data)
 
 	log.WithError(err).WithFields(logrus.Fields{
-		"amount": bytesutil.FromBytes8(amount),
-		"pubkey": fmt.Sprintf("%#x", pubkey),
+		"amount":          amount,
+		"pubkey":          fmt.Sprintf("%#x", pubkey),
+		"creatorAddr":     creatorAddr.Hex(),
+		"withdrawalCreds": withdrawalCredentials.Hex(),
+		"depositIndex":    depositIndex,
+		"s.lastIndex":     s.lastReceivedMerkleIndex,
 	}).Info("Processing deposit")
 
 	if err != nil {
@@ -115,7 +156,7 @@ func (s *Service) ProcessDepositLog(ctx context.Context, depositLog gethTypes.Lo
 	// This can happen sometimes when we receive the same log twice from the
 	// ETH1.0 network, and prevents us from updating our trie
 	// with the same log twice, causing an inconsistent state root.
-	index := int64(binary.LittleEndian.Uint64(merkleTreeIndex)) // lint:ignore uintcast -- MerkleTreeIndex should not exceed int64 in your lifetime.
+	index := int64(depositIndex) // lint:ignore uintcast -- MerkleTreeIndex should not exceed int64 in your lifetime.
 	if index <= s.lastReceivedMerkleIndex {
 		return nil
 	}
@@ -129,10 +170,11 @@ func (s *Service) ProcessDepositLog(ctx context.Context, depositLog gethTypes.Lo
 	// We then decode the deposit input in order to create a deposit object
 	// we can store in our persistent DB.
 	depositData := &ethpb.Deposit_Data{
-		Amount:                bytesutil.FromBytes8(amount),
-		PublicKey:             pubkey,
-		Signature:             signature,
-		WithdrawalCredentials: withdrawalCredentials,
+		Amount:                amount,
+		PublicKey:             pubkey.Bytes(),
+		Signature:             signature.Bytes(),
+		CreatorAddress:        creatorAddr.Bytes(),
+		WithdrawalCredentials: withdrawalCredentials.Bytes(),
 	}
 
 	depositHash, err := depositData.HashTreeRoot()
@@ -182,10 +224,10 @@ func (s *Service) ProcessDepositLog(ctx context.Context, depositLog gethTypes.Lo
 	}
 	if validData {
 		log.WithFields(logrus.Fields{
-			"eth1Block":       depositLog.BlockNumber,
-			"publicKey":       fmt.Sprintf("%#x", depositData.PublicKey),
-			"merkleTreeIndex": index,
-		}).Info("Deposit registered from deposit contract")
+			"eth1Block":    depositLog.BlockNumber,
+			"publicKey":    fmt.Sprintf("%#x", depositData.PublicKey),
+			"depositIndex": index,
+		}).Info("Deposit registered from gwat deposit event")
 		validDepositsCount.Inc()
 		// Notify users what is going on, from time to time.
 		if !s.chainStartData.Chainstarted {
@@ -203,10 +245,10 @@ func (s *Service) ProcessDepositLog(ctx context.Context, depositLog gethTypes.Lo
 		}
 	} else {
 		log.WithFields(logrus.Fields{
-			"eth1Block":       depositLog.BlockHash.Hex(),
-			"eth1Tx":          depositLog.TxHash.Hex(),
-			"merkleTreeIndex": index,
-		}).Info("Invalid deposit registered in deposit contract")
+			"eth1Block":    depositLog.BlockHash.Hex(),
+			"eth1Tx":       depositLog.TxHash.Hex(),
+			"depositIndex": index,
+		}).Info("Invalid deposit registered in gwat deposit event")
 	}
 	return nil
 }
@@ -271,12 +313,11 @@ func (s *Service) processPastLogs(ctx context.Context) error {
 		currentBlockNum = deploymentBlock
 	}
 	// To store all blocks.
-	headersMap := make(map[uint64]*gethTypes.Header)
-	rawLogCount, err := s.depositContractCaller.GetDepositCount(&bind.CallOpts{})
+	headersMap := make(map[uint64]*gwatTypes.Header)
+	logCount, err := s.GetDepositCount(ctx)
 	if err != nil {
 		return err
 	}
-	logCount := binary.LittleEndian.Uint64(rawLogCount)
 
 	// Batch request the desired headers and store them in a
 	// map for quick access.
@@ -308,8 +349,8 @@ func (s *Service) processPastLogs(ctx context.Context) error {
 		if end > latestFollowHeight {
 			end = latestFollowHeight
 		}
-		query := ethereum.FilterQuery{
-			Addresses: []common.Address{
+		query := gwat.FilterQuery{
+			Addresses: []gwatCommon.Address{
 				s.cfg.depositContractAddr,
 			},
 			FromBlock: big.NewInt(0).SetUint64(start),
@@ -461,11 +502,11 @@ func (s *Service) checkBlockNumberForChainStart(ctx context.Context, blkNum uint
 	return nil
 }
 
-func (s *Service) checkHeaderForChainstart(ctx context.Context, header *gethTypes.Header) {
+func (s *Service) checkHeaderForChainstart(ctx context.Context, header *gwatTypes.Header) {
 	s.checkForChainstart(ctx, header.Hash(), header.Nr(), header.Time)
 }
 
-func (s *Service) checkHeaderRange(ctx context.Context, start, end uint64, headersMap map[uint64]*gethTypes.Header,
+func (s *Service) checkHeaderRange(ctx context.Context, start, end uint64, headersMap map[uint64]*gwatTypes.Header,
 	requestHeaders func(uint64, uint64) error) error {
 	for i := start; i <= end; i++ {
 		if !s.chainStartData.Chainstarted {

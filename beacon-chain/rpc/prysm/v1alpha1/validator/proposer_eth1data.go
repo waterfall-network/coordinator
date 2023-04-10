@@ -2,16 +2,17 @@ package validator
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 
 	fastssz "github.com/ferranbt/fastssz"
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
+	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/rand"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
@@ -35,14 +36,6 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 	ctx, cancel := context.WithTimeout(ctx, eth1dataTimeout)
 	defer cancel()
 
-	slot := beaconState.Slot()
-	votingPeriodStartTime := vs.slotStartTime(slot)
-
-	// if inerOp true
-	if vs.MockEth1Votes {
-		return vs.mockETH1DataVote(ctx, slot)
-	}
-
 	if !vs.Eth1InfoFetcher.IsConnectedToETH1() {
 		//return vs.randomETH1DataVote
 		prevEth1Data := vs.HeadFetcher.HeadETH1Data()
@@ -55,23 +48,14 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 	}
 	eth1DataNotification = false
 
-	eth1FollowDistance := params.BeaconConfig().Eth1FollowDistance
-	earliestValidTime := votingPeriodStartTime - 2*params.BeaconConfig().SecondsPerETH1Block*eth1FollowDistance
-	latestValidTime := votingPeriodStartTime - params.BeaconConfig().SecondsPerETH1Block*eth1FollowDistance
-
-	lastBlockByLatestValidTime, err := vs.Eth1BlockFetcher.BlockByTimestamp(ctx, latestValidTime)
+	headState, err := vs.HeadFetcher.HeadState(ctx)
 	if err != nil {
-		log.WithError(err).Error("Could not get last block by latest valid time")
-		//return vs.randomETH1DataVote(ctx)
-		prevEth1Data := vs.HeadFetcher.HeadETH1Data()
-		return &ethpb.Eth1Data{
-			Finalization: beaconState.Eth1Data().GetFinalization(),
-			BlockHash:    prevEth1Data.GetBlockHash(),
-			DepositCount: prevEth1Data.GetDepositCount(),
-			DepositRoot:  prevEth1Data.GetDepositRoot(),
-		}, nil
+		log.WithError(err).Error("eth1DataMajorityVote: could not retrieve head state")
+		return nil, err
 	}
-	if lastBlockByLatestValidTime.Time < earliestValidTime {
+	cpRoot := headState.FinalizedCheckpoint().Root
+
+	if bytesutil.ToBytes32(cpRoot) == params.BeaconConfig().ZeroHash {
 		prevEth1Data := vs.HeadFetcher.HeadETH1Data()
 		return &ethpb.Eth1Data{
 			Finalization: beaconState.Eth1Data().GetFinalization(),
@@ -81,25 +65,64 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 		}, nil
 	}
 
-	lastBlockDepositCount, lastBlockDepositRoot := vs.DepositFetcher.DepositsNumberAndRootAtHeight(ctx, lastBlockByLatestValidTime.Number)
+	cpState, err := vs.StateGen.StateByRoot(ctx, bytesutil.ToBytes32(cpRoot))
+	if err != nil {
+		log.WithError(err).Error("eth1DataMajorityVote: could not retrieve checkpoint state")
+		return nil, err
+	}
+	cpFinSpines := gwatCommon.HashArrayFromBytes(cpState.Eth1Data().Finalization)
+	if len(cpFinSpines) == 0 {
+		log.Warn("eth1DataMajorityVote: no finalization in state")
+		prevEth1Data := vs.HeadFetcher.HeadETH1Data()
+		return &ethpb.Eth1Data{
+			Finalization: beaconState.Eth1Data().GetFinalization(),
+			BlockHash:    prevEth1Data.GetBlockHash(),
+			DepositCount: prevEth1Data.GetDepositCount(),
+			DepositRoot:  prevEth1Data.GetDepositRoot(),
+		}, nil
+	}
+	cpSpine := cpFinSpines[len(cpFinSpines)-1]
+	cpSpineExists, cpSpineNum, err := vs.Eth1BlockFetcher.BlockExists(ctx, cpSpine)
+	if !cpSpineExists || err != nil {
+		log.WithError(err).Warn("eth1DataMajorityVote: could not retrieve checkpoint terminal spine")
+		return nil, errors.Wrap(err, "eth1DataMajorityVote: could not retrieve checkpoint terminal spine")
+		//prevEth1Data := vs.HeadFetcher.HeadETH1Data()
+		//return &ethpb.Eth1Data{
+		//	Finalization: beaconState.Eth1Data().GetFinalization(),
+		//	BlockHash:    prevEth1Data.GetBlockHash(),
+		//	DepositCount: prevEth1Data.GetDepositCount(),
+		//	DepositRoot:  prevEth1Data.GetDepositRoot(),
+		//}, nil
+	}
+	cpDepositCount, cpDepositRoot := vs.DepositFetcher.DepositsNumberAndRootAtHeight(ctx, cpSpineNum)
 
-	if lastBlockDepositCount >= vs.HeadFetcher.HeadETH1Data().DepositCount {
-		lvtHash, err := vs.Eth1BlockFetcher.BlockHashByHeight(ctx, lastBlockByLatestValidTime.Number)
+	if cpDepositCount >= vs.HeadFetcher.HeadETH1Data().DepositCount {
+		//if cpDepositCount > vs.HeadFetcher.HeadETH1Data().DepositCount {
+		lvtHash, err := vs.Eth1BlockFetcher.BlockHashByHeight(ctx, cpSpineNum)
 		if err != nil {
-			log.WithError(err).Error("Could not get hash of last block by latest valid time")
-			prevEth1Data := vs.HeadFetcher.HeadETH1Data()
-			return &ethpb.Eth1Data{
-				Finalization: beaconState.Eth1Data().GetFinalization(),
-				BlockHash:    prevEth1Data.GetBlockHash(),
-				DepositCount: prevEth1Data.GetDepositCount(),
-				DepositRoot:  prevEth1Data.GetDepositRoot(),
-			}, nil
+			log.WithError(err).Warn("eth1DataMajorityVote: Could not get hash of last block by latest valid time")
+			return nil, errors.Wrap(err, "eth1DataMajorityVote: Could not get hash of last block by latest valid time")
+			//prevEth1Data := vs.HeadFetcher.HeadETH1Data()
+			//return &ethpb.Eth1Data{
+			//	Finalization: beaconState.Eth1Data().GetFinalization(),
+			//	BlockHash:    prevEth1Data.GetBlockHash(),
+			//	DepositCount: prevEth1Data.GetDepositCount(),
+			//	DepositRoot:  prevEth1Data.GetDepositRoot(),
+			//}, nil
 		}
+
+		log.WithFields(logrus.Fields{
+			"cpDepositRoot":               fmt.Sprintf("%#x", cpDepositRoot),
+			"cpDepositCount":              cpDepositCount,
+			"HeadETH1Data().DepositCount": vs.HeadFetcher.HeadETH1Data().DepositCount,
+			"condition":                   cpDepositCount >= vs.HeadFetcher.HeadETH1Data().DepositCount,
+		}).Info("eth1DataMajorityVote: update deposit eth1 data")
+
 		return &ethpb.Eth1Data{
 			Finalization: beaconState.Eth1Data().GetFinalization(),
 			BlockHash:    lvtHash.Bytes(),
-			DepositCount: lastBlockDepositCount,
-			DepositRoot:  lastBlockDepositRoot[:],
+			DepositCount: cpDepositCount,
+			DepositRoot:  cpDepositRoot[:],
 		}, nil
 	}
 
@@ -153,16 +176,6 @@ func (vs *Server) mockETH1DataVote(ctx context.Context, slot types.Slot) (*ethpb
 		log.Warn("Beacon Node is no longer connected to an ETH1 chain, so ETH1 data votes are now mocked.")
 		eth1DataNotification = true
 	}
-	// If a mock eth1 data votes is specified, we use the following for the
-	// eth1data we provide to every proposer based on https://github.com/ethereum/eth2.0-pm/issues/62:
-	//
-	// slot_in_voting_period = current_slot % SLOTS_PER_ETH1_VOTING_PERIOD
-	// Eth1Data(
-	//   DepositRoot = hash(current_epoch + slot_in_voting_period),
-	//   DepositCount = state.eth1_deposit_index,
-	//   BlockHash = hash(hash(current_epoch + slot_in_voting_period)),
-	//   Candidates = ffinalizer.NrHashMap{ slot: hash(hash(current_epoch + slot_in_voting_period)) }
-	// )
 	slotInVotingPeriod := slot.ModSlot(params.BeaconConfig().SlotsPerEpoch.Mul(uint64(params.BeaconConfig().EpochsPerEth1VotingPeriod)))
 	headState, err := vs.HeadFetcher.HeadState(ctx)
 	if err != nil {
@@ -175,34 +188,6 @@ func (vs *Server) mockETH1DataVote(ctx context.Context, slot types.Slot) (*ethpb
 
 	finHash := &common.Hash{}
 	finHash.SetBytes(depRoot[:])
-	candidates := gwatCommon.HashArray{*finHash}
-
-	return &ethpb.Eth1Data{
-		DepositRoot:  depRoot[:],
-		DepositCount: headState.Eth1DepositIndex(),
-		BlockHash:    blockHash[:],
-		Candidates:   candidates.ToBytes(),
-	}, nil
-}
-
-func (vs *Server) randomETH1DataVote(ctx context.Context) (*ethpb.Eth1Data, error) {
-	if !eth1DataNotification {
-		log.Warn("Beacon Node is no longer connected to an ETH1 chain, so ETH1 data votes are now random.")
-		eth1DataNotification = true
-	}
-	headState, err := vs.HeadFetcher.HeadState(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	// set random roots and block hashes to prevent a majority from being
-	// built if the eth1 node is offline
-	randGen := rand.NewGenerator()
-	depRoot := hash.Hash(bytesutil.Bytes32(randGen.Uint64()))
-	blockHash := hash.Hash(bytesutil.Bytes32(randGen.Uint64()))
-
-	finHash := &common.Hash{}
-	finHash.SetBytes(blockHash[:])
 	candidates := gwatCommon.HashArray{*finHash}
 
 	return &ethpb.Eth1Data{

@@ -24,7 +24,8 @@ func TestProcessDeposits_SameValidatorMultipleDepositsSameBlock(t *testing.T) {
 	require.NoError(t, err)
 	registry := []*ethpb.Validator{
 		{
-			PublicKey:             []byte{1},
+			PublicKey: []byte{1},
+			//CreatorAddress:        []byte{1, 2, 3},
 			WithdrawalCredentials: []byte{1, 2, 3},
 		},
 	}
@@ -48,7 +49,8 @@ func TestProcessDeposits_MerkleBranchFailsVerification(t *testing.T) {
 	deposit := &ethpb.Deposit{
 		Data: &ethpb.Deposit_Data{
 			PublicKey:             bytesutil.PadTo([]byte{1, 2, 3}, 48),
-			WithdrawalCredentials: make([]byte, 32),
+			CreatorAddress:        make([]byte, 20),
+			WithdrawalCredentials: make([]byte, 20),
 			Signature:             make([]byte, 96),
 		},
 	}
@@ -84,6 +86,7 @@ func TestProcessDeposits_AddsNewValidatorDeposit(t *testing.T) {
 	registry := []*ethpb.Validator{
 		{
 			PublicKey:             []byte{1},
+			CreatorAddress:        []byte{1, 2, 3},
 			WithdrawalCredentials: []byte{1, 2, 3},
 		},
 	}
@@ -116,7 +119,8 @@ func TestProcessDeposits_RepeatedDeposit_IncreasesValidatorBalance(t *testing.T)
 		Data: &ethpb.Deposit_Data{
 			PublicKey:             sk.PublicKey().Marshal(),
 			Amount:                1000,
-			WithdrawalCredentials: make([]byte, 32),
+			CreatorAddress:        make([]byte, 20),
+			WithdrawalCredentials: make([]byte, 20),
 			Signature:             make([]byte, 96),
 		},
 	}
@@ -140,6 +144,7 @@ func TestProcessDeposits_RepeatedDeposit_IncreasesValidatorBalance(t *testing.T)
 		},
 		{
 			PublicKey:             sk.PublicKey().Marshal(),
+			CreatorAddress:        []byte{1},
 			WithdrawalCredentials: []byte{1},
 		},
 	}
@@ -170,6 +175,7 @@ func TestProcessDeposit_AddsNewValidatorDeposit(t *testing.T) {
 	registry := []*ethpb.Validator{
 		{
 			PublicKey:             []byte{1},
+			CreatorAddress:        []byte{1, 2, 3},
 			WithdrawalCredentials: []byte{1, 2, 3},
 		},
 	}
@@ -212,6 +218,7 @@ func TestProcessDeposit_SkipsInvalidDeposit(t *testing.T) {
 	registry := []*ethpb.Validator{
 		{
 			PublicKey:             []byte{1},
+			CreatorAddress:        []byte{1, 2, 3},
 			WithdrawalCredentials: []byte{1, 2, 3},
 		},
 	}

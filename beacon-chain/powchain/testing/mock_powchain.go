@@ -11,7 +11,6 @@ import (
 
 	ethTypes "github.com/prysmaticlabs/eth2-types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/async/event"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain/types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
@@ -31,7 +30,6 @@ type POWChain struct {
 	LatestBlockNumber *big.Int
 	HashesByHeight    map[int][]byte
 	TimesByHeight     map[int]uint64
-	BlockNumberByTime map[uint64]*big.Int
 	Eth1Data          *ethpb.Eth1Data
 	GenesisEth1Block  *big.Int
 	GenesisState      state.BeaconState
@@ -51,17 +49,12 @@ func (m *POWChain) ExecutionDagGetCandidates(ctx context.Context, slot ethTypes.
 	return candidates, err
 }
 
-func (m *POWChain) ExecutionDagSync(ctx context.Context, syncParams *gwatTypes.ConsensusInfo) (gwatCommon.HashArray, error) {
-	var err error
-	candidates := make(gwatCommon.HashArray, len(m.HashesByHeight))
-	for _, val := range m.HashesByHeight {
-		h := common.BytesToHash(val)
-		candidates = append(candidates, h)
-	}
-	return candidates, err
+func (m *POWChain) ExecutionDagFinalize(ctx context.Context, finParams *gwatTypes.FinalizationParams) (*gwatTypes.FinalizationResult, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
-func (m *POWChain) ExecutionDagFinalize(ctx context.Context, spines gwatCommon.HashArray, baseSpine *gwatCommon.Hash) (*gwatCommon.Hash, error) {
+func (m *POWChain) ExecutionDagCoordinatedState(ctx context.Context) (*gwatTypes.FinalizationResult, error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -71,14 +64,6 @@ func (m *POWChain) GetHeaderByHash(ctx context.Context, hash gwatCommon.Hash) (*
 }
 
 func (m *POWChain) GetHeaderByNumber(ctx context.Context, nr *big.Int) (*gwatTypes.Header, error) {
-	panic("implement me")
-}
-
-func (m *POWChain) ExecutionDagHeadSyncReady(ctx context.Context, params *gwatTypes.ConsensusInfo) (bool, error) {
-	panic("implement me")
-}
-
-func (m *POWChain) ExecutionDagHeadSync(ctx context.Context, params []gwatTypes.ConsensusInfo) (bool, error) {
 	panic("implement me")
 }
 
@@ -92,9 +77,8 @@ var GenesisTime = time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Unix()
 // NewPOWChain creates a new mock chain with empty block info.
 func NewPOWChain() *POWChain {
 	return &POWChain{
-		HashesByHeight:    make(map[int][]byte),
-		TimesByHeight:     make(map[int]uint64),
-		BlockNumberByTime: make(map[uint64]*big.Int),
+		HashesByHeight: make(map[int][]byte),
+		TimesByHeight:  make(map[int]uint64),
 	}
 }
 
@@ -136,19 +120,6 @@ func (m *POWChain) BlockHashByHeight(_ context.Context, height *big.Int) (common
 func (m *POWChain) BlockTimeByHeight(_ context.Context, height *big.Int) (uint64, error) {
 	h := int(height.Int64())
 	return m.TimesByHeight[h], nil
-}
-
-// BlockByTimestamp --
-func (m *POWChain) BlockByTimestamp(_ context.Context, time uint64) (*types.HeaderInfo, error) {
-	var chosenTime uint64
-	var chosenNumber *big.Int = new(big.Int).SetInt64(0)
-	for t, num := range m.BlockNumberByTime {
-		if t > chosenTime && t <= time {
-			chosenNumber = num
-			chosenTime = t
-		}
-	}
-	return &types.HeaderInfo{Number: chosenNumber, Time: chosenTime}, nil
 }
 
 // ChainStartEth1Data --
@@ -223,7 +194,6 @@ func (r *RPCClient) BatchCall(b []rpc.BatchElem) error {
 func (m *POWChain) InsertBlock(height int, time uint64, hash []byte) *POWChain {
 	m.HashesByHeight[height] = hash
 	m.TimesByHeight[height] = time
-	m.BlockNumberByTime[time] = big.NewInt(int64(height))
 	return m
 }
 

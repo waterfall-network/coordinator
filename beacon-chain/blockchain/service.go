@@ -46,7 +46,6 @@ import (
 
 // SyncSrv interface to treat sync functionality.
 type SyncSrv interface {
-	SetHeadSyncFn(fn func(context.Context, bool) error)
 	SetIsSyncFn(fn func() bool)
 	AddFinalizedSpines(finSpines gwatCommon.HashArray)
 	ResetFinalizedSpines()
@@ -64,7 +63,6 @@ type Service struct {
 	cancel      context.CancelFunc
 	genesisTime time.Time
 	spineData   spineData
-	creators    creatorsAssignment
 	head        *head
 	headLock    sync.RWMutex
 	// originBlockRoot is the genesis root, or weak subjectivity checkpoint root, depending on how the node is initialized
@@ -77,9 +75,9 @@ type Service struct {
 	justifiedBalances     *stateBalanceCache
 	wsVerifier            *WeakSubjectivityVerifier
 	store                 *store.Store
-	fnHeadSync            func(context.Context, bool) error
 	fnIsSync              func() bool
 	newHeadCh             chan *head
+	isGwatSyncing         bool
 }
 
 // config options for the service.
@@ -136,9 +134,6 @@ func NewService(ctx context.Context, opts ...Option) (*Service, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	srv.spawnProcessDagFinalize()
-
 	return srv, nil
 }
 
@@ -156,6 +151,7 @@ func (s *Service) Start() {
 		}
 	}
 	s.spawnProcessAttestationsRoutine(s.cfg.StateNotifier.StateFeed())
+	go s.initGwatSync()
 }
 
 // Stop the blockchain service's main event loop and associated goroutines.
@@ -182,6 +178,25 @@ func (s *Service) Status() error {
 		return fmt.Errorf("too many goroutines %d", runtime.NumGoroutine())
 	}
 	return nil
+}
+
+func (s *Service) SetIsSyncFn(fn func() bool) {
+	s.fnIsSync = fn
+}
+
+func (s *Service) isSynchronizing() bool {
+	if s.fnIsSync == nil {
+		return false
+	}
+	return s.fnIsSync()
+}
+
+func (s *Service) IsSynced() bool {
+	return !s.isSynchronizing()
+}
+
+func (s *Service) IsGwatSynchronizing() bool {
+	return s.isGwatSyncing
 }
 
 func (s *Service) StartFromSavedState(saved state.BeaconState) error {
@@ -523,31 +538,6 @@ func (s *Service) hasBlock(ctx context.Context, root [32]byte) bool {
 	}
 
 	return s.cfg.BeaconDB.HasBlock(ctx, root)
-}
-
-func (s *Service) SetHeadSyncFn(fn func(context.Context, bool) error) {
-	s.fnHeadSync = fn
-}
-
-func (s *Service) runHeadSync(ctx context.Context) {
-	if s.fnHeadSync == nil {
-		return
-	}
-	err := s.fnHeadSync(ctx, false)
-	if err != nil {
-		log.WithError(err).Error("Head sync error")
-	}
-}
-
-func (s *Service) SetIsSyncFn(fn func() bool) {
-	s.fnIsSync = fn
-}
-
-func (s *Service) isSync() bool {
-	if s.fnHeadSync == nil {
-		return false
-	}
-	return s.fnIsSync()
 }
 
 func spawnCountdownIfPreGenesis(ctx context.Context, genesisTime time.Time, db db.HeadAccessDatabase) {

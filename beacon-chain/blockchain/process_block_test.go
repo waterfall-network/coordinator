@@ -1527,6 +1527,7 @@ func TestInsertFinalizedDeposits(t *testing.T) {
 		root := []byte(strconv.Itoa(int(i)))
 		assert.NoError(t, depositCache.InsertDeposit(ctx, &ethpb.Deposit{Data: &ethpb.Deposit_Data{
 			PublicKey:             bytesutil.FromBytes48([fieldparams.BLSPubkeyLength]byte{}),
+			CreatorAddress:        params.BeaconConfig().ZeroHash[:],
 			WithdrawalCredentials: params.BeaconConfig().ZeroHash[:],
 			Amount:                0,
 			Signature:             zeroSig[:],
@@ -1570,6 +1571,7 @@ func TestInsertFinalizedDeposits_MultipleFinalizedRoutines(t *testing.T) {
 		root := []byte(strconv.Itoa(int(i)))
 		assert.NoError(t, depositCache.InsertDeposit(ctx, &ethpb.Deposit{Data: &ethpb.Deposit_Data{
 			PublicKey:             bytesutil.FromBytes48([fieldparams.BLSPubkeyLength]byte{}),
+			CreatorAddress:        params.BeaconConfig().ZeroHash[:],
 			WithdrawalCredentials: params.BeaconConfig().ZeroHash[:],
 			Amount:                0,
 			Signature:             zeroSig[:],

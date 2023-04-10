@@ -73,7 +73,8 @@ func TestEndToEnd_SlasherSimulator(t *testing.T) {
 		privKeys[types.ValidatorIndex(valIdx)] = privKey
 		validators[valIdx] = &ethpb.Validator{
 			PublicKey:             privKey.PublicKey().Marshal(),
-			WithdrawalCredentials: make([]byte, 32),
+			CreatorAddress:        make([]byte, 20),
+			WithdrawalCredentials: make([]byte, 20),
 		}
 	}
 	err = beaconState.SetValidators(validators)

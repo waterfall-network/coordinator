@@ -181,7 +181,9 @@ func (s *Service) saveHead(ctx context.Context, headRoot [32]byte, headBlock blo
 	}
 
 	go func() {
-		s.newHeadCh <- s.head
+		if !s.IsGwatSynchronizing() {
+			s.newHeadCh <- s.head
+		}
 	}()
 
 	// Forward an event capturing a new chain head over a common event feed
@@ -228,7 +230,7 @@ func (s *Service) setHead(root [32]byte, block block.SignedBeaconBlock, state st
 		"block.Parent": fmt.Sprintf("%#x", block.Block().ParentRoot()),
 		"state.Slot":   state.Slot(),
 		"state.Root":   fmt.Sprintf("%#x", stRoot),
-	}).Info("setHead >>>>> 11111")
+	}).Info("set head")
 
 	// This does a full copy of the block and state.
 	s.head = &head{
