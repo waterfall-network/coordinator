@@ -10,7 +10,6 @@ import (
 
 	types "github.com/prysmaticlabs/eth2-types"
 	log "github.com/sirupsen/logrus"
-
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
