@@ -111,6 +111,34 @@ message ValidatorBalancesResponse {
     bool execution_optimistic = 2;
 }
 
+message StateBlockVotingsRequest {
+    // The state id which can be any of: "head" (canonical head in node's view),
+    // "genesis", "finalized", "justified", <slot>, <hex encoded stateRoot with 0x prefix>.
+    bytes state_id = 1;
+
+    // An array of either hex encoded public keys (with 0x prefix) or validator indexes.
+    repeated bytes id = 2;
+}
+
+message StateBlockVotingsResponse {
+    repeated BlockVoting data = 1;
+    bool execution_optimistic = 2;
+}
+
+message StateEth1DataRequest {
+    // The state id which can be any of: "head" (canonical head in node's view),
+    // "genesis", "finalized", "justified", <slot>, <hex encoded stateRoot with 0x prefix>.
+    bytes state_id = 1;
+
+    // An array of either hex encoded public keys (with 0x prefix) or validator indexes.
+    repeated bytes id = 2;
+}
+
+message StateEth1DataResponse {
+    repeated Eth1Data data = 1;
+    bool execution_optimistic = 2;
+}
+
 message ValidatorBalance {
     // The index of the validator the retrieved balance is for.
     uint64 index = 1 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.ValidatorIndex"];
