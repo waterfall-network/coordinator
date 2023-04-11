@@ -520,7 +520,7 @@ func TestSetParticipationAndRewardProposer(t *testing.T) {
 
 			b, err := helpers.TotalActiveBalance(beaconState)
 			require.NoError(t, err)
-			st, err := altair.SetParticipationAndRewardProposer(context.Background(), beaconState, test.epoch, test.indices, test.participatedFlags, b, uint64(len(test.indices)*4))
+			st, err := altair.SetParticipationAndRewardProposer(context.Background(), beaconState, test.epoch, test.indices, test.participatedFlags, b)
 			require.NoError(t, err)
 
 			i, err := helpers.BeaconProposerIndex(context.Background(), st)
@@ -611,7 +611,7 @@ func TestEpochParticipation(t *testing.T) {
 	for _, test := range tests {
 		b, err := helpers.TotalActiveBalance(beaconState)
 		require.NoError(t, err)
-		n, p, err := altair.EpochParticipation(beaconState, test.indices, test.epochParticipation, test.participatedFlags, b, uint64(len(test.indices)*4))
+		n, p, err := altair.EpochParticipation(beaconState, test.indices, test.epochParticipation, test.participatedFlags, b)
 		require.NoError(t, err)
 		require.Equal(t, test.wantedNumerator, n)
 		require.DeepSSZEqual(t, test.wantedEpochParticipation, p)

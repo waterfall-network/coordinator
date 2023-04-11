@@ -78,9 +78,7 @@ func ProcessAttestationNoVerifySignature(
 		return nil, err
 	}
 
-	includedVotesNumber := helpers.CountAttestationsVotes([]*ethpb.Attestation{att})
-
-	return SetParticipationAndRewardProposer(ctx, beaconState, att.Data.Target.Epoch, indices, participatedFlags, totalBalance, includedVotesNumber)
+	return SetParticipationAndRewardProposer(ctx, beaconState, att.Data.Target.Epoch, indices, participatedFlags, totalBalance)
 }
 
 // SetParticipationAndRewardProposer retrieves and sets the epoch participation bits in state. Based on the epoch participation, it rewards
@@ -110,26 +108,26 @@ func SetParticipationAndRewardProposer(
 	beaconState state.BeaconState,
 	targetEpoch types.Epoch,
 	indices []uint64,
-	participatedFlags map[uint8]bool, totalBalance uint64, includedVotesNumber uint64) (state.BeaconState, error) {
-	var proposerRewardNumerator uint64
+	participatedFlags map[uint8]bool, totalBalance uint64) (state.BeaconState, error) {
+	var proposerReward uint64
 	currentEpoch := time.CurrentEpoch(beaconState)
 	var stateErr error
 	if targetEpoch == currentEpoch {
 		stateErr = beaconState.ModifyCurrentParticipationBits(func(val []byte) ([]byte, error) {
-			propRewardNum, epochParticipation, err := EpochParticipation(beaconState, indices, val, participatedFlags, totalBalance, includedVotesNumber)
+			propReward, epochParticipation, err := EpochParticipation(beaconState, indices, val, participatedFlags, totalBalance)
 			if err != nil {
 				return nil, err
 			}
-			proposerRewardNumerator = propRewardNum
+			proposerReward = propReward
 			return epochParticipation, nil
 		})
 	} else {
 		stateErr = beaconState.ModifyPreviousParticipationBits(func(val []byte) ([]byte, error) {
-			propRewardNum, epochParticipation, err := EpochParticipation(beaconState, indices, val, participatedFlags, totalBalance, includedVotesNumber)
+			rewardNum, epochParticipation, err := EpochParticipation(beaconState, indices, val, participatedFlags, totalBalance)
 			if err != nil {
 				return nil, err
 			}
-			proposerRewardNumerator = propRewardNum
+			proposerReward = rewardNum
 			return epochParticipation, nil
 		})
 	}
@@ -145,7 +143,7 @@ func SetParticipationAndRewardProposer(
 	if err != nil {
 		return nil, err
 	}
-	if err := RewardProposer(ctx, beaconState, proposerRewardNumerator); err != nil {
+	if err := RewardProposer(ctx, beaconState, proposerReward); err != nil {
 		return nil, err
 	}
 	newBalAtIdx, err := beaconState.BalanceAtIndex(i)
@@ -153,7 +151,7 @@ func SetParticipationAndRewardProposer(
 		return nil, err
 	}
 
-	if err := helpers.LogBalanceChanges(uint64(i), balAtIdx, proposerRewardNumerator, newBalAtIdx, uint64(beaconState.Slot()), includedVotesNumber, helpers.Increase, helpers.Proposer); err != nil {
+	if err := helpers.LogBalanceChanges(uint64(i), balAtIdx, proposerReward, newBalAtIdx, uint64(beaconState.Slot()), uint64(len(indices)), helpers.Increase, helpers.Proposer); err != nil {
 		return nil, err
 	}
 
@@ -186,7 +184,7 @@ func AddValidatorFlag(flag, flagPosition uint8) (uint8, error) {
 //	        if flag_index in participation_flag_indices and not has_flag(epoch_participation[index], flag_index):
 //	            epoch_participation[index] = add_flag(epoch_participation[index], flag_index)
 //	            proposer_reward_numerator += get_base_reward(state, index) * weight
-func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochParticipation []byte, participatedFlags map[uint8]bool, totalBalance uint64, includedVotesNumber uint64) (uint64, []byte, error) {
+func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochParticipation []byte, participatedFlags map[uint8]bool, totalBalance uint64) (uint64, []byte, error) {
 	ctx := context.Background()
 	cfg := params.BeaconConfig()
 	numOfValidators := beaconState.NumValidators() // N in formula, number of registered validators
@@ -258,7 +256,7 @@ func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochPa
 	}
 
 	// add reward for votes included in the block
-	proposerReward += RewardForBlockVotes(br, includedVotesNumber)
+	proposerReward += RewardForBlockVotes(br, uint64(len(indices)))
 
 	return proposerReward, epochParticipation, nil
 }
@@ -270,8 +268,7 @@ func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochPa
 //	proposer_reward_denominator = (WEIGHT_DENOMINATOR - PROPOSER_WEIGHT) * WEIGHT_DENOMINATOR // PROPOSER_WEIGHT
 //	proposer_reward = Gwei(proposer_reward_numerator // proposer_reward_denominator)
 //	increase_balance(state, get_beacon_proposer_index(state), proposer_reward)
-func RewardProposer(ctx context.Context, beaconState state.BeaconState, proposerRewardNumerator uint64) error {
-	proposerReward := proposerRewardNumerator
+func RewardProposer(ctx context.Context, beaconState state.BeaconState, proposerReward uint64) error {
 	i, err := helpers.BeaconProposerIndex(ctx, beaconState)
 	if err != nil {
 		return err
