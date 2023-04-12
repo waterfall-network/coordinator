@@ -53,6 +53,8 @@ message BeaconState {
   Checkpoint previous_justified_checkpoint = 8002;
   Checkpoint current_justified_checkpoint = 8003;
   Checkpoint finalized_checkpoint = 8004;
+
+  SpineData spine_data = 9001;
 }
 
 // The beacon state for Altair hard fork 1.
@@ -243,6 +245,31 @@ message BeaconStateBellatrix {
   ethereum.eth.v1alpha1.ExecutionPayloadHeader latest_execution_payload_header = 10001; // [New in Bellatrix]
 }
 
+
+message SpineData {
+
+  // The 32 byte array of hashes presented sequence of the GWAT spines candidates.
+  // ssz_max = 32 * 128
+  bytes spines = 1 [(ethereum.eth.ext.ssz_max) = "4096"];
+
+  // The 32 byte array of hashes presented sequence of the GWAT spines candidates.
+  // ssz_max = 32 * 128
+  bytes prefix = 2 [(ethereum.eth.ext.ssz_max) = "4096"];
+
+  //The 32 byte array of hashes presented sequence of the GWAT spines to finalization.
+  // ssz_max = 32 * 128
+  bytes finalization = 3 [(ethereum.eth.ext.ssz_max) = "4096"];
+
+  // The array of 32 byte arrays of hashes.
+  // Presents the sequences of the GWAT spines of ancestors.
+  // The hashes of finalization and prefix excluded.
+  // ssz_max = 32 * 128 * 128
+  repeated SpinesSeq parent_spines = 4 [(ethereum.eth.ext.ssz_max) = "128"];
+}
+
+message SpinesSeq {
+  bytes spines = 1 [(ethereum.eth.ext.ssz_max) = "524288"];
+}
 
 message BlockVoting {
   // 32 byte merkle tree root of the ssz encoded block.
