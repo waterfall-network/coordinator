@@ -48,6 +48,8 @@ message BeaconState {
   uint64 eth1_deposit_index = 3003;
   repeated BlockVoting block_voting = 3004 [(ethereum.eth.ext.ssz_max) = "block_voting.size"];
 
+  SpineData spine_data = 3005;
+
   // Registry [4001-5000]
   repeated Validator validators = 4001 [(ethereum.eth.ext.ssz_max) = "1099511627776"];
   repeated uint64 balances = 4002 [(ethereum.eth.ext.ssz_max) = "1099511627776"];
@@ -68,8 +70,6 @@ message BeaconState {
   Checkpoint previous_justified_checkpoint = 8002;
   Checkpoint current_justified_checkpoint = 8003;
   Checkpoint finalized_checkpoint = 8004;
-
-  SpineData spine_data = 9001;
 }
 
 message SpineData {
