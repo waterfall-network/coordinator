@@ -356,6 +356,8 @@ func (b *BeaconState) rootSelector(field types.FieldIndex) ([32]byte, error) {
 		return ssz.ByteArrayRootWithLimit(hRoots, fieldparams.HistoricalRootsLength)
 	case eth1Data:
 		return stateutil.Eth1Root(hasher, b.eth1Data)
+	case spineData:
+		return stateutil.SpineDataRoot(hasher, b.spineData)
 	case eth1DataVotes:
 		if b.rebuildTrie[field] {
 			err := b.resetFieldTrie(

@@ -19,7 +19,7 @@ func Eth1DataRootWithHasher(hasher ssz.HashFn, eth1Data *ethpb.Eth1Data) ([32]by
 	}
 	fixedFldsCount := 3
 
-	finLen := len(eth1Data.Candidates) + len(eth1Data.Finalization)
+	finLen := len(eth1Data.Candidates)
 	finChunks := finLen / 32
 	if finLen%32 > 0 {
 		finChunks++
@@ -43,7 +43,6 @@ func Eth1DataRootWithHasher(hasher ssz.HashFn, eth1Data *ethpb.Eth1Data) ([32]by
 
 	if finLen > 0 {
 		mergedData := append([]byte{}, eth1Data.Candidates...)
-		mergedData = append(mergedData, eth1Data.Finalization...)
 		for i := 0; i < finChunks; i++ {
 			from := i * 32
 			to := from + 32
