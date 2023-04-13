@@ -4,12 +4,11 @@ import (
 	"context"
 	"testing"
 
-	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
-
 	chainMock "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain/testing"
 	dbTest "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/testing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc/testutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"

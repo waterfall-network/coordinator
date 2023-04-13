@@ -3,12 +3,11 @@ package beacon
 import (
 	"context"
 
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc/eth/helpers"
 	ethpbv "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc/eth/helpers"
 )
 
 // GetEth1Data retrieves the eth1 data for the given state.
