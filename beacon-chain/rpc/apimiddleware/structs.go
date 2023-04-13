@@ -93,6 +93,18 @@ type syncCommitteesResponseJson struct {
 	ExecutionOptimistic bool                         `json:"execution_optimistic"`
 }
 
+// stateBlockVotingsResponseJson is used in /beacon/states/{state_id}/block_votings API endpoint.
+type stateBlockVotingsResponseJson struct {
+	Data                []*blockVotingJson `json:"data"`
+	ExecutionOptimistic bool               `json:"execution_optimistic"`
+}
+
+// syncCommitteesResponseJson is used in /beacon/states/{state_id}/sync_committees API endpoint.
+type stateEth1DataResponseJson struct {
+	Data                *eth1DataJson `json:"data"`
+	ExecutionOptimistic bool          `json:"execution_optimistic"`
+}
+
 // blockHeadersResponseJson is used in /beacon/headers API endpoint.
 type blockHeadersResponseJson struct {
 	Data                []*blockHeaderContainerJson `json:"data"`
@@ -931,4 +943,11 @@ type syncDetails struct {
 	HeadSlot     string `json:"head_slot"`
 	SyncDistance string `json:"sync_distance"`
 	IsSyncing    bool   `json:"is_syncing"`
+}
+
+type blockVotingJson struct {
+	Root         string             `json:"root" hex:"true"`
+	Slot         string             `json:"slot"`
+	Candidates   string             `json:"candidates" hex:"true"`
+	Attestations []*attestationJson `json:"attestations"`
 }

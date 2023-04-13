@@ -115,7 +115,7 @@ service BeaconChain {
     };
   }
 
-  // ListEth1Data retrieves the ith1Data for the given state at the given epoch.
+  // GetEth1Data retrieves the eth1Data for the given state at the given epoch.
   rpc GetEth1Data(v1.StateEth1DataRequest) returns (v1.StateEth1DataResponse) {
     option (google.api.http) = {
       get: "/internal/eth/v1/beacon/states/{state_id}/eth1_data"
