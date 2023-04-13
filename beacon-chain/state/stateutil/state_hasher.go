@@ -100,72 +100,79 @@ func ComputeFieldRootsWithHasherPhase0(ctx context.Context, state *ethpb.BeaconS
 	}
 	fieldRoots[11] = validatorsRoot[:]
 
+	// spineData root.
+	spineDataRoot, err := SpineDataRoot(hasher, state.SpineData)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not compute spine data merkleization")
+	}
+	fieldRoots[12] = spineDataRoot[:]
+
 	// Balances slice root.
 	balancesRoot, err := Uint64ListRootWithRegistryLimit(state.Balances)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute validator balances merkleization")
 	}
-	fieldRoots[12] = balancesRoot[:]
+	fieldRoots[13] = balancesRoot[:]
 
 	// RandaoMixes array root.
 	randaoRootsRoot, err := arraysRoot(state.RandaoMixes, fieldparams.RandaoMixesLength)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute randao roots merkleization")
 	}
-	fieldRoots[13] = randaoRootsRoot[:]
+	fieldRoots[14] = randaoRootsRoot[:]
 
 	// Slashings array root.
 	slashingsRootsRoot, err := ssz.SlashingsRoot(state.Slashings)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute slashings merkleization")
 	}
-	fieldRoots[14] = slashingsRootsRoot[:]
+	fieldRoots[15] = slashingsRootsRoot[:]
 
 	// PreviousEpochAttestations slice root.
 	prevAttsRoot, err := epochAttestationsRoot(state.PreviousEpochAttestations)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute previous epoch attestations merkleization")
 	}
-	fieldRoots[15] = prevAttsRoot[:]
+	fieldRoots[16] = prevAttsRoot[:]
 
 	// CurrentEpochAttestations slice root.
 	currAttsRoot, err := epochAttestationsRoot(state.CurrentEpochAttestations)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute current epoch attestations merkleization")
 	}
-	fieldRoots[16] = currAttsRoot[:]
+	fieldRoots[17] = currAttsRoot[:]
 
 	// JustificationBits root.
 	justifiedBitsRoot := bytesutil.ToBytes32(state.JustificationBits)
-	fieldRoots[17] = justifiedBitsRoot[:]
+	fieldRoots[18] = justifiedBitsRoot[:]
 
 	// PreviousJustifiedCheckpoint data structure root.
 	prevCheckRoot, err := ssz.CheckpointRoot(hasher, state.PreviousJustifiedCheckpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute previous justified checkpoint merkleization")
 	}
-	fieldRoots[18] = prevCheckRoot[:]
+	fieldRoots[19] = prevCheckRoot[:]
 
 	// CurrentJustifiedCheckpoint data structure root.
 	currJustRoot, err := ssz.CheckpointRoot(hasher, state.CurrentJustifiedCheckpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute current justified checkpoint merkleization")
 	}
-	fieldRoots[19] = currJustRoot[:]
+	fieldRoots[20] = currJustRoot[:]
 
 	// FinalizedCheckpoint data structure root.
 	finalRoot, err := ssz.CheckpointRoot(hasher, state.FinalizedCheckpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute finalized checkpoint merkleization")
 	}
-	fieldRoots[20] = finalRoot[:]
+	fieldRoots[21] = finalRoot[:]
 
 	// BlockVoting slice root.
 	blockVotingHashTreeRoot, err := blockVotingRoot(state.BlockVoting)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute blockVoting merkleization")
 	}
-	fieldRoots[21] = blockVotingHashTreeRoot[:]
+	fieldRoots[22] = blockVotingHashTreeRoot[:]
 
 	return fieldRoots, nil
 }
@@ -256,93 +263,100 @@ func ComputeFieldRootsWithHasherAltair(ctx context.Context, state *ethpb.BeaconS
 	}
 	fieldRoots[11] = validatorsRoot[:]
 
+	// spineData root.
+	spineDataRoot, err := SpineDataRoot(hasher, state.SpineData)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not compute spine data merkleization")
+	}
+	fieldRoots[12] = spineDataRoot[:]
+
 	// Balances slice root.
 	balancesRoot, err := Uint64ListRootWithRegistryLimit(state.Balances)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute validator balances merkleization")
 	}
-	fieldRoots[12] = balancesRoot[:]
+	fieldRoots[13] = balancesRoot[:]
 
 	// RandaoMixes array root.
 	randaoRootsRoot, err := arraysRoot(state.RandaoMixes, fieldparams.RandaoMixesLength)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute randao roots merkleization")
 	}
-	fieldRoots[13] = randaoRootsRoot[:]
+	fieldRoots[14] = randaoRootsRoot[:]
 
 	// Slashings array root.
 	slashingsRootsRoot, err := ssz.SlashingsRoot(state.Slashings)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute slashings merkleization")
 	}
-	fieldRoots[14] = slashingsRootsRoot[:]
+	fieldRoots[15] = slashingsRootsRoot[:]
 
 	// PreviousEpochParticipation slice root.
 	prevParticipationRoot, err := ParticipationBitsRoot(state.PreviousEpochParticipation)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute previous epoch participation merkleization")
 	}
-	fieldRoots[15] = prevParticipationRoot[:]
+	fieldRoots[16] = prevParticipationRoot[:]
 
 	// CurrentEpochParticipation slice root.
 	currParticipationRoot, err := ParticipationBitsRoot(state.CurrentEpochParticipation)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute current epoch participation merkleization")
 	}
-	fieldRoots[16] = currParticipationRoot[:]
+	fieldRoots[17] = currParticipationRoot[:]
 
 	// JustificationBits root.
 	justifiedBitsRoot := bytesutil.ToBytes32(state.JustificationBits)
-	fieldRoots[17] = justifiedBitsRoot[:]
+	fieldRoots[18] = justifiedBitsRoot[:]
 
 	// PreviousJustifiedCheckpoint data structure root.
 	prevCheckRoot, err := ssz.CheckpointRoot(hasher, state.PreviousJustifiedCheckpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute previous justified checkpoint merkleization")
 	}
-	fieldRoots[18] = prevCheckRoot[:]
+	fieldRoots[19] = prevCheckRoot[:]
 
 	// CurrentJustifiedCheckpoint data structure root.
 	currJustRoot, err := ssz.CheckpointRoot(hasher, state.CurrentJustifiedCheckpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute current justified checkpoint merkleization")
 	}
-	fieldRoots[19] = currJustRoot[:]
+	fieldRoots[20] = currJustRoot[:]
 
 	// FinalizedCheckpoint data structure root.
 	finalRoot, err := ssz.CheckpointRoot(hasher, state.FinalizedCheckpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute finalized checkpoint merkleization")
 	}
-	fieldRoots[20] = finalRoot[:]
+	fieldRoots[21] = finalRoot[:]
 
 	// BlockVoting slice root.
 	blockVotingHashTreeRoot, err := blockVotingRoot(state.BlockVoting)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute blockVoting merkleization")
 	}
-	fieldRoots[21] = blockVotingHashTreeRoot[:]
+	fieldRoots[22] = blockVotingHashTreeRoot[:]
 
 	// Inactivity scores root.
 	inactivityScoresRoot, err := Uint64ListRootWithRegistryLimit(state.InactivityScores)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute inactivityScoreRoot")
 	}
-	fieldRoots[22] = inactivityScoresRoot[:]
+	fieldRoots[23] = inactivityScoresRoot[:]
 
 	// Current sync committee root.
 	currentSyncCommitteeRoot, err := SyncCommitteeRoot(state.CurrentSyncCommittee)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute sync committee merkleization")
 	}
-	fieldRoots[23] = currentSyncCommitteeRoot[:]
+	fieldRoots[24] = currentSyncCommitteeRoot[:]
 
 	// Next sync committee root.
 	nextSyncCommitteeRoot, err := SyncCommitteeRoot(state.NextSyncCommittee)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute sync committee merkleization")
 	}
-	fieldRoots[24] = nextSyncCommitteeRoot[:]
+	fieldRoots[25] = nextSyncCommitteeRoot[:]
 
 	return fieldRoots, nil
 }
@@ -433,100 +447,107 @@ func ComputeFieldRootsWithHasherBellatrix(ctx context.Context, state *ethpb.Beac
 	}
 	fieldRoots[11] = validatorsRoot[:]
 
+	// spineData root.
+	spineDataRoot, err := SpineDataRoot(hasher, state.SpineData)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not compute spine data merkleization")
+	}
+	fieldRoots[12] = spineDataRoot[:]
+
 	// Balances slice root.
 	balancesRoot, err := Uint64ListRootWithRegistryLimit(state.Balances)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute validator balances merkleization")
 	}
-	fieldRoots[12] = balancesRoot[:]
+	fieldRoots[13] = balancesRoot[:]
 
 	// RandaoMixes array root.
 	randaoRootsRoot, err := arraysRoot(state.RandaoMixes, fieldparams.RandaoMixesLength)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute randao roots merkleization")
 	}
-	fieldRoots[13] = randaoRootsRoot[:]
+	fieldRoots[14] = randaoRootsRoot[:]
 
 	// Slashings array root.
 	slashingsRootsRoot, err := ssz.SlashingsRoot(state.Slashings)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute slashings merkleization")
 	}
-	fieldRoots[14] = slashingsRootsRoot[:]
+	fieldRoots[15] = slashingsRootsRoot[:]
 
 	// PreviousEpochParticipation slice root.
 	prevParticipationRoot, err := ParticipationBitsRoot(state.PreviousEpochParticipation)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute previous epoch participation merkleization")
 	}
-	fieldRoots[15] = prevParticipationRoot[:]
+	fieldRoots[16] = prevParticipationRoot[:]
 
 	// CurrentEpochParticipation slice root.
 	currParticipationRoot, err := ParticipationBitsRoot(state.CurrentEpochParticipation)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute current epoch participation merkleization")
 	}
-	fieldRoots[16] = currParticipationRoot[:]
+	fieldRoots[17] = currParticipationRoot[:]
 
 	// JustificationBits root.
 	justifiedBitsRoot := bytesutil.ToBytes32(state.JustificationBits)
-	fieldRoots[17] = justifiedBitsRoot[:]
+	fieldRoots[18] = justifiedBitsRoot[:]
 
 	// PreviousJustifiedCheckpoint data structure root.
 	prevCheckRoot, err := ssz.CheckpointRoot(hasher, state.PreviousJustifiedCheckpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute previous justified checkpoint merkleization")
 	}
-	fieldRoots[18] = prevCheckRoot[:]
+	fieldRoots[19] = prevCheckRoot[:]
 
 	// CurrentJustifiedCheckpoint data structure root.
 	currJustRoot, err := ssz.CheckpointRoot(hasher, state.CurrentJustifiedCheckpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute current justified checkpoint merkleization")
 	}
-	fieldRoots[19] = currJustRoot[:]
+	fieldRoots[20] = currJustRoot[:]
 
 	// FinalizedCheckpoint data structure root.
 	finalRoot, err := ssz.CheckpointRoot(hasher, state.FinalizedCheckpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute finalized checkpoint merkleization")
 	}
-	fieldRoots[20] = finalRoot[:]
+	fieldRoots[21] = finalRoot[:]
 
 	// BlockVoting slice root.
 	blockVotingHashTreeRoot, err := blockVotingRoot(state.BlockVoting)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute blockVoting merkleization")
 	}
-	fieldRoots[21] = blockVotingHashTreeRoot[:]
+	fieldRoots[22] = blockVotingHashTreeRoot[:]
 
 	// Inactivity scores root.
 	inactivityScoresRoot, err := Uint64ListRootWithRegistryLimit(state.InactivityScores)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute inactivityScoreRoot")
 	}
-	fieldRoots[22] = inactivityScoresRoot[:]
+	fieldRoots[23] = inactivityScoresRoot[:]
 
 	// Current sync committee root.
 	currentSyncCommitteeRoot, err := SyncCommitteeRoot(state.CurrentSyncCommittee)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute sync committee merkleization")
 	}
-	fieldRoots[23] = currentSyncCommitteeRoot[:]
+	fieldRoots[24] = currentSyncCommitteeRoot[:]
 
 	// Next sync committee root.
 	nextSyncCommitteeRoot, err := SyncCommitteeRoot(state.NextSyncCommittee)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute sync committee merkleization")
 	}
-	fieldRoots[24] = nextSyncCommitteeRoot[:]
+	fieldRoots[25] = nextSyncCommitteeRoot[:]
 
 	// Execution payload root.
 	executionPayloadRoot, err := state.LatestExecutionPayloadHeader.HashTreeRoot()
 	if err != nil {
 		return nil, err
 	}
-	fieldRoots[25] = executionPayloadRoot[:]
+	fieldRoots[26] = executionPayloadRoot[:]
 
 	return fieldRoots, nil
 }

@@ -29,6 +29,7 @@ func (b *BeaconState) ToProtoUnsafe() interface{} {
 		BlockVoting:                  b.blockVoting,
 		Eth1DepositIndex:             b.eth1DepositIndex,
 		Validators:                   b.validators,
+		SpineData:                    b.spineData,
 		Balances:                     b.balances,
 		RandaoMixes:                  b.randaoMixes.Slice(),
 		Slashings:                    b.slashings,
@@ -70,6 +71,7 @@ func (b *BeaconState) ToProto() interface{} {
 		BlockVoting:                  b.blockVotingVal(),
 		Eth1DepositIndex:             b.eth1DepositIndex,
 		Validators:                   b.validatorsVal(),
+		SpineData:                    b.spineDataVal(),
 		Balances:                     b.balancesVal(),
 		RandaoMixes:                  b.randaoMixes.Slice(),
 		Slashings:                    b.slashingsVal(),
@@ -134,5 +136,6 @@ func (b *BeaconState) InnerStateUnsafe() interface{} {
 
 // CloneInnerState the beacon state into a protobuf for usage.
 func (b *BeaconState) CloneInnerState() interface{} {
-	return nil
+	//return nil //(???)
+	return b.ToProto()
 }

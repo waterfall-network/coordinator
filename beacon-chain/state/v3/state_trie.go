@@ -119,6 +119,7 @@ func (b *BeaconState) Copy() state.BeaconState {
 			Fork:                         b.fork(),
 			LatestBlockHeader:            b.latestBlockHeader(),
 			Eth1Data:                     b.eth1Data(),
+			SpineData:                    b.spineData(),
 			JustificationBits:            b.justificationBits(),
 			PreviousJustifiedCheckpoint:  b.previousJustifiedCheckpoint(),
 			CurrentJustifiedCheckpoint:   b.currentJustifiedCheckpoint(),
