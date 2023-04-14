@@ -372,6 +372,42 @@
 			"response": []
 		},
 		{
+			"name": "/beacon/states/{state_id}/spine_data",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3500/eth/v1/beacon/states/{state_id}/spine_data",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3500",
+					"path": [
+						"eth",
+						"v1",
+						"beacon",
+						"states",
+						"{state_id}",
+						"spine_data"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "/beacon/headers",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true

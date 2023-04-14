@@ -108,6 +108,13 @@ service BeaconChain {
     };
   }
 
+  // GetSpineData returns spine data specified by state.
+  rpc GetSpineData(v1.StateSpineDataRequest) returns (v1.StateSpineDataResponse) {
+    option (google.api.http) = {
+      get: "/internal/eth/v1/beacon/states/{state_id}/spine_data"
+    };
+  }
+
   // Beacon blocks API related endpoints.
 
   // ListBlockHeaders retrieves block headers matching given query. By default it will fetch current head slot blocks.

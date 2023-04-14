@@ -160,6 +160,17 @@ message BlockAttestationsResponse {
     bool execution_optimistic = 2;
 }
 
+message StateSpineDataRequest {
+    // The state id which can be any of: "head" (canonical head in node's view),
+    // "genesis", "finalized", "justified", <slot>, <hex encoded stateRoot with 0x prefix>.
+    bytes state_id = 1;
+}
+
+message StateSpineDataResponse {
+    SpineData data = 1;
+    bool execution_optimistic = 2;
+}
+
 message BlockRootContainer {
     // 32 byte merkle tree root of the ssz encoded block.
     bytes root = 1 [(ethereum.eth.ext.ssz_size) = "32"];

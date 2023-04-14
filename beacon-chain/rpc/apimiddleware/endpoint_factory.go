@@ -2,6 +2,7 @@ package apimiddleware
 
 import (
 	"github.com/pkg/errors"
+
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/api/gateway/apimiddleware"
 )
 
@@ -25,6 +26,7 @@ func (_ *BeaconEndpointFactory) Paths() []string {
 		"/eth/v1/beacon/states/{state_id}/validator_balances",
 		"/eth/v1/beacon/states/{state_id}/committees",
 		"/eth/v1/beacon/states/{state_id}/sync_committees",
+		"/eth/v1/beacon/states/{state_id}/spine_data",
 		"/eth/v1/beacon/headers",
 		"/eth/v1/beacon/headers/{block_id}",
 		"/eth/v1/beacon/blocks",
@@ -98,6 +100,9 @@ func (_ *BeaconEndpointFactory) Create(path string) (*apimiddleware.Endpoint, er
 		endpoint.Hooks = apimiddleware.HookCollection{
 			OnPreDeserializeGrpcResponseBodyIntoContainer: prepareValidatorAggregates,
 		}
+	case "/eth/v1/beacon/states/{state_id}/spine_data":
+		endpoint.RequestQueryParams = []apimiddleware.QueryParam{{Name: "id", Hex: true}}
+		endpoint.GetResponse = &validatorBalancesResponseJson{}
 	case "/eth/v1/beacon/headers":
 		endpoint.RequestQueryParams = []apimiddleware.QueryParam{{Name: "slot"}, {Name: "parent_root", Hex: true}}
 		endpoint.GetResponse = &blockHeadersResponseJson{}

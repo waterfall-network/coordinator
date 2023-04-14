@@ -3,8 +3,9 @@ package apimiddleware
 import (
 	"strings"
 
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/api/gateway/apimiddleware"
 	ethpbv2 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v2"
+
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/api/gateway/apimiddleware"
 )
 
 // genesisResponseJson is used in /beacon/genesis API endpoint.
@@ -91,6 +92,12 @@ type stateCommitteesResponseJson struct {
 type syncCommitteesResponseJson struct {
 	Data                *syncCommitteeValidatorsJson `json:"data"`
 	ExecutionOptimistic bool                         `json:"execution_optimistic"`
+}
+
+// stateSpineDataResponseJson is used in /beacon/states/{state_id}/spine_data API endpoint.
+type stateSpineDataResponseJson struct {
+	Data                *spineDataJson `json:"data"`
+	ExecutionOptimistic bool           `json:"execution_optimistic"`
 }
 
 // blockHeadersResponseJson is used in /beacon/headers API endpoint.
@@ -712,6 +719,17 @@ type syncCommitteeJson struct {
 type syncCommitteeValidatorsJson struct {
 	Validators          []string   `json:"validators"`
 	ValidatorAggregates [][]string `json:"validator_aggregates"`
+}
+
+type spineDataJson struct {
+	Spines       string           `json:"spines" hex:"true"`
+	Prefix       string           `json:"prefix" hex:"true"`
+	Finalization string           `json:"finalization" hex:"true"`
+	ParentSpines []*spinesSeqJson `json:"parent_spines"`
+}
+
+type spinesSeqJson struct {
+	Spines string `json:"spines" hex:"true"`
 }
 
 type pendingAttestationJson struct {
