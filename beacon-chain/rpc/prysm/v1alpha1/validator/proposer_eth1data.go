@@ -40,7 +40,6 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 		//return vs.randomETH1DataVote
 		prevEth1Data := vs.HeadFetcher.HeadETH1Data()
 		return &ethpb.Eth1Data{
-			Finalization: beaconState.Eth1Data().GetFinalization(),
 			BlockHash:    prevEth1Data.GetBlockHash(),
 			DepositCount: prevEth1Data.GetDepositCount(),
 			DepositRoot:  prevEth1Data.GetDepositRoot(),
@@ -58,7 +57,6 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 	if bytesutil.ToBytes32(cpRoot) == params.BeaconConfig().ZeroHash {
 		prevEth1Data := vs.HeadFetcher.HeadETH1Data()
 		return &ethpb.Eth1Data{
-			Finalization: beaconState.Eth1Data().GetFinalization(),
 			BlockHash:    prevEth1Data.GetBlockHash(),
 			DepositCount: prevEth1Data.GetDepositCount(),
 			DepositRoot:  prevEth1Data.GetDepositRoot(),
@@ -70,12 +68,11 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 		log.WithError(err).Error("eth1DataMajorityVote: could not retrieve checkpoint state")
 		return nil, err
 	}
-	cpFinSpines := gwatCommon.HashArrayFromBytes(cpState.Eth1Data().Finalization)
+	cpFinSpines := gwatCommon.HashArrayFromBytes(cpState.SpineData().Finalization)
 	if len(cpFinSpines) == 0 {
 		log.Warn("eth1DataMajorityVote: no finalization in state")
 		prevEth1Data := vs.HeadFetcher.HeadETH1Data()
 		return &ethpb.Eth1Data{
-			Finalization: beaconState.Eth1Data().GetFinalization(),
 			BlockHash:    prevEth1Data.GetBlockHash(),
 			DepositCount: prevEth1Data.GetDepositCount(),
 			DepositRoot:  prevEth1Data.GetDepositRoot(),
@@ -88,7 +85,6 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 		return nil, errors.Wrap(err, "eth1DataMajorityVote: could not retrieve checkpoint terminal spine")
 		//prevEth1Data := vs.HeadFetcher.HeadETH1Data()
 		//return &ethpb.Eth1Data{
-		//	Finalization: beaconState.Eth1Data().GetFinalization(),
 		//	BlockHash:    prevEth1Data.GetBlockHash(),
 		//	DepositCount: prevEth1Data.GetDepositCount(),
 		//	DepositRoot:  prevEth1Data.GetDepositRoot(),
@@ -104,7 +100,6 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 			return nil, errors.Wrap(err, "eth1DataMajorityVote: Could not get hash of last block by latest valid time")
 			//prevEth1Data := vs.HeadFetcher.HeadETH1Data()
 			//return &ethpb.Eth1Data{
-			//	Finalization: beaconState.Eth1Data().GetFinalization(),
 			//	BlockHash:    prevEth1Data.GetBlockHash(),
 			//	DepositCount: prevEth1Data.GetDepositCount(),
 			//	DepositRoot:  prevEth1Data.GetDepositRoot(),
@@ -119,7 +114,6 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 		}).Info("eth1DataMajorityVote: update deposit eth1 data")
 
 		return &ethpb.Eth1Data{
-			Finalization: beaconState.Eth1Data().GetFinalization(),
 			BlockHash:    lvtHash.Bytes(),
 			DepositCount: cpDepositCount,
 			DepositRoot:  cpDepositRoot[:],
@@ -128,7 +122,6 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 
 	prevEth1Data := vs.HeadFetcher.HeadETH1Data()
 	return &ethpb.Eth1Data{
-		Finalization: beaconState.Eth1Data().GetFinalization(),
 		BlockHash:    prevEth1Data.GetBlockHash(),
 		DepositCount: prevEth1Data.GetDepositCount(),
 		DepositRoot:  prevEth1Data.GetDepositRoot(),

@@ -55,7 +55,6 @@ func GenerateGenesisStateFromDepositData(ctx context.Context, gwtGenesisHash gwa
 		DepositCount: uint64(len(deposits)),
 		BlockHash:    gwtGenesisHash.Bytes(),
 		Candidates:   genesisCandidates.ToBytes(),
-		Finalization: genesisCandidates.ToBytes(),
 	})
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "could not generate genesis state")

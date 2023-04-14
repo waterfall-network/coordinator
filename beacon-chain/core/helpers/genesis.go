@@ -47,5 +47,12 @@ func UpdateGenesisEth1Data(state state.BeaconState, deposits []*ethpb.Deposit, e
 	if err != nil {
 		return nil, err
 	}
+
+	spineData := state.SpineData()
+	spineData.Finalization = eth1Data.BlockHash
+	err = state.SetSpineData(spineData)
+	if err != nil {
+		return nil, err
+	}
 	return state, nil
 }

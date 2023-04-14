@@ -276,7 +276,6 @@ func (s *Service) ProcessChainStart(genesisTime uint64, eth1BlockHash [32]byte, 
 		DepositRoot:  root[:],
 		BlockHash:    eth1BlockHash[:],
 		Candidates:   []byte{},
-		Finalization: []byte{},
 	}
 
 	log.WithFields(logrus.Fields{

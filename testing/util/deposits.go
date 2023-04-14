@@ -252,7 +252,6 @@ func DeterministicEth1Data(size int) (*ethpb.Eth1Data, error) {
 
 	eth1Data := &ethpb.Eth1Data{
 		Candidates:   candidates.ToBytes(),
-		Finalization: candidates.ToBytes(),
 		BlockHash:    root[:],
 		DepositRoot:  root[:],
 		DepositCount: uint64(size),
