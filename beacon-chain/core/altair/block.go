@@ -6,6 +6,8 @@ import (
 
 	types "github.com/prysmaticlabs/eth2-types"
 	log "github.com/sirupsen/logrus"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/signing"
 	p2pType "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/types"
@@ -13,7 +15,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
-	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 )
 
@@ -157,7 +158,7 @@ func ApplySyncRewardsPenalties(ctx context.Context, s state.BeaconStateAltair, v
 		if err != nil {
 			return nil, err
 		}
-		if err = helpers.LogBalanceChanges(uint64(index), balAtIdx, participantReward, newBalAtIdx, uint64(s.Slot()), 0, helpers.Increase, helpers.SyncCommittee); err != nil {
+		if err = helpers.LogBalanceChanges(uint64(index), balAtIdx, participantReward, newBalAtIdx, uint64(s.Slot()), nil, helpers.Increase, helpers.SyncCommittee); err != nil {
 			return nil, err
 		}
 		earnedProposerReward += proposerReward
@@ -183,7 +184,7 @@ func ApplySyncRewardsPenalties(ctx context.Context, s state.BeaconStateAltair, v
 	if err != nil {
 		return nil, err
 	}
-	if err = helpers.LogBalanceChanges(uint64(proposerIndex), balAtIdx, earnedProposerReward, newBalAtIdx, uint64(s.Slot()), 0, helpers.Increase, helpers.SyncProposer); err != nil {
+	if err = helpers.LogBalanceChanges(uint64(proposerIndex), balAtIdx, earnedProposerReward, newBalAtIdx, uint64(s.Slot()), nil, helpers.Increase, helpers.SyncProposer); err != nil {
 		return nil, err
 	}
 	// Apply sync committee penalties.
@@ -204,7 +205,7 @@ func ApplySyncRewardsPenalties(ctx context.Context, s state.BeaconStateAltair, v
 		if err != nil {
 			return nil, err
 		}
-		if err = helpers.LogBalanceChanges(uint64(index), balAtIdx, participantReward, newBalAtIdx, uint64(s.Slot()), 0, helpers.Decrease, helpers.SyncCommittee); err != nil {
+		if err = helpers.LogBalanceChanges(uint64(index), balAtIdx, participantReward, newBalAtIdx, uint64(s.Slot()), nil, helpers.Decrease, helpers.SyncCommittee); err != nil {
 			return nil, err
 		}
 	}

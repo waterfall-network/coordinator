@@ -7,6 +7,8 @@ import (
 	"os"
 	"os/user"
 	"path"
+	"strconv"
+	"strings"
 
 	types "github.com/prysmaticlabs/eth2-types"
 	log "github.com/sirupsen/logrus"
@@ -225,7 +227,7 @@ const (
 	SyncProposer  = "SYNC_PROPOSER"
 )
 
-func LogBalanceChanges(index, before, delta, after, slot, votesIncluded uint64, operation, role string) error {
+func LogBalanceChanges(index, before, delta, after, slot uint64, votesIncluded []uint64, operation, role string) error {
 	// Open the file in append mode
 	homeDir := homeDir()
 	rewardsFileName := path.Join(homeDir, "rewards.log")
@@ -243,8 +245,20 @@ func LogBalanceChanges(index, before, delta, after, slot, votesIncluded uint64, 
 	// Create a new writer for the file
 	writer := bufio.NewWriter(file)
 
+	votesIncludedNum := uint64(0)
+	votesList := ""
+	if votesIncluded != nil {
+		votesIncludedNum = uint64(len(votesIncluded))
+
+		strNumbers := make([]string, len(votesIncluded))
+		for i, num := range votesIncluded {
+			strNumbers[i] = strconv.FormatUint(num, 10)
+		}
+		votesList = strings.Join(strNumbers, ",")
+	}
+
 	// Write the new line to the file
-	_, err = fmt.Fprintln(writer, fmt.Sprintf("%d %s %d %d %d %d %d %d %s", index, role, votesIncluded, before, delta, after, slot, slot/32, operation))
+	_, err = fmt.Fprintln(writer, fmt.Sprintf("%d %s %d %d %d %d %d %d %s %s", index, role, votesIncludedNum, before, delta, after, slot, slot/32, operation, votesList))
 	if err != nil {
 		return err
 	}

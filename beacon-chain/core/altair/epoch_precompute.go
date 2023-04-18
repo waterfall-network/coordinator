@@ -6,6 +6,8 @@ import (
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	log "github.com/sirupsen/logrus"
+	"go.opencensus.io/trace"
+
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/epoch/precompute"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
@@ -13,7 +15,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/math"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
-	"go.opencensus.io/trace"
 )
 
 // InitializePrecomputeValidators precomputes individual validator for its attested balances and the total sum of validators attested balances of the epoch.
@@ -266,7 +267,7 @@ func ProcessRewardsAndPenaltiesPrecompute(
 		if err != nil {
 			return nil, err
 		}
-		if err = helpers.LogBalanceChanges(uint64(i), before, attsRewards[i], balances[i], uint64(beaconState.Slot()), 0, helpers.Increase, helpers.Attester); err != nil {
+		if err = helpers.LogBalanceChanges(uint64(i), before, attsRewards[i], balances[i], uint64(beaconState.Slot()), nil, helpers.Increase, helpers.Attester); err != nil {
 			return nil, err
 		}
 		log.WithFields(log.Fields{
@@ -276,7 +277,7 @@ func ProcessRewardsAndPenaltiesPrecompute(
 		}).Debug("ATTESTATION PENALTY >>>>>>>>>>>")
 		before = balances[i]
 		balances[i] = helpers.DecreaseBalanceWithVal(balances[i], attsPenalties[i])
-		if err = helpers.LogBalanceChanges(uint64(i), before, attsPenalties[i], balances[i], uint64(beaconState.Slot()), 0, helpers.Decrease, helpers.Attester); err != nil {
+		if err = helpers.LogBalanceChanges(uint64(i), before, attsPenalties[i], balances[i], uint64(beaconState.Slot()), nil, helpers.Decrease, helpers.Attester); err != nil {
 			return nil, err
 		}
 

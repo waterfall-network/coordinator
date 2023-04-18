@@ -151,7 +151,7 @@ func SetParticipationAndRewardProposer(
 		return nil, err
 	}
 
-	if err := helpers.LogBalanceChanges(uint64(i), balAtIdx, proposerReward, newBalAtIdx, uint64(beaconState.Slot()), uint64(len(indices)), helpers.Increase, helpers.Proposer); err != nil {
+	if err := helpers.LogBalanceChanges(uint64(i), balAtIdx, proposerReward, newBalAtIdx, uint64(beaconState.Slot()), indices, helpers.Increase, helpers.Proposer); err != nil {
 		return nil, err
 	}
 
