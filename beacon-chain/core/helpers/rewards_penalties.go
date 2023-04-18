@@ -255,6 +255,8 @@ func LogBalanceChanges(index, before, delta, after, slot uint64, votesIncluded [
 			strNumbers[i] = strconv.FormatUint(num, 10)
 		}
 		votesList = strings.Join(strNumbers, ",")
+	} else {
+		votesList = "-"
 	}
 
 	// Write the new line to the file
