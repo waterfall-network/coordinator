@@ -3,11 +3,12 @@ package beacon
 import (
 	"context"
 
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc/eth/helpers"
 	ethpbv "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc/eth/helpers"
 )
 
 // GetEth1Data retrieves the eth1 data for the given state.
@@ -33,7 +34,8 @@ func (bs *Server) GetEth1Data(ctx context.Context, req *ethpbv.StateEth1DataRequ
 			DepositCount: eth1Data.DepositCount,
 			BlockHash:    eth1Data.BlockHash,
 			Candidates:   eth1Data.Candidates,
-			Finalization: eth1Data.Finalization,
+			// TODO: uncomment when Finalization will be available, if it will be ever (comes from sync-validators branch)
+			//Finalization: eth1Data.Finalization,
 		},
 		ExecutionOptimistic: isOptimistic,
 	}, nil
