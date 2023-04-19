@@ -3,9 +3,8 @@ package apimiddleware
 import (
 	"strings"
 
-	ethpbv2 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v2"
-
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/api/gateway/apimiddleware"
+	ethpbv2 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v2"
 )
 
 // genesisResponseJson is used in /beacon/genesis API endpoint.
@@ -98,6 +97,18 @@ type syncCommitteesResponseJson struct {
 type stateSpineDataResponseJson struct {
 	Data                *spineDataJson `json:"data"`
 	ExecutionOptimistic bool           `json:"execution_optimistic"`
+}
+
+// stateBlockVotingsResponseJson is used in /beacon/states/{state_id}/block_votings API endpoint.
+type stateBlockVotingsResponseJson struct {
+	Data                []*blockVotingJson `json:"data"`
+	ExecutionOptimistic bool               `json:"execution_optimistic"`
+}
+
+// syncCommitteesResponseJson is used in /beacon/states/{state_id}/sync_committees API endpoint.
+type stateEth1DataResponseJson struct {
+	Data                *eth1DataJson `json:"data"`
+	ExecutionOptimistic bool          `json:"execution_optimistic"`
 }
 
 // blockHeadersResponseJson is used in /beacon/headers API endpoint.
@@ -949,4 +960,11 @@ type syncDetails struct {
 	HeadSlot     string `json:"head_slot"`
 	SyncDistance string `json:"sync_distance"`
 	IsSyncing    bool   `json:"is_syncing"`
+}
+
+type blockVotingJson struct {
+	Root         string             `json:"root" hex:"true"`
+	Slot         string             `json:"slot"`
+	Candidates   string             `json:"candidates" hex:"true"`
+	Attestations []*attestationJson `json:"attestations"`
 }

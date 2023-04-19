@@ -115,6 +115,20 @@ service BeaconChain {
     };
   }
 
+  // ListBlockVotings retrieves the block votings for the given state at the given epoch.
+  rpc ListBlockVotings(v1.StateBlockVotingsRequest) returns (v1.StateBlockVotingsResponse) {
+    option (google.api.http) = {
+      get: "/internal/eth/v1/beacon/states/{state_id}/block_votings"
+    };
+  }
+
+  // GetEth1Data retrieves the eth1Data for the given state at the given epoch.
+  rpc GetEth1Data(v1.StateEth1DataRequest) returns (v1.StateEth1DataResponse) {
+    option (google.api.http) = {
+      get: "/internal/eth/v1/beacon/states/{state_id}/eth1_data"
+    };
+  }
+
   // Beacon blocks API related endpoints.
 
   // ListBlockHeaders retrieves block headers matching given query. By default it will fetch current head slot blocks.

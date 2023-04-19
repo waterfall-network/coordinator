@@ -12,6 +12,8 @@ go_library(
         "sync_committee.go",
         "validator.go",
         "spine_data.go",
+        "block_voting.go",
+        "eth1_data.go",
     ],
     importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc/eth/beacon",
     visibility = ["//beacon-chain:__subpackages__"],
@@ -74,6 +76,8 @@ go_test(
         "sync_committee_test.go",
         "validator_test.go",
         "spine_data_test.go",
+        "block_voting_test.go",
+        "eth1_data_test.go",
     ],
     embed = [":go_default_library"],
     deps = [
