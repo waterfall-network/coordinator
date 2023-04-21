@@ -19,6 +19,8 @@ import (
 	"go.opencensus.io/trace"
 )
 
+type BlockFetcherContextValue func(context.Context, []byte) (block.SignedBeaconBlock, error)
+
 // ProcessAttestationsNoVerifySignature applies processing operations to a block's inner attestation
 // records. The only difference would be that the attestation signature would not be verified.
 func ProcessAttestationsNoVerifySignature(
@@ -78,7 +80,7 @@ func ProcessAttestationNoVerifySignature(
 		return nil, err
 	}
 
-	return SetParticipationAndRewardProposer(ctx, beaconState, att.Data.Target.Epoch, indices, participatedFlags, totalBalance)
+	return SetParticipationAndRewardProposer(ctx, beaconState, att.Data.Target.Epoch, indices, participatedFlags, totalBalance, att.Data.BeaconBlockRoot)
 }
 
 // SetParticipationAndRewardProposer retrieves and sets the epoch participation bits in state. Based on the epoch participation, it rewards
@@ -108,7 +110,7 @@ func SetParticipationAndRewardProposer(
 	beaconState state.BeaconState,
 	targetEpoch types.Epoch,
 	indices []uint64,
-	participatedFlags map[uint8]bool, totalBalance uint64) (state.BeaconState, error) {
+	participatedFlags map[uint8]bool, totalBalance uint64, beaconBlockRoot []byte) (state.BeaconState, error) {
 	var proposerReward uint64
 	currentEpoch := time.CurrentEpoch(beaconState)
 	var stateErr error
@@ -150,8 +152,11 @@ func SetParticipationAndRewardProposer(
 	if err != nil {
 		return nil, err
 	}
-
 	if err := helpers.LogBalanceChanges(uint64(i), balAtIdx, proposerReward, newBalAtIdx, uint64(beaconState.Slot()), indices, helpers.Increase, helpers.Proposer); err != nil {
+		return nil, err
+	}
+
+	if err := RewardBeaconBlockRootProposer(ctx, beaconState, beaconBlockRoot, proposerReward); err != nil {
 		return nil, err
 	}
 
@@ -255,9 +260,6 @@ func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochPa
 		}
 	}
 
-	// add reward for votes included in the block
-	proposerReward += RewardForBlockVotes(br, uint64(len(indices)))
-
 	return proposerReward, epochParticipation, nil
 }
 
@@ -280,6 +282,43 @@ func RewardProposer(ctx context.Context, beaconState state.BeaconState, proposer
 		"ProposerReward": proposerReward,
 	}).Debug("REWARD PROPOSER >>>>>>>>>>>>>")
 	return helpers.IncreaseBalance(beaconState, i, proposerReward)
+}
+
+func RewardBeaconBlockRootProposer(ctx context.Context, beaconState state.BeaconState, beaconBlockRoot []byte, proposerReward uint64) error {
+	blockFetcher, ok := ctx.Value(params.BeaconConfig().CtxBlockFetcherKey).(BlockFetcherContextValue)
+	if !ok {
+		return errors.New("Cannot cast to BlockFetcherContextValue")
+	}
+	beaconBlock, err := blockFetcher(ctx, beaconBlockRoot)
+	if err != nil {
+		return err
+	}
+
+	beaconBlockRootProposerIndex := beaconBlock.Block().ProposerIndex()
+
+	log.WithFields(log.Fields{
+		"SlotBlockWasProposedAt": beaconBlock.Block().Slot(),
+		"Slot":                   beaconState.Slot(),
+		"Proposer":               beaconBlockRootProposerIndex,
+		"ProposerReward":         proposerReward,
+	}).Debug("REWARD BEACON BLOCK ROOT PROPOSER >>>>>>>>>>>>>")
+	balAtIdx, err := beaconState.BalanceAtIndex(beaconBlockRootProposerIndex)
+	if err != nil {
+		return err
+	}
+	// Should we have the state at beacon block root slot or current is ok??? seems current is ok
+	if err = helpers.IncreaseBalance(beaconState, beaconBlockRootProposerIndex, proposerReward); err != nil {
+		return err
+	}
+	newBalAtIdx, err := beaconState.BalanceAtIndex(beaconBlockRootProposerIndex)
+	if err != nil {
+		return err
+	}
+	if err := helpers.LogBalanceChanges(uint64(beaconBlockRootProposerIndex), balAtIdx, proposerReward, newBalAtIdx, uint64(beaconState.Slot()), nil, helpers.Increase, helpers.BeaconBlockProposer); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // RewardForBlockVotes rewards proposer by increasing proposer's balance with input reward.
