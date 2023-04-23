@@ -45,9 +45,8 @@ func (vs *Server) getPhase0BeaconBlock(ctx context.Context, req *ethpb.BlockRequ
 	}
 
 	log.WithFields(logrus.Fields{
-		"req.slot":             req.Slot,
-		"blkData.Finalization": gwatCommon.HashArrayFromBytes(blkData.Eth1Data.Finalization),
-		"blkData.Candidates":   gwatCommon.HashArrayFromBytes(blkData.Eth1Data.Candidates),
+		"req.slot":           req.Slot,
+		"blkData.Candidates": gwatCommon.HashArrayFromBytes(blkData.Eth1Data.Candidates),
 	}).Info("#### get-Phase0Beacon-Block ###")
 
 	// Use zero hash as stub for state root to compute later.

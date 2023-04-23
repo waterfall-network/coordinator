@@ -121,6 +121,7 @@ const (
 	Eth1DataVotes
 	Eth1DepositIndex
 	Validators
+	SpineData
 	Balances
 	RandaoMixes
 	Slashings

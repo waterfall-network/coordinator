@@ -116,6 +116,7 @@ func (b *BeaconState) Copy() state.BeaconState {
 			Fork:                        b.fork(),
 			LatestBlockHeader:           b.latestBlockHeader(),
 			Eth1Data:                    b.eth1Data(),
+			SpineData:                   b.spineData(),
 			JustificationBits:           b.justificationBits(),
 			PreviousJustifiedCheckpoint: b.previousJustifiedCheckpoint(),
 			CurrentJustifiedCheckpoint:  b.currentJustifiedCheckpoint(),
@@ -314,6 +315,8 @@ func (b *BeaconState) rootSelector(ctx context.Context, field types.FieldIndex) 
 		return ssz.ByteArrayRootWithLimit(b.state.HistoricalRoots, fieldparams.HistoricalRootsLength)
 	case eth1Data:
 		return stateutil.Eth1Root(hasher, b.state.Eth1Data)
+	case spineData:
+		return stateutil.SpineDataRoot(hasher, b.state.SpineData)
 	case eth1DataVotes:
 		if b.rebuildTrie[field] {
 			err := b.resetFieldTrie(

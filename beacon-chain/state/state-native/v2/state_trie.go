@@ -67,6 +67,7 @@ func InitializeFromProtoUnsafe(st *ethpb.BeaconStateAltair) (*BeaconState, error
 		eth1DepositIndex:            st.Eth1DepositIndex,
 		blockVoting:                 st.BlockVoting,
 		validators:                  st.Validators,
+		spineData:                   st.SpineData,
 		balances:                    st.Balances,
 		randaoMixes:                 &mixes,
 		slashings:                   st.Slashings,
@@ -151,6 +152,7 @@ func (b *BeaconState) Copy() state.BeaconState {
 		fork:                        b.forkVal(),
 		latestBlockHeader:           b.latestBlockHeaderVal(),
 		eth1Data:                    b.eth1DataVal(),
+		spineData:                   b.spineDataVal(),
 		previousJustifiedCheckpoint: b.previousJustifiedCheckpointVal(),
 		currentJustifiedCheckpoint:  b.currentJustifiedCheckpointVal(),
 		finalizedCheckpoint:         b.finalizedCheckpointVal(),
@@ -357,6 +359,8 @@ func (b *BeaconState) rootSelector(ctx context.Context, field types.FieldIndex) 
 		return ssz.ByteArrayRootWithLimit(hRoots, fieldparams.HistoricalRootsLength)
 	case eth1Data:
 		return stateutil.Eth1Root(hasher, b.eth1Data)
+	case spineData:
+		return stateutil.SpineDataRoot(hasher, b.spineData)
 	case eth1DataVotes:
 		if b.rebuildTrie[field] {
 			err := b.resetFieldTrie(

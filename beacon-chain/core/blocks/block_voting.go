@@ -57,8 +57,13 @@ func ProcessBlockVoting(ctx context.Context, beaconState state.BeaconState, sign
 	// update Eth1Data of state
 	eth1Data := beaconState.Eth1Data()
 	eth1Data.Candidates = candidates
-	eth1Data.Finalization = finalization.ToBytes()
 	if err := beaconState.SetEth1Data(eth1Data); err != nil {
+		return nil, err
+	}
+
+	spineData := beaconState.SpineData()
+	spineData.Finalization = finalization.ToBytes()
+	if err := beaconState.SetSpineData(spineData); err != nil {
 		return nil, err
 	}
 

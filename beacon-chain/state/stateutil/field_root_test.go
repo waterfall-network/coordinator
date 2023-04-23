@@ -67,3 +67,81 @@ func TestEth1DataRootWithHasher2(t *testing.T) {
 	assert.Equal(t, "2c3bdd383d83fd7b6f11074a55eaedccdf45205045de027b4a1c67246b716267", fmt.Sprintf("%x", root))
 	assert.NoError(t, err)
 }
+
+func TestSpineDataRootWithHasher(t *testing.T) {
+	hasher := hash.CustomSHA256Hasher()
+	spines := gwatCommon.HashArray{
+		gwatCommon.HexToHash("0x1111111111111111111111111111111111111111111111111111111111111111"),
+		gwatCommon.HexToHash("0x2222222222222222222222222222222222222222222222222222222222222222"),
+	}
+	prefix := gwatCommon.HashArray{
+		gwatCommon.HexToHash("0x3333333333333333333333333333333333333333333333333333333333333333"),
+		gwatCommon.HexToHash("0x4444444444444444444444444444444444444444444444444444444444444444"),
+	}
+	finalization := gwatCommon.HashArray{
+		gwatCommon.HexToHash("0x5555555555555555555555555555555555555555555555555555555555555555"),
+		gwatCommon.HexToHash("0x6666666666666666666666666666666666666666666666666666666666666666"),
+	}
+
+	parentSpines := []*ethpb.SpinesSeq{
+		&ethpb.SpinesSeq{Spines: spines.ToBytes()},
+		&ethpb.SpinesSeq{Spines: gwatCommon.HashArray{
+			gwatCommon.HexToHash("0x1111111111111111111111111111111111111111111111111111111111111111"),
+			gwatCommon.HexToHash("0x2222222222222222222222222222222222222222222222222222222222222222"),
+			gwatCommon.HexToHash("0x7777777777777777777777777777777777777777777777777777777777777777"),
+			gwatCommon.HexToHash("0xffffffffffffffffffffffffffffffffffffffffffffffff0101010101010101"),
+		}.ToBytes(),
+		},
+	}
+
+	spineData := &ethpb.SpineData{
+		Spines:       spines.ToBytes(),
+		Prefix:       prefix.ToBytes(),
+		Finalization: finalization.ToBytes(),
+		ParentSpines: parentSpines,
+	}
+	root, err := SpineDataRootWithHasher(hasher, spineData)
+	fmt.Printf("root=%x \n", root)
+
+	assert.Equal(t, "5d450e6b013c3f2b0902caffbd70220440e59663a987e093cfa94f30259c4781", fmt.Sprintf("%x", root))
+	assert.NoError(t, err)
+}
+
+func TestSpineDataRootWithHasher2(t *testing.T) {
+	hasher := hash.CustomSHA256Hasher()
+	spines := gwatCommon.HashArray{
+		gwatCommon.HexToHash("0x1111111111111111111111111111111111111111111111111111111111111111"),
+		gwatCommon.HexToHash("0x2222222222222222222222222222222222222222222222222222222222222222"),
+	}
+	prefix := gwatCommon.HashArray{
+		gwatCommon.HexToHash("0x3333333333333333333333333333333333333333333333333333333333333333"),
+		gwatCommon.HexToHash("0x4444444444444444444444444444444444444444444444444444444444444444"),
+	}
+	finalization := gwatCommon.HashArray{
+		gwatCommon.HexToHash("0x5555555555555555555555555555555555555555555555555555555555555555"),
+		gwatCommon.HexToHash("0x6666666666666666666666666666666666666666666666666666666666666666"),
+	}
+
+	parentSpines := []*ethpb.SpinesSeq{
+		&ethpb.SpinesSeq{Spines: spines.ToBytes()},
+		&ethpb.SpinesSeq{Spines: gwatCommon.HashArray{
+			gwatCommon.HexToHash("0x1111111111111111111111111111111111111111111111111111111111111111"),
+			gwatCommon.HexToHash("0x2222222222222222222222222222222222222222222222222222222222222222"),
+			gwatCommon.HexToHash("0x7777777777777777777777777777777777777777777777777777777777777777"),
+			gwatCommon.HexToHash("0xffffffffffffffffffffffffffffffffffffffffffffffff0101010101010101"),
+		}.ToBytes(),
+		},
+	}
+
+	spineData := &ethpb.SpineData{
+		Spines:       spines.ToBytes(),
+		Prefix:       prefix.ToBytes(),
+		Finalization: finalization.ToBytes(),
+		ParentSpines: parentSpines,
+	}
+	root, err := SpineDataRootWithHasher(hasher, spineData)
+	fmt.Printf("root=%x \n", root)
+
+	assert.Equal(t, "5d450e6b013c3f2b0902caffbd70220440e59663a987e093cfa94f30259c4781", fmt.Sprintf("%x", root))
+	assert.NoError(t, err)
+}

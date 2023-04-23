@@ -66,6 +66,7 @@ const (
 	eth1DataVotes                  = types.Eth1DataVotes
 	eth1DepositIndex               = types.Eth1DepositIndex
 	validators                     = types.Validators
+	spineData                      = types.SpineData
 	balances                       = types.Balances
 	randaoMixes                    = types.RandaoMixes
 	slashings                      = types.Slashings
