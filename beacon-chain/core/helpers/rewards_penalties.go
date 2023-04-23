@@ -219,12 +219,13 @@ func FinalityDelay(prevEpoch, finalizedEpoch types.Epoch) types.Epoch {
 }
 
 const (
-	Increase      = "INC"
-	Decrease      = "DEC"
-	Attester      = "ATTESTER"
-	Proposer      = "PROPOSER"
-	SyncCommittee = "SYNC_COMMITTEE"
-	SyncProposer  = "SYNC_PROPOSER"
+	Increase            = "INC"
+	Decrease            = "DEC"
+	Attester            = "ATTESTER"
+	Proposer            = "PROPOSER"
+	SyncCommittee       = "SYNC_COMMITTEE"
+	SyncProposer        = "SYNC_PROPOSER"
+	BeaconBlockProposer = "BEACON_BLOCK_PROPOSER"
 )
 
 func LogBalanceChanges(index, before, delta, after, slot uint64, votesIncluded []uint64, operation, role string) error {

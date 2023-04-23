@@ -109,6 +109,10 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	}
 	b := signed.Block()
 
+	ctx = context.WithValue(ctx, params.BeaconConfig().CtxBlockFetcherKey, func(ctx context.Context, blockRoot [32]byte) (block.SignedBeaconBlock, error) {
+		return s.cfg.BeaconDB.Block(ctx, blockRoot)
+	})
+
 	preState, err := s.getBlockPreState(ctx, b)
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
