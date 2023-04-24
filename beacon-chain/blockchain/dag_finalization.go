@@ -155,37 +155,38 @@ func (s *Service) runProcessDagFinalize() {
 					log.Info("Dag finalization: skip (head duplicated)")
 					continue
 				}
-				headRoot = bytesutil.SafeCopyBytes(newHead.root[:])
-				var (
-					lastFinalized gwatCommon.Hash
-					lastSpine     gwatCommon.Hash
-				)
-				finalizedSpines := s.GetFinalizedSpines()
-				if len(finalizedSpines) > 0 {
-					lastFinalized = finalizedSpines[len(finalizedSpines)-1]
-				}
-				finalization := gwatCommon.HashArrayFromBytes(newHead.state.SpineData().Finalization)
-				if len(finalization) > 0 {
-					lastSpine = finalization[len(finalization)-1]
-				}
-
-				isNewCp := true
-				fincp := s.GetCachedGwatCoordinatedState()
-				if fincp != nil && fincp.Root != (gwatCommon.Hash{}) {
-					// finCp root not equal finCp root from gwat
-					// and is not empty root (the first 4 epochs after starts from genesis)
-					isNewCp = !bytes.Equal(
-						s.GetCachedGwatCoordinatedState().Root.Bytes(),
-						newHead.state.FinalizedCheckpoint().GetRoot(),
-					) && !bytes.Equal(
-						params.BeaconConfig().ZeroHash[:],
-						newHead.state.FinalizedCheckpoint().GetRoot(),
-					)
-				}
-				if lastFinalized == lastSpine && !isNewCp {
-					log.Info("Dag finalization: skip (no updates)")
-					continue
-				}
+				//todo check and rm
+				//headRoot = bytesutil.SafeCopyBytes(newHead.root[:])
+				//var (
+				//	lastFinalized gwatCommon.Hash
+				//	lastSpine     gwatCommon.Hash
+				//)
+				//finalizedSpines := s.GetFinalizedSpines()
+				//if len(finalizedSpines) > 0 {
+				//	lastFinalized = finalizedSpines[len(finalizedSpines)-1]
+				//}
+				//finalization := gwatCommon.HashArrayFromBytes(newHead.state.SpineData().Finalization)
+				//if len(finalization) > 0 {
+				//	lastSpine = finalization[len(finalization)-1]
+				//}
+				//isNewCp := true
+				//fincp := s.GetCachedGwatCoordinatedState()
+				//if fincp != nil && fincp.Root != (gwatCommon.Hash{}) {
+				//	// finCp root not equal finCp root from gwat
+				//	// and is not empty root (the first 4 epochs after starts from genesis)
+				//	isNewCp = !bytes.Equal(
+				//		s.GetCachedGwatCoordinatedState().Root.Bytes(),
+				//		newHead.state.FinalizedCheckpoint().GetRoot(),
+				//	) && !bytes.Equal(
+				//		params.BeaconConfig().ZeroHash[:],
+				//		newHead.state.FinalizedCheckpoint().GetRoot(),
+				//	)
+				//}
+				////todo Добавить условие обязательной отправки чекпоинта при смене Эпох
+				//if lastFinalized == lastSpine && !isNewCp {
+				//	log.Info("Dag finalization: skip (no updates)")
+				//	continue
+				//}
 
 				err := s.processDagFinalization(newHead.block, newHead.state)
 				if err != nil {
