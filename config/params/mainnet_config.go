@@ -204,7 +204,7 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	BeaconStateAltairFieldCount:    24 + 2,
 	BeaconStateBellatrixFieldCount: 25 + 2,
 	BlockVotingMinSupportPrc:       66,
-	CtxBlockFetcherKey:             BlockFetcherContextKey("CtxBlockFetcher"),
+	CtxBlockFetcherKey:             BlockInfoFetcherContextKey("CtxBlockFetcher"),
 
 	// Slasher related values.
 	WeakSubjectivityPeriod:          54000,

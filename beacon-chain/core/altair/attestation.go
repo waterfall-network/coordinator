@@ -8,18 +8,17 @@ import (
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	log "github.com/sirupsen/logrus"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"go.opencensus.io/trace"
+
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
-	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/attestation"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
-	"go.opencensus.io/trace"
 )
-
-type BlockFetcherContextValue func(context.Context, []byte) (block.SignedBeaconBlock, error)
 
 // ProcessAttestationsNoVerifySignature applies processing operations to a block's inner attestation
 // records. The only difference would be that the attestation signature would not be verified.
@@ -285,19 +284,32 @@ func RewardProposer(ctx context.Context, beaconState state.BeaconState, proposer
 }
 
 func RewardBeaconBlockRootProposer(ctx context.Context, beaconState state.BeaconState, beaconBlockRoot []byte, proposerReward uint64) error {
-	blockFetcher, ok := ctx.Value(params.BeaconConfig().CtxBlockFetcherKey).(BlockFetcherContextValue)
+	blockFetcher, ok := ctx.Value(params.BeaconConfig().CtxBlockFetcherKey).(params.BlockInfoFetcherContextValue)
 	if !ok {
-		return errors.New("Cannot cast to BlockFetcherContextValue")
+		err := errors.New("Cannot cast to BlockInfoFetcherContextValue")
+		log.WithError(err).WithFields(log.Fields{
+			"Slot":           beaconState.Slot(),
+			"ProposerReward": proposerReward,
+		}).Error("CANNOT CAST TO BlockInfoFetcherContextValue >>>>>>>>>>>>>")
+		return err
 	}
-	beaconBlock, err := blockFetcher(ctx, beaconBlockRoot)
+	var beaconBlockRootArray [32]byte
+	copy(beaconBlockRootArray[:], beaconBlockRoot)
+	proposerIndex, proposedAtSlot, err := blockFetcher(ctx, beaconBlockRootArray)
 	if err != nil {
+		log.WithError(err).WithFields(log.Fields{
+			"SlotBlockWasProposedAt": proposedAtSlot,
+			"Slot":                   beaconState.Slot(),
+			"BeaconBlockRoot":        proposerIndex,
+			"ProposerReward":         proposerReward,
+		}).Error("CANNOT FETCH BEACON BLOCK INFO >>>>>>>>>>>>>")
 		return err
 	}
 
-	beaconBlockRootProposerIndex := beaconBlock.Block().ProposerIndex()
+	beaconBlockRootProposerIndex := proposerIndex
 
 	log.WithFields(log.Fields{
-		"SlotBlockWasProposedAt": beaconBlock.Block().Slot(),
+		"SlotBlockWasProposedAt": proposedAtSlot,
 		"Slot":                   beaconState.Slot(),
 		"Proposer":               beaconBlockRootProposerIndex,
 		"ProposerReward":         proposerReward,
