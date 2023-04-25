@@ -8,12 +8,23 @@ import (
 	enginev1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/engine/v1"
 	v1alpha1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 func TestCopyETH1Data(t *testing.T) {
 	data := genEth1Data()
 
 	got := v1alpha1.CopyETH1Data(data)
+	if !reflect.DeepEqual(got, data) {
+		t.Errorf("CopyETH1Data() = %v, want %v", got, data)
+	}
+	assert.NotEmpty(t, got, "Copied eth1data has empty fields")
+}
+
+func TestCopySpineData(t *testing.T) {
+	data := genSpineData()
+
+	got := v1alpha1.CopySpineData(data)
 	if !reflect.DeepEqual(got, data) {
 		t.Errorf("CopyETH1Data() = %v, want %v", got, data)
 	}
@@ -432,6 +443,39 @@ func genEth1Data() *v1alpha1.Eth1Data {
 		DepositCount: 4,
 		BlockHash:    bytes(),
 		Candidates:   bytes(),
+	}
+}
+
+func genSpineData() *v1alpha1.SpineData {
+	spines := gwatCommon.HashArray{
+		gwatCommon.HexToHash("0x1111111111111111111111111111111111111111111111111111111111111111"),
+		gwatCommon.HexToHash("0x2222222222222222222222222222222222222222222222222222222222222222"),
+	}
+	prefix := gwatCommon.HashArray{
+		gwatCommon.HexToHash("0x3333333333333333333333333333333333333333333333333333333333333333"),
+		gwatCommon.HexToHash("0x4444444444444444444444444444444444444444444444444444444444444444"),
+	}
+	finalization := gwatCommon.HashArray{
+		gwatCommon.HexToHash("0x5555555555555555555555555555555555555555555555555555555555555555"),
+		gwatCommon.HexToHash("0x6666666666666666666666666666666666666666666666666666666666666666"),
+	}
+
+	parentSpines := []*v1alpha1.SpinesSeq{
+		{Spines: spines.ToBytes()},
+		{Spines: gwatCommon.HashArray{
+			gwatCommon.HexToHash("0x1111111111111111111111111111111111111111111111111111111111111111"),
+			gwatCommon.HexToHash("0x2222222222222222222222222222222222222222222222222222222222222222"),
+			gwatCommon.HexToHash("0x7777777777777777777777777777777777777777777777777777777777777777"),
+			gwatCommon.HexToHash("0xffffffffffffffffffffffffffffffffffffffffffffffff0101010101010101"),
+		}.ToBytes(),
+		},
+	}
+
+	return &v1alpha1.SpineData{
+		Spines:       spines.ToBytes(),
+		Prefix:       prefix.ToBytes(),
+		Finalization: finalization.ToBytes(),
+		ParentSpines: parentSpines,
 	}
 }
 

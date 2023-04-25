@@ -60,3 +60,18 @@ func (b *BeaconState) AppendEth1DataVotes(val *ethpb.Eth1Data) error {
 	b.addDirtyIndices(eth1DataVotes, []uint64{uint64(len(b.eth1DataVotes) - 1)})
 	return nil
 }
+
+// SetBlockVoting for the beacon state. Updates the entire
+// list to a new value by overwriting the previous one.
+func (b *BeaconState) SetBlockVoting(val []*ethpb.BlockVoting) error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
+	b.sharedFieldReferences[blockVoting].MinusRef()
+	b.sharedFieldReferences[blockVoting] = stateutil.NewRef(1)
+
+	b.blockVoting = val
+	b.markFieldAsDirty(blockVoting)
+	b.rebuildTrie[blockVoting] = true
+	return nil
+}

@@ -280,7 +280,7 @@ func ProcessBlockForStateRoot(
 		).Error("ProcessBlockForStateRoot:Err")
 		return nil, err
 	}
-	finalization := gwatCommon.HashArrayFromBytes(state.Eth1Data().Finalization)
+	finalization := gwatCommon.HashArrayFromBytes(state.SpineData().Finalization)
 	lastFinSpine := finalization[len(finalization)-1]
 
 	blk := signed.Block()
@@ -305,8 +305,10 @@ func ProcessBlockForStateRoot(
 		"slot":         state.Slot(),
 		"Validators":   len(state.Validators()),
 		"BlockVoting":  len(state.BlockVoting()),
-		"Finalization": gwatCommon.HashArrayFromBytes(state.Eth1Data().Finalization),
-		"Candidates":   gwatCommon.HashArrayFromBytes(state.Eth1Data().Candidates),
+		"Spines":       gwatCommon.HashArrayFromBytes(state.SpineData().Spines),
+		"Prefix":       gwatCommon.HashArrayFromBytes(state.SpineData().Prefix),
+		"Finalization": gwatCommon.HashArrayFromBytes(state.SpineData().Finalization),
+		"ParentSpines": state.SpineData().ParentSpines,
 	}).Info("--------- ProcessBlockForStateRoot:state:111")
 
 	log.WithError(err).WithFields(logrus.Fields{
@@ -314,7 +316,6 @@ func ProcessBlockForStateRoot(
 		"ParentRoot":   fmt.Sprintf("%#x", blk.ParentRoot()),
 		"sigRoot":      fmt.Sprintf("%#x", sigRoot),
 		"Attestations": len(blk.Body().Attestations()),
-		"Finalization": gwatCommon.HashArrayFromBytes(blk.Body().Eth1Data().Finalization),
 		"Candidates":   gwatCommon.HashArrayFromBytes(blk.Body().Eth1Data().Candidates),
 	}).Info("--------- ProcessBlockForStateRoot:Block:222")
 

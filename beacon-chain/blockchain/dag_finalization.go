@@ -155,37 +155,38 @@ func (s *Service) runProcessDagFinalize() {
 					log.Info("Dag finalization: skip (head duplicated)")
 					continue
 				}
-				headRoot = bytesutil.SafeCopyBytes(newHead.root[:])
-				var (
-					lastFinalized gwatCommon.Hash
-					lastSpine     gwatCommon.Hash
-				)
-				finalizedSpines := s.GetFinalizedSpines()
-				if len(finalizedSpines) > 0 {
-					lastFinalized = finalizedSpines[len(finalizedSpines)-1]
-				}
-				finalization := gwatCommon.HashArrayFromBytes(newHead.state.Eth1Data().Finalization)
-				if len(finalization) > 0 {
-					lastSpine = finalization[len(finalization)-1]
-				}
-
-				isNewCp := true
-				fincp := s.GetCachedGwatCoordinatedState()
-				if fincp != nil && fincp.Root != (gwatCommon.Hash{}) {
-					// finCp root not equal finCp root from gwat
-					// and is not empty root (the first 4 epochs after starts from genesis)
-					isNewCp = !bytes.Equal(
-						s.GetCachedGwatCoordinatedState().Root.Bytes(),
-						newHead.state.FinalizedCheckpoint().GetRoot(),
-					) && !bytes.Equal(
-						params.BeaconConfig().ZeroHash[:],
-						newHead.state.FinalizedCheckpoint().GetRoot(),
-					)
-				}
-				if lastFinalized == lastSpine && !isNewCp {
-					log.Info("Dag finalization: skip (no updates)")
-					continue
-				}
+				//todo check and rm
+				//headRoot = bytesutil.SafeCopyBytes(newHead.root[:])
+				//var (
+				//	lastFinalized gwatCommon.Hash
+				//	lastSpine     gwatCommon.Hash
+				//)
+				//finalizedSpines := s.GetFinalizedSpines()
+				//if len(finalizedSpines) > 0 {
+				//	lastFinalized = finalizedSpines[len(finalizedSpines)-1]
+				//}
+				//finalization := gwatCommon.HashArrayFromBytes(newHead.state.SpineData().Finalization)
+				//if len(finalization) > 0 {
+				//	lastSpine = finalization[len(finalization)-1]
+				//}
+				//isNewCp := true
+				//fincp := s.GetCachedGwatCoordinatedState()
+				//if fincp != nil && fincp.Root != (gwatCommon.Hash{}) {
+				//	// finCp root not equal finCp root from gwat
+				//	// and is not empty root (the first 4 epochs after starts from genesis)
+				//	isNewCp = !bytes.Equal(
+				//		s.GetCachedGwatCoordinatedState().Root.Bytes(),
+				//		newHead.state.FinalizedCheckpoint().GetRoot(),
+				//	) && !bytes.Equal(
+				//		params.BeaconConfig().ZeroHash[:],
+				//		newHead.state.FinalizedCheckpoint().GetRoot(),
+				//	)
+				//}
+				////todo Добавить условие обязательной отправки чекпоинта при смене Эпох
+				//if lastFinalized == lastSpine && !isNewCp {
+				//	log.Info("Dag finalization: skip (no updates)")
+				//	continue
+				//}
 
 				err := s.processDagFinalization(newHead.block, newHead.state)
 				if err != nil {
@@ -384,7 +385,7 @@ func (s *Service) processGwatSync(gsp *wrapper.GwatSyncParam) error {
 			}
 			cpRoot := gwatCommon.BytesToHash(finRes.CpRoot.Bytes())
 			cpEpoch := uint64(slots.ToEpoch(cpState.Slot()))
-			finSeq := gwatCommon.HashArrayFromBytes(cpState.Eth1Data().Finalization)
+			finSeq := gwatCommon.HashArrayFromBytes(cpState.SpineData().Finalization)
 			var spine gwatCommon.Hash
 			if len(finSeq) > 0 {
 				spine = finSeq[len(finSeq)-1]
@@ -495,7 +496,7 @@ func (s *Service) processDagFinalization(headBlock block.SignedBeaconBlock, head
 				}
 				cpRoot := gwatCommon.BytesToHash(finRes.CpRoot.Bytes())
 				cpEpoch := uint64(slots.ToEpoch(cpState.Slot()))
-				finSeq := gwatCommon.HashArrayFromBytes(cpState.Eth1Data().Finalization)
+				finSeq := gwatCommon.HashArrayFromBytes(cpState.SpineData().Finalization)
 				var spine gwatCommon.Hash
 				if len(finSeq) > 0 {
 					spine = finSeq[len(finSeq)-1]
@@ -550,7 +551,7 @@ func (s *Service) processDagFinalization(headBlock block.SignedBeaconBlock, head
 		).Error("Dag finalization: state error")
 		return errors.Wrapf(err, "Cache finalized spines: checkpoint's state not found for epoch=%d root=%x", cpFin.Epoch, cpFin.GetRoot())
 	}
-	cpFinSeq := gwatCommon.HashArrayFromBytes(cpState.Eth1Data().Finalization)
+	cpFinSeq := gwatCommon.HashArrayFromBytes(cpState.SpineData().Finalization)
 	s.SetFinalizedSpinesCheckpoint(cpFinSeq[len(cpFinSeq)-1])
 
 	//update FinalizedSpines cache
@@ -612,7 +613,7 @@ func (s *Service) collectFinalizationParams(
 			"cpSlot":              cpSlot,
 		}).Debug("Collect finalization params: collect data")
 
-		currFinalization := gwatCommon.HashArrayFromBytes(currState.Eth1Data().Finalization)
+		currFinalization := gwatCommon.HashArrayFromBytes(currState.SpineData().Finalization)
 		intersect := finalizedSpines.SequenceIntersection(currFinalization).Uniq()
 		if len(intersect) == 0 {
 			baseSpine = currFinalization[len(currFinalization)-1]
@@ -737,7 +738,7 @@ func (s *Service) getRequestGwatCheckpoint(
 	if err != nil {
 		return cpFinalized, err
 	}
-	finalization := gwatCommon.HashArrayFromBytes(cpState.Eth1Data().Finalization)
+	finalization := gwatCommon.HashArrayFromBytes(cpState.SpineData().Finalization)
 	return &gwatTypes.Checkpoint{
 		Epoch: uint64(checkpoint.Epoch),
 		Root:  gwatCommon.BytesToHash(checkpoint.Root),
@@ -874,7 +875,7 @@ func (s *Service) initCoordinatedState(ctx context.Context) error {
 		"cpRoot":  fmt.Sprintf("%#x", cpRoot),
 	}).Debug("Init coordinated state: current result")
 
-	finSeq := gwatCommon.HashArrayFromBytes(cpState.Eth1Data().Finalization)
+	finSeq := gwatCommon.HashArrayFromBytes(cpState.SpineData().Finalization)
 	if len(finSeq) == 0 {
 		log.WithFields(logrus.Fields{
 			"cpSlot":   cpState.Slot(),
@@ -972,7 +973,7 @@ func (s *Service) collectGwatSyncParams(
 			"cpSlot":              cpSlot,
 		}).Debug("Collect gwat sync params: cycle start")
 
-		currFinalization := gwatCommon.HashArrayFromBytes(currState.Eth1Data().Finalization)
+		currFinalization := gwatCommon.HashArrayFromBytes(currState.SpineData().Finalization)
 		intersect := finalizedSpines.SequenceIntersection(currFinalization).Uniq()
 		if len(intersect) == 0 {
 			log.WithFields(logrus.Fields{

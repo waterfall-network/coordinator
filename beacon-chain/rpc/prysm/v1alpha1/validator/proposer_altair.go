@@ -29,9 +29,8 @@ func (vs *Server) buildAltairBeaconBlock(ctx context.Context, req *ethpb.BlockRe
 	}
 
 	log.WithError(err).WithFields(logrus.Fields{
-		"req.slot":             req.Slot,
-		"blkData.Finalization": gwatCommon.HashArrayFromBytes(blkData.Eth1Data.Finalization),
-		"blkData.Candidates":   gwatCommon.HashArrayFromBytes(blkData.Eth1Data.Candidates),
+		"req.slot":           req.Slot,
+		"blkData.Candidates": gwatCommon.HashArrayFromBytes(blkData.Eth1Data.Candidates),
 	}).Info("#### build-Altair-BeaconBlock ###")
 
 	// Use zero hash as stub for state root to compute later.

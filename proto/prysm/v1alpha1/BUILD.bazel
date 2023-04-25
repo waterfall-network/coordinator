@@ -213,5 +213,6 @@ go_test(
     embed = [":go_default_library"],
     deps = [
         "//testing/assert:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//common:go_default_library",
     ],
 )

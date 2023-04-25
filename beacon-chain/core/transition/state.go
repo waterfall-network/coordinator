@@ -165,20 +165,25 @@ func OptimizedGenesisBeaconState(genesisTime uint64, preState state.BeaconState,
 			DepositCount: 0,
 			BlockHash:    eth1Data.GetBlockHash(),
 			Candidates:   eth1Data.GetCandidates(),
-			Finalization: eth1Data.GetFinalization(),
 		},
 		Eth1DataVotes:    make([]*ethpb.Eth1Data, 0),
 		BlockVoting:      make([]*ethpb.BlockVoting, 0),
 		Eth1DepositIndex: 0,
+		// Spine data.
+		SpineData: &ethpb.SpineData{
+			Spines:       []byte{},
+			Prefix:       []byte{},
+			Finalization: eth1Data.GetBlockHash(),
+			ParentSpines: []*ethpb.SpinesSeq{},
+		},
 	}
 
 	bodyRoot, err := (&ethpb.BeaconBlockBody{
 		RandaoReveal: make([]byte, 96),
 		Eth1Data: &ethpb.Eth1Data{
-			DepositRoot:  make([]byte, 32),
-			BlockHash:    make([]byte, 32),
-			Candidates:   make([]byte, 0),
-			Finalization: make([]byte, 0),
+			DepositRoot: make([]byte, 32),
+			BlockHash:   make([]byte, 32),
+			Candidates:  make([]byte, 0),
 		},
 		Graffiti: make([]byte, 32),
 	}).HashTreeRoot()
@@ -221,6 +226,13 @@ func EmptyGenesisState() (state.BeaconState, error) {
 		Eth1DataVotes:    make([]*ethpb.Eth1Data, 0),
 		BlockVoting:      make([]*ethpb.BlockVoting, 0),
 		Eth1DepositIndex: 0,
+		// Spine data.
+		SpineData: &ethpb.SpineData{
+			Spines:       []byte{},
+			Prefix:       []byte{},
+			Finalization: []byte{},
+			ParentSpines: []*ethpb.SpinesSeq{},
+		},
 	}
 	return v1.InitializeFromProto(state)
 }

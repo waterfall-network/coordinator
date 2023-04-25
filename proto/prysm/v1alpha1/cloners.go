@@ -15,7 +15,38 @@ func CopyETH1Data(data *Eth1Data) *Eth1Data {
 		DepositCount: data.DepositCount,
 		BlockHash:    bytesutil.SafeCopyBytes(data.BlockHash),
 		Candidates:   bytesutil.SafeCopyBytes(data.Candidates),
+	}
+}
+
+// CopySpineData copies the provided spine data object.
+func CopySpineData(data *SpineData) *SpineData {
+	if data == nil {
+		return nil
+	}
+	return &SpineData{
+		Spines:       bytesutil.SafeCopyBytes(data.Spines),
+		Prefix:       bytesutil.SafeCopyBytes(data.Prefix),
 		Finalization: bytesutil.SafeCopyBytes(data.Finalization),
+		ParentSpines: CopyParentSpines(data.ParentSpines),
+	}
+}
+
+func CopyParentSpines(data []*SpinesSeq) []*SpinesSeq {
+	if data == nil {
+		return nil
+	}
+	cpy := make([]*SpinesSeq, len(data))
+	for i, s := range data {
+		cpy[i] = CopySpinesSeq(s)
+	}
+	return cpy
+}
+func CopySpinesSeq(data *SpinesSeq) *SpinesSeq {
+	if data == nil {
+		return nil
+	}
+	return &SpinesSeq{
+		Spines: bytesutil.SafeCopyBytes(data.Spines),
 	}
 }
 

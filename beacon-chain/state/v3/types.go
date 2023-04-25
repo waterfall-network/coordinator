@@ -40,6 +40,7 @@ const (
 	eth1DataVotes                  = types.Eth1DataVotes
 	eth1DepositIndex               = types.Eth1DepositIndex
 	validators                     = types.Validators
+	spineData                      = types.SpineData
 	balances                       = types.Balances
 	randaoMixes                    = types.RandaoMixes
 	slashings                      = types.Slashings
@@ -49,11 +50,11 @@ const (
 	previousJustifiedCheckpoint    = types.PreviousJustifiedCheckpoint
 	currentJustifiedCheckpoint     = types.CurrentJustifiedCheckpoint
 	finalizedCheckpoint            = types.FinalizedCheckpoint
+	blockVoting                    = types.BlockVoting
 	inactivityScores               = types.InactivityScores
 	currentSyncCommittee           = types.CurrentSyncCommittee
 	nextSyncCommittee              = types.NextSyncCommittee
 	latestExecutionPayloadHeader   = types.LatestExecutionPayloadHeader
-	blockVoting                    = types.BlockVoting
 )
 
 // fieldMap keeps track of each field

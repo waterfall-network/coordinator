@@ -53,6 +53,7 @@ type ReadOnlyBeaconState interface {
 	IsNil() bool
 	Version() int
 	LatestExecutionPayloadHeader() (*ethpb.ExecutionPayloadHeader, error)
+	SpineData() *ethpb.SpineData
 }
 
 // WriteOnlyBeaconState defines a struct which only has write access to beacon state methods.
@@ -172,6 +173,7 @@ type WriteOnlyEth1Data interface {
 	AppendEth1DataVotes(val *ethpb.Eth1Data) error
 	SetEth1DepositIndex(val uint64) error
 	SetBlockVoting(val []*ethpb.BlockVoting) error
+	SetSpineData(val *ethpb.SpineData) error
 }
 
 // WriteOnlyValidators defines a struct which only has write access to validators methods.
