@@ -7,11 +7,6 @@ import (
 	"strconv"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/emptypb"
-
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/api/pagination"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/altair"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/epoch/precompute"
@@ -24,8 +19,12 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // ListValidatorBalances retrieves the validator balances for a given set of public keys.

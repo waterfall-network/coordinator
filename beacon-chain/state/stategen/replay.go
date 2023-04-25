@@ -8,8 +8,6 @@ import (
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
-	"go.opencensus.io/trace"
-
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/altair"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/execution"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
@@ -23,6 +21,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/tracing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
+	"go.opencensus.io/trace"
 )
 
 // ReplayBlocks replays the input blocks on the input state until the target slot is reached.
