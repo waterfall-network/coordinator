@@ -294,13 +294,14 @@ func RewardBeaconBlockRootProposer(ctx context.Context, beaconState state.Beacon
 	}
 	var beaconBlockRootArray [32]byte
 	copy(beaconBlockRootArray[:], beaconBlockRoot)
-	proposerIndex, proposedAtSlot, err := blockFetcher(ctx, beaconBlockRootArray)
+	proposerIndex, proposedAtSlot, votesIncluded, err := blockFetcher(ctx, beaconBlockRootArray)
 	if err != nil {
 		log.WithError(err).WithFields(log.Fields{
 			"SlotBlockWasProposedAt": proposedAtSlot,
 			"Slot":                   beaconState.Slot(),
 			"BeaconBlockRoot":        proposerIndex,
 			"ProposerReward":         proposerReward,
+			"VotesIncluded":          votesIncluded,
 		}).Error("CANNOT FETCH BEACON BLOCK INFO >>>>>>>>>>>>>")
 		return err
 	}
@@ -325,7 +326,7 @@ func RewardBeaconBlockRootProposer(ctx context.Context, beaconState state.Beacon
 	if err != nil {
 		return err
 	}
-	if err := helpers.LogBalanceChanges(uint64(beaconBlockRootProposerIndex), balAtIdx, proposerReward, newBalAtIdx, uint64(beaconState.Slot()), nil, helpers.Increase, helpers.BeaconBlockProposer); err != nil {
+	if err := helpers.LogBalanceChanges(uint64(beaconBlockRootProposerIndex), balAtIdx, proposerReward, newBalAtIdx, uint64(beaconState.Slot()), make([]uint64, votesIncluded), helpers.Increase, helpers.BeaconBlockProposer); err != nil {
 		return err
 	}
 

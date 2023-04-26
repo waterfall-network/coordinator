@@ -210,7 +210,7 @@ type BeaconChainConfig struct {
 }
 
 type BlockInfoFetcherContextKey string
-type BlockInfoFetcherContextValue func(context.Context, [32]byte) (types.ValidatorIndex, types.Slot, error)
+type BlockInfoFetcherContextValue func(context.Context, [32]byte) (types.ValidatorIndex, types.Slot, uint64, error)
 
 // InitializeForkSchedule initializes the schedules forks baked into the config.
 func (b *BeaconChainConfig) InitializeForkSchedule() {
