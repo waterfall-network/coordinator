@@ -458,7 +458,7 @@ func (s *Service) processDagFinalization(headBlock block.SignedBeaconBlock, head
 			"cp.Epch":          finParams.Checkpoint.Epoch,
 			"cp.Root":          finParams.Checkpoint.Root.Hex(),
 			"cp.Spine":         finParams.Checkpoint.Spine.Hex(),
-		}).Debug("Dag finalization: finalization params")
+		}).Info("Dag finalization: finalization params")
 
 		finRes, err := s.cfg.ExecutionEngineCaller.ExecutionDagFinalize(ctx, finParams)
 		baseSpine := finParams.BaseSpine

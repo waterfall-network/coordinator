@@ -1414,8 +1414,8 @@ github.com/yuin/goldmark v1.1.32/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9de
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.3.5/go.mod h1:mwnBkeHKe2W/ZEtQ+71ViKU8L12m81fl3OWwC1Zlc8k=
 github.com/yuin/goldmark v1.4.1/go.mod h1:mwnBkeHKe2W/ZEtQ+71ViKU8L12m81fl3OWwC1Zlc8k=
-gitlab.waterfall.network/waterfall/protocol/gwat v0.7.17 h1:eKMm79G93ev+PUo1P/zj0mJ3c+nsBbdqouC27VJKMeM=
-gitlab.waterfall.network/waterfall/protocol/gwat v0.7.17/go.mod h1:1tJFZgVNvRHs+rvRThPUqojbw+Rh4ci+rxfOXwJPbzc=
+gitlab.waterfall.network/waterfall/protocol/gwat v0.7.21 h1:IkTE91wPGR8KSqFXVmpLxomMfelKBDaTjw7Ylhm6LM4=
+gitlab.waterfall.network/waterfall/protocol/gwat v0.7.21/go.mod h1:1tJFZgVNvRHs+rvRThPUqojbw+Rh4ci+rxfOXwJPbzc=
 go.etcd.io/bbolt v1.3.2/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/bbolt v1.3.3/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/bbolt v1.3.5 h1:XAzx9gjCb0Rxj7EoqcClPD1d5ZBxZJk0jbuoPHenBt0=
