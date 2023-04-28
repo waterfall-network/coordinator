@@ -303,7 +303,8 @@ func RewardBeaconBlockRootProposer(ctx context.Context, beaconState state.Beacon
 		log.WithError(err).WithFields(log.Fields{
 			"SlotBlockWasProposedAt": proposedAtSlot,
 			"Slot":                   beaconState.Slot(),
-			"BeaconBlockRoot":        proposerIndex,
+			"BeaconBlockRoot":        beaconBlockRoot,
+			"ProposerIndex":          proposerIndex,
 			"ProposerReward":         proposerReward,
 			"VotesIncluded":          votesIncluded,
 		}).Error("CANNOT FETCH BEACON BLOCK INFO >>>>>>>>>>>>>")
@@ -335,12 +336,6 @@ func RewardBeaconBlockRootProposer(ctx context.Context, beaconState state.Beacon
 	}
 
 	return nil
-}
-
-// RewardForBlockVotes rewards proposer by increasing proposer's balance with input reward.
-// Block leader gets 1/8 of base reward v for each included vote in the block
-func RewardForBlockVotes(baseReward uint64, includedVotesNumber uint64) uint64 {
-	return uint64(float64(baseReward)*0.25) * includedVotesNumber
 }
 
 // AttestationParticipationFlagIndices retrieves a map of attestation scoring based on Altair's participation flag indices.
