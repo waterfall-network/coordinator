@@ -8,15 +8,16 @@ import (
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	log "github.com/sirupsen/logrus"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"go.opencensus.io/trace"
+
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
-	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/attestation"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
-	"go.opencensus.io/trace"
 )
 
 // ProcessAttestationsNoVerifySignature applies processing operations to a block's inner attestation
@@ -205,13 +206,6 @@ func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochPa
 		if index >= uint64(len(epochParticipation)) {
 			return 0, nil, fmt.Errorf("index %d exceeds participation length %d", index, len(epochParticipation))
 		}
-		log.WithFields(log.Fields{
-			"Slot":             beaconState.Slot(),
-			"Validator":        index,
-			"NumValidators":    numOfValidators,
-			"ActiveValidators": activeValidatorsForSlot,
-			"BaseReward":       br,
-		}).Debug("BASE REWARD >>>>>>>>>>>>>")
 		has, err := HasValidatorFlag(epochParticipation[index], sourceFlagIndex)
 		if err != nil {
 			return 0, nil, err
@@ -256,6 +250,17 @@ func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochPa
 			}
 			proposerReward += uint64(float64(br) * (cfg.DAGTimelyVotingWeight / 2))
 		}
+		log.WithFields(log.Fields{
+			"Slot":             beaconState.Slot(),
+			"Validator":        index,
+			"NumValidators":    numOfValidators,
+			"ActiveValidators": activeValidatorsForSlot,
+			"BaseReward":       br,
+			"sourceVoting":     participatedFlags[sourceFlagIndex],
+			"targetVoting":     participatedFlags[targetFlagIndex],
+			"headVoting":       participatedFlags[headFlagIndex],
+			"timelyVoting":     participatedFlags[sourceFlagIndex] && participatedFlags[targetFlagIndex] && participatedFlags[headFlagIndex],
+		}).Debug("BASE REWARD >>>>>>>>>>>>>")
 	}
 
 	return proposerReward, epochParticipation, nil
