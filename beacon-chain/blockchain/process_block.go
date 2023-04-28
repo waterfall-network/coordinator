@@ -7,7 +7,6 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed"
 	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
@@ -376,7 +375,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 			}
 		}()
 
-		if err := s.onFinCpUpdHandleGwatSyncParam(ctx, postState.FinalizedCheckpoint()); err != nil {
+		if err := s.onFinCpUpdHandleGwatSyncParam(ctx, postState.FinalizedCheckpoint(), slots.ToEpoch(postState.Slot())); err != nil {
 			return err
 		}
 	}
@@ -575,7 +574,7 @@ func (s *Service) handleBlockAfterBatchVerify(ctx context.Context, signed block.
 		}
 		s.store.SetPrevFinalizedCheckpt(finalized)
 		s.store.SetFinalizedCheckpt(fCheckpoint)
-		if err := s.onFinCpUpdHandleGwatSyncParam(ctx, fCheckpoint); err != nil {
+		if err := s.onFinCpUpdHandleGwatSyncParam(ctx, fCheckpoint, slots.ToEpoch(signed.Block().Slot())); err != nil {
 			return err
 		}
 	}
@@ -668,15 +667,16 @@ func (s *Service) insertBlockToForkChoiceStore(ctx context.Context, blk block.Be
 }
 
 func getBlockPayloadHash(blk block.BeaconBlock) ([32]byte, error) {
-	payloadHash := [32]byte{}
-	if blocks.IsPreBellatrixVersion(blk.Version()) {
-		return payloadHash, nil
-	}
-	payload, err := blk.Body().ExecutionPayload()
-	if err != nil {
-		return payloadHash, err
-	}
-	return bytesutil.ToBytes32(payload.BlockHash), nil
+	return [32]byte{}, nil
+	//payloadHash := [32]byte{}
+	//if blocks.IsPreBellatrixVersion(blk.Version()) {
+	//	return payloadHash, nil
+	//}
+	//payload, err := blk.Body().ExecutionPayload()
+	//if err != nil {
+	//	return payloadHash, err
+	//}
+	//return bytesutil.ToBytes32(payload.BlockHash), nil
 }
 
 // This saves post state info to DB or cache. This also saves post state info to fork choice store.

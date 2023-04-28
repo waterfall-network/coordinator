@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go.opencensus.io/trace"
 	"math/big"
+	"time"
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
@@ -37,6 +38,8 @@ func (s *Service) ExecutionDagFinalize(ctx context.Context, params *gwatTypes.Fi
 	defer span.End()
 	result := &gwatTypes.FinalizationResult{}
 
+	start := time.Now()
+
 	if s.rpcClient == nil {
 		return nil, fmt.Errorf("Rpc Client not init")
 	}
@@ -62,6 +65,10 @@ func (s *Service) ExecutionDagFinalize(ctx context.Context, params *gwatTypes.Fi
 	if result.Error != nil {
 		err = errors.New(*result.Error)
 	}
+
+	log.WithField("elapsed", time.Since(start)).WithField(
+		"api", ExecutionDagFinalizeMethod,
+	).Info("Request finish")
 
 	return result, handleDagRPCError(err)
 }
@@ -105,6 +112,8 @@ func (s *Service) ExecutionDagGetCandidates(ctx context.Context, slot types.Slot
 	defer span.End()
 	result := &gwatTypes.CandidatesResult{}
 
+	start := time.Now()
+
 	if s.rpcClient == nil {
 		return result.Candidates, fmt.Errorf("Rpc Client not init")
 	}
@@ -121,6 +130,11 @@ func (s *Service) ExecutionDagGetCandidates(ctx context.Context, slot types.Slot
 	if result.Candidates == nil {
 		result.Candidates = gwatCommon.HashArray{}
 	}
+
+	log.WithField("elapsed", time.Since(start)).WithField(
+		"api", ExecutionDagGetCandidatesMethod,
+	).Info("Request finish")
+
 	return result.Candidates, handleDagRPCError(err)
 }
 
@@ -155,6 +169,8 @@ func (s *Service) ExecutionDagValidateSpines(ctx context.Context, params gwatCom
 	defer span.End()
 	var result bool
 
+	start := time.Now()
+
 	if s.rpcClient == nil {
 		return result, fmt.Errorf("Rpc Client not init")
 	}
@@ -168,6 +184,10 @@ func (s *Service) ExecutionDagValidateSpines(ctx context.Context, params gwatCom
 	if err != nil {
 		log.WithError(err).Error("ExecutionDagValidateSpines")
 	}
+
+	log.WithField("elapsed", time.Since(start)).WithField(
+		"api", ExecutionDagValidateSpinesMethod,
+	).Info("Request finish")
 
 	return result, handleDagRPCError(err)
 }
