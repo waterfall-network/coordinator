@@ -64,6 +64,11 @@ type ChainService struct {
 	ReceiveBlockMockErr         error
 }
 
+func (s *ChainService) IsGwatSynchronizing() bool {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (s *ChainService) GetValidatedBlockInfo() ([]byte, types.Slot) {
 	//TODO implement me
 	panic("implement me")
