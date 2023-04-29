@@ -33,8 +33,6 @@ func (bs *Server) GetEth1Data(ctx context.Context, req *ethpbv.StateEth1DataRequ
 			DepositCount: eth1Data.DepositCount,
 			BlockHash:    eth1Data.BlockHash,
 			Candidates:   eth1Data.Candidates,
-			// TODO: uncomment when Finalization will be available, if it will be ever (comes from sync-validators branch)
-			//Finalization: eth1Data.Finalization,
 		},
 		ExecutionOptimistic: isOptimistic,
 	}, nil

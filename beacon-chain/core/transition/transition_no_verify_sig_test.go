@@ -24,7 +24,6 @@ func TestExecuteStateTransitionNoVerify_FullProcess(t *testing.T) {
 		DepositRoot:  bytesutil.PadTo([]byte{2}, 32),
 		BlockHash:    make([]byte, 32),
 		//Candidates:   make([]byte, 0),
-		//Finalization: make([]byte, 0),
 	}
 	require.NoError(t, beaconState.SetSlot(params.BeaconConfig().SlotsPerEpoch-1))
 	e := beaconState.Eth1Data()
@@ -82,7 +81,6 @@ func TestExecuteStateTransitionNoVerifySignature_CouldNotVerifyStateRoot(t *test
 		DepositRoot:  bytesutil.PadTo([]byte{2}, 32),
 		BlockHash:    make([]byte, 32),
 		Candidates:   make([]byte, 0),
-		Finalization: make([]byte, 0),
 	}
 	require.NoError(t, beaconState.SetSlot(params.BeaconConfig().SlotsPerEpoch-1))
 	e := beaconState.Eth1Data()
