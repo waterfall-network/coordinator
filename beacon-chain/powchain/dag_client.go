@@ -17,6 +17,8 @@ import (
 )
 
 const (
+	//ExecutionDagGetOptimisticSpines request string for JSON-RPC of dag api.
+	ExecutionDagGetOptimisticSpines = "dag_getOptimisticSpines"
 	//ExecutionDagGetCandidatesMethod request string for JSON-RPC of dag api.
 	ExecutionDagGetCandidatesMethod = "dag_getCandidates"
 	//ExecutionDagFinalizeMethod request string for JSON-RPC of dag api.
@@ -103,6 +105,39 @@ func (s *Service) ExecutionDagCoordinatedState(ctx context.Context) (*gwatTypes.
 	}
 
 	return result, handleDagRPCError(err)
+}
+
+// ExecutionDagGetOptimisticSpines executing consensus procedure
+// by calling dag_getOptimisticSpines via JSON-RPC.
+func (s *Service) ExecutionDagGetOptimisticSpines(ctx context.Context, fromSpine gwatCommon.Hash) ([]gwatCommon.HashArray, error) {
+	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagGetOptimisticSpines")
+	defer span.End()
+	result := &gwatTypes.OptimisticSpinesResult{}
+
+	start := time.Now()
+
+	if s.rpcClient == nil {
+		return result.Data, fmt.Errorf("Rpc Client not init")
+	}
+
+	err := s.rpcClient.CallContext(
+		ctx,
+		result,
+		ExecutionDagGetOptimisticSpines,
+		fromSpine,
+	)
+	if result.Error != nil {
+		err = errors.New(*result.Error)
+	}
+	if result.Data == nil {
+		result.Data = []gwatCommon.HashArray{}
+	}
+
+	log.WithField("elapsed", time.Since(start)).WithField(
+		"api", ExecutionDagGetOptimisticSpines,
+	).Info("Request finish")
+
+	return result.Data, handleDagRPCError(err)
 }
 
 // ExecutionDagGetCandidates executing consensus procedure

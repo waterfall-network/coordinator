@@ -54,6 +54,11 @@ func (m *POWChain) ExecutionDagFinalize(ctx context.Context, finParams *gwatType
 	panic("implement me")
 }
 
+func (m *POWChain) ExecutionDagGetOptimisticSpines(ctx context.Context, fromSpine gwatCommon.Hash) ([]gwatCommon.HashArray, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (m *POWChain) ExecutionDagCoordinatedState(ctx context.Context) (*gwatTypes.FinalizationResult, error) {
 	//TODO implement me
 	panic("implement me")

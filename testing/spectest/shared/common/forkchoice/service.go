@@ -92,6 +92,11 @@ func (m *engineMock) ExecutionDagGetCandidates(ctx context.Context, slot types.S
 	panic("implement me")
 }
 
+func (m *engineMock) ExecutionDagGetOptimisticSpines(ctx context.Context, fromSpine gwatCommon.Hash) ([]gwatCommon.HashArray, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (m *engineMock) GetHeaderByHash(ctx context.Context, hash gwatCommon.Hash) (*gwatTypes.Header, error) {
 	//TODO implement me
 	panic("implement me")

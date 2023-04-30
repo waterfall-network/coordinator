@@ -33,6 +33,13 @@ func TestDagClient_IPC(t *testing.T) {
 	ctx := context.Background()
 	fix := dagFixtures()
 
+	t.Run(ExecutionDagGetOptimisticSpines, func(t *testing.T) {
+		want, ok := fix["ExecutionOptimisticSpines"].(*gwatTypes.OptimisticSpinesResult)
+		require.Equal(t, true, ok)
+		resp, err := srv.ExecutionDagGetOptimisticSpines(ctx, gwatCommon.Hash{})
+		require.NoError(t, err)
+		require.DeepEqual(t, want.Data, resp)
+	})
 	t.Run(ExecutionDagGetCandidatesMethod, func(t *testing.T) {
 		want, ok := fix["ExecutionCandidates"].(*gwatTypes.CandidatesResult)
 		require.Equal(t, true, ok)
@@ -70,6 +77,38 @@ func TestDagClient_HTTP(t *testing.T) {
 	ctx := context.Background()
 	fix := dagFixtures()
 
+	t.Run(ExecutionDagGetOptimisticSpines, func(t *testing.T) {
+		want, ok := fix["ExecutionOptimisticSpines"].(*gwatTypes.OptimisticSpinesResult)
+		require.Equal(t, true, ok)
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			defer func() {
+				require.NoError(t, r.Body.Close())
+			}()
+			_, err := ioutil.ReadAll(r.Body)
+			require.NoError(t, err)
+			resp := map[string]interface{}{
+				"jsonrpc": "2.0",
+				"id":      1,
+				"result":  want,
+			}
+			err = json.NewEncoder(w).Encode(resp)
+			require.NoError(t, err)
+		}))
+		defer srv.Close()
+
+		rpcClient, err := rpc.DialHTTP(srv.URL)
+		require.NoError(t, err)
+		defer rpcClient.Close()
+
+		service := &Service{}
+		service.rpcClient = rpcClient
+
+		// We call the RPC method via HTTP and expect a proper result.
+		resp, err := service.ExecutionDagGetOptimisticSpines(ctx, gwatCommon.Hash{})
+		require.NoError(t, err)
+		require.DeepEqual(t, want.Data, resp)
+	})
 	t.Run(ExecutionDagGetCandidatesMethod, func(t *testing.T) {
 		want, ok := fix["ExecutionCandidates"].(*gwatTypes.CandidatesResult)
 		require.Equal(t, true, ok)
@@ -215,6 +254,11 @@ func dagFixtures() map[string]interface{} {
 		Candidates: gwatCommon.HashArray{hash_1},
 	}
 
+	executionOptimisticSpines := &gwatTypes.OptimisticSpinesResult{
+		Error: nil,
+		Data:  []gwatCommon.HashArray{gwatCommon.HashArray{hash_1, hash_1}, gwatCommon.HashArray{hash_1, hash_1}},
+	}
+
 	finErr := "test error"
 	executionFinalize := &gwatTypes.FinalizationResult{
 		Error:   &finErr,
@@ -224,14 +268,26 @@ func dagFixtures() map[string]interface{} {
 	}
 
 	return map[string]interface{}{
-		"ExecutionFinalize":   executionFinalize,
-		"ExecutionCandidates": executionCandidates,
+		"ExecutionFinalize":         executionFinalize,
+		"ExecutionCandidates":       executionCandidates,
+		"ExecutionOptimisticSpines": executionOptimisticSpines,
 	}
 }
 
 type testDagEngineService struct{}
 
 func (*testDagEngineService) NoArgsRets() {}
+
+func (*testDagEngineService) GetOptimisticSpines(
+	_ context.Context, fromSpine gwatCommon.Hash,
+) *gwatTypes.OptimisticSpinesResult {
+	fix := dagFixtures()
+	item, ok := fix["ExecutionOptimisticSpines"].(*gwatTypes.OptimisticSpinesResult)
+	if !ok {
+		panic("not found")
+	}
+	return item
+}
 
 func (*testDagEngineService) GetCandidates(
 	_ context.Context, slot uint64,

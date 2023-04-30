@@ -37,6 +37,10 @@ func (e *EngineClient) ExecutionDagGetCandidates(ctx context.Context, slot types
 	panic("implement me")
 }
 
+func (e *EngineClient) ExecutionDagGetOptimisticSpines(ctx context.Context, fromSpine gwatCommon.Hash) ([]gwatCommon.HashArray, error) {
+	panic("implement me")
+}
+
 func (e *EngineClient) ExecutionDagFinalize(ctx context.Context, finParams *gwatTypes.FinalizationParams) (*gwatTypes.FinalizationResult, error) {
 	panic("implement me")
 }
