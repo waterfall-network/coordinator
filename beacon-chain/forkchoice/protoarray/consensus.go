@@ -4,7 +4,7 @@ import (
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
-// GetNode searches root of the first fork of current ForkChoice.
+// GetNode retrieves node by root.
 func (f *ForkChoice) GetNode(root [32]byte) *Node {
 	if !f.HasNode(root) {
 		return nil
