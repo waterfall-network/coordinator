@@ -65,3 +65,8 @@ type Vote struct {
 
 // NonExistentNode defines an unknown node which is used for the array based stateful DAG.
 const NonExistentNode = ^uint64(0)
+
+type Fork struct {
+	roots    [][32]byte
+	nodesMap map[[32]byte]*Node
+}
