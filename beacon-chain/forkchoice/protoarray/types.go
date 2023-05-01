@@ -45,6 +45,9 @@ type Node struct {
 	bestChild      uint64                       // bestChild index of this node.
 	bestDescendant uint64                       // bestDescendant of this node.
 	status         status                       // optimistic status of this node
+	// optimistic consensus data
+	spinesData *SpinesData
+	attsData   *AttestationsData
 }
 
 // enum used as optimistic status of a node
@@ -65,8 +68,3 @@ type Vote struct {
 
 // NonExistentNode defines an unknown node which is used for the array based stateful DAG.
 const NonExistentNode = ^uint64(0)
-
-type Fork struct {
-	roots    [][32]byte
-	nodesMap map[[32]byte]*Node
-}

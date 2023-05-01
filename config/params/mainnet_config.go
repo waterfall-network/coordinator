@@ -201,6 +201,7 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	BeaconStateAltairFieldCount:    24 + 2,
 	BeaconStateBellatrixFieldCount: 25 + 2,
 	BlockVotingMinSupportPrc:       66,
+	SpinePublicationsPefixSupport:  3,
 
 	// Slasher related values.
 	WeakSubjectivityPeriod:          54000,
