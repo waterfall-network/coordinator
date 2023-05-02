@@ -29,13 +29,19 @@ type HeadRetriever interface {
 
 // BlockProcessor processes the block that's used for accounting fork choice.
 type BlockProcessor interface {
-	InsertOptimisticBlock(ctx context.Context,
+	InsertOptimisticBlock(
+		ctx context.Context,
 		slot types.Slot,
-		root [32]byte,
+		blockRoot [32]byte,
 		parentRoot [32]byte,
 		payloadHash [32]byte,
 		justifiedEpoch types.Epoch,
 		finalizedEpoch types.Epoch,
+		justifiedRoot []byte,
+		finalizedRoot []byte,
+		atts []*pbrpc.Attestation,
+		spines []byte,
+		stFinalised []byte,
 	) error
 }
 

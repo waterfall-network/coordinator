@@ -374,10 +374,22 @@ func (s *Service) fillInForkChoiceMissingBlocks(ctx context.Context, blk block.B
 		if err != nil {
 			return err
 		}
+
+		st, err := s.cfg.StateGen.StateByRoot(ctx, pendingRoots[i])
+		if err != nil {
+			return err
+		}
+
 		if err := s.cfg.ForkChoiceStore.InsertOptimisticBlock(ctx,
 			b.Slot(), r, bytesutil.ToBytes32(b.ParentRoot()), payloadHash,
 			jCheckpoint.Epoch,
-			fCheckpoint.Epoch); err != nil {
+			fCheckpoint.Epoch,
+			jCheckpoint.Root,
+			fCheckpoint.Root,
+			b.Body().Attestations(),
+			b.Body().Eth1Data().Candidates,
+			st.SpineData().Finalization,
+		); err != nil {
 			return errors.Wrap(err, "could not process block for proto array fork choice")
 		}
 	}

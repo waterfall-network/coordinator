@@ -451,6 +451,7 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 		return nil, nil, fmt.Errorf("nil pre state for slot %d", b.Slot())
 	}
 
+	stFinalizations := make([][]byte, len(blks))
 	jCheckpoints := make([]*ethpb.Checkpoint, len(blks))
 	fCheckpoints := make([]*ethpb.Checkpoint, len(blks))
 	sigSet := &bls.SignatureBatch{
@@ -469,6 +470,7 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 			}).Error("Block batch handling error")
 			return nil, nil, err
 		}
+		stFinalizations[i] = bytesutil.SafeCopyBytes(preState.SpineData().Finalization)
 		// Save potential boundary states.
 		if slots.IsEpochStart(preState.Slot()) {
 			boundaries[blockRoots[i]] = preState.Copy()
@@ -498,12 +500,7 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 	for i, b := range blks {
 		s.saveInitSyncBlock(blockRoots[i], b)
 
-		var st state.BeaconState
-		st, err = s.cfg.StateGen.StateByRoot(ctx, blockRoots[i])
-		if err != nil {
-			return nil, nil, err
-		}
-		if err = s.insertBlockToForkChoiceStore(ctx, b.Block(), blockRoots[i], fCheckpoints[i], jCheckpoints[i], st.SpineData().Finalization); err != nil {
+		if err = s.insertBlockToForkChoiceStore(ctx, b.Block(), blockRoots[i], fCheckpoints[i], jCheckpoints[i], stFinalizations[i]); err != nil {
 			return nil, nil, err
 		}
 
@@ -675,9 +672,16 @@ func (s *Service) insertBlockToForkChoiceStore(
 		return err
 	}
 	return s.cfg.ForkChoiceStore.InsertOptimisticBlock(ctx,
-		blk.Slot(), root, bytesutil.ToBytes32(blk.ParentRoot()), payloadHash,
+		blk.Slot(), root, bytesutil.ToBytes32(blk.ParentRoot()),
+		payloadHash,
 		jCheckpoint.Epoch,
-		fCheckpoint.Epoch)
+		fCheckpoint.Epoch,
+		jCheckpoint.Root,
+		fCheckpoint.Root,
+		blk.Body().Attestations(),
+		blk.Body().Eth1Data().Candidates,
+		stFinalization,
+	)
 }
 
 func getBlockPayloadHash(blk block.BeaconBlock) ([32]byte, error) {

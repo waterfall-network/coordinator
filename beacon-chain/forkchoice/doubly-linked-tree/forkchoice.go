@@ -11,7 +11,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	pbrpc "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
 	"go.opencensus.io/trace"
 )
 
@@ -111,33 +110,17 @@ func (f *ForkChoice) ProcessAttestation(ctx context.Context, validatorIndices []
 func (f *ForkChoice) InsertOptimisticBlock(
 	ctx context.Context,
 	slot types.Slot,
-	blockRoot, parentRoot, payloadHash [fieldparams.RootLength]byte,
+	blockRoot, parentRoot, payloadHash [32]byte,
 	justifiedEpoch, finalizedEpoch types.Epoch,
+	//optimistic consensus params
+	justifiedRoot, finalizedRoot []byte,
+	atts []*pbrpc.Attestation,
+	spines, stFinalised []byte,
 ) error {
 	ctx, span := trace.StartSpan(ctx, "doublyLinkedForkchoice.InsertOptimisticBlock")
 	defer span.End()
 
 	return f.store.insert(ctx, slot, blockRoot, parentRoot, payloadHash, justifiedEpoch, finalizedEpoch)
-}
-
-// InsertOptimisticConsensusBlock processes a new block by inserting it to the fork choice store.
-func (f *ForkChoice) InsertOptimisticConsensusBlock(ctx context.Context,
-	blk block.BeaconBlock,
-	blockRoot [32]byte,
-	fCheckpoint, jCheckpoint *pbrpc.Checkpoint,
-	stFinalized []byte,
-) error {
-	ctx, span := trace.StartSpan(ctx, "doublyLinkedForkchoice.InsertOptimisticConsensusBlock")
-	defer span.End()
-
-	return f.store.insert(ctx,
-		blk.Slot(),
-		blockRoot,
-		bytesutil.ToBytes32(blk.ParentRoot()),
-		params.BeaconConfig().ZeroHash,
-		jCheckpoint.Epoch,
-		fCheckpoint.Epoch,
-	)
 }
 
 // Prune prunes the fork choice store with the new finalized root. The store is only pruned if the input

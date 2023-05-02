@@ -12,7 +12,9 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	pmath "gitlab.waterfall.network/waterfall/protocol/coordinator/math"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	pbrpc "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	"go.opencensus.io/trace"
 )
 
@@ -122,11 +124,29 @@ func (f *ForkChoice) InsertOptimisticBlock(
 	ctx context.Context,
 	slot types.Slot,
 	blockRoot, parentRoot, payloadHash [32]byte,
-	justifiedEpoch, finalizedEpoch types.Epoch) error {
+	justifiedEpoch, finalizedEpoch types.Epoch,
+	//optimistic consensus params
+	justifiedRoot, finalizedRoot []byte,
+	atts []*ethpb.Attestation,
+	spines, stFinalised []byte,
+) error {
 	ctx, span := trace.StartSpan(ctx, "protoArrayForkChoice.InsertOptimisticBlock")
 	defer span.End()
 
-	return f.store.insert(ctx, slot, blockRoot, parentRoot, payloadHash, justifiedEpoch, finalizedEpoch)
+	return f.store.insert(ctx,
+		slot,
+		blockRoot,
+		parentRoot,
+		payloadHash,
+		justifiedEpoch,
+		finalizedEpoch,
+		//optimistic consensus params
+		bytesutil.ToBytes32(justifiedRoot),
+		bytesutil.ToBytes32(finalizedRoot),
+		atts,
+		spines,
+		stFinalised,
+	)
 }
 
 // Prune prunes the fork choice store with the new finalized root. The store is only pruned if the input
@@ -315,8 +335,18 @@ func (s *Store) updateCanonicalNodes(ctx context.Context, root [32]byte) error {
 // It then updates the new node's parent with best child and descendant node.
 func (s *Store) insert(ctx context.Context,
 	slot types.Slot,
-	root, parent, payloadHash [32]byte,
-	justifiedEpoch, finalizedEpoch types.Epoch) error {
+	root [32]byte,
+	parent [32]byte,
+	payloadHash [32]byte,
+	justifiedEpoch,
+	finalizedEpoch types.Epoch,
+	//optimistic consensus params
+	justifiedRoot,
+	finalizedRoot [32]byte,
+	atts []*ethpb.Attestation,
+	spines []byte,
+	stFinalised []byte,
+) error {
 	_, span := trace.StartSpan(ctx, "protoArrayForkChoice.insert")
 	defer span.End()
 
@@ -328,11 +358,20 @@ func (s *Store) insert(ctx context.Context,
 		return nil
 	}
 
+	var parentNode *Node
 	index := uint64(len(s.nodes))
 	parentIndex, ok := s.nodesIndices[parent]
 	// Mark genesis block's parent as non-existent.
 	if !ok {
 		parentIndex = NonExistentNode
+	} else {
+		parentNode = s.nodes[parentIndex]
+	}
+
+	attsData := NewAttestationsData(atts, justifiedRoot, finalizedRoot)
+	spinesData, err := NewSpinesData(parentNode, gwatCommon.HashArrayFromBytes(spines), gwatCommon.HashArrayFromBytes(stFinalised))
+	if err != nil {
+		return err
 	}
 
 	n := &Node{
@@ -345,6 +384,8 @@ func (s *Store) insert(ctx context.Context,
 		bestDescendant: NonExistentNode,
 		weight:         0,
 		payloadHash:    payloadHash,
+		attsData:       attsData,
+		spinesData:     spinesData,
 	}
 
 	s.nodesIndices[root] = index

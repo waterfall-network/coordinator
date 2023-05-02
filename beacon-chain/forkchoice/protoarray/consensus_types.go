@@ -65,8 +65,8 @@ func NewAttestationsData(
 	atts []*ethpb.Attestation,
 	justifiedRoot [32]byte,
 	finalizedRoot [32]byte,
-) AttestationsData {
-	return AttestationsData{
+) *AttestationsData {
+	return &AttestationsData{
 		atts:          atts,
 		justifiedRoot: justifiedRoot,
 		finalizedRoot: finalizedRoot,

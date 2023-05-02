@@ -244,9 +244,24 @@ func (s *Service) StartFromSavedState(saved state.BeaconState) error {
 	if err != nil {
 		return errors.Wrap(err, "could not get execution payload hash")
 	}
+
+	calcRoot, err := fb.Block().HashTreeRoot()
+	if err != nil {
+		return errors.Wrap(err, "could not get state for forkchoice")
+	}
+	st, err := s.cfg.StateGen.StateByRoot(s.ctx, calcRoot)
+	if err != nil {
+		return errors.Wrap(err, "could not get state for forkchoice")
+	}
+
 	fSlot := fb.Block().Slot()
 	if err := fc.InsertOptimisticBlock(s.ctx, fSlot, fRoot, params.BeaconConfig().ZeroHash,
-		payloadHash, justified.Epoch, finalized.Epoch); err != nil {
+		payloadHash, justified.Epoch, finalized.Epoch,
+		justified.Root, finalized.Root,
+		fb.Block().Body().Attestations(),
+		fb.Block().Body().Eth1Data().Candidates,
+		st.SpineData().Finalization,
+	); err != nil {
 		return errors.Wrap(err, "could not insert finalized block to forkchoice")
 	}
 
@@ -517,7 +532,13 @@ func (s *Service) saveGenesisData(ctx context.Context, genesisState state.Beacon
 		params.BeaconConfig().ZeroHash,
 		payloadHash,
 		genesisCheckpoint.Epoch,
-		genesisCheckpoint.Epoch); err != nil {
+		genesisCheckpoint.Epoch,
+		genesisCheckpoint.Root,
+		genesisCheckpoint.Root,
+		genesisBlk.Block().Body().Attestations(),
+		genesisBlk.Block().Body().Eth1Data().Candidates,
+		genesisState.SpineData().Finalization,
+	); err != nil {
 		log.Fatalf("Could not process genesis block for fork choice: %v", err)
 	}
 	if err := s.cfg.ForkChoiceStore.SetOptimisticToValid(ctx, genesisBlkRoot); err != nil {
