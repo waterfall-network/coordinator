@@ -96,5 +96,7 @@ func copyNode(node *Node) *Node {
 		bestChild:      node.bestChild,
 		bestDescendant: node.bestDescendant,
 		status:         node.status,
+		spinesData:     node.spinesData.Copy(),
+		attsData:       node.attsData.Copy(),
 	}
 }

@@ -51,6 +51,9 @@ func (ad *AttestationsData) FinalizedRoot() [32]byte {
 }
 
 func (ad *AttestationsData) Copy() *AttestationsData {
+	if ad == nil {
+		return nil
+	}
 	return &AttestationsData{
 		atts:          ad.Attesatations(),
 		justifiedRoot: ad.JustifiedRoot(),
@@ -89,6 +92,9 @@ func (rc *SpinesData) unpublishedChains() []gwatCommon.HashArray {
 	return cpy
 }
 func (rc *SpinesData) Copy() *SpinesData {
+	if rc == nil {
+		return nil
+	}
 	return &SpinesData{
 		spines:      rc.Spines(),
 		prefix:      rc.Prefix(),

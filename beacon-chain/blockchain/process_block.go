@@ -498,7 +498,12 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 	for i, b := range blks {
 		s.saveInitSyncBlock(blockRoots[i], b)
 
-		if err := s.insertBlockToForkChoiceStore(ctx, b.Block(), blockRoots[i], fCheckpoints[i], jCheckpoints[i]); err != nil {
+		var st state.BeaconState
+		st, err = s.cfg.StateGen.StateByRoot(ctx, blockRoots[i])
+		if err != nil {
+			return nil, nil, err
+		}
+		if err = s.insertBlockToForkChoiceStore(ctx, b.Block(), blockRoots[i], fCheckpoints[i], jCheckpoints[i], st.SpineData().Finalization); err != nil {
 			return nil, nil, err
 		}
 
@@ -624,14 +629,18 @@ func (s *Service) handleEpochBoundary(ctx context.Context, postState state.Beaco
 
 // This feeds in the block and block's attestations to fork choice store. It's allows fork choice store
 // to gain information on the most current chain.
-func (s *Service) insertBlockAndAttestationsToForkChoiceStore(ctx context.Context, blk block.BeaconBlock, root [32]byte,
-	st state.BeaconState) error {
+func (s *Service) insertBlockAndAttestationsToForkChoiceStore(
+	ctx context.Context,
+	blk block.BeaconBlock,
+	root [32]byte,
+	st state.BeaconState,
+) error {
 	ctx, span := trace.StartSpan(ctx, "blockChain.insertBlockAndAttestationsToForkChoiceStore")
 	defer span.End()
 
 	fCheckpoint := st.FinalizedCheckpoint()
 	jCheckpoint := st.CurrentJustifiedCheckpoint()
-	if err := s.insertBlockToForkChoiceStore(ctx, blk, root, fCheckpoint, jCheckpoint); err != nil {
+	if err := s.insertBlockToForkChoiceStore(ctx, blk, root, fCheckpoint, jCheckpoint, st.SpineData().Finalization); err != nil {
 		return err
 	}
 	// Feed in block's attestations to fork choice store.
@@ -649,8 +658,13 @@ func (s *Service) insertBlockAndAttestationsToForkChoiceStore(ctx context.Contex
 	return nil
 }
 
-func (s *Service) insertBlockToForkChoiceStore(ctx context.Context, blk block.BeaconBlock,
-	root [32]byte, fCheckpoint, jCheckpoint *ethpb.Checkpoint) error {
+func (s *Service) insertBlockToForkChoiceStore(
+	ctx context.Context,
+	blk block.BeaconBlock,
+	root [32]byte,
+	fCheckpoint, jCheckpoint *ethpb.Checkpoint,
+	stFinalization []byte,
+) error {
 	if err := s.fillInForkChoiceMissingBlocks(ctx, blk, fCheckpoint, jCheckpoint); err != nil {
 		return err
 	}

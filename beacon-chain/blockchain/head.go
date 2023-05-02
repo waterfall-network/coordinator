@@ -100,7 +100,11 @@ func (s *Service) updateHead(ctx context.Context, balances []uint64) ([32]byte, 
 		} else {
 			s.cfg.ForkChoiceStore = protoarray.New(j.Epoch, f.Epoch, bytesutil.ToBytes32(f.Root))
 		}
-		if err := s.insertBlockToForkChoiceStore(ctx, jb.Block(), headStartRoot, f, j); err != nil {
+		st, err := s.cfg.StateGen.StateByRoot(ctx, headStartRoot)
+		if err != nil {
+			return [32]byte{}, err
+		}
+		if err := s.insertBlockToForkChoiceStore(ctx, jb.Block(), headStartRoot, f, j, st.SpineData().Finalization); err != nil {
 			return [32]byte{}, err
 		}
 	}
