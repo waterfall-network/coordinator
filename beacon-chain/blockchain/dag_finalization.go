@@ -119,6 +119,7 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 			return nil
 		}
 		log.WithFields(logrus.Fields{
+			"syncParams.FinEpoch":  syncParams.FinEpoch(),
 			"syncParams.Epoch":     syncParams.Epoch(),
 			"syncParams.Root":      fmt.Sprintf("%#x", syncParams.Root()),
 			"syncParams.CP.Epoch":  syncParams.Param().Checkpoint.Epoch,
@@ -210,7 +211,7 @@ func (s *Service) runProcessDagFinalize() {
 }
 
 // onFinCpUpdHandleGwatSyncParam calculate and save gwat sync params
-func (s *Service) onFinCpUpdHandleGwatSyncParam(ctx context.Context, cp *ethpb.Checkpoint) error {
+func (s *Service) onFinCpUpdHandleGwatSyncParam(ctx context.Context, cp *ethpb.Checkpoint, cpFinEpoch types.Epoch) error {
 	ctx, span := trace.StartSpan(ctx, "blockChain.onFinCpUpdHandleGwatSyncParam")
 	defer span.End()
 
@@ -261,9 +262,10 @@ func (s *Service) onFinCpUpdHandleGwatSyncParam(ctx context.Context, cp *ethpb.C
 			prevSpines := prevCheckParam.Param().Spines
 			lastSpine := prevSpines[len(prevSpines)-1]
 			prevCp = &gwatTypes.Checkpoint{
-				Epoch: uint64(prevCheckParam.Epoch()),
-				Root:  gwatCommon.BytesToHash(prevCheckParam.Root()),
-				Spine: lastSpine,
+				Epoch:    uint64(prevCheckParam.Epoch()),
+				FinEpoch: uint64(prevCheckParam.FinEpoch()),
+				Root:     gwatCommon.BytesToHash(prevCheckParam.Root()),
+				Spine:    lastSpine,
 			}
 			break
 		}
@@ -272,8 +274,9 @@ func (s *Service) onFinCpUpdHandleGwatSyncParam(ctx context.Context, cp *ethpb.C
 			prevCp, err = s.createGenesisCoordinatedCheckpoint(ctx)
 			if err != nil {
 				log.WithError(err).WithFields(logrus.Fields{
-					"cp.Epoch": cp.Epoch,
-					"cp.Root":  fmt.Sprintf("%#x", cp.Root),
+					"cpFinEpoch": cpFinEpoch,
+					"cp.Epoch":   cp.Epoch,
+					"cp.Root":    fmt.Sprintf("%#x", cp.Root),
 				}).Error("Save gwat sync params: create genesis checkpoint failed")
 				return err
 			}
@@ -282,11 +285,13 @@ func (s *Service) onFinCpUpdHandleGwatSyncParam(ctx context.Context, cp *ethpb.C
 	}
 
 	log.WithFields(logrus.Fields{
-		"cp.Epoch":     cp.Epoch,
-		"cp.Root":      fmt.Sprintf("%#x", cp.Root),
-		"prevCp.Epoch": prevCp.Epoch,
-		"prevCp.Root":  fmt.Sprintf("%#x", prevCp.Root),
-		"prevCp.Spine": fmt.Sprintf("%#x", prevCp.Spine),
+		"cpFinEpoch":      cpFinEpoch,
+		"cp.Epoch":        cp.Epoch,
+		"cp.Root":         fmt.Sprintf("%#x", cp.Root),
+		"prevCp.FinEpoch": prevCp.FinEpoch,
+		"prevCp.Epoch":    prevCp.Epoch,
+		"prevCp.Root":     fmt.Sprintf("%#x", prevCp.Root),
+		"prevCp.Spine":    fmt.Sprintf("%#x", prevCp.Spine),
 	}).Debug("Save gwat sync params:: previous checkpoint found")
 
 	// collect finalization params
@@ -299,20 +304,23 @@ func (s *Service) onFinCpUpdHandleGwatSyncParam(ctx context.Context, cp *ethpb.C
 		return err
 	}
 	log.WithFields(logrus.Fields{
-		"cp.Epoch":                   cp.Epoch,
-		"cp.Root":                    fmt.Sprintf("%#x", cp.Root),
-		"gwatSyncParam.Spines":       finParams.Spines,
-		"gwatSyncParam.BaseSpine":    fmt.Sprintf("%#x", finParams.BaseSpine),
-		"finParams.Checkpoint.Spine": fmt.Sprintf("%#x", finParams.Checkpoint.Spine),
-		"finParams.Checkpoint.Root":  fmt.Sprintf("%#x", finParams.Checkpoint.Root),
-		"finParams.Checkpoint.Epoch": finParams.Checkpoint.Epoch,
-	}).Debug("Save gwat sync params:: gwat sync param calculated")
+		"cpFinEpoch":              cpFinEpoch,
+		"cp.Epoch":                cp.Epoch,
+		"cp.Root":                 fmt.Sprintf("%#x", cp.Root),
+		"gwatSyncParam.Spines":    finParams.Spines,
+		"gwatSyncParam.BaseSpine": fmt.Sprintf("%#x", finParams.BaseSpine),
+		"finParams.CP.Spine":      fmt.Sprintf("%#x", finParams.Checkpoint.Spine),
+		"finParams.CP.Root":       fmt.Sprintf("%#x", finParams.Checkpoint.Root),
+		"finParams.CP.Epoch":      finParams.Checkpoint.Epoch,
+		"finParams.CP.FinEpoch":   finParams.Checkpoint.FinEpoch,
+	}).Info("Save gwat sync params:: gwat sync param calculated")
 
 	//Save gwat sync param
-	gsp := wrapper.NewGwatSyncParam(cp, finParams)
+	gsp := wrapper.NewGwatSyncParam(cp, finParams, cpFinEpoch)
 	err = s.cfg.BeaconDB.SaveGwatSyncParam(ctx, *gsp)
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
+			"cpFinEpoch": cpFinEpoch,
 			"cp.Epoch":   cp.Epoch,
 			"state.Slot": cpState.Slot(),
 		}).Error("Save gwat sync params: save param error")
@@ -455,6 +463,7 @@ func (s *Service) processDagFinalization(headBlock block.SignedBeaconBlock, head
 		log.WithFields(logrus.Fields{
 			"params.Spines":    finParams.Spines,
 			"params.BaseSpine": finParams.BaseSpine.Hex(),
+			"cp.FinEpoch":      finParams.Checkpoint.FinEpoch,
 			"cp.Epch":          finParams.Checkpoint.Epoch,
 			"cp.Root":          finParams.Checkpoint.Root.Hex(),
 			"cp.Spine":         finParams.Checkpoint.Spine.Hex(),
@@ -467,11 +476,12 @@ func (s *Service) processDagFinalization(headBlock block.SignedBeaconBlock, head
 		fSeq := append(gwatCommon.HashArray{*baseSpine}, finalizing...)
 		if err != nil || lfSpine == nil {
 			log.WithError(err).WithFields(logrus.Fields{
-				"params.Spines":           finParams.Spines,
-				"params.BaseSpine":        finParams.BaseSpine.Hex(),
-				"checkpoint":              finParams.Checkpoint.Epoch,
-				"params.Checkpoint.Spine": finParams.Checkpoint.Spine.Hex(),
-				"lfSpine":                 fmt.Sprintf("%#x", lfSpine),
+				"params.Spines":      finParams.Spines,
+				"params.BaseSpine":   finParams.BaseSpine.Hex(),
+				"params.Cp.FinEpoch": finParams.Checkpoint.FinEpoch,
+				"params.Cp.Epoch":    finParams.Checkpoint.Epoch,
+				"params.Cp.Spine":    finParams.Checkpoint.Spine.Hex(),
+				"lfSpine":            fmt.Sprintf("%#x", lfSpine),
 			}).Error("Dag finalization: execution failed")
 			return errors.Wrap(err, "Dag finalization: execution failed")
 		}
@@ -595,10 +605,11 @@ func (s *Service) collectFinalizationParams(
 	}
 
 	log.WithFields(logrus.Fields{
-		"cpSlot":                 cpSlot,
-		"paramCpFinalized.Epoch": paramCpFinalized.Epoch,
-		"paramCpFinalized.Root":  fmt.Sprintf("%#x", paramCpFinalized.Root),
-		"paramCpFinalized.Spine": fmt.Sprintf("%#x", paramCpFinalized.Spine),
+		"cpSlot":                    cpSlot,
+		"paramCpFinalized.FinEpoch": paramCpFinalized.FinEpoch,
+		"paramCpFinalized.Epoch":    paramCpFinalized.Epoch,
+		"paramCpFinalized.Root":     fmt.Sprintf("%#x", paramCpFinalized.Root),
+		"paramCpFinalized.Spine":    fmt.Sprintf("%#x", paramCpFinalized.Spine),
 	}).Debug("Collect finalization params: finalized checkpoint")
 
 	finalizedSpines := s.GetFinalizedSpines()
@@ -740,9 +751,10 @@ func (s *Service) getRequestGwatCheckpoint(
 	}
 	finalization := gwatCommon.HashArrayFromBytes(cpState.SpineData().Finalization)
 	return &gwatTypes.Checkpoint{
-		Epoch: uint64(checkpoint.Epoch),
-		Root:  gwatCommon.BytesToHash(checkpoint.Root),
-		Spine: finalization[len(finalization)-1], // use last spine
+		FinEpoch: uint64(slots.ToEpoch(headState.Slot())),
+		Epoch:    uint64(checkpoint.Epoch),
+		Root:     gwatCommon.BytesToHash(checkpoint.Root),
+		Spine:    finalization[len(finalization)-1], // use last spine
 	}, nil
 }
 
@@ -909,9 +921,10 @@ func (s *Service) createGenesisCoordinatedCheckpoint(ctx context.Context) (*gwat
 	cpRoot := gwatCommon.BytesToHash(genRoot[:])
 	lfSpine := gwatCommon.BytesToHash(genesisSt.Eth1Data().BlockHash)
 	return &gwatTypes.Checkpoint{
-		Epoch: cpEpoch,
-		Root:  cpRoot,
-		Spine: lfSpine,
+		Epoch:    cpEpoch,
+		FinEpoch: cpEpoch,
+		Root:     cpRoot,
+		Spine:    lfSpine,
 	}, nil
 }
 
