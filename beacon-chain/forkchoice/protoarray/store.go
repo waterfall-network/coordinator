@@ -34,7 +34,6 @@ func New(justifiedEpoch, finalizedEpoch types.Epoch, finalizedRoot [32]byte) *Fo
 		proposerBoostRoot: [32]byte{},
 		nodes:             make([]*Node, 0),
 		nodesIndices:      make(map[[32]byte]uint64),
-		payloadIndices:    make(map[[32]byte]uint64),
 		canonicalNodes:    make(map[[32]byte]bool),
 		pruneThreshold:    defaultPruneThreshold,
 	}
@@ -123,7 +122,7 @@ func (f *ForkChoice) ProposerBoost() [fieldparams.RootLength]byte {
 func (f *ForkChoice) InsertOptimisticBlock(
 	ctx context.Context,
 	slot types.Slot,
-	blockRoot, parentRoot, payloadHash [32]byte,
+	blockRoot, parentRoot [32]byte,
 	justifiedEpoch, finalizedEpoch types.Epoch,
 	//optimistic consensus params
 	justifiedRoot, finalizedRoot []byte,
@@ -137,7 +136,6 @@ func (f *ForkChoice) InsertOptimisticBlock(
 		slot,
 		blockRoot,
 		parentRoot,
-		payloadHash,
 		justifiedEpoch,
 		finalizedEpoch,
 		//optimistic consensus params
@@ -337,7 +335,6 @@ func (s *Store) insert(ctx context.Context,
 	slot types.Slot,
 	root [32]byte,
 	parent [32]byte,
-	payloadHash [32]byte,
 	justifiedEpoch,
 	finalizedEpoch types.Epoch,
 	//optimistic consensus params
@@ -383,13 +380,16 @@ func (s *Store) insert(ctx context.Context,
 		bestChild:      NonExistentNode,
 		bestDescendant: NonExistentNode,
 		weight:         0,
-		payloadHash:    payloadHash,
 		attsData:       attsData,
 		spinesData:     spinesData,
 	}
 
+	//log.WithFields(logrus.Fields{
+	//	"attsData":   fmt.Sprintf("%v", n.attsData),
+	//	"spinesData": fmt.Sprintf("%v", n.spinesData),
+	//}).Info("Forkchoice: insert node")
+
 	s.nodesIndices[root] = index
-	s.payloadIndices[payloadHash] = index
 	s.nodes = append(s.nodes, n)
 
 	// Update parent with the best child and descendant only if it's available.
@@ -657,7 +657,6 @@ func (s *Store) prune(ctx context.Context, finalizedRoot [32]byte) error {
 		if ok {
 			currentIndex := uint64(len(canonicalNodes))
 			s.nodesIndices[node.root] = currentIndex
-			s.payloadIndices[node.payloadHash] = currentIndex
 			canonicalNodesMap[idx] = currentIndex
 			node.parent = parentIdx
 			canonicalNodes = append(canonicalNodes, node)
@@ -665,12 +664,10 @@ func (s *Store) prune(ctx context.Context, finalizedRoot [32]byte) error {
 			// Remove node that is not part of finalized branch.
 			delete(s.nodesIndices, node.root)
 			delete(s.canonicalNodes, node.root)
-			delete(s.payloadIndices, node.payloadHash)
 		}
 	}
 	s.nodesIndices[finalizedRoot] = uint64(0)
 	s.canonicalNodes[finalizedRoot] = true
-	s.payloadIndices[finalizedNode.payloadHash] = uint64(0)
 
 	// Recompute the best child and descendant for each canonical nodes.
 	for _, node := range canonicalNodes {

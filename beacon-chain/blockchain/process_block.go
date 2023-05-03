@@ -266,11 +266,6 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		return err
 	}
 
-	//// todo test no-belatrix
-	//if _, err := s.notifyForkchoiceUpdate(ctx, headState, headBlock.Block(), headRoot, bytesutil.ToBytes32(finalized.Root)); err != nil {
-	//	return err
-	//}
-
 	if err := s.saveHead(ctx, headRoot, headBlock, headState); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"block.slot": signed.Block().Slot(),
@@ -503,10 +498,6 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 		if err = s.insertBlockToForkChoiceStore(ctx, b.Block(), blockRoots[i], fCheckpoints[i], jCheckpoints[i], stFinalizations[i]); err != nil {
 			return nil, nil, err
 		}
-
-		if _, err := s.notifyForkchoiceUpdate(ctx, preState, b.Block(), blockRoots[i], bytesutil.ToBytes32(fCheckpoints[i].Root)); err != nil {
-			return nil, nil, err
-		}
 	}
 
 	for r, st := range boundaries {
@@ -667,13 +658,8 @@ func (s *Service) insertBlockToForkChoiceStore(
 	}
 	// Feed in block to fork choice store.
 
-	payloadHash, err := getBlockPayloadHash(blk)
-	if err != nil {
-		return err
-	}
 	return s.cfg.ForkChoiceStore.InsertOptimisticBlock(ctx,
 		blk.Slot(), root, bytesutil.ToBytes32(blk.ParentRoot()),
-		payloadHash,
 		jCheckpoint.Epoch,
 		fCheckpoint.Epoch,
 		jCheckpoint.Root,
@@ -682,19 +668,6 @@ func (s *Service) insertBlockToForkChoiceStore(
 		blk.Body().Eth1Data().Candidates,
 		stFinalization,
 	)
-}
-
-func getBlockPayloadHash(blk block.BeaconBlock) ([32]byte, error) {
-	return [32]byte{}, nil
-	//payloadHash := [32]byte{}
-	//if blocks.IsPreBellatrixVersion(blk.Version()) {
-	//	return payloadHash, nil
-	//}
-	//payload, err := blk.Body().ExecutionPayload()
-	//if err != nil {
-	//	return payloadHash, err
-	//}
-	//return bytesutil.ToBytes32(payload.BlockHash), nil
 }
 
 // This saves post state info to DB or cache. This also saves post state info to fork choice store.

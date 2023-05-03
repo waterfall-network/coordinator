@@ -370,10 +370,6 @@ func (s *Service) fillInForkChoiceMissingBlocks(ctx context.Context, blk block.B
 	for i := len(pendingNodes) - 1; i >= 0; i-- {
 		b := pendingNodes[i]
 		r := pendingRoots[i]
-		payloadHash, err := getBlockPayloadHash(blk)
-		if err != nil {
-			return err
-		}
 
 		st, err := s.cfg.StateGen.StateByRoot(ctx, pendingRoots[i])
 		if err != nil {
@@ -381,7 +377,7 @@ func (s *Service) fillInForkChoiceMissingBlocks(ctx context.Context, blk block.B
 		}
 
 		if err := s.cfg.ForkChoiceStore.InsertOptimisticBlock(ctx,
-			b.Slot(), r, bytesutil.ToBytes32(b.ParentRoot()), payloadHash,
+			b.Slot(), r, bytesutil.ToBytes32(b.ParentRoot()),
 			jCheckpoint.Epoch,
 			fCheckpoint.Epoch,
 			jCheckpoint.Root,

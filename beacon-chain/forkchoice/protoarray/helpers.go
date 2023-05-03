@@ -89,7 +89,6 @@ func copyNode(node *Node) *Node {
 		slot:           node.slot,
 		root:           node.root,
 		parent:         node.parent,
-		payloadHash:    node.payloadHash,
 		justifiedEpoch: node.justifiedEpoch,
 		finalizedEpoch: node.finalizedEpoch,
 		weight:         node.weight,

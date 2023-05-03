@@ -137,7 +137,7 @@ func NewSpinesData(
 
 	// set new spines to the first position
 	for _, chain := range parentUnpubChains {
-		if len(chain) == 0 {
+		if len(chain) == 0 || len(spines) == 0 {
 			continue
 		}
 		chainDif := chain.Difference(parentPrefix)

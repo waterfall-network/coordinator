@@ -242,6 +242,12 @@ func emptyGenesisState() (state.BeaconStateAltair, error) {
 		Eth1DataVotes:    make([]*ethpb.Eth1Data, 0),
 		BlockVoting:      make([]*ethpb.BlockVoting, 0),
 		Eth1DepositIndex: 0,
+		SpineData: &ethpb.SpineData{
+			Spines:       nil,
+			Prefix:       nil,
+			Finalization: nil,
+			ParentSpines: nil,
+		},
 	}
 	return stateAltair.InitializeFromProto(st)
 }

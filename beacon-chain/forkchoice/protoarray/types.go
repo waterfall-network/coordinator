@@ -27,7 +27,6 @@ type Store struct {
 	nodes                      []*Node                                 // list of block nodes, each node is a representation of one block.
 	nodesIndices               map[[fieldparams.RootLength]byte]uint64 // the root of block node and the nodes index in the list.
 	canonicalNodes             map[[fieldparams.RootLength]byte]bool   // the canonical block nodes.
-	payloadIndices             map[[fieldparams.RootLength]byte]uint64 // the payload hash of block node and the index in the list
 	nodesLock                  sync.RWMutex
 	proposerBoostLock          sync.RWMutex
 }
@@ -37,7 +36,6 @@ type Store struct {
 type Node struct {
 	slot           types.Slot                   // slot of the block converted to the node.
 	root           [fieldparams.RootLength]byte // root of the block converted to the node.
-	payloadHash    [fieldparams.RootLength]byte // payloadHash of the block converted to the node.
 	parent         uint64                       // parent index of this node.
 	justifiedEpoch types.Epoch                  // justifiedEpoch of this node.
 	finalizedEpoch types.Epoch                  // finalizedEpoch of this node.

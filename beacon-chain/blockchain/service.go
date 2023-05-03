@@ -240,10 +240,6 @@ func (s *Service) StartFromSavedState(saved state.BeaconState) error {
 	if fb == nil {
 		return errNilFinalizedInStore
 	}
-	payloadHash, err := getBlockPayloadHash(fb.Block())
-	if err != nil {
-		return errors.Wrap(err, "could not get execution payload hash")
-	}
 
 	calcRoot, err := fb.Block().HashTreeRoot()
 	if err != nil {
@@ -256,7 +252,7 @@ func (s *Service) StartFromSavedState(saved state.BeaconState) error {
 
 	fSlot := fb.Block().Slot()
 	if err := fc.InsertOptimisticBlock(s.ctx, fSlot, fRoot, params.BeaconConfig().ZeroHash,
-		payloadHash, justified.Epoch, finalized.Epoch,
+		justified.Epoch, finalized.Epoch,
 		justified.Root, finalized.Root,
 		fb.Block().Body().Attestations(),
 		fb.Block().Body().Eth1Data().Candidates,
@@ -522,15 +518,10 @@ func (s *Service) saveGenesisData(ctx context.Context, genesisState state.Beacon
 	genesisCheckpoint := genesisState.FinalizedCheckpoint()
 	s.store = store.New(genesisCheckpoint, genesisCheckpoint)
 
-	payloadHash, err := getBlockPayloadHash(genesisBlk.Block())
-	if err != nil {
-		return err
-	}
 	if err := s.cfg.ForkChoiceStore.InsertOptimisticBlock(ctx,
 		genesisBlk.Block().Slot(),
 		genesisBlkRoot,
 		params.BeaconConfig().ZeroHash,
-		payloadHash,
 		genesisCheckpoint.Epoch,
 		genesisCheckpoint.Epoch,
 		genesisCheckpoint.Root,
