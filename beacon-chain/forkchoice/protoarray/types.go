@@ -29,6 +29,9 @@ type Store struct {
 	canonicalNodes             map[[fieldparams.RootLength]byte]bool   // the canonical block nodes.
 	nodesLock                  sync.RWMutex
 	proposerBoostLock          sync.RWMutex
+	// todo check required
+	balances     map[[fieldparams.RootLength]byte][]uint64
+	balancesLock sync.RWMutex
 }
 
 // Node defines the individual block which includes its block parent, ancestor and how much weight accounted for it.

@@ -1,6 +1,7 @@
 package protoarray
 
 import (
+	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
@@ -17,6 +18,23 @@ type AttestationsData struct {
 	atts          []*ethpb.Attestation
 	justifiedRoot [32]byte
 	finalizedRoot [32]byte
+	votes         map[uint64]Vote
+}
+
+func copyVotes(votes map[uint64]Vote) map[uint64]Vote {
+	cpy := make(map[uint64]Vote, len(votes))
+	for vix, v := range votes {
+		cpy[vix] = Vote{
+			currentRoot: bytesutil.ToBytes32(bytesutil.SafeCopyBytes(v.currentRoot[:])),
+			nextRoot:    bytesutil.ToBytes32(bytesutil.SafeCopyBytes(v.nextRoot[:])),
+			nextEpoch:   v.nextEpoch,
+		}
+	}
+	return cpy
+}
+
+func (ad *AttestationsData) Votes() map[uint64]Vote {
+	return copyVotes(ad.votes)
 }
 
 func (ad *AttestationsData) Attesatations() []*ethpb.Attestation {
@@ -58,6 +76,7 @@ func (ad *AttestationsData) Copy() *AttestationsData {
 		atts:          ad.Attesatations(),
 		justifiedRoot: ad.JustifiedRoot(),
 		finalizedRoot: ad.FinalizedRoot(),
+		votes:         ad.Votes(),
 	}
 }
 
@@ -70,6 +89,7 @@ func NewAttestationsData(
 		atts:          atts,
 		justifiedRoot: justifiedRoot,
 		finalizedRoot: finalizedRoot,
+		votes:         map[uint64]Vote{},
 	}
 }
 
@@ -143,7 +163,7 @@ func NewSpinesData(
 		chainDif := chain.Difference(parentPrefix)
 		// the first spine of dif-chain must be equal to the first spine
 		// otherwise - skip
-		if chainDif[0] == spines[0] {
+		if len(chainDif) > 0 && chainDif[0] == spines[0] {
 			unpubChains = append(unpubChains, chain)
 		}
 	}
@@ -155,6 +175,13 @@ func NewSpinesData(
 	}
 	newPrefix := append(parentPrefix, prefix...).Uniq()
 	newPrefix = newPrefix.Difference(newFin)
+
+	log.WithFields(logrus.Fields{
+		"spines":     spines,
+		"prefix":     newPrefix,
+		"finalized":  newFin,
+		"parentNode": parentNode.slot,
+	}).Info("**************  NewSpinesData")
 
 	return &SpinesData{
 		spines:      spines,

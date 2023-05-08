@@ -156,38 +156,6 @@ func (s *Service) runProcessDagFinalize() {
 					log.Info("Dag finalization: skip (head duplicated)")
 					continue
 				}
-				//todo check and rm
-				//headRoot = bytesutil.SafeCopyBytes(newHead.root[:])
-				//var (
-				//	lastFinalized gwatCommon.Hash
-				//	lastSpine     gwatCommon.Hash
-				//)
-				//finalizedSpines := s.GetFinalizedSpines()
-				//if len(finalizedSpines) > 0 {
-				//	lastFinalized = finalizedSpines[len(finalizedSpines)-1]
-				//}
-				//finalization := gwatCommon.HashArrayFromBytes(newHead.state.SpineData().Finalization)
-				//if len(finalization) > 0 {
-				//	lastSpine = finalization[len(finalization)-1]
-				//}
-				//isNewCp := true
-				//fincp := s.GetCachedGwatCoordinatedState()
-				//if fincp != nil && fincp.Root != (gwatCommon.Hash{}) {
-				//	// finCp root not equal finCp root from gwat
-				//	// and is not empty root (the first 4 epochs after starts from genesis)
-				//	isNewCp = !bytes.Equal(
-				//		s.GetCachedGwatCoordinatedState().Root.Bytes(),
-				//		newHead.state.FinalizedCheckpoint().GetRoot(),
-				//	) && !bytes.Equal(
-				//		params.BeaconConfig().ZeroHash[:],
-				//		newHead.state.FinalizedCheckpoint().GetRoot(),
-				//	)
-				//}
-				////todo Добавить условие обязательной отправки чекпоинта при смене Эпох
-				//if lastFinalized == lastSpine && !isNewCp {
-				//	log.Info("Dag finalization: skip (no updates)")
-				//	continue
-				//}
 
 				err := s.processDagFinalization(newHead.block, newHead.state)
 				if err != nil {
@@ -588,7 +556,7 @@ func (s *Service) collectFinalizationParams(
 	)
 
 	// get gwat validator sync data
-	valSyncData, err := collectValidatorSyncData(ctx, headState)
+	valSyncData, err := collectValidatorSyncData(headState)
 	if err != nil {
 		return nil, err
 	}
@@ -759,7 +727,7 @@ func (s *Service) getRequestGwatCheckpoint(
 }
 
 // collectValidatorSyncData collect data for ValSyncData param to call gwat finalization api.
-func collectValidatorSyncData(ctx context.Context, st state.BeaconState) ([]*gwatTypes.ValidatorSync, error) {
+func collectValidatorSyncData(st state.BeaconState) ([]*gwatTypes.ValidatorSync, error) {
 	var validatorSyncData []*gwatTypes.ValidatorSync
 	currentEpoch := slots.ToEpoch(st.Slot())
 	vals := st.Validators()
@@ -954,7 +922,7 @@ func (s *Service) collectGwatSyncParams(
 		return nil, err
 	}
 
-	valSyncData, err := collectValidatorSyncData(ctx, cpState)
+	valSyncData, err := collectValidatorSyncData(cpState)
 	if err != nil {
 		return nil, err
 	}

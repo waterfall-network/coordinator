@@ -130,12 +130,12 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 			break
 		}
 
-		if headState.Slot() <= cpSlot {
-			log.WithError(status.Errorf(codes.Internal, "Not found valid candidates after checkpoint: cp.Slot=%d cp.Slot=%v", cpSlot, checkPoint.Root)).WithFields(logrus.Fields{
+		if headState.Slot() <= cpSlot && headState.Slot() > 0 {
+			log.WithError(status.Errorf(codes.Internal, "Not found valid candidates after checkpoint: cp.Slot=%d cp.Root=%#x", cpSlot, checkPoint.Root)).WithFields(logrus.Fields{
 				"cp.Slot": cpSlot,
-				"cp.Root": checkPoint.Root,
+				"cp.Root": fmt.Sprintf("%#x", checkPoint.Root),
 			}).Error("GetAttestationData: candidates validation failed")
-			return nil, status.Errorf(codes.Internal, "Not found valid candidates after checkpoint: cp.Slot=%d cp.Slot=%v", cpSlot, checkPoint.Root)
+			return nil, status.Errorf(codes.Internal, "Not found valid candidates after checkpoint: cp.Slot=%d cp.Root=%#x", cpSlot, checkPoint.Root)
 		}
 
 		// gwat validation

@@ -36,6 +36,7 @@ func New(justifiedEpoch, finalizedEpoch types.Epoch, finalizedRoot [32]byte) *Fo
 		nodesIndices:      make(map[[32]byte]uint64),
 		canonicalNodes:    make(map[[32]byte]bool),
 		pruneThreshold:    defaultPruneThreshold,
+		balances:          make(map[[32]byte][]uint64),
 	}
 
 	b := make([]uint64, 0)
@@ -65,6 +66,19 @@ func (f *ForkChoice) Head(
 	f.store.nodesLock.Lock()
 	defer f.store.nodesLock.Unlock()
 	deltas, newVotes, err := computeDeltas(ctx, f.store.nodesIndices, f.votes, f.balances, newBalances)
+
+	log.WithFields(logrus.Fields{
+		"bal-prev-equal": fmt.Sprintf("%#v", newBalances) == fmt.Sprintf("%#v", f.getBalances(justifiedRoot)),
+		"bal-FCh-equal":  fmt.Sprintf("%#v", newBalances) == fmt.Sprintf("%#v", f.balances),
+		//"deltas":        deltas,
+		"len(newVotes)": len(newVotes),
+
+		"justifiedEpoch":             justifiedEpoch,
+		"justifiedRoot":              fmt.Sprintf("%#x", justifiedRoot),
+		"justifiedStateBalances.len": len(justifiedStateBalances),
+		"finalizedEpoch":             finalizedEpoch,
+	}).Info("--- Head --- 000")
+
 	if err != nil {
 		return [32]byte{}, errors.Wrap(err, "Could not compute deltas")
 	}
@@ -74,6 +88,7 @@ func (f *ForkChoice) Head(
 		return [32]byte{}, errors.Wrap(err, "Could not apply score changes")
 	}
 	f.balances = newBalances
+	f.setBalances(justifiedRoot, newBalances)
 
 	return f.store.head(ctx, justifiedRoot)
 }
@@ -100,8 +115,21 @@ func (f *ForkChoice) ProcessAttestation(ctx context.Context, validatorIndices []
 		if newVote || targetEpoch > f.votes[index].nextEpoch {
 			f.votes[index].nextEpoch = targetEpoch
 			f.votes[index].nextRoot = blockRoot
+
+			f.setNodeVotes(index, Vote{
+				currentRoot: bytesutil.ToBytes32(bytesutil.SafeCopyBytes(f.votes[index].currentRoot[:])),
+				nextRoot:    bytesutil.ToBytes32(bytesutil.SafeCopyBytes(f.votes[index].nextRoot[:])),
+				nextEpoch:   f.votes[index].nextEpoch,
+			})
 		}
 	}
+
+	log.WithFields(logrus.Fields{
+		"validatorIndexes": validatorIndices,
+		"blockRoot":        fmt.Sprintf("%#x", blockRoot),
+		"node.votes":       len(f.store.nodes[f.NodeCount()-1].AttestationsData().votes),
+		"node.votesByRoot": len(f.getNodeVotes(f.store.nodes[f.NodeCount()-1].root)),
+	}).Info(">>> GetParentByOptimisticSpines : ProcessAttestation")
 
 	processedAttestationCount.Inc()
 }
@@ -664,6 +692,7 @@ func (s *Store) prune(ctx context.Context, finalizedRoot [32]byte) error {
 			// Remove node that is not part of finalized branch.
 			delete(s.nodesIndices, node.root)
 			delete(s.canonicalNodes, node.root)
+			delete(s.balances, node.root)
 		}
 	}
 	s.nodesIndices[finalizedRoot] = uint64(0)

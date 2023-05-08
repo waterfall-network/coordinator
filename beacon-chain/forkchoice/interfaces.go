@@ -7,6 +7,7 @@ import (
 	forkchoicetypes "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/forkchoice/types"
 	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 	pbrpc "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 // ForkChoicer represents the full fork choice interface composed of all the sub-interfaces.
@@ -71,6 +72,7 @@ type Getter interface {
 	JustifiedEpoch() types.Epoch
 	ForkChoiceNodes() []*pbrpc.ForkChoiceNode
 	NodeCount() int
+	GetParentByOptimisticSpines(ctx context.Context, optSpines []gwatCommon.HashArray) ([32]byte, error)
 }
 
 // Setter allows to set forkchoice information

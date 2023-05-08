@@ -128,13 +128,13 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 	}
 
 	//retrieving of gwat candidates
-	const CandidatesСutoffSlots = 2
-	candidates, err := vs.ExecutionEngineCaller.ExecutionDagGetCandidates(ctx, req.Slot-CandidatesСutoffSlots)
+	const CandidatesCutoffSlots = 2
+	candidates, err := vs.ExecutionEngineCaller.ExecutionDagGetCandidates(ctx, req.Slot-CandidatesCutoffSlots)
 	if err != nil {
 		errWrap := fmt.Errorf("could not get gwat candidates: %v", err)
 		log.WithError(errWrap).WithFields(logrus.Fields{
 			"req.Slot":    req.Slot,
-			"cutoff.Slot": req.Slot - CandidatesСutoffSlots,
+			"cutoff.Slot": req.Slot - CandidatesCutoffSlots,
 			"candidates":  candidates,
 		}).Error("build block data: retrieving of gwat candidates failed")
 		return nil, errWrap
@@ -142,9 +142,53 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		eth1Data.Candidates = candidates.ToBytes()
 		log.WithFields(logrus.Fields{
 			"req.Slot":    req.Slot,
-			"cutoff.Slot": req.Slot - CandidatesСutoffSlots,
+			"cutoff.Slot": req.Slot - CandidatesCutoffSlots,
 			"candidates":  candidates,
 		}).Info("build block data: retrieving of gwat candidates")
+	}
+
+	fCpRoot := bytesutil.ToBytes32(head.FinalizedCheckpoint().Root)
+	if head.FinalizedCheckpoint().Epoch == 0 {
+		fCpRoot, err = vs.BeaconDB.GenesisBlockRoot(ctx)
+		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"optSpines": fmt.Sprintf("%#x", head.FinalizedCheckpoint().Root),
+			}).Error("************** build block data: retrieving of gwat candidates failed 5555")
+			//return nil, errors.Wrap(err, "get genesis root failed")
+		}
+	}
+
+	cpSt, err := vs.StateGen.StateByRoot(ctx, fCpRoot)
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"optSpines": fmt.Sprintf("%#x", head.FinalizedCheckpoint().Root),
+		}).Error("************** build block data: retrieving of gwat candidates failed 0000")
+	}
+	finSeq := gwatCommon.HashArrayFromBytes(cpSt.SpineData().Finalization)
+	baseSpine := finSeq[len(finSeq)-1]
+
+	optSpines, err := vs.ExecutionEngineCaller.ExecutionDagGetOptimisticSpines(ctx, baseSpine)
+	if err != nil {
+		errWrap := fmt.Errorf("could not get gwat candidates: %v", err)
+		log.WithError(errWrap).WithFields(logrus.Fields{
+			"optSpines": optSpines,
+		}).Error("************** build block data: retrieving of gwat candidates failed 0000")
+	} else {
+
+		optSpines = append([]gwatCommon.HashArray{gwatCommon.HashArrayFromBytes(cpSt.SpineData().Finalization)}, optSpines...)
+
+		optRoot, err := vs.HeadFetcher.ForkChoicer().GetParentByOptimisticSpines(ctx, optSpines)
+		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"optSpines": optSpines,
+			}).Error("************** build block data: retrieving of gwat candidates failed 11111")
+		}
+
+		log.WithFields(logrus.Fields{
+			"optSpines":  optSpines,
+			"optRoot":    fmt.Sprintf("%#x", optRoot),
+			"parentRoot": fmt.Sprintf("%#x", parentRoot),
+		}).Info("**************  build block data: retrieving of gwat candidates")
 	}
 
 	deposits, atts, err := vs.packDepositsAndAttestations(ctx, head, eth1Data)
