@@ -36,6 +36,7 @@ func (bs *Server) GetSpineData(ctx context.Context, req *ethpbv.StateSpineDataRe
 		Spines:       spineData.Spines,
 		Prefix:       spineData.Prefix,
 		Finalization: spineData.Finalization,
+		CpFinalized:  spineData.CpFinalized,
 		ParentSpines: parentSpines,
 	}
 

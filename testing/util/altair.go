@@ -246,6 +246,7 @@ func emptyGenesisState() (state.BeaconStateAltair, error) {
 			Spines:       nil,
 			Prefix:       nil,
 			Finalization: nil,
+			CpFinalized:  nil,
 			ParentSpines: nil,
 		},
 	}

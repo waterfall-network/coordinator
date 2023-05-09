@@ -459,6 +459,10 @@ func genSpineData() *v1alpha1.SpineData {
 		gwatCommon.HexToHash("0x5555555555555555555555555555555555555555555555555555555555555555"),
 		gwatCommon.HexToHash("0x6666666666666666666666666666666666666666666666666666666666666666"),
 	}
+	cpFinalized := gwatCommon.HashArray{
+		gwatCommon.HexToHash("0x5555555555555555555555555555555555555555555555555555555555555555"),
+		gwatCommon.HexToHash("0x6666666666666666666666666666666666666666666666666666666666666666"),
+	}
 
 	parentSpines := []*v1alpha1.SpinesSeq{
 		{Spines: spines.ToBytes()},
@@ -475,6 +479,7 @@ func genSpineData() *v1alpha1.SpineData {
 		Spines:       spines.ToBytes(),
 		Prefix:       prefix.ToBytes(),
 		Finalization: finalization.ToBytes(),
+		CpFinalized:  cpFinalized.ToBytes(),
 		ParentSpines: parentSpines,
 	}
 }

@@ -735,6 +735,7 @@ type spineDataJson struct {
 	Spines       string           `json:"spines" hex:"true"`
 	Prefix       string           `json:"prefix" hex:"true"`
 	Finalization string           `json:"finalization" hex:"true"`
+	CpFinalized  string           `json:"cp_finalized" hex:"true"`
 	ParentSpines []*spinesSeqJson `json:"parent_spines"`
 }
 

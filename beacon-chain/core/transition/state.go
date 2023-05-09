@@ -174,6 +174,7 @@ func OptimizedGenesisBeaconState(genesisTime uint64, preState state.BeaconState,
 			Spines:       []byte{},
 			Prefix:       []byte{},
 			Finalization: eth1Data.GetBlockHash(),
+			CpFinalized:  []byte{},
 			ParentSpines: []*ethpb.SpinesSeq{},
 		},
 	}
@@ -231,6 +232,7 @@ func EmptyGenesisState() (state.BeaconState, error) {
 			Spines:       []byte{},
 			Prefix:       []byte{},
 			Finalization: []byte{},
+			CpFinalized:  []byte{},
 			ParentSpines: []*ethpb.SpinesSeq{},
 		},
 	}
