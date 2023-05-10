@@ -446,7 +446,7 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 		return nil, nil, fmt.Errorf("nil pre state for slot %d", b.Slot())
 	}
 
-	stFinalizations := make([][]byte, len(blks))
+	stSpineData := make([]*ethpb.SpineData, len(blks))
 	jCheckpoints := make([]*ethpb.Checkpoint, len(blks))
 	fCheckpoints := make([]*ethpb.Checkpoint, len(blks))
 	sigSet := &bls.SignatureBatch{
@@ -465,7 +465,7 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 			}).Error("Block batch handling error")
 			return nil, nil, err
 		}
-		stFinalizations[i] = bytesutil.SafeCopyBytes(preState.SpineData().Finalization)
+		stSpineData[i] = preState.SpineData()
 		// Save potential boundary states.
 		if slots.IsEpochStart(preState.Slot()) {
 			boundaries[blockRoots[i]] = preState.Copy()
@@ -495,7 +495,7 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 	for i, b := range blks {
 		s.saveInitSyncBlock(blockRoots[i], b)
 
-		if err = s.insertBlockToForkChoiceStore(ctx, b.Block(), blockRoots[i], fCheckpoints[i], jCheckpoints[i], stFinalizations[i]); err != nil {
+		if err = s.insertBlockToForkChoiceStore(ctx, b.Block(), blockRoots[i], fCheckpoints[i], jCheckpoints[i], stSpineData[i]); err != nil {
 			return nil, nil, err
 		}
 	}
@@ -628,7 +628,7 @@ func (s *Service) insertBlockAndAttestationsToForkChoiceStore(
 
 	fCheckpoint := st.FinalizedCheckpoint()
 	jCheckpoint := st.CurrentJustifiedCheckpoint()
-	if err := s.insertBlockToForkChoiceStore(ctx, blk, root, fCheckpoint, jCheckpoint, st.SpineData().Finalization); err != nil {
+	if err := s.insertBlockToForkChoiceStore(ctx, blk, root, fCheckpoint, jCheckpoint, st.SpineData()); err != nil {
 		return err
 	}
 	// Feed in block's attestations to fork choice store.
@@ -651,7 +651,7 @@ func (s *Service) insertBlockToForkChoiceStore(
 	blk block.BeaconBlock,
 	root [32]byte,
 	fCheckpoint, jCheckpoint *ethpb.Checkpoint,
-	stFinalization []byte,
+	spineData *ethpb.SpineData,
 ) error {
 	if err := s.fillInForkChoiceMissingBlocks(ctx, blk, fCheckpoint, jCheckpoint); err != nil {
 		return err
@@ -665,8 +665,9 @@ func (s *Service) insertBlockToForkChoiceStore(
 		jCheckpoint.Root,
 		fCheckpoint.Root,
 		blk.Body().Attestations(),
-		blk.Body().Eth1Data().Candidates,
-		stFinalization,
+		spineData.GetSpines(),
+		spineData.GetPrefix(),
+		spineData.GetFinalization(),
 	)
 }
 

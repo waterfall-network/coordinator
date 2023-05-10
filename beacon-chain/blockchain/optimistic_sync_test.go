@@ -86,7 +86,7 @@ func Test_UpdateLastValidatedCheckpoint(t *testing.T) {
 	require.NoError(t, err)
 	assert.NoError(t, beaconDB.SaveGenesisBlockRoot(ctx, genesisRoot))
 	require.NoError(t, fcs.InsertOptimisticBlock(ctx, 0, genesisRoot, params.BeaconConfig().ZeroHash,
-		0, 0, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil, nil))
+		0, 0, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil, nil, nil))
 	genesisSummary := &ethpb.StateSummary{
 		Root: genesisStateRoot[:],
 		Slot: 0,
@@ -118,7 +118,7 @@ func Test_UpdateLastValidatedCheckpoint(t *testing.T) {
 	}
 	require.NoError(t, beaconDB.SaveStateSummary(ctx, opStateSummary))
 	require.NoError(t, fcs.InsertOptimisticBlock(ctx, 320, opRoot, genesisRoot,
-		10, 10, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil, nil))
+		10, 10, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil, nil, nil))
 	assert.NoError(t, beaconDB.SaveGenesisBlockRoot(ctx, opRoot))
 	require.NoError(t, service.updateFinalized(ctx, opCheckpoint))
 	cp, err := service.cfg.BeaconDB.LastValidatedCheckpoint(ctx)
@@ -146,7 +146,7 @@ func Test_UpdateLastValidatedCheckpoint(t *testing.T) {
 	}
 	require.NoError(t, beaconDB.SaveStateSummary(ctx, validSummary))
 	require.NoError(t, fcs.InsertOptimisticBlock(ctx, 640, validRoot, params.BeaconConfig().ZeroHash,
-		20, 20, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil, nil))
+		20, 20, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil, nil, nil))
 	require.NoError(t, fcs.SetOptimisticToValid(ctx, validRoot))
 	assert.NoError(t, beaconDB.SaveGenesisBlockRoot(ctx, validRoot))
 	require.NoError(t, service.updateFinalized(ctx, validCheckpoint))

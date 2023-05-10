@@ -139,7 +139,8 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 		}
 
 		// gwat validation
-		candidates := gwatCommon.HashArrayFromBytes(headState.Eth1Data().Candidates)
+		//candidates := gwatCommon.HashArrayFromBytes(headState.Eth1Data().Candidates)
+		candidates := gwatCommon.HashArrayFromBytes(headState.SpineData().Prefix)
 		log.WithFields(logrus.Fields{
 			"slot":            headState.Slot(),
 			"headRoot":        fmt.Sprintf("%#x", headRoot),

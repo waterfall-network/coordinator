@@ -155,7 +155,7 @@ func (f *ForkChoice) InsertOptimisticBlock(
 	//optimistic consensus params
 	justifiedRoot, finalizedRoot []byte,
 	atts []*ethpb.Attestation,
-	spines, stFinalised []byte,
+	spines, prefix, finalisation []byte,
 ) error {
 	ctx, span := trace.StartSpan(ctx, "protoArrayForkChoice.InsertOptimisticBlock")
 	defer span.End()
@@ -171,7 +171,8 @@ func (f *ForkChoice) InsertOptimisticBlock(
 		bytesutil.ToBytes32(finalizedRoot),
 		atts,
 		spines,
-		stFinalised,
+		prefix,
+		finalisation,
 	)
 }
 
@@ -370,7 +371,8 @@ func (s *Store) insert(ctx context.Context,
 	finalizedRoot [32]byte,
 	atts []*ethpb.Attestation,
 	spines []byte,
-	stFinalised []byte,
+	prefix []byte,
+	finalisation []byte,
 ) error {
 	_, span := trace.StartSpan(ctx, "protoArrayForkChoice.insert")
 	defer span.End()
@@ -394,7 +396,12 @@ func (s *Store) insert(ctx context.Context,
 	}
 
 	attsData := NewAttestationsData(atts, justifiedRoot, finalizedRoot)
-	spinesData, err := NewSpinesData(parentNode, gwatCommon.HashArrayFromBytes(spines), gwatCommon.HashArrayFromBytes(stFinalised))
+	spinesData, err := NewSpinesData(
+		parentNode,
+		gwatCommon.HashArrayFromBytes(spines),
+		gwatCommon.HashArrayFromBytes(prefix),
+		gwatCommon.HashArrayFromBytes(finalisation),
+	)
 	if err != nil {
 		return err
 	}

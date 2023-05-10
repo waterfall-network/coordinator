@@ -255,8 +255,9 @@ func (s *Service) StartFromSavedState(saved state.BeaconState) error {
 		justified.Epoch, finalized.Epoch,
 		justified.Root, finalized.Root,
 		fb.Block().Body().Attestations(),
-		fb.Block().Body().Eth1Data().Candidates,
-		st.SpineData().Finalization,
+		st.SpineData().GetSpines(),
+		st.SpineData().GetPrefix(),
+		st.SpineData().GetFinalization(),
 	); err != nil {
 		return errors.Wrap(err, "could not insert finalized block to forkchoice")
 	}
@@ -527,8 +528,9 @@ func (s *Service) saveGenesisData(ctx context.Context, genesisState state.Beacon
 		genesisCheckpoint.Root,
 		genesisCheckpoint.Root,
 		genesisBlk.Block().Body().Attestations(),
-		genesisBlk.Block().Body().Eth1Data().Candidates,
-		genesisState.SpineData().Finalization,
+		genesisState.SpineData().GetSpines(),
+		genesisState.SpineData().GetPrefix(),
+		genesisState.SpineData().GetFinalization(),
 	); err != nil {
 		log.Fatalf("Could not process genesis block for fork choice: %v", err)
 	}

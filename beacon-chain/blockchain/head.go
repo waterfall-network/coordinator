@@ -104,7 +104,7 @@ func (s *Service) updateHead(ctx context.Context, balances []uint64) ([32]byte, 
 		if err != nil {
 			return [32]byte{}, err
 		}
-		if err := s.insertBlockToForkChoiceStore(ctx, jb.Block(), headStartRoot, f, j, st.SpineData().Finalization); err != nil {
+		if err := s.insertBlockToForkChoiceStore(ctx, jb.Block(), headStartRoot, f, j, st.SpineData()); err != nil {
 			return [32]byte{}, err
 		}
 	}

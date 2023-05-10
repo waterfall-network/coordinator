@@ -10,6 +10,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	prysmTime "gitlab.waterfall.network/waterfall/protocol/coordinator/time"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
@@ -205,4 +206,28 @@ func VerifyCheckpointEpoch(c *ethpb.Checkpoint, genesis time.Time) bool {
 	}
 
 	return true
+}
+
+func CopyAttestatations(atts []*ethpb.Attestation) []*ethpb.Attestation {
+	cpy := make([]*ethpb.Attestation, len(atts))
+	for i, v := range atts {
+		cpy[i] = &ethpb.Attestation{
+			AggregationBits: bytesutil.SafeCopyBytes(v.GetAggregationBits()),
+			Data: &ethpb.AttestationData{
+				Slot:            v.Data.Slot,
+				CommitteeIndex:  v.Data.CommitteeIndex,
+				BeaconBlockRoot: bytesutil.SafeCopyBytes(v.Data.BeaconBlockRoot),
+				Source: &ethpb.Checkpoint{
+					Epoch: v.Data.Source.Epoch,
+					Root:  bytesutil.SafeCopyBytes(v.Data.Source.Root),
+				},
+				Target: &ethpb.Checkpoint{
+					Epoch: v.Data.Target.Epoch,
+					Root:  bytesutil.SafeCopyBytes(v.Data.Target.Root),
+				},
+			},
+			Signature: nil,
+		}
+	}
+	return cpy
 }

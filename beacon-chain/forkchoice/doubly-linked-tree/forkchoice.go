@@ -116,7 +116,7 @@ func (f *ForkChoice) InsertOptimisticBlock(
 	//optimistic consensus params
 	justifiedRoot, finalizedRoot []byte,
 	atts []*pbrpc.Attestation,
-	spines, stFinalised []byte,
+	spines, prefix, finalisation []byte,
 ) error {
 	ctx, span := trace.StartSpan(ctx, "doublyLinkedForkchoice.InsertOptimisticBlock")
 	defer span.End()
