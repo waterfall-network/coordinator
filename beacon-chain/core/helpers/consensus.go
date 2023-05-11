@@ -43,6 +43,33 @@ func ConsensusUpdateStateSpineFinalization(beaconState state.BeaconState, preJus
 	return beaconState, err
 }
 
+// CalculateCandidates candidates sequence from optimistic spines for publication in block.
+func CalculateCandidates(parentState state.BeaconState, optSpines []gwatCommon.HashArray) gwatCommon.HashArray {
+	//find terminal spine
+	var terminalSpine gwatCommon.Hash
+	sd := parentState.SpineData()
+	// 1. from prefix
+	if len(sd.Prefix) > 0 {
+		terminalSpine = gwatCommon.BytesToHash(sd.Prefix[len(sd.Prefix)-gwatCommon.HashLength:])
+	} else {
+		// 2. from finalization or checkpoint finalized spines
+		terminalSpine = GetTerminalFinalizedSpine(parentState)
+	}
+	//calc candidates
+	candidates := make(gwatCommon.HashArray, 0, len(optSpines))
+	for i, spineList := range optSpines {
+		// reset candidates if reach terminal finalized spine
+		if spineList.Has(terminalSpine) {
+			candidates = make(gwatCommon.HashArray, 0, len(optSpines)-i)
+			continue
+		}
+		if len(spineList) > 0 {
+			candidates = append(candidates, spineList[0])
+		}
+	}
+	return candidates
+}
+
 // GetTerminalFinalizedSpine validate unpublished chains
 func GetTerminalFinalizedSpine(beaconState state.BeaconState) gwatCommon.Hash {
 	finalization := beaconState.SpineData().Finalization

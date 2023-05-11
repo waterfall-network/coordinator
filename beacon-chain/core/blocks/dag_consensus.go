@@ -293,7 +293,10 @@ func CalcPrefixAndParentSpines(stSpineData *ethpb.SpineData, blCandidates []byte
 	//calc parent unpublished spines
 	parentUnpubChains = make([]gwatCommon.HashArray, len(stSpineData.ParentSpines))
 	for i, spseq := range stSpineData.ParentSpines {
-		parentUnpubChains[i] = gwatCommon.HashArrayFromBytes(spseq.Spines)
+		chain := gwatCommon.HashArrayFromBytes(spseq.Spines)
+		if len(chain) > 0 {
+			parentUnpubChains[i] = chain
+		}
 	}
 
 	// calculate unpublished spines chains

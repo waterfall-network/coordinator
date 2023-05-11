@@ -716,12 +716,11 @@ func (s *Service) getRequestGwatCheckpoint(
 	if err != nil {
 		return cpFinalized, err
 	}
-	finalization := gwatCommon.HashArrayFromBytes(cpState.SpineData().Finalization)
 	return &gwatTypes.Checkpoint{
 		FinEpoch: uint64(slots.ToEpoch(headState.Slot())),
 		Epoch:    uint64(checkpoint.Epoch),
 		Root:     gwatCommon.BytesToHash(checkpoint.Root),
-		Spine:    finalization[len(finalization)-1], // use last spine
+		Spine:    helpers.GetTerminalFinalizedSpine(cpState), // use last finalized spine
 	}, nil
 }
 

@@ -184,10 +184,10 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 	}
 
 	log.WithFields(logrus.Fields{
-		"slot":       headState.Slot(),
-		"headRoot":   fmt.Sprintf("%#x", headRoot),
-		"candidates": gwatCommon.HashArrayFromBytes(headState.Eth1Data().Candidates),
-	}).Warn("GetAttestationData: candidates validation success")
+		"slot":     headState.Slot(),
+		"headRoot": fmt.Sprintf("%#x", headRoot),
+		"stPrefix": gwatCommon.HashArrayFromBytes(headState.SpineData().Prefix),
+	}).Warn("GetAttestationData: prefix validation success")
 
 	if headState == nil || headState.IsNil() {
 		return nil, status.Error(codes.Internal, "Could not lookup parent state from head.")
