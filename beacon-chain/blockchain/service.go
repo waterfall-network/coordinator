@@ -230,7 +230,7 @@ func (s *Service) StartFromSavedState(saved state.BeaconState) error {
 	if features.Get().EnableForkChoiceDoublyLinkedTree {
 		fc = doublylinkedtree.New(justified.Epoch, finalized.Epoch)
 	} else {
-		fc = protoarray.New(justified.Epoch, finalized.Epoch, fRoot)
+		fc = protoarray.New(justified.Epoch, finalized.Epoch)
 	}
 	s.cfg.ForkChoiceStore = fc
 	fb, err := s.cfg.BeaconDB.Block(s.ctx, s.ensureRootNotZeros(fRoot))
@@ -255,9 +255,7 @@ func (s *Service) StartFromSavedState(saved state.BeaconState) error {
 		justified.Epoch, finalized.Epoch,
 		justified.Root, finalized.Root,
 		fb.Block().Body().Attestations(),
-		st.SpineData().GetSpines(),
-		st.SpineData().GetPrefix(),
-		st.SpineData().GetFinalization(),
+		st.SpineData(),
 	); err != nil {
 		return errors.Wrap(err, "could not insert finalized block to forkchoice")
 	}
@@ -528,9 +526,7 @@ func (s *Service) saveGenesisData(ctx context.Context, genesisState state.Beacon
 		genesisCheckpoint.Root,
 		genesisCheckpoint.Root,
 		genesisBlk.Block().Body().Attestations(),
-		genesisState.SpineData().GetSpines(),
-		genesisState.SpineData().GetPrefix(),
-		genesisState.SpineData().GetFinalization(),
+		genesisState.SpineData(),
 	); err != nil {
 		log.Fatalf("Could not process genesis block for fork choice: %v", err)
 	}

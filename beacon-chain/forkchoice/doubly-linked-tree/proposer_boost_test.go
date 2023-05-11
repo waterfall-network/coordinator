@@ -52,7 +52,7 @@ func TestForkChoice_BoostProposerRoot_PreventsExAnteAttack(t *testing.T) {
 				newRoot,
 				headRoot,
 				jEpoch,
-				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil, nil, nil,
+				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil,
 			),
 		)
 		f.ProcessAttestation(ctx, []uint64{0}, newRoot, fEpoch)
@@ -75,7 +75,7 @@ func TestForkChoice_BoostProposerRoot_PreventsExAnteAttack(t *testing.T) {
 				newRoot,
 				headRoot,
 				jEpoch,
-				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil, nil, nil,
+				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil,
 			),
 		)
 		f.ProcessAttestation(ctx, []uint64{1}, newRoot, fEpoch)
@@ -100,7 +100,7 @@ func TestForkChoice_BoostProposerRoot_PreventsExAnteAttack(t *testing.T) {
 				newRoot,
 				headRoot,
 				jEpoch,
-				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil, nil, nil,
+				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil,
 			),
 		)
 		f.ProcessAttestation(ctx, []uint64{2}, newRoot, fEpoch)
@@ -125,7 +125,7 @@ func TestForkChoice_BoostProposerRoot_PreventsExAnteAttack(t *testing.T) {
 				newRoot,
 				headRoot,
 				jEpoch,
-				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil, nil, nil,
+				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil,
 			),
 		)
 		f.ProcessAttestation(ctx, []uint64{3}, newRoot, fEpoch)
@@ -199,7 +199,7 @@ func TestForkChoice_BoostProposerRoot_PreventsExAnteAttack(t *testing.T) {
 				honestBlock,
 				zeroHash,
 				jEpoch,
-				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil, nil, nil,
+				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil,
 			),
 		)
 		r, err = f.Head(ctx, jEpoch, zeroHash, balances, fEpoch)
@@ -215,7 +215,7 @@ func TestForkChoice_BoostProposerRoot_PreventsExAnteAttack(t *testing.T) {
 				maliciouslyWithheldBlock,
 				zeroHash,
 				jEpoch,
-				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil, nil, nil,
+				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil,
 			),
 		)
 
@@ -267,7 +267,7 @@ func TestForkChoice_BoostProposerRoot_PreventsExAnteAttack(t *testing.T) {
 				honestBlock,
 				zeroHash,
 				jEpoch,
-				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil, nil, nil,
+				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil,
 			),
 		)
 
@@ -285,7 +285,7 @@ func TestForkChoice_BoostProposerRoot_PreventsExAnteAttack(t *testing.T) {
 				maliciouslyWithheldBlock,
 				zeroHash,
 				jEpoch,
-				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil, nil, nil,
+				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil,
 			),
 		)
 
@@ -344,7 +344,7 @@ func TestForkChoice_BoostProposerRoot_PreventsExAnteAttack(t *testing.T) {
 				c,
 				a, // parent
 				jEpoch,
-				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil, nil, nil,
+				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil,
 			),
 		)
 
@@ -371,7 +371,7 @@ func TestForkChoice_BoostProposerRoot_PreventsExAnteAttack(t *testing.T) {
 				b,
 				a, // parent
 				jEpoch,
-				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil, nil, nil,
+				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil,
 			),
 		)
 
@@ -394,7 +394,7 @@ func TestForkChoice_BoostProposerRoot_PreventsExAnteAttack(t *testing.T) {
 				d,
 				b, // parent
 				jEpoch,
-				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil, nil, nil,
+				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil, nil,
 			),
 		)
 

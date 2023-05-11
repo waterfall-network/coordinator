@@ -665,9 +665,7 @@ func (s *Service) insertBlockToForkChoiceStore(
 		jCheckpoint.Root,
 		fCheckpoint.Root,
 		blk.Body().Attestations(),
-		spineData.GetSpines(),
-		spineData.GetPrefix(),
-		spineData.GetFinalization(),
+		spineData,
 	)
 }
 

@@ -1,8 +1,11 @@
 package helpers
 
 import (
+	"bytes"
+
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
@@ -10,6 +13,45 @@ import (
 var ErrBadUnpublishedChains = errors.New("bad unpublished chains")
 
 type mapPublications map[gwatCommon.Hash]int
+
+// ConsensusUpdateStateSpineFinalization validate unpublished chains
+func ConsensusUpdateStateSpineFinalization(beaconState state.BeaconState, preJustRoot, preFinRoot []byte) (state.BeaconState, error) {
+	finRoot := beaconState.FinalizedCheckpoint().GetRoot()
+	justRoot := beaconState.CurrentJustifiedCheckpoint().GetRoot()
+
+	if bytes.Equal(justRoot, preJustRoot) {
+		return beaconState, nil
+	}
+	cp_finalized := beaconState.SpineData().GetCpFinalized()
+	finalization := beaconState.SpineData().GetFinalization()
+	if len(finalization) == 0 {
+		finalization = cp_finalized[len(cp_finalized)-32:]
+	}
+	if bytes.Equal(finRoot, preFinRoot) {
+		cp_finalized = append(cp_finalized, finalization...)
+		finalization = []byte{}
+	} else {
+		cp_finalized = finalization
+		finalization = []byte{}
+	}
+	//update state.SpineData
+	spineData := beaconState.SpineData()
+	spineData.Finalization = finalization
+	spineData.CpFinalized = cp_finalized
+	err := beaconState.SetSpineData(spineData)
+
+	return beaconState, err
+}
+
+// GetTerminalFinalizedSpine validate unpublished chains
+func GetTerminalFinalizedSpine(beaconState state.BeaconState) gwatCommon.Hash {
+	finalization := beaconState.SpineData().Finalization
+	if len(finalization) > 0 {
+		return gwatCommon.BytesToHash(finalization[len(finalization)-32:])
+	}
+	cpFinalized := beaconState.SpineData().CpFinalized
+	return gwatCommon.BytesToHash(cpFinalized[len(cpFinalized)-32:])
+}
 
 // ConsensusCalcPrefix calculates sequence of prefix from array of unpublished spines sequences.
 func ConsensusCalcPrefix(unpublishedChains []gwatCommon.HashArray) (gwatCommon.HashArray, error) {

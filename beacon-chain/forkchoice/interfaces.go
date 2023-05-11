@@ -40,9 +40,7 @@ type BlockProcessor interface {
 		justifiedRoot []byte,
 		finalizedRoot []byte,
 		atts []*pbrpc.Attestation,
-		spines []byte,
-		prefix []byte,
-		stFinalised []byte,
+		spineData *pbrpc.SpineData,
 	) error
 }
 

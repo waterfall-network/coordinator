@@ -240,65 +240,65 @@ func Test_collectTgTreeNodesByOptimisticSpines_prefix_extension(t *testing.T) {
 	f.store.nodes = []*Node{
 
 		{slot: 0, root: nrToHash(0), parent: NonExistentNode, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{},
-			prefix:      gwatCommon.HashArray{},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{},
+			prefix:       gwatCommon.HashArray{},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 1, root: nrToHash(1), parent: 0, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '2'}},
-			prefix:      gwatCommon.HashArray{},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '2'}},
+			prefix:       gwatCommon.HashArray{},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 2, root: nrToHash(2), parent: 1, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '2'}, {'a', '3'}},
-			prefix:      gwatCommon.HashArray{},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '2'}, {'a', '3'}},
+			prefix:       gwatCommon.HashArray{},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 3, root: nrToHash(3), parent: 2, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '2'}, {'a', '3'}, {'a', '4'}},
-			prefix:      gwatCommon.HashArray{{'a', '2'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '2'}, {'a', '3'}, {'a', '4'}},
+			prefix:       gwatCommon.HashArray{{'a', '2'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 4, root: nrToHash(4), parent: 3, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '2'}, {'a', '3'}, {'a', '4'}},
-			prefix:      gwatCommon.HashArray{{'a', '2'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '2'}, {'a', '3'}, {'a', '4'}},
+			prefix:       gwatCommon.HashArray{{'a', '2'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 5, root: nrToHash(5), parent: 4, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '3'}, {'a', '4'}, {'a', '5'}},
-			prefix:      gwatCommon.HashArray{{'a', '2'}, {'a', '3'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '3'}, {'a', '4'}, {'a', '5'}},
+			prefix:       gwatCommon.HashArray{{'a', '2'}, {'a', '3'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		//fork 0
 		{slot: 6, root: nrToHash(6), parent: 5, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '4'}, {'a', '5'}, {'a', '6'}},
-			prefix:      gwatCommon.HashArray{{'a', '2'}, {'a', '3'}, {'a', '4'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '4'}, {'a', '5'}, {'a', '6'}},
+			prefix:       gwatCommon.HashArray{{'a', '2'}, {'a', '3'}, {'a', '4'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 7, root: nrToHash(7), parent: 6, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '5'}, {'a', '6'}, {'a', '7'}},
-			prefix:      gwatCommon.HashArray{{'a', '3'}, {'a', '4'}, {'a', '5'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}, {'a', '2'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '5'}, {'a', '6'}, {'a', '7'}},
+			prefix:       gwatCommon.HashArray{{'a', '3'}, {'a', '4'}, {'a', '5'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}, {'a', '2'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 8, root: nrToHash(8), parent: 7, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '6'}, {'a', '7'}, {'a', '8'}},
-			prefix:      gwatCommon.HashArray{{'a', '4'}, {'a', '5'}, {'a', '6'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}, {'a', '2'}, {'a', '3'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '6'}, {'a', '7'}, {'a', '8'}},
+			prefix:       gwatCommon.HashArray{{'a', '4'}, {'a', '5'}, {'a', '6'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}, {'a', '2'}, {'a', '3'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 9, root: nrToHash(9), parent: 8, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '7'}, {'a', '8'}, {'a', '9'}, {'a', '1', '0'}},
-			prefix:      gwatCommon.HashArray{{'a', '4'}, {'a', '5'}, {'a', '6'}, {'a', '7'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}, {'a', '2'}, {'a', '3'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '7'}, {'a', '8'}, {'a', '9'}, {'a', '1', '0'}},
+			prefix:       gwatCommon.HashArray{{'a', '4'}, {'a', '5'}, {'a', '6'}, {'a', '7'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}, {'a', '2'}, {'a', '3'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 	}
 
@@ -353,65 +353,65 @@ func Test_collectTgTreeNodesByOptimisticSpines_prefix_not_extension(t *testing.T
 	f.store.nodes = []*Node{
 
 		{slot: 0, root: nrToHash(0), parent: NonExistentNode, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{},
-			prefix:      gwatCommon.HashArray{},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{},
+			prefix:       gwatCommon.HashArray{},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 1, root: nrToHash(1), parent: 0, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '2'}},
-			prefix:      gwatCommon.HashArray{},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '2'}},
+			prefix:       gwatCommon.HashArray{},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 2, root: nrToHash(2), parent: 1, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '2'}, {'a', '3'}},
-			prefix:      gwatCommon.HashArray{},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '2'}, {'a', '3'}},
+			prefix:       gwatCommon.HashArray{},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 3, root: nrToHash(3), parent: 2, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '2'}, {'a', '3'}, {'a', '4'}},
-			prefix:      gwatCommon.HashArray{{'a', '2'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '2'}, {'a', '3'}, {'a', '4'}},
+			prefix:       gwatCommon.HashArray{{'a', '2'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 4, root: nrToHash(4), parent: 3, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '2'}, {'a', '3'}, {'a', '4'}},
-			prefix:      gwatCommon.HashArray{{'a', '2'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '2'}, {'a', '3'}, {'a', '4'}},
+			prefix:       gwatCommon.HashArray{{'a', '2'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 5, root: nrToHash(5), parent: 4, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '3'}, {'a', '4'}, {'a', '5'}},
-			prefix:      gwatCommon.HashArray{{'a', '2'}, {'a', '3'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '3'}, {'a', '4'}, {'a', '5'}},
+			prefix:       gwatCommon.HashArray{{'a', '2'}, {'a', '3'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		//fork 0
 		{slot: 6, root: nrToHash(6), parent: 5, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '4'}, {'a', '5'}, {'a', '6'}},
-			prefix:      gwatCommon.HashArray{{'a', '2'}, {'a', '3'}, {'a', '4'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '4'}, {'a', '5'}, {'a', '6'}},
+			prefix:       gwatCommon.HashArray{{'a', '2'}, {'a', '3'}, {'a', '4'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 7, root: nrToHash(7), parent: 6, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '5'}, {'a', '6'}, {'a', '7'}},
-			prefix:      gwatCommon.HashArray{{'a', '3'}, {'a', '4'}, {'a', '5'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}, {'a', '2'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '5'}, {'a', '6'}, {'a', '7'}},
+			prefix:       gwatCommon.HashArray{{'a', '3'}, {'a', '4'}, {'a', '5'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}, {'a', '2'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 8, root: nrToHash(8), parent: 7, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '6'}, {'a', '7'}, {'a', '8'}},
-			prefix:      gwatCommon.HashArray{{'a', '4'}, {'a', '5'}, {'a', '6'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}, {'a', '2'}, {'a', '3'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '6'}, {'a', '7'}, {'a', '8'}},
+			prefix:       gwatCommon.HashArray{{'a', '4'}, {'a', '5'}, {'a', '6'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}, {'a', '2'}, {'a', '3'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 9, root: nrToHash(9), parent: 8, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '8'}, {'a', '9'}, {'a', '1', '0'}},
-			prefix:      gwatCommon.HashArray{{'a', '4'}, {'a', '5'}, {'a', '6'}, {'a', '7'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}, {'a', '2'}, {'a', '3'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '8'}, {'a', '9'}, {'a', '1', '0'}},
+			prefix:       gwatCommon.HashArray{{'a', '4'}, {'a', '5'}, {'a', '6'}, {'a', '7'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}, {'a', '2'}, {'a', '3'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 	}
 
@@ -465,67 +465,67 @@ func Test_collectTgTreeNodesByOptimisticSpines_3_forks(t *testing.T) {
 	f.store.nodes = []*Node{
 
 		{slot: 0, root: nrToHash(0), parent: NonExistentNode, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{},
-			prefix:      gwatCommon.HashArray{},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{},
+			prefix:       gwatCommon.HashArray{},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 1, root: nrToHash(1), parent: 0, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '2'}},
-			prefix:      gwatCommon.HashArray{},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '2'}},
+			prefix:       gwatCommon.HashArray{},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 2, root: nrToHash(2), parent: 1, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '2'}, {'a', '3'}},
-			prefix:      gwatCommon.HashArray{},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '2'}, {'a', '3'}},
+			prefix:       gwatCommon.HashArray{},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 3, root: nrToHash(3), parent: 2, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '2'}, {'a', '3'}, {'a', '4'}},
-			prefix:      gwatCommon.HashArray{{'a', '2'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '2'}, {'a', '3'}, {'a', '4'}},
+			prefix:       gwatCommon.HashArray{{'a', '2'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		//fork 1
 		{slot: 4, root: nrToHash(4), parent: 1, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '2'}, {'a', '3'}, {'a', '4'}},
-			prefix:      gwatCommon.HashArray{{'a', '2'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '2'}, {'a', '3'}, {'a', '4'}},
+			prefix:       gwatCommon.HashArray{{'a', '2'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 5, root: nrToHash(5), parent: 4, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '3'}, {'a', '4'}, {'a', '5'}},
-			prefix:      gwatCommon.HashArray{{'a', '2'}, {'a', '3'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '3'}, {'a', '4'}, {'a', '5'}},
+			prefix:       gwatCommon.HashArray{{'a', '2'}, {'a', '3'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		//fork 2
 		{slot: 6, root: nrToHash(6), parent: 2, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '4'}, {'a', '5'}, {'a', '6'}},
-			prefix:      gwatCommon.HashArray{{'a', '2'}, {'a', '3'}, {'a', '4'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '4'}, {'a', '5'}, {'a', '6'}},
+			prefix:       gwatCommon.HashArray{{'a', '2'}, {'a', '3'}, {'a', '4'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 7, root: nrToHash(7), parent: 6, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '5'}, {'a', '6'}, {'a', '7'}},
-			prefix:      gwatCommon.HashArray{{'a', '3'}, {'a', '4'}, {'a', '5'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}, {'a', '2'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '5'}, {'a', '6'}, {'a', '7'}},
+			prefix:       gwatCommon.HashArray{{'a', '3'}, {'a', '4'}, {'a', '5'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}, {'a', '2'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		//fork 3
 		{slot: 8, root: nrToHash(8), parent: 5, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '6'}, {'a', '7'}, {'a', '8'}},
-			prefix:      gwatCommon.HashArray{{'a', '4'}, {'a', '5'}, {'a', '6'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}, {'a', '2'}, {'a', '3'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '6'}, {'a', '7'}, {'a', '8'}},
+			prefix:       gwatCommon.HashArray{{'a', '4'}, {'a', '5'}, {'a', '6'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}, {'a', '2'}, {'a', '3'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 9, root: nrToHash(9), parent: 8, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '7'}, {'a', '8'}, {'a', '9'}, {'a', '1', '0'}},
-			prefix:      gwatCommon.HashArray{{'a', '4'}, {'a', '5'}, {'a', '6'}, {'a', '7'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}, {'a', '2'}, {'a', '3'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '7'}, {'a', '8'}, {'a', '9'}, {'a', '1', '0'}},
+			prefix:       gwatCommon.HashArray{{'a', '4'}, {'a', '5'}, {'a', '6'}, {'a', '7'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}, {'a', '2'}, {'a', '3'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 	}
 
@@ -584,67 +584,67 @@ func Test_collectTgTreeNodesByOptimisticSpines_1_forks(t *testing.T) {
 	f.store.nodes = []*Node{
 
 		{slot: 0, root: nrToHash(0), parent: NonExistentNode, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{},
-			prefix:      gwatCommon.HashArray{},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{},
+			prefix:       gwatCommon.HashArray{},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 1, root: nrToHash(1), parent: 0, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '2'}},
-			prefix:      gwatCommon.HashArray{},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '2'}},
+			prefix:       gwatCommon.HashArray{},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 2, root: nrToHash(2), parent: 1, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '2'}, {'a', '3'}},
-			prefix:      gwatCommon.HashArray{},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '2'}, {'a', '3'}},
+			prefix:       gwatCommon.HashArray{},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 3, root: nrToHash(3), parent: 2, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '2'}, {'a', '3'}, {'a', '4'}},
-			prefix:      gwatCommon.HashArray{{'a', '2'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '2'}, {'a', '3'}, {'a', '4'}},
+			prefix:       gwatCommon.HashArray{{'a', '2'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		//fork 1
 		{slot: 4, root: nrToHash(4), parent: 1, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '2'}, {'a', '3'}, {'a', '4'}},
-			prefix:      gwatCommon.HashArray{{'a', '2'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '2'}, {'a', '3'}, {'a', '4'}},
+			prefix:       gwatCommon.HashArray{{'a', '2'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 5, root: nrToHash(5), parent: 4, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '3'}, {'a', '4'}, {'a', '5'}},
-			prefix:      gwatCommon.HashArray{{'a', '2'}, {'a', '3'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '3'}, {'a', '4'}, {'a', '5'}},
+			prefix:       gwatCommon.HashArray{{'a', '2'}, {'a', '3'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		//fork 2
 		{slot: 6, root: nrToHash(6), parent: 2, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '4'}, {'a', '5'}, {'a', '6'}},
-			prefix:      gwatCommon.HashArray{{'a', '2'}, {'a', '3'}, {'a', '4'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '4'}, {'a', '5'}, {'a', '6'}},
+			prefix:       gwatCommon.HashArray{{'a', '2'}, {'a', '3'}, {'a', '4'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 7, root: nrToHash(7), parent: 6, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '5'}, {'a', '6'}, {'a', '7'}},
-			prefix:      gwatCommon.HashArray{{'a', '3'}, {'a', '4'}, {'a', '5'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}, {'a', '2'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '5'}, {'a', '6'}, {'a', '7'}},
+			prefix:       gwatCommon.HashArray{{'a', '3'}, {'a', '4'}, {'a', '5'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}, {'a', '2'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		//fork 3
 		{slot: 8, root: nrToHash(8), parent: 5, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '6'}, {'a', '7'}, {'a', '8'}},
-			prefix:      gwatCommon.HashArray{{'a', '4'}, {'a', '5'}, {'a', '6'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}, {'a', '2'}, {'a', '3'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '6'}, {'a', '7'}, {'a', '8'}},
+			prefix:       gwatCommon.HashArray{{'a', '4'}, {'a', '5'}, {'a', '6'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}, {'a', '2'}, {'a', '3'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 		{slot: 9, root: nrToHash(9), parent: 8, spinesData: &SpinesData{
-			spines:      gwatCommon.HashArray{{'a', '7'}, {'a', '8'}, {'a', '9'}, {'a', '1', '0'}},
-			prefix:      gwatCommon.HashArray{{'a', '4'}, {'a', '5'}, {'a', '6'}, {'a', '7'}},
-			finalized:   gwatCommon.HashArray{{'a', '1'}, {'a', '2'}, {'a', '3'}},
-			unpubChains: nil,
+			spines:       gwatCommon.HashArray{{'a', '7'}, {'a', '8'}, {'a', '9'}, {'a', '1', '0'}},
+			prefix:       gwatCommon.HashArray{{'a', '4'}, {'a', '5'}, {'a', '6'}, {'a', '7'}},
+			finalization: gwatCommon.HashArray{{'a', '1'}, {'a', '2'}, {'a', '3'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
 	}
 
@@ -689,8 +689,8 @@ func TestGetParentByOptimisticSpines_TwoBranches(t *testing.T) {
 		nodesRootIndexMap map[[32]byte]uint64
 	)
 
-	f := New(0, 0, params.BeaconConfig().ZeroHash)
-	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 0, nrToHash(0), params.BeaconConfig().ZeroHash, 0, 0, justifiedRoot[:], finalizedRoot[:], nil, nil, nil, nil))
+	f := New(0, 0)
+	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 0, nrToHash(0), params.BeaconConfig().ZeroHash, 0, 0, justifiedRoot[:], finalizedRoot[:], nil, nil))
 
 	r, err = f.Head(context.Background(), 0, nrToHash(0), balances, 0)
 	require.NoError(t, err)
@@ -704,27 +704,27 @@ func TestGetParentByOptimisticSpines_TwoBranches(t *testing.T) {
 	// Define the following tree:
 	//                                0
 	//                               / \
-	//  justified: 0, finalized: 0 -> 1   2 <- justified: 0, finalized: 0
+	//  justified: 0, finalization: 0 -> 1   2 <- justified: 0, finalization: 0
 	//                              |   |
-	//  justified: 1, finalized: 0 -> 3   4 <- justified: 0, finalized: 0
+	//  justified: 1, finalization: 0 -> 3   4 <- justified: 0, finalization: 0
 	//                              |   |
-	//  justified: 1, finalized: 0 -> 5   6 <- justified: 0, finalized: 0
+	//  justified: 1, finalization: 0 -> 5   6 <- justified: 0, finalization: 0
 	//                              |   |
-	//  justified: 1, finalized: 0 -> 7   8 <- justified: 1, finalized: 0
+	//  justified: 1, finalization: 0 -> 7   8 <- justified: 1, finalization: 0
 	//                              |   |
-	//  justified: 2, finalized: 0 -> 9  10 <- justified: 2, finalized: 0
+	//  justified: 2, finalization: 0 -> 9  10 <- justified: 2, finalization: 0
 	// Left branch.
-	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 1, nrToHash(1), nrToHash(0), 0, 0, justifiedRoot[:], finalizedRoot[:], nil, nil, nil, nil))
-	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 2, nrToHash(3), nrToHash(1), 1, 0, justifiedRoot[:], finalizedRoot[:], nil, nil, nil, nil))
-	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 3, nrToHash(5), nrToHash(3), 1, 0, justifiedRoot[:], finalizedRoot[:], nil, nil, nil, nil))
-	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 4, nrToHash(7), nrToHash(5), 1, 0, justifiedRoot[:], finalizedRoot[:], nil, nil, nil, nil))
-	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 4, nrToHash(9), nrToHash(7), 2, 0, justifiedRoot[:], finalizedRoot[:], nil, nil, nil, nil))
+	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 1, nrToHash(1), nrToHash(0), 0, 0, justifiedRoot[:], finalizedRoot[:], nil, nil))
+	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 2, nrToHash(3), nrToHash(1), 1, 0, justifiedRoot[:], finalizedRoot[:], nil, nil))
+	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 3, nrToHash(5), nrToHash(3), 1, 0, justifiedRoot[:], finalizedRoot[:], nil, nil))
+	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 4, nrToHash(7), nrToHash(5), 1, 0, justifiedRoot[:], finalizedRoot[:], nil, nil))
+	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 4, nrToHash(9), nrToHash(7), 2, 0, justifiedRoot[:], finalizedRoot[:], nil, nil))
 	// Right branch.
-	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 1, nrToHash(2), nrToHash(0), 0, 0, justifiedRoot[:], finalizedRoot[:], nil, nil, nil, nil))
-	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 2, nrToHash(4), nrToHash(2), 0, 0, justifiedRoot[:], finalizedRoot[:], nil, nil, nil, nil))
-	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 3, nrToHash(6), nrToHash(4), 0, 0, justifiedRoot[:], finalizedRoot[:], nil, nil, nil, nil))
-	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 4, nrToHash(8), nrToHash(6), 1, 0, justifiedRoot[:], finalizedRoot[:], nil, nil, nil, nil))
-	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 4, nrToHash(10), nrToHash(8), 2, 0, justifiedRoot[:], finalizedRoot[:], nil, nil, nil, nil))
+	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 1, nrToHash(2), nrToHash(0), 0, 0, justifiedRoot[:], finalizedRoot[:], nil, nil))
+	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 2, nrToHash(4), nrToHash(2), 0, 0, justifiedRoot[:], finalizedRoot[:], nil, nil))
+	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 3, nrToHash(6), nrToHash(4), 0, 0, justifiedRoot[:], finalizedRoot[:], nil, nil))
+	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 4, nrToHash(8), nrToHash(6), 1, 0, justifiedRoot[:], finalizedRoot[:], nil, nil))
+	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 4, nrToHash(10), nrToHash(8), 2, 0, justifiedRoot[:], finalizedRoot[:], nil, nil))
 
 	// With start at 0, the head should be 10:
 	//           0  <-- start

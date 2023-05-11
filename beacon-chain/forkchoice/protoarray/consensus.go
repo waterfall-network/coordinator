@@ -86,7 +86,6 @@ func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines 
 		"balances":             len(fc.balances),
 		"store.justifiedEpoch": fc.store.justifiedEpoch,
 		"store.finalizedEpoch": fc.store.finalizedEpoch,
-		"store.finalizedRoot":  fmt.Sprintf("%#x", fc.store.finalizedRoot),
 		"store.[0].root":       fmt.Sprintf("%#x", fc.store.nodes[0].root),
 		"fork[0]":              frkRoots_0,
 		//"fc":                     fc,
@@ -130,14 +129,13 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 		"balances":             len(f.balances),
 		"store.justifiedEpoch": f.store.justifiedEpoch,
 		"store.finalizedEpoch": f.store.finalizedEpoch,
-		"store.finalizedRoot":  fmt.Sprintf("%#x", f.store.finalizedRoot),
 		"store.[0].root":       fmt.Sprintf("%#x", f.store.nodes[0].root),
 		"fork[0]":              frkRoots_0,
 		//"fc":                     fc,
 	}).Info("**************  calculateHeadRootByNodesIndexes")
 
 	// create ForkChoice instance
-	fcInstance := New(f.store.justifiedEpoch, f.store.finalizedEpoch, f.store.finalizedRoot)
+	fcInstance := New(f.store.justifiedEpoch, f.store.finalizedEpoch)
 
 	// sort node's indexes
 	nodeIndexes := make(gwatCommon.SorterAscU64, 0, len(nodesRootIndexMap))
@@ -258,7 +256,6 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 		"_balances":            len(f.balances),
 		"store.justifiedEpoch": fcInstance.store.justifiedEpoch,
 		"store.finalizedEpoch": fcInstance.store.finalizedEpoch,
-		"store.finalizedRoot":  fmt.Sprintf("%#x", fcInstance.store.finalizedRoot),
 		"store.[0].root":       fmt.Sprintf("%#x", fcInstance.store.nodes[0].root),
 	}).Info("**************  GetParentByOptimisticSpines 99999")
 
@@ -277,15 +274,32 @@ func collectTgTreeNodesByOptimisticSpines(fc *ForkChoice, optSpines []gwatCommon
 		for i, r := range frk.roots {
 			node := frk.nodesMap[r]
 
-			// check finalized matches to optSpines
-			finalized := node.spinesData.Finalized()
-			ok := isSequenceMatchOptimisticSpines(finalized, optSpines)
+			if len(node.spinesData.cpFinalized) == 0 {
+				log.WithFields(logrus.Fields{
+					"node.slot":         node.slot,
+					"node.root":         fmt.Sprintf("%#x", node.root),
+					"node.cpFinalized":  node.spinesData.cpFinalized,
+					"node.Finalization": node.spinesData.Finalization(),
+					"optSpines":         optSpines,
+				}).Error("------ collectTgTreeNodesByOptimisticSpines: checkpoint finalized seq empty ------")
+			}
+
+			// rm finalized spines from optSpines if contains
+			lastFinHash := node.spinesData.cpFinalized[len(node.spinesData.cpFinalized)-1]
+			lastFinIndex := indexOfOptimisticSpines(lastFinHash, optSpines)
+			if lastFinIndex > -1 {
+				optSpines = optSpines[lastFinIndex+1:]
+			}
+
+			// check finalization matches to optSpines
+			finalization := node.spinesData.Finalization()
+			ok := isSequenceMatchOptimisticSpines(finalization, optSpines)
 
 			log.WithFields(logrus.Fields{
 				"ok":           ok,
-				"finalized":    finalized,
-				"optSpines[0]": optSpines[0],
-			}).Info("collectTgTreeNodesByOptimisticSpines: check finalized")
+				"finalization": finalization,
+				"optSpines":    optSpines,
+			}).Info("collectTgTreeNodesByOptimisticSpines: check finalization")
 
 			if !ok {
 				continue
@@ -293,8 +307,8 @@ func collectTgTreeNodesByOptimisticSpines(fc *ForkChoice, optSpines []gwatCommon
 
 			// check prefix matches to optSpines
 			prefOptSpines := []gwatCommon.HashArray{}
-			if len(optSpines) > len(finalized) {
-				prefOptSpines = optSpines[len(finalized):]
+			if len(optSpines) > len(finalization) {
+				prefOptSpines = optSpines[len(finalization):]
 			}
 			prefix := node.spinesData.Prefix()
 			ok = isSequenceMatchOptimisticSpines(prefix, prefOptSpines)
@@ -309,7 +323,7 @@ func collectTgTreeNodesByOptimisticSpines(fc *ForkChoice, optSpines []gwatCommon
 
 			//check prefix extension or no published spines
 			published := node.spinesData.Spines()
-			isExtended := len(prefix.Intersection(published)) > 0 || len(finalized.Intersection(published)) > 0
+			isExtended := len(prefix.Intersection(published)) > 0 || len(finalization.Intersection(published)) > 0
 			if isExtended || len(published) == 0 {
 				//collect roots of acceptable forks
 				forkRoots := frk.roots[i:]
@@ -366,16 +380,25 @@ func collectTgTreeNodesByOptimisticSpines(fc *ForkChoice, optSpines []gwatCommon
 	return rootIndexMap, leafs
 }
 
-func isSequenceMatchOptimisticSpines(seq gwatCommon.HashArray, spines []gwatCommon.HashArray) bool {
-	if len(seq) > len(spines) {
+func isSequenceMatchOptimisticSpines(seq gwatCommon.HashArray, optSpines []gwatCommon.HashArray) bool {
+	if len(seq) > len(optSpines) {
 		return false
 	}
 	for i, h := range seq {
-		if !spines[i].Has(h) {
+		if !optSpines[i].Has(h) {
 			return false
 		}
 	}
 	return true
+}
+
+func indexOfOptimisticSpines(hash gwatCommon.Hash, optSpines []gwatCommon.HashArray) int {
+	for i, sines := range optSpines {
+		if sines.Has(hash) {
+			return i
+		}
+	}
+	return -1
 }
 
 // insertNode inserts node to the fork choice store's node list.

@@ -280,8 +280,6 @@ func ProcessBlockForStateRoot(
 		).Error("ProcessBlockForStateRoot:Err")
 		return nil, err
 	}
-	finalization := gwatCommon.HashArrayFromBytes(state.SpineData().Finalization)
-	lastFinSpine := finalization[len(finalization)-1]
 
 	blk := signed.Block()
 	body := blk.Body()
@@ -308,7 +306,7 @@ func ProcessBlockForStateRoot(
 		"Spines":       gwatCommon.HashArrayFromBytes(state.SpineData().Spines),
 		"Prefix":       gwatCommon.HashArrayFromBytes(state.SpineData().Prefix),
 		"Finalization": gwatCommon.HashArrayFromBytes(state.SpineData().Finalization),
-		"ParentSpines": state.SpineData().ParentSpines,
+		"CpFinalized":  gwatCommon.HashArrayFromBytes(state.SpineData().CpFinalized),
 	}).Info("--------- ProcessBlockForStateRoot:state:111")
 
 	log.WithError(err).WithFields(logrus.Fields{
@@ -346,7 +344,7 @@ func ProcessBlockForStateRoot(
 		return nil, errors.Wrap(err, "could not process eth1 data")
 	}
 
-	state, err = b.ProcessBlockVoting(ctx, state, signed, lastFinSpine)
+	state, err = b.ProcessDagConsensus(ctx, state, signed)
 	if err != nil {
 		log.WithError(
 			errors.Wrap(err, "could not process block voting data"),

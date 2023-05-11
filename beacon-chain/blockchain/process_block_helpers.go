@@ -383,9 +383,7 @@ func (s *Service) fillInForkChoiceMissingBlocks(ctx context.Context, blk block.B
 			jCheckpoint.Root,
 			fCheckpoint.Root,
 			b.Body().Attestations(),
-			st.SpineData().GetSpines(),
-			st.SpineData().GetPrefix(),
-			st.SpineData().GetFinalization(),
+			st.SpineData(),
 		); err != nil {
 			return errors.Wrap(err, "could not process block for proto array fork choice")
 		}

@@ -98,7 +98,7 @@ func (s *Service) updateHead(ctx context.Context, balances []uint64) ([32]byte, 
 		if features.Get().EnableForkChoiceDoublyLinkedTree {
 			s.cfg.ForkChoiceStore = doublylinkedtree.New(j.Epoch, f.Epoch)
 		} else {
-			s.cfg.ForkChoiceStore = protoarray.New(j.Epoch, f.Epoch, bytesutil.ToBytes32(f.Root))
+			s.cfg.ForkChoiceStore = protoarray.New(j.Epoch, f.Epoch)
 		}
 		st, err := s.cfg.StateGen.StateByRoot(ctx, headStartRoot)
 		if err != nil {

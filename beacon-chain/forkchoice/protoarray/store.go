@@ -26,11 +26,10 @@ const defaultPruneThreshold = 256
 var lastHeadRoot [32]byte
 
 // New initializes a new fork choice store.
-func New(justifiedEpoch, finalizedEpoch types.Epoch, finalizedRoot [32]byte) *ForkChoice {
+func New(justifiedEpoch, finalizedEpoch types.Epoch) *ForkChoice {
 	s := &Store{
 		justifiedEpoch:    justifiedEpoch,
 		finalizedEpoch:    finalizedEpoch,
-		finalizedRoot:     finalizedRoot,
 		proposerBoostRoot: [32]byte{},
 		nodes:             make([]*Node, 0),
 		nodesIndices:      make(map[[32]byte]uint64),
@@ -155,7 +154,7 @@ func (f *ForkChoice) InsertOptimisticBlock(
 	//optimistic consensus params
 	justifiedRoot, finalizedRoot []byte,
 	atts []*ethpb.Attestation,
-	spines, prefix, finalisation []byte,
+	spineData *ethpb.SpineData,
 ) error {
 	ctx, span := trace.StartSpan(ctx, "protoArrayForkChoice.InsertOptimisticBlock")
 	defer span.End()
@@ -170,9 +169,7 @@ func (f *ForkChoice) InsertOptimisticBlock(
 		bytesutil.ToBytes32(justifiedRoot),
 		bytesutil.ToBytes32(finalizedRoot),
 		atts,
-		spines,
-		prefix,
-		finalisation,
+		spineData,
 	)
 }
 
@@ -370,9 +367,7 @@ func (s *Store) insert(ctx context.Context,
 	justifiedRoot,
 	finalizedRoot [32]byte,
 	atts []*ethpb.Attestation,
-	spines []byte,
-	prefix []byte,
-	finalisation []byte,
+	spineData *ethpb.SpineData,
 ) error {
 	_, span := trace.StartSpan(ctx, "protoArrayForkChoice.insert")
 	defer span.End()
@@ -385,26 +380,23 @@ func (s *Store) insert(ctx context.Context,
 		return nil
 	}
 
-	var parentNode *Node
 	index := uint64(len(s.nodes))
 	parentIndex, ok := s.nodesIndices[parent]
 	// Mark genesis block's parent as non-existent.
 	if !ok {
 		parentIndex = NonExistentNode
-	} else {
-		parentNode = s.nodes[parentIndex]
+	}
+
+	if len(spineData.GetCpFinalized()) == 0 {
+		log.WithFields(logrus.Fields{
+			"node.slot":         slot,
+			"node.root":         fmt.Sprintf("%#x", root),
+			"node.cpFinalized":  spineData.GetCpFinalized(),
+			"node.Finalization": spineData.GetFinalization(),
+		}).Error("------ collectTgTreeNodesByOptimisticSpines: insert node ------")
 	}
 
 	attsData := NewAttestationsData(atts, justifiedRoot, finalizedRoot)
-	spinesData, err := NewSpinesData(
-		parentNode,
-		gwatCommon.HashArrayFromBytes(spines),
-		gwatCommon.HashArrayFromBytes(prefix),
-		gwatCommon.HashArrayFromBytes(finalisation),
-	)
-	if err != nil {
-		return err
-	}
 
 	n := &Node{
 		slot:           slot,
@@ -416,13 +408,13 @@ func (s *Store) insert(ctx context.Context,
 		bestDescendant: NonExistentNode,
 		weight:         0,
 		attsData:       attsData,
-		spinesData:     spinesData,
+		spinesData: &SpinesData{
+			spines:       gwatCommon.HashArrayFromBytes(spineData.GetSpines()),
+			prefix:       gwatCommon.HashArrayFromBytes(spineData.GetPrefix()),
+			finalization: gwatCommon.HashArrayFromBytes(spineData.GetFinalization()),
+			cpFinalized:  gwatCommon.HashArrayFromBytes(spineData.GetCpFinalized()),
+		},
 	}
-
-	//log.WithFields(logrus.Fields{
-	//	"attsData":   fmt.Sprintf("%v", n.attsData),
-	//	"spinesData": fmt.Sprintf("%v", n.spinesData),
-	//}).Info("Forkchoice: insert node")
 
 	s.nodesIndices[root] = index
 	s.nodes = append(s.nodes, n)

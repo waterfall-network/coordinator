@@ -529,8 +529,7 @@ func (s *Service) processDagFinalization(headBlock block.SignedBeaconBlock, head
 		).Error("Dag finalization: state error")
 		return errors.Wrapf(err, "Cache finalized spines: checkpoint's state not found for epoch=%d root=%x", cpFin.Epoch, cpFin.GetRoot())
 	}
-	cpFinSeq := gwatCommon.HashArrayFromBytes(cpState.SpineData().Finalization)
-	s.SetFinalizedSpinesCheckpoint(cpFinSeq[len(cpFinSeq)-1])
+	s.SetFinalizedSpinesCheckpoint(helpers.GetTerminalFinalizedSpine(cpState))
 
 	//update FinalizedSpines cache
 	s.AddFinalizedSpines(finalizedSeq)
@@ -595,7 +594,7 @@ func (s *Service) collectFinalizationParams(
 		currFinalization := gwatCommon.HashArrayFromBytes(currState.SpineData().Finalization)
 		intersect := finalizedSpines.SequenceIntersection(currFinalization).Uniq()
 		if len(intersect) == 0 {
-			baseSpine = currFinalization[len(currFinalization)-1]
+			baseSpine = helpers.GetTerminalFinalizedSpine(currState)
 			finalizationSeq = append(currFinalization, finalizationSeq...)
 
 			log.WithFields(logrus.Fields{
