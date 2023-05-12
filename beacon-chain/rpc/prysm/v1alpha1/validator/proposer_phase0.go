@@ -183,7 +183,7 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		"2.candidates": candidates,
 	}).Info("build block data: retrieving of gwat candidates")
 
-	deposits, atts, err := vs.packDepositsAndAttestations(ctx, head, eth1Data)
+	deposits, atts, err := vs.packDepositsAndAttestations(ctx, head, eth1Data, parentRoot)
 	if err != nil {
 		return nil, err
 	}

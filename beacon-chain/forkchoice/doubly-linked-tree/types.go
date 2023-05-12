@@ -17,6 +17,11 @@ type ForkChoice struct {
 	balances  []uint64 // tracks individual validator's last justified balances.
 }
 
+func (f *ForkChoice) CollectForkExcludedBlkRoots(leaf common.Hash) common.HashArray {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines []common.HashArray) ([32]byte, error) {
 	//TODO implement me
 	panic("implement me")

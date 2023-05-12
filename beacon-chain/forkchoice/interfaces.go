@@ -72,6 +72,7 @@ type Getter interface {
 	ForkChoiceNodes() []*pbrpc.ForkChoiceNode
 	NodeCount() int
 	GetParentByOptimisticSpines(ctx context.Context, optSpines []gwatCommon.HashArray) ([32]byte, error)
+	CollectForkExcludedBlkRoots(leaf gwatCommon.Hash) gwatCommon.HashArray
 }
 
 // Setter allows to set forkchoice information

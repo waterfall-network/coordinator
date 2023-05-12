@@ -401,6 +401,25 @@ func indexOfOptimisticSpines(hash gwatCommon.Hash, optSpines []gwatCommon.HashAr
 	return -1
 }
 
+// CollectForkExcludedAttestations collect attestations
+func (f *ForkChoice) CollectForkExcludedBlkRoots(leaf gwatCommon.Hash) gwatCommon.HashArray {
+	// collect nodes excluded from fork
+	fork := f.GetFork(leaf)
+	exIndices := make(map[[32]byte]uint64, len(f.store.nodesIndices))
+	for k, v := range f.store.nodesIndices {
+		exIndices[k] = v
+	}
+	for _, r := range fork.roots {
+		delete(exIndices, r)
+	}
+	//collect attestation
+	exRoots := make(gwatCommon.HashArray, 0, len(exIndices))
+	for r := range exIndices {
+		exRoots = append(exRoots, r)
+	}
+	return exRoots
+}
+
 // insertNode inserts node to the fork choice store's node list.
 // It then updates the new node's parent with best child and descendant node.
 func (s *Store) insertNode(ctx context.Context, node *Node) error {

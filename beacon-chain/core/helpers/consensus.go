@@ -70,7 +70,7 @@ func CalculateCandidates(parentState state.BeaconState, optSpines []gwatCommon.H
 	return candidates
 }
 
-// GetTerminalFinalizedSpine validate unpublished chains
+// GetTerminalFinalizedSpine retrieve last optimistic finalized spine
 func GetTerminalFinalizedSpine(beaconState state.BeaconState) gwatCommon.Hash {
 	finalization := beaconState.SpineData().Finalization
 	if len(finalization) > 0 {
