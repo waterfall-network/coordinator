@@ -254,7 +254,6 @@ func (s *Service) StartFromSavedState(saved state.BeaconState) error {
 	if err := fc.InsertOptimisticBlock(s.ctx, fSlot, fRoot, params.BeaconConfig().ZeroHash,
 		justified.Epoch, finalized.Epoch,
 		justified.Root, finalized.Root,
-		fb.Block().Body().Attestations(),
 		st.SpineData(),
 	); err != nil {
 		return errors.Wrap(err, "could not insert finalized block to forkchoice")
@@ -525,7 +524,6 @@ func (s *Service) saveGenesisData(ctx context.Context, genesisState state.Beacon
 		genesisCheckpoint.Epoch,
 		genesisCheckpoint.Root,
 		genesisCheckpoint.Root,
-		genesisBlk.Block().Body().Attestations(),
 		genesisState.SpineData(),
 	); err != nil {
 		log.Fatalf("Could not process genesis block for fork choice: %v", err)

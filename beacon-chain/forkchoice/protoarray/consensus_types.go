@@ -1,9 +1,7 @@
 package protoarray
 
 import (
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
-	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
@@ -14,7 +12,6 @@ type Fork struct {
 
 // AttestationsData represents data related with attestations in Node.
 type AttestationsData struct {
-	atts          []*ethpb.Attestation
 	justifiedRoot [32]byte
 	finalizedRoot [32]byte
 	votes         map[uint64]Vote
@@ -36,9 +33,6 @@ func (ad *AttestationsData) Votes() map[uint64]Vote {
 	return copyVotes(ad.votes)
 }
 
-func (ad *AttestationsData) Attestations() []*ethpb.Attestation {
-	return helpers.CopyAttestatations(ad.atts)
-}
 func (ad *AttestationsData) JustifiedRoot() [32]byte {
 	return bytesutil.ToBytes32(bytesutil.SafeCopyBytes(ad.justifiedRoot[:]))
 }
@@ -51,23 +45,9 @@ func (ad *AttestationsData) Copy() *AttestationsData {
 		return nil
 	}
 	return &AttestationsData{
-		atts:          ad.Attestations(),
 		justifiedRoot: ad.JustifiedRoot(),
 		finalizedRoot: ad.FinalizedRoot(),
 		votes:         ad.Votes(),
-	}
-}
-
-func NewAttestationsData(
-	atts []*ethpb.Attestation,
-	justifiedRoot [32]byte,
-	finalizedRoot [32]byte,
-) *AttestationsData {
-	return &AttestationsData{
-		atts:          atts,
-		justifiedRoot: justifiedRoot,
-		finalizedRoot: finalizedRoot,
-		votes:         map[uint64]Vote{},
 	}
 }
 

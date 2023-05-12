@@ -153,7 +153,6 @@ func (f *ForkChoice) InsertOptimisticBlock(
 	justifiedEpoch, finalizedEpoch types.Epoch,
 	//optimistic consensus params
 	justifiedRoot, finalizedRoot []byte,
-	atts []*ethpb.Attestation,
 	spineData *ethpb.SpineData,
 ) error {
 	ctx, span := trace.StartSpan(ctx, "protoArrayForkChoice.InsertOptimisticBlock")
@@ -168,7 +167,6 @@ func (f *ForkChoice) InsertOptimisticBlock(
 		//optimistic consensus params
 		bytesutil.ToBytes32(justifiedRoot),
 		bytesutil.ToBytes32(finalizedRoot),
-		atts,
 		spineData,
 	)
 }
@@ -366,7 +364,6 @@ func (s *Store) insert(ctx context.Context,
 	//optimistic consensus params
 	justifiedRoot,
 	finalizedRoot [32]byte,
-	atts []*ethpb.Attestation,
 	spineData *ethpb.SpineData,
 ) error {
 	_, span := trace.StartSpan(ctx, "protoArrayForkChoice.insert")
@@ -396,7 +393,11 @@ func (s *Store) insert(ctx context.Context,
 		}).Error("------ collectTgTreeNodesByOptimisticSpines: insert node ------")
 	}
 
-	attsData := NewAttestationsData(atts, justifiedRoot, finalizedRoot)
+	attsData := &AttestationsData{
+		justifiedRoot: justifiedRoot,
+		finalizedRoot: finalizedRoot,
+		votes:         map[uint64]Vote{},
+	}
 
 	n := &Node{
 		slot:           slot,

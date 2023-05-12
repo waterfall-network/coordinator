@@ -690,7 +690,7 @@ func TestGetParentByOptimisticSpines_TwoBranches(t *testing.T) {
 	)
 
 	f := New(0, 0)
-	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 0, nrToHash(0), params.BeaconConfig().ZeroHash, 0, 0, justifiedRoot[:], finalizedRoot[:], nil, nil))
+	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 0, nrToHash(0), params.BeaconConfig().ZeroHash, 0, 0, justifiedRoot[:], finalizedRoot[:], nil))
 
 	r, err = f.Head(context.Background(), 0, nrToHash(0), balances, 0)
 	require.NoError(t, err)
@@ -714,17 +714,17 @@ func TestGetParentByOptimisticSpines_TwoBranches(t *testing.T) {
 	//                              |   |
 	//  justified: 2, finalization: 0 -> 9  10 <- justified: 2, finalization: 0
 	// Left branch.
-	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 1, nrToHash(1), nrToHash(0), 0, 0, justifiedRoot[:], finalizedRoot[:], nil, nil))
-	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 2, nrToHash(3), nrToHash(1), 1, 0, justifiedRoot[:], finalizedRoot[:], nil, nil))
-	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 3, nrToHash(5), nrToHash(3), 1, 0, justifiedRoot[:], finalizedRoot[:], nil, nil))
-	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 4, nrToHash(7), nrToHash(5), 1, 0, justifiedRoot[:], finalizedRoot[:], nil, nil))
-	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 4, nrToHash(9), nrToHash(7), 2, 0, justifiedRoot[:], finalizedRoot[:], nil, nil))
+	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 1, nrToHash(1), nrToHash(0), 0, 0, justifiedRoot[:], finalizedRoot[:], nil))
+	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 2, nrToHash(3), nrToHash(1), 1, 0, justifiedRoot[:], finalizedRoot[:], nil))
+	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 3, nrToHash(5), nrToHash(3), 1, 0, justifiedRoot[:], finalizedRoot[:], nil))
+	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 4, nrToHash(7), nrToHash(5), 1, 0, justifiedRoot[:], finalizedRoot[:], nil))
+	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 4, nrToHash(9), nrToHash(7), 2, 0, justifiedRoot[:], finalizedRoot[:], nil))
 	// Right branch.
-	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 1, nrToHash(2), nrToHash(0), 0, 0, justifiedRoot[:], finalizedRoot[:], nil, nil))
-	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 2, nrToHash(4), nrToHash(2), 0, 0, justifiedRoot[:], finalizedRoot[:], nil, nil))
-	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 3, nrToHash(6), nrToHash(4), 0, 0, justifiedRoot[:], finalizedRoot[:], nil, nil))
-	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 4, nrToHash(8), nrToHash(6), 1, 0, justifiedRoot[:], finalizedRoot[:], nil, nil))
-	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 4, nrToHash(10), nrToHash(8), 2, 0, justifiedRoot[:], finalizedRoot[:], nil, nil))
+	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 1, nrToHash(2), nrToHash(0), 0, 0, justifiedRoot[:], finalizedRoot[:], nil))
+	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 2, nrToHash(4), nrToHash(2), 0, 0, justifiedRoot[:], finalizedRoot[:], nil))
+	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 3, nrToHash(6), nrToHash(4), 0, 0, justifiedRoot[:], finalizedRoot[:], nil))
+	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 4, nrToHash(8), nrToHash(6), 1, 0, justifiedRoot[:], finalizedRoot[:], nil))
+	require.NoError(t, f.InsertOptimisticBlock(context.Background(), 4, nrToHash(10), nrToHash(8), 2, 0, justifiedRoot[:], finalizedRoot[:], nil))
 
 	// With start at 0, the head should be 10:
 	//           0  <-- start

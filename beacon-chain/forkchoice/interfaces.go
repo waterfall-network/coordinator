@@ -39,7 +39,6 @@ type BlockProcessor interface {
 		finalizedEpoch types.Epoch,
 		justifiedRoot []byte,
 		finalizedRoot []byte,
-		atts []*pbrpc.Attestation,
 		spineData *pbrpc.SpineData,
 	) error
 }
