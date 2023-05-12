@@ -137,7 +137,7 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		errWrap := fmt.Errorf("could not get gwat candidates: %v", err)
 		log.WithError(errWrap).WithFields(logrus.Fields{
 			"baseSpine": baseSpine,
-		}).Error("build block data: retrieving of gwat optimistic spines failed")
+		}).Error("build block data: retrieving of parent failed")
 		return nil, errWrap
 	}
 

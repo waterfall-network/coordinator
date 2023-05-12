@@ -108,7 +108,7 @@ func ConsensusCalcPrefix(unpublishedChains []gwatCommon.HashArray) (gwatCommon.H
 	}
 
 	log.WithFields(log.Fields{
-		"prefix":            prefix,
+		"calcPrefix":        prefix,
 		"unpublishedChains": unpublishedChains,
 		"commonChain":       commonChain,
 		"publicationsMap":   publicationsMap,
