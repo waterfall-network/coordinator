@@ -76,6 +76,11 @@ func (m *engineMock) ExecutionDagValidateSpines(ctx context.Context, params gwat
 	panic("implement me")
 }
 
+func (m *engineMock) ExecutionDagValidateFinalization(ctx context.Context, params gwatCommon.HashArray) (bool, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (m *engineMock) ExecutionDagFinalize(ctx context.Context, finParams *gwatTypes.FinalizationParams) (*gwatTypes.FinalizationResult, error) {
 	//TODO implement me
 	panic("implement me")

@@ -284,6 +284,10 @@ func collectTgTreeNodesByOptimisticSpines(fc *ForkChoice, optSpines []gwatCommon
 				}).Error("------ collectTgTreeNodesByOptimisticSpines: checkpoint finalized seq empty ------")
 			}
 
+			if !node.spinesData.IsValid() {
+				continue
+			}
+
 			// rm finalized spines from optSpines if contains
 			lastFinHash := node.spinesData.cpFinalized[len(node.spinesData.cpFinalized)-1]
 			lastFinIndex := indexOfOptimisticSpines(lastFinHash, optSpines)
@@ -555,4 +559,19 @@ func (f *ForkChoice) GetCommonAncestor() (node *Node) {
 	}
 	commonRoot := commonChain[len(commonChain)-1]
 	return f.GetNode(commonRoot)
+}
+
+func (f *ForkChoice) SetFinalizationValid(root [32]byte, isValid bool) {
+	if !f.HasNode(root) {
+		return
+	}
+	i, _ := f.store.nodesIndices[root]
+	f.store.nodes[i].spinesData.isFinalizationValid = isValid
+	if isValid {
+		// set ancestor valid too
+		fork := f.GetFork(root)
+		for _, n := range fork.nodesMap {
+			n.spinesData.isFinalizationValid = isValid
+		}
+	}
 }

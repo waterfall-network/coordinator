@@ -41,6 +41,7 @@ type BlockProcessor interface {
 		finalizedRoot []byte,
 		spineData *pbrpc.SpineData,
 	) error
+	SetFinalizationValid(root [32]byte, isValid bool)
 }
 
 // AttestationProcessor processes the attestation that's used for accounting fork choice.
