@@ -66,11 +66,11 @@ func ProcessDagConsensus(ctx context.Context, beaconState state.BeaconState, sig
 	prefix = prefix.Difference(finalization)
 
 	// cutoff the finalization & prefix and cast to []*SpinesSeq
-	parentSpines := make([]*ethpb.SpinesSeq, len(unpubChains))
-	for i, chain := range unpubChains {
+	parentSpines := make([]*ethpb.SpinesSeq, 0, len(unpubChains))
+	for _, chain := range unpubChains {
 		dif := chain.Difference(finalization).Difference(prefix)
-		parentSpines[i] = &ethpb.SpinesSeq{
-			Spines: dif.ToBytes(),
+		if len(dif) > 0 {
+			parentSpines = append(parentSpines, &ethpb.SpinesSeq{Spines: dif.ToBytes()})
 		}
 	}
 
@@ -303,7 +303,9 @@ func CalcPrefixAndParentSpines(stSpineData *ethpb.SpineData, blCandidates []byte
 	resUnpubChains = parentUnpubChains
 	if len(spines) > 0 {
 		// set new spines to the first position
-		resUnpubChains = []gwatCommon.HashArray{spines}
+		if len(spines) > 0 {
+			resUnpubChains = []gwatCommon.HashArray{spines}
+		}
 		for _, chain := range parentUnpubChains {
 			if len(chain) == 0 {
 				continue

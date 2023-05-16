@@ -172,20 +172,6 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 		}
 		err := fcInstance.store.insertNode(ctx, n)
 
-		log.WithError(err).WithFields(logrus.Fields{
-			"i":                         i,
-			"index":                     index,
-			"len(nodes)":                len(nodeIndexes),
-			"root":                      fmt.Sprintf("%#x", node.root),
-			"parent":                    node.parent,
-			"bestChild":                 node.bestChild,
-			"bestDescendant":            node.bestDescendant,
-			"weight":                    node.weight,
-			"att.justRoot":              fmt.Sprintf("%#x", node.AttestationsData().justifiedRoot),
-			"justifiedRoot":             fmt.Sprintf("%#x", justifiedRoot),
-			"f.getNodeVotes(node.root)": f.getNodeVotes(node.root),
-		}).Info(">>> GetParentByOptimisticSpines 0000")
-
 		if err != nil {
 			return [32]byte{}, err
 		}
