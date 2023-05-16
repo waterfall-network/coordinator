@@ -729,7 +729,7 @@ func (s *Service) ValidateFinalization(finalisation []byte, blockRoot [32]byte) 
 	isValid, err := s.cfg.ExecutionEngineCaller.ExecutionDagValidateFinalization(s.ctx, finSeq)
 	if err != nil || !isValid {
 		log.WithError(err).WithFields(logrus.Fields{
-			"finalisation": finalisation,
+			"finalisation": gwatCommon.HashArrayFromBytes(finalisation),
 			"isValid":      isValid,
 		}).Warn("Validate finalization failed")
 		return

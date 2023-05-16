@@ -312,7 +312,7 @@ func (s *Service) processGwatSync(gsp *wrapper.GwatSyncParam) error {
 		"syncParams.CP.Epoch": gsp.Param().Checkpoint.Epoch,
 		"syncParams.CP.Spine": fmt.Sprintf("%#x", gsp.Param().Checkpoint.Spine),
 		"syncParams.CP.Root":  fmt.Sprintf("%#x", gsp.Param().Checkpoint.Root),
-	}).Debug("Gwat sync: gwat sync param")
+	}).Info("Gwat sync: gwat sync param")
 
 	finRes, err := s.cfg.ExecutionEngineCaller.ExecutionDagFinalize(ctx, syncParams)
 	baseSpine := syncParams.BaseSpine
@@ -338,7 +338,7 @@ func (s *Service) processGwatSync(gsp *wrapper.GwatSyncParam) error {
 		"lfSpine":              fmt.Sprintf("%#x", lfSpine),
 		"finRes":               finRes,
 		"isNoResCp":            finRes.CpEpoch != nil && finRes.CpRoot != nil,
-	}).Debug("Gwat sync: execution result")
+	}).Info("Gwat sync: execution result")
 
 	// cache coordinated checkpoint
 	if finRes.CpEpoch != nil && finRes.CpRoot != nil {
@@ -374,22 +374,22 @@ func (s *Service) processGwatSync(gsp *wrapper.GwatSyncParam) error {
 		}
 	}
 
-	for _, h := range fSeq {
-		finalizedSeq = append(finalizedSeq, h)
-		if h == *lfSpine {
-			break
-		}
-	}
-
-	if len(finalizedSeq) == 0 {
-		err = errors.New("Gwat sync: lf spine is invalid")
-		log.WithError(err).WithFields(logrus.Fields{
-			"finalizationSeq": fSeq,
-			"lfSpine":         fmt.Sprintf("%#x", lfSpine),
-			"isValid":         fSeq.Has(*lfSpine),
-		}).Error("Gwat sync: failed")
-		return errors.Wrap(err, "Gwat sync: failed")
-	}
+	//for _, h := range fSeq {
+	//	finalizedSeq = append(finalizedSeq, h)
+	//	if h == *lfSpine {
+	//		break
+	//	}
+	//}
+	//
+	//if len(finalizedSeq) == 0 {
+	//	err = errors.New("Gwat sync: lf spine is invalid")
+	//	log.WithError(err).WithFields(logrus.Fields{
+	//		"finalizationSeq": fSeq,
+	//		"lfSpine":         fmt.Sprintf("%#x", lfSpine),
+	//		"isValid":         fSeq.Has(*lfSpine),
+	//	}).Error("Gwat sync: failed")
+	//	return errors.Wrap(err, "Gwat sync: failed")
+	//}
 
 	log.WithFields(logrus.Fields{
 		"finalized":        finalizing,
@@ -400,11 +400,11 @@ func (s *Service) processGwatSync(gsp *wrapper.GwatSyncParam) error {
 		"isFullyFinalized": fSeq.IsEqualTo(finalizedSeq),
 	}).Info("Gwat sync: finalization success")
 
-	//update checkpoint of FinalizedSpines cache
-	s.SetFinalizedSpinesCheckpoint(gsp.Param().Checkpoint.Spine)
+	////update checkpoint of FinalizedSpines cache
+	//s.SetFinalizedSpinesCheckpoint(gsp.Param().Checkpoint.Spine)
 
-	//update FinalizedSpines cache
-	s.AddFinalizedSpines(finalizedSeq)
+	////update FinalizedSpines cache
+	//s.AddFinalizedSpines(finalizedSeq)
 
 	return nil
 }
@@ -441,7 +441,7 @@ func (s *Service) processDagFinalization(headBlock block.SignedBeaconBlock, head
 		baseSpine := finParams.BaseSpine
 		finalizing := finParams.Spines
 		lfSpine := finRes.LFSpine
-		fSeq := append(gwatCommon.HashArray{*baseSpine}, finalizing...)
+		//fSeq := append(gwatCommon.HashArray{*baseSpine}, finalizing...)
 		if err != nil || lfSpine == nil {
 			log.WithError(err).WithFields(logrus.Fields{
 				"params.Spines":      finParams.Spines,
@@ -487,52 +487,52 @@ func (s *Service) processDagFinalization(headBlock block.SignedBeaconBlock, head
 			}
 		}
 
-		for _, h := range fSeq {
-			finalizedSeq = append(finalizedSeq, h)
-			if h == *lfSpine {
-				break
-			}
-		}
+		//for _, h := range fSeq {
+		//	finalizedSeq = append(finalizedSeq, h)
+		//	if h == *lfSpine {
+		//		break
+		//	}
+		//}
 
-		if len(finalizedSeq) == 0 {
-			err = errors.New("lf spine is invalid")
-			log.WithError(err).WithFields(logrus.Fields{
-				"finalizationSeq": fSeq,
-				"lfSpine":         lfSpine.Hex(),
-				"isValid":         fSeq.Has(*lfSpine),
-			}).Error("Dag finalization: finalization failed")
-			return errors.Wrap(err, "Dag finalization: gwat finalization failed")
-		}
+		//if len(finalizedSeq) == 0 {
+		//	err = errors.New("lf spine is invalid")
+		//	log.WithError(err).WithFields(logrus.Fields{
+		//		"finalizationSeq": fSeq,
+		//		"lfSpine":         lfSpine.Hex(),
+		//		"isValid":         fSeq.Has(*lfSpine),
+		//	}).Error("Dag finalization: finalization failed")
+		//	return errors.Wrap(err, "Dag finalization: gwat finalization failed")
+		//}
 
 		log.WithFields(logrus.Fields{
-			"finalized":        finalizing,
-			"baseSpine":        fmt.Sprintf("%#x", baseSpine),
-			"lfSpine":          fmt.Sprintf("%#x", lfSpine),
-			"finalizationSeq":  fSeq,
-			"finalizedSeq":     finalizedSeq,
-			"isFullyFinalized": fSeq.IsEqualTo(finalizedSeq),
+			"finalized": finalizing,
+			"baseSpine": fmt.Sprintf("%#x", baseSpine),
+			"lfSpine":   fmt.Sprintf("%#x", lfSpine),
+			//"finalizationSeq":  fSeq,
+			"finalizedSeq": finalizedSeq,
+			//"isFullyFinalized": fSeq.IsEqualTo(finalizedSeq),
 		}).Debug("Dag finalization: finalization success")
 	}
 
-	//update checkpoint of FinalizedSpines cache
-	cpFin := headState.FinalizedCheckpoint()
-	cpState, err := s.cfg.StateGen.StateByRoot(ctx, bytesutil.ToBytes32(cpFin.Root))
-	if err != nil {
-		log.WithError(errors.Wrapf(err,
-			"Cache finalized spines: could not get checkpoint state for epoch=%d root=%x", cpFin.Epoch, cpFin.GetRoot(),
-		)).Error("Dag finalization: state error")
-		return errors.Wrapf(err, "Cache finalized spines: could not get checkpoint state for epoch=%d root=%x", cpFin.Epoch, cpFin.GetRoot())
-	}
-	if cpState == nil || cpState.IsNil() {
-		log.WithError(errors.Wrapf(err,
-			"Cache finalized spines: checkpoint's state not found for epoch=%d root=%x", cpFin.Epoch, cpFin.GetRoot()),
-		).Error("Dag finalization: state error")
-		return errors.Wrapf(err, "Cache finalized spines: checkpoint's state not found for epoch=%d root=%x", cpFin.Epoch, cpFin.GetRoot())
-	}
-	s.SetFinalizedSpinesCheckpoint(helpers.GetTerminalFinalizedSpine(cpState))
+	////update checkpoint of FinalizedSpines cache
+	//cpFin := headState.FinalizedCheckpoint()
+	//cpState, err := s.cfg.StateGen.StateByRoot(ctx, bytesutil.ToBytes32(cpFin.Root))
+	//if err != nil {
+	//	log.WithError(errors.Wrapf(err,
+	//		"Cache finalized spines: could not get checkpoint state for epoch=%d root=%x", cpFin.Epoch, cpFin.GetRoot(),
+	//	)).Error("Dag finalization: state error")
+	//	return errors.Wrapf(err, "Cache finalized spines: could not get checkpoint state for epoch=%d root=%x", cpFin.Epoch, cpFin.GetRoot())
+	//}
+	//if cpState == nil || cpState.IsNil() {
+	//	log.WithError(errors.Wrapf(err,
+	//		"Cache finalized spines: checkpoint's state not found for epoch=%d root=%x", cpFin.Epoch, cpFin.GetRoot()),
+	//	).Error("Dag finalization: state error")
+	//	return errors.Wrapf(err, "Cache finalized spines: checkpoint's state not found for epoch=%d root=%x", cpFin.Epoch, cpFin.GetRoot())
+	//}
+	//s.SetFinalizedSpinesCheckpoint(helpers.GetTerminalFinalizedSpine(cpState))
 
-	//update FinalizedSpines cache
-	s.AddFinalizedSpines(finalizedSeq)
+	////update FinalizedSpines cache
+	//s.AddFinalizedSpines(finalizedSeq)
 
 	return nil
 }
@@ -579,113 +579,118 @@ func (s *Service) collectFinalizationParams(
 		"paramCpFinalized.Spine":    fmt.Sprintf("%#x", paramCpFinalized.Spine),
 	}).Debug("Collect finalization params: finalized checkpoint")
 
-	finalizedSpines := s.GetFinalizedSpines()
-	var currRoot [32]byte
-	currState := headState
-	currBlock := headBlock
-	for {
-		log.WithFields(logrus.Fields{
-			"currState.Slot":      currState.Slot(),
-			"currBlock.Slot":      currBlock.Block().Slot(),
-			"currBlock.StateRoot": fmt.Sprintf("%#x", currBlock.Block().StateRoot()),
-			"cpSlot":              cpSlot,
-		}).Debug("Collect finalization params: collect data")
+	//finalizedSpines := s.GetFinalizedSpines()
+	//var currRoot [32]byte
+	//currState := headState
+	//currBlock := headBlock
+	//for {
+	//	log.WithFields(logrus.Fields{
+	//		"currState.Slot":      currState.Slot(),
+	//		"currBlock.Slot":      currBlock.Block().Slot(),
+	//		"currBlock.StateRoot": fmt.Sprintf("%#x", currBlock.Block().StateRoot()),
+	//		"cpSlot":              cpSlot,
+	//	}).Debug("Collect finalization params: collect data")
+	//
+	//	currFinalization := gwatCommon.HashArrayFromBytes(currState.SpineData().Finalization)
+	//	intersect := finalizedSpines.SequenceIntersection(currFinalization).Uniq()
+	//	if len(intersect) == 0 {
+	//		baseSpine = helpers.GetTerminalFinalizedSpine(currState)
+	//		finalizationSeq = append(currFinalization, finalizationSeq...)
+	//
+	//		log.WithFields(logrus.Fields{
+	//			"intersect":           intersect,
+	//			"currFinalization":    currFinalization,
+	//			"finalizationSeq":     finalizationSeq,
+	//			"currBlock.StateRoot": fmt.Sprintf("%#x", currBlock.Block().StateRoot()),
+	//			"baseSpine":           fmt.Sprintf("%#x", baseSpine),
+	//			"cpSlot":              cpSlot,
+	//		}).Debug("Collect finalization params: collect data: intersect empty")
+	//
+	//	} else {
+	//		baseSpine = intersect[len(intersect)-1]
+	//		add := false
+	//
+	//		log.WithFields(logrus.Fields{
+	//			"intersect":        intersect,
+	//			"currFinalization": currFinalization,
+	//			"finalizationSeq":  finalizationSeq,
+	//			"baseSpine":        fmt.Sprintf("%#x", baseSpine),
+	//			"cpSlot":           cpSlot,
+	//		}).Debug("Collect finalization params: collect data: intersect not empty")
+	//
+	//		for _, h := range currFinalization {
+	//			if add {
+	//				finalizationSeq = append(gwatCommon.HashArray{h}, finalizationSeq...)
+	//			}
+	//			if h == baseSpine {
+	//				add = true
+	//			}
+	//		}
+	//		break
+	//	}
+	//	//update FinalizedSpines cache
+	//	s.SetFinalizedSpinesHead(baseSpine)
+	//	//set next block root as current
+	//	currRoot = bytesutil.ToBytes32(currBlock.Block().ParentRoot())
+	//	if currRoot == params.BeaconConfig().ZeroHash {
+	//		return &gwatTypes.FinalizationParams{
+	//			Spines:      finalizationSeq.Uniq(),
+	//			BaseSpine:   &baseSpine,
+	//			Checkpoint:  paramCpFinalized,
+	//			ValSyncData: valSyncData,
+	//		}, nil
+	//	}
+	//	//set next block as current
+	//	currBlock, err = s.cfg.BeaconDB.Block(s.ctx, currRoot)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	//set next state as current
+	//	currState, err = s.cfg.StateGen.StateByRoot(ctx, currRoot)
+	//	if err != nil {
+	//		err = errors.Wrapf(err, "could not get parent state for root=%x", currRoot)
+	//		log.WithError(err).Error("Collect finalization params: eror")
+	//		return nil, err
+	//	}
+	//	if currState == nil || currState.IsNil() {
+	//		err = errors.Errorf("retrieved nil parent state for root=%x", currRoot)
+	//		log.WithError(err).Error("Collect finalization params: eror")
+	//		return nil, err
+	//	}
+	//
+	//	log.WithFields(logrus.Fields{
+	//		"currState.Slot":       currState.Slot(),
+	//		"currBlock.Slot":       currBlock.Block().Slot(),
+	//		"currRoot":             fmt.Sprintf("%#x", currRoot),
+	//		"currBlock.StateRoot":  fmt.Sprintf("%#x", currBlock.Block().StateRoot()),
+	//		"coordCheckpoint.Root": fmt.Sprintf("%#x", coordCheckpoint.Root),
+	//		"cpSlot":               cpSlot,
+	//		"isErr-Slot":           currBlock.Block().Slot() < cpSlot,
+	//		"isCp":                 coordCheckpoint.Root == currRoot,
+	//	}).Debug("Collect finalization params: current result")
+	//
+	//	if coordCheckpoint.Root == currRoot {
+	//		//update FinalizedSpines cache
+	//		s.ResetFinalizedSpines()
+	//		s.SetFinalizedSpinesHead(coordCheckpoint.Spine)
+	//		break
+	//	}
+	//
+	//	// if reach finalized checkpoint slot
+	//	if currBlock.Block().Slot() < cpSlot {
+	//		err = errors.New("Collect finalization params: failed")
+	//		log.WithError(err).WithFields(logrus.Fields{
+	//			"currBlock.Block().Slot()": currBlock.Block().Slot(),
+	//			"cpSlot":                   cpSlot,
+	//		}).Error("Collect finalization params: failed")
+	//		return nil, err
+	//	}
+	//}
 
-		currFinalization := gwatCommon.HashArrayFromBytes(currState.SpineData().Finalization)
-		intersect := finalizedSpines.SequenceIntersection(currFinalization).Uniq()
-		if len(intersect) == 0 {
-			baseSpine = helpers.GetTerminalFinalizedSpine(currState)
-			finalizationSeq = append(currFinalization, finalizationSeq...)
+	finalizationSeq = gwatCommon.HashArrayFromBytes(headState.SpineData().Finalization)
+	finalizationSeq = append(finalizationSeq, gwatCommon.HashArrayFromBytes(headState.SpineData().Prefix)...)
+	baseSpine = helpers.GetTerminalFinalizedSpine(headState)
 
-			log.WithFields(logrus.Fields{
-				"intersect":           intersect,
-				"currFinalization":    currFinalization,
-				"finalizationSeq":     finalizationSeq,
-				"currBlock.StateRoot": fmt.Sprintf("%#x", currBlock.Block().StateRoot()),
-				"baseSpine":           fmt.Sprintf("%#x", baseSpine),
-				"cpSlot":              cpSlot,
-			}).Debug("Collect finalization params: collect data: intersect empty")
-
-		} else {
-			baseSpine = intersect[len(intersect)-1]
-			add := false
-
-			log.WithFields(logrus.Fields{
-				"intersect":        intersect,
-				"currFinalization": currFinalization,
-				"finalizationSeq":  finalizationSeq,
-				"baseSpine":        fmt.Sprintf("%#x", baseSpine),
-				"cpSlot":           cpSlot,
-			}).Debug("Collect finalization params: collect data: intersect not empty")
-
-			for _, h := range currFinalization {
-				if add {
-					finalizationSeq = append(gwatCommon.HashArray{h}, finalizationSeq...)
-				}
-				if h == baseSpine {
-					add = true
-				}
-			}
-			break
-		}
-		//update FinalizedSpines cache
-		s.SetFinalizedSpinesHead(baseSpine)
-		//set next block root as current
-		currRoot = bytesutil.ToBytes32(currBlock.Block().ParentRoot())
-		if currRoot == params.BeaconConfig().ZeroHash {
-			return &gwatTypes.FinalizationParams{
-				Spines:      finalizationSeq.Uniq(),
-				BaseSpine:   &baseSpine,
-				Checkpoint:  paramCpFinalized,
-				ValSyncData: valSyncData,
-			}, nil
-		}
-		//set next block as current
-		currBlock, err = s.cfg.BeaconDB.Block(s.ctx, currRoot)
-		if err != nil {
-			return nil, err
-		}
-		//set next state as current
-		currState, err = s.cfg.StateGen.StateByRoot(ctx, currRoot)
-		if err != nil {
-			err = errors.Wrapf(err, "could not get parent state for root=%x", currRoot)
-			log.WithError(err).Error("Collect finalization params: eror")
-			return nil, err
-		}
-		if currState == nil || currState.IsNil() {
-			err = errors.Errorf("retrieved nil parent state for root=%x", currRoot)
-			log.WithError(err).Error("Collect finalization params: eror")
-			return nil, err
-		}
-
-		log.WithFields(logrus.Fields{
-			"currState.Slot":       currState.Slot(),
-			"currBlock.Slot":       currBlock.Block().Slot(),
-			"currRoot":             fmt.Sprintf("%#x", currRoot),
-			"currBlock.StateRoot":  fmt.Sprintf("%#x", currBlock.Block().StateRoot()),
-			"coordCheckpoint.Root": fmt.Sprintf("%#x", coordCheckpoint.Root),
-			"cpSlot":               cpSlot,
-			"isErr-Slot":           currBlock.Block().Slot() < cpSlot,
-			"isCp":                 coordCheckpoint.Root == currRoot,
-		}).Debug("Collect finalization params: current result")
-
-		if coordCheckpoint.Root == currRoot {
-			//update FinalizedSpines cache
-			s.ResetFinalizedSpines()
-			s.SetFinalizedSpinesHead(coordCheckpoint.Spine)
-			break
-		}
-
-		// if reach finalized checkpoint slot
-		if currBlock.Block().Slot() < cpSlot {
-			err = errors.New("Collect finalization params: failed")
-			log.WithError(err).WithFields(logrus.Fields{
-				"currBlock.Block().Slot()": currBlock.Block().Slot(),
-				"cpSlot":                   cpSlot,
-			}).Error("Collect finalization params: failed")
-			return nil, err
-		}
-	}
 	return &gwatTypes.FinalizationParams{
 		Spines:      finalizationSeq.Uniq(),
 		BaseSpine:   &baseSpine,
@@ -829,10 +834,11 @@ func (s *Service) initCoordinatedState(ctx context.Context) error {
 			"LFSpine": fmt.Sprintf("%#x", coordCp.Spine),
 		}).Info("Init coordinated state: init by genesis")
 
-		// cache coordinated checkpoint
+		//cache coordinated checkpoint
 		s.CacheGwatCoordinatedState(coordCp)
-		// cache last finalized spine
-		s.SetFinalizedSpinesHead(coordCp.Spine)
+
+		//// cache last finalized spine
+		//s.SetFinalizedSpinesHead(coordCp.Spine)
 		return nil
 	}
 
