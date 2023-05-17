@@ -4343,8 +4343,8 @@ def prysm_deps():
             "gazelle:resolve go github.com/karalabe/usb @prysm//third_party/usb:go_default_library",
         ],
         importpath = "gitlab.waterfall.network/waterfall/protocol/gwat",
-        sum = "h1:QiYjB+p8NH/cpm8DvWH7EaDZFtKFjaqhT04Jf23JaA4=",
-        version = "v0.7.25",
+        sum = "h1:5EHSbj8wBDJP3kI3DxczgLn/3/GcjX8CvfW2mXWzdZE=",
+        version = "v0.7.26",
 
         ## to use local repo comment `sum` & `version`, and uncomment follows below
         #vcs = "git",
