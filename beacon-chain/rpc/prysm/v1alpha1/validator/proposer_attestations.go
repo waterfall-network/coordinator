@@ -17,12 +17,13 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/attestation/aggregation"
 	attaggregation "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/attestation/aggregation/attestations"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	"go.opencensus.io/trace"
 )
 
 type proposerAtts []*ethpb.Attestation
 
-func (vs *Server) packAttestations(ctx context.Context, latestState state.BeaconState) ([]*ethpb.Attestation, error) {
+func (vs *Server) packAttestations(ctx context.Context, latestState state.BeaconState, parentRoot [32]byte) ([]*ethpb.Attestation, error) {
 	ctx, span := trace.StartSpan(ctx, "ProposerServer.packAttestations")
 	defer span.End()
 
@@ -41,6 +42,16 @@ func (vs *Server) packAttestations(ctx context.Context, latestState state.Beacon
 		return nil, errors.Wrap(err, "could not filter attestations")
 	}
 	atts = append(atts, uAtts...)
+
+	excludedAtts, err := vs.CollectForkExcludedAttestations(ctx, parentRoot)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not get excluded attestations")
+	}
+	excludedAtts, err = vs.validateAndDeleteAttsInPool(ctx, latestState, excludedAtts)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not filter excluded attestations")
+	}
+	atts = append(atts, excludedAtts...)
 
 	// Remove duplicates from both aggregated/unaggregated attestations. This
 	// prevents inefficient aggregates being created.
@@ -285,4 +296,27 @@ func (vs *Server) deleteAttsInPool(ctx context.Context, atts []*ethpb.Attestatio
 		}
 	}
 	return nil
+}
+
+// CollectForkExcludedAttestations collect attestations not included into canonical chain
+func (vs *Server) CollectForkExcludedAttestations(ctx context.Context, parentRoot [32]byte) ([]*ethpb.Attestation, error) {
+	if parentRoot == params.BeaconConfig().ZeroHash {
+		return nil, nil
+	}
+	leaf := gwatCommon.BytesToHash(parentRoot[:])
+	// collect blocks excluded from canonical chain
+	exRoots := vs.HeadFetcher.ForkChoicer().CollectForkExcludedBlkRoots(leaf)
+	//collect attestation
+	atts := []*ethpb.Attestation{}
+	for _, r := range exRoots {
+		blk, err := vs.BeaconDB.Block(ctx, r)
+		if err != nil {
+			return nil, err
+		}
+		attestations := blk.Block().Body().Attestations()
+		if len(attestations) > 0 {
+			atts = append(atts, attestations...)
+		}
+	}
+	return atts, nil
 }

@@ -95,7 +95,7 @@ func ExecuteStateTransition(
 			valid, err := aSet.Verify()
 			log.WithError(err).WithFields(logrus.Fields{
 				"valid":                valid,
-				"len(bSet.Signatures)": len(aSet.Signatures),
+				"len(aSet.Signatures)": len(aSet.Signatures),
 			}).Warn("*** ExecuteStateTransition: signature invalid ATTESTATION ***")
 		} else {
 			log.Warn("*** ExecuteStateTransition: signature==nil ATTESTATION ***")
@@ -394,6 +394,10 @@ func ProcessEpochPrecompute(ctx context.Context, state state.BeaconState) (state
 	if state == nil || state.IsNil() {
 		return nil, errors.New("nil state")
 	}
+
+	preFinRoot := state.FinalizedCheckpoint().GetRoot()
+	preJustRoot := state.CurrentJustifiedCheckpoint().GetRoot()
+
 	vp, bp, err := precompute.New(ctx, state)
 	if err != nil {
 		return nil, err
@@ -429,5 +433,11 @@ func ProcessEpochPrecompute(ctx context.Context, state state.BeaconState) (state
 	if err != nil {
 		return nil, errors.Wrap(err, "could not process final updates")
 	}
+
+	state, err = helpers.ConsensusUpdateStateSpineFinalization(state, preJustRoot, preFinRoot)
+	if err != nil {
+		return nil, err
+	}
+
 	return state, nil
 }

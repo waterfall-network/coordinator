@@ -40,15 +40,14 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
 	prysmTime "gitlab.waterfall.network/waterfall/protocol/coordinator/time"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
-	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	"go.opencensus.io/trace"
 )
 
 // SyncSrv interface to treat sync functionality.
 type SyncSrv interface {
 	SetIsSyncFn(fn func() bool)
-	AddFinalizedSpines(finSpines gwatCommon.HashArray)
-	ResetFinalizedSpines()
+	//AddFinalizedSpines(finSpines gwatCommon.HashArray)
+	//ResetFinalizedSpines()
 }
 
 // headSyncMinEpochsAfterCheckpoint defines how many epochs should elapse after known finalization
@@ -230,7 +229,7 @@ func (s *Service) StartFromSavedState(saved state.BeaconState) error {
 	if features.Get().EnableForkChoiceDoublyLinkedTree {
 		fc = doublylinkedtree.New(justified.Epoch, finalized.Epoch)
 	} else {
-		fc = protoarray.New(justified.Epoch, finalized.Epoch, fRoot)
+		fc = protoarray.New(justified.Epoch, finalized.Epoch)
 	}
 	s.cfg.ForkChoiceStore = fc
 	fb, err := s.cfg.BeaconDB.Block(s.ctx, s.ensureRootNotZeros(fRoot))
@@ -240,13 +239,22 @@ func (s *Service) StartFromSavedState(saved state.BeaconState) error {
 	if fb == nil {
 		return errNilFinalizedInStore
 	}
-	payloadHash, err := getBlockPayloadHash(fb.Block())
+
+	calcRoot, err := fb.Block().HashTreeRoot()
 	if err != nil {
-		return errors.Wrap(err, "could not get execution payload hash")
+		return errors.Wrap(err, "could not get state for forkchoice")
 	}
+	st, err := s.cfg.StateGen.StateByRoot(s.ctx, calcRoot)
+	if err != nil {
+		return errors.Wrap(err, "could not get state for forkchoice")
+	}
+
 	fSlot := fb.Block().Slot()
 	if err := fc.InsertOptimisticBlock(s.ctx, fSlot, fRoot, params.BeaconConfig().ZeroHash,
-		payloadHash, justified.Epoch, finalized.Epoch); err != nil {
+		justified.Epoch, finalized.Epoch,
+		justified.Root, finalized.Root,
+		st.SpineData(),
+	); err != nil {
 		return errors.Wrap(err, "could not insert finalized block to forkchoice")
 	}
 
@@ -507,17 +515,16 @@ func (s *Service) saveGenesisData(ctx context.Context, genesisState state.Beacon
 	genesisCheckpoint := genesisState.FinalizedCheckpoint()
 	s.store = store.New(genesisCheckpoint, genesisCheckpoint)
 
-	payloadHash, err := getBlockPayloadHash(genesisBlk.Block())
-	if err != nil {
-		return err
-	}
 	if err := s.cfg.ForkChoiceStore.InsertOptimisticBlock(ctx,
 		genesisBlk.Block().Slot(),
 		genesisBlkRoot,
 		params.BeaconConfig().ZeroHash,
-		payloadHash,
 		genesisCheckpoint.Epoch,
-		genesisCheckpoint.Epoch); err != nil {
+		genesisCheckpoint.Epoch,
+		genesisCheckpoint.Root,
+		genesisCheckpoint.Root,
+		genesisState.SpineData(),
+	); err != nil {
 		log.Fatalf("Could not process genesis block for fork choice: %v", err)
 	}
 	if err := s.cfg.ForkChoiceStore.SetOptimisticToValid(ctx, genesisBlkRoot); err != nil {

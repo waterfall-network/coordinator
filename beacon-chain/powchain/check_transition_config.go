@@ -9,7 +9,6 @@ import (
 
 	"github.com/holiman/uint256"
 	"github.com/sirupsen/logrus"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed"
 	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
@@ -68,18 +67,9 @@ func (s *Service) checkTransitionConfiguration(
 		case <-sub.Err():
 			return
 		case ev := <-blockNotifications:
-			data, ok := ev.Data.(*statefeed.BlockProcessedData)
+			_, ok := ev.Data.(*statefeed.BlockProcessedData)
 			if !ok {
 				continue
-			}
-			isExecutionBlock, err := blocks.IsExecutionBlock(data.SignedBlock.Block().Body())
-			if err != nil {
-				log.WithError(err).Debug("Could not check whether signed block is execution block")
-				continue
-			}
-			if isExecutionBlock {
-				log.Debug("PoS transition is complete, no longer checking for configuration changes")
-				return
 			}
 		case tm := <-ticker.C:
 			ctx, cancel := context.WithDeadline(ctx, tm.Add(network.DefaultRPCHTTPTimeout))

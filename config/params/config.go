@@ -131,6 +131,7 @@ type BeaconChainConfig struct {
 	BeaconStateAltairFieldCount    int           // BeaconStateAltairFieldCount defines how many fields are in beacon state hard fork 1.
 	BeaconStateBellatrixFieldCount int           // BeaconStateBellatrixFieldCount defines how many fields are in beacon state post upgrade to the Bellatrix.
 	BlockVotingMinSupportPrc       int           // BlockVotingMinSupportPrc defines minimum percentage of votes for accept of consensus for block.
+	SpinePublicationsPefixSupport  int           // SpinePublicationsPefixSupport defines number of publications of spine to accept it as prefix.
 
 	// Slasher constants.
 	WeakSubjectivityPeriod    types.Epoch // WeakSubjectivityPeriod defines the time period expressed in number of epochs were proof of stake network should validate block headers and attestations for slashable events.

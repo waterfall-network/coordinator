@@ -17,19 +17,21 @@ import (
 )
 
 const (
-	//ExecutionDagGetOptimisticSpines request string for JSON-RPC of dag api.
+	// ExecutionDagGetOptimisticSpines request string for JSON-RPC of dag api.
 	ExecutionDagGetOptimisticSpines = "dag_getOptimisticSpines"
-	//ExecutionDagGetCandidatesMethod request string for JSON-RPC of dag api.
+	// ExecutionDagGetCandidatesMethod request string for JSON-RPC of dag api.
 	ExecutionDagGetCandidatesMethod = "dag_getCandidates"
-	//ExecutionDagFinalizeMethod request string for JSON-RPC of dag api.
+	// ExecutionDagFinalizeMethod request string for JSON-RPC of dag api.
 	ExecutionDagFinalizeMethod = "dag_finalize"
-	//ExecutionDagCoordinatedStateMethod request string for JSON-RPC of dag api.
+	// ExecutionDagCoordinatedStateMethod request string for JSON-RPC of dag api.
 	ExecutionDagCoordinatedStateMethod = "dag_coordinatedState"
-	//ExecutionDagSyncSlotInfoMethod request string for JSON-RPC of dag api.
+	// ExecutionDagSyncSlotInfoMethod request string for JSON-RPC of dag api.
 	ExecutionDagSyncSlotInfoMethod = "dag_syncSlotInfo"
-	//ExecutionDagValidateSpinesMethod request string for JSON-RPC of dag api.
+	// ExecutionDagValidateFinalizationMethod request string for JSON-RPC of dag api.
+	ExecutionDagValidateFinalizationMethod = "dag_validateFinalization"
+	// ExecutionDagValidateSpinesMethod request string for JSON-RPC of dag api.
 	ExecutionDagValidateSpinesMethod = "dag_validateSpines"
-	//ExecutionDepositCountMethod request string for JSON-RPC of validator api.
+	// ExecutionDepositCountMethod request string for JSON-RPC of validator api.
 	ExecutionDepositCountMethod = "wat_validator_DepositCount"
 )
 
@@ -222,6 +224,37 @@ func (s *Service) ExecutionDagValidateSpines(ctx context.Context, params gwatCom
 
 	log.WithField("elapsed", time.Since(start)).WithField(
 		"api", ExecutionDagValidateSpinesMethod,
+	).Info("Request finish")
+
+	return result, handleDagRPCError(err)
+}
+
+// ExecutionDagValidateFinalization executing validation of given spines sequence of finalization
+// by calling dag_validateSpines via JSON-RPC.
+// Checks existence and order by slot of finalization sequence.
+func (s *Service) ExecutionDagValidateFinalization(ctx context.Context, params gwatCommon.HashArray) (bool, error) {
+	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagValidateFinalization")
+	defer span.End()
+	var result bool
+
+	start := time.Now()
+
+	if s.rpcClient == nil {
+		return result, fmt.Errorf("Rpc Client not init")
+	}
+	err := s.rpcClient.CallContext(
+		ctx,
+		&result,
+		ExecutionDagValidateFinalizationMethod,
+		params,
+	)
+
+	if err != nil {
+		log.WithError(err).Error("ExecutionDagValidateFinalization")
+	}
+
+	log.WithField("elapsed", time.Since(start)).WithField(
+		"api", ExecutionDagValidateFinalizationMethod,
 	).Info("Request finish")
 
 	return result, handleDagRPCError(err)

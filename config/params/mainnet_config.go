@@ -122,8 +122,10 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	//Eth1FollowDistance:         64,
 	SafeSlotsToUpdateJustified: 8,
 
-	//BlockVoting slots
-	VotingRequiredSlots: 3,
+	//Optimistic consensus constants.
+	VotingRequiredSlots:           3,
+	BlockVotingMinSupportPrc:      50,
+	SpinePublicationsPefixSupport: 3,
 
 	// Fork choice algorithm constants.
 	ProposerScoreBoost: 70,
@@ -200,7 +202,6 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	BeaconStateFieldCount:          21 + 2,
 	BeaconStateAltairFieldCount:    24 + 2,
 	BeaconStateBellatrixFieldCount: 25 + 2,
-	BlockVotingMinSupportPrc:       66,
 
 	// Slasher related values.
 	WeakSubjectivityPeriod:          54000,

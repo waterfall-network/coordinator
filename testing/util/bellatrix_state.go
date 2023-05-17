@@ -89,6 +89,7 @@ func emptyGenesisStateBellatrix() (state.BeaconState, error) {
 			Spines:       []byte{},
 			Prefix:       []byte{},
 			Finalization: []byte{},
+			CpFinalized:  []byte{},
 			ParentSpines: []*ethpb.SpinesSeq{},
 		},
 	}

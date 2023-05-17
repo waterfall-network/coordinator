@@ -30,6 +30,7 @@ func SpineDataRootWithHasher(hasher ssz.HashFn, spineData *ethpb.SpineData) ([32
 		mergedData = append(mergedData, spineData.Spines...)
 		mergedData = append(mergedData, spineData.Prefix...)
 		mergedData = append(mergedData, spineData.Finalization...)
+		mergedData = append(mergedData, spineData.CpFinalized...)
 		for i := 0; i < finChunks; i++ {
 			from := i * 32
 			to := from + 32

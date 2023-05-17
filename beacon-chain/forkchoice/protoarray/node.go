@@ -43,3 +43,11 @@ func (n *Node) BestChild() uint64 {
 func (n *Node) BestDescendant() uint64 {
 	return n.bestDescendant
 }
+
+func (n *Node) SpinesData() *SpinesData {
+	return n.spinesData
+}
+
+func (n *Node) AttestationsData() *AttestationsData {
+	return n.attsData
+}

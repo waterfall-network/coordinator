@@ -110,12 +110,17 @@ func (f *ForkChoice) ProcessAttestation(ctx context.Context, validatorIndices []
 func (f *ForkChoice) InsertOptimisticBlock(
 	ctx context.Context,
 	slot types.Slot,
-	blockRoot, parentRoot, payloadHash [fieldparams.RootLength]byte,
+	blockRoot, parentRoot [fieldparams.RootLength]byte,
+	//payloadHash [fieldparams.RootLength]byte,
 	justifiedEpoch, finalizedEpoch types.Epoch,
+	//optimistic consensus params
+	justifiedRoot, finalizedRoot []byte,
+	spineData *pbrpc.SpineData,
 ) error {
 	ctx, span := trace.StartSpan(ctx, "doublyLinkedForkchoice.InsertOptimisticBlock")
 	defer span.End()
-
+	//todo deprecated
+	payloadHash := params.BeaconConfig().ZeroHash
 	return f.store.insert(ctx, slot, blockRoot, parentRoot, payloadHash, justifiedEpoch, finalizedEpoch)
 }
 

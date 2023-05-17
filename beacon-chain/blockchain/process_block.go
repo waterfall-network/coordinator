@@ -266,11 +266,6 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		return err
 	}
 
-	//// todo test no-belatrix
-	//if _, err := s.notifyForkchoiceUpdate(ctx, headState, headBlock.Block(), headRoot, bytesutil.ToBytes32(finalized.Root)); err != nil {
-	//	return err
-	//}
-
 	if err := s.saveHead(ctx, headRoot, headBlock, headState); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"block.slot": signed.Block().Slot(),
@@ -451,6 +446,7 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 		return nil, nil, fmt.Errorf("nil pre state for slot %d", b.Slot())
 	}
 
+	stSpineData := make([]*ethpb.SpineData, len(blks))
 	jCheckpoints := make([]*ethpb.Checkpoint, len(blks))
 	fCheckpoints := make([]*ethpb.Checkpoint, len(blks))
 	sigSet := &bls.SignatureBatch{
@@ -469,6 +465,7 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 			}).Error("Block batch handling error")
 			return nil, nil, err
 		}
+		stSpineData[i] = preState.SpineData()
 		// Save potential boundary states.
 		if slots.IsEpochStart(preState.Slot()) {
 			boundaries[blockRoots[i]] = preState.Copy()
@@ -498,11 +495,7 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 	for i, b := range blks {
 		s.saveInitSyncBlock(blockRoots[i], b)
 
-		if err := s.insertBlockToForkChoiceStore(ctx, b.Block(), blockRoots[i], fCheckpoints[i], jCheckpoints[i]); err != nil {
-			return nil, nil, err
-		}
-
-		if _, err := s.notifyForkchoiceUpdate(ctx, preState, b.Block(), blockRoots[i], bytesutil.ToBytes32(fCheckpoints[i].Root)); err != nil {
+		if err = s.insertBlockToForkChoiceStore(ctx, b.Block(), blockRoots[i], fCheckpoints[i], jCheckpoints[i], stSpineData[i]); err != nil {
 			return nil, nil, err
 		}
 	}
@@ -624,14 +617,18 @@ func (s *Service) handleEpochBoundary(ctx context.Context, postState state.Beaco
 
 // This feeds in the block and block's attestations to fork choice store. It's allows fork choice store
 // to gain information on the most current chain.
-func (s *Service) insertBlockAndAttestationsToForkChoiceStore(ctx context.Context, blk block.BeaconBlock, root [32]byte,
-	st state.BeaconState) error {
+func (s *Service) insertBlockAndAttestationsToForkChoiceStore(
+	ctx context.Context,
+	blk block.BeaconBlock,
+	root [32]byte,
+	st state.BeaconState,
+) error {
 	ctx, span := trace.StartSpan(ctx, "blockChain.insertBlockAndAttestationsToForkChoiceStore")
 	defer span.End()
 
 	fCheckpoint := st.FinalizedCheckpoint()
 	jCheckpoint := st.CurrentJustifiedCheckpoint()
-	if err := s.insertBlockToForkChoiceStore(ctx, blk, root, fCheckpoint, jCheckpoint); err != nil {
+	if err := s.insertBlockToForkChoiceStore(ctx, blk, root, fCheckpoint, jCheckpoint, st.SpineData()); err != nil {
 		return err
 	}
 	// Feed in block's attestations to fork choice store.
@@ -649,34 +646,28 @@ func (s *Service) insertBlockAndAttestationsToForkChoiceStore(ctx context.Contex
 	return nil
 }
 
-func (s *Service) insertBlockToForkChoiceStore(ctx context.Context, blk block.BeaconBlock,
-	root [32]byte, fCheckpoint, jCheckpoint *ethpb.Checkpoint) error {
+func (s *Service) insertBlockToForkChoiceStore(
+	ctx context.Context,
+	blk block.BeaconBlock,
+	root [32]byte,
+	fCheckpoint, jCheckpoint *ethpb.Checkpoint,
+	spineData *ethpb.SpineData,
+) error {
 	if err := s.fillInForkChoiceMissingBlocks(ctx, blk, fCheckpoint, jCheckpoint); err != nil {
 		return err
 	}
+	// start validation of finalization sequence
+	go s.ValidateFinalization(spineData.Finalization, root)
+
 	// Feed in block to fork choice store.
-
-	payloadHash, err := getBlockPayloadHash(blk)
-	if err != nil {
-		return err
-	}
 	return s.cfg.ForkChoiceStore.InsertOptimisticBlock(ctx,
-		blk.Slot(), root, bytesutil.ToBytes32(blk.ParentRoot()), payloadHash,
+		blk.Slot(), root, bytesutil.ToBytes32(blk.ParentRoot()),
 		jCheckpoint.Epoch,
-		fCheckpoint.Epoch)
-}
-
-func getBlockPayloadHash(blk block.BeaconBlock) ([32]byte, error) {
-	return [32]byte{}, nil
-	//payloadHash := [32]byte{}
-	//if blocks.IsPreBellatrixVersion(blk.Version()) {
-	//	return payloadHash, nil
-	//}
-	//payload, err := blk.Body().ExecutionPayload()
-	//if err != nil {
-	//	return payloadHash, err
-	//}
-	//return bytesutil.ToBytes32(payload.BlockHash), nil
+		fCheckpoint.Epoch,
+		jCheckpoint.Root,
+		fCheckpoint.Root,
+		spineData,
+	)
 }
 
 // This saves post state info to DB or cache. This also saves post state info to fork choice store.
@@ -723,4 +714,26 @@ func (s *Service) pruneCanonicalAttsFromPool(ctx context.Context, r [32]byte, b 
 		}
 	}
 	return nil
+}
+
+// ValidateFinalization validate given spines sequence of finalization.
+// Checks existence and order by slot of finalization sequence.
+func (s *Service) ValidateFinalization(finalisation []byte, blockRoot [32]byte) {
+	if s.IsGwatSynchronizing() {
+		log.WithFields(logrus.Fields{
+			"Syncing": s.IsGwatSynchronizing(),
+		}).Warn("Validate finalization skipped")
+		return
+	}
+	finSeq := gwatCommon.HashArrayFromBytes(finalisation)
+	isValid, err := s.cfg.ExecutionEngineCaller.ExecutionDagValidateFinalization(s.ctx, finSeq)
+	if err != nil || !isValid {
+		log.WithError(err).WithFields(logrus.Fields{
+			"finalisation": gwatCommon.HashArrayFromBytes(finalisation),
+			"isValid":      isValid,
+		}).Warn("Validate finalization failed")
+		return
+	}
+	s.cfg.ForkChoiceStore.SetFinalizationValid(blockRoot, isValid)
+	return
 }
