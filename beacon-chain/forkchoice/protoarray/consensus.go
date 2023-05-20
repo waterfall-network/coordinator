@@ -80,8 +80,8 @@ func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines 
 		}
 	}
 	log.WithFields(logrus.Fields{
-		"acceptLeafsArr":       acceptLeafsArr,
-		"fcRoots":              fRoots,
+		"acceptLeafsArr":       len(acceptLeafsArr),
+		"fcRoots":              len(fRoots),
 		"votes":                len(fc.votes),
 		"balances":             len(fc.balances),
 		"store.justifiedEpoch": fc.store.justifiedEpoch,
@@ -124,14 +124,13 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 		}
 	}
 	log.WithFields(logrus.Fields{
-		"fcRoots":              fRoots,
+		"fcRoots":              len(fRoots),
 		"votes":                len(f.votes),
 		"balances":             len(f.balances),
 		"store.justifiedEpoch": f.store.justifiedEpoch,
 		"store.finalizedEpoch": f.store.finalizedEpoch,
 		"store.[0].root":       fmt.Sprintf("%#x", f.store.nodes[0].root),
 		"fork[0]":              frkRoots_0,
-		//"fc":                     fc,
 	}).Info("**************  calculateHeadRootByNodesIndexes")
 
 	// create ForkChoice instance
@@ -217,8 +216,8 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 		"headRoot":            fmt.Sprintf("%#x", headRoot),
 		"len(nodes)":          len(nodeIndexes),
 		"nodeCount":           f.NodeCount(),
-		"fc.roots":            fcInstance.GetRoots(),
-		"_f.roots":            f.GetRoots(),
+		"fc.roots":            len(fcInstance.GetRoots()),
+		"_f.roots":            len(f.GetRoots()),
 		"topNode.root":        fmt.Sprintf("%#x", topNode.root),
 		"parent":              topNode.parent,
 		"bestChild":           topNode.bestChild,
@@ -227,7 +226,6 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 		"att.justRoot":        fmt.Sprintf("%#x", topNode.AttestationsData().justifiedRoot),
 		"justifiedRoot":       fmt.Sprintf("%#x", justifiedRoot),
 		"len(node.att.votes)": len(topNode.AttestationsData().votes),
-		//"len(___n.att.votes)": len(n.AttestationsData().votes),
 	}).Info(">>> GetParentByOptimisticSpines 2222")
 
 	if err != nil {
