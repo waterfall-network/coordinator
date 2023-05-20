@@ -722,7 +722,7 @@ func (s *Service) ValidateFinalization(finalisation []byte, blockRoot [32]byte) 
 	if s.IsGwatSynchronizing() {
 		log.WithFields(logrus.Fields{
 			"Syncing": s.IsGwatSynchronizing(),
-		}).Warn("Validate finalization skipped")
+		}).Warn("Validate finalization skipped due to sync")
 		return
 	}
 	finSeq := gwatCommon.HashArrayFromBytes(finalisation)

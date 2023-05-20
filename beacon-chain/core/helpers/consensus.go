@@ -2,7 +2,6 @@ package helpers
 
 import (
 	"bytes"
-
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
@@ -14,7 +13,7 @@ var ErrBadUnpublishedChains = errors.New("bad unpublished chains")
 
 type mapPublications map[gwatCommon.Hash]int
 
-// ConsensusUpdateStateSpineFinalization validate unpublished chains
+// ConsensusUpdateStateSpineFinalization update spine data while checkpoints updated.
 func ConsensusUpdateStateSpineFinalization(beaconState state.BeaconState, preJustRoot, preFinRoot []byte) (state.BeaconState, error) {
 	finRoot := beaconState.FinalizedCheckpoint().GetRoot()
 	justRoot := beaconState.CurrentJustifiedCheckpoint().GetRoot()
@@ -24,14 +23,11 @@ func ConsensusUpdateStateSpineFinalization(beaconState state.BeaconState, preJus
 	}
 	cp_finalized := beaconState.SpineData().GetCpFinalized()
 	finalization := beaconState.SpineData().GetFinalization()
-	if len(finalization) == 0 {
-		finalization = cp_finalized[len(cp_finalized)-32:]
-	}
 	if bytes.Equal(finRoot, preFinRoot) {
 		cp_finalized = append(cp_finalized, finalization...)
 		finalization = []byte{}
 	} else {
-		cp_finalized = finalization
+		cp_finalized = append(cp_finalized[len(cp_finalized)-32:], finalization...)
 		finalization = []byte{}
 	}
 	//update state.SpineData
