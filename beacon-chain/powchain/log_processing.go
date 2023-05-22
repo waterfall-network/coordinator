@@ -119,6 +119,11 @@ func (s *Service) ProcessExitLog(ctx context.Context, exitLog gwatTypes.Log) err
 		currentEpoch = types.Epoch(*exitEpoch)
 	}
 
+	deposit, _ := s.cfg.depositCache.DepositByPubkey(ctx, pubkey.Bytes())
+	if deposit == nil {
+		return errors.New("unable to find deposit with the provided public key")
+	}
+
 	exit := &ethpb.VoluntaryExit{Epoch: currentEpoch, ValidatorIndex: types.ValidatorIndex(valIndex)}
 
 	// add tx data as sig
