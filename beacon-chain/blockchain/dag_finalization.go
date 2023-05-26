@@ -14,7 +14,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
-	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
@@ -99,6 +98,7 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 	//todo work by state
 	//var currStateRoot []byte
 
+	//gwatSearchEpoch := types.Epoch(gwatCheckpoint.Epoch)
 	gwatSearchEpoch := types.Epoch(gwatCheckpoint.Epoch)
 
 	for {
@@ -112,8 +112,7 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 		syncParams, err := s.searchNextGwatSyncParam(ctx, gwatSearchEpoch)
 		if err != nil {
 			log.WithError(err).WithFields(logrus.Fields{
-				"gwatSearchEpoch": gwatSearchEpoch,
-				"fromEpoch":       gwatSearchEpoch,
+				"fromEpoch": gwatSearchEpoch,
 			}).Error("Gwat sync: retrieving sync param failed")
 			return err
 		}
@@ -123,9 +122,13 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 		}
 
 		log.WithError(err).WithFields(logrus.Fields{
-			"gwatSearchEpoch":  gwatSearchEpoch,
-			"syncParams":       syncParams,
-			"syncParams.Epoch": syncParams.Checkpoint().Epoch,
+			"gwatSearchEpoch":     gwatSearchEpoch,
+			"syncParams":          syncParams,
+			"syncParams.CP.Epoch": syncParams.Checkpoint().Epoch,
+			"syncParams.CP.Root":  fmt.Sprintf("%#x", syncParams.Checkpoint().Root),
+			"syncParams.Root":     fmt.Sprintf("%#x", syncParams.Root()),
+			"syncParams.Epoch":    syncParams.Epoch(),
+			"syncParams.FinEpoch": syncParams.FinEpoch(),
 		}).Info("Gwat sync: retrieving sync param")
 
 		//todo work by state
@@ -173,7 +176,7 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 		//	}).Error("Gwat sync: sync to current state failed")
 		//	return err
 		//}
-		gwatSearchEpoch = syncParams.Epoch()
+		gwatSearchEpoch = syncParams.FinEpoch()
 	}
 
 	log.WithFields(logrus.Fields{
@@ -271,37 +274,53 @@ func (s *Service) runProcessDagFinalize() {
 	}()
 }
 
-// onFinCpUpdHandleGwatSyncParam calculate and save gwat sync params
-func (s *Service) onFinCpUpdHandleGwatSyncParam(ctx context.Context, cp *ethpb.Checkpoint, cpFinEpoch types.Epoch) error {
-	ctx, span := trace.StartSpan(ctx, "blockChain.onFinCpUpdHandleGwatSyncParam")
+// createGwatSyncParam calculate and save gwat sync params
+func (s *Service) createGwatSyncParam(ctx context.Context, blockRoot [32]byte) error {
+	ctx, span := trace.StartSpan(ctx, "blockChain.createGwatSyncParam")
 	defer span.End()
+
+	blState, err := s.cfg.StateGen.StateByRoot(ctx, blockRoot)
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"blockRoot": fmt.Sprintf("%#x", blockRoot),
+		}).Error("Save gwat sync params: get block state")
+		return err
+	}
+	cp := blState.CurrentJustifiedCheckpoint()
+	curEpoch := slots.ToEpoch(blState.Slot())
 
 	//save gwat sync params
 	//check gwat sync params already exists
-	checkParam, err := s.cfg.BeaconDB.GwatSyncParam(ctx, cp.Epoch)
+	checkParam, err := s.cfg.BeaconDB.GwatSyncParam(ctx, curEpoch)
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
-			"cp.Epoch": cp.Epoch,
-			"cp.Root":  fmt.Sprintf("%#x", cp.Root),
+			"curEpoch":  curEpoch,
+			"blockRoot": fmt.Sprintf("%#x", blockRoot),
+			"cp.Epoch":  cp.Epoch,
+			"cp.Root":   fmt.Sprintf("%#x", cp.Root),
 		}).Error("Save gwat sync params: db error")
 		return err
 	}
 	// skip if already exist
-	if checkParam != nil && bytes.Equal(checkParam.Root(), cp.Root) {
+	if checkParam != nil && bytes.Equal(checkParam.Root(), cp.Root) && checkParam.FinEpoch() == curEpoch {
 		return nil
 	}
 	//get cp state
 	cpState, err := s.cfg.StateGen.StateByRoot(ctx, bytesutil.ToBytes32(cp.Root))
 	if err != nil {
 		log.WithError(
-			errors.Wrapf(err, "could not get checkpoint state for epoch=%d root=%x", cp.Epoch, cp.GetRoot()),
-		).Error("Save gwat sync params: state error")
+			errors.Wrapf(err, "could not get checkpoint state for cp.epoch=%d cp.root=%x curEpoch=%d", cp.Epoch, cp.GetRoot(), curEpoch),
+		).Error("Save gwat sync params: cp state error")
 		return err
 	}
 	// search previous checkpoint
 	var prevCp *gwatTypes.Checkpoint
-	prevEpoch := cp.Epoch - 1
+	prevEpoch := curEpoch
 	for {
+		if prevEpoch == 0 {
+			break
+		}
+		prevEpoch--
 		var prevCheckParam *wrapper.GwatSyncParam
 		prevCheckParam, err = s.cfg.BeaconDB.GwatSyncParam(ctx, prevEpoch)
 		if err != nil {
@@ -325,23 +344,23 @@ func (s *Service) onFinCpUpdHandleGwatSyncParam(ctx context.Context, cp *ethpb.C
 			}
 			break
 		}
-		prevEpoch--
-		if prevEpoch == 0 {
-			prevCp, err = s.createGenesisCoordinatedCheckpoint(ctx)
-			if err != nil {
-				log.WithError(err).WithFields(logrus.Fields{
-					"cpFinEpoch": cpFinEpoch,
-					"cp.Epoch":   cp.Epoch,
-					"cp.Root":    fmt.Sprintf("%#x", cp.Root),
-				}).Error("Save gwat sync params: create genesis checkpoint failed")
-				return err
-			}
-			break
+	}
+
+	if prevCp == nil || prevCp.Epoch == 0 {
+		prevCp, err = s.createGenesisCoordinatedCheckpoint(ctx, curEpoch)
+		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"curEpoch": curEpoch,
+				"cp.Epoch": cp.Epoch,
+				"cp.Root":  fmt.Sprintf("%#x", cp.Root),
+			}).Error("Save gwat sync params: create genesis checkpoint failed")
+			return err
 		}
 	}
 
 	log.WithFields(logrus.Fields{
-		"cpFinEpoch":      cpFinEpoch,
+		"curEpoch":        curEpoch,
+		"blockRoot":       fmt.Sprintf("%#x", blockRoot),
 		"cp.Epoch":        cp.Epoch,
 		"cp.Root":         fmt.Sprintf("%#x", cp.Root),
 		"prevCp.FinEpoch": prevCp.FinEpoch,
@@ -360,7 +379,8 @@ func (s *Service) onFinCpUpdHandleGwatSyncParam(ctx context.Context, cp *ethpb.C
 		return err
 	}
 	log.WithFields(logrus.Fields{
-		"cpFinEpoch":              cpFinEpoch,
+		"curEpoch":                curEpoch,
+		"blockRoot":               fmt.Sprintf("%#x", blockRoot),
 		"cp.Epoch":                cp.Epoch,
 		"cp.Root":                 fmt.Sprintf("%#x", cp.Root),
 		"gwatSyncParam.Spines":    finParams.Spines,
@@ -372,11 +392,12 @@ func (s *Service) onFinCpUpdHandleGwatSyncParam(ctx context.Context, cp *ethpb.C
 	}).Info("Save gwat sync params:: gwat sync param calculated")
 
 	//Save gwat sync param
-	gsp := wrapper.NewGwatSyncParam(cp, finParams, cpFinEpoch)
+	gsp := wrapper.NewGwatSyncParam(cp, finParams, curEpoch)
 	err = s.cfg.BeaconDB.SaveGwatSyncParam(ctx, *gsp)
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
-			"cpFinEpoch": cpFinEpoch,
+			"curEpoch":   curEpoch,
+			"blockRoot":  fmt.Sprintf("%#x", blockRoot),
 			"cp.Epoch":   cp.Epoch,
 			"state.Slot": cpState.Slot(),
 		}).Error("Save gwat sync params: save param error")
@@ -396,11 +417,13 @@ func (s *Service) processGwatSync(gsp *wrapper.GwatSyncParam) error {
 	paramCp := syncParams.Checkpoint.Copy()
 
 	log.WithFields(logrus.Fields{
-		"syncParams.Epoch":    gsp.Epoch(),
-		"syncParams.Root":     fmt.Sprintf("%#x", gsp.Root()),
-		"syncParams.CP.Epoch": gsp.Param().Checkpoint.Epoch,
-		"syncParams.CP.Spine": fmt.Sprintf("%#x", gsp.Param().Checkpoint.Spine),
-		"syncParams.CP.Root":  fmt.Sprintf("%#x", gsp.Param().Checkpoint.Root),
+		"syncParams.Epoch":       gsp.Epoch(),
+		"syncParams.FinEpoch":    gsp.FinEpoch(),
+		"syncParams.Root":        fmt.Sprintf("%#x", gsp.Root()),
+		"syncParams.CP.Epoch":    gsp.Param().Checkpoint.Epoch,
+		"syncParams.CP.FinEpoch": gsp.Param().Checkpoint.FinEpoch,
+		"syncParams.CP.Spine":    fmt.Sprintf("%#x", gsp.Param().Checkpoint.Spine),
+		"syncParams.CP.Root":     fmt.Sprintf("%#x", gsp.Param().Checkpoint.Root),
 	}).Info("Gwat sync: gwat sync param")
 
 	finRes, err := s.cfg.ExecutionEngineCaller.ExecutionDagFinalize(ctx, syncParams)
@@ -431,37 +454,9 @@ func (s *Service) processGwatSync(gsp *wrapper.GwatSyncParam) error {
 
 	// cache coordinated checkpoint
 	if finRes.CpEpoch != nil && finRes.CpRoot != nil {
-		if paramCp.Root == *finRes.CpRoot && paramCp.Epoch == *finRes.CpEpoch {
+		if paramCp.Root == *finRes.CpRoot && paramCp.FinEpoch == *finRes.CpEpoch {
 			s.CacheGwatCoordinatedState(paramCp)
 		} else {
-			//todo using s.cfg.StateGen.StateByRoot takes too much time - check work without state
-			////get gwat matched checkpoint
-			//cpState, err := s.cfg.StateGen.StateByRoot(ctx, bytesutil.ToBytes32(finRes.CpRoot.Bytes()))
-			//if err != nil {
-			//	log.WithError(
-			//		errors.Wrapf(err, "get gwat checkpoint state failed for epoch=%d root=%x", finRes.CpEpoch, finRes.CpRoot),
-			//	).Error("Gwat sync: err")
-			//	return errors.Wrapf(err, "get gwat checkpoint state failed for epoch=%d root=%x", finRes.CpEpoch, finRes.CpRoot)
-			//}
-			//if cpState == nil || cpState.IsNil() {
-			//	log.WithError(
-			//		errors.Wrapf(err, "gwat checkpoint state not found for epoch=%d root=%x", finRes.CpEpoch, finRes.CpRoot),
-			//	).Error("Gwat sync: err")
-			//	return errors.Wrapf(err, "gwat checkpoint state not found for epoch=%d root=%x", finRes.CpEpoch, finRes.CpRoot)
-			//}
-			//cpRoot := gwatCommon.BytesToHash(finRes.CpRoot.Bytes())
-			//cpEpoch := uint64(slots.ToEpoch(cpState.Slot()))
-			//finSeq := gwatCommon.HashArrayFromBytes(cpState.SpineData().Finalization)
-			//var spine gwatCommon.Hash
-			//if len(finSeq) > 0 {
-			//	spine = finSeq[len(finSeq)-1]
-			//}
-			//s.CacheGwatCoordinatedState(&gwatTypes.Checkpoint{
-			//	Epoch: cpEpoch,
-			//	Root:  cpRoot,
-			//	Spine: spine,
-			//})
-
 			log.WithFields(logrus.Fields{
 				"cond_1: paramCp.Root == *finRes.CpRoot":   paramCp.Root == *finRes.CpRoot,
 				"cond_2: paramCp.Epoch == *finRes.CpEpoch": paramCp.Epoch == *finRes.CpEpoch,
@@ -474,13 +469,9 @@ func (s *Service) processGwatSync(gsp *wrapper.GwatSyncParam) error {
 				"finalizationSeq":  fSeq,
 				"finalizedSeq":     finalizedSeq,
 				"isFullyFinalized": fSeq.IsEqualTo(finalizedSeq),
-			}).Warn("Gwat sync: dismatche of checkpoints of param and response")
+			}).Warn("Gwat sync: mismatch of checkpoints of param and response")
 
-			s.CacheGwatCoordinatedState(&gwatTypes.Checkpoint{
-				Epoch: *finRes.CpEpoch,
-				Root:  gwatCommon.BytesToHash(finRes.CpRoot.Bytes()),
-				Spine: *finRes.LFSpine,
-			})
+			return errors.New("mismatch of checkpoints of param and response")
 		}
 	}
 
@@ -689,7 +680,7 @@ func (s *Service) getRequestGwatCheckpoint(
 		return cp, nil
 	}
 	if checkpoint.Epoch == 0 {
-		return s.createGenesisCoordinatedCheckpoint(ctx)
+		return s.createGenesisCoordinatedCheckpoint(ctx, slots.ToEpoch(headState.Slot()))
 	}
 	// create
 	cpRoot := bytesutil.ToBytes32(checkpoint.Root)
@@ -790,7 +781,7 @@ func (s *Service) initCoordinatedState(ctx context.Context) error {
 	}
 	// if gwat at genesis state
 	if coordState.CpRoot == nil || coordState.CpEpoch == nil || *coordState.CpRoot == (gwatCommon.Hash{}) {
-		coordCp, err = s.createGenesisCoordinatedCheckpoint(ctx)
+		coordCp, err = s.createGenesisCoordinatedCheckpoint(ctx, 1)
 		if err != nil {
 			log.WithError(err).Error("Init coordinated state: create genesis state failed")
 			return errors.Wrap(err, "Init coordinated state: create genesis state failed")
@@ -856,7 +847,7 @@ func (s *Service) initCoordinatedState(ctx context.Context) error {
 }
 
 // createGenesisCoordinatedCheckpoint create coordinated state if gwat at genesis
-func (s *Service) createGenesisCoordinatedCheckpoint(ctx context.Context) (*gwatTypes.Checkpoint, error) {
+func (s *Service) createGenesisCoordinatedCheckpoint(ctx context.Context, cpFinEpoch types.Epoch) (*gwatTypes.Checkpoint, error) {
 	genRoot, err := s.cfg.BeaconDB.GenesisBlockRoot(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "get genesis root failed")
@@ -870,7 +861,7 @@ func (s *Service) createGenesisCoordinatedCheckpoint(ctx context.Context) (*gwat
 	lfSpine := gwatCommon.BytesToHash(genesisSt.Eth1Data().BlockHash)
 	return &gwatTypes.Checkpoint{
 		Epoch:    cpEpoch,
-		FinEpoch: cpEpoch,
+		FinEpoch: uint64(cpFinEpoch),
 		Root:     cpRoot,
 		Spine:    lfSpine,
 	}, nil

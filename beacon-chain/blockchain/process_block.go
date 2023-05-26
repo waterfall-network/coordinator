@@ -369,10 +369,14 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 				log.WithError(err).Error("Could not insert finalized deposits.")
 			}
 		}()
+	}
 
-		if err := s.onFinCpUpdHandleGwatSyncParam(ctx, postState.FinalizedCheckpoint(), slots.ToEpoch(postState.Slot())); err != nil {
+	//create gwat synchronization params
+	if currEpoch := slots.ToEpoch(postState.Slot()); currEpoch > s.store.LastEpoch() {
+		if err = s.createGwatSyncParam(ctx, blockRoot); err != nil {
 			return err
 		}
+		s.store.SetLastEpoch(currEpoch)
 	}
 
 	defer reportAttestationInclusion(b)
@@ -567,9 +571,13 @@ func (s *Service) handleBlockAfterBatchVerify(ctx context.Context, signed block.
 		}
 		s.store.SetPrevFinalizedCheckpt(finalized)
 		s.store.SetFinalizedCheckpt(fCheckpoint)
-		if err := s.onFinCpUpdHandleGwatSyncParam(ctx, fCheckpoint, slots.ToEpoch(signed.Block().Slot())); err != nil {
+	}
+	//create gwat synchronization params
+	if currEpoch := slots.ToEpoch(signed.Block().Slot()); currEpoch > s.store.LastEpoch() {
+		if err := s.createGwatSyncParam(ctx, blockRoot); err != nil {
 			return err
 		}
+		s.store.SetLastEpoch(currEpoch)
 	}
 	return nil
 }

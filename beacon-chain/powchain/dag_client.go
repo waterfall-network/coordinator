@@ -40,10 +40,11 @@ const (
 func (s *Service) ExecutionDagFinalize(ctx context.Context, params *gwatTypes.FinalizationParams) (*gwatTypes.FinalizationResult, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagFinalize")
 	defer span.End()
+	defer func(start time.Time) {
+		log.WithField("api", ExecutionDagFinalizeMethod).WithField("elapsed", time.Since(start)).Info("Request finish")
+	}(time.Now())
+
 	result := &gwatTypes.FinalizationResult{}
-
-	start := time.Now()
-
 	if s.rpcClient == nil {
 		return nil, fmt.Errorf("Rpc Client not init")
 	}
@@ -69,10 +70,6 @@ func (s *Service) ExecutionDagFinalize(ctx context.Context, params *gwatTypes.Fi
 	if result.Error != nil {
 		err = errors.New(*result.Error)
 	}
-
-	log.WithField("elapsed", time.Since(start)).WithField(
-		"api", ExecutionDagFinalizeMethod,
-	).Info("Request finish")
 
 	return result, handleDagRPCError(err)
 }
@@ -116,7 +113,9 @@ func (s *Service) ExecutionDagGetOptimisticSpines(ctx context.Context, fromSpine
 	defer span.End()
 	result := &gwatTypes.OptimisticSpinesResult{}
 
-	start := time.Now()
+	defer func(start time.Time) {
+		log.WithField("api", ExecutionDagGetOptimisticSpines).WithField("elapsed", time.Since(start)).Info("Request finish")
+	}(time.Now())
 
 	if s.rpcClient == nil {
 		return result.Data, fmt.Errorf("Rpc Client not init")
@@ -134,11 +133,6 @@ func (s *Service) ExecutionDagGetOptimisticSpines(ctx context.Context, fromSpine
 	if result.Data == nil {
 		result.Data = []gwatCommon.HashArray{}
 	}
-
-	log.WithField("elapsed", time.Since(start)).WithField(
-		"api", ExecutionDagGetOptimisticSpines,
-	).Info("Request finish")
-
 	return result.Data, handleDagRPCError(err)
 }
 
@@ -147,10 +141,11 @@ func (s *Service) ExecutionDagGetOptimisticSpines(ctx context.Context, fromSpine
 func (s *Service) ExecutionDagGetCandidates(ctx context.Context, slot types.Slot) (gwatCommon.HashArray, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionGetCandidates")
 	defer span.End()
+	defer func(start time.Time) {
+		log.WithField("api", ExecutionDagGetCandidatesMethod).WithField("elapsed", time.Since(start)).Info("Request finish")
+	}(time.Now())
+
 	result := &gwatTypes.CandidatesResult{}
-
-	start := time.Now()
-
 	if s.rpcClient == nil {
 		return result.Candidates, fmt.Errorf("Rpc Client not init")
 	}
@@ -167,11 +162,6 @@ func (s *Service) ExecutionDagGetCandidates(ctx context.Context, slot types.Slot
 	if result.Candidates == nil {
 		result.Candidates = gwatCommon.HashArray{}
 	}
-
-	log.WithField("elapsed", time.Since(start)).WithField(
-		"api", ExecutionDagGetCandidatesMethod,
-	).Info("Request finish")
-
 	return result.Candidates, handleDagRPCError(err)
 }
 
@@ -204,10 +194,11 @@ func (s *Service) ExecutionDagSyncSlotInfo(ctx context.Context, params *gwatType
 func (s *Service) ExecutionDagValidateSpines(ctx context.Context, params gwatCommon.HashArray) (bool, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagValidateSpines")
 	defer span.End()
+	defer func(start time.Time) {
+		log.WithField("api", ExecutionDagValidateSpinesMethod).WithField("elapsed", time.Since(start)).Info("Request finish")
+	}(time.Now())
+
 	var result bool
-
-	start := time.Now()
-
 	if s.rpcClient == nil {
 		return result, fmt.Errorf("Rpc Client not init")
 	}
@@ -221,11 +212,6 @@ func (s *Service) ExecutionDagValidateSpines(ctx context.Context, params gwatCom
 	if err != nil {
 		log.WithError(err).Error("ExecutionDagValidateSpines")
 	}
-
-	log.WithField("elapsed", time.Since(start)).WithField(
-		"api", ExecutionDagValidateSpinesMethod,
-	).Info("Request finish")
-
 	return result, handleDagRPCError(err)
 }
 
@@ -235,10 +221,11 @@ func (s *Service) ExecutionDagValidateSpines(ctx context.Context, params gwatCom
 func (s *Service) ExecutionDagValidateFinalization(ctx context.Context, params gwatCommon.HashArray) (bool, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagValidateFinalization")
 	defer span.End()
+	defer func(start time.Time) {
+		log.WithField("api", ExecutionDagValidateFinalizationMethod).WithField("elapsed", time.Since(start)).Info("Request finish")
+	}(time.Now())
+
 	var result bool
-
-	start := time.Now()
-
 	if s.rpcClient == nil {
 		return result, fmt.Errorf("Rpc Client not init")
 	}
@@ -252,11 +239,6 @@ func (s *Service) ExecutionDagValidateFinalization(ctx context.Context, params g
 	if err != nil {
 		log.WithError(err).Error("ExecutionDagValidateFinalization")
 	}
-
-	log.WithField("elapsed", time.Since(start)).WithField(
-		"api", ExecutionDagValidateFinalizationMethod,
-	).Info("Request finish")
-
 	return result, handleDagRPCError(err)
 }
 
@@ -264,6 +246,10 @@ func (s *Service) ExecutionDagValidateFinalization(ctx context.Context, params g
 func (s *Service) GetHeaderByHash(ctx context.Context, hash gwatCommon.Hash) (*gwatTypes.Header, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.GetHeaderByHash")
 	defer span.End()
+	defer func(start time.Time) {
+		log.WithField("api", "GetHeaderByHash").WithField("elapsed", time.Since(start)).Info("Request finish")
+	}(time.Now())
+
 	if s.rpcClient == nil {
 		return nil, fmt.Errorf("Rpc Client not init")
 	}
@@ -275,6 +261,10 @@ func (s *Service) GetHeaderByHash(ctx context.Context, hash gwatCommon.Hash) (*g
 func (s *Service) GetHeaderByNumber(ctx context.Context, nr *big.Int) (*gwatTypes.Header, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.GetHeaderByNumber")
 	defer span.End()
+	defer func(start time.Time) {
+		log.WithField("api", "GetHeaderByNumber").WithField("elapsed", time.Since(start)).Info("Request finish")
+	}(time.Now())
+
 	if s.rpcClient == nil {
 		return nil, fmt.Errorf("Rpc Client not init")
 	}
@@ -286,9 +276,11 @@ func (s *Service) GetHeaderByNumber(ctx context.Context, nr *big.Int) (*gwatType
 func (s *Service) GetDepositCount(ctx context.Context) (uint64, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.GetDepositCount")
 	defer span.End()
-	//var result uint64
-	var result string
+	defer func(start time.Time) {
+		log.WithField("api", "GetDepositCount").WithField("elapsed", time.Since(start)).Info("Request finish")
+	}(time.Now())
 
+	var result string
 	if s.rpcClient == nil {
 		return 0, fmt.Errorf("Rpc Client not init")
 	}

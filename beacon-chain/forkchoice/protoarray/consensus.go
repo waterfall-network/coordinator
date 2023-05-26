@@ -87,8 +87,7 @@ func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines 
 		"store.justifiedEpoch": fc.store.justifiedEpoch,
 		"store.finalizedEpoch": fc.store.finalizedEpoch,
 		"store.[0].root":       fmt.Sprintf("%#x", fc.store.nodes[0].root),
-		"fork[0]":              frkRoots_0,
-		//"fc":                     fc,
+		//"fork[0]":              frkRoots_0,
 	}).Info("**************  GetParentByOptimisticSpines")
 
 	if len(acceptableRootIndexMap) == 0 {
@@ -130,7 +129,7 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 		"store.justifiedEpoch": f.store.justifiedEpoch,
 		"store.finalizedEpoch": f.store.finalizedEpoch,
 		"store.[0].root":       fmt.Sprintf("%#x", f.store.nodes[0].root),
-		"fork[0]":              frkRoots_0,
+		//"fork[0]":              frkRoots_0,
 	}).Info("**************  calculateHeadRootByNodesIndexes")
 
 	// create ForkChoice instance
@@ -285,8 +284,8 @@ func collectTgTreeNodesByOptimisticSpines(fc *ForkChoice, optSpines []gwatCommon
 
 			log.WithFields(logrus.Fields{
 				"ok":           ok,
-				"finalization": finalization,
-				"optSpines":    optSpines,
+				"finalization": len(finalization),
+				"optSpines":    len(optSpines),
 			}).Info("collectTgTreeNodesByOptimisticSpines: check finalization")
 
 			if !ok {
