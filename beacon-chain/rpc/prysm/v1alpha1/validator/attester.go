@@ -137,7 +137,7 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 
 	log.WithFields(logrus.Fields{
 		"1.supportedRoot": fmt.Sprintf("%#x", supportedRoot),
-		"2.extOptSpines":  optSpines,
+		"2.extOptSpines":  len(optSpines),
 	}).Info("Get attestation data: retrieving of gwat optimistic spines")
 
 	headState, err := vs.StateGen.StateByRoot(ctx, supportedRoot)

@@ -158,7 +158,7 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 
 	log.WithFields(logrus.Fields{
 		"1.parentRoot":   fmt.Sprintf("%#x", parentRoot),
-		"2.extOptSpines": optSpines,
+		"2.extOptSpines": len(optSpines),
 	}).Info("build block data: retrieving of gwat optimistic spines")
 
 	head, err := vs.StateGen.StateByRoot(ctx, parentRoot)
