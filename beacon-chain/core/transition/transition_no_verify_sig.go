@@ -291,7 +291,7 @@ func ProcessBlockForStateRoot(
 		return nil, errors.Wrap(err, "could not hash tree root beacon block body")
 	}
 
-	// todo tmp log
+	//tmp log
 	sigRoot, err := blk.HashTreeRoot()
 	if err != nil {
 		log.WithError(
@@ -299,7 +299,7 @@ func ProcessBlockForStateRoot(
 		).Error("ProcessBlockForStateRoot:Err:000")
 		return nil, errors.Wrap(err, "could not hash tree root siBlock")
 	}
-	log.WithError(err).WithFields(logrus.Fields{
+	log.WithFields(logrus.Fields{
 		"slot":         state.Slot(),
 		"Validators":   len(state.Validators()),
 		"BlockVoting":  len(state.BlockVoting()),
@@ -307,15 +307,15 @@ func ProcessBlockForStateRoot(
 		"Prefix":       gwatCommon.HashArrayFromBytes(state.SpineData().Prefix),
 		"Finalization": gwatCommon.HashArrayFromBytes(state.SpineData().Finalization),
 		"CpFinalized":  gwatCommon.HashArrayFromBytes(state.SpineData().CpFinalized),
-	}).Info("--------- ProcessBlockForStateRoot:state:111")
+	}).Debug("ProcessBlockForStateRoot:state:111")
 
-	log.WithError(err).WithFields(logrus.Fields{
+	log.WithFields(logrus.Fields{
 		"slot":         blk.Slot(),
 		"ParentRoot":   fmt.Sprintf("%#x", blk.ParentRoot()),
 		"sigRoot":      fmt.Sprintf("%#x", sigRoot),
 		"Attestations": len(blk.Body().Attestations()),
 		"Candidates":   gwatCommon.HashArrayFromBytes(blk.Body().Eth1Data().Candidates),
-	}).Info("--------- ProcessBlockForStateRoot:Block:222")
+	}).Debug("ProcessBlockForStateRoot:Block:222")
 
 	state, err = b.ProcessBlockHeaderNoVerify(ctx, state, blk.Slot(), blk.ProposerIndex(), blk.ParentRoot(), bodyRoot[:])
 	if err != nil {

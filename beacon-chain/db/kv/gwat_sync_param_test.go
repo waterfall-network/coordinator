@@ -34,7 +34,7 @@ func TestStore_GwatSyncParamCRUD(t *testing.T) {
 			db := setupDB(t)
 
 			gsp := tt.newGwatSyncParam()
-			epoch := types.Epoch(gsp.Epoch())
+			epoch := types.Epoch(gsp.FinEpoch())
 			retrievedGsp, err := db.GwatSyncParam(ctx, epoch)
 			require.NoError(t, err)
 			var nilGsp *wrapper.GwatSyncParam

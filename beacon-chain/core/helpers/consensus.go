@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"bytes"
+
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"

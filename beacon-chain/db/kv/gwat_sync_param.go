@@ -37,7 +37,7 @@ func (s *Store) SaveGwatSyncParam(ctx context.Context, gsp wrapper.GwatSyncParam
 
 	return s.db.Update(func(tx *bolt.Tx) error {
 		bkt := tx.Bucket(gwatSyncParamBucket)
-		key := bytesutil.EpochToBytesBigEndian(gsp.Epoch())
+		key := bytesutil.EpochToBytesBigEndian(gsp.FinEpoch())
 		enc, err := gsp.Bytes()
 		if err != nil {
 			return err
