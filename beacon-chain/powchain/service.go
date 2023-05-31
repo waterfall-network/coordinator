@@ -376,12 +376,12 @@ func (s *Service) ETH1ConnectionErrors() []error {
 
 // refers to the latest eth1 block which follows the condition: eth1_timestamp +
 // SECONDS_PER_ETH1_BLOCK * ETH1_FOLLOW_DISTANCE <= current_unix_time
-func (s *Service) followBlockHeight(_ context.Context) (uint64, error) {
+func (s *Service) followBlockHeight(_ context.Context) uint64 {
 	latestValidBlock := uint64(0)
-	if s.latestEth1Data.BlockHeight > params.BeaconConfig().Eth1FollowDistance {
-		latestValidBlock = s.latestEth1Data.BlockHeight - params.BeaconConfig().Eth1FollowDistance
+	if s.latestEth1Data.CpNr > params.BeaconConfig().Eth1FollowDistance {
+		latestValidBlock = s.latestEth1Data.CpNr - params.BeaconConfig().Eth1FollowDistance
 	}
-	return latestValidBlock, nil
+	return latestValidBlock
 }
 
 func (s *Service) initDepositCaches(ctx context.Context, ctrs []*ethpb.DepositContainer) error {
@@ -457,6 +457,9 @@ func (s *Service) processBlockHeader(header *gwatTypes.Header) {
 	s.latestEth1Data.BlockHeight = header.Nr()
 	s.latestEth1Data.BlockHash = header.Hash().Bytes()
 	s.latestEth1Data.BlockTime = header.Time
+	s.latestEth1Data.CpNr = header.CpNumber
+	s.latestEth1Data.CpHash = header.CpHash.Bytes()
+
 	log.WithFields(logrus.Fields{
 		"slot":        header.Slot,
 		"height":      header.Height,
@@ -595,6 +598,8 @@ func (s *Service) initPOWService() {
 			s.latestEth1Data.BlockHeight = header.Nr()
 			s.latestEth1Data.BlockHash = header.Hash().Bytes()
 			s.latestEth1Data.BlockTime = header.Time
+			s.latestEth1Data.CpHash = header.CpHash.Bytes()
+			s.latestEth1Data.CpNr = header.CpNumber
 
 			if err := s.processPastLogs(ctx); err != nil {
 				s.retryExecutionClientConnection(ctx, err)
