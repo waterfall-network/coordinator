@@ -337,10 +337,7 @@ func (s *Service) processPastLogs(ctx context.Context) error {
 		}
 		return nil
 	}
-	latestFollowHeight, err := s.followBlockHeight(ctx)
-	if err != nil {
-		return err
-	}
+	latestFollowHeight := s.followBlockHeight(ctx)
 
 	batchSize := s.cfg.eth1HeaderReqLimit
 	additiveFactor := uint64(float64(batchSize) * additiveFactorMultiplier)
@@ -456,10 +453,7 @@ func (s *Service) requestBatchedHeadersAndLogs(ctx context.Context) error {
 	// We request for the nth block behind the current head, in order to have
 	// stabilized logs when we retrieve it from the 1.0 chain.
 
-	requestedBlock, err := s.followBlockHeight(ctx)
-	if err != nil {
-		return err
-	}
+	requestedBlock := s.followBlockHeight(ctx)
 	if requestedBlock > s.latestEth1Data.LastRequestedBlock &&
 		requestedBlock-s.latestEth1Data.LastRequestedBlock > maxTolerableDifference {
 		log.Infof("Falling back to historical headers and logs sync. Current difference is %d", requestedBlock-s.latestEth1Data.LastRequestedBlock)

@@ -103,6 +103,13 @@ func NewBeaconState(options ...NewBeaconStateOption) (state.BeaconState, error) 
 		PreviousEpochAttestations:   make([]*ethpb.PendingAttestation, 0),
 		CurrentEpochAttestations:    make([]*ethpb.PendingAttestation, 0),
 		PreviousJustifiedCheckpoint: &ethpb.Checkpoint{Root: make([]byte, fieldparams.RootLength)},
+		SpineData: &ethpb.SpineData{
+			Spines:       []byte{},
+			Prefix:       []byte{},
+			Finalization: []byte{},
+			CpFinalized:  []byte{}, //eth1Data.GetBlockHash(),
+			ParentSpines: []*ethpb.SpinesSeq{},
+		},
 	}
 
 	for _, opt := range options {
