@@ -39,13 +39,21 @@ func (s *Service) maintainPeerStatuses() {
 				if s.cfg.p2p.Host().Network().Connectedness(id) != network.Connected {
 					s.cfg.p2p.Peers().SetConnectionState(id, peers.PeerDisconnecting)
 					if err := s.cfg.p2p.Disconnect(id); err != nil {
-						log.Debugf("Error when disconnecting with peer: %v", err)
+						log.Errorf("Error when disconnecting with peer: %v", err)
 					}
+					log.WithFields(logrus.Fields{
+						"func": "maintainPeerStatuses",
+						"peer": id,
+					}).Info("Disconnect: peer")
 					s.cfg.p2p.Peers().SetConnectionState(id, peers.PeerDisconnected)
 					return
 				}
 				// Disconnect from peers that are considered bad by any of the registered scorers.
 				if s.cfg.p2p.Peers().IsBad(id) {
+					log.WithFields(logrus.Fields{
+						"func": "maintainPeerStatuses",
+						"peer": id,
+					}).Info("Disconnect: call IsBad")
 					s.disconnectBadPeer(s.ctx, id)
 					return
 				}
@@ -70,8 +78,12 @@ func (s *Service) maintainPeerStatuses() {
 		peerIds = s.filterNeededPeers(peerIds)
 		for _, id := range peerIds {
 			if err := s.sendGoodByeAndDisconnect(s.ctx, p2ptypes.GoodbyeCodeTooManyPeers, id); err != nil {
-				log.WithField("peer", id).WithError(err).Debug("Could not disconnect with peer")
+				log.WithField("peer", id).WithError(err).Error("Could not disconnect with peer")
 			}
+			log.WithFields(logrus.Fields{
+				"func": "maintainPeerStatuses",
+				"peer": id,
+			}).Info("Disconnect: peer")
 		}
 	})
 }
@@ -165,6 +177,11 @@ func (s *Service) sendRPCStatusRequest(ctx context.Context, id peer.ID) error {
 	// If validation fails, validation error is logged, and peer status scorer will mark peer as bad.
 	err = s.validateStatusMessage(ctx, msg)
 	s.cfg.p2p.Peers().Scorers().PeerStatusScorer().SetPeerStatus(id, msg, err)
+
+	log.WithFields(logrus.Fields{
+		"func": "sendRPCStatusRequest",
+	}).Info("Disconnect: call IsBad")
+
 	if s.cfg.p2p.Peers().IsBad(id) {
 		s.disconnectBadPeer(s.ctx, id)
 	}
@@ -204,13 +221,19 @@ func (s *Service) statusRPCHandler(ctx context.Context, msg interface{}, stream 
 		log.WithFields(logrus.Fields{
 			"peer":  remotePeer,
 			"error": err,
-		}).Debug("Invalid status message from peer")
+		}).Info("Invalid status message from peer")
 
 		respCode := byte(0)
 		switch err {
 		case p2ptypes.ErrGeneric:
 			respCode = responseCodeServerError
 		case p2ptypes.ErrWrongForkDigestVersion:
+
+			log.WithError(err).WithFields(logrus.Fields{
+				"func": "statusRPCHandler",
+				"peer": remotePeer,
+			}).Info("Disconnect: bad peer status")
+
 			// Respond with our status and disconnect with the peer.
 			s.cfg.p2p.Peers().SetChainState(remotePeer, m)
 			if err := s.respondWithStatus(ctx, stream); err != nil {
@@ -230,11 +253,17 @@ func (s *Service) statusRPCHandler(ctx context.Context, msg interface{}, stream 
 		originalErr := err
 		resp, err := s.generateErrorResponse(respCode, err.Error())
 		if err != nil {
-			log.WithError(err).Debug("Could not generate a response error")
+			log.WithError(err).Error("Could not generate a response error")
 		} else if _, err := stream.Write(resp); err != nil {
 			// The peer may already be ignoring us, as we disagree on fork version, so log this as debug only.
-			log.WithError(err).Debug("Could not write to stream")
+			log.WithError(err).Error("Could not write to stream")
 		}
+
+		log.WithError(err).WithFields(logrus.Fields{
+			"func": "statusRPCHandler",
+			"peer": remotePeer,
+		}).Info("Disconnect: bad peer status")
+
 		closeStreamAndWait(stream, log)
 		if err := s.sendGoodByeAndDisconnect(ctx, p2ptypes.GoodbyeCodeGenericError, remotePeer); err != nil {
 			return err
