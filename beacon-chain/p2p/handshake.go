@@ -86,7 +86,7 @@ func (s *Service) AddConnectionHandler(reqFunc, goodByeFunc func(ctx context.Con
 				s.peers.Add(nil /* ENR */, remotePeer, conn.RemoteMultiaddr(), conn.Stat().Direction)
 				// Defensive check in the event we still get a bad peer.
 				if s.peers.IsBad(remotePeer) {
-					log.WithField("reason", "bad peer").Trace("Ignoring connection request")
+					log.WithField("reason", "bad peer").Info("Ignoring connection request")
 					disconnectFromPeer()
 					return
 				}
@@ -97,7 +97,7 @@ func (s *Service) AddConnectionHandler(reqFunc, goodByeFunc func(ctx context.Con
 						"direction":   conn.Stat().Direction,
 						"multiAddr":   peerMultiaddrString(conn),
 						"activePeers": len(s.peers.Active()),
-					}).Debug("Peer connected")
+					}).Info("Peer connected")
 				}
 
 				// Do not perform handshake on inbound dials.
@@ -139,7 +139,7 @@ func (s *Service) AddConnectionHandler(reqFunc, goodByeFunc func(ctx context.Con
 
 				s.peers.SetConnectionState(conn.RemotePeer(), peers.PeerConnecting)
 				if err := reqFunc(context.TODO(), conn.RemotePeer()); err != nil && err != io.EOF {
-					log.WithError(err).Trace("Handshake failed")
+					log.WithError(err).Info("Handshake failed")
 					disconnectFromPeer()
 					return
 				}
