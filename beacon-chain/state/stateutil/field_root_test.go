@@ -82,10 +82,14 @@ func TestSpineDataRootWithHasher(t *testing.T) {
 		gwatCommon.HexToHash("0x5555555555555555555555555555555555555555555555555555555555555555"),
 		gwatCommon.HexToHash("0x6666666666666666666666666666666666666666666666666666666666666666"),
 	}
+	cpFinalized := gwatCommon.HashArray{
+		gwatCommon.HexToHash("0x5555555555555555555555555555555555555555555555555555555555555555"),
+		gwatCommon.HexToHash("0x6666666666666666666666666666666666666666666666666666666666666666"),
+	}
 
 	parentSpines := []*ethpb.SpinesSeq{
-		&ethpb.SpinesSeq{Spines: spines.ToBytes()},
-		&ethpb.SpinesSeq{Spines: gwatCommon.HashArray{
+		{Spines: spines.ToBytes()},
+		{Spines: gwatCommon.HashArray{
 			gwatCommon.HexToHash("0x1111111111111111111111111111111111111111111111111111111111111111"),
 			gwatCommon.HexToHash("0x2222222222222222222222222222222222222222222222222222222222222222"),
 			gwatCommon.HexToHash("0x7777777777777777777777777777777777777777777777777777777777777777"),
@@ -98,6 +102,7 @@ func TestSpineDataRootWithHasher(t *testing.T) {
 		Spines:       spines.ToBytes(),
 		Prefix:       prefix.ToBytes(),
 		Finalization: finalization.ToBytes(),
+		CpFinalized:  cpFinalized.ToBytes(),
 		ParentSpines: parentSpines,
 	}
 	root, err := SpineDataRootWithHasher(hasher, spineData)
@@ -121,10 +126,14 @@ func TestSpineDataRootWithHasher2(t *testing.T) {
 		gwatCommon.HexToHash("0x5555555555555555555555555555555555555555555555555555555555555555"),
 		gwatCommon.HexToHash("0x6666666666666666666666666666666666666666666666666666666666666666"),
 	}
+	cpFinalized := gwatCommon.HashArray{
+		gwatCommon.HexToHash("0x5555555555555555555555555555555555555555555555555555555555555555"),
+		gwatCommon.HexToHash("0x6666666666666666666666666666666666666666666666666666666666666666"),
+	}
 
 	parentSpines := []*ethpb.SpinesSeq{
-		&ethpb.SpinesSeq{Spines: spines.ToBytes()},
-		&ethpb.SpinesSeq{Spines: gwatCommon.HashArray{
+		{Spines: spines.ToBytes()},
+		{Spines: gwatCommon.HashArray{
 			gwatCommon.HexToHash("0x1111111111111111111111111111111111111111111111111111111111111111"),
 			gwatCommon.HexToHash("0x2222222222222222222222222222222222222222222222222222222222222222"),
 			gwatCommon.HexToHash("0x7777777777777777777777777777777777777777777777777777777777777777"),
@@ -137,6 +146,7 @@ func TestSpineDataRootWithHasher2(t *testing.T) {
 		Spines:       spines.ToBytes(),
 		Prefix:       prefix.ToBytes(),
 		Finalization: finalization.ToBytes(),
+		CpFinalized:  cpFinalized.ToBytes(),
 		ParentSpines: parentSpines,
 	}
 	root, err := SpineDataRootWithHasher(hasher, spineData)

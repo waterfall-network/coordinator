@@ -280,8 +280,6 @@ func ProcessBlockForStateRoot(
 		).Error("ProcessBlockForStateRoot:Err")
 		return nil, err
 	}
-	finalization := gwatCommon.HashArrayFromBytes(state.SpineData().Finalization)
-	lastFinSpine := finalization[len(finalization)-1]
 
 	blk := signed.Block()
 	body := blk.Body()
@@ -293,7 +291,7 @@ func ProcessBlockForStateRoot(
 		return nil, errors.Wrap(err, "could not hash tree root beacon block body")
 	}
 
-	// todo tmp log
+	//tmp log
 	sigRoot, err := blk.HashTreeRoot()
 	if err != nil {
 		log.WithError(
@@ -301,23 +299,23 @@ func ProcessBlockForStateRoot(
 		).Error("ProcessBlockForStateRoot:Err:000")
 		return nil, errors.Wrap(err, "could not hash tree root siBlock")
 	}
-	log.WithError(err).WithFields(logrus.Fields{
+	log.WithFields(logrus.Fields{
 		"slot":         state.Slot(),
 		"Validators":   len(state.Validators()),
 		"BlockVoting":  len(state.BlockVoting()),
 		"Spines":       gwatCommon.HashArrayFromBytes(state.SpineData().Spines),
 		"Prefix":       gwatCommon.HashArrayFromBytes(state.SpineData().Prefix),
 		"Finalization": gwatCommon.HashArrayFromBytes(state.SpineData().Finalization),
-		"ParentSpines": state.SpineData().ParentSpines,
-	}).Info("--------- ProcessBlockForStateRoot:state:111")
+		"CpFinalized":  gwatCommon.HashArrayFromBytes(state.SpineData().CpFinalized),
+	}).Debug("ProcessBlockForStateRoot:state:111")
 
-	log.WithError(err).WithFields(logrus.Fields{
+	log.WithFields(logrus.Fields{
 		"slot":         blk.Slot(),
 		"ParentRoot":   fmt.Sprintf("%#x", blk.ParentRoot()),
 		"sigRoot":      fmt.Sprintf("%#x", sigRoot),
 		"Attestations": len(blk.Body().Attestations()),
 		"Candidates":   gwatCommon.HashArrayFromBytes(blk.Body().Eth1Data().Candidates),
-	}).Info("--------- ProcessBlockForStateRoot:Block:222")
+	}).Debug("ProcessBlockForStateRoot:Block:222")
 
 	state, err = b.ProcessBlockHeaderNoVerify(ctx, state, blk.Slot(), blk.ProposerIndex(), blk.ParentRoot(), bodyRoot[:])
 	if err != nil {
@@ -346,7 +344,7 @@ func ProcessBlockForStateRoot(
 		return nil, errors.Wrap(err, "could not process eth1 data")
 	}
 
-	state, err = b.ProcessBlockVoting(ctx, state, signed, lastFinSpine)
+	state, err = b.ProcessDagConsensus(ctx, state, signed)
 	if err != nil {
 		log.WithError(
 			errors.Wrap(err, "could not process block voting data"),

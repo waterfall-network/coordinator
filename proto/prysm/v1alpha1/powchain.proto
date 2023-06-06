@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package ethereum.eth.v1alpha1;
 
+import "proto/eth/ext/options.proto";
 import "proto/prysm/v1alpha1/beacon_block.proto";
 import "proto/prysm/v1alpha1/beacon_state.proto";
 
@@ -24,10 +25,12 @@ message ETH1ChainData {
 
 // LatestETH1Data contains the current state of the eth1 chain.
 message LatestETH1Data {
-    uint64 block_height = 2;
-    uint64 block_time = 3;
-    bytes block_hash = 4;
-    uint64 last_requested_block = 5;
+    uint64 block_height = 1;
+    uint64 block_time = 2;
+    bytes block_hash = 3 [(ethereum.eth.ext.ssz_size) = "32"];
+    uint64 last_requested_block = 4;
+    bytes cp_hash = 5 [(ethereum.eth.ext.ssz_size) = "32"];
+    uint64 cp_nr = 6;
 }
 
 // ChainStartData contains all the information related to chainstart.

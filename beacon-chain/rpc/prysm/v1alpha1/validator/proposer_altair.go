@@ -24,7 +24,7 @@ func (vs *Server) buildAltairBeaconBlock(ctx context.Context, req *ethpb.BlockRe
 	blkData, err := vs.buildPhase0BlockData(ctx, req)
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
-			"req": req,
+			"req.Slot": req.Slot,
 		}).Error("#### build-Altair-BeaconBlock: could not build block data ###")
 		return nil, fmt.Errorf("could not build block data: %v", err)
 	}

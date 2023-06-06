@@ -34,7 +34,7 @@ func TestStore_GwatSyncParamCRUD(t *testing.T) {
 			db := setupDB(t)
 
 			gsp := tt.newGwatSyncParam()
-			epoch := types.Epoch(gsp.Epoch())
+			epoch := types.Epoch(gsp.FinEpoch())
 			retrievedGsp, err := db.GwatSyncParam(ctx, epoch)
 			require.NoError(t, err)
 			var nilGsp *wrapper.GwatSyncParam
@@ -64,9 +64,10 @@ func NewGwatSyncParam() *wrapper.GwatSyncParam {
 		},
 		BaseSpine: &baseSpine,
 		Checkpoint: &gwatTypes.Checkpoint{
-			Epoch: 123,
-			Root:  gwatCommon.HexToHash("0x317b57e99bda9cba1cdeb257876dd1d31cadba4b8356f2f1925c2bce08d71377"),
-			Spine: gwatCommon.HexToHash("0xedefc29821526716c997dc29fdf9d3bbb549c3fd883fdd68ab2bcee35c212965"),
+			Epoch:    123,
+			FinEpoch: 128,
+			Root:     gwatCommon.HexToHash("0x317b57e99bda9cba1cdeb257876dd1d31cadba4b8356f2f1925c2bce08d71377"),
+			Spine:    gwatCommon.HexToHash("0xedefc29821526716c997dc29fdf9d3bbb549c3fd883fdd68ab2bcee35c212965"),
 		},
 		ValSyncData: []*gwatTypes.ValidatorSync{},
 	}
@@ -74,5 +75,5 @@ func NewGwatSyncParam() *wrapper.GwatSyncParam {
 		Epoch: 124,
 		Root:  gwatCommon.HexToHash("0x317b57e99bda9cba1cdeb257876dd1d31cadba4b8356f2f1925c2bce08d71377").Bytes(),
 	}
-	return wrapper.NewGwatSyncParam(cp, param)
+	return wrapper.NewGwatSyncParam(cp, param, 128)
 }

@@ -59,9 +59,6 @@ const (
 )
 
 const (
-	// ColocationLimit restricts how many peer identities we can see from a single ip or ipv6 subnet.
-	ColocationLimit = 5
-
 	// Additional buffer beyond current peer limit, from which we can store the relevant peer statuses.
 	maxLimitBuffer = 150
 
@@ -78,11 +75,10 @@ const (
 
 // Status is the structure holding the peer status information.
 type Status struct {
-	ctx       context.Context
-	scorers   *scorers.Service
-	store     *peerdata.Store
-	ipTracker map[string]uint64
-	rand      *rand.Rand
+	ctx     context.Context
+	scorers *scorers.Service
+	store   *peerdata.Store
+	rand    *rand.Rand
 }
 
 // StatusConfig represents peer status service params.
@@ -99,10 +95,9 @@ func NewStatus(ctx context.Context, config *StatusConfig) *Status {
 		MaxPeers: maxLimitBuffer + config.PeerLimit,
 	})
 	return &Status{
-		ctx:       ctx,
-		store:     store,
-		scorers:   scorers.NewService(ctx, store, config.ScorerParams),
-		ipTracker: map[string]uint64{},
+		ctx:     ctx,
+		store:   store,
+		scorers: scorers.NewService(ctx, store, config.ScorerParams),
 		// Random generator used to calculate dial backoff period.
 		// It is ok to use deterministic generator, no need for true entropy.
 		rand: rand.NewDeterministicGenerator(),
@@ -910,59 +905,54 @@ func (p *Status) isfromBadIP(pid peer.ID) bool {
 	if peerData.Address == nil {
 		return false
 	}
-	ip, err := manet.ToIP(peerData.Address)
+	_, err := manet.ToIP(peerData.Address)
 	if err != nil {
 		return true
-	}
-	if val, ok := p.ipTracker[ip.String()]; ok {
-		if val > ColocationLimit {
-			return true
-		}
 	}
 	return false
 }
 
 func (p *Status) addIpToTracker(pid peer.ID) {
-	data, ok := p.store.PeerData(pid)
-	if !ok {
-		return
-	}
-	if data.Address == nil {
-		return
-	}
-	ip, err := manet.ToIP(data.Address)
-	if err != nil {
-		// Should never happen, it is
-		// assumed every IP coming in
-		// is a valid ip.
-		return
-	}
-	// Ignore loopback addresses.
-	if ip.IsLoopback() {
-		return
-	}
-	stringIP := ip.String()
-	p.ipTracker[stringIP] += 1
+	//data, ok := p.store.PeerData(pid)
+	//if !ok {
+	//	return
+	//}
+	//if data.Address == nil {
+	//	return
+	//}
+	//ip, err := manet.ToIP(data.Address)
+	//if err != nil {
+	//	// Should never happen, it is
+	//	// assumed every IP coming in
+	//	// is a valid ip.
+	//	return
+	//}
+	//// Ignore loopback addresses.
+	//if ip.IsLoopback() {
+	//	return
+	//}
+	//stringIP := ip.String()
+	//p.ipTracker[stringIP] += 1
 }
 
 func (p *Status) tallyIPTracker() {
-	tracker := map[string]uint64{}
-	// Iterate through all peers.
-	for _, peerData := range p.store.Peers() {
-		if peerData.Address == nil {
-			continue
-		}
-		ip, err := manet.ToIP(peerData.Address)
-		if err != nil {
-			// Should never happen, it is
-			// assumed every IP coming in
-			// is a valid ip.
-			continue
-		}
-		stringIP := ip.String()
-		tracker[stringIP] += 1
-	}
-	p.ipTracker = tracker
+	//tracker := map[string]uint64{}
+	//// Iterate through all peers.
+	//for _, peerData := range p.store.Peers() {
+	//	if peerData.Address == nil {
+	//		continue
+	//	}
+	//	ip, err := manet.ToIP(peerData.Address)
+	//	if err != nil {
+	//		// Should never happen, it is
+	//		// assumed every IP coming in
+	//		// is a valid ip.
+	//		continue
+	//	}
+	//	stringIP := ip.String()
+	//	tracker[stringIP] += 1
+	//}
+	//p.ipTracker = tracker
 }
 
 func sameIP(firstAddr, secondAddr ma.Multiaddr) bool {

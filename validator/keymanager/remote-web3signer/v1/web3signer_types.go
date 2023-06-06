@@ -171,7 +171,6 @@ type Eth1Data struct {
 	DepositCount string `json:"deposit_count"` /* uint64 */
 	BlockHash    string `json:"block_hash"`
 	Candidates   string `json:"candidates"`
-	Finalization string `json:"finalization"`
 }
 
 // ProposerSlashing a sub property of BeaconBlockBody.

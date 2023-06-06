@@ -370,14 +370,20 @@ func (s *Service) fillInForkChoiceMissingBlocks(ctx context.Context, blk block.B
 	for i := len(pendingNodes) - 1; i >= 0; i-- {
 		b := pendingNodes[i]
 		r := pendingRoots[i]
-		payloadHash, err := getBlockPayloadHash(blk)
+
+		st, err := s.cfg.StateGen.StateByRoot(ctx, pendingRoots[i])
 		if err != nil {
 			return err
 		}
+
 		if err := s.cfg.ForkChoiceStore.InsertOptimisticBlock(ctx,
-			b.Slot(), r, bytesutil.ToBytes32(b.ParentRoot()), payloadHash,
+			b.Slot(), r, bytesutil.ToBytes32(b.ParentRoot()),
 			jCheckpoint.Epoch,
-			fCheckpoint.Epoch); err != nil {
+			fCheckpoint.Epoch,
+			jCheckpoint.Root,
+			fCheckpoint.Root,
+			st.SpineData(),
+		); err != nil {
 			return errors.Wrap(err, "could not process block for proto array fork choice")
 		}
 	}

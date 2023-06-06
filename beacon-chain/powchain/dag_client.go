@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go.opencensus.io/trace"
 	"math/big"
+	"time"
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
@@ -16,17 +17,21 @@ import (
 )
 
 const (
-	//ExecutionDagGetCandidatesMethod request string for JSON-RPC of dag api.
+	// ExecutionDagGetOptimisticSpines request string for JSON-RPC of dag api.
+	ExecutionDagGetOptimisticSpines = "dag_getOptimisticSpines"
+	// ExecutionDagGetCandidatesMethod request string for JSON-RPC of dag api.
 	ExecutionDagGetCandidatesMethod = "dag_getCandidates"
-	//ExecutionDagFinalizeMethod request string for JSON-RPC of dag api.
+	// ExecutionDagFinalizeMethod request string for JSON-RPC of dag api.
 	ExecutionDagFinalizeMethod = "dag_finalize"
-	//ExecutionDagCoordinatedStateMethod request string for JSON-RPC of dag api.
+	// ExecutionDagCoordinatedStateMethod request string for JSON-RPC of dag api.
 	ExecutionDagCoordinatedStateMethod = "dag_coordinatedState"
-	//ExecutionDagSyncSlotInfoMethod request string for JSON-RPC of dag api.
+	// ExecutionDagSyncSlotInfoMethod request string for JSON-RPC of dag api.
 	ExecutionDagSyncSlotInfoMethod = "dag_syncSlotInfo"
-	//ExecutionDagValidateSpinesMethod request string for JSON-RPC of dag api.
+	// ExecutionDagValidateFinalizationMethod request string for JSON-RPC of dag api.
+	ExecutionDagValidateFinalizationMethod = "dag_validateFinalization"
+	// ExecutionDagValidateSpinesMethod request string for JSON-RPC of dag api.
 	ExecutionDagValidateSpinesMethod = "dag_validateSpines"
-	//ExecutionDepositCountMethod request string for JSON-RPC of validator api.
+	// ExecutionDepositCountMethod request string for JSON-RPC of validator api.
 	ExecutionDepositCountMethod = "wat_validator_DepositCount"
 )
 
@@ -35,8 +40,11 @@ const (
 func (s *Service) ExecutionDagFinalize(ctx context.Context, params *gwatTypes.FinalizationParams) (*gwatTypes.FinalizationResult, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagFinalize")
 	defer span.End()
-	result := &gwatTypes.FinalizationResult{}
+	defer func(start time.Time) {
+		log.WithField("api", ExecutionDagFinalizeMethod).WithField("elapsed", time.Since(start)).Info("Request finish")
+	}(time.Now())
 
+	result := &gwatTypes.FinalizationResult{}
 	if s.rpcClient == nil {
 		return nil, fmt.Errorf("Rpc Client not init")
 	}
@@ -98,13 +106,46 @@ func (s *Service) ExecutionDagCoordinatedState(ctx context.Context) (*gwatTypes.
 	return result, handleDagRPCError(err)
 }
 
+// ExecutionDagGetOptimisticSpines executing consensus procedure
+// by calling dag_getOptimisticSpines via JSON-RPC.
+func (s *Service) ExecutionDagGetOptimisticSpines(ctx context.Context, fromSpine gwatCommon.Hash) ([]gwatCommon.HashArray, error) {
+	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagGetOptimisticSpines")
+	defer span.End()
+	result := &gwatTypes.OptimisticSpinesResult{}
+
+	defer func(start time.Time) {
+		log.WithField("api", ExecutionDagGetOptimisticSpines).WithField("elapsed", time.Since(start)).Info("Request finish")
+	}(time.Now())
+
+	if s.rpcClient == nil {
+		return result.Data, fmt.Errorf("Rpc Client not init")
+	}
+
+	err := s.rpcClient.CallContext(
+		ctx,
+		result,
+		ExecutionDagGetOptimisticSpines,
+		fromSpine,
+	)
+	if result.Error != nil {
+		err = errors.New(*result.Error)
+	}
+	if result.Data == nil {
+		result.Data = []gwatCommon.HashArray{}
+	}
+	return result.Data, handleDagRPCError(err)
+}
+
 // ExecutionDagGetCandidates executing consensus procedure
 // by calling dag_getCandidates via JSON-RPC.
 func (s *Service) ExecutionDagGetCandidates(ctx context.Context, slot types.Slot) (gwatCommon.HashArray, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionGetCandidates")
 	defer span.End()
-	result := &gwatTypes.CandidatesResult{}
+	defer func(start time.Time) {
+		log.WithField("api", ExecutionDagGetCandidatesMethod).WithField("elapsed", time.Since(start)).Info("Request finish")
+	}(time.Now())
 
+	result := &gwatTypes.CandidatesResult{}
 	if s.rpcClient == nil {
 		return result.Candidates, fmt.Errorf("Rpc Client not init")
 	}
@@ -153,8 +194,11 @@ func (s *Service) ExecutionDagSyncSlotInfo(ctx context.Context, params *gwatType
 func (s *Service) ExecutionDagValidateSpines(ctx context.Context, params gwatCommon.HashArray) (bool, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagValidateSpines")
 	defer span.End()
-	var result bool
+	defer func(start time.Time) {
+		log.WithField("api", ExecutionDagValidateSpinesMethod).WithField("elapsed", time.Since(start)).Info("Request finish")
+	}(time.Now())
 
+	var result bool
 	if s.rpcClient == nil {
 		return result, fmt.Errorf("Rpc Client not init")
 	}
@@ -168,7 +212,33 @@ func (s *Service) ExecutionDagValidateSpines(ctx context.Context, params gwatCom
 	if err != nil {
 		log.WithError(err).Error("ExecutionDagValidateSpines")
 	}
+	return result, handleDagRPCError(err)
+}
 
+// ExecutionDagValidateFinalization executing validation of given spines sequence of finalization
+// by calling dag_validateSpines via JSON-RPC.
+// Checks existence and order by slot of finalization sequence.
+func (s *Service) ExecutionDagValidateFinalization(ctx context.Context, params gwatCommon.HashArray) (bool, error) {
+	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagValidateFinalization")
+	defer span.End()
+	defer func(start time.Time) {
+		log.WithField("api", ExecutionDagValidateFinalizationMethod).WithField("elapsed", time.Since(start)).Info("Request finish")
+	}(time.Now())
+
+	var result bool
+	if s.rpcClient == nil {
+		return result, fmt.Errorf("Rpc Client not init")
+	}
+	err := s.rpcClient.CallContext(
+		ctx,
+		&result,
+		ExecutionDagValidateFinalizationMethod,
+		params,
+	)
+
+	if err != nil {
+		log.WithError(err).Error("ExecutionDagValidateFinalization")
+	}
 	return result, handleDagRPCError(err)
 }
 
@@ -176,6 +246,10 @@ func (s *Service) ExecutionDagValidateSpines(ctx context.Context, params gwatCom
 func (s *Service) GetHeaderByHash(ctx context.Context, hash gwatCommon.Hash) (*gwatTypes.Header, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.GetHeaderByHash")
 	defer span.End()
+	defer func(start time.Time) {
+		log.WithField("api", "GetHeaderByHash").WithField("elapsed", time.Since(start)).Info("Request finish")
+	}(time.Now())
+
 	if s.rpcClient == nil {
 		return nil, fmt.Errorf("Rpc Client not init")
 	}
@@ -187,6 +261,10 @@ func (s *Service) GetHeaderByHash(ctx context.Context, hash gwatCommon.Hash) (*g
 func (s *Service) GetHeaderByNumber(ctx context.Context, nr *big.Int) (*gwatTypes.Header, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.GetHeaderByNumber")
 	defer span.End()
+	defer func(start time.Time) {
+		log.WithField("api", "GetHeaderByNumber").WithField("elapsed", time.Since(start)).Info("Request finish")
+	}(time.Now())
+
 	if s.rpcClient == nil {
 		return nil, fmt.Errorf("Rpc Client not init")
 	}
@@ -198,9 +276,11 @@ func (s *Service) GetHeaderByNumber(ctx context.Context, nr *big.Int) (*gwatType
 func (s *Service) GetDepositCount(ctx context.Context) (uint64, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.GetDepositCount")
 	defer span.End()
-	//var result uint64
-	var result string
+	defer func(start time.Time) {
+		log.WithField("api", "GetDepositCount").WithField("elapsed", time.Since(start)).Info("Request finish")
+	}(time.Now())
 
+	var result string
 	if s.rpcClient == nil {
 		return 0, fmt.Errorf("Rpc Client not init")
 	}

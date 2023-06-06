@@ -7,6 +7,7 @@ import (
 	forkchoicetypes "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/forkchoice/types"
 	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 	pbrpc "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 // ForkChoicer represents the full fork choice interface composed of all the sub-interfaces.
@@ -29,14 +30,18 @@ type HeadRetriever interface {
 
 // BlockProcessor processes the block that's used for accounting fork choice.
 type BlockProcessor interface {
-	InsertOptimisticBlock(ctx context.Context,
+	InsertOptimisticBlock(
+		ctx context.Context,
 		slot types.Slot,
-		root [32]byte,
+		blockRoot [32]byte,
 		parentRoot [32]byte,
-		payloadHash [32]byte,
 		justifiedEpoch types.Epoch,
 		finalizedEpoch types.Epoch,
+		justifiedRoot []byte,
+		finalizedRoot []byte,
+		spineData *pbrpc.SpineData,
 	) error
+	SetFinalizationValid(root [32]byte, isValid bool)
 }
 
 // AttestationProcessor processes the attestation that's used for accounting fork choice.
@@ -66,10 +71,11 @@ type Getter interface {
 	JustifiedEpoch() types.Epoch
 	ForkChoiceNodes() []*pbrpc.ForkChoiceNode
 	NodeCount() int
+	GetParentByOptimisticSpines(ctx context.Context, optSpines []gwatCommon.HashArray) ([32]byte, error)
+	CollectForkExcludedBlkRoots(leaf gwatCommon.Hash) gwatCommon.HashArray
 }
 
 // Setter allows to set forkchoice information
 type Setter interface {
 	SetOptimisticToValid(context.Context, [fieldparams.RootLength]byte) error
-	SetOptimisticToInvalid(context.Context, [fieldparams.RootLength]byte, [fieldparams.RootLength]byte) ([][32]byte, error)
 }

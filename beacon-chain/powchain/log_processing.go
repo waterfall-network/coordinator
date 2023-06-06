@@ -119,6 +119,11 @@ func (s *Service) ProcessExitLog(ctx context.Context, exitLog gwatTypes.Log) err
 		currentEpoch = types.Epoch(*exitEpoch)
 	}
 
+	deposit, _ := s.cfg.depositCache.DepositByPubkey(ctx, pubkey.Bytes())
+	if deposit == nil {
+		return errors.New("unable to find deposit with the provided public key")
+	}
+
 	exit := &ethpb.VoluntaryExit{Epoch: currentEpoch, ValidatorIndex: types.ValidatorIndex(valIndex)}
 
 	// add tx data as sig
@@ -332,10 +337,7 @@ func (s *Service) processPastLogs(ctx context.Context) error {
 		}
 		return nil
 	}
-	latestFollowHeight, err := s.followBlockHeight(ctx)
-	if err != nil {
-		return err
-	}
+	latestFollowHeight := s.followBlockHeight(ctx)
 
 	batchSize := s.cfg.eth1HeaderReqLimit
 	additiveFactor := uint64(float64(batchSize) * additiveFactorMultiplier)
@@ -451,10 +453,7 @@ func (s *Service) requestBatchedHeadersAndLogs(ctx context.Context) error {
 	// We request for the nth block behind the current head, in order to have
 	// stabilized logs when we retrieve it from the 1.0 chain.
 
-	requestedBlock, err := s.followBlockHeight(ctx)
-	if err != nil {
-		return err
-	}
+	requestedBlock := s.followBlockHeight(ctx)
 	if requestedBlock > s.latestEth1Data.LastRequestedBlock &&
 		requestedBlock-s.latestEth1Data.LastRequestedBlock > maxTolerableDifference {
 		log.Infof("Falling back to historical headers and logs sync. Current difference is %d", requestedBlock-s.latestEth1Data.LastRequestedBlock)

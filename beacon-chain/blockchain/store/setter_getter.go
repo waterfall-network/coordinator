@@ -1,6 +1,9 @@
 package store
 
-import ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+import (
+	types "github.com/prysmaticlabs/eth2-types"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+)
 
 // PrevJustifiedCheckpt returns the previous justified checkpoint in the Store.
 func (s *Store) PrevJustifiedCheckpt() *ethpb.Checkpoint {
@@ -70,4 +73,18 @@ func (s *Store) SetPrevFinalizedCheckpt(cp *ethpb.Checkpoint) {
 	s.Lock()
 	defer s.Unlock()
 	s.prevFinalizedCheckpt = cp
+}
+
+// LastEpoch returns the last handled epoch in the Store.
+func (s *Store) LastEpoch() types.Epoch {
+	s.RLock()
+	defer s.RUnlock()
+	return s.lastEpoch
+}
+
+// SetLastEpoch sets the last handled epoch in the Store.
+func (s *Store) SetLastEpoch(epoch types.Epoch) {
+	s.Lock()
+	defer s.Unlock()
+	s.lastEpoch = epoch
 }

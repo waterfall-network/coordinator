@@ -93,6 +93,24 @@ type syncCommitteesResponseJson struct {
 	ExecutionOptimistic bool                         `json:"execution_optimistic"`
 }
 
+// stateSpineDataResponseJson is used in /beacon/states/{state_id}/spine_data API endpoint.
+type stateSpineDataResponseJson struct {
+	Data                *spineDataJson `json:"data"`
+	ExecutionOptimistic bool           `json:"execution_optimistic"`
+}
+
+// stateBlockVotingsResponseJson is used in /beacon/states/{state_id}/block_votings API endpoint.
+type stateBlockVotingsResponseJson struct {
+	Data                []*blockVotingJson `json:"data"`
+	ExecutionOptimistic bool               `json:"execution_optimistic"`
+}
+
+// syncCommitteesResponseJson is used in /beacon/states/{state_id}/sync_committees API endpoint.
+type stateEth1DataResponseJson struct {
+	Data                *eth1DataJson `json:"data"`
+	ExecutionOptimistic bool          `json:"execution_optimistic"`
+}
+
 // blockHeadersResponseJson is used in /beacon/headers API endpoint.
 type blockHeadersResponseJson struct {
 	Data                []*blockHeaderContainerJson `json:"data"`
@@ -490,7 +508,6 @@ type eth1DataJson struct {
 	DepositCount string `json:"deposit_count"`
 	BlockHash    string `json:"block_hash" hex:"true"`
 	Candidates   string `json:"candidates" hex:"true"`
-	Finalization string `json:"finalization" hex:"true"`
 }
 
 type proposerSlashingJson struct {
@@ -714,6 +731,18 @@ type syncCommitteeValidatorsJson struct {
 	ValidatorAggregates [][]string `json:"validator_aggregates"`
 }
 
+type spineDataJson struct {
+	Spines       string           `json:"spines" hex:"true"`
+	Prefix       string           `json:"prefix" hex:"true"`
+	Finalization string           `json:"finalization" hex:"true"`
+	CpFinalized  string           `json:"cp_finalized" hex:"true"`
+	ParentSpines []*spinesSeqJson `json:"parent_spines"`
+}
+
+type spinesSeqJson struct {
+	Spines string `json:"spines" hex:"true"`
+}
+
 type pendingAttestationJson struct {
 	AggregationBits string               `json:"aggregation_bits" hex:"true"`
 	Data            *attestationDataJson `json:"data"`
@@ -931,4 +960,11 @@ type syncDetails struct {
 	HeadSlot     string `json:"head_slot"`
 	SyncDistance string `json:"sync_distance"`
 	IsSyncing    bool   `json:"is_syncing"`
+}
+
+type blockVotingJson struct {
+	Root         string             `json:"root" hex:"true"`
+	Slot         string             `json:"slot"`
+	Candidates   string             `json:"candidates" hex:"true"`
+	Attestations []*attestationJson `json:"attestations"`
 }

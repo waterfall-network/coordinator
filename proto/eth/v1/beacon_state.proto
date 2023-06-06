@@ -86,11 +86,16 @@ message SpineData {
   // ssz_max = 32 * 128
   bytes finalization = 3 [(ethereum.eth.ext.ssz_max) = "4096"];
 
+  //The 32 byte array of hashes presented sequence of the GWAT spines
+  // finalized from finalized to justified checkpoint.
+  // ssz_max = 32 * 128
+  bytes cp_finalized = 4 [(ethereum.eth.ext.ssz_max) = "4096"];
+
   // The array of 32 byte arrays of hashes.
   // Presents the sequences of the GWAT spines of ancestors.
   // The hashes of finalization and prefix excluded.
   // ssz_max = 32 * 128 * 128
-  repeated SpinesSeq parent_spines = 4 [(ethereum.eth.ext.ssz_max) = "128"];
+  repeated SpinesSeq parent_spines = 5 [(ethereum.eth.ext.ssz_max) = "128"];
 }
 
 message SpinesSeq {

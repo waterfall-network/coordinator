@@ -27,6 +27,7 @@ func CopySpineData(data *SpineData) *SpineData {
 		Spines:       bytesutil.SafeCopyBytes(data.Spines),
 		Prefix:       bytesutil.SafeCopyBytes(data.Prefix),
 		Finalization: bytesutil.SafeCopyBytes(data.Finalization),
+		CpFinalized:  bytesutil.SafeCopyBytes(data.CpFinalized),
 		ParentSpines: CopyParentSpines(data.ParentSpines),
 	}
 }

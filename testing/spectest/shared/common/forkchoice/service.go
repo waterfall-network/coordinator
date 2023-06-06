@@ -16,7 +16,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/attestations"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	pb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/engine/v1"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
@@ -55,7 +54,7 @@ func startChainService(t *testing.T, st state.BeaconState, block block.SignedBea
 		blockchain.WithFinalizedStateAtStartUp(st),
 		blockchain.WithDatabase(db),
 		blockchain.WithAttestationService(attPool),
-		blockchain.WithForkChoiceStore(protoarray.New(0, 0, params.BeaconConfig().ZeroHash)),
+		blockchain.WithForkChoiceStore(protoarray.New(0, 0)),
 		blockchain.WithStateGen(stategen.New(db)),
 		blockchain.WithStateNotifier(&mock.MockStateNotifier{}),
 		blockchain.WithAttestationPool(attestations.NewPool()),
@@ -77,6 +76,11 @@ func (m *engineMock) ExecutionDagValidateSpines(ctx context.Context, params gwat
 	panic("implement me")
 }
 
+func (m *engineMock) ExecutionDagValidateFinalization(ctx context.Context, params gwatCommon.HashArray) (bool, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (m *engineMock) ExecutionDagFinalize(ctx context.Context, finParams *gwatTypes.FinalizationParams) (*gwatTypes.FinalizationResult, error) {
 	//TODO implement me
 	panic("implement me")
@@ -88,6 +92,11 @@ func (m *engineMock) ExecutionDagCoordinatedState(ctx context.Context) (*gwatTyp
 }
 
 func (m *engineMock) ExecutionDagGetCandidates(ctx context.Context, slot types.Slot) (gwatCommon.HashArray, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *engineMock) ExecutionDagGetOptimisticSpines(ctx context.Context, fromSpine gwatCommon.Hash) ([]gwatCommon.HashArray, error) {
 	//TODO implement me
 	panic("implement me")
 }

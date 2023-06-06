@@ -106,18 +106,67 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		return nil, fmt.Errorf("GWAT synchronization process is running, not ready to respond")
 	}
 
-	// Retrieve the parent block as the current head of the canonical chain.
-	parentRoot, err := vs.HeadFetcher.HeadRoot(ctx)
+	// calculate the parent block by optimistic spine.
+	currHead, err := vs.HeadFetcher.HeadState(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("could not retrieve head root: %v", err)
+		log.WithError(err).Error("build block data: retrieving of head state failed")
+		return nil, fmt.Errorf("could not get head state %v", err)
 	}
 
-	head, err := vs.HeadFetcher.HeadState(ctx)
+	jCpRoot := bytesutil.ToBytes32(currHead.CurrentJustifiedCheckpoint().Root)
+	if currHead.CurrentJustifiedCheckpoint().Epoch == 0 {
+		jCpRoot, err = vs.BeaconDB.GenesisBlockRoot(ctx)
+		if err != nil {
+			log.WithError(err).Error("build block data: retrieving of genesis root")
+			return nil, errors.Wrap(err, "get genesis root failed")
+		}
+	}
+
+	cpSt, err := vs.StateGen.StateByRoot(ctx, jCpRoot)
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"jCpRoot": fmt.Sprintf("%#x", jCpRoot),
+		}).Error("build block data: retrieving of cp state failed")
+		return nil, err
+	}
+
+	//request optimistic spine
+	baseSpine := helpers.GetTerminalFinalizedSpine(cpSt)
+	optSpines, err := vs.ExecutionEngineCaller.ExecutionDagGetOptimisticSpines(ctx, baseSpine)
+	if err != nil {
+		errWrap := fmt.Errorf("could not get gwat candidates: %v", err)
+		log.WithError(errWrap).WithFields(logrus.Fields{
+			"baseSpine": baseSpine,
+		}).Error("build block data: retrieving of parent failed")
+		return nil, errWrap
+	}
+
+	//prepend current optimistic finalization to optimistic spine to calc parent
+	optFinalisation := make([]gwatCommon.HashArray, len(cpSt.SpineData().Finalization)/gwatCommon.HashLength)
+	for i, h := range gwatCommon.HashArrayFromBytes(cpSt.SpineData().Finalization) {
+		optFinalisation[i] = gwatCommon.HashArray{h}
+	}
+	optSpines = append(optFinalisation, optSpines...)
+
+	//calculate optimistic parent root
+	parentRoot, err := vs.HeadFetcher.ForkChoicer().GetParentByOptimisticSpines(ctx, optSpines)
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"extOptSpines": optSpines,
+		}).Error("build block data: retrieving of gwat optimistic spines failed")
+	}
+
+	log.WithFields(logrus.Fields{
+		"1.parentRoot":   fmt.Sprintf("%#x", parentRoot),
+		"2.extOptSpines": len(optSpines),
+	}).Info("build block data: retrieving of gwat optimistic spines")
+
+	head, err := vs.StateGen.StateByRoot(ctx, parentRoot)
 	if err != nil {
 		return nil, fmt.Errorf("could not get head state %v", err)
 	}
 
-	head, err = transition.ProcessSlotsUsingNextSlotCache(ctx, head, parentRoot, req.Slot)
+	head, err = transition.ProcessSlotsUsingNextSlotCache(ctx, head, parentRoot[:], req.Slot)
 	if err != nil {
 		return nil, fmt.Errorf("could not advance slots to calculate proposer index: %v", err)
 	}
@@ -127,27 +176,14 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		return nil, fmt.Errorf("could not get ETH1 data: %v", err)
 	}
 
-	//retrieving of gwat candidates
-	const CandidatesСutoffSlots = 2
-	candidates, err := vs.ExecutionEngineCaller.ExecutionDagGetCandidates(ctx, req.Slot-CandidatesСutoffSlots)
-	if err != nil {
-		errWrap := fmt.Errorf("could not get gwat candidates: %v", err)
-		log.WithError(errWrap).WithFields(logrus.Fields{
-			"req.Slot":    req.Slot,
-			"cutoff.Slot": req.Slot - CandidatesСutoffSlots,
-			"candidates":  candidates,
-		}).Error("build block data: retrieving of gwat candidates failed")
-		return nil, errWrap
-	} else {
-		eth1Data.Candidates = candidates.ToBytes()
-		log.WithFields(logrus.Fields{
-			"req.Slot":    req.Slot,
-			"cutoff.Slot": req.Slot - CandidatesСutoffSlots,
-			"candidates":  candidates,
-		}).Info("build block data: retrieving of gwat candidates")
-	}
+	candidates := helpers.CalculateCandidates(head, optSpines)
+	eth1Data.Candidates = candidates.ToBytes()
+	log.WithFields(logrus.Fields{
+		"1.req.Slot":   req.Slot,
+		"2.candidates": candidates,
+	}).Info("build block data: retrieving of gwat candidates")
 
-	deposits, atts, err := vs.packDepositsAndAttestations(ctx, head, eth1Data)
+	deposits, atts, err := vs.packDepositsAndAttestations(ctx, head, eth1Data, parentRoot)
 	if err != nil {
 		return nil, err
 	}
@@ -197,7 +233,7 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 	}
 
 	return &blockData{
-		ParentRoot:        parentRoot,
+		ParentRoot:        parentRoot[:],
 		Graffiti:          graffiti,
 		ProposerIdx:       idx,
 		Eth1Data:          eth1Data,

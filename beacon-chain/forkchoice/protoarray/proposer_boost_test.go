@@ -51,9 +51,8 @@ func TestForkChoice_BoostProposerRoot_PreventsExAnteAttack(t *testing.T) {
 				slot,
 				newRoot,
 				headRoot,
-				params.BeaconConfig().ZeroHash,
 				jEpoch,
-				fEpoch,
+				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil,
 			),
 		)
 		f.ProcessAttestation(ctx, []uint64{0}, newRoot, fEpoch)
@@ -75,9 +74,8 @@ func TestForkChoice_BoostProposerRoot_PreventsExAnteAttack(t *testing.T) {
 				slot,
 				newRoot,
 				headRoot,
-				params.BeaconConfig().ZeroHash,
 				jEpoch,
-				fEpoch,
+				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil,
 			),
 		)
 		f.ProcessAttestation(ctx, []uint64{1}, newRoot, fEpoch)
@@ -101,9 +99,8 @@ func TestForkChoice_BoostProposerRoot_PreventsExAnteAttack(t *testing.T) {
 				slot,
 				newRoot,
 				headRoot,
-				params.BeaconConfig().ZeroHash,
 				jEpoch,
-				fEpoch,
+				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil,
 			),
 		)
 		f.ProcessAttestation(ctx, []uint64{2}, newRoot, fEpoch)
@@ -127,9 +124,8 @@ func TestForkChoice_BoostProposerRoot_PreventsExAnteAttack(t *testing.T) {
 				slot,
 				newRoot,
 				headRoot,
-				params.BeaconConfig().ZeroHash,
 				jEpoch,
-				fEpoch,
+				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil,
 			),
 		)
 		f.ProcessAttestation(ctx, []uint64{3}, newRoot, fEpoch)
@@ -199,9 +195,8 @@ func TestForkChoice_BoostProposerRoot_PreventsExAnteAttack(t *testing.T) {
 				honestBlockSlot,
 				honestBlock,
 				zeroHash,
-				zeroHash,
 				jEpoch,
-				fEpoch,
+				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil,
 			),
 		)
 		r, err = f.Head(ctx, jEpoch, zeroHash, balances, fEpoch)
@@ -216,9 +211,8 @@ func TestForkChoice_BoostProposerRoot_PreventsExAnteAttack(t *testing.T) {
 				maliciouslyWithheldBlockSlot,
 				maliciouslyWithheldBlock,
 				zeroHash,
-				zeroHash,
 				jEpoch,
-				fEpoch,
+				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil,
 			),
 		)
 
@@ -269,9 +263,8 @@ func TestForkChoice_BoostProposerRoot_PreventsExAnteAttack(t *testing.T) {
 				honestBlockSlot,
 				honestBlock,
 				zeroHash,
-				zeroHash,
 				jEpoch,
-				fEpoch,
+				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil,
 			),
 		)
 
@@ -288,9 +281,8 @@ func TestForkChoice_BoostProposerRoot_PreventsExAnteAttack(t *testing.T) {
 				maliciouslyWithheldBlockSlot,
 				maliciouslyWithheldBlock,
 				zeroHash,
-				zeroHash,
 				jEpoch,
-				fEpoch,
+				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil,
 			),
 		)
 
@@ -348,9 +340,8 @@ func TestForkChoice_BoostProposerRoot_PreventsExAnteAttack(t *testing.T) {
 				cSlot,
 				c,
 				a, // parent
-				zeroHash,
 				jEpoch,
-				fEpoch,
+				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil,
 			),
 		)
 
@@ -376,9 +367,8 @@ func TestForkChoice_BoostProposerRoot_PreventsExAnteAttack(t *testing.T) {
 				bSlot,
 				b,
 				a, // parent
-				zeroHash,
 				jEpoch,
-				fEpoch,
+				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil,
 			),
 		)
 
@@ -400,9 +390,8 @@ func TestForkChoice_BoostProposerRoot_PreventsExAnteAttack(t *testing.T) {
 				dSlot,
 				d,
 				b, // parent
-				zeroHash,
 				jEpoch,
-				fEpoch,
+				fEpoch, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil,
 			),
 		)
 

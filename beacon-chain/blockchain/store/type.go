@@ -3,6 +3,7 @@ package store
 import (
 	"sync"
 
+	types "github.com/prysmaticlabs/eth2-types"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
@@ -18,6 +19,7 @@ import (
 //	best_justified_checkpoint: Checkpoint
 //	proposerBoostRoot: Root
 type Store struct {
+	lastEpoch            types.Epoch
 	justifiedCheckpt     *ethpb.Checkpoint
 	finalizedCheckpt     *ethpb.Checkpoint
 	bestJustifiedCheckpt *ethpb.Checkpoint

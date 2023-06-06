@@ -89,12 +89,13 @@ func copyNode(node *Node) *Node {
 		slot:           node.slot,
 		root:           node.root,
 		parent:         node.parent,
-		payloadHash:    node.payloadHash,
 		justifiedEpoch: node.justifiedEpoch,
 		finalizedEpoch: node.finalizedEpoch,
 		weight:         node.weight,
 		bestChild:      node.bestChild,
 		bestDescendant: node.bestDescendant,
 		status:         node.status,
+		spinesData:     node.spinesData.Copy(),
+		attsData:       node.attsData.Copy(),
 	}
 }

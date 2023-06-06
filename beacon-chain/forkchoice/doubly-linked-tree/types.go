@@ -1,10 +1,12 @@
 package doublylinkedtree
 
 import (
+	"context"
 	"sync"
 
 	types "github.com/prysmaticlabs/eth2-types"
 	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 // ForkChoice defines the overall fork choice store which includes all block nodes, validator's latest votes and balances.
@@ -13,6 +15,21 @@ type ForkChoice struct {
 	votes     []Vote // tracks individual validator's last vote.
 	votesLock sync.RWMutex
 	balances  []uint64 // tracks individual validator's last justified balances.
+}
+
+func (f *ForkChoice) SetFinalizationValid(root [32]byte, isValid bool) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (f *ForkChoice) CollectForkExcludedBlkRoots(leaf common.Hash) common.HashArray {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines []common.HashArray) ([32]byte, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 // Store defines the fork choice store which includes block nodes and the last view of checkpoint information.

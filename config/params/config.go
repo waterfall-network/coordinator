@@ -135,6 +135,7 @@ type BeaconChainConfig struct {
 	BeaconStateAltairFieldCount    int                        // BeaconStateAltairFieldCount defines how many fields are in beacon state hard fork 1.
 	BeaconStateBellatrixFieldCount int                        // BeaconStateBellatrixFieldCount defines how many fields are in beacon state post upgrade to the Bellatrix.
 	BlockVotingMinSupportPrc       int                        // BlockVotingMinSupportPrc defines minimum percentage of votes for accept of consensus for block.
+	SpinePublicationsPefixSupport  int                        // SpinePublicationsPefixSupport defines number of publications of spine to accept it as prefix.
 	CtxBlockFetcherKey             BlockInfoFetcherContextKey // CtxBlockFetcherKey defines the key of block fetcher for context of state transition.
 
 	// Slasher constants.

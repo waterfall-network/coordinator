@@ -267,8 +267,7 @@ func TestFollowBlock_OK(t *testing.T) {
 	web3Service.latestEth1Data.BlockHeight = testAcc.Backend.Blockchain().GetLastFinalizedBlock().Nr()
 	web3Service.latestEth1Data.BlockTime = testAcc.Backend.Blockchain().GetLastFinalizedBlock().Time()
 
-	h, err := web3Service.followBlockHeight(context.Background())
-	require.NoError(t, err)
+	h := web3Service.followBlockHeight(context.Background())
 	assert.Equal(t, baseHeight, h, "Unexpected block height")
 	numToForward := uint64(2)
 	expectedHeight := numToForward + baseHeight
@@ -280,8 +279,7 @@ func TestFollowBlock_OK(t *testing.T) {
 	web3Service.latestEth1Data.BlockHeight = testAcc.Backend.Blockchain().GetLastFinalizedBlock().Nr()
 	web3Service.latestEth1Data.BlockTime = testAcc.Backend.Blockchain().GetLastFinalizedBlock().Time()
 
-	h, err = web3Service.followBlockHeight(context.Background())
-	require.NoError(t, err)
+	h = web3Service.followBlockHeight(context.Background())
 	assert.Equal(t, expectedHeight, h, "Unexpected block height")
 }
 

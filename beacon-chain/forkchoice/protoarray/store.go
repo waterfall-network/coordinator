@@ -12,7 +12,9 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	pmath "gitlab.waterfall.network/waterfall/protocol/coordinator/math"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	pbrpc "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	"go.opencensus.io/trace"
 )
 
@@ -24,17 +26,16 @@ const defaultPruneThreshold = 256
 var lastHeadRoot [32]byte
 
 // New initializes a new fork choice store.
-func New(justifiedEpoch, finalizedEpoch types.Epoch, finalizedRoot [32]byte) *ForkChoice {
+func New(justifiedEpoch, finalizedEpoch types.Epoch) *ForkChoice {
 	s := &Store{
 		justifiedEpoch:    justifiedEpoch,
 		finalizedEpoch:    finalizedEpoch,
-		finalizedRoot:     finalizedRoot,
 		proposerBoostRoot: [32]byte{},
 		nodes:             make([]*Node, 0),
 		nodesIndices:      make(map[[32]byte]uint64),
-		payloadIndices:    make(map[[32]byte]uint64),
 		canonicalNodes:    make(map[[32]byte]bool),
 		pruneThreshold:    defaultPruneThreshold,
+		balances:          make(map[[32]byte][]uint64),
 	}
 
 	b := make([]uint64, 0)
@@ -64,6 +65,19 @@ func (f *ForkChoice) Head(
 	f.store.nodesLock.Lock()
 	defer f.store.nodesLock.Unlock()
 	deltas, newVotes, err := computeDeltas(ctx, f.store.nodesIndices, f.votes, f.balances, newBalances)
+
+	log.WithFields(logrus.Fields{
+		"bal-prev-equal": fmt.Sprintf("%#v", newBalances) == fmt.Sprintf("%#v", f.getBalances(justifiedRoot)),
+		"bal-FCh-equal":  fmt.Sprintf("%#v", newBalances) == fmt.Sprintf("%#v", f.balances),
+		//"deltas":        deltas,
+		"len(newVotes)": len(newVotes),
+
+		"justifiedEpoch":             justifiedEpoch,
+		"justifiedRoot":              fmt.Sprintf("%#x", justifiedRoot),
+		"justifiedStateBalances.len": len(justifiedStateBalances),
+		"finalizedEpoch":             finalizedEpoch,
+	}).Info("--- Head --- 000")
+
 	if err != nil {
 		return [32]byte{}, errors.Wrap(err, "Could not compute deltas")
 	}
@@ -73,6 +87,7 @@ func (f *ForkChoice) Head(
 		return [32]byte{}, errors.Wrap(err, "Could not apply score changes")
 	}
 	f.balances = newBalances
+	f.setBalances(justifiedRoot, newBalances)
 
 	return f.store.head(ctx, justifiedRoot)
 }
@@ -99,8 +114,21 @@ func (f *ForkChoice) ProcessAttestation(ctx context.Context, validatorIndices []
 		if newVote || targetEpoch > f.votes[index].nextEpoch {
 			f.votes[index].nextEpoch = targetEpoch
 			f.votes[index].nextRoot = blockRoot
+
+			f.setNodeVotes(index, Vote{
+				currentRoot: bytesutil.ToBytes32(bytesutil.SafeCopyBytes(f.votes[index].currentRoot[:])),
+				nextRoot:    bytesutil.ToBytes32(bytesutil.SafeCopyBytes(f.votes[index].nextRoot[:])),
+				nextEpoch:   f.votes[index].nextEpoch,
+			})
 		}
 	}
+
+	log.WithFields(logrus.Fields{
+		"validatorIndexes": validatorIndices,
+		"blockRoot":        fmt.Sprintf("%#x", blockRoot),
+		"node.votes":       len(f.store.nodes[f.NodeCount()-1].AttestationsData().votes),
+		"node.votesByRoot": len(f.getNodeVotes(f.store.nodes[f.NodeCount()-1].root)),
+	}).Info(">>> GetParentByOptimisticSpines : ProcessAttestation")
 
 	processedAttestationCount.Inc()
 }
@@ -121,12 +149,26 @@ func (f *ForkChoice) ProposerBoost() [fieldparams.RootLength]byte {
 func (f *ForkChoice) InsertOptimisticBlock(
 	ctx context.Context,
 	slot types.Slot,
-	blockRoot, parentRoot, payloadHash [32]byte,
-	justifiedEpoch, finalizedEpoch types.Epoch) error {
+	blockRoot, parentRoot [32]byte,
+	justifiedEpoch, finalizedEpoch types.Epoch,
+	//optimistic consensus params
+	justifiedRoot, finalizedRoot []byte,
+	spineData *ethpb.SpineData,
+) error {
 	ctx, span := trace.StartSpan(ctx, "protoArrayForkChoice.InsertOptimisticBlock")
 	defer span.End()
 
-	return f.store.insert(ctx, slot, blockRoot, parentRoot, payloadHash, justifiedEpoch, finalizedEpoch)
+	return f.store.insert(ctx,
+		slot,
+		blockRoot,
+		parentRoot,
+		justifiedEpoch,
+		finalizedEpoch,
+		//optimistic consensus params
+		bytesutil.ToBytes32(justifiedRoot),
+		bytesutil.ToBytes32(finalizedRoot),
+		spineData,
+	)
 }
 
 // Prune prunes the fork choice store with the new finalized root. The store is only pruned if the input
@@ -315,8 +357,15 @@ func (s *Store) updateCanonicalNodes(ctx context.Context, root [32]byte) error {
 // It then updates the new node's parent with best child and descendant node.
 func (s *Store) insert(ctx context.Context,
 	slot types.Slot,
-	root, parent, payloadHash [32]byte,
-	justifiedEpoch, finalizedEpoch types.Epoch) error {
+	root [32]byte,
+	parent [32]byte,
+	justifiedEpoch,
+	finalizedEpoch types.Epoch,
+	//optimistic consensus params
+	justifiedRoot,
+	finalizedRoot [32]byte,
+	spineData *ethpb.SpineData,
+) error {
 	_, span := trace.StartSpan(ctx, "protoArrayForkChoice.insert")
 	defer span.End()
 
@@ -335,6 +384,21 @@ func (s *Store) insert(ctx context.Context,
 		parentIndex = NonExistentNode
 	}
 
+	if len(spineData.GetCpFinalized()) == 0 {
+		log.WithFields(logrus.Fields{
+			"node.slot":         slot,
+			"node.root":         fmt.Sprintf("%#x", root),
+			"node.cpFinalized":  spineData.GetCpFinalized(),
+			"node.Finalization": spineData.GetFinalization(),
+		}).Error("------ collectTgTreeNodesByOptimisticSpines: insert node ------")
+	}
+
+	attsData := &AttestationsData{
+		justifiedRoot: justifiedRoot,
+		finalizedRoot: finalizedRoot,
+		votes:         map[uint64]Vote{},
+	}
+
 	n := &Node{
 		slot:           slot,
 		root:           root,
@@ -344,11 +408,16 @@ func (s *Store) insert(ctx context.Context,
 		bestChild:      NonExistentNode,
 		bestDescendant: NonExistentNode,
 		weight:         0,
-		payloadHash:    payloadHash,
+		attsData:       attsData,
+		spinesData: &SpinesData{
+			spines:       gwatCommon.HashArrayFromBytes(spineData.GetSpines()),
+			prefix:       gwatCommon.HashArrayFromBytes(spineData.GetPrefix()),
+			finalization: gwatCommon.HashArrayFromBytes(spineData.GetFinalization()),
+			cpFinalized:  gwatCommon.HashArrayFromBytes(spineData.GetCpFinalized()),
+		},
 	}
 
 	s.nodesIndices[root] = index
-	s.payloadIndices[payloadHash] = index
 	s.nodes = append(s.nodes, n)
 
 	// Update parent with the best child and descendant only if it's available.
@@ -616,7 +685,6 @@ func (s *Store) prune(ctx context.Context, finalizedRoot [32]byte) error {
 		if ok {
 			currentIndex := uint64(len(canonicalNodes))
 			s.nodesIndices[node.root] = currentIndex
-			s.payloadIndices[node.payloadHash] = currentIndex
 			canonicalNodesMap[idx] = currentIndex
 			node.parent = parentIdx
 			canonicalNodes = append(canonicalNodes, node)
@@ -624,12 +692,11 @@ func (s *Store) prune(ctx context.Context, finalizedRoot [32]byte) error {
 			// Remove node that is not part of finalized branch.
 			delete(s.nodesIndices, node.root)
 			delete(s.canonicalNodes, node.root)
-			delete(s.payloadIndices, node.payloadHash)
+			delete(s.balances, node.root)
 		}
 	}
 	s.nodesIndices[finalizedRoot] = uint64(0)
 	s.canonicalNodes[finalizedRoot] = true
-	s.payloadIndices[finalizedNode.payloadHash] = uint64(0)
 
 	// Recompute the best child and descendant for each canonical nodes.
 	for _, node := range canonicalNodes {

@@ -15,6 +15,8 @@ go_library(
         "//beacon-chain/forkchoice/types:go_default_library",
         "//config/fieldparams:go_default_library",
         "//proto/prysm/v1alpha1:go_default_library",
+        "//proto/prysm/v1alpha1/block:go_default_library",
         "@com_github_prysmaticlabs_eth2_types//:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//common:go_default_library",
     ],
 )
