@@ -1,7 +1,7 @@
 package altair
 
 import (
-	regularMath "math"
+	stdmath "math"
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
@@ -71,7 +71,7 @@ func CalculateBaseReward(config *params.BeaconChainConfig, validatorsNum int, ac
 	numOfSlotsPerYear := secondsInYear / float64(config.SecondsPerSlot) // Bi-th in formula
 	annualMintedCoins := config.MaxAnnualizedReturnRate *
 		float64(config.MaxEffectiveBalance) *
-		regularMath.Sqrt(float64(uint64(validatorsNum)*config.OptValidatorsNum)) // v in formula
+		stdmath.Sqrt(float64(uint64(validatorsNum)*config.OptValidatorsNum)) // v in formula
 	rewardPerBlock := annualMintedCoins / numOfSlotsPerYear // Wi-th in formula
 	baseReward := rewardPerBlock / (rewardMultiplier * float64(activeValidatorsForSlot))
 	return uint64(baseReward)

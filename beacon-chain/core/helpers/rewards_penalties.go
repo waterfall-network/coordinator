@@ -230,10 +230,8 @@ const (
 
 func LogBalanceChanges(index, before, delta, after, slot uint64, votesIncluded []uint64, operation, role string) error {
 	// Open the file in append mode
-	homeDir := homeDir()
-	rewardsFileName := path.Join(homeDir, "rewards.log")
+	rewardsFileName := path.Join(params.BeaconConfig().DataDir, "rewards.log")
 	file, err := os.OpenFile(rewardsFileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, params.BeaconIoConfig().ReadWritePermissions) // #nosec G304
-	//file, err := os.OpenFile("/Users/andriytkachyshyn/Documents/Projects/WaterfallFoundation/temp/balances_log.txt", os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}

@@ -129,6 +129,7 @@ func New(cliCtx *cli.Context, opts ...Option) (*BeaconNode, error) {
 	configureEth1Config(cliCtx)
 	configureNetwork(cliCtx)
 	configureInteropConfig(cliCtx)
+	configureDataConfig(cliCtx)
 	if err := configureExecutionSetting(cliCtx); err != nil {
 		return nil, err
 	}

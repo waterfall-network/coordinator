@@ -263,9 +263,7 @@ func TestProcessAttestationNoVerify_SourceTargetHead(t *testing.T) {
 	copy(ckp.Root, make([]byte, fieldparams.RootLength))
 	require.NoError(t, beaconState.SetCurrentJustifiedCheckpoint(ckp))
 
-	b, err := helpers.TotalActiveBalance(beaconState)
-	require.NoError(t, err)
-	beaconState, err = altair.ProcessAttestationNoVerifySignature(context.Background(), beaconState, att, b)
+	beaconState, err = altair.ProcessAttestationNoVerifySignature(context.Background(), beaconState, att)
 	require.NoError(t, err)
 
 	p, err := beaconState.CurrentEpochParticipation()
@@ -421,21 +419,21 @@ func TestValidatorFlag_Add_ExceedsLength(t *testing.T) {
 
 func TestFuzzProcessAttestationsNoVerify_10000(t *testing.T) {
 	fuzzer := fuzz.NewWithSeed(0)
-	state := &ethpb.BeaconStateAltair{}
+	bState := &ethpb.BeaconStateAltair{}
 	b := &ethpb.SignedBeaconBlockAltair{Block: &ethpb.BeaconBlockAltair{}}
 	for i := 0; i < 10000; i++ {
-		fuzzer.Fuzz(state)
+		fuzzer.Fuzz(bState)
 		fuzzer.Fuzz(b)
 		if b.Block == nil {
 			b.Block = &ethpb.BeaconBlockAltair{}
 		}
-		s, err := stateAltair.InitializeFromProtoUnsafe(state)
+		s, err := stateAltair.InitializeFromProtoUnsafe(bState)
 		require.NoError(t, err)
 		wsb, err := wrapper.WrappedSignedBeaconBlock(b)
 		require.NoError(t, err)
 		r, err := altair.ProcessAttestationsNoVerifySignature(context.Background(), s, wsb)
 		if err != nil && r != nil {
-			t.Fatalf("return value should be nil on err. found: %v on error: %v for state: %v and block: %v", r, err, state, b)
+			t.Fatalf("return value should be nil on err. found: %v on error: %v for state: %v and block: %v", r, err, bState, b)
 		}
 	}
 }
@@ -518,14 +516,12 @@ func TestSetParticipationAndRewardProposer(t *testing.T) {
 				require.NoError(t, beaconState.SetPreviousParticipationBits(test.epochParticipation))
 			}
 
-			b, err := helpers.TotalActiveBalance(beaconState)
-			require.NoError(t, err)
-			st, err := altair.SetParticipationAndRewardProposer(context.Background(), beaconState, test.epoch, test.indices, test.participatedFlags, b)
+			st, err := altair.SetParticipationAndRewardProposer(context.Background(), beaconState, test.epoch, test.indices, test.participatedFlags, []byte{})
 			require.NoError(t, err)
 
 			i, err := helpers.BeaconProposerIndex(context.Background(), st)
 			require.NoError(t, err)
-			b, err = beaconState.BalanceAtIndex(i)
+			b, err := beaconState.BalanceAtIndex(i)
 			require.NoError(t, err)
 			require.Equal(t, test.wantedBalance, b)
 
@@ -609,9 +605,7 @@ func TestEpochParticipation(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		b, err := helpers.TotalActiveBalance(beaconState)
-		require.NoError(t, err)
-		n, p, err := altair.EpochParticipation(beaconState, test.indices, test.epochParticipation, test.participatedFlags, b)
+		n, p, err := altair.EpochParticipation(beaconState, test.indices, test.epochParticipation, test.participatedFlags)
 		require.NoError(t, err)
 		require.Equal(t, test.wantedNumerator, n)
 		require.DeepSSZEqual(t, test.wantedEpochParticipation, p)
