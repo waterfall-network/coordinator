@@ -11,27 +11,64 @@ load(
     "with_feature_set",
 )
 
-load(
-    "@bazel_tools//tools/cpp:cc_toolchain_config.bzl",
-    ALL_COMPILE_ACTIONS = "all_compile_actions",
-    ALL_CPP_COMPILE_ACTIONS = "all_cpp_compile_actions",
-    ALL_LINK_ACTIONS = "all_link_actions",
-)
+load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
+
+all_compile_actions = [
+    ACTION_NAMES.c_compile,
+    ACTION_NAMES.cpp_compile,
+    ACTION_NAMES.linkstamp_compile,
+    ACTION_NAMES.assemble,
+    ACTION_NAMES.preprocess_assemble,
+    ACTION_NAMES.cpp_header_parsing,
+    ACTION_NAMES.cpp_module_compile,
+    ACTION_NAMES.cpp_module_codegen,
+    ACTION_NAMES.clif_match,
+    ACTION_NAMES.lto_backend,
+]
+
+all_cpp_compile_actions = [
+    ACTION_NAMES.cpp_compile,
+    ACTION_NAMES.linkstamp_compile,
+    ACTION_NAMES.cpp_header_parsing,
+    ACTION_NAMES.cpp_module_compile,
+    ACTION_NAMES.cpp_module_codegen,
+    ACTION_NAMES.clif_match,
+]
+
+all_link_actions = [
+    ACTION_NAMES.cpp_link_executable,
+    ACTION_NAMES.cpp_link_dynamic_library,
+    ACTION_NAMES.cpp_link_nodeps_dynamic_library,
+]
 
 def _impl(ctx):
     toolchain_identifier = "osxcross"
     compiler = "clang"
-    abi_version = "darwin_x86_64"
-    abi_libc_version = "darwin_x86_64"
-    install = "/usr/x86_64-apple-darwin/"
-    clang_version = "10.0.0"
+    clang_version = "12.0.0"
     target_libc = "macosx"
-    target_cpu = "x86_64"
-    osxcross = install + "osxcross/"
-    osxcross_binprefix = osxcross + "bin/x86_64-apple-darwin19-"
-    sdkroot = osxcross + "SDK/MacOSX10.15.sdk/"
+
+    target_cpu = ctx.attr.target_cpu
+
+    osxcross = "/usr/osxcross/"
+    sdkroot = osxcross + "SDK/MacOSX12.3.sdk/"
+
+    if (target_cpu == "aarch64"):
+        abi_version = "darwin_aarch64"
+        abi_libc_version = "darwin_aarch64"
+        osxcross_binprefix = osxcross + "bin/aarch64-apple-darwin21.4-"
+        tool_cpp = osxcross + "bin/oa64-clang++"
+        tool_gcc = osxcross + "bin/oa64-clang"
+    elif (target_cpu == "x86_64"):
+        abi_version = "darwin_x86_64"
+        abi_libc_version = "darwin_x86_64"
+        osxcross_binprefix = osxcross + "bin/x86_64-apple-darwin21.4-"
+        tool_cpp = osxcross + "bin/o64-clang++"
+        tool_gcc = osxcross + "bin/o64-clang"
+    else:
+        fail("Unreachable")
+
     cross_system_include_dirs = [
-        "/usr/lib/clang/10.0.0/include",
+        "/usr/lib/clang/12.0.0/include",
         osxcross + "include",
         sdkroot + "usr/include",
     ]
@@ -48,7 +85,7 @@ def _impl(ctx):
         enabled = True,
         flag_sets = [
             flag_set(
-                actions = ALL_COMPILE_ACTIONS,
+                actions = all_compile_actions,
                 flag_groups = [
                     flag_group(
                         flags = [
@@ -75,7 +112,7 @@ def _impl(ctx):
         enabled = True,
         flag_sets = [
             flag_set(
-                actions = ALL_COMPILE_ACTIONS,
+                actions = all_compile_actions,
                 flag_groups = [
                     flag_group(
                         flags = [
@@ -94,12 +131,12 @@ def _impl(ctx):
                 ],
             ),
             flag_set(
-                actions = ALL_COMPILE_ACTIONS,
+                actions = all_compile_actions,
                 flag_groups = [flag_group(flags = ["-g", "-fstandalone-debug"])],
                 with_features = [with_feature_set(features = ["dbg"])],
             ),
             flag_set(
-                actions = ALL_COMPILE_ACTIONS,
+                actions = all_compile_actions,
                 flag_groups = [
                     flag_group(
                         flags = [
@@ -115,7 +152,7 @@ def _impl(ctx):
                 with_features = [with_feature_set(features = ["opt"])],
             ),
             flag_set(
-                actions = ALL_CPP_COMPILE_ACTIONS,
+                actions = all_cpp_compile_actions,
                 flag_groups = [flag_group(flags = ["-std=c++17", "-nostdinc++"])],
             ),
         ],
@@ -126,7 +163,7 @@ def _impl(ctx):
         enabled = True,
         flag_sets = [
             flag_set(
-                actions = ALL_LINK_ACTIONS,
+                actions = all_link_actions,
                 flag_groups = [
                     flag_group(
                         flags = [
@@ -162,7 +199,7 @@ def _impl(ctx):
         enabled = True,
         flag_sets = [
             flag_set(
-                actions = ALL_COMPILE_ACTIONS,
+                actions = all_compile_actions,
                 flag_groups = [
                     flag_group(
                         expand_if_available = "user_compile_flags",
@@ -178,7 +215,7 @@ def _impl(ctx):
         name = "coverage",
         flag_sets = [
             flag_set(
-                actions = ALL_COMPILE_ACTIONS,
+                actions = all_compile_actions,
                 flag_groups = [
                     flag_group(
                         flags = ["-fprofile-instr-generate", "-fcoverage-mapping"],
@@ -186,7 +223,7 @@ def _impl(ctx):
                 ],
             ),
             flag_set(
-                actions = ALL_LINK_ACTIONS,
+                actions = all_link_actions,
                 flag_groups = [flag_group(flags = ["-fprofile-instr-generate"])],
             ),
         ],
@@ -210,13 +247,13 @@ def _impl(ctx):
 
     tool_paths = [
         tool_path(name = "ld", path = osxcross_binprefix + "ld"),
-        tool_path(name = "cpp", path = osxcross + "bin/o64-clang++"),
+        tool_path(name = "cpp", path = tool_cpp),
         tool_path(name = "dwp", path = "/usr/bin/dwp"),
         tool_path(name = "gcov", path = "/usr/bin/gcov"),
         tool_path(name = "nm", path = osxcross_binprefix + "nm"),
         tool_path(name = "objdump", path = osxcross_binprefix + "ObjectDump"),
         tool_path(name = "strip", path = osxcross_binprefix + "strip"),
-        tool_path(name = "gcc", path = osxcross + "bin/o64-clang"),
+        tool_path(name = "gcc", path = tool_gcc),
         tool_path(name = "ar", path = osxcross_binprefix + "libtool"),
     ]
 
@@ -239,6 +276,7 @@ osx_cc_toolchain_config = rule(
     implementation = _impl,
     attrs = {
         "target": attr.string(mandatory = True),
+        "target_cpu": attr.string(mandatory = True),
         "stdlib": attr.string(),
     },
     provides = [CcToolchainConfigInfo],
