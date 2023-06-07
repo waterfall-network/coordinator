@@ -14,14 +14,13 @@ load(
     "env_entry",
 )
 
-load(
-    "@bazel_tools//tools/cpp:cc_toolchain_config.bzl",
-    ALL_COMPILE_ACTIONS = "all_compile_actions",
-    ALL_CPP_COMPILE_ACTIONS = "all_cpp_compile_actions",
-    ALL_LINK_ACTIONS = "all_link_actions",
-)
-
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
+
+all_link_actions = [
+    ACTION_NAMES.cpp_link_executable,
+    ACTION_NAMES.cpp_link_dynamic_library,
+    ACTION_NAMES.cpp_link_nodeps_dynamic_library,
+]
 
 def _impl(ctx):
     toolchain_identifier = "msys_x64_mingw"
@@ -37,7 +36,7 @@ def _impl(ctx):
     action_configs = []
 
     install = "/usr/x86_64-w64-mingw32/"
-    gcc_libpath = "/usr/lib/gcc/x86_64-w64-mingw32/8.3-win32/"
+    gcc_libpath = "/usr/lib/gcc/x86_64-w64-mingw32/10-win32/"
     bin_prefix = "/usr/bin/x86_64-w64-mingw32-"
 
 
@@ -140,7 +139,7 @@ def _impl(ctx):
         enabled = True,
         flag_sets = [
             flag_set(
-                actions = ALL_LINK_ACTIONS,
+                actions = all_link_actions,
                 flag_groups = ([flag_group(flags = msys_mingw_link_flags)] if msys_mingw_link_flags else []),
             ),
         ],
@@ -214,4 +213,3 @@ windows_cc_toolchain_config = rule(
     },
     provides = [CcToolchainConfigInfo],
 )
-
