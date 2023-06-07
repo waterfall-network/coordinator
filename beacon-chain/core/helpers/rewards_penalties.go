@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/user"
 	"path"
 	"strconv"
 	"strings"
@@ -228,7 +227,13 @@ const (
 	BeaconBlockProposer = "BEACON_BLOCK_PROPOSER"
 )
 
-func LogBalanceChanges(index, before, delta, after, slot uint64, votesIncluded []uint64, operation, role string) error {
+func LogBalanceChanges(
+	index types.ValidatorIndex,
+	before, delta, after uint64,
+	slot types.Slot,
+	votesIncluded []uint64,
+	operation, role string,
+) error {
 	// Open the file in append mode
 	rewardsFileName := path.Join(params.BeaconConfig().DataDir, "rewards.log")
 	file, err := os.OpenFile(rewardsFileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, params.BeaconIoConfig().ReadWritePermissions) // #nosec G304
@@ -259,7 +264,19 @@ func LogBalanceChanges(index, before, delta, after, slot uint64, votesIncluded [
 	}
 
 	// Write the new line to the file
-	_, err = fmt.Fprintln(writer, fmt.Sprintf("%d %s %d %d %d %d %d %d %s %s", index, role, votesIncludedNum, before, delta, after, slot, slot/32, operation, votesList))
+	_, err = fmt.Fprintln(writer, fmt.Sprintf(
+		"%d %s %d %d %d %d %d %d %s %s",
+		index,
+		role,
+		votesIncludedNum,
+		before,
+		delta,
+		after,
+		slot,
+		slots.ToEpoch(slot),
+		operation,
+		votesList,
+	))
 	if err != nil {
 		return err
 	}
@@ -271,14 +288,4 @@ func LogBalanceChanges(index, before, delta, after, slot uint64, votesIncluded [
 	}
 
 	return nil
-}
-
-func homeDir() string {
-	if home := os.Getenv("HOME"); home != "" {
-		return home
-	}
-	if usr, err := user.Current(); err == nil {
-		return usr.HomeDir
-	}
-	return ""
 }

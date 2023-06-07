@@ -119,24 +119,24 @@ type BeaconChainConfig struct {
 	DomainContributionAndProof        [4]byte `yaml:"DOMAIN_CONTRIBUTION_AND_PROOF" spec:"true"`         // DomainAggregateAndProof defines the BLS signature domain for contribution and proof.
 
 	// Prysm constants.
-	GweiPerEth                     uint64                     // GweiPerEth is the amount of gwei corresponding to 1 eth.
-	BLSSecretKeyLength             int                        // BLSSecretKeyLength defines the expected length of BLS secret keys in bytes.
-	BLSPubkeyLength                int                        // BLSPubkeyLength defines the expected length of BLS public keys in bytes.
-	DefaultBufferSize              int                        // DefaultBufferSize for channels across the Prysm repository.
-	ValidatorPrivkeyFileName       string                     // ValidatorPrivKeyFileName specifies the string name of a validator private key file.
-	WithdrawalPrivkeyFileName      string                     // WithdrawalPrivKeyFileName specifies the string name of a withdrawal private key file.
-	RPCSyncCheck                   time.Duration              // Number of seconds to query the sync service, to find out if the node is synced or not.
-	EmptySignature                 [96]byte                   // EmptySignature is used to represent a zeroed out BLS Signature.
-	DefaultPageSize                int                        // DefaultPageSize defines the default page size for RPC server request.
-	MaxPeersToSync                 int                        // MaxPeersToSync describes the limit for number of peers in round robin sync.
-	SlotsPerArchivedPoint          types.Slot                 // SlotsPerArchivedPoint defines the number of slots per one archived point.
-	GenesisCountdownInterval       time.Duration              // How often to log the countdown until the genesis time is reached.
-	BeaconStateFieldCount          int                        // BeaconStateFieldCount defines how many fields are in beacon state.
-	BeaconStateAltairFieldCount    int                        // BeaconStateAltairFieldCount defines how many fields are in beacon state hard fork 1.
-	BeaconStateBellatrixFieldCount int                        // BeaconStateBellatrixFieldCount defines how many fields are in beacon state post upgrade to the Bellatrix.
-	BlockVotingMinSupportPrc       int                        // BlockVotingMinSupportPrc defines minimum percentage of votes for accept of consensus for block.
-	SpinePublicationsPefixSupport  int                        // SpinePublicationsPefixSupport defines number of publications of spine to accept it as prefix.
-	CtxBlockFetcherKey             BlockInfoFetcherContextKey // CtxBlockFetcherKey defines the key of block fetcher for context of state transition.
+	GweiPerEth                     uint64        // GweiPerEth is the amount of gwei corresponding to 1 eth.
+	BLSSecretKeyLength             int           // BLSSecretKeyLength defines the expected length of BLS secret keys in bytes.
+	BLSPubkeyLength                int           // BLSPubkeyLength defines the expected length of BLS public keys in bytes.
+	DefaultBufferSize              int           // DefaultBufferSize for channels across the Prysm repository.
+	ValidatorPrivkeyFileName       string        // ValidatorPrivKeyFileName specifies the string name of a validator private key file.
+	WithdrawalPrivkeyFileName      string        // WithdrawalPrivKeyFileName specifies the string name of a withdrawal private key file.
+	RPCSyncCheck                   time.Duration // Number of seconds to query the sync service, to find out if the node is synced or not.
+	EmptySignature                 [96]byte      // EmptySignature is used to represent a zeroed out BLS Signature.
+	DefaultPageSize                int           // DefaultPageSize defines the default page size for RPC server request.
+	MaxPeersToSync                 int           // MaxPeersToSync describes the limit for number of peers in round robin sync.
+	SlotsPerArchivedPoint          types.Slot    // SlotsPerArchivedPoint defines the number of slots per one archived point.
+	GenesisCountdownInterval       time.Duration // How often to log the countdown until the genesis time is reached.
+	BeaconStateFieldCount          int           // BeaconStateFieldCount defines how many fields are in beacon state.
+	BeaconStateAltairFieldCount    int           // BeaconStateAltairFieldCount defines how many fields are in beacon state hard fork 1.
+	BeaconStateBellatrixFieldCount int           // BeaconStateBellatrixFieldCount defines how many fields are in beacon state post upgrade to the Bellatrix.
+	BlockVotingMinSupportPrc       int           // BlockVotingMinSupportPrc defines minimum percentage of votes for accept of consensus for block.
+	SpinePublicationsPefixSupport  int           // SpinePublicationsPefixSupport defines number of publications of spine to accept it as prefix.
+	CtxBlockFetcherKey             CtxFnKey      // CtxBlockFetcherKey defines the key of block fetcher for context of state transition.
 	DataDir                        string
 
 	// Slasher constants.
@@ -211,8 +211,8 @@ type BeaconChainConfig struct {
 	DefaultFeeRecipient              common.Address // DefaultFeeRecipient where the transaction fee goes to.
 }
 
-type BlockInfoFetcherContextKey string
-type BlockInfoFetcherContextValue func(context.Context, [32]byte) (types.ValidatorIndex, types.Slot, uint64, error)
+type CtxFnKey string
+type CtxBlockFetcher func(context.Context, [32]byte) (types.ValidatorIndex, types.Slot, uint64, error)
 
 // InitializeForkSchedule initializes the schedules forks baked into the config.
 func (b *BeaconChainConfig) InitializeForkSchedule() {

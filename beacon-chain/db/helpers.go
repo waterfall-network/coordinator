@@ -7,7 +7,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 )
 
-func BlockInfoFetcherFunc(db ReadOnlyDatabase) params.BlockInfoFetcherContextValue {
+func BlockInfoFetcherFunc(db ReadOnlyDatabase) params.CtxBlockFetcher {
 	return func(ctx context.Context, blockRoot [32]byte) (types.ValidatorIndex, types.Slot, uint64, error) {
 		block, err := db.Block(ctx, blockRoot)
 		if err != nil {

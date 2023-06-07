@@ -146,7 +146,7 @@ func SetParticipationAndRewardProposer(
 	if err != nil {
 		return nil, err
 	}
-	if err := helpers.LogBalanceChanges(uint64(i), balAtIdx, proposerReward, newBalAtIdx, uint64(beaconState.Slot()), indices, helpers.Increase, helpers.Proposer); err != nil {
+	if err := helpers.LogBalanceChanges(i, balAtIdx, proposerReward, newBalAtIdx, beaconState.Slot(), indices, helpers.Increase, helpers.Proposer); err != nil {
 		return nil, err
 	}
 
@@ -283,13 +283,13 @@ func RewardProposer(ctx context.Context, beaconState state.BeaconState, proposer
 }
 
 func RewardBeaconBlockRootProposer(ctx context.Context, beaconState state.BeaconState, beaconBlockRoot []byte, proposerReward uint64) error {
-	blockFetcher, ok := ctx.Value(params.BeaconConfig().CtxBlockFetcherKey).(params.BlockInfoFetcherContextValue)
+	blockFetcher, ok := ctx.Value(params.BeaconConfig().CtxBlockFetcherKey).(params.CtxBlockFetcher)
 	if !ok {
-		err := errors.New("Cannot cast to BlockInfoFetcherContextValue")
+		err := errors.New("Cannot cast to CtxBlockFetcher")
 		log.WithError(err).WithFields(log.Fields{
 			"Slot":           beaconState.Slot(),
 			"ProposerReward": proposerReward,
-		}).Error("CANNOT CAST TO BlockInfoFetcherContextValue >>>>>>>>>>>>>")
+		}).Error("Proposer reward error: get CtxBlockFetcher failed")
 		return err
 	}
 	var beaconBlockRootArray [32]byte
@@ -327,7 +327,7 @@ func RewardBeaconBlockRootProposer(ctx context.Context, beaconState state.Beacon
 	if err != nil {
 		return err
 	}
-	if err := helpers.LogBalanceChanges(uint64(beaconBlockRootProposerIndex), balAtIdx, proposerReward, newBalAtIdx, uint64(beaconState.Slot()), make([]uint64, votesIncluded), helpers.Increase, helpers.BeaconBlockProposer); err != nil {
+	if err := helpers.LogBalanceChanges(beaconBlockRootProposerIndex, balAtIdx, proposerReward, newBalAtIdx, beaconState.Slot(), make([]uint64, votesIncluded), helpers.Increase, helpers.BeaconBlockProposer); err != nil {
 		return err
 	}
 
