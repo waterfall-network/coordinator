@@ -30,6 +30,7 @@ proto_library(
         "slasher.proto",
         "validator.proto",
         "p2p_messages.proto",
+        "prevoting.proto",
         ":ssz_proto_files",
         #        ":generated_swagger_proto",
     ],
