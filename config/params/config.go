@@ -138,6 +138,7 @@ type BeaconChainConfig struct {
 	SpinePublicationsPefixSupport  int           // SpinePublicationsPefixSupport defines number of publications of spine to accept it as prefix.
 	CtxBlockFetcherKey             CtxFnKey      // CtxBlockFetcherKey defines the key of block fetcher for context of state transition.
 	DataDir                        string
+	WriteRewardLogFlag             bool
 
 	// Slasher constants.
 	WeakSubjectivityPeriod    types.Epoch // WeakSubjectivityPeriod defines the time period expressed in number of epochs were proof of stake network should validate block headers and attestations for slashable events.

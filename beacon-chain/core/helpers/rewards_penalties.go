@@ -239,6 +239,9 @@ var (
 )
 
 func initLogRewardsAndPenalties(st state.BeaconState) error {
+	if !params.BeaconConfig().WriteRewardLogFlag {
+		return nil
+	}
 	if rpLogCache != nil {
 		return nil
 	}
@@ -306,6 +309,9 @@ func LogBeforeRewardsAndPenalties(
 	operation,
 	role string,
 ) error {
+	if !params.BeaconConfig().WriteRewardLogFlag {
+		return nil
+	}
 	if err := initLogRewardsAndPenalties(st); err != nil {
 		return err
 	}
@@ -327,6 +333,13 @@ func LogBalanceChanges(
 	votesIncluded []uint64,
 	operation, role string,
 ) error {
+	if !params.BeaconConfig().WriteRewardLogFlag {
+		return nil
+	}
+	//start write after 3-d epoch
+	if slots.ToEpoch(slot) < 3 {
+		return nil
+	}
 	if rpLogCache == nil {
 		panic("Reward and penalty logging is not initialized")
 	}
@@ -360,10 +373,6 @@ func LogBalanceChanges(
 	)
 	key := hash.FastSum64([]byte(line))
 	if _, ok := rpLogCache.Get(key); ok {
-
-		//todo rm
-		log.WithField("line", line).Info("*** SKIP LOG ***")
-
 		return nil
 	}
 	rpLogCache.Add(key, true)

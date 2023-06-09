@@ -130,6 +130,7 @@ func New(cliCtx *cli.Context, opts ...Option) (*BeaconNode, error) {
 	configureNetwork(cliCtx)
 	configureInteropConfig(cliCtx)
 	configureDataConfig(cliCtx)
+	configureRewardLogConfig(cliCtx)
 	if err := configureExecutionSetting(cliCtx); err != nil {
 		return nil, err
 	}
