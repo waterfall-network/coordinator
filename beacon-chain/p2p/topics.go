@@ -26,6 +26,8 @@ const (
 	GossipAggregateAndProofMessage = "beacon_aggregate_and_proof"
 	// GossipContributionAndProofMessage is the name for the sync contribution and proof message type.
 	GossipContributionAndProofMessage = "sync_committee_contribution_and_proof"
+	// GossipPrevoteMessage is a name for the prevote message type
+	GossipPrevoteMessage = "prevote"
 
 	// Topic Formats
 	//
@@ -45,4 +47,6 @@ const (
 	AggregateAndProofSubnetTopicFormat = GossipProtocolAndDigest + GossipAggregateAndProofMessage
 	// SyncContributionAndProofSubnetTopicFormat is the topic format for the sync aggregate and proof subnet.
 	SyncContributionAndProofSubnetTopicFormat = GossipProtocolAndDigest + GossipContributionAndProofMessage
+	// PrevoteSubnetTopicFormat is the topic format for prevoting subnet
+	PrevoteSubnetTopicFormat = GossipProtocolAndDigest + GossipPrevoteMessage + "_%d"
 )
