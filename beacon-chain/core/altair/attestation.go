@@ -135,6 +135,13 @@ func SetParticipationAndRewardProposer(
 		return nil, err
 	}
 
+	log.WithFields(log.Fields{
+		"Slot":           beaconState.Slot(),
+		"Proposer":       proposerIndex,
+		"ProposerReward": proposerReward,
+	}).Debug("Reward proposer: current block incr")
+
+	// 4. rewards the block proposer voted for by the participants,
 	if err := RewardBeaconBlockRootProposer(ctx, beaconState, beaconBlockRoot, proposerReward); err != nil {
 		return nil, err
 	}
@@ -245,7 +252,7 @@ func EpochParticipation(
 			"targetVoting":     participatedFlags[targetFlagIndex],
 			"headVoting":       participatedFlags[headFlagIndex],
 			"timelyVoting":     participatedFlags[sourceFlagIndex] && participatedFlags[targetFlagIndex] && participatedFlags[headFlagIndex],
-		}).Info("Reward proposer: calc by epoch participation incr")
+		}).Debug("Reward proposer: calc by epoch participation incr")
 	}
 
 	return proposerReward, epochParticipation, nil
@@ -284,7 +291,7 @@ func RewardBeaconBlockRootProposer(ctx context.Context, beaconState state.Beacon
 		"Slot":                   beaconState.Slot(),
 		"Proposer":               beaconBlockRootProposerIndex,
 		"ProposerReward":         proposerReward,
-	}).Info("Reward proposer: voting for root incr")
+	}).Debug("Reward proposer: voting for root incr")
 
 	// write Rewards And Penalties log
 	if err = helpers.LogBeforeRewardsAndPenalties(beaconState, proposerIndex, proposerReward, make([]uint64, votesIncluded), helpers.Increase, helpers.BeaconBlockProposer); err != nil {

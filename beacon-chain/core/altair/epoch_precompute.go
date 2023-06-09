@@ -260,7 +260,7 @@ func ProcessRewardsAndPenaltiesPrecompute(
 			"Slot":              beaconState.Slot(),
 			"Validator":         valIndex,
 			"AttestationReward": attsRewards[valIndex],
-		}).Info("Reward attestor: incr")
+		}).Debug("Reward attestor: incr")
 
 		// write Rewards And Penalties log
 		if attsRewards[valIndex] != 0 {
@@ -282,7 +282,7 @@ func ProcessRewardsAndPenaltiesPrecompute(
 			"Slot":               beaconState.Slot(),
 			"Validator":          valIndex,
 			"AttestationPenalty": attsPenalties[valIndex],
-		}).Info("Reward attestor: decr")
+		}).Debug("Reward attestor: decr")
 
 		// write Rewards And Penalties log
 		if attsPenalties[valIndex] != 0 {
@@ -417,7 +417,7 @@ func attestationDelta(
 		"IsPrevEpochTargetAttester": val.IsPrevEpochTargetAttester,
 		"IsSlashed":                 val.IsSlashed,
 		"inactivityLeak":            inactivityLeak,
-	}).Debug("ATTESTATION BASE REWARD >>>>>>>>>>>")
+	}).Debug("Reward attestor: calc delta")
 
 	return reward, penalty, nil
 }
