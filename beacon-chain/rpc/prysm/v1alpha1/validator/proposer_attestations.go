@@ -10,6 +10,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/altair"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
@@ -103,11 +104,7 @@ func (a proposerAtts) filter(ctx context.Context, st state.BeaconState) (propose
 	case version.Altair, version.Bellatrix:
 		// Use a wrapper here, as go needs strong typing for the function signature.
 		attestationProcessor = func(ctx context.Context, st state.BeaconState, attestation *ethpb.Attestation) (state.BeaconState, error) {
-			totalBalance, err := helpers.TotalActiveBalance(st)
-			if err != nil {
-				return nil, err
-			}
-			return altair.ProcessAttestationNoVerifySignature(ctx, st, attestation, totalBalance)
+			return altair.ProcessAttestationNoVerifySignature(ctx, st, attestation)
 		}
 	default:
 		// Exit early if there is an unknown state type.
@@ -268,6 +265,7 @@ func (vs *Server) validateAndDeleteAttsInPool(ctx context.Context, st state.Beac
 	ctx, span := trace.StartSpan(ctx, "ProposerServer.validateAndDeleteAttsInPool")
 	defer span.End()
 
+	ctx = context.WithValue(ctx, params.BeaconConfig().CtxBlockFetcherKey, db.BlockInfoFetcherFunc(vs.BeaconDB))
 	validAtts, invalidAtts := proposerAtts(atts).filter(ctx, st)
 	if err := vs.deleteAttsInPool(ctx, invalidAtts); err != nil {
 		return nil, err

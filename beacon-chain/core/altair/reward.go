@@ -1,6 +1,8 @@
 package altair
 
 import (
+	stdmath "math"
+
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
@@ -59,4 +61,18 @@ func BaseRewardPerIncrement(activeBalance uint64) (uint64, error) {
 	}
 	cfg := params.BeaconConfig()
 	return cfg.EffectiveBalanceIncrement * cfg.BaseRewardFactor / math.IntegerSquareRoot(activeBalance), nil
+}
+
+func CalculateBaseReward(config *params.BeaconChainConfig, validatorsNum int, activeValidatorsForSlot uint64, rewardMultiplier float64) uint64 {
+	var (
+		secondsInYear = 60 * 60 * 24 * 365.25 // Number of seconds in year
+	)
+
+	numOfSlotsPerYear := secondsInYear / float64(config.SecondsPerSlot) // Bi-th in formula
+	annualMintedCoins := config.MaxAnnualizedReturnRate *
+		float64(config.MaxEffectiveBalance) *
+		stdmath.Sqrt(float64(uint64(validatorsNum)*config.OptValidatorsNum)) // v in formula
+	rewardPerBlock := annualMintedCoins / numOfSlotsPerYear // Wi-th in formula
+	baseReward := rewardPerBlock / (rewardMultiplier * float64(activeValidatorsForSlot))
+	return uint64(baseReward)
 }

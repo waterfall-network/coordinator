@@ -164,6 +164,9 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	InactivityPenaltyQuotient:      67108864,
 	MinSlashingPenaltyQuotient:     128,
 	ProportionalSlashingMultiplier: 1,
+	BaseRewardMultiplier:           2.0,
+	MaxAnnualizedReturnRate:        0.2,
+	OptValidatorsNum:               300_000,
 
 	// Max operations per block constants.
 	MaxProposerSlashings: 16,
@@ -202,6 +205,7 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	BeaconStateFieldCount:          21 + 2,
 	BeaconStateAltairFieldCount:    24 + 2,
 	BeaconStateBellatrixFieldCount: 25 + 2,
+	CtxBlockFetcherKey:             CtxFnKey("CtxBlockFetcher"),
 
 	// Slasher related values.
 	WeakSubjectivityPeriod:          54000,
@@ -227,6 +231,9 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	TimelyTargetFlagIndex: 1,
 	TimelyHeadFlagIndex:   2,
 
+	// DAG Participation flag indices.
+	DAGTimelyVotingFlagIndex: 3,
+
 	// Incentivization weight values.
 	TimelySourceWeight: 14,
 	TimelyTargetWeight: 26,
@@ -234,6 +241,12 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	SyncRewardWeight:   2,
 	ProposerWeight:     8,
 	WeightDenominator:  64,
+
+	// DAG Incentivization weight values.
+	DAGTimelySourceWeight: 0.25,
+	DAGTimelyTargetWeight: 0.25,
+	DAGTimelyHeadWeight:   0.25,
+	DAGTimelyVotingWeight: 0.25,
 
 	// Validator related values.
 	TargetAggregatorsPerSyncSubcommittee: 16,
@@ -251,7 +264,6 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	ProportionalSlashingMultiplierAltair:    2,
 	MinSlashingPenaltyQuotientBellatrix:     32,
 	ProportionalSlashingMultiplierBellatrix: 3,
-	InactivityPenaltyQuotientBellatrix:      1 << 24,
 
 	// Light client
 	MinSyncCommitteeParticipants: 1,

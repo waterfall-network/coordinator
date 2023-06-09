@@ -13,9 +13,9 @@ import (
 )
 
 func testnetConfigFilePath(t *testing.T, network string) string {
-	filepath, err := bazel.Runfile("external/eth2_networks")
+	fpath, err := bazel.Runfile("external/eth2_networks")
 	require.NoError(t, err)
-	configFilePath := path.Join(filepath, "shared", network, "config.yaml")
+	configFilePath := path.Join(fpath, "shared", network, "config.yaml")
 	return configFilePath
 }
 
@@ -141,12 +141,17 @@ func compareConfigs(t *testing.T, expected, actual *params.BeaconChainConfig) {
 	require.DeepEqual(t, expected.TimelySourceFlagIndex, actual.TimelySourceFlagIndex)
 	require.DeepEqual(t, expected.TimelyTargetFlagIndex, actual.TimelyTargetFlagIndex)
 	require.DeepEqual(t, expected.TimelyHeadFlagIndex, actual.TimelyHeadFlagIndex)
+	require.DeepEqual(t, expected.DAGTimelyVotingFlagIndex, actual.DAGTimelyVotingFlagIndex)
 	require.DeepEqual(t, expected.TimelySourceWeight, actual.TimelySourceWeight)
 	require.DeepEqual(t, expected.TimelyTargetWeight, actual.TimelyTargetWeight)
 	require.DeepEqual(t, expected.TimelyHeadWeight, actual.TimelyHeadWeight)
 	require.DeepEqual(t, expected.SyncRewardWeight, actual.SyncRewardWeight)
 	require.DeepEqual(t, expected.WeightDenominator, actual.WeightDenominator)
 	require.DeepEqual(t, expected.ProposerWeight, actual.ProposerWeight)
+	require.DeepEqual(t, expected.DAGTimelySourceWeight, actual.DAGTimelySourceWeight)
+	require.DeepEqual(t, expected.DAGTimelyTargetWeight, actual.DAGTimelyTargetWeight)
+	require.DeepEqual(t, expected.DAGTimelyHeadWeight, actual.DAGTimelyHeadWeight)
+	require.DeepEqual(t, expected.DAGTimelyVotingWeight, actual.DAGTimelyVotingWeight)
 	require.DeepEqual(t, expected.TargetAggregatorsPerSyncSubcommittee, actual.TargetAggregatorsPerSyncSubcommittee)
 	require.DeepEqual(t, expected.SyncCommitteeSubnetCount, actual.SyncCommitteeSubnetCount)
 	require.DeepEqual(t, expected.SyncCommitteeSize, actual.SyncCommitteeSize)
@@ -158,7 +163,6 @@ func compareConfigs(t *testing.T, expected, actual *params.BeaconChainConfig) {
 	require.DeepEqual(t, expected.ProportionalSlashingMultiplierAltair, actual.ProportionalSlashingMultiplierAltair)
 	require.DeepEqual(t, expected.MinSlashingPenaltyQuotientBellatrix, actual.MinSlashingPenaltyQuotientBellatrix)
 	require.DeepEqual(t, expected.ProportionalSlashingMultiplierBellatrix, actual.ProportionalSlashingMultiplierBellatrix)
-	require.DeepEqual(t, expected.InactivityPenaltyQuotientBellatrix, actual.InactivityPenaltyQuotientBellatrix)
 	require.DeepEqual(t, expected.MinSyncCommitteeParticipants, actual.MinSyncCommitteeParticipants)
 	require.DeepEqual(t, expected.TerminalBlockHash, actual.TerminalBlockHash)
 	require.DeepEqual(t, expected.TerminalBlockHashActivationEpoch, actual.TerminalBlockHashActivationEpoch)

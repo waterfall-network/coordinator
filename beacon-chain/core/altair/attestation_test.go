@@ -263,9 +263,7 @@ func TestProcessAttestationNoVerify_SourceTargetHead(t *testing.T) {
 	copy(ckp.Root, make([]byte, fieldparams.RootLength))
 	require.NoError(t, beaconState.SetCurrentJustifiedCheckpoint(ckp))
 
-	b, err := helpers.TotalActiveBalance(beaconState)
-	require.NoError(t, err)
-	beaconState, err = altair.ProcessAttestationNoVerifySignature(context.Background(), beaconState, att, b)
+	beaconState, err = altair.ProcessAttestationNoVerifySignature(context.Background(), beaconState, att)
 	require.NoError(t, err)
 
 	p, err := beaconState.CurrentEpochParticipation()
@@ -314,6 +312,11 @@ func TestValidatorFlag_Has(t *testing.T) {
 			expected: []uint8{params.BeaconConfig().TimelyHeadFlagIndex},
 		},
 		{
+			name:     "voting",
+			set:      8,
+			expected: []uint8{params.BeaconConfig().DAGTimelyVotingFlagIndex},
+		},
+		{
 			name:     "source, target",
 			set:      3,
 			expected: []uint8{params.BeaconConfig().TimelySourceFlagIndex, params.BeaconConfig().TimelyTargetFlagIndex},
@@ -332,6 +335,11 @@ func TestValidatorFlag_Has(t *testing.T) {
 			name:     "source, target, head",
 			set:      7,
 			expected: []uint8{params.BeaconConfig().TimelySourceFlagIndex, params.BeaconConfig().TimelyTargetFlagIndex, params.BeaconConfig().TimelyHeadFlagIndex},
+		},
+		{
+			name:     "source, target, head, voting",
+			set:      15,
+			expected: []uint8{params.BeaconConfig().TimelySourceFlagIndex, params.BeaconConfig().TimelyTargetFlagIndex, params.BeaconConfig().TimelyHeadFlagIndex, params.BeaconConfig().DAGTimelyVotingFlagIndex},
 		},
 	}
 
@@ -411,21 +419,21 @@ func TestValidatorFlag_Add_ExceedsLength(t *testing.T) {
 
 func TestFuzzProcessAttestationsNoVerify_10000(t *testing.T) {
 	fuzzer := fuzz.NewWithSeed(0)
-	state := &ethpb.BeaconStateAltair{}
+	bState := &ethpb.BeaconStateAltair{}
 	b := &ethpb.SignedBeaconBlockAltair{Block: &ethpb.BeaconBlockAltair{}}
 	for i := 0; i < 10000; i++ {
-		fuzzer.Fuzz(state)
+		fuzzer.Fuzz(bState)
 		fuzzer.Fuzz(b)
 		if b.Block == nil {
 			b.Block = &ethpb.BeaconBlockAltair{}
 		}
-		s, err := stateAltair.InitializeFromProtoUnsafe(state)
+		s, err := stateAltair.InitializeFromProtoUnsafe(bState)
 		require.NoError(t, err)
 		wsb, err := wrapper.WrappedSignedBeaconBlock(b)
 		require.NoError(t, err)
 		r, err := altair.ProcessAttestationsNoVerifySignature(context.Background(), s, wsb)
 		if err != nil && r != nil {
-			t.Fatalf("return value should be nil on err. found: %v on error: %v for state: %v and block: %v", r, err, state, b)
+			t.Fatalf("return value should be nil on err. found: %v on error: %v for state: %v and block: %v", r, err, bState, b)
 		}
 	}
 }
@@ -435,6 +443,7 @@ func TestSetParticipationAndRewardProposer(t *testing.T) {
 	sourceFlagIndex := cfg.TimelySourceFlagIndex
 	targetFlagIndex := cfg.TimelyTargetFlagIndex
 	headFlagIndex := cfg.TimelyHeadFlagIndex
+	voteFlagIndex := cfg.DAGTimelyVotingFlagIndex
 	tests := []struct {
 		name                string
 		indices             []uint64
@@ -449,45 +458,50 @@ func TestSetParticipationAndRewardProposer(t *testing.T) {
 				sourceFlagIndex: false,
 				targetFlagIndex: false,
 				headFlagIndex:   false,
+				voteFlagIndex:   false,
 			},
 			wantedParticipation: []byte{0, 0, 0, 0, 0, 0, 0, 0},
-			wantedBalance:       32000000000,
+			wantedBalance:       32_000_000_000_000,
 		},
 		{name: "some participated without flags",
 			indices: []uint64{0, 1, 2, 3}, epochParticipation: []byte{0, 0, 0, 0, 0, 0, 0, 0}, participatedFlags: map[uint8]bool{
 				sourceFlagIndex: false,
 				targetFlagIndex: false,
 				headFlagIndex:   false,
+				voteFlagIndex:   false,
 			},
 			wantedParticipation: []byte{0, 0, 0, 0, 0, 0, 0, 0},
-			wantedBalance:       32000000000,
+			wantedBalance:       32_000_314_182_224,
 		},
 		{name: "some participated with some flags",
 			indices: []uint64{0, 1, 2, 3}, epochParticipation: []byte{0, 0, 0, 0, 0, 0, 0, 0}, participatedFlags: map[uint8]bool{
 				sourceFlagIndex: true,
 				targetFlagIndex: true,
 				headFlagIndex:   false,
+				voteFlagIndex:   false,
 			},
 			wantedParticipation: []byte{3, 3, 3, 3, 0, 0, 0, 0},
-			wantedBalance:       32000090342,
+			wantedBalance:       32_000_471_273_336,
 		},
 		{name: "all participated with some flags",
 			indices: []uint64{0, 1, 2, 3, 4, 5, 6, 7}, epochParticipation: []byte{0, 0, 0, 0, 0, 0, 0, 0}, participatedFlags: map[uint8]bool{
 				sourceFlagIndex: true,
 				targetFlagIndex: false,
 				headFlagIndex:   false,
+				voteFlagIndex:   false,
 			},
 			wantedParticipation: []byte{1, 1, 1, 1, 1, 1, 1, 1},
-			wantedBalance:       32000063240,
+			wantedBalance:       32_000_785_455_560,
 		},
 		{name: "all participated with all flags",
 			indices: []uint64{0, 1, 2, 3, 4, 5, 6, 7}, epochParticipation: []byte{0, 0, 0, 0, 0, 0, 0, 0}, participatedFlags: map[uint8]bool{
 				sourceFlagIndex: true,
 				targetFlagIndex: true,
 				headFlagIndex:   true,
+				voteFlagIndex:   true,
 			},
-			wantedParticipation: []byte{7, 7, 7, 7, 7, 7, 7, 7},
-			wantedBalance:       32000243925,
+			wantedParticipation: []byte{15, 15, 15, 15, 15, 15, 15, 15},
+			wantedBalance:       32_001_256_728_896,
 		},
 	}
 	for _, test := range tests {
@@ -502,14 +516,12 @@ func TestSetParticipationAndRewardProposer(t *testing.T) {
 				require.NoError(t, beaconState.SetPreviousParticipationBits(test.epochParticipation))
 			}
 
-			b, err := helpers.TotalActiveBalance(beaconState)
-			require.NoError(t, err)
-			st, err := altair.SetParticipationAndRewardProposer(context.Background(), beaconState, test.epoch, test.indices, test.participatedFlags, b)
+			st, err := altair.SetParticipationAndRewardProposer(context.Background(), beaconState, test.epoch, test.indices, test.participatedFlags, []byte{})
 			require.NoError(t, err)
 
 			i, err := helpers.BeaconProposerIndex(context.Background(), st)
 			require.NoError(t, err)
-			b, err = beaconState.BalanceAtIndex(i)
+			b, err := beaconState.BalanceAtIndex(i)
 			require.NoError(t, err)
 			require.Equal(t, test.wantedBalance, b)
 
@@ -532,6 +544,7 @@ func TestEpochParticipation(t *testing.T) {
 	sourceFlagIndex := cfg.TimelySourceFlagIndex
 	targetFlagIndex := cfg.TimelyTargetFlagIndex
 	headFlagIndex := cfg.TimelyHeadFlagIndex
+	votingFlagIndex := cfg.DAGTimelyVotingFlagIndex
 	tests := []struct {
 		name                     string
 		indices                  []uint64
@@ -545,6 +558,7 @@ func TestEpochParticipation(t *testing.T) {
 				sourceFlagIndex: false,
 				targetFlagIndex: false,
 				headFlagIndex:   false,
+				votingFlagIndex: false,
 			},
 			wantedNumerator:          0,
 			wantedEpochParticipation: []byte{0, 0, 0, 0, 0, 0, 0, 0},
@@ -554,8 +568,9 @@ func TestEpochParticipation(t *testing.T) {
 				sourceFlagIndex: false,
 				targetFlagIndex: false,
 				headFlagIndex:   false,
+				votingFlagIndex: false,
 			},
-			wantedNumerator:          0,
+			wantedNumerator:          314_182_224,
 			wantedEpochParticipation: []byte{0, 0, 0, 0, 0, 0, 0, 0},
 		},
 		{name: "some participated with some flags",
@@ -563,8 +578,9 @@ func TestEpochParticipation(t *testing.T) {
 				sourceFlagIndex: true,
 				targetFlagIndex: true,
 				headFlagIndex:   false,
+				votingFlagIndex: false,
 			},
-			wantedNumerator:          40473600,
+			wantedNumerator:          471_273_336,
 			wantedEpochParticipation: []byte{3, 3, 3, 3, 0, 0, 0, 0},
 		},
 		{name: "all participated with some flags",
@@ -572,8 +588,9 @@ func TestEpochParticipation(t *testing.T) {
 				sourceFlagIndex: true,
 				targetFlagIndex: false,
 				headFlagIndex:   false,
+				votingFlagIndex: false,
 			},
-			wantedNumerator:          28331520,
+			wantedNumerator:          785_455_560,
 			wantedEpochParticipation: []byte{1, 1, 1, 1, 1, 1, 1, 1},
 		},
 		{name: "all participated with all flags",
@@ -581,41 +598,17 @@ func TestEpochParticipation(t *testing.T) {
 				sourceFlagIndex: true,
 				targetFlagIndex: true,
 				headFlagIndex:   true,
+				votingFlagIndex: true,
 			},
-			wantedNumerator:          109278720,
-			wantedEpochParticipation: []byte{7, 7, 7, 7, 7, 7, 7, 7},
+			wantedNumerator:          1_256_728_896,
+			wantedEpochParticipation: []byte{15, 15, 15, 15, 15, 15, 15, 15},
 		},
 	}
 	for _, test := range tests {
-		b, err := helpers.TotalActiveBalance(beaconState)
-		require.NoError(t, err)
-		n, p, err := altair.EpochParticipation(beaconState, test.indices, test.epochParticipation, test.participatedFlags, b)
+		n, p, err := altair.EpochParticipation(beaconState, test.indices, test.epochParticipation, test.participatedFlags)
 		require.NoError(t, err)
 		require.Equal(t, test.wantedNumerator, n)
 		require.DeepSSZEqual(t, test.wantedEpochParticipation, p)
-	}
-}
-
-func TestRewardProposer(t *testing.T) {
-	beaconState, _ := util.DeterministicGenesisStateAltair(t, params.BeaconConfig().MaxValidatorsPerCommittee)
-	require.NoError(t, beaconState.SetSlot(1))
-	tests := []struct {
-		rewardNumerator uint64
-		want            uint64
-	}{
-		{rewardNumerator: 1, want: 32000000000},
-		{rewardNumerator: 10000, want: 32000000022},
-		{rewardNumerator: 1000000, want: 32000002254},
-		{rewardNumerator: 1000000000, want: 32002234396},
-		{rewardNumerator: 1000000000000, want: 34234377253},
-	}
-	for _, test := range tests {
-		require.NoError(t, altair.RewardProposer(context.Background(), beaconState, test.rewardNumerator))
-		i, err := helpers.BeaconProposerIndex(context.Background(), beaconState)
-		require.NoError(t, err)
-		b, err := beaconState.BalanceAtIndex(i)
-		require.NoError(t, err)
-		require.Equal(t, test.want, b)
 	}
 }
 
@@ -626,6 +619,7 @@ func TestAttestationParticipationFlagIndices(t *testing.T) {
 	sourceFlagIndex := cfg.TimelySourceFlagIndex
 	targetFlagIndex := cfg.TimelyTargetFlagIndex
 	headFlagIndex := cfg.TimelyHeadFlagIndex
+	votingFlagIndex := cfg.DAGTimelyVotingFlagIndex
 
 	tests := []struct {
 		name                 string
@@ -643,8 +637,10 @@ func TestAttestationParticipationFlagIndices(t *testing.T) {
 				Source: &ethpb.Checkpoint{Root: params.BeaconConfig().ZeroHash[:]},
 				Target: &ethpb.Checkpoint{},
 			},
-			inputDelay:           params.BeaconConfig().SlotsPerEpoch,
-			participationIndices: map[uint8]bool{},
+			inputDelay: params.BeaconConfig().SlotsPerEpoch,
+			participationIndices: map[uint8]bool{
+				votingFlagIndex: false,
+			},
 		},
 		{
 			name: "participated source",
@@ -658,6 +654,7 @@ func TestAttestationParticipationFlagIndices(t *testing.T) {
 			inputDelay: types.Slot(math.IntegerSquareRoot(uint64(cfg.SlotsPerEpoch)) - 1),
 			participationIndices: map[uint8]bool{
 				sourceFlagIndex: true,
+				votingFlagIndex: false,
 			},
 		},
 		{
@@ -673,6 +670,7 @@ func TestAttestationParticipationFlagIndices(t *testing.T) {
 			participationIndices: map[uint8]bool{
 				sourceFlagIndex: true,
 				targetFlagIndex: true,
+				votingFlagIndex: false,
 			},
 		},
 		{
@@ -690,6 +688,7 @@ func TestAttestationParticipationFlagIndices(t *testing.T) {
 				sourceFlagIndex: true,
 				targetFlagIndex: true,
 				headFlagIndex:   true,
+				votingFlagIndex: true,
 			},
 		},
 	}

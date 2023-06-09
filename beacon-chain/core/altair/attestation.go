@@ -7,6 +7,7 @@ import (
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
+	log "github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
@@ -29,12 +30,9 @@ func ProcessAttestationsNoVerifySignature(
 		return nil, err
 	}
 	body := b.Block().Body()
-	totalBalance, err := helpers.TotalActiveBalance(beaconState)
-	if err != nil {
-		return nil, err
-	}
-	for idx, attestation := range body.Attestations() {
-		beaconState, err = ProcessAttestationNoVerifySignature(ctx, beaconState, attestation, totalBalance)
+	for idx, att := range body.Attestations() {
+		var err error
+		beaconState, err = ProcessAttestationNoVerifySignature(ctx, beaconState, att)
 		if err != nil {
 			return nil, errors.Wrapf(err, "could not verify attestation at index %d in block", idx)
 		}
@@ -48,7 +46,6 @@ func ProcessAttestationNoVerifySignature(
 	ctx context.Context,
 	beaconState state.BeaconStateAltair,
 	att *ethpb.Attestation,
-	totalBalance uint64,
 ) (state.BeaconStateAltair, error) {
 	ctx, span := trace.StartSpan(ctx, "altair.ProcessAttestationNoVerifySignature")
 	defer span.End()
@@ -77,56 +74,41 @@ func ProcessAttestationNoVerifySignature(
 		return nil, err
 	}
 
-	return SetParticipationAndRewardProposer(ctx, beaconState, att.Data.Target.Epoch, indices, participatedFlags, totalBalance)
+	return SetParticipationAndRewardProposer(ctx, beaconState, att.Data.Target.Epoch, indices, participatedFlags, att.Data.BeaconBlockRoot)
 }
 
-// SetParticipationAndRewardProposer retrieves and sets the epoch participation bits in state. Based on the epoch participation, it rewards
-// the proposer in state.
-//
-// Spec code:
-//
-//	 # Update epoch participation flags
-//	if data.target.epoch == get_current_epoch(state):
-//	    epoch_participation = state.current_epoch_participation
-//	else:
-//	    epoch_participation = state.previous_epoch_participation
-//
-//	proposer_reward_numerator = 0
-//	for index in get_attesting_indices(state, data, attestation.aggregation_bits):
-//	    for flag_index, weight in enumerate(PARTICIPATION_FLAG_WEIGHTS):
-//	        if flag_index in participation_flag_indices and not has_flag(epoch_participation[index], flag_index):
-//	            epoch_participation[index] = add_flag(epoch_participation[index], flag_index)
-//	            proposer_reward_numerator += get_base_reward(state, index) * weight
-//
-//	# Reward proposer
-//	proposer_reward_denominator = (WEIGHT_DENOMINATOR - PROPOSER_WEIGHT) * WEIGHT_DENOMINATOR // PROPOSER_WEIGHT
-//	proposer_reward = Gwei(proposer_reward_numerator // proposer_reward_denominator)
-//	increase_balance(state, get_beacon_proposer_index(state), proposer_reward)
+// SetParticipationAndRewardProposer performs
+// 1. retrieves and sets the epoch participation bits in state,
+// 2. calculate reward for proposer of the current block,
+// 3. rewards proposer of the current block,
+// 4. rewards the block proposer voted for by the participants,
 func SetParticipationAndRewardProposer(
 	ctx context.Context,
 	beaconState state.BeaconState,
 	targetEpoch types.Epoch,
 	indices []uint64,
-	participatedFlags map[uint8]bool, totalBalance uint64) (state.BeaconState, error) {
-	var proposerRewardNumerator uint64
+	participatedFlags map[uint8]bool, beaconBlockRoot []byte) (state.BeaconState, error) {
+	var proposerReward uint64
 	currentEpoch := time.CurrentEpoch(beaconState)
 	var stateErr error
+	// 1. retrieves and sets the epoch participation bits in state,
+	// 2. calculate reward for proposer of the current block,
 	if targetEpoch == currentEpoch {
 		stateErr = beaconState.ModifyCurrentParticipationBits(func(val []byte) ([]byte, error) {
-			propRewardNum, epochParticipation, err := EpochParticipation(beaconState, indices, val, participatedFlags, totalBalance)
+			propReward, epochParticipation, err := EpochParticipation(beaconState, indices, val, participatedFlags)
 			if err != nil {
 				return nil, err
 			}
-			proposerRewardNumerator = propRewardNum
+			proposerReward = propReward
 			return epochParticipation, nil
 		})
 	} else {
 		stateErr = beaconState.ModifyPreviousParticipationBits(func(val []byte) ([]byte, error) {
-			propRewardNum, epochParticipation, err := EpochParticipation(beaconState, indices, val, participatedFlags, totalBalance)
+			rewardNum, epochParticipation, err := EpochParticipation(beaconState, indices, val, participatedFlags)
 			if err != nil {
 				return nil, err
 			}
-			proposerRewardNumerator = propRewardNum
+			proposerReward = rewardNum
 			return epochParticipation, nil
 		})
 	}
@@ -134,7 +116,33 @@ func SetParticipationAndRewardProposer(
 		return nil, stateErr
 	}
 
-	if err := RewardProposer(ctx, beaconState, proposerRewardNumerator); err != nil {
+	// 3. rewards proposer of the current block,
+	proposerIndex, err := helpers.BeaconProposerIndex(ctx, beaconState)
+	if err != nil {
+		return nil, err
+	}
+
+	// write Rewards And Penalties log
+	if err = helpers.LogBeforeRewardsAndPenalties(beaconState, proposerIndex, proposerReward, indices, helpers.Increase, helpers.Proposer); err != nil {
+		log.WithError(err).WithFields(log.Fields{
+			"Slot":           beaconState.Slot(),
+			"Proposer":       proposerIndex,
+			"ProposerReward": proposerReward,
+		}).Error("Log rewards and penalties failed: SetParticipationAndRewardProposer")
+	}
+
+	if err = helpers.IncreaseBalance(beaconState, proposerIndex, proposerReward); err != nil {
+		return nil, err
+	}
+
+	log.WithFields(log.Fields{
+		"Slot":           beaconState.Slot(),
+		"Proposer":       proposerIndex,
+		"ProposerReward": proposerReward,
+	}).Debug("Reward proposer: current block incr")
+
+	// 4. rewards the block proposer voted for by the participants,
+	if err := RewardBeaconBlockRootProposer(ctx, beaconState, beaconBlockRoot, proposerReward); err != nil {
 		return nil, err
 	}
 
@@ -167,19 +175,28 @@ func AddValidatorFlag(flag, flagPosition uint8) (uint8, error) {
 //	        if flag_index in participation_flag_indices and not has_flag(epoch_participation[index], flag_index):
 //	            epoch_participation[index] = add_flag(epoch_participation[index], flag_index)
 //	            proposer_reward_numerator += get_base_reward(state, index) * weight
-func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochParticipation []byte, participatedFlags map[uint8]bool, totalBalance uint64) (uint64, []byte, error) {
+func EpochParticipation(
+	beaconState state.BeaconState,
+	indices []uint64,
+	epochParticipation []byte,
+	participatedFlags map[uint8]bool,
+) (uint64, []byte, error) {
+	ctx := context.Background()
 	cfg := params.BeaconConfig()
+	numOfValidators := beaconState.NumValidators() // N in formula, number of registered validators
+	activeValidatorsForSlot, err := helpers.ActiveValidatorForSlotCount(ctx, beaconState, beaconState.Slot())
+	if err != nil || activeValidatorsForSlot == 0 {
+		activeValidatorsForSlot = cfg.MaxCommitteesPerSlot * cfg.TargetCommitteeSize
+	}
+	baseReward := CalculateBaseReward(cfg, numOfValidators, activeValidatorsForSlot, cfg.BaseRewardMultiplier)
 	sourceFlagIndex := cfg.TimelySourceFlagIndex
 	targetFlagIndex := cfg.TimelyTargetFlagIndex
 	headFlagIndex := cfg.TimelyHeadFlagIndex
-	proposerRewardNumerator := uint64(0)
+	votingFlagIndex := cfg.DAGTimelyVotingFlagIndex
+	proposerReward := uint64(0)
 	for _, index := range indices {
 		if index >= uint64(len(epochParticipation)) {
 			return 0, nil, fmt.Errorf("index %d exceeds participation length %d", index, len(epochParticipation))
-		}
-		br, err := BaseRewardWithTotalBalance(beaconState, types.ValidatorIndex(index), totalBalance)
-		if err != nil {
-			return 0, nil, err
 		}
 		has, err := HasValidatorFlag(epochParticipation[index], sourceFlagIndex)
 		if err != nil {
@@ -190,7 +207,7 @@ func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochPa
 			if err != nil {
 				return 0, nil, err
 			}
-			proposerRewardNumerator += br * cfg.TimelySourceWeight
+			proposerReward += uint64(float64(baseReward) * (cfg.DAGTimelySourceWeight / 2))
 		}
 		has, err = HasValidatorFlag(epochParticipation[index], targetFlagIndex)
 		if err != nil {
@@ -201,7 +218,7 @@ func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochPa
 			if err != nil {
 				return 0, nil, err
 			}
-			proposerRewardNumerator += br * cfg.TimelyTargetWeight
+			proposerReward += uint64(float64(baseReward) * (cfg.DAGTimelyTargetWeight / 2))
 		}
 		has, err = HasValidatorFlag(epochParticipation[index], headFlagIndex)
 		if err != nil {
@@ -212,30 +229,84 @@ func EpochParticipation(beaconState state.BeaconState, indices []uint64, epochPa
 			if err != nil {
 				return 0, nil, err
 			}
-			proposerRewardNumerator += br * cfg.TimelyHeadWeight
+			proposerReward += uint64(float64(baseReward) * (cfg.DAGTimelyHeadWeight / 2))
 		}
+		has, err = HasValidatorFlag(epochParticipation[index], votingFlagIndex)
+		if err != nil {
+			return 0, nil, err
+		}
+		if participatedFlags[headFlagIndex] && !has {
+			epochParticipation[index], err = AddValidatorFlag(epochParticipation[index], votingFlagIndex)
+			if err != nil {
+				return 0, nil, err
+			}
+			proposerReward += uint64(float64(baseReward) * (cfg.DAGTimelyVotingWeight / 2))
+		}
+		log.WithFields(log.Fields{
+			"Slot":             beaconState.Slot(),
+			"Validator":        index,
+			"NumValidators":    numOfValidators,
+			"ActiveValidators": activeValidatorsForSlot,
+			"BaseReward":       baseReward,
+			"sourceVoting":     participatedFlags[sourceFlagIndex],
+			"targetVoting":     participatedFlags[targetFlagIndex],
+			"headVoting":       participatedFlags[headFlagIndex],
+			"timelyVoting":     participatedFlags[sourceFlagIndex] && participatedFlags[targetFlagIndex] && participatedFlags[headFlagIndex],
+		}).Debug("Reward proposer: calc by epoch participation incr")
 	}
 
-	return proposerRewardNumerator, epochParticipation, nil
+	return proposerReward, epochParticipation, nil
 }
 
-// RewardProposer rewards proposer by increasing proposer's balance with input reward numerator and calculated reward denominator.
-//
-// Spec code:
-//
-//	proposer_reward_denominator = (WEIGHT_DENOMINATOR - PROPOSER_WEIGHT) * WEIGHT_DENOMINATOR // PROPOSER_WEIGHT
-//	proposer_reward = Gwei(proposer_reward_numerator // proposer_reward_denominator)
-//	increase_balance(state, get_beacon_proposer_index(state), proposer_reward)
-func RewardProposer(ctx context.Context, beaconState state.BeaconState, proposerRewardNumerator uint64) error {
-	cfg := params.BeaconConfig()
-	d := (cfg.WeightDenominator - cfg.ProposerWeight) * cfg.WeightDenominator / cfg.ProposerWeight
-	proposerReward := proposerRewardNumerator / d
-	i, err := helpers.BeaconProposerIndex(ctx, beaconState)
+// RewardBeaconBlockRootProposer rewards the block proposer voted for by the participants
+func RewardBeaconBlockRootProposer(ctx context.Context, beaconState state.BeaconState, beaconBlockRoot []byte, proposerReward uint64) error {
+	blockFetcher, ok := ctx.Value(params.BeaconConfig().CtxBlockFetcherKey).(params.CtxBlockFetcher)
+	if !ok {
+		err := errors.New("Cannot cast to CtxBlockFetcher")
+		log.WithError(err).WithFields(log.Fields{
+			"Slot":           beaconState.Slot(),
+			"ProposerReward": proposerReward,
+		}).Error("Proposer reward error: get CtxBlockFetcher failed")
+		return err
+	}
+	var beaconBlockRootArray [32]byte
+	copy(beaconBlockRootArray[:], beaconBlockRoot)
+	proposerIndex, proposedAtSlot, votesIncluded, err := blockFetcher(ctx, beaconBlockRootArray)
 	if err != nil {
+		log.WithError(err).WithFields(log.Fields{
+			"SlotBlockWasProposedAt": proposedAtSlot,
+			"Slot":                   beaconState.Slot(),
+			"BeaconBlockRoot":        beaconBlockRoot,
+			"ProposerIndex":          proposerIndex,
+			"ProposerReward":         proposerReward,
+			"VotesIncluded":          votesIncluded,
+		}).Error("Proposer reward error: retrieving block failed")
 		return err
 	}
 
-	return helpers.IncreaseBalance(beaconState, i, proposerReward)
+	beaconBlockRootProposerIndex := proposerIndex
+
+	log.WithFields(log.Fields{
+		"SlotBlockWasProposedAt": proposedAtSlot,
+		"Slot":                   beaconState.Slot(),
+		"Proposer":               beaconBlockRootProposerIndex,
+		"ProposerReward":         proposerReward,
+	}).Debug("Reward proposer: voting for root incr")
+
+	// write Rewards And Penalties log
+	if err = helpers.LogBeforeRewardsAndPenalties(beaconState, proposerIndex, proposerReward, make([]uint64, votesIncluded), helpers.Increase, helpers.BeaconBlockProposer); err != nil {
+		log.WithError(err).WithFields(log.Fields{
+			"Slot":           beaconState.Slot(),
+			"Proposer":       proposerIndex,
+			"ProposerReward": proposerReward,
+		}).Error("Log rewards and penalties failed: RewardBeaconBlockRootProposer")
+	}
+
+	// Should we have the state at beacon block root slot or current is ok??? seems current is ok
+	if err = helpers.IncreaseBalance(beaconState, beaconBlockRootProposerIndex, proposerReward); err != nil {
+		return err
+	}
+	return nil
 }
 
 // AttestationParticipationFlagIndices retrieves a map of attestation scoring based on Altair's participation flag indices.
@@ -291,6 +362,7 @@ func AttestationParticipationFlagIndices(beaconState state.BeaconStateAltair, da
 	sourceFlagIndex := cfg.TimelySourceFlagIndex
 	targetFlagIndex := cfg.TimelyTargetFlagIndex
 	headFlagIndex := cfg.TimelyHeadFlagIndex
+	votingFlagIndex := cfg.DAGTimelyVotingFlagIndex
 	slotsPerEpoch := cfg.SlotsPerEpoch
 	sqtRootSlots := cfg.SqrRootSlotsPerEpoch
 	if matchedSrc && delay <= sqtRootSlots {
@@ -304,6 +376,10 @@ func AttestationParticipationFlagIndices(beaconState state.BeaconStateAltair, da
 	if matchedSrcTgtHead && delay == cfg.MinAttestationInclusionDelay {
 		participatedFlags[headFlagIndex] = true
 	}
+	// Participated in attestation in timely manner for source, target and head
+	participatedFlags[votingFlagIndex] = participatedFlags[sourceFlagIndex] &&
+		participatedFlags[targetFlagIndex] &&
+		participatedFlags[headFlagIndex]
 	return participatedFlags, nil
 }
 

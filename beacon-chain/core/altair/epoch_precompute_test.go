@@ -232,9 +232,9 @@ func TestAttestationsDelta(t *testing.T) {
 	// Last index should have 0 penalty.
 	require.Equal(t, uint64(0), penalties[len(penalties)-1])
 
-	want := []uint64{0, 939146, 2101898, 2414946}
+	want := []uint64{0, 13_559, 27_118, 54_236}
 	require.DeepEqual(t, want, rewards)
-	want = []uint64{3577700, 2325505, 0, 0}
+	want = []uint64{422, 211, 0, 0}
 	require.DeepEqual(t, want, penalties)
 }
 
@@ -263,9 +263,9 @@ func TestAttestationsDeltaBellatrix(t *testing.T) {
 	// Last index should have 0 penalty.
 	require.Equal(t, uint64(0), penalties[len(penalties)-1])
 
-	want := []uint64{0, 939146, 2101898, 2414946}
+	want := []uint64{0, 13_559, 27_118, 54_236}
 	require.DeepEqual(t, want, rewards)
-	want = []uint64{3577700, 2325505, 0, 0}
+	want = []uint64{422, 211, 0, 0}
 	require.DeepEqual(t, want, penalties)
 }
 
@@ -320,8 +320,8 @@ func TestProcessRewardsAndPenaltiesPrecompute_InactivityLeak(t *testing.T) {
 	balances := s.Balances()
 	inactivityBalances := sCopy.Balances()
 	// Balances decreased to 0 due to inactivity
-	require.Equal(t, uint64(2101898), balances[2])
-	require.Equal(t, uint64(2414946), balances[3])
+	require.Equal(t, uint64(27_118), balances[2])
+	require.Equal(t, uint64(54_236), balances[3])
 	require.Equal(t, uint64(0), inactivityBalances[2])
 	require.Equal(t, uint64(0), inactivityBalances[3])
 }
@@ -480,13 +480,13 @@ func testState() (state.BeaconState, error) {
 			0,
 			generateParticipation(params.BeaconConfig().TimelySourceFlagIndex),
 			generateParticipation(params.BeaconConfig().TimelySourceFlagIndex, params.BeaconConfig().TimelyTargetFlagIndex),
-			generateParticipation(params.BeaconConfig().TimelySourceFlagIndex, params.BeaconConfig().TimelyTargetFlagIndex, params.BeaconConfig().TimelyHeadFlagIndex),
+			generateParticipation(params.BeaconConfig().TimelySourceFlagIndex, params.BeaconConfig().TimelyTargetFlagIndex, params.BeaconConfig().TimelyHeadFlagIndex, params.BeaconConfig().DAGTimelyVotingFlagIndex),
 		},
 		PreviousEpochParticipation: []byte{
 			0,
 			generateParticipation(params.BeaconConfig().TimelySourceFlagIndex),
 			generateParticipation(params.BeaconConfig().TimelySourceFlagIndex, params.BeaconConfig().TimelyTargetFlagIndex),
-			generateParticipation(params.BeaconConfig().TimelySourceFlagIndex, params.BeaconConfig().TimelyTargetFlagIndex, params.BeaconConfig().TimelyHeadFlagIndex),
+			generateParticipation(params.BeaconConfig().TimelySourceFlagIndex, params.BeaconConfig().TimelyTargetFlagIndex, params.BeaconConfig().TimelyHeadFlagIndex, params.BeaconConfig().DAGTimelyVotingFlagIndex),
 		},
 		InactivityScores: []uint64{0, 0, 0, 0},
 		Balances:         []uint64{0, 0, 0, 0},

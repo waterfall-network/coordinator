@@ -82,11 +82,16 @@ func TestGetSpec(t *testing.T) {
 	config.TimelyHeadFlagIndex = 53
 	config.TimelySourceFlagIndex = 54
 	config.TimelyTargetFlagIndex = 55
+	config.DAGTimelyVotingFlagIndex = 56
 	config.TimelyHeadWeight = 56
 	config.TimelySourceWeight = 57
 	config.TimelyTargetWeight = 58
 	config.SyncRewardWeight = 59
 	config.WeightDenominator = 60
+	config.DAGTimelyHeadWeight = 0.25
+	config.DAGTimelySourceWeight = 0.25
+	config.DAGTimelyTargetWeight = 0.25
+	config.DAGTimelyVotingWeight = 0.25
 	config.TargetAggregatorsPerSyncSubcommittee = 61
 	config.SyncCommitteeSubnetCount = 62
 	config.SyncCommitteeSize = 63

@@ -112,6 +112,18 @@ func configureInteropConfig(cliCtx *cli.Context) {
 	}
 }
 
+func configureDataConfig(cliCtx *cli.Context) {
+	bCfg := params.BeaconConfig()
+	bCfg.DataDir = cliCtx.String(cmd.DataDirFlag.Name)
+	params.OverrideBeaconConfig(bCfg)
+}
+
+func configureRewardLogConfig(cliCtx *cli.Context) {
+	bCfg := params.BeaconConfig()
+	bCfg.WriteRewardLogFlag = cliCtx.Bool(cmd.WriteRewardLogFlag.Name)
+	params.OverrideBeaconConfig(bCfg)
+}
+
 func configureExecutionSetting(cliCtx *cli.Context) error {
 	if !cliCtx.IsSet(flags.SuggestedFeeRecipient.Name) {
 		return nil
