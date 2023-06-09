@@ -13,9 +13,9 @@ import (
 )
 
 func testnetConfigFilePath(t *testing.T, network string) string {
-	filepath, err := bazel.Runfile("external/eth2_networks")
+	fpath, err := bazel.Runfile("external/eth2_networks")
 	require.NoError(t, err)
-	configFilePath := path.Join(filepath, "shared", network, "config.yaml")
+	configFilePath := path.Join(fpath, "shared", network, "config.yaml")
 	return configFilePath
 }
 
@@ -163,7 +163,6 @@ func compareConfigs(t *testing.T, expected, actual *params.BeaconChainConfig) {
 	require.DeepEqual(t, expected.ProportionalSlashingMultiplierAltair, actual.ProportionalSlashingMultiplierAltair)
 	require.DeepEqual(t, expected.MinSlashingPenaltyQuotientBellatrix, actual.MinSlashingPenaltyQuotientBellatrix)
 	require.DeepEqual(t, expected.ProportionalSlashingMultiplierBellatrix, actual.ProportionalSlashingMultiplierBellatrix)
-	require.DeepEqual(t, expected.InactivityPenaltyQuotientBellatrix, actual.InactivityPenaltyQuotientBellatrix)
 	require.DeepEqual(t, expected.MinSyncCommitteeParticipants, actual.MinSyncCommitteeParticipants)
 	require.DeepEqual(t, expected.TerminalBlockHash, actual.TerminalBlockHash)
 	require.DeepEqual(t, expected.TerminalBlockHashActivationEpoch, actual.TerminalBlockHashActivationEpoch)

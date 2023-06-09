@@ -243,8 +243,8 @@ func ProcessRewardsAndPenaltiesPrecompute(
 	}
 
 	balances := beaconState.Balances()
-	for i := 0; i < numOfVals; i++ {
-		isLocked, err := helpers.IsWithdrawBalanceLocked(beaconState, types.ValidatorIndex(i))
+	for valIndex := 0; valIndex < numOfVals; valIndex++ {
+		isLocked, err := helpers.IsWithdrawBalanceLocked(beaconState, types.ValidatorIndex(valIndex))
 		if err != nil {
 			return nil, err
 		}
@@ -252,35 +252,48 @@ func ProcessRewardsAndPenaltiesPrecompute(
 			continue
 		}
 
-		vals[i].BeforeEpochTransitionBalance = balances[i]
+		vals[valIndex].BeforeEpochTransitionBalance = balances[valIndex]
 
 		// Compute the post balance of the validator after accounting for the
 		// attester and proposer rewards and penalties.
 		log.WithFields(log.Fields{
 			"Slot":              beaconState.Slot(),
-			"Validator":         i,
-			"AttestationReward": attsRewards[i],
-		}).Debug("ATTESTATION REWARD >>>>>>>>>>>")
-		before := balances[i]
-		balances[i], err = helpers.IncreaseBalanceWithVal(balances[i], attsRewards[i])
+			"Validator":         valIndex,
+			"AttestationReward": attsRewards[valIndex],
+		}).Info("Reward attestor: incr")
+
+		// write Rewards And Penalties log
+		if attsRewards[valIndex] != 0 {
+			aftBal, err := helpers.IncreaseBalanceWithVal(balances[valIndex], attsRewards[valIndex])
+			if err != nil {
+				return nil, err
+			}
+			if err = helpers.LogBalanceChanges(types.ValidatorIndex(valIndex), balances[valIndex], attsRewards[valIndex], aftBal, beaconState.Slot(), nil, helpers.Increase, helpers.Attester); err != nil {
+				return nil, err
+			}
+		}
+
+		balances[valIndex], err = helpers.IncreaseBalanceWithVal(balances[valIndex], attsRewards[valIndex])
 		if err != nil {
 			return nil, err
 		}
-		if err = helpers.LogBalanceChanges(types.ValidatorIndex(i), before, attsRewards[i], balances[i], beaconState.Slot(), nil, helpers.Increase, helpers.Attester); err != nil {
-			return nil, err
-		}
+
 		log.WithFields(log.Fields{
 			"Slot":               beaconState.Slot(),
-			"Validator":          i,
-			"AttestationPenalty": attsPenalties[i],
-		}).Debug("ATTESTATION PENALTY >>>>>>>>>>>")
-		before = balances[i]
-		balances[i] = helpers.DecreaseBalanceWithVal(balances[i], attsPenalties[i])
-		if err = helpers.LogBalanceChanges(types.ValidatorIndex(i), before, attsPenalties[i], balances[i], beaconState.Slot(), nil, helpers.Decrease, helpers.Attester); err != nil {
-			return nil, err
+			"Validator":          valIndex,
+			"AttestationPenalty": attsPenalties[valIndex],
+		}).Info("Reward attestor: decr")
+
+		// write Rewards And Penalties log
+		if attsPenalties[valIndex] != 0 {
+			if err = helpers.LogBalanceChanges(types.ValidatorIndex(valIndex), balances[valIndex], attsPenalties[valIndex], helpers.DecreaseBalanceWithVal(balances[valIndex], attsPenalties[valIndex]), beaconState.Slot(), nil, helpers.Decrease, helpers.Attester); err != nil {
+				return nil, err
+			}
 		}
 
-		vals[i].AfterEpochTransitionBalance = balances[i]
+		balances[valIndex] = helpers.DecreaseBalanceWithVal(balances[valIndex], attsPenalties[valIndex])
+
+		vals[valIndex].AfterEpochTransitionBalance = balances[valIndex]
 	}
 
 	if err := beaconState.SetBalances(balances); err != nil {
@@ -314,8 +327,6 @@ func AttestationsDelta(beaconState state.BeaconState, bal *precompute.Balance, v
 	switch beaconState.Version() {
 	case version.Altair:
 		inactivityDenominator = bias * cfg.InactivityPenaltyQuotientAltair
-	case version.Bellatrix:
-		inactivityDenominator = bias * cfg.InactivityPenaltyQuotientBellatrix
 	default:
 		return nil, nil, errors.Errorf("invalid state type version: %T", beaconState.Version())
 	}
@@ -334,7 +345,10 @@ func attestationDelta(
 	bal *precompute.Balance,
 	val *precompute.Validator,
 	inactivityDenominator uint64,
-	inactivityLeak bool, validatorsNum int, activeValidatorsFroSlot uint64) (reward, penalty uint64, err error) {
+	inactivityLeak bool,
+	validatorsNum int,
+	activeValidatorsFroSlot uint64,
+) (reward, penalty uint64, err error) {
 	eligible := val.IsActivePrevEpoch || (val.IsSlashed && !val.IsWithdrawableCurrentEpoch)
 	// Per spec `ActiveCurrentEpoch` can't be 0 to process attestation delta.
 	if !eligible || bal.ActiveCurrentEpoch == 0 {

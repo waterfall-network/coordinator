@@ -612,29 +612,6 @@ func TestEpochParticipation(t *testing.T) {
 	}
 }
 
-func TestRewardProposer(t *testing.T) {
-	beaconState, _ := util.DeterministicGenesisStateAltair(t, params.BeaconConfig().MaxValidatorsPerCommittee)
-	require.NoError(t, beaconState.SetSlot(1))
-	tests := []struct {
-		rewardNumerator uint64
-		want            uint64
-	}{
-		{rewardNumerator: 1, want: 32_000_000_000_001},
-		{rewardNumerator: 10_000, want: 32_000_000_010_001},
-		{rewardNumerator: 1_000_000, want: 32_000_001_010_001},
-		{rewardNumerator: 1_000_000_000, want: 32_001_001_010_001},
-		{rewardNumerator: 1_000_000_000_000, want: 33_001_001_010_001},
-	}
-	for _, test := range tests {
-		require.NoError(t, altair.RewardProposer(context.Background(), beaconState, test.rewardNumerator))
-		i, err := helpers.BeaconProposerIndex(context.Background(), beaconState)
-		require.NoError(t, err)
-		b, err := beaconState.BalanceAtIndex(i)
-		require.NoError(t, err)
-		require.Equal(t, test.want, b)
-	}
-}
-
 func TestAttestationParticipationFlagIndices(t *testing.T) {
 	beaconState, _ := util.DeterministicGenesisStateAltair(t, params.BeaconConfig().MaxValidatorsPerCommittee)
 	require.NoError(t, beaconState.SetSlot(1))

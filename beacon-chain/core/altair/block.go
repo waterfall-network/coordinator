@@ -141,23 +141,23 @@ func ApplySyncRewardsPenalties(ctx context.Context, s state.BeaconStateAltair, v
 	// Apply sync committee rewards.
 	earnedProposerReward := uint64(0)
 	for _, index := range votedIndices {
+
 		log.WithFields(log.Fields{
 			"Slot":              s.Slot(),
 			"Validator":         index,
 			"ParticipantReward": participantReward,
-		}).Debug("SYNC COMMITTEE PARTICIPANT REWARD >>>>>>>>>>>>>")
-		balAtIdx, err := s.BalanceAtIndex(index)
-		if err != nil {
-			return nil, err
+		}).Info("Reward sync committee: participant incr")
+
+		// write Rewards And Penalties log
+		if err = helpers.LogBeforeRewardsAndPenalties(s, index, participantReward, nil, helpers.Increase, helpers.SyncCommittee); err != nil {
+			log.WithError(err).WithFields(log.Fields{
+				"Slot":              s.Slot(),
+				"Validator":         index,
+				"ParticipantReward": participantReward,
+			}).Error("Log rewards and penalties failed: ApplySyncRewardsPenalties")
 		}
+
 		if err := helpers.IncreaseBalance(s, index, participantReward); err != nil {
-			return nil, err
-		}
-		newBalAtIdx, err := s.BalanceAtIndex(index)
-		if err != nil {
-			return nil, err
-		}
-		if err = helpers.LogBalanceChanges(index, balAtIdx, participantReward, newBalAtIdx, s.Slot(), nil, helpers.Increase, helpers.SyncCommittee); err != nil {
 			return nil, err
 		}
 		earnedProposerReward += proposerReward
@@ -171,40 +171,40 @@ func ApplySyncRewardsPenalties(ctx context.Context, s state.BeaconStateAltair, v
 		"Slot":           s.Slot(),
 		"Proposer":       proposerIndex,
 		"ProposerReward": earnedProposerReward,
-	}).Debug("SYNC COMMITTEE PROPOSER REWARD >>>>>>>>>>>>>")
-	balAtIdx, err := s.BalanceAtIndex(proposerIndex)
-	if err != nil {
-		return nil, err
+	}).Info("Reward sync committee: proposer incr")
+
+	// write Rewards And Penalties log
+	if err = helpers.LogBeforeRewardsAndPenalties(s, proposerIndex, earnedProposerReward, nil, helpers.Increase, helpers.SyncProposer); err != nil {
+		log.WithError(err).WithFields(log.Fields{
+			"Slot":              s.Slot(),
+			"Validator":         proposerIndex,
+			"ParticipantReward": earnedProposerReward,
+		}).Error("Log rewards and penalties failed: ApplySyncRewardsPenalties")
 	}
+
 	if err := helpers.IncreaseBalance(s, proposerIndex, earnedProposerReward); err != nil {
 		return nil, err
 	}
-	newBalAtIdx, err := s.BalanceAtIndex(proposerIndex)
-	if err != nil {
-		return nil, err
-	}
-	if err = helpers.LogBalanceChanges(proposerIndex, balAtIdx, earnedProposerReward, newBalAtIdx, s.Slot(), nil, helpers.Increase, helpers.SyncProposer); err != nil {
-		return nil, err
-	}
+
 	// Apply sync committee penalties.
 	for _, index := range didntVoteIndices {
+
 		log.WithFields(log.Fields{
 			"Slot":           s.Slot(),
 			"Validator":      index,
 			"ProposerReward": participantReward,
-		}).Debug("SYNC COMMITTEE PARTICIPANT PENALTY >>>>>>>>>>>>>")
-		balAtIdx, err := s.BalanceAtIndex(index)
-		if err != nil {
-			return nil, err
+		}).Info("Reward sync committee: proposer decr")
+
+		// write Rewards And Penalties log
+		if err = helpers.LogBeforeRewardsAndPenalties(s, index, participantReward, nil, helpers.Decrease, helpers.SyncCommittee); err != nil {
+			log.WithError(err).WithFields(log.Fields{
+				"Slot":           s.Slot(),
+				"Validator":      index,
+				"ProposerReward": participantReward,
+			}).Error("Log rewards and penalties failed: ApplySyncRewardsPenalties")
 		}
+
 		if err := helpers.DecreaseBalance(s, index, participantReward); err != nil {
-			return nil, err
-		}
-		newBalAtIdx, err := s.BalanceAtIndex(index)
-		if err != nil {
-			return nil, err
-		}
-		if err = helpers.LogBalanceChanges(index, balAtIdx, participantReward, newBalAtIdx, s.Slot(), nil, helpers.Decrease, helpers.SyncCommittee); err != nil {
 			return nil, err
 		}
 	}

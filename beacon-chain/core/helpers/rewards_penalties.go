@@ -227,6 +227,25 @@ const (
 	BeaconBlockProposer = "BEACON_BLOCK_PROPOSER"
 )
 
+func LogBeforeRewardsAndPenalties(
+	st state.BeaconState,
+	validator types.ValidatorIndex,
+	amount uint64,
+	votesIncluded []uint64,
+	operation,
+	role string,
+) error {
+	// skip zero values
+	if amount == 0 {
+		return nil
+	}
+	before, err := st.BalanceAtIndex(validator)
+	if err != nil {
+		return err
+	}
+	return LogBalanceChanges(validator, before, amount, before+amount, st.Slot(), votesIncluded, operation, role)
+}
+
 func LogBalanceChanges(
 	index types.ValidatorIndex,
 	before, delta, after uint64,
