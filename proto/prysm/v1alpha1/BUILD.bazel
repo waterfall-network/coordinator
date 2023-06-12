@@ -108,6 +108,7 @@ ssz_gen_marshal(
         "SignedBlindedBeaconBlockBellatrix",
         "BlindedBeaconBlockBellatrix",
         "BlindedBeaconBlockBodyBellatrix",
+        "PreVote",
     ],
 )
 
