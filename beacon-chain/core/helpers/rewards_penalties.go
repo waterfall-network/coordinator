@@ -323,7 +323,16 @@ func LogBeforeRewardsAndPenalties(
 	if err != nil {
 		return err
 	}
-	return LogBalanceChanges(validator, before, amount, before+amount, st.Slot(), votesIncluded, operation, role)
+	var after = uint64(0)
+	switch operation {
+	case Increase:
+		after = before + amount
+	case Decrease:
+		after = before - amount
+	default:
+		return fmt.Errorf("bad operation %s", operation)
+	}
+	return LogBalanceChanges(validator, before, amount, after, st.Slot(), votesIncluded, operation, role)
 }
 
 func LogBalanceChanges(
