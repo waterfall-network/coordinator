@@ -323,7 +323,7 @@ func LogBeforeRewardsAndPenalties(
 	if err != nil {
 		return err
 	}
-	var after = uint64(0)
+	after := uint64(0)
 	switch operation {
 	case Increase:
 		after = before + amount
