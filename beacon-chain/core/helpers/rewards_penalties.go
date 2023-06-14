@@ -223,14 +223,14 @@ func FinalityDelay(prevEpoch, finalizedEpoch types.Epoch) types.Epoch {
 
 /* functionality of Reward and Penalty logging */
 const (
-	Increase            = "INC"
-	Decrease            = "DEC"
-	Attester            = "ATTESTER"
-	Proposer            = "PROPOSER"
-	SyncCommittee       = "SYNC_COMMITTEE"
-	SyncProposer        = "SYNC_PROPOSER"
-	BeaconBlockProposer = "BEACON_BLOCK_PROPOSER"
-	MetaGlobalParams    = "META"
+	BalanceIncrease   = "+"
+	BalanceDecrease   = "-"
+	OpAttestation     = "attesting"
+	OpProposing       = "blk-props"
+	OpBlockAttested   = "blk-attsd"
+	OpSyncCommittee   = "sync-comm"
+	OpSyncAggregation = "sync-aggr"
+	MetaGlobalParams  = "META"
 )
 
 var (
@@ -325,9 +325,9 @@ func LogBeforeRewardsAndPenalties(
 	}
 	after := uint64(0)
 	switch operation {
-	case Increase:
+	case BalanceIncrease:
 		after = before + amount
-	case Decrease:
+	case BalanceDecrease:
 		after = before - amount
 	default:
 		return fmt.Errorf("bad operation %s", operation)
@@ -363,6 +363,9 @@ func LogBalanceChanges(
 			strNumbers[i] = strconv.FormatUint(num, 10)
 		}
 		votesList = strings.Join(strNumbers, ",")
+		if votesIncludedNum == 0 {
+			votesList = "-"
+		}
 	} else {
 		votesList = "-"
 	}
