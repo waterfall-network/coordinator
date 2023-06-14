@@ -86,11 +86,23 @@ func (s *Service) registerSubscribers(epoch types.Epoch, digest [4]byte) {
 			s.committeeIndexBeaconAttestationSubscriber, /* message handler */
 			digest,
 		)
+		s.subscribeStaticWithSubnets(
+			p2p.PrevoteSubnetTopicFormat,
+			s.validateCommitteeIndexPrevote,
+			s.committeeIndexBeaconPrevoteSubscriber,
+			digest,
+		)
 	} else {
 		s.subscribeDynamicWithSubnets(
 			p2p.AttestationSubnetTopicFormat,
 			s.validateCommitteeIndexBeaconAttestation,   /* validator */
 			s.committeeIndexBeaconAttestationSubscriber, /* message handler */
+			digest,
+		)
+		s.subscribeDynamicWithSubnets(
+			p2p.PrevoteSubnetTopicFormat,
+			s.validateCommitteeIndexPrevote,         /* validator */
+			s.committeeIndexBeaconPrevoteSubscriber, /* message handler */
 			digest,
 		)
 	}

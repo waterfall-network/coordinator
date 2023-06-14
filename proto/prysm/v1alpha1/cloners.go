@@ -103,6 +103,17 @@ func CopyAttestation(att *Attestation) *Attestation {
 	}
 }
 
+func CopyPrevote(pv *PreVote) *PreVote {
+	if pv == nil {
+		return nil
+	}
+	return &PreVote{
+		AggregationBits: bytesutil.SafeCopyBytes(pv.AggregationBits),
+		Data:            CopyPrevoteData(pv.Data),
+		Signature:       bytesutil.SafeCopyBytes(pv.Signature),
+	}
+}
+
 // CopyAttestationData copies the provided AttestationData object.
 func CopyAttestationData(attData *AttestationData) *AttestationData {
 	if attData == nil {
@@ -114,6 +125,18 @@ func CopyAttestationData(attData *AttestationData) *AttestationData {
 		BeaconBlockRoot: bytesutil.SafeCopyBytes(attData.BeaconBlockRoot),
 		Source:          CopyCheckpoint(attData.Source),
 		Target:          CopyCheckpoint(attData.Target),
+	}
+}
+
+// CopyPrevoteData copies the provided PreVoteData object.
+func CopyPrevoteData(pvData *PreVoteData) *PreVoteData {
+	if pvData == nil {
+		return nil
+	}
+	return &PreVoteData{
+		Slot:       pvData.Slot,
+		Index:      pvData.Index,
+		Candidates: bytesutil.SafeCopyBytes(pvData.Candidates),
 	}
 }
 

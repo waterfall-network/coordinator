@@ -15,6 +15,7 @@ go_library(
         "sync_committee.go",
         "validators.go",
         "weak_subjectivity.go",
+        "prevote.go",
     ],
     importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers",
     visibility = ["//visibility:public"],

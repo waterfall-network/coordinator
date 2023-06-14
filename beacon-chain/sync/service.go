@@ -6,6 +6,7 @@ package sync
 
 import (
 	"context"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/prevote"
 	"sync"
 	"time"
 
@@ -72,6 +73,7 @@ type config struct {
 	p2p                     p2p.P2P
 	beaconDB                db.NoHeadAccessDatabase
 	attPool                 attestations.Pool
+	prevotePool             prevote.Pool
 	exitPool                voluntaryexits.PoolManager
 	slashingPool            slashings.PoolManager
 	syncCommsPool           synccommittee.Pool

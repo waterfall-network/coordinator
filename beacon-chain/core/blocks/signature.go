@@ -15,6 +15,7 @@ import (
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/attestation"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/prevote"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 )
 
@@ -282,4 +283,85 @@ func AttestationSignatureBatch(ctx context.Context, beaconState state.ReadOnlyBe
 	}
 
 	return set, nil
+}
+
+// PrevoteSignatureBatch retrieves all the related prevote signature data such as the relevant public keys,
+// signatures and prevote signing data and collate it into a signature batch object.
+func PrevoteSignatureBatch(ctx context.Context, beaconState state.ReadOnlyBeaconState, prevotes []*ethpb.PreVote) (*bls.SignatureBatch, error) {
+	if len(prevotes) == 0 {
+		return bls.NewSet(), nil
+	}
+
+	fork := beaconState.Fork()
+	gvr := beaconState.GenesisValidatorsRoot()
+	dt := params.BeaconConfig().DomainBeaconAttester
+
+	set := bls.NewSet()
+
+	domain, err := signing.Domain(fork, fork.Epoch, dt, gvr)
+	if err != nil {
+		return nil, err
+	}
+
+	aSet, err := createPrevoteSignatureBatch(ctx, beaconState, prevotes, domain)
+	if err != nil {
+		return nil, err
+	}
+	if aSet != nil {
+		return set.Join(aSet), nil
+	}
+
+	return set, nil
+}
+
+// Method to break down prevotes of the same domain and collect them into a single signature batch.
+func createPrevoteSignatureBatch(
+	ctx context.Context,
+	beaconState state.ReadOnlyBeaconState,
+	prevotes []*ethpb.PreVote,
+	domain []byte,
+) (*bls.SignatureBatch, error) {
+	if len(prevotes) == 0 {
+		return nil, nil
+	}
+
+	sigs := make([][]byte, len(prevotes))
+	pks := make([]bls.PublicKey, len(prevotes))
+	msgs := make([][32]byte, len(prevotes))
+	for i, p := range prevotes {
+		sigs[i] = p.Signature
+		c, err := helpers.BeaconCommitteeFromState(ctx, beaconState, p.Data.Slot, p.Data.Index)
+		if err != nil {
+			return nil, err
+		}
+		ip, err := prevote.ConvertToIndexed(ctx, p, c)
+		if err != nil {
+			return nil, err
+		}
+		if err := prevote.IsValidPrevoteIndices(ctx, ip); err != nil {
+			return nil, err
+		}
+		indices := ip.AttestingIndices
+		pubkeys := make([][]byte, len(indices))
+		for i := 0; i < len(indices); i++ {
+			pubkeyAtIdx := beaconState.PubkeyAtIndex(types.ValidatorIndex(indices[i]))
+			pubkeys[i] = pubkeyAtIdx[:]
+		}
+		aggP, err := bls.AggregatePublicKeys(pubkeys)
+		if err != nil {
+			return nil, err
+		}
+		pks[i] = aggP
+
+		root, err := signing.ComputeSigningRoot(ip.Data, domain)
+		if err != nil {
+			return nil, errors.Wrap(err, "could not get signing root of object")
+		}
+		msgs[i] = root
+	}
+	return &bls.SignatureBatch{
+		Signatures: sigs,
+		PublicKeys: pks,
+		Messages:   msgs,
+	}, nil
 }
