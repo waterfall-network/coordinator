@@ -268,7 +268,7 @@ func ProcessRewardsAndPenaltiesPrecompute(
 			if err != nil {
 				return nil, err
 			}
-			if err = helpers.LogBalanceChanges(types.ValidatorIndex(valIndex), balances[valIndex], attsRewards[valIndex], aftBal, beaconState.Slot(), nil, helpers.Increase, helpers.Attester); err != nil {
+			if err = helpers.LogBalanceChanges(types.ValidatorIndex(valIndex), balances[valIndex], attsRewards[valIndex], aftBal, beaconState.Slot(), nil, helpers.BalanceIncrease, helpers.OpAttestation); err != nil {
 				return nil, err
 			}
 		}
@@ -286,7 +286,7 @@ func ProcessRewardsAndPenaltiesPrecompute(
 
 		// write Rewards And Penalties log
 		if attsPenalties[valIndex] != 0 {
-			if err = helpers.LogBalanceChanges(types.ValidatorIndex(valIndex), balances[valIndex], attsPenalties[valIndex], helpers.DecreaseBalanceWithVal(balances[valIndex], attsPenalties[valIndex]), beaconState.Slot(), nil, helpers.Decrease, helpers.Attester); err != nil {
+			if err = helpers.LogBalanceChanges(types.ValidatorIndex(valIndex), balances[valIndex], attsPenalties[valIndex], helpers.DecreaseBalanceWithVal(balances[valIndex], attsPenalties[valIndex]), beaconState.Slot(), nil, helpers.BalanceDecrease, helpers.OpAttestation); err != nil {
 				return nil, err
 			}
 		}

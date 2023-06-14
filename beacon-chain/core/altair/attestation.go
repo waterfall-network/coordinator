@@ -123,7 +123,7 @@ func SetParticipationAndRewardProposer(
 	}
 
 	// write Rewards And Penalties log
-	if err = helpers.LogBeforeRewardsAndPenalties(beaconState, proposerIndex, proposerReward, indices, helpers.Increase, helpers.Proposer); err != nil {
+	if err = helpers.LogBeforeRewardsAndPenalties(beaconState, proposerIndex, proposerReward, indices, helpers.BalanceIncrease, helpers.OpProposing); err != nil {
 		log.WithError(err).WithFields(log.Fields{
 			"Slot":           beaconState.Slot(),
 			"Proposer":       proposerIndex,
@@ -142,7 +142,7 @@ func SetParticipationAndRewardProposer(
 	}).Debug("Reward proposer: current block incr")
 
 	// 4. rewards the block proposer voted for by the participants,
-	if err := RewardBeaconBlockRootProposer(ctx, beaconState, beaconBlockRoot, proposerReward); err != nil {
+	if err := RewardBeaconBlockRootProposer(ctx, beaconState, beaconBlockRoot, proposerReward, indices); err != nil {
 		return nil, err
 	}
 
@@ -259,7 +259,13 @@ func EpochParticipation(
 }
 
 // RewardBeaconBlockRootProposer rewards the block proposer voted for by the participants
-func RewardBeaconBlockRootProposer(ctx context.Context, beaconState state.BeaconState, beaconBlockRoot []byte, proposerReward uint64) error {
+func RewardBeaconBlockRootProposer(
+	ctx context.Context,
+	beaconState state.BeaconState,
+	beaconBlockRoot []byte,
+	proposerReward uint64,
+	indices []uint64,
+) error {
 	blockFetcher, ok := ctx.Value(params.BeaconConfig().CtxBlockFetcherKey).(params.CtxBlockFetcher)
 	if !ok {
 		err := errors.New("Cannot cast to CtxBlockFetcher")
@@ -271,7 +277,7 @@ func RewardBeaconBlockRootProposer(ctx context.Context, beaconState state.Beacon
 	}
 	var beaconBlockRootArray [32]byte
 	copy(beaconBlockRootArray[:], beaconBlockRoot)
-	proposerIndex, proposedAtSlot, votesIncluded, err := blockFetcher(ctx, beaconBlockRootArray)
+	proposerIndex, proposedAtSlot, _, err := blockFetcher(ctx, beaconBlockRootArray)
 	if err != nil {
 		log.WithError(err).WithFields(log.Fields{
 			"SlotBlockWasProposedAt": proposedAtSlot,
@@ -279,7 +285,7 @@ func RewardBeaconBlockRootProposer(ctx context.Context, beaconState state.Beacon
 			"BeaconBlockRoot":        beaconBlockRoot,
 			"ProposerIndex":          proposerIndex,
 			"ProposerReward":         proposerReward,
-			"VotesIncluded":          votesIncluded,
+			"attestors":              indices,
 		}).Error("Proposer reward error: retrieving block failed")
 		return err
 	}
@@ -294,7 +300,7 @@ func RewardBeaconBlockRootProposer(ctx context.Context, beaconState state.Beacon
 	}).Debug("Reward proposer: voting for root incr")
 
 	// write Rewards And Penalties log
-	if err = helpers.LogBeforeRewardsAndPenalties(beaconState, proposerIndex, proposerReward, make([]uint64, votesIncluded), helpers.Increase, helpers.BeaconBlockProposer); err != nil {
+	if err = helpers.LogBeforeRewardsAndPenalties(beaconState, proposerIndex, proposerReward, indices, helpers.BalanceIncrease, helpers.OpBlockAttested); err != nil {
 		log.WithError(err).WithFields(log.Fields{
 			"Slot":           beaconState.Slot(),
 			"Proposer":       proposerIndex,
