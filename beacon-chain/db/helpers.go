@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"fmt"
 
 	types "github.com/prysmaticlabs/eth2-types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
@@ -15,8 +14,7 @@ func BlockInfoFetcherFunc(db ReadOnlyDatabase) params.CtxBlockFetcher {
 			return 0, 0, 0, err
 		}
 		if block == nil {
-			err = fmt.Errorf("block info not found root=%#x", blockRoot)
-			return 0, 0, 0, err
+			return 0, 0, 0, ErrNotFound
 		}
 		votesIncluded := uint64(0)
 		for _, att := range block.Block().Body().Attestations() {

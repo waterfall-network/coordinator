@@ -176,7 +176,7 @@ func calcFinalization(ctx context.Context, beaconState state.BeaconState, blockV
 		"supported-BlockVoting": len(supportedVotes),
 		"VotingRequiredSlots":   params.BeaconConfig().VotingRequiredSlots,
 		"SecondsPerSlot":        params.BeaconConfig().SecondsPerSlot,
-	}).Warn("VOTING INFO >>>>")
+	}).Info("Voting info")
 
 	// handle supported votes
 	for _, bv := range supportedVotes {
@@ -410,7 +410,7 @@ func appendBlockVotingAtt(votes []*ethpb.BlockVoting, val *ethpb.Attestation) []
 				"atts": helpers.PrintBlockVoting(itm),
 				"slot": itm.GetSlot(),
 				"root": fmt.Sprintf("%#x", itm.GetRoot()),
-			}).Info("??? appendBlockVotingAtt ??? 000")
+			}).Debug("appendBlockVotingAtt op=000")
 
 			valDataRoot, err := val.Data.HashTreeRoot()
 			if err != nil {
@@ -458,7 +458,7 @@ func appendBlockVotingAtt(votes []*ethpb.BlockVoting, val *ethpb.Attestation) []
 				"BlockVoting": helpers.PrintBlockVoting(ccc),
 				"slot":        itm.GetSlot(),
 				"root":        fmt.Sprintf("%#x", itm.GetRoot()),
-			}).Info("??? appendBlockVotingAtt ??? 111 aggregation")
+			}).Debug("appendBlockVotingAtt op=1 aggregation")
 
 			atts, err = stateutil.Dedup(atts)
 			if err != nil {
@@ -474,7 +474,7 @@ func appendBlockVotingAtt(votes []*ethpb.BlockVoting, val *ethpb.Attestation) []
 				"BlockVoting": helpers.PrintBlockVoting(ccc),
 				"slot":        itm.GetSlot(),
 				"root":        fmt.Sprintf("%#x", itm.GetRoot()),
-			}).Info("??? appendBlockVotingAtt ??? 222 deduplication")
+			}).Debug("appendBlockVotingAtt op=2 deduplication")
 
 			itm.Attestations = atts
 		}
