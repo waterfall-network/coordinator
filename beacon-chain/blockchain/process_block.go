@@ -536,7 +536,7 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 	return fCheckpoints, jCheckpoints, nil
 }
 
-func BatchHandlerBlockInfoFetcherFunc(db db.ReadOnlyDatabase, blks []block.SignedBeaconBlock, blockRoots [][32]byte) params.CtxBlockFetcher {
+func BatchHandlerBlockInfoFetcherFunc(dbRo db.ReadOnlyDatabase, blks []block.SignedBeaconBlock, blockRoots [][32]byte) params.CtxBlockFetcher {
 	return func(ctx context.Context, blockRoot [32]byte) (types.ValidatorIndex, types.Slot, uint64, error) {
 		var blk block.SignedBeaconBlock
 		var err error
@@ -549,14 +549,13 @@ func BatchHandlerBlockInfoFetcherFunc(db db.ReadOnlyDatabase, blks []block.Signe
 		}
 		// if not found in batch
 		if blk == nil {
-			blk, err = db.Block(ctx, blockRoot)
+			blk, err = dbRo.Block(ctx, blockRoot)
 			if err != nil {
 				return 0, 0, 0, err
 			}
 		}
 		if blk == nil {
-			err = fmt.Errorf("block info not found root=%#x", blockRoot)
-			return 0, 0, 0, err
+			return 0, 0, 0, db.ErrNotFound
 		}
 
 		votesIncluded := uint64(0)

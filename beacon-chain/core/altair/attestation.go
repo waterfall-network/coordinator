@@ -11,8 +11,10 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/attestation"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
@@ -34,6 +36,13 @@ func ProcessAttestationsNoVerifySignature(
 		var err error
 		beaconState, err = ProcessAttestationNoVerifySignature(ctx, beaconState, att)
 		if err != nil {
+			log.WithError(err).WithFields(log.Fields{
+				"i":        idx,
+				"slot":     b.Block().Slot(),
+				"att.root": fmt.Sprintf("%#x", att.Data.BeaconBlockRoot),
+				"att.slot": fmt.Sprintf("%d", att.Data.Slot),
+				"parent":   fmt.Sprintf("%#x", b.Block().ParentRoot()),
+			}).Error("Process attestations err")
 			return nil, errors.Wrapf(err, "could not verify attestation at index %d in block", idx)
 		}
 	}
@@ -262,54 +271,83 @@ func EpochParticipation(
 func RewardBeaconBlockRootProposer(
 	ctx context.Context,
 	beaconState state.BeaconState,
-	beaconBlockRoot []byte,
-	proposerReward uint64,
+	attRoot []byte,
+	reward uint64,
 	indices []uint64,
 ) error {
 	blockFetcher, ok := ctx.Value(params.BeaconConfig().CtxBlockFetcherKey).(params.CtxBlockFetcher)
 	if !ok {
 		err := errors.New("Cannot cast to CtxBlockFetcher")
 		log.WithError(err).WithFields(log.Fields{
-			"Slot":           beaconState.Slot(),
-			"ProposerReward": proposerReward,
+			"Slot":   beaconState.Slot(),
+			"reward": reward,
 		}).Error("Proposer reward error: get CtxBlockFetcher failed")
 		return err
 	}
-	var beaconBlockRootArray [32]byte
-	copy(beaconBlockRootArray[:], beaconBlockRoot)
-	proposerIndex, proposedAtSlot, _, err := blockFetcher(ctx, beaconBlockRootArray)
+	proposerIndex, proposedAtSlot, _, err := blockFetcher(ctx, bytesutil.ToBytes32(attRoot))
 	if err != nil {
 		log.WithError(err).WithFields(log.Fields{
 			"SlotBlockWasProposedAt": proposedAtSlot,
 			"Slot":                   beaconState.Slot(),
-			"BeaconBlockRoot":        beaconBlockRoot,
+			"attestationRoot":        fmt.Sprintf("%#x", attRoot),
 			"ProposerIndex":          proposerIndex,
-			"ProposerReward":         proposerReward,
+			"reward":                 reward,
 			"attestors":              indices,
 		}).Error("Proposer reward error: retrieving block failed")
+		// if no block on local node
+		if errors.Is(err, db.ErrNotFound) {
+			log.WithFields(log.Fields{
+				"Slot":            beaconState.Slot(),
+				"attestationRoot": fmt.Sprintf("%#x", attRoot),
+				"reward":          reward,
+				"canonical":       false,
+			}).Info("Reward proposer: skip reward of voting for root (not found)")
+			return nil
+		}
 		return err
 	}
-
-	beaconBlockRootProposerIndex := proposerIndex
+	slotRoot, err := helpers.BlockRootAtSlot(beaconState, proposedAtSlot)
+	if err != nil {
+		log.WithError(err).WithFields(log.Fields{
+			"proposedAtSlot":  proposedAtSlot,
+			"Slot":            beaconState.Slot(),
+			"attestationRoot": fmt.Sprintf("%#x", attRoot),
+			"reward":          reward,
+			"attestors":       indices,
+		}).Error("Proposer reward error: retrieving historical root failed")
+		return err
+	}
+	// if attested root is not in past of state - skip reward
+	if !bytes.Equal(slotRoot, attRoot) {
+		log.WithFields(log.Fields{
+			"Slot":            beaconState.Slot(),
+			"slotRoot":        fmt.Sprintf("%#x", slotRoot),
+			"attestationRoot": fmt.Sprintf("%#x", attRoot),
+			"reward":          reward,
+			"canonical":       false,
+		}).Info("Reward proposer: skip reward of voting for root (not canonical)")
+		return nil
+	}
 
 	log.WithFields(log.Fields{
 		"SlotBlockWasProposedAt": proposedAtSlot,
 		"Slot":                   beaconState.Slot(),
-		"Proposer":               beaconBlockRootProposerIndex,
-		"ProposerReward":         proposerReward,
-	}).Debug("Reward proposer: voting for root incr")
+		"attestationRoot":        fmt.Sprintf("%#x", attRoot),
+		"Proposer":               proposerIndex,
+		"reward":                 reward,
+	}).Info("Reward proposer: voting for root incr")
 
 	// write Rewards And Penalties log
-	if err = helpers.LogBeforeRewardsAndPenalties(beaconState, proposerIndex, proposerReward, indices, helpers.BalanceIncrease, helpers.OpBlockAttested); err != nil {
+	if err = helpers.LogBeforeRewardsAndPenalties(beaconState, proposerIndex, reward, indices, helpers.BalanceIncrease, helpers.OpBlockAttested); err != nil {
 		log.WithError(err).WithFields(log.Fields{
-			"Slot":           beaconState.Slot(),
-			"Proposer":       proposerIndex,
-			"ProposerReward": proposerReward,
+			"Slot":     beaconState.Slot(),
+			"Proposer": proposerIndex,
+			"reward":   reward,
 		}).Error("Log rewards and penalties failed: RewardBeaconBlockRootProposer")
 	}
 
 	// Should we have the state at beacon block root slot or current is ok??? seems current is ok
-	if err = helpers.IncreaseBalance(beaconState, beaconBlockRootProposerIndex, proposerReward); err != nil {
+	if err = helpers.IncreaseBalance(beaconState, proposerIndex, reward); err != nil {
 		return err
 	}
 	return nil
