@@ -171,7 +171,7 @@ func (v *validator) signPrevote(ctx context.Context, pubKey [fieldparams.BLSPubk
 		PublicKey:       pubKey[:],
 		SigningRoot:     root[:],
 		SignatureDomain: domain.SignatureDomain,
-		Object:          &validatorpb.SignRequest_PrevoteData{PreVoteData: data},
+		Object:          &validatorpb.SignRequest_PrevoteData{PrevoteData: data},
 		SigningSlot:     slot,
 	})
 	if err != nil {
