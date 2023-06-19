@@ -5,6 +5,7 @@ import "proto/eth/ext/options.proto";
 import "proto/prysm/v1alpha1/attestation.proto";
 import "proto/prysm/v1alpha1/beacon_block.proto";
 import "proto/prysm/v1alpha1/beacon_state.proto";
+import "proto/prysm/v1alpha1/prevoting.proto";
 import "proto/prysm/v1alpha1/sync_committee.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
@@ -78,6 +79,9 @@ message SignRequest {
         // Bellatrix objects.
         ethereum.eth.v1alpha1.BeaconBlockBellatrix blockV3 = 111;
         ethereum.eth.v1alpha1.BlindedBeaconBlockBellatrix blinded_blockV3 = 112;
+
+        // Prevote
+        ethereum.eth.v1alpha1.PreVoteData prevote_data = 113;
     }
     reserved 4, 5; // Reserving old, deleted fields.
     uint64 signing_slot = 6 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Slot"];

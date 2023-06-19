@@ -24,9 +24,9 @@ message PreVoteData {
 }
 
 message PreVoteRequest {
-  // Slot for which the attestation should be created.
+  // Slot for which the prevote should be created.
   uint64 slot = 1 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Slot"];
-  // Committee index the attestation should be created for.
+  // Committee index the prevote should be created for.
   uint64 committee_index = 2  [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.CommitteeIndex"];
 }
 
