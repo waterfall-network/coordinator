@@ -204,6 +204,7 @@ func (p *StateProvider) StateBySlot(ctx context.Context, target types.Slot) (sta
 	ctx, span := trace.StartSpan(ctx, "statefetcher.StateBySlot")
 	defer span.End()
 
+	ctx = context.WithValue(ctx, params.BeaconConfig().CtxBlockFetcherKey, db.BlockInfoFetcherFunc(p.BeaconDB))
 	st, err := p.ReplayerBuilder.ReplayerForSlot(target).ReplayBlocks(ctx)
 	if err != nil {
 		msg := fmt.Sprintf("error while replaying history to slot=%d", target)

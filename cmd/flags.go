@@ -187,6 +187,11 @@ var (
 		Usage: "Specify log formatting. Supports: text, json, fluentd, journald.",
 		Value: "text",
 	}
+	// WriteRewardLogFlag Write log of rewards and penalties.
+	WriteRewardLogFlag = &cli.BoolFlag{
+		Name:  "write-reward-log",
+		Usage: "Enable write log file of rewards and penalties.",
+	}
 	// MaxGoroutines specifies the maximum amount of goroutines tolerated, before a status check fails.
 	MaxGoroutines = &cli.IntFlag{
 		Name:  "max-goroutines",

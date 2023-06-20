@@ -192,6 +192,21 @@ func ActiveValidatorCount(ctx context.Context, s state.ReadOnlyBeaconState, epoc
 	return count, nil
 }
 
+// ActiveValidatorForSlotCount returns the number of active validators in the state
+// at the given slot.
+func ActiveValidatorForSlotCount(ctx context.Context, s state.BeaconState, slot types.Slot) (uint64, error) {
+	committees, err := CalcSlotCommitteesIndexes(ctx, s, slot)
+	if err != nil {
+		return 0, err
+	}
+	count := uint64(0)
+	for _, vals := range committees {
+		count += uint64(len(vals))
+	}
+
+	return count, nil
+}
+
 // ActivationExitEpoch takes in epoch number and returns when
 // the validator is eligible for activation and exit.
 //

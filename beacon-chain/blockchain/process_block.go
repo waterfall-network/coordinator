@@ -6,12 +6,14 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed"
 	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	coreTime "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	forkchoicetypes "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/forkchoice/types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
@@ -92,6 +94,8 @@ var initialSyncBlockCacheSize = uint64(2 * params.BeaconConfig().SlotsPerEpoch)
 //	             store.justified_checkpoint = state.current_justified_checkpoint
 func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, blockRoot [32]byte) error {
 	ctx, span := trace.StartSpan(ctx, "blockChain.onBlock")
+	//required to support rewards and penalties state operations
+	ctx = context.WithValue(ctx, params.BeaconConfig().CtxBlockFetcherKey, db.BlockInfoFetcherFunc(s.cfg.BeaconDB))
 	defer span.End()
 
 	log.WithFields(logrus.Fields{
@@ -404,6 +408,8 @@ func getStateVersionAndPayload(st state.BeaconState) (int, *ethpb.ExecutionPaylo
 
 func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlock, blockRoots [][32]byte) ([]*ethpb.Checkpoint, []*ethpb.Checkpoint, error) {
 	ctx, span := trace.StartSpan(ctx, "blockChain.onBlockBatch")
+	//required to support rewards and penalties state operations
+	ctx = context.WithValue(ctx, params.BeaconConfig().CtxBlockFetcherKey, BatchHandlerBlockInfoFetcherFunc(s.cfg.BeaconDB, blks, blockRoots))
 	defer span.End()
 
 	if len(blks) == 0 || len(blockRoots) == 0 {
@@ -528,6 +534,37 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 		return nil, nil, err
 	}
 	return fCheckpoints, jCheckpoints, nil
+}
+
+func BatchHandlerBlockInfoFetcherFunc(dbRo db.ReadOnlyDatabase, blks []block.SignedBeaconBlock, blockRoots [][32]byte) params.CtxBlockFetcher {
+	return func(ctx context.Context, blockRoot [32]byte) (types.ValidatorIndex, types.Slot, uint64, error) {
+		var blk block.SignedBeaconBlock
+		var err error
+
+		for i, root := range blockRoots {
+			if blockRoot == root {
+				blk = blks[i]
+				break
+			}
+		}
+		// if not found in batch
+		if blk == nil {
+			blk, err = dbRo.Block(ctx, blockRoot)
+			if err != nil {
+				return 0, 0, 0, err
+			}
+		}
+		if blk == nil {
+			return 0, 0, 0, db.ErrNotFound
+		}
+
+		votesIncluded := uint64(0)
+		for _, att := range blk.Block().Body().Attestations() {
+			votesIncluded += att.AggregationBits.Count()
+		}
+
+		return blk.Block().ProposerIndex(), blk.Block().Slot(), votesIncluded, nil
+	}
 }
 
 // handles a block after the block's batch has been verified, where we can save blocks

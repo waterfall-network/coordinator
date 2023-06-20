@@ -110,6 +110,7 @@ var appFlags = []cli.Flag{
 	debug.BlockProfileRateFlag,
 	debug.MutexProfileFractionFlag,
 	cmd.LogFileName,
+	cmd.WriteRewardLogFlag,
 	cmd.EnableUPnPFlag,
 	cmd.ConfigFileFlag,
 	cmd.ChainConfigFileFlag,
