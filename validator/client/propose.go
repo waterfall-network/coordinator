@@ -264,44 +264,6 @@ func (v *validator) signBlock(ctx context.Context, pubKey [fieldparams.BLSPubkey
 	return sig.Marshal(), blockRoot, nil
 }
 
-// Sign voluntary exit with proposer domain and private key.
-func signVoluntaryExit(
-	ctx context.Context,
-	validatorClient ethpb.BeaconNodeValidatorClient,
-	signer signingFunc,
-	pubKey []byte,
-	exit *ethpb.VoluntaryExit,
-) ([]byte, error) {
-	req := &ethpb.DomainRequest{
-		Epoch:  exit.Epoch,
-		Domain: params.BeaconConfig().DomainVoluntaryExit[:],
-	}
-
-	domain, err := validatorClient.DomainData(ctx, req)
-	if err != nil {
-		return nil, errors.Wrap(err, domainDataErr)
-	}
-	if domain == nil {
-		return nil, errors.New(domainDataErr)
-	}
-
-	exitRoot, err := signing.ComputeSigningRoot(exit, domain.SignatureDomain)
-	if err != nil {
-		return nil, errors.Wrap(err, signingRootErr)
-	}
-
-	sig, err := signer(ctx, &validatorpb.SignRequest{
-		PublicKey:       pubKey,
-		SigningRoot:     exitRoot[:],
-		SignatureDomain: domain.SignatureDomain,
-		Object:          &validatorpb.SignRequest_Exit{Exit: exit},
-	})
-	if err != nil {
-		return nil, errors.Wrap(err, signExitErr)
-	}
-	return sig.Marshal(), nil
-}
-
 // Gets the graffiti from cli or file for the validator public key.
 func (v *validator) getGraffiti(ctx context.Context, pubKey [fieldparams.BLSPubkeyLength]byte) ([]byte, error) {
 	// When specified, default graffiti from the command line takes the first priority.
