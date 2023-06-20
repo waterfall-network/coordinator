@@ -5,10 +5,10 @@ import (
 )
 
 type Pool interface {
-	HasAggregatedPrevote(att *ethpb.PreVote) (bool, error)
-	SaveUnaggregatedPrevote(att *ethpb.PreVote) error
+	HasPrevote(att *ethpb.PreVote) (bool, error)
+	SavePrevote(att *ethpb.PreVote) error
 }
 
-func NewPool() *PrevoteCaches {
-	return NewPrevoteCaches()
+func NewPool() *PrevoteCache {
+	return NewPrevoteCache()
 }

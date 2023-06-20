@@ -38,7 +38,7 @@ func (s *Service) committeeIndexBeaconPrevoteSubscriber(_ context.Context, msg p
 		return errors.New("prevote data is nil")
 	}
 
-	exists, err := s.cfg.prevotePool.HasAggregatedPrevote(prevote)
+	exists, err := s.cfg.prevotePool.HasPrevote(prevote)
 	if err != nil {
 		return errors.Wrap(err, "Could not determine if prevote pool has this prevote")
 	}
@@ -46,7 +46,7 @@ func (s *Service) committeeIndexBeaconPrevoteSubscriber(_ context.Context, msg p
 		return nil
 	}
 
-	return s.cfg.prevotePool.SaveUnaggregatedPrevote(prevote)
+	return s.cfg.prevotePool.SavePrevote(prevote)
 }
 
 func (s *Service) attesterSlashingSubscriber(ctx context.Context, msg proto.Message) error {

@@ -205,6 +205,7 @@ func run(ctx context.Context, v iface.Validator) {
 						switch role {
 						case iface.RoleAttester:
 							v.SubmitAttestation(slotCtx, slot, pubKey)
+							v.SubmitPrevote(slotCtx, slot-1, pubKey)
 						case iface.RoleProposer:
 							v.ProposeBlock(slotCtx, slot, pubKey)
 						case iface.RoleAggregator:

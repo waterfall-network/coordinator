@@ -11,24 +11,20 @@ import (
 
 var hashFn = hash.HashProto
 
-// PrevoteCaches defines the caches used to satisfy prevote pool interface.
-// These caches are KV store for various prevotes
-// such are unaggregated, aggregated
-type PrevoteCaches struct {
-	aggregatedPrevoteLock  sync.RWMutex
-	aggregatedPrevote      map[[32]byte][]*ethpb.PreVote
-	unAggregatePrevoteLock sync.RWMutex
-	unAggregatedPrevote    map[[32]byte]*ethpb.PreVote
-	seenPrevote            *cache.Cache
+// PrevoteCache defines the caches used to satisfy prevote pool interface.
+// These caches are KV store for prevotes
+type PrevoteCache struct {
+	prevoteCacheLock sync.RWMutex
+	prevoteCache     map[[32]byte]*ethpb.PreVote
+	seenPrevote      *cache.Cache
 }
 
-func NewPrevoteCaches() *PrevoteCaches {
+func NewPrevoteCache() *PrevoteCache {
 	secsInEpoch := time.Duration(params.BeaconConfig().SlotsPerEpoch.Mul(params.BeaconConfig().SecondsPerSlot))
 	c := cache.New(secsInEpoch*time.Second, 2*secsInEpoch*time.Second)
-	pool := &PrevoteCaches{
-		unAggregatedPrevote: make(map[[32]byte]*ethpb.PreVote),
-		aggregatedPrevote:   make(map[[32]byte][]*ethpb.PreVote),
-		seenPrevote:         c,
+	pool := &PrevoteCache{
+		prevoteCache: make(map[[32]byte]*ethpb.PreVote),
+		seenPrevote:  c,
 	}
 
 	return pool
