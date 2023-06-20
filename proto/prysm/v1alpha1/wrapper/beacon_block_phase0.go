@@ -273,7 +273,7 @@ func (w Phase0BeaconBlockBody) Deposits() []*eth.Deposit {
 }
 
 // VoluntaryExits returns the voluntary exits in the block.
-func (w Phase0BeaconBlockBody) VoluntaryExits() []*eth.SignedVoluntaryExit {
+func (w Phase0BeaconBlockBody) VoluntaryExits() []*eth.VoluntaryExit {
 	return w.b.VoluntaryExits
 }
 

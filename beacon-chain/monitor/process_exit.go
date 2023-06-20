@@ -11,7 +11,7 @@ func (s *Service) processExitsFromBlock(blk block.BeaconBlock) {
 	s.RLock()
 	defer s.RUnlock()
 	for _, exit := range blk.Body().VoluntaryExits() {
-		idx := exit.Exit.ValidatorIndex
+		idx := exit.ValidatorIndex
 		if s.trackedIndex(idx) {
 			log.WithFields(logrus.Fields{
 				"ValidatorIndex": idx,
@@ -22,8 +22,8 @@ func (s *Service) processExitsFromBlock(blk block.BeaconBlock) {
 }
 
 // processExit logs the event when tracked validators' exit was processed
-func (s *Service) processExit(exit *ethpb.SignedVoluntaryExit) {
-	idx := exit.Exit.ValidatorIndex
+func (s *Service) processExit(exit *ethpb.VoluntaryExit) {
+	idx := exit.ValidatorIndex
 	s.RLock()
 	defer s.RUnlock()
 	if s.trackedIndex(idx) {

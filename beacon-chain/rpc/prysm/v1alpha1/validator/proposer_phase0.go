@@ -218,14 +218,14 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		validAttSlashings = append(validAttSlashings, slashing)
 	}
 	exits := vs.ExitPool.PendingExits(head, req.Slot, false /*noLimit*/)
-	validExits := make([]*ethpb.SignedVoluntaryExit, 0, len(exits))
+	validExits := make([]*ethpb.VoluntaryExit, 0, len(exits))
 	for _, exit := range exits {
-		val, err := head.ValidatorAtIndexReadOnly(exit.Exit.ValidatorIndex)
+		val, err := head.ValidatorAtIndexReadOnly(exit.ValidatorIndex)
 		if err != nil {
 			log.WithError(err).Warn("Proposer: invalid exit")
 			continue
 		}
-		if err := blocks.VerifyExitAndSignature(val, head.Slot(), head.Fork(), exit, head.GenesisValidatorsRoot()); err != nil {
+		if err := blocks.VerifyExitData(val, head.Slot(), exit); err != nil {
 			log.WithError(err).Warn("Proposer: invalid exit")
 			continue
 		}

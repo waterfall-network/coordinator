@@ -56,7 +56,7 @@ type BeaconBlockBody interface {
 	AttesterSlashings() []*ethpb.AttesterSlashing
 	Attestations() []*ethpb.Attestation
 	Deposits() []*ethpb.Deposit
-	VoluntaryExits() []*ethpb.SignedVoluntaryExit
+	VoluntaryExits() []*ethpb.VoluntaryExit
 	SyncAggregate() (*ethpb.SyncAggregate, error)
 	IsNil() bool
 	HashTreeRoot() ([32]byte, error)

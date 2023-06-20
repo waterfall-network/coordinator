@@ -223,12 +223,9 @@ func Test_V1Alpha1ProposerSlashingToV1(t *testing.T) {
 }
 
 func Test_V1Alpha1ExitToV1(t *testing.T) {
-	alphaExit := &ethpbalpha.SignedVoluntaryExit{
-		Exit: &ethpbalpha.VoluntaryExit{
-			Epoch:          epoch,
-			ValidatorIndex: validatorIndex,
-		},
-		Signature: signature,
+	alphaExit := &ethpbalpha.VoluntaryExit{
+		Epoch:          epoch,
+		ValidatorIndex: validatorIndex,
 	}
 
 	v1Exit := V1Alpha1ExitToV1(alphaExit)
@@ -240,12 +237,9 @@ func Test_V1Alpha1ExitToV1(t *testing.T) {
 }
 
 func Test_V1ExitToV1Alpha1(t *testing.T) {
-	v1Exit := &ethpbv1.SignedVoluntaryExit{
-		Message: &ethpbv1.VoluntaryExit{
-			Epoch:          epoch,
-			ValidatorIndex: validatorIndex,
-		},
-		Signature: signature,
+	v1Exit := &ethpbv1.VoluntaryExit{
+		Epoch:          epoch,
+		ValidatorIndex: validatorIndex,
 	}
 
 	alphaExit := V1ExitToV1Alpha1(v1Exit)

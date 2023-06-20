@@ -206,31 +206,25 @@ func V1Alpha1ProposerSlashingToV1(v1alpha1Slashing *ethpbalpha.ProposerSlashing)
 	}
 }
 
-// V1Alpha1ExitToV1 converts a v1alpha1 SignedVoluntaryExit to v1.
-func V1Alpha1ExitToV1(v1alpha1Exit *ethpbalpha.SignedVoluntaryExit) *ethpbv1.SignedVoluntaryExit {
-	if v1alpha1Exit == nil || v1alpha1Exit.Exit == nil {
-		return &ethpbv1.SignedVoluntaryExit{}
+// V1Alpha1ExitToV1 converts a v1alpha1 VoluntaryExit to v1.
+func V1Alpha1ExitToV1(v1alpha1Exit *ethpbalpha.VoluntaryExit) *ethpbv1.VoluntaryExit {
+	if v1alpha1Exit == nil {
+		return &ethpbv1.VoluntaryExit{}
 	}
-	return &ethpbv1.SignedVoluntaryExit{
-		Message: &ethpbv1.VoluntaryExit{
-			Epoch:          v1alpha1Exit.Exit.Epoch,
-			ValidatorIndex: v1alpha1Exit.Exit.ValidatorIndex,
-		},
-		Signature: v1alpha1Exit.Signature,
+	return &ethpbv1.VoluntaryExit{
+		Epoch:          v1alpha1Exit.Epoch,
+		ValidatorIndex: v1alpha1Exit.ValidatorIndex,
 	}
 }
 
-// V1ExitToV1Alpha1 converts a v1 SignedVoluntaryExit to v1alpha1.
-func V1ExitToV1Alpha1(v1Exit *ethpbv1.SignedVoluntaryExit) *ethpbalpha.SignedVoluntaryExit {
-	if v1Exit == nil || v1Exit.Message == nil {
-		return &ethpbalpha.SignedVoluntaryExit{}
+// V1ExitToV1Alpha1 converts a v1 VoluntaryExit to v1alpha1.
+func V1ExitToV1Alpha1(v1Exit *ethpbv1.VoluntaryExit) *ethpbalpha.VoluntaryExit {
+	if v1Exit == nil {
+		return &ethpbalpha.VoluntaryExit{}
 	}
-	return &ethpbalpha.SignedVoluntaryExit{
-		Exit: &ethpbalpha.VoluntaryExit{
-			Epoch:          v1Exit.Message.Epoch,
-			ValidatorIndex: v1Exit.Message.ValidatorIndex,
-		},
-		Signature: v1Exit.Signature,
+	return &ethpbalpha.VoluntaryExit{
+		Epoch:          v1Exit.Epoch,
+		ValidatorIndex: v1Exit.ValidatorIndex,
 	}
 }
 
