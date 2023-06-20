@@ -25,7 +25,6 @@ import (
 	mockSync "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/sync/initial-sync/testing"
 	lruwrpr "gitlab.waterfall.network/waterfall/protocol/coordinator/cache/lru"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/beacon-chain/flags"
-	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/network/forks"
@@ -60,9 +59,9 @@ func TestSubscribe_ReceivesValidMessage(t *testing.T) {
 	wg.Add(1)
 
 	r.subscribe(topic, r.noopValidator, func(_ context.Context, msg proto.Message) error {
-		m, ok := msg.(*pb.SignedVoluntaryExit)
-		assert.Equal(t, true, ok, "Object is not of type *pb.SignedVoluntaryExit")
-		if m.Exit == nil || m.Exit.Epoch != 55 {
+		m, ok := msg.(*pb.VoluntaryExit)
+		assert.Equal(t, true, ok, "Object is not of type *pb.VoluntaryExit")
+		if m == nil || m.Epoch != 55 {
 			t.Errorf("Unexpected incoming message: %+v", m)
 		}
 		wg.Done()
@@ -70,7 +69,7 @@ func TestSubscribe_ReceivesValidMessage(t *testing.T) {
 	}, p2pService.Digest)
 	r.markForChainStart()
 
-	p2pService.ReceivePubSub(topic, &pb.SignedVoluntaryExit{Exit: &pb.VoluntaryExit{Epoch: 55}, Signature: make([]byte, fieldparams.BLSSignatureLength)})
+	p2pService.ReceivePubSub(topic, &pb.VoluntaryExit{Epoch: 55})
 
 	if util.WaitTimeout(&wg, time.Second) {
 		t.Fatal("Did not receive PubSub in 1 second")
@@ -239,7 +238,7 @@ func TestSubscribe_HandlesPanic(t *testing.T) {
 	p.Digest, err = r.currentForkDigest()
 	require.NoError(t, err)
 
-	topic := p2p.GossipTypeMapping[reflect.TypeOf(&pb.SignedVoluntaryExit{})]
+	topic := p2p.GossipTypeMapping[reflect.TypeOf(&pb.VoluntaryExit{})]
 	var wg sync.WaitGroup
 	wg.Add(1)
 
@@ -248,7 +247,7 @@ func TestSubscribe_HandlesPanic(t *testing.T) {
 		panic("bad")
 	}, p.Digest)
 	r.markForChainStart()
-	p.ReceivePubSub(topic, &pb.SignedVoluntaryExit{Exit: &pb.VoluntaryExit{Epoch: 55}, Signature: make([]byte, fieldparams.BLSSignatureLength)})
+	p.ReceivePubSub(topic, &pb.VoluntaryExit{Epoch: 55})
 
 	if util.WaitTimeout(&wg, time.Second) {
 		t.Fatal("Did not receive PubSub in 1 second")

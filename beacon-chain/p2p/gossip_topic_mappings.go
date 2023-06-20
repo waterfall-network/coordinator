@@ -14,7 +14,7 @@ import (
 var gossipTopicMappings = map[string]proto.Message{
 	BlockSubnetTopicFormat:                    &ethpb.SignedBeaconBlock{},
 	AttestationSubnetTopicFormat:              &ethpb.Attestation{},
-	ExitSubnetTopicFormat:                     &ethpb.SignedVoluntaryExit{},
+	ExitSubnetTopicFormat:                     &ethpb.VoluntaryExit{},
 	ProposerSlashingSubnetTopicFormat:         &ethpb.ProposerSlashing{},
 	AttesterSlashingSubnetTopicFormat:         &ethpb.AttesterSlashing{},
 	AggregateAndProofSubnetTopicFormat:        &ethpb.SignedAggregateAttestationAndProof{},

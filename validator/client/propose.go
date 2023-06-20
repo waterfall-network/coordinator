@@ -195,13 +195,7 @@ func ProposeExit(
 	currentEpoch := types.Epoch(uint64(totalSecondsPassed) / uint64(params.BeaconConfig().SlotsPerEpoch.Mul(params.BeaconConfig().SecondsPerSlot)))
 
 	exit := &ethpb.VoluntaryExit{Epoch: currentEpoch, ValidatorIndex: indexResponse.Index}
-	sig, err := signVoluntaryExit(ctx, validatorClient, signer, pubKey, exit)
-	if err != nil {
-		return errors.Wrap(err, "failed to sign voluntary exit")
-	}
-
-	signedExit := &ethpb.SignedVoluntaryExit{Exit: exit, Signature: sig}
-	exitResp, err := validatorClient.ProposeExit(ctx, signedExit)
+	exitResp, err := validatorClient.ProposeExit(ctx, exit)
 	if err != nil {
 		return errors.Wrap(err, "failed to propose voluntary exit")
 	}

@@ -27,7 +27,7 @@ var ValidatorCannotExitYetMsg = "validator has not been active long enough to ex
 //
 // Spec pseudocode definition:
 //
-//	def process_voluntary_exit(state: BeaconState, signed_voluntary_exit: SignedVoluntaryExit) -> None:
+//	def process_voluntary_exit(state: BeaconState, signed_voluntary_exit: VoluntaryExit) -> None:
 //	 voluntary_exit = signed_voluntary_exit.message
 //	 validator = state.validators[voluntary_exit.validator_index]
 //	 # Verify the validator is active
@@ -86,7 +86,7 @@ func VerifyExitData(
 //
 // Spec pseudocode definition:
 //
-//	def process_voluntary_exit(state: BeaconState, signed_voluntary_exit: SignedVoluntaryExit) -> None:
+//	def process_voluntary_exit(state: BeaconState, signed_voluntary_exit: VoluntaryExit) -> None:
 //	 voluntary_exit = signed_voluntary_exit.message
 //	 validator = state.validators[voluntary_exit.validator_index]
 //	 # Verify the validator is active

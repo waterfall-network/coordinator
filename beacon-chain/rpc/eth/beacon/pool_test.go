@@ -343,24 +343,18 @@ func TestListPoolProposerSlashings(t *testing.T) {
 func TestListPoolVoluntaryExits(t *testing.T) {
 	bs, err := util.NewBeaconState()
 	require.NoError(t, err)
-	exit1 := &ethpbv1alpha1.SignedVoluntaryExit{
-		Exit: &ethpbv1alpha1.VoluntaryExit{
-			Epoch:          1,
-			ValidatorIndex: 1,
-		},
-		Signature: bytesutil.PadTo([]byte("signature1"), 96),
+	exit1 := &ethpbv1alpha1.VoluntaryExit{
+		Epoch:          1,
+		ValidatorIndex: 1,
 	}
-	exit2 := &ethpbv1alpha1.SignedVoluntaryExit{
-		Exit: &ethpbv1alpha1.VoluntaryExit{
-			Epoch:          2,
-			ValidatorIndex: 2,
-		},
-		Signature: bytesutil.PadTo([]byte("signature2"), 96),
+	exit2 := &ethpbv1alpha1.VoluntaryExit{
+		Epoch:          2,
+		ValidatorIndex: 2,
 	}
 
 	s := &Server{
 		ChainInfoFetcher:   &blockchainmock.ChainService{State: bs},
-		VoluntaryExitsPool: &mock.PoolMock{Exits: []*ethpbv1alpha1.SignedVoluntaryExit{exit1, exit2}},
+		VoluntaryExitsPool: &mock.PoolMock{Exits: []*ethpbv1alpha1.VoluntaryExit{exit1, exit2}},
 	}
 
 	resp, err := s.ListPoolVoluntaryExits(context.Background(), &emptypb.Empty{})
@@ -601,19 +595,10 @@ func TestSubmitVoluntaryExit_Ok(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	exit := &ethpbv1.SignedVoluntaryExit{
-		Message: &ethpbv1.VoluntaryExit{
-			Epoch:          0,
-			ValidatorIndex: 0,
-		},
-		Signature: make([]byte, 96),
+	exit := &ethpbv1.VoluntaryExit{
+		Epoch:          0,
+		ValidatorIndex: 0,
 	}
-
-	sb, err := signing.ComputeDomainAndSign(bs, exit.Message.Epoch, exit.Message, params.BeaconConfig().DomainVoluntaryExit, keys[0])
-	require.NoError(t, err)
-	sig, err := bls.SignatureFromBytes(sb)
-	require.NoError(t, err)
-	exit.Signature = sig.Marshal()
 
 	broadcaster := &p2pMock.MockBroadcaster{}
 	s := &Server{
@@ -645,12 +630,10 @@ func TestSubmitVoluntaryExit_InvalidValidatorIndex(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	exit := &ethpbv1.SignedVoluntaryExit{
-		Message: &ethpbv1.VoluntaryExit{
-			Epoch:          0,
-			ValidatorIndex: 99,
-		},
-		Signature: make([]byte, 96),
+	exit := &ethpbv1.VoluntaryExit{
+
+		Epoch:          0,
+		ValidatorIndex: 99,
 	}
 
 	broadcaster := &p2pMock.MockBroadcaster{}
@@ -680,12 +663,9 @@ func TestSubmitVoluntaryExit_InvalidExit(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	exit := &ethpbv1.SignedVoluntaryExit{
-		Message: &ethpbv1.VoluntaryExit{
-			Epoch:          0,
-			ValidatorIndex: 0,
-		},
-		Signature: make([]byte, 96),
+	exit := &ethpbv1.VoluntaryExit{
+		Epoch:          0,
+		ValidatorIndex: 0,
 	}
 
 	broadcaster := &p2pMock.MockBroadcaster{}

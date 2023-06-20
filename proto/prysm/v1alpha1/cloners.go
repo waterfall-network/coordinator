@@ -344,7 +344,7 @@ func CopyDepositData(depData *Deposit_Data) *Deposit_Data {
 	}
 }
 
-// CopyVoluntaryExits copies the provided SignedVoluntaryExits array.
+// CopyVoluntaryExits copies the provided VoluntaryExits array.
 func CopyVoluntaryExits(exits []*VoluntaryExit) []*VoluntaryExit {
 	if exits == nil {
 		return nil
@@ -356,7 +356,7 @@ func CopyVoluntaryExits(exits []*VoluntaryExit) []*VoluntaryExit {
 	return newExits
 }
 
-// CopyVoluntaryExit copies the provided SignedVoluntaryExit.
+// CopyVoluntaryExit copies the provided VoluntaryExit.
 func CopyVoluntaryExit(exit *VoluntaryExit) *VoluntaryExit {
 	if exit == nil {
 		return nil

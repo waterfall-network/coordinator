@@ -19,14 +19,7 @@ import (
 )
 
 func TestProcessVoluntaryExits_NotActiveLongEnoughToExit(t *testing.T) {
-	exits := []*ethpb.SignedVoluntaryExit{
-		{
-			Exit: &ethpb.VoluntaryExit{
-				ValidatorIndex: 0,
-				Epoch:          0,
-			},
-		},
-	}
+	exits := []*ethpb.VoluntaryExit{{ValidatorIndex: 0, Epoch: 0}}
 	registry := []*ethpb.Validator{
 		{
 			ExitEpoch: params.BeaconConfig().FarFutureEpoch,
@@ -50,13 +43,7 @@ func TestProcessVoluntaryExits_NotActiveLongEnoughToExit(t *testing.T) {
 }
 
 func TestProcessVoluntaryExits_ExitAlreadySubmitted(t *testing.T) {
-	exits := []*ethpb.SignedVoluntaryExit{
-		{
-			Exit: &ethpb.VoluntaryExit{
-				Epoch: 10,
-			},
-		},
-	}
+	exits := []*ethpb.VoluntaryExit{{Epoch: 10}}
 	registry := []*ethpb.Validator{
 		{
 			ExitEpoch: 10,
@@ -80,13 +67,10 @@ func TestProcessVoluntaryExits_ExitAlreadySubmitted(t *testing.T) {
 }
 
 func TestProcessVoluntaryExits_AppliesCorrectStatus(t *testing.T) {
-	exits := []*ethpb.SignedVoluntaryExit{
-		{
-			Exit: &ethpb.VoluntaryExit{
-				ValidatorIndex: 0,
-				Epoch:          0,
-			},
-		},
+	exits := []*ethpb.VoluntaryExit{{
+		ValidatorIndex: 0,
+		Epoch:          0,
+	},
 	}
 	registry := []*ethpb.Validator{
 		{

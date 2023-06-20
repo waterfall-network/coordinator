@@ -238,7 +238,7 @@ func receiveEvents(eventChan <-chan *sse.Event, w http.ResponseWriter, req *http
 				}
 				msg.Data = attData
 			case events.VoluntaryExitTopic:
-				data = &signedVoluntaryExitJson{}
+				data = &voluntaryExitJson{}
 			case events.FinalizedCheckpointTopic:
 				data = &eventFinalizedCheckpointJson{}
 			case events.ChainReorgTopic:

@@ -85,8 +85,6 @@ func unmarshalledSSZ(t *testing.T, serializedBytes []byte, folderName string) (i
 		obj = &ethpb.SignedBeaconBlockBellatrix{}
 	case "SignedBeaconBlockHeader":
 		obj = &ethpb.SignedBeaconBlockHeader{}
-	case "SignedVoluntaryExit":
-		obj = &ethpb.SignedVoluntaryExit{}
 	case "SigningData":
 		obj = &ethpb.SigningData{}
 	case "Validator":

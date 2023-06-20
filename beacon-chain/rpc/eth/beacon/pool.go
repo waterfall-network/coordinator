@@ -259,7 +259,7 @@ func (bs *Server) ListPoolVoluntaryExits(ctx context.Context, _ *emptypb.Empty) 
 	}, nil
 }
 
-// SubmitVoluntaryExit submits SignedVoluntaryExit object to node's pool
+// SubmitVoluntaryExit submits VoluntaryExit object to node's pool
 // and if passes validation node MUST broadcast it to network.
 func (bs *Server) SubmitVoluntaryExit(ctx context.Context, req *ethpbv1.VoluntaryExit) (*emptypb.Empty, error) {
 	ctx, span := trace.StartSpan(ctx, "beacon.SubmitVoluntaryExit")

@@ -20,9 +20,6 @@ func (vs *Server) ProposeExit(ctx context.Context, req *ethpb.VoluntaryExit) (*e
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Could not get head state: %v", err)
 	}
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "voluntary exit does not exist")
-	}
 
 	// Confirm the validator is eligible to exit with the parameters provided.
 	val, err := s.ValidatorAtIndexReadOnly(req.ValidatorIndex)

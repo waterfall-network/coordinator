@@ -30,7 +30,7 @@ type blockData struct {
 	Attestations      []*ethpb.Attestation
 	ProposerSlashings []*ethpb.ProposerSlashing
 	AttesterSlashings []*ethpb.AttesterSlashing
-	VoluntaryExits    []*ethpb.SignedVoluntaryExit
+	VoluntaryExits    []*ethpb.VoluntaryExit
 }
 
 func (vs *Server) getPhase0BeaconBlock(ctx context.Context, req *ethpb.BlockRequest) (*ethpb.BeaconBlock, error) {
