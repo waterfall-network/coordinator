@@ -36,7 +36,7 @@ type AggregatedAttReceivedData struct {
 // ExitReceivedData is the data sent with ExitReceived events.
 type ExitReceivedData struct {
 	// Exit is the voluntary exit object.
-	Exit *ethpb.SignedVoluntaryExit
+	Exit *ethpb.VoluntaryExit
 }
 
 // SyncCommitteeContributionReceivedData is the data sent with SyncCommitteeContributionReceived objects.

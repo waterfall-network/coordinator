@@ -9,14 +9,11 @@ import (
 	mockChain "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain/testing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed"
 	opfeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/operation"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/signing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/voluntaryexits"
 	mockp2p "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/testing"
 	mockSync "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/sync/initial-sync/testing"
-	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
@@ -26,7 +23,7 @@ import (
 func TestProposeExit_Notification(t *testing.T) {
 	ctx := context.Background()
 
-	deposits, keys, err := util.DeterministicDepositsAndKeys(params.BeaconConfig().MinGenesisActiveValidatorCount)
+	deposits, _, err := util.DeterministicDepositsAndKeys(params.BeaconConfig().MinGenesisActiveValidatorCount)
 	require.NoError(t, err)
 	beaconState, err := transition.GenesisBeaconState(ctx, deposits, 0, &ethpb.Eth1Data{Candidates: make([]byte, 0), BlockHash: make([]byte, 32)})
 	require.NoError(t, err)
@@ -57,18 +54,14 @@ func TestProposeExit_Notification(t *testing.T) {
 
 	// Send the request, expect a result on the state feed.
 	validatorIndex := types.ValidatorIndex(0)
-	req := &ethpb.SignedVoluntaryExit{
-		Exit: &ethpb.VoluntaryExit{
-			Epoch:          epoch,
-			ValidatorIndex: validatorIndex,
-		},
+	req := &ethpb.VoluntaryExit{
+		Epoch:          epoch,
+		ValidatorIndex: validatorIndex,
 	}
-	req.Signature, err = signing.ComputeDomainAndSign(beaconState, epoch, req.Exit, params.BeaconConfig().DomainVoluntaryExit, keys[0])
-	require.NoError(t, err)
 
 	resp, err := server.ProposeExit(context.Background(), req)
 	require.NoError(t, err)
-	expectedRoot, err := req.Exit.HashTreeRoot()
+	expectedRoot, err := req.HashTreeRoot()
 	require.NoError(t, err)
 	assert.DeepEqual(t, expectedRoot[:], resp.ExitRoot)
 
@@ -81,7 +74,7 @@ func TestProposeExit_Notification(t *testing.T) {
 				notificationFound = true
 				data, ok := event.Data.(*opfeed.ExitReceivedData)
 				assert.Equal(t, true, ok, "Entity is of the wrong type")
-				assert.NotNil(t, data.Exit)
+				assert.NotNil(t, data)
 			}
 		case <-opSub.Err():
 			t.Error("Subscription to state notifier failed")
@@ -93,7 +86,7 @@ func TestProposeExit_Notification(t *testing.T) {
 func TestProposeExit_NoPanic(t *testing.T) {
 	ctx := context.Background()
 
-	deposits, keys, err := util.DeterministicDepositsAndKeys(params.BeaconConfig().MinGenesisActiveValidatorCount)
+	deposits, _, err := util.DeterministicDepositsAndKeys(params.BeaconConfig().MinGenesisActiveValidatorCount)
 	require.NoError(t, err)
 	beaconState, err := transition.GenesisBeaconState(ctx, deposits, 0, &ethpb.Eth1Data{BlockHash: make([]byte, 32), Candidates: make([]byte, 0)})
 	require.NoError(t, err)
@@ -122,30 +115,27 @@ func TestProposeExit_NoPanic(t *testing.T) {
 	opSub := server.OperationNotifier.OperationFeed().Subscribe(opChannel)
 	defer opSub.Unsubscribe()
 
-	req := &ethpb.SignedVoluntaryExit{}
+	req := &ethpb.VoluntaryExit{}
 	_, err = server.ProposeExit(context.Background(), req)
 	require.ErrorContains(t, "voluntary exit does not exist", err, "Expected error for no exit existing")
 
 	// Send the request, expect a result on the state feed.
 	validatorIndex := types.ValidatorIndex(0)
-	req = &ethpb.SignedVoluntaryExit{
-		Exit: &ethpb.VoluntaryExit{
-			Epoch:          epoch,
-			ValidatorIndex: validatorIndex,
-		},
+	req = &ethpb.VoluntaryExit{
+		Epoch:          epoch,
+		ValidatorIndex: validatorIndex,
 	}
 
 	_, err = server.ProposeExit(context.Background(), req)
 	require.ErrorContains(t, "invalid signature provided", err, "Expected error for no signature exists")
-	req.Signature = bytesutil.FromBytes48([fieldparams.BLSPubkeyLength]byte{})
 
 	_, err = server.ProposeExit(context.Background(), req)
 	require.ErrorContains(t, "invalid signature provided", err, "Expected error for invalid signature length")
-	req.Signature, err = signing.ComputeDomainAndSign(beaconState, epoch, req.Exit, params.BeaconConfig().DomainVoluntaryExit, keys[0])
+
 	require.NoError(t, err)
 	resp, err := server.ProposeExit(context.Background(), req)
 	require.NoError(t, err)
-	expectedRoot, err := req.Exit.HashTreeRoot()
+	expectedRoot, err := req.HashTreeRoot()
 	require.NoError(t, err)
 	assert.DeepEqual(t, expectedRoot[:], resp.ExitRoot)
 }

@@ -230,22 +230,22 @@ func TestCopyDepositData(t *testing.T) {
 	assert.NotEmpty(t, got, "Copied deposit data has empty fields")
 }
 
-func TestCopySignedVoluntaryExits(t *testing.T) {
-	sv := genSignedVoluntaryExits(10)
+func TestCopyVoluntaryExits(t *testing.T) {
+	sv := genVoluntaryExits(10)
 
-	got := v1alpha1.CopySignedVoluntaryExits(sv)
+	got := v1alpha1.CopyVoluntaryExits(sv)
 	if !reflect.DeepEqual(got, sv) {
-		t.Errorf("CopySignedVoluntaryExits() = %v, want %v", got, sv)
+		t.Errorf("CopyVoluntaryExits() = %v, want %v", got, sv)
 	}
 	assert.NotEmpty(t, got, "Copied signed voluntary exits have empty fields")
 }
 
-func TestCopySignedVoluntaryExit(t *testing.T) {
-	sv := genSignedVoluntaryExit()
+func TestCopyVoluntaryExit(t *testing.T) {
+	sv := genVoluntaryExit()
 
-	got := v1alpha1.CopySignedVoluntaryExit(sv)
+	got := v1alpha1.CopyVoluntaryExit(sv)
 	if !reflect.DeepEqual(got, sv) {
-		t.Errorf("CopySignedVoluntaryExit() = %v, want %v", got, sv)
+		t.Errorf("CopyVoluntaryExit() = %v, want %v", got, sv)
 	}
 	assert.NotEmpty(t, got, "Copied signed voluntary exit has empty fields")
 }
@@ -519,7 +519,7 @@ func genBeaconBlockBody() *v1alpha1.BeaconBlockBody {
 		AttesterSlashings: genAttesterSlashings(5),
 		Attestations:      genAttestations(5),
 		Deposits:          genDeposits(5),
-		VoluntaryExits:    genSignedVoluntaryExits(5),
+		VoluntaryExits:    genVoluntaryExits(5),
 	}
 }
 
@@ -610,17 +610,10 @@ func genVoluntaryExit() *v1alpha1.VoluntaryExit {
 	}
 }
 
-func genSignedVoluntaryExit() *v1alpha1.SignedVoluntaryExit {
-	return &v1alpha1.SignedVoluntaryExit{
-		Exit:      genVoluntaryExit(),
-		Signature: bytes(),
-	}
-}
-
-func genSignedVoluntaryExits(num int) []*v1alpha1.SignedVoluntaryExit {
-	sv := make([]*v1alpha1.SignedVoluntaryExit, num)
+func genVoluntaryExits(num int) []*v1alpha1.VoluntaryExit {
+	sv := make([]*v1alpha1.VoluntaryExit, num)
 	for i := 0; i < num; i++ {
-		sv[i] = genSignedVoluntaryExit()
+		sv[i] = genVoluntaryExit()
 	}
 	return sv
 }
@@ -664,7 +657,7 @@ func genBeaconBlockBodyAltair() *v1alpha1.BeaconBlockBodyAltair {
 		AttesterSlashings: genAttesterSlashings(5),
 		Attestations:      genAttestations(10),
 		Deposits:          genDeposits(5),
-		VoluntaryExits:    genSignedVoluntaryExits(12),
+		VoluntaryExits:    genVoluntaryExits(12),
 		SyncAggregate:     genSyncAggregate(),
 	}
 }
@@ -695,7 +688,7 @@ func genBeaconBlockBodyBellatrix() *v1alpha1.BeaconBlockBodyBellatrix {
 		AttesterSlashings: genAttesterSlashings(5),
 		Attestations:      genAttestations(10),
 		Deposits:          genDeposits(5),
-		VoluntaryExits:    genSignedVoluntaryExits(12),
+		VoluntaryExits:    genVoluntaryExits(12),
 		SyncAggregate:     genSyncAggregate(),
 		ExecutionPayload:  genPayload(),
 	}
@@ -727,7 +720,7 @@ func genBlindedBeaconBlockBodyBellatrix() *v1alpha1.BlindedBeaconBlockBodyBellat
 		AttesterSlashings:      genAttesterSlashings(5),
 		Attestations:           genAttestations(10),
 		Deposits:               genDeposits(5),
-		VoluntaryExits:         genSignedVoluntaryExits(12),
+		VoluntaryExits:         genVoluntaryExits(12),
 		SyncAggregate:          genSyncAggregate(),
 		ExecutionPayloadHeader: genPayloadHeader(),
 	}

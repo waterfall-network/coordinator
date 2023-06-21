@@ -55,7 +55,7 @@ func Test_logStateTransitionData(t *testing.T) {
 		},
 		{name: "has exit",
 			b: wrapper.WrappedPhase0BeaconBlock(&ethpb.BeaconBlock{Body: &ethpb.BeaconBlockBody{
-				VoluntaryExits: []*ethpb.SignedVoluntaryExit{{}}}}),
+				VoluntaryExits: []*ethpb.VoluntaryExit{{}}}}),
 			want: "\"Finished applying state transition\" prefix=blockchain slot=0 voluntaryExits=1",
 		},
 		{name: "has everything",
@@ -64,7 +64,7 @@ func Test_logStateTransitionData(t *testing.T) {
 				Deposits:          []*ethpb.Deposit{{}},
 				AttesterSlashings: []*ethpb.AttesterSlashing{{}},
 				ProposerSlashings: []*ethpb.ProposerSlashing{{}},
-				VoluntaryExits:    []*ethpb.SignedVoluntaryExit{{}}}}),
+				VoluntaryExits:    []*ethpb.VoluntaryExit{{}}}}),
 			want: "\"Finished applying state transition\" attestations=1 attesterSlashings=1 deposits=1 prefix=blockchain proposerSlashings=1 slot=0 voluntaryExits=1",
 		},
 		{name: "has payload",

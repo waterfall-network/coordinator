@@ -142,7 +142,7 @@ message BeaconBlockBodyBellatrix {
   repeated v1.Deposit deposits = 7 [(ethereum.eth.ext.ssz_max) = "16"];
 
   // At most MAX_VOLUNTARY_EXITS.
-  repeated v1.SignedVoluntaryExit voluntary_exits = 8 [(ethereum.eth.ext.ssz_max) = "16"];
+  repeated v1.VoluntaryExit voluntary_exits = 8 [(ethereum.eth.ext.ssz_max) = "16"];
 
   // Sync aggregate object to track sync committee votes for light client support. 
   v1.SyncAggregate sync_aggregate = 9;
@@ -178,7 +178,7 @@ message BeaconBlockBodyAltair {
   repeated v1.Deposit deposits = 7 [(ethereum.eth.ext.ssz_max) = "16"];
 
   // At most MAX_VOLUNTARY_EXITS.
-  repeated v1.SignedVoluntaryExit voluntary_exits = 8 [(ethereum.eth.ext.ssz_max) = "16"];
+  repeated v1.VoluntaryExit voluntary_exits = 8 [(ethereum.eth.ext.ssz_max) = "16"];
 
   // Sync aggregate object to track sync committee votes for light client support. [New in ]
   v1.SyncAggregate sync_aggregate = 9;

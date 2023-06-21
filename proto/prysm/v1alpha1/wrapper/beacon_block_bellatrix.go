@@ -280,7 +280,7 @@ func (w bellatrixBeaconBlockBody) Deposits() []*eth.Deposit {
 }
 
 // VoluntaryExits returns the voluntary exits in the block.
-func (w bellatrixBeaconBlockBody) VoluntaryExits() []*eth.SignedVoluntaryExit {
+func (w bellatrixBeaconBlockBody) VoluntaryExits() []*eth.VoluntaryExit {
 	return w.b.VoluntaryExits
 }
 

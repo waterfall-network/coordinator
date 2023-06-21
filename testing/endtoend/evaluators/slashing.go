@@ -265,7 +265,7 @@ func proposeDoubleBlock(conns ...*grpc.ClientConn) error {
 			AttesterSlashings: []*eth.AttesterSlashing{},
 			Attestations:      []*eth.Attestation{},
 			Deposits:          []*eth.Deposit{},
-			VoluntaryExits:    []*eth.SignedVoluntaryExit{},
+			VoluntaryExits:    []*eth.VoluntaryExit{},
 		},
 	}
 

@@ -47,7 +47,7 @@ func TestExitAccountsCli_OK(t *testing.T) {
 		Return(&ethpb.DomainResponse{SignatureDomain: make([]byte, 32)}, nil)
 
 	mockValidatorClient.EXPECT().
-		ProposeExit(gomock.Any(), gomock.AssignableToTypeOf(&ethpb.SignedVoluntaryExit{})).
+		ProposeExit(gomock.Any(), gomock.AssignableToTypeOf(&ethpb.VoluntaryExit{})).
 		Return(&ethpb.ProposeExitResponse{}, nil)
 
 	walletDir, _, passwordFilePath := setupWalletAndPasswordsDir(t)
@@ -139,7 +139,7 @@ func TestExitAccountsCli_OK_AllPublicKeys(t *testing.T) {
 		Return(&ethpb.DomainResponse{SignatureDomain: make([]byte, 32)}, nil)
 
 	mockValidatorClient.EXPECT().
-		ProposeExit(gomock.Any(), gomock.AssignableToTypeOf(&ethpb.SignedVoluntaryExit{})).
+		ProposeExit(gomock.Any(), gomock.AssignableToTypeOf(&ethpb.VoluntaryExit{})).
 		Times(2).
 		Return(&ethpb.ProposeExitResponse{}, nil)
 

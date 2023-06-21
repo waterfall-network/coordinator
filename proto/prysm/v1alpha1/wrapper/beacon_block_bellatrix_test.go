@@ -301,9 +301,7 @@ func TestBellatrixBeaconBlockBody_Deposits(t *testing.T) {
 }
 
 func TestBellatrixBeaconBlockBody_VoluntaryExits(t *testing.T) {
-	exits := []*ethpb.SignedVoluntaryExit{
-		{Exit: &ethpb.VoluntaryExit{Epoch: 54}},
-	}
+	exits := []*ethpb.VoluntaryExit{{Epoch: 54}}
 	body := &ethpb.BeaconBlockBodyBellatrix{VoluntaryExits: exits}
 	wbb, err := wrapper.WrappedBellatrixBeaconBlockBody(body)
 	require.NoError(t, err)

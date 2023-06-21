@@ -9,7 +9,6 @@ import (
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	corehelpers "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/signing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
@@ -19,7 +18,6 @@ import (
 	e2e "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/policies"
 	e2etypes "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/types"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
 	"golang.org/x/exp/rand"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -292,11 +290,6 @@ func proposeVoluntaryExit(conns ...*grpc.ClientConn) error {
 		return errors.Wrap(err, "could not get chain head")
 	}
 
-	_, privKeys, err := util.DeterministicDepositsAndKeys(params.BeaconConfig().MinGenesisActiveValidatorCount)
-	if err != nil {
-		return err
-	}
-
 	exitedIndex = types.ValidatorIndex(rand.Uint64() % params.BeaconConfig().MinGenesisActiveValidatorCount)
 	valExited = true
 
@@ -304,25 +297,8 @@ func proposeVoluntaryExit(conns ...*grpc.ClientConn) error {
 		Epoch:          chainHead.HeadEpoch,
 		ValidatorIndex: exitedIndex,
 	}
-	req := &ethpb.DomainRequest{
-		Epoch:  chainHead.HeadEpoch,
-		Domain: params.BeaconConfig().DomainVoluntaryExit[:],
-	}
-	domain, err := valClient.DomainData(ctx, req)
-	if err != nil {
-		return err
-	}
-	signingData, err := signing.ComputeSigningRoot(voluntaryExit, domain.SignatureDomain)
-	if err != nil {
-		return err
-	}
-	signature := privKeys[exitedIndex].Sign(signingData[:])
-	signedExit := &ethpb.SignedVoluntaryExit{
-		Exit:      voluntaryExit,
-		Signature: signature.Marshal(),
-	}
 
-	if _, err = valClient.ProposeExit(ctx, signedExit); err != nil {
+	if _, err = valClient.ProposeExit(ctx, voluntaryExit); err != nil {
 		return errors.Wrap(err, "could not propose exit")
 	}
 	return nil
