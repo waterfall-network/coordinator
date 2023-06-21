@@ -205,7 +205,6 @@ func run(ctx context.Context, v iface.Validator) {
 						switch role {
 						case iface.RoleAttester:
 							v.SubmitAttestation(slotCtx, slot, pubKey)
-							v.SubmitPrevote(slotCtx, slot-1, pubKey)
 						case iface.RoleProposer:
 							v.ProposeBlock(slotCtx, slot, pubKey)
 						case iface.RoleAggregator:
@@ -218,6 +217,24 @@ func run(ctx context.Context, v iface.Validator) {
 							log.WithField("pubKey", fmt.Sprintf("%#x", bytesutil.Trunc(pubKey[:]))).Trace("No active roles, doing nothing")
 						default:
 							log.Warnf("Unhandled role %v", role)
+						}
+					}(role, pubKey)
+				}
+			}
+			//todo check flow
+			nextRoles, err := v.RolesAt(ctx, slot+1)
+			if err != nil {
+				log.WithError(err).Error("Could not get validator next roles")
+				span.End()
+				continue
+			}
+			for pubKey, roles := range nextRoles {
+				wg.Add(len(roles))
+				for _, role := range roles {
+					go func(role iface.ValidatorRole, pubKey [fieldparams.BLSPubkeyLength]byte) {
+						defer wg.Done()
+						if role == iface.RoleAttester {
+							v.SubmitPrevote(slotCtx, slot, pubKey)
 						}
 					}(role, pubKey)
 				}
