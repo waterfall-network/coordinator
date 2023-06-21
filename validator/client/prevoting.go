@@ -3,6 +3,8 @@ package client
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/go-bitfield"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/async"
@@ -16,7 +18,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/client/iface"
 	"go.opencensus.io/trace"
-	"strings"
 )
 
 // SubmitPrevote completes the validator client's prevote responsibility at a given slot.
@@ -28,17 +29,15 @@ func (v *validator) SubmitPrevote(ctx context.Context, slot types.Slot, pubKey [
 	defer span.End()
 	span.AddAttributes(trace.StringAttribute("validator", fmt.Sprintf("%#x", pubKey)))
 
-	v.waitOneThirdOrValidBlock(ctx, slot)
-
 	var b strings.Builder
 	if err := b.WriteByte(byte(iface.RoleAttester)); err != nil {
-		log.WithError(err).Error("Could not write role byte for lock key")
+		log.WithError(err).Error("Could not write role byte for lock key while prevote")
 		tracing.AnnotateError(span, err)
 		return
 	}
 	_, err := b.Write(pubKey[:])
 	if err != nil {
-		log.WithError(err).Error("Could not write pubkey bytes for lock key")
+		log.WithError(err).Error("Could not write pubkey bytes for lock key while prevote")
 		tracing.AnnotateError(span, err)
 		return
 	}
@@ -50,7 +49,7 @@ func (v *validator) SubmitPrevote(ctx context.Context, slot types.Slot, pubKey [
 	log := log.WithField("pubKey", fmt.Sprintf("%#x", bytesutil.Trunc(pubKey[:]))).WithField("slot", slot)
 	duty, err := v.duty(pubKey)
 	if err != nil {
-		log.WithError(err).Error("Could not fetch validator assignment")
+		log.WithError(err).Error("Could not fetch validator assignment while prevote")
 		if v.emitAccountMetrics {
 			ValidatorAttestFailVec.WithLabelValues(fmtKey).Inc()
 		}
@@ -58,7 +57,7 @@ func (v *validator) SubmitPrevote(ctx context.Context, slot types.Slot, pubKey [
 		return
 	}
 	if len(duty.Committee) == 0 {
-		log.Debug("Empty committee for validator duty, not attesting")
+		log.Warnf("Empty committee for validator prevote")
 		return
 	}
 
@@ -83,7 +82,7 @@ func (v *validator) SubmitPrevote(ctx context.Context, slot types.Slot, pubKey [
 
 	domain, signingRoot, err := v.getDomainAndSigningRootPrevote(ctx, indexedPrevote.Data)
 	if err != nil {
-		log.WithError(err).Error("Could not get domain and signing root from attestation")
+		log.WithError(err).Error("Could not get domain and signing root from prevote")
 		if v.emitAccountMetrics {
 			ValidatorAttestFailVec.WithLabelValues(fmtKey).Inc()
 		}

@@ -234,7 +234,7 @@ func run(ctx context.Context, v iface.Validator) {
 					go func(role iface.ValidatorRole, pubKey [fieldparams.BLSPubkeyLength]byte) {
 						defer wg.Done()
 						if role == iface.RoleAttester {
-							v.SubmitPrevote(slotCtx, slot, pubKey)
+							v.SubmitPrevote(slotCtx, slot+1, pubKey)
 						}
 					}(role, pubKey)
 				}
