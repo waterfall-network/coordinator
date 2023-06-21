@@ -1,12 +1,13 @@
 package prevote
 
 import (
+	"sync"
+	"time"
+
 	"github.com/patrickmn/go-cache"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
-	"sync"
-	"time"
 )
 
 var hashFn = hash.HashProto

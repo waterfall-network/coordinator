@@ -3,14 +3,15 @@ package cache
 import (
 	"context"
 	"fmt"
+	"math"
+	"sync"
+	"time"
+
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"k8s.io/client-go/tools/cache"
-	"math"
-	"sync"
-	"time"
 )
 
 var (
