@@ -271,7 +271,7 @@ func NewBeaconBlockAltair() *ethpb.SignedBeaconBlockAltair {
 				AttesterSlashings: []*ethpb.AttesterSlashing{},
 				Deposits:          []*ethpb.Deposit{},
 				ProposerSlashings: []*ethpb.ProposerSlashing{},
-				VoluntaryExits:    []*ethpb.SignedVoluntaryExit{},
+				VoluntaryExits:    []*ethpb.VoluntaryExit{},
 				SyncAggregate: &ethpb.SyncAggregate{
 					SyncCommitteeBits:      make([]byte, len(bitfield.NewBitvector512())),
 					SyncCommitteeSignature: make([]byte, 96),
@@ -380,7 +380,7 @@ func GenerateFullBlockAltair(
 	}
 
 	numToGen = conf.NumVoluntaryExits
-	var exits []*ethpb.SignedVoluntaryExit
+	var exits []*ethpb.VoluntaryExit
 	if numToGen > 0 {
 		exits, err = generateVoluntaryExits(bState, privs, numToGen)
 		if err != nil {

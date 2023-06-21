@@ -117,7 +117,7 @@ func MapBeaconBlockBody(body *ethpb.BeaconBlockBody) (*BeaconBlockBody, error) {
 		AttesterSlashings: make([]*AttesterSlashing, len(body.AttesterSlashings)),
 		Attestations:      make([]*Attestation, len(body.Attestations)),
 		Deposits:          make([]*Deposit, len(body.Deposits)),
-		VoluntaryExits:    make([]*SignedVoluntaryExit, len(body.VoluntaryExits)),
+		VoluntaryExits:    make([]*VoluntaryExit, len(body.VoluntaryExits)),
 	}
 	for i, slashing := range body.ProposerSlashings {
 		slashing, err := MapProposerSlashing(slashing)
@@ -147,12 +147,12 @@ func MapBeaconBlockBody(body *ethpb.BeaconBlockBody) (*BeaconBlockBody, error) {
 		}
 		block.Deposits[i] = deposit
 	}
-	for i, signedVoluntaryExit := range body.VoluntaryExits {
-		signedVoluntaryExit, err := MapSignedVoluntaryExit(signedVoluntaryExit)
+	for i, voluntaryExit := range body.VoluntaryExits {
+		voluntaryExit, err := MapVoluntaryExit(voluntaryExit)
 		if err != nil {
 			return nil, fmt.Errorf("could not map signed voluntary exit at index %v: %v", i, err)
 		}
-		block.VoluntaryExits[i] = signedVoluntaryExit
+		block.VoluntaryExits[i] = voluntaryExit
 	}
 	return block, nil
 }
@@ -272,22 +272,14 @@ func MapDeposit(deposit *ethpb.Deposit) (*Deposit, error) {
 	}, nil
 }
 
-// MapSignedVoluntaryExit maps the eth2.SignedVoluntaryExit proto to the Web3Signer spec.
-func MapSignedVoluntaryExit(signedVoluntaryExit *ethpb.SignedVoluntaryExit) (*SignedVoluntaryExit, error) {
-	if signedVoluntaryExit == nil {
-		return nil, fmt.Errorf("signed voluntary exit is nil")
+// MapVoluntaryExit maps the eth2.VoluntaryExit proto to the Web3Signer spec.
+func MapVoluntaryExit(voluntaryExit *ethpb.VoluntaryExit) (*VoluntaryExit, error) {
+	if voluntaryExit == nil {
+		return nil, fmt.Errorf("voluntary exit is nil")
 	}
-	if signedVoluntaryExit.Exit == nil {
-		return nil, fmt.Errorf("exit in signed voluntary exit is nil")
-	}
-	return &SignedVoluntaryExit{
-		Message: &VoluntaryExit{
-			Epoch:          fmt.Sprint(signedVoluntaryExit.Exit.Epoch),
-			ValidatorIndex: fmt.Sprint(signedVoluntaryExit.Exit.ValidatorIndex),
-		},
-		Signature: hexutil.Encode(
-			signedVoluntaryExit.Signature,
-		),
+	return &VoluntaryExit{
+		Epoch:          fmt.Sprint(voluntaryExit.Epoch),
+		ValidatorIndex: fmt.Sprint(voluntaryExit.ValidatorIndex),
 	}, nil
 }
 
@@ -338,7 +330,7 @@ func MapBeaconBlockBodyAltair(body *ethpb.BeaconBlockBodyAltair) (*BeaconBlockBo
 		AttesterSlashings: make([]*AttesterSlashing, len(body.AttesterSlashings)),
 		Attestations:      make([]*Attestation, len(body.Attestations)),
 		Deposits:          make([]*Deposit, len(body.Deposits)),
-		VoluntaryExits:    make([]*SignedVoluntaryExit, len(body.VoluntaryExits)),
+		VoluntaryExits:    make([]*VoluntaryExit, len(body.VoluntaryExits)),
 		SyncAggregate: &SyncAggregate{
 			SyncCommitteeBits:      hexutil.Encode(body.SyncAggregate.SyncCommitteeBits),
 			SyncCommitteeSignature: hexutil.Encode(body.SyncAggregate.SyncCommitteeSignature),
@@ -374,7 +366,7 @@ func MapBeaconBlockBodyAltair(body *ethpb.BeaconBlockBodyAltair) (*BeaconBlockBo
 	}
 	for i, exit := range body.VoluntaryExits {
 
-		exit, err := MapSignedVoluntaryExit(exit)
+		exit, err := MapVoluntaryExit(exit)
 		if err != nil {
 			return nil, fmt.Errorf("could not map signed voluntary exit at index %v: %v", i, err)
 		}

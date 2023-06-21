@@ -281,7 +281,7 @@ func (w blindedBeaconBlockBodyBellatrix) Deposits() []*eth.Deposit {
 }
 
 // VoluntaryExits returns the voluntary exits in the block.
-func (w blindedBeaconBlockBodyBellatrix) VoluntaryExits() []*eth.SignedVoluntaryExit {
+func (w blindedBeaconBlockBodyBellatrix) VoluntaryExits() []*eth.VoluntaryExit {
 	return w.b.VoluntaryExits
 }
 

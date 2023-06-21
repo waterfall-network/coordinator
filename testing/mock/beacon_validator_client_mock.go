@@ -308,7 +308,7 @@ func (mr *MockBeaconNodeValidatorClientMockRecorder) ProposeBlock(arg0, arg1 int
 }
 
 // ProposeExit mocks base method
-func (m *MockBeaconNodeValidatorClient) ProposeExit(arg0 context.Context, arg1 *eth.SignedVoluntaryExit, arg2 ...grpc.CallOption) (*eth.ProposeExitResponse, error) {
+func (m *MockBeaconNodeValidatorClient) ProposeExit(arg0 context.Context, arg1 *eth.VoluntaryExit, arg2 ...grpc.CallOption) (*eth.ProposeExitResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {

@@ -304,9 +304,7 @@ func TestAltairBeaconBlockBody_Deposits(t *testing.T) {
 }
 
 func TestAltairBeaconBlockBody_VoluntaryExits(t *testing.T) {
-	exits := []*ethpb.SignedVoluntaryExit{
-		{Exit: &ethpb.VoluntaryExit{Epoch: 54}},
-	}
+	exits := []*ethpb.VoluntaryExit{{Epoch: 54}}
 	body := &ethpb.BeaconBlockBodyAltair{VoluntaryExits: exits}
 	wbb, err := wrapper.WrappedAltairBeaconBlockBody(body)
 	require.NoError(t, err)

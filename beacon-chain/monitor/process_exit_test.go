@@ -19,18 +19,14 @@ func TestProcessExitsFromBlockTrackedIndices(t *testing.T) {
 		},
 	}
 
-	exits := []*ethpb.SignedVoluntaryExit{
+	exits := []*ethpb.VoluntaryExit{
 		{
-			Exit: &ethpb.VoluntaryExit{
-				ValidatorIndex: 3,
-				Epoch:          1,
-			},
+			ValidatorIndex: 3,
+			Epoch:          1,
 		},
 		{
-			Exit: &ethpb.VoluntaryExit{
-				ValidatorIndex: 2,
-				Epoch:          0,
-			},
+			ValidatorIndex: 2,
+			Epoch:          0,
 		},
 	}
 
@@ -53,18 +49,14 @@ func TestProcessExitsFromBlockUntrackedIndices(t *testing.T) {
 		},
 	}
 
-	exits := []*ethpb.SignedVoluntaryExit{
+	exits := []*ethpb.VoluntaryExit{
 		{
-			Exit: &ethpb.VoluntaryExit{
-				ValidatorIndex: 3,
-				Epoch:          1,
-			},
+			ValidatorIndex: 3,
+			Epoch:          1,
 		},
 		{
-			Exit: &ethpb.VoluntaryExit{
-				ValidatorIndex: 4,
-				Epoch:          0,
-			},
+			ValidatorIndex: 4,
+			Epoch:          0,
 		},
 	}
 
@@ -87,12 +79,9 @@ func TestProcessExitP2PTrackedIndices(t *testing.T) {
 		},
 	}
 
-	exit := &ethpb.SignedVoluntaryExit{
-		Exit: &ethpb.VoluntaryExit{
-			ValidatorIndex: 1,
-			Epoch:          1,
-		},
-		Signature: make([]byte, 96),
+	exit := &ethpb.VoluntaryExit{
+		ValidatorIndex: 1,
+		Epoch:          1,
 	}
 	s.processExit(exit)
 	require.LogsContain(t, hook, "\"Voluntary exit was processed\" ValidatorIndex=1")
@@ -107,11 +96,9 @@ func TestProcessExitP2PUntrackedIndices(t *testing.T) {
 		},
 	}
 
-	exit := &ethpb.SignedVoluntaryExit{
-		Exit: &ethpb.VoluntaryExit{
-			ValidatorIndex: 3,
-			Epoch:          1,
-		},
+	exit := &ethpb.VoluntaryExit{
+		ValidatorIndex: 3,
+		Epoch:          1,
 	}
 	s.processExit(exit)
 	require.LogsDoNotContain(t, hook, "\"Voluntary exit was processed\"")

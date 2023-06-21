@@ -189,7 +189,7 @@ func CopyBeaconBlockBody(body *BeaconBlockBody) *BeaconBlockBody {
 		AttesterSlashings: CopyAttesterSlashings(body.AttesterSlashings),
 		Attestations:      CopyAttestations(body.Attestations),
 		Deposits:          CopyDeposits(body.Deposits),
-		VoluntaryExits:    CopySignedVoluntaryExits(body.VoluntaryExits),
+		VoluntaryExits:    CopyVoluntaryExits(body.VoluntaryExits),
 	}
 }
 
@@ -231,7 +231,7 @@ func CopyBeaconBlockBodyAltair(body *BeaconBlockBodyAltair) *BeaconBlockBodyAlta
 		AttesterSlashings: CopyAttesterSlashings(body.AttesterSlashings),
 		Attestations:      CopyAttestations(body.Attestations),
 		Deposits:          CopyDeposits(body.Deposits),
-		VoluntaryExits:    CopySignedVoluntaryExits(body.VoluntaryExits),
+		VoluntaryExits:    CopyVoluntaryExits(body.VoluntaryExits),
 		SyncAggregate:     CopySyncAggregate(body.SyncAggregate),
 	}
 }
@@ -367,29 +367,26 @@ func CopyDepositData(depData *Deposit_Data) *Deposit_Data {
 	}
 }
 
-// CopySignedVoluntaryExits copies the provided SignedVoluntaryExits array.
-func CopySignedVoluntaryExits(exits []*SignedVoluntaryExit) []*SignedVoluntaryExit {
+// CopyVoluntaryExits copies the provided VoluntaryExits array.
+func CopyVoluntaryExits(exits []*VoluntaryExit) []*VoluntaryExit {
 	if exits == nil {
 		return nil
 	}
-	newExits := make([]*SignedVoluntaryExit, len(exits))
+	newExits := make([]*VoluntaryExit, len(exits))
 	for i, exit := range exits {
-		newExits[i] = CopySignedVoluntaryExit(exit)
+		newExits[i] = CopyVoluntaryExit(exit)
 	}
 	return newExits
 }
 
-// CopySignedVoluntaryExit copies the provided SignedVoluntaryExit.
-func CopySignedVoluntaryExit(exit *SignedVoluntaryExit) *SignedVoluntaryExit {
+// CopyVoluntaryExit copies the provided VoluntaryExit.
+func CopyVoluntaryExit(exit *VoluntaryExit) *VoluntaryExit {
 	if exit == nil {
 		return nil
 	}
-	return &SignedVoluntaryExit{
-		Exit: &VoluntaryExit{
-			Epoch:          exit.Exit.Epoch,
-			ValidatorIndex: exit.Exit.ValidatorIndex,
-		},
-		Signature: bytesutil.SafeCopyBytes(exit.Signature),
+	return &VoluntaryExit{
+		Epoch:          exit.Epoch,
+		ValidatorIndex: exit.ValidatorIndex,
 	}
 }
 
@@ -490,7 +487,7 @@ func CopyBeaconBlockBodyBellatrix(body *BeaconBlockBodyBellatrix) *BeaconBlockBo
 		AttesterSlashings: CopyAttesterSlashings(body.AttesterSlashings),
 		Attestations:      CopyAttestations(body.Attestations),
 		Deposits:          CopyDeposits(body.Deposits),
-		VoluntaryExits:    CopySignedVoluntaryExits(body.VoluntaryExits),
+		VoluntaryExits:    CopyVoluntaryExits(body.VoluntaryExits),
 		SyncAggregate:     CopySyncAggregate(body.SyncAggregate),
 		ExecutionPayload:  CopyExecutionPayload(body.ExecutionPayload),
 	}
@@ -581,7 +578,7 @@ func CopyBlindedBeaconBlockBodyBellatrix(body *BlindedBeaconBlockBodyBellatrix) 
 		AttesterSlashings:      CopyAttesterSlashings(body.AttesterSlashings),
 		Attestations:           CopyAttestations(body.Attestations),
 		Deposits:               CopyDeposits(body.Deposits),
-		VoluntaryExits:         CopySignedVoluntaryExits(body.VoluntaryExits),
+		VoluntaryExits:         CopyVoluntaryExits(body.VoluntaryExits),
 		SyncAggregate:          CopySyncAggregate(body.SyncAggregate),
 		ExecutionPayloadHeader: CopyExecutionPayloadHeader(body.ExecutionPayloadHeader),
 	}

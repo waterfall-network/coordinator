@@ -1404,7 +1404,7 @@ func local_request_BeaconChain_ListPoolVoluntaryExits_0(ctx context.Context, mar
 }
 
 func request_BeaconChain_SubmitVoluntaryExit_0(ctx context.Context, marshaler runtime.Marshaler, client BeaconChainClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq v1.SignedVoluntaryExit
+	var protoReq v1.VoluntaryExit
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -1421,7 +1421,7 @@ func request_BeaconChain_SubmitVoluntaryExit_0(ctx context.Context, marshaler ru
 }
 
 func local_request_BeaconChain_SubmitVoluntaryExit_0(ctx context.Context, marshaler runtime.Marshaler, server BeaconChainServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq v1.SignedVoluntaryExit
+	var protoReq v1.VoluntaryExit
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)

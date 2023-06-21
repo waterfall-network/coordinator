@@ -86,8 +86,6 @@ func main() {
 					data = &ethpb.ProposerSlashing{}
 				case "signed_block_header":
 					data = &ethpb.SignedBeaconBlockHeader{}
-				case "signed_voluntary_exit":
-					data = &ethpb.SignedVoluntaryExit{}
 				case "voluntary_exit":
 					data = &ethpb.VoluntaryExit{}
 				case "state":

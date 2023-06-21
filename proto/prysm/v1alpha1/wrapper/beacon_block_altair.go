@@ -285,7 +285,7 @@ func (w altairBeaconBlockBody) Deposits() []*eth.Deposit {
 }
 
 // VoluntaryExits returns the voluntary exits in the block.
-func (w altairBeaconBlockBody) VoluntaryExits() []*eth.SignedVoluntaryExit {
+func (w altairBeaconBlockBody) VoluntaryExits() []*eth.VoluntaryExit {
 	return w.b.VoluntaryExits
 }
 

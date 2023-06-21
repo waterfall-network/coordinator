@@ -195,13 +195,7 @@ func ProposeExit(
 	currentEpoch := types.Epoch(uint64(totalSecondsPassed) / uint64(params.BeaconConfig().SlotsPerEpoch.Mul(params.BeaconConfig().SecondsPerSlot)))
 
 	exit := &ethpb.VoluntaryExit{Epoch: currentEpoch, ValidatorIndex: indexResponse.Index}
-	sig, err := signVoluntaryExit(ctx, validatorClient, signer, pubKey, exit)
-	if err != nil {
-		return errors.Wrap(err, "failed to sign voluntary exit")
-	}
-
-	signedExit := &ethpb.SignedVoluntaryExit{Exit: exit, Signature: sig}
-	exitResp, err := validatorClient.ProposeExit(ctx, signedExit)
+	exitResp, err := validatorClient.ProposeExit(ctx, exit)
 	if err != nil {
 		return errors.Wrap(err, "failed to propose voluntary exit")
 	}
@@ -268,44 +262,6 @@ func (v *validator) signBlock(ctx context.Context, pubKey [fieldparams.BLSPubkey
 		return nil, [32]byte{}, errors.Wrap(err, "could not sign block proposal")
 	}
 	return sig.Marshal(), blockRoot, nil
-}
-
-// Sign voluntary exit with proposer domain and private key.
-func signVoluntaryExit(
-	ctx context.Context,
-	validatorClient ethpb.BeaconNodeValidatorClient,
-	signer signingFunc,
-	pubKey []byte,
-	exit *ethpb.VoluntaryExit,
-) ([]byte, error) {
-	req := &ethpb.DomainRequest{
-		Epoch:  exit.Epoch,
-		Domain: params.BeaconConfig().DomainVoluntaryExit[:],
-	}
-
-	domain, err := validatorClient.DomainData(ctx, req)
-	if err != nil {
-		return nil, errors.Wrap(err, domainDataErr)
-	}
-	if domain == nil {
-		return nil, errors.New(domainDataErr)
-	}
-
-	exitRoot, err := signing.ComputeSigningRoot(exit, domain.SignatureDomain)
-	if err != nil {
-		return nil, errors.Wrap(err, signingRootErr)
-	}
-
-	sig, err := signer(ctx, &validatorpb.SignRequest{
-		PublicKey:       pubKey,
-		SigningRoot:     exitRoot[:],
-		SignatureDomain: domain.SignatureDomain,
-		Object:          &validatorpb.SignRequest_Exit{Exit: exit},
-	})
-	if err != nil {
-		return nil, errors.Wrap(err, signExitErr)
-	}
-	return sig.Marshal(), nil
 }
 
 // Gets the graffiti from cli or file for the validator public key.

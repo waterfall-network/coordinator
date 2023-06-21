@@ -10,15 +10,15 @@ import (
 )
 
 func (s *Service) voluntaryExitSubscriber(ctx context.Context, msg proto.Message) error {
-	ve, ok := msg.(*ethpb.SignedVoluntaryExit)
+	ve, ok := msg.(*ethpb.VoluntaryExit)
 	if !ok {
-		return fmt.Errorf("wrong type, expected: *ethpb.SignedVoluntaryExit got: %T", msg)
+		return fmt.Errorf("wrong type, expected: *ethpb.VoluntaryExit got: %T", msg)
 	}
 
-	if ve.Exit == nil {
+	if ve == nil {
 		return errors.New("exit can't be nil")
 	}
-	s.setExitIndexSeen(ve.Exit.ValidatorIndex)
+	s.setExitIndexSeen(ve.ValidatorIndex)
 
 	headState, err := s.cfg.chain.HeadState(ctx)
 	if err != nil {

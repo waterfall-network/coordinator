@@ -241,7 +241,7 @@ func (mr *MockBeaconNodeValidatorServerMockRecorder) ProposeBlock(arg0, arg1 int
 }
 
 // ProposeExit mocks base method
-func (m *MockBeaconNodeValidatorServer) ProposeExit(arg0 context.Context, arg1 *eth.SignedVoluntaryExit) (*eth.ProposeExitResponse, error) {
+func (m *MockBeaconNodeValidatorServer) ProposeExit(arg0 context.Context, arg1 *eth.VoluntaryExit) (*eth.ProposeExitResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ProposeExit", arg0, arg1)
 	ret0, _ := ret[0].(*eth.ProposeExitResponse)

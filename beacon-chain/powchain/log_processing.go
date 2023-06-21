@@ -126,15 +126,7 @@ func (s *Service) ProcessExitLog(ctx context.Context, exitLog gwatTypes.Log) err
 
 	exit := &ethpb.VoluntaryExit{Epoch: currentEpoch, ValidatorIndex: types.ValidatorIndex(valIndex)}
 
-	// add tx data as sig
-	adddata := make([]byte, 0, 96)
-	adddata = append(adddata, pubkey.Bytes()...)
-	adddata = append(adddata, exitLog.TxHash.Bytes()...)
-	adddata = append(adddata, bytesutil.ToBytes(exitLog.BlockNumber, 8)...)
-	adddata = append(adddata, bytesutil.ToBytes(uint64(exitLog.TxIndex), 8)...)
-	signedExit := &ethpb.SignedVoluntaryExit{Exit: exit, Signature: adddata}
-
-	s.cfg.exitPool.InsertVoluntaryExitByGwat(s.ctx, signedExit)
+	s.cfg.exitPool.InsertVoluntaryExitByGwat(s.ctx, exit)
 
 	return nil
 }

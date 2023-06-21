@@ -158,12 +158,9 @@ func TestStreamEvents_OperationsEvents(t *testing.T) {
 		srv, ctrl, mockStream := setupServer(ctx, t)
 		defer ctrl.Finish()
 
-		wantedExitV1alpha1 := &eth.SignedVoluntaryExit{
-			Exit: &eth.VoluntaryExit{
-				Epoch:          1,
-				ValidatorIndex: 1,
-			},
-			Signature: make([]byte, 96),
+		wantedExitV1alpha1 := &eth.VoluntaryExit{
+			Epoch:          1,
+			ValidatorIndex: 1,
 		}
 		wantedExit := migration.V1Alpha1ExitToV1(wantedExitV1alpha1)
 		genericResponse, err := anypb.New(wantedExit)

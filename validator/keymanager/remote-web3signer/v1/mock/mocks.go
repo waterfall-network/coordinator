@@ -197,13 +197,10 @@ func GetMockSignRequest(t string) *validatorpb.SignRequest {
 								},
 							},
 						},
-						VoluntaryExits: []*eth.SignedVoluntaryExit{
+						VoluntaryExits: []*eth.VoluntaryExit{
 							{
-								Exit: &eth.VoluntaryExit{
-									Epoch:          0,
-									ValidatorIndex: 0,
-								},
-								Signature: make([]byte, fieldparams.BLSSignatureLength),
+								Epoch:          0,
+								ValidatorIndex: 0,
 							},
 						},
 					},
@@ -312,13 +309,10 @@ func GetMockSignRequest(t string) *validatorpb.SignRequest {
 								},
 							},
 						},
-						VoluntaryExits: []*eth.SignedVoluntaryExit{
+						VoluntaryExits: []*eth.VoluntaryExit{
 							{
-								Exit: &eth.VoluntaryExit{
-									Epoch:          0,
-									ValidatorIndex: 0,
-								},
-								Signature: make([]byte, fieldparams.BLSSignatureLength),
+								Epoch:          0,
+								ValidatorIndex: 0,
 							},
 						},
 						SyncAggregate: &eth.SyncAggregate{
@@ -644,13 +638,10 @@ func MockBeaconBlockAltair() *v1.BeaconBlockAltair {
 					},
 				},
 			},
-			VoluntaryExits: []*v1.SignedVoluntaryExit{
+			VoluntaryExits: []*v1.VoluntaryExit{
 				{
-					Message: &v1.VoluntaryExit{
-						Epoch:          "0",
-						ValidatorIndex: "0",
-					},
-					Signature: hexutil.Encode(make([]byte, fieldparams.BLSSignatureLength)),
+					Epoch:          "0",
+					ValidatorIndex: "0",
 				},
 			},
 			SyncAggregate: &v1.SyncAggregate{
@@ -716,13 +707,10 @@ func MockBeaconBlockBody() *v1.BeaconBlockBody {
 				},
 			},
 		},
-		VoluntaryExits: []*v1.SignedVoluntaryExit{
+		VoluntaryExits: []*v1.VoluntaryExit{
 			{
-				Message: &v1.VoluntaryExit{
-					Epoch:          "0",
-					ValidatorIndex: "0",
-				},
-				Signature: hexutil.Encode(make([]byte, fieldparams.BLSSignatureLength)),
+				Epoch:          "0",
+				ValidatorIndex: "0",
 			},
 		},
 	}

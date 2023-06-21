@@ -249,7 +249,7 @@ func (bs *Server) ListPoolVoluntaryExits(ctx context.Context, _ *emptypb.Empty) 
 
 	sourceExits := bs.VoluntaryExitsPool.PendingExits(headState, headState.Slot(), true /* return unlimited exits */)
 
-	exits := make([]*ethpbv1.SignedVoluntaryExit, len(sourceExits))
+	exits := make([]*ethpbv1.VoluntaryExit, len(sourceExits))
 	for i, s := range sourceExits {
 		exits[i] = migration.V1Alpha1ExitToV1(s)
 	}
@@ -259,9 +259,9 @@ func (bs *Server) ListPoolVoluntaryExits(ctx context.Context, _ *emptypb.Empty) 
 	}, nil
 }
 
-// SubmitVoluntaryExit submits SignedVoluntaryExit object to node's pool
+// SubmitVoluntaryExit submits VoluntaryExit object to node's pool
 // and if passes validation node MUST broadcast it to network.
-func (bs *Server) SubmitVoluntaryExit(ctx context.Context, req *ethpbv1.SignedVoluntaryExit) (*emptypb.Empty, error) {
+func (bs *Server) SubmitVoluntaryExit(ctx context.Context, req *ethpbv1.VoluntaryExit) (*emptypb.Empty, error) {
 	ctx, span := trace.StartSpan(ctx, "beacon.SubmitVoluntaryExit")
 	defer span.End()
 
@@ -270,12 +270,12 @@ func (bs *Server) SubmitVoluntaryExit(ctx context.Context, req *ethpbv1.SignedVo
 		return nil, status.Errorf(codes.Internal, "Could not get head state: %v", err)
 	}
 
-	validator, err := headState.ValidatorAtIndexReadOnly(req.Message.ValidatorIndex)
+	validator, err := headState.ValidatorAtIndexReadOnly(req.ValidatorIndex)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Could not get exiting validator: %v", err)
 	}
 	alphaExit := migration.V1ExitToV1Alpha1(req)
-	err = blocks.VerifyExitAndSignature(validator, headState.Slot(), headState.Fork(), alphaExit, headState.GenesisValidatorsRoot())
+	err = blocks.VerifyExitData(validator, headState.Slot(), alphaExit)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "Invalid voluntary exit: %v", err)
 	}

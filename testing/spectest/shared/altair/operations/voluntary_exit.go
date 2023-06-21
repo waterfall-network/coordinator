@@ -25,10 +25,10 @@ func RunVoluntaryExitTest(t *testing.T, config string) {
 			require.NoError(t, err)
 			exitSSZ, err := snappy.Decode(nil /* dst */, exitFile)
 			require.NoError(t, err, "Failed to decompress")
-			voluntaryExit := &ethpb.SignedVoluntaryExit{}
+			voluntaryExit := &ethpb.VoluntaryExit{}
 			require.NoError(t, voluntaryExit.UnmarshalSSZ(exitSSZ), "Failed to unmarshal")
 
-			body := &ethpb.BeaconBlockBodyAltair{VoluntaryExits: []*ethpb.SignedVoluntaryExit{voluntaryExit}}
+			body := &ethpb.BeaconBlockBodyAltair{VoluntaryExits: []*ethpb.VoluntaryExit{voluntaryExit}}
 			RunBlockOperationTest(t, folderPath, body, func(ctx context.Context, s state.BeaconState, b block.SignedBeaconBlock) (state.BeaconState, error) {
 				return blocks.ProcessVoluntaryExits(ctx, s, b.Block().Body().VoluntaryExits())
 			})

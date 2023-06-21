@@ -81,7 +81,7 @@ message BeaconBlockBody {
     repeated Deposit deposits = 7 [(ethereum.eth.ext.ssz_max) = "16"];
 
     // At most MAX_VOLUNTARY_EXITS.
-    repeated SignedVoluntaryExit voluntary_exits = 8 [(ethereum.eth.ext.ssz_max) = "16"];
+    repeated VoluntaryExit voluntary_exits = 8 [(ethereum.eth.ext.ssz_max) = "16"];
 }
 
 // Proposer slashings are proofs that a slashable offense has been committed by
@@ -139,15 +139,6 @@ message VoluntaryExit {
 
     // Index of the exiting validator.
     uint64 validator_index = 2 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.ValidatorIndex"];
-}
-
-// The signed version of voluntary exit.
-message SignedVoluntaryExit {
-    // The unsigned voluntary exit itself.
-    VoluntaryExit message = 1;
-
-    // Validator's 96 byte signature
-    bytes signature = 2 [(ethereum.eth.ext.ssz_size) = "96"];
 }
 
 // Eth1Data represents references to the Ethereum 1.x deposit contract.

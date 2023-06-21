@@ -730,7 +730,7 @@ func TestProposeBlock_ProposeExitFailed(t *testing.T) {
 		Return(&ethpb.DomainResponse{SignatureDomain: make([]byte, 32)}, nil)
 
 	m.validatorClient.EXPECT().
-		ProposeExit(gomock.Any(), gomock.AssignableToTypeOf(&ethpb.SignedVoluntaryExit{})).
+		ProposeExit(gomock.Any(), gomock.AssignableToTypeOf(&ethpb.VoluntaryExit{})).
 		Return(nil, errors.New("uh oh"))
 
 	err := ProposeExit(
@@ -767,7 +767,7 @@ func TestProposeExit_BroadcastsBlock(t *testing.T) {
 		Return(&ethpb.DomainResponse{SignatureDomain: make([]byte, 32)}, nil)
 
 	m.validatorClient.EXPECT().
-		ProposeExit(gomock.Any(), gomock.AssignableToTypeOf(&ethpb.SignedVoluntaryExit{})).
+		ProposeExit(gomock.Any(), gomock.AssignableToTypeOf(&ethpb.VoluntaryExit{})).
 		Return(&ethpb.ProposeExitResponse{}, nil)
 
 	assert.NoError(t, ProposeExit(

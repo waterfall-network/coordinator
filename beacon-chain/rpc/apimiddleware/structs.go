@@ -169,7 +169,7 @@ type proposerSlashingsPoolResponseJson struct {
 
 // voluntaryExitsPoolResponseJson is used in /beacon/pool/voluntary_exits API endpoint.
 type voluntaryExitsPoolResponseJson struct {
-	Data []*signedVoluntaryExitJson `json:"data"`
+	Data []*voluntaryExitJson `json:"data"`
 }
 
 // submitSyncCommitteeSignaturesRequestJson is used in /beacon/pool/sync_committees API endpoint.
@@ -366,14 +366,14 @@ type beaconBlockJson struct {
 }
 
 type beaconBlockBodyJson struct {
-	RandaoReveal      string                     `json:"randao_reveal" hex:"true"`
-	Eth1Data          *eth1DataJson              `json:"eth1_data"`
-	Graffiti          string                     `json:"graffiti" hex:"true"`
-	ProposerSlashings []*proposerSlashingJson    `json:"proposer_slashings"`
-	AttesterSlashings []*attesterSlashingJson    `json:"attester_slashings"`
-	Attestations      []*attestationJson         `json:"attestations"`
-	Deposits          []*depositJson             `json:"deposits"`
-	VoluntaryExits    []*signedVoluntaryExitJson `json:"voluntary_exits"`
+	RandaoReveal      string                  `json:"randao_reveal" hex:"true"`
+	Eth1Data          *eth1DataJson           `json:"eth1_data"`
+	Graffiti          string                  `json:"graffiti" hex:"true"`
+	ProposerSlashings []*proposerSlashingJson `json:"proposer_slashings"`
+	AttesterSlashings []*attesterSlashingJson `json:"attester_slashings"`
+	Attestations      []*attestationJson      `json:"attestations"`
+	Deposits          []*depositJson          `json:"deposits"`
+	VoluntaryExits    []*voluntaryExitJson    `json:"voluntary_exits"`
 }
 
 type signedBeaconBlockContainerV2Json struct {
@@ -416,28 +416,28 @@ type beaconBlockBellatrixJson struct {
 }
 
 type beaconBlockBodyAltairJson struct {
-	RandaoReveal      string                     `json:"randao_reveal" hex:"true"`
-	Eth1Data          *eth1DataJson              `json:"eth1_data"`
-	Graffiti          string                     `json:"graffiti" hex:"true"`
-	ProposerSlashings []*proposerSlashingJson    `json:"proposer_slashings"`
-	AttesterSlashings []*attesterSlashingJson    `json:"attester_slashings"`
-	Attestations      []*attestationJson         `json:"attestations"`
-	Deposits          []*depositJson             `json:"deposits"`
-	VoluntaryExits    []*signedVoluntaryExitJson `json:"voluntary_exits"`
-	SyncAggregate     *syncAggregateJson         `json:"sync_aggregate"`
+	RandaoReveal      string                  `json:"randao_reveal" hex:"true"`
+	Eth1Data          *eth1DataJson           `json:"eth1_data"`
+	Graffiti          string                  `json:"graffiti" hex:"true"`
+	ProposerSlashings []*proposerSlashingJson `json:"proposer_slashings"`
+	AttesterSlashings []*attesterSlashingJson `json:"attester_slashings"`
+	Attestations      []*attestationJson      `json:"attestations"`
+	Deposits          []*depositJson          `json:"deposits"`
+	VoluntaryExits    []*voluntaryExitJson    `json:"voluntary_exits"`
+	SyncAggregate     *syncAggregateJson      `json:"sync_aggregate"`
 }
 
 type beaconBlockBodyBellatrixJson struct {
-	RandaoReveal      string                     `json:"randao_reveal" hex:"true"`
-	Eth1Data          *eth1DataJson              `json:"eth1_data"`
-	Graffiti          string                     `json:"graffiti" hex:"true"`
-	ProposerSlashings []*proposerSlashingJson    `json:"proposer_slashings"`
-	AttesterSlashings []*attesterSlashingJson    `json:"attester_slashings"`
-	Attestations      []*attestationJson         `json:"attestations"`
-	Deposits          []*depositJson             `json:"deposits"`
-	VoluntaryExits    []*signedVoluntaryExitJson `json:"voluntary_exits"`
-	SyncAggregate     *syncAggregateJson         `json:"sync_aggregate"`
-	ExecutionPayload  *executionPayloadJson      `json:"execution_payload"`
+	RandaoReveal      string                  `json:"randao_reveal" hex:"true"`
+	Eth1Data          *eth1DataJson           `json:"eth1_data"`
+	Graffiti          string                  `json:"graffiti" hex:"true"`
+	ProposerSlashings []*proposerSlashingJson `json:"proposer_slashings"`
+	AttesterSlashings []*attesterSlashingJson `json:"attester_slashings"`
+	Attestations      []*attestationJson      `json:"attestations"`
+	Deposits          []*depositJson          `json:"deposits"`
+	VoluntaryExits    []*voluntaryExitJson    `json:"voluntary_exits"`
+	SyncAggregate     *syncAggregateJson      `json:"sync_aggregate"`
+	ExecutionPayload  *executionPayloadJson   `json:"execution_payload"`
 }
 
 type executionPayloadJson struct {
@@ -556,11 +556,6 @@ type deposit_DataJson struct {
 	WithdrawalCredentials string `json:"withdrawal_credentials" hex:"true"`
 	Amount                string `json:"amount"`
 	Signature             string `json:"signature" hex:"true"`
-}
-
-type signedVoluntaryExitJson struct {
-	Exit      *voluntaryExitJson `json:"message"`
-	Signature string             `json:"signature" hex:"true"`
 }
 
 type voluntaryExitJson struct {

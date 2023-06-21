@@ -673,7 +673,7 @@ func local_request_BeaconNodeValidator_SubmitSignedAggregateSelectionProof_0(ctx
 }
 
 func request_BeaconNodeValidator_ProposeExit_0(ctx context.Context, marshaler runtime.Marshaler, client BeaconNodeValidatorClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq SignedVoluntaryExit
+	var protoReq VoluntaryExit
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -690,7 +690,7 @@ func request_BeaconNodeValidator_ProposeExit_0(ctx context.Context, marshaler ru
 }
 
 func local_request_BeaconNodeValidator_ProposeExit_0(ctx context.Context, marshaler runtime.Marshaler, server BeaconNodeValidatorServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq SignedVoluntaryExit
+	var protoReq VoluntaryExit
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)

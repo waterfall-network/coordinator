@@ -323,13 +323,10 @@ func TestMapBeaconBlockAltair(t *testing.T) {
 								},
 							},
 						},
-						VoluntaryExits: []*ethpb.SignedVoluntaryExit{
+						VoluntaryExits: []*ethpb.VoluntaryExit{
 							{
-								Exit: &ethpb.VoluntaryExit{
-									Epoch:          0,
-									ValidatorIndex: 0,
-								},
-								Signature: make([]byte, fieldparams.BLSSignatureLength),
+								Epoch:          0,
+								ValidatorIndex: 0,
 							},
 						},
 						SyncAggregate: &ethpb.SyncAggregate{
@@ -460,13 +457,10 @@ func TestMapBeaconBlockBody(t *testing.T) {
 							},
 						},
 					},
-					VoluntaryExits: []*ethpb.SignedVoluntaryExit{
+					VoluntaryExits: []*ethpb.VoluntaryExit{
 						{
-							Exit: &ethpb.VoluntaryExit{
-								Epoch:          0,
-								ValidatorIndex: 0,
-							},
-							Signature: make([]byte, fieldparams.BLSSignatureLength),
+							Epoch:          0,
+							ValidatorIndex: 0,
 						},
 					},
 				},

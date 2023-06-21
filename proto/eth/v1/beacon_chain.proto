@@ -285,7 +285,7 @@ message ProposerSlashingPoolResponse {
 }
 
 message VoluntaryExitsPoolResponse {
-    repeated SignedVoluntaryExit data = 1;
+    repeated VoluntaryExit data = 1;
 }
 
 // Beacon Config API related messages.
