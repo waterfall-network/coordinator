@@ -276,4 +276,4 @@ replace github.com/grpc-ecosystem/grpc-gateway/v2 => github.com/prysmaticlabs/gr
 
 replace github.com/ferranbt/fastssz => github.com/prysmaticlabs/fastssz v0.0.0-20220110145812-fafb696cae88
 
-replace gitlab.waterfall.network/waterfall/protocol/gwat => /Users/who/Documents/projects/waterfall/gitlab/gwat
+//replace gitlab.waterfall.network/waterfall/protocol/gwat => /home/mezin/go/src/gwat
