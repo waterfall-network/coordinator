@@ -2,6 +2,7 @@ package prevote
 
 import (
 	"github.com/pkg/errors"
+	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/go-bitfield"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
@@ -74,4 +75,19 @@ func (c *PrevoteCache) hasSeenBit(pv *ethpb.PreVote) (bool, error) {
 		}
 	}
 	return false, nil
+}
+
+func (c *PrevoteCache) GetPrevoteBySlot(slot types.Slot) []*ethpb.PreVote {
+	c.prevoteCacheLock.RLock()
+	defer c.prevoteCacheLock.RUnlock()
+
+	pv := make([]*ethpb.PreVote, 0)
+
+	for _, a := range c.prevoteCache {
+		if a.Data.Slot == slot {
+			pv = append(pv, a)
+		}
+	}
+
+	return pv
 }

@@ -5,6 +5,7 @@ package validator
 
 import (
 	"context"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/prevote"
 	"time"
 
 	"github.com/pkg/errors"
@@ -56,6 +57,7 @@ type Server struct {
 	BlockNotifier          blockfeed.Notifier
 	P2P                    p2p.Broadcaster
 	AttPool                attestations.Pool
+	PvPool                 prevote.Pool
 	SlashingsPool          slashings.PoolManager
 	ExitPool               voluntaryexits.PoolManager
 	SyncCommitteePool      synccommittee.Pool
