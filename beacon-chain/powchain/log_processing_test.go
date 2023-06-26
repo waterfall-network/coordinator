@@ -58,7 +58,7 @@ func TestProcessDepositLog_OK(t *testing.T) {
 	require.NoError(t, err)
 	data := deposits[0].Data
 
-	testAcc.TxOpts.Value = mock.Amount32Eth()
+	testAcc.TxOpts.Value = mock.Amount3200Wat()
 	testAcc.TxOpts.GasLimit = 1000000
 	_, err = testAcc.Contract.Deposit(testAcc.TxOpts, data.PublicKey, data.WithdrawalCredentials, data.Signature, depositRoots[0])
 	require.NoError(t, err, "Could not deposit to deposit contract")
@@ -126,7 +126,7 @@ func TestProcessDepositLog_InsertsPendingDeposit(t *testing.T) {
 	require.NoError(t, err)
 	data := deposits[0].Data
 
-	testAcc.TxOpts.Value = mock.Amount32Eth()
+	testAcc.TxOpts.Value = mock.Amount3200Wat()
 	testAcc.TxOpts.GasLimit = 1000000
 
 	_, err = testAcc.Contract.Deposit(testAcc.TxOpts, data.PublicKey, data.WithdrawalCredentials, data.Signature, depositRoots[0])
@@ -186,7 +186,7 @@ func TestUnpackDepositLogData_OK(t *testing.T) {
 	require.NoError(t, err)
 	data := deposits[0].Data
 
-	testAcc.TxOpts.Value = mock.Amount32Eth()
+	testAcc.TxOpts.Value = mock.Amount3200Wat()
 	testAcc.TxOpts.GasLimit = 1000000
 	_, err = testAcc.Contract.Deposit(testAcc.TxOpts, data.PublicKey, data.WithdrawalCredentials, data.Signature, depositRoots[0])
 	require.NoError(t, err, "Could not deposit to deposit contract")
@@ -248,14 +248,14 @@ func TestProcessETH2GenesisLog_8DuplicatePubkeys(t *testing.T) {
 	require.NoError(t, err)
 	data := deposits[0].Data
 
-	testAcc.TxOpts.Value = mock.Amount32Eth()
+	testAcc.TxOpts.Value = mock.Amount3200Wat()
 	testAcc.TxOpts.GasLimit = 1000000
 
 	// 64 Validators are used as size required for beacon-chain to start. This number
 	// is defined in the deposit contract as the number required for the testnet. The actual number
 	// is 2**14
 	for i := 0; i < depositsReqForChainStart; i++ {
-		testAcc.TxOpts.Value = mock.Amount32Eth()
+		testAcc.TxOpts.Value = mock.Amount3200Wat()
 		_, err = testAcc.Contract.Deposit(testAcc.TxOpts, data.PublicKey, data.WithdrawalCredentials, data.Signature, depositRoots[0])
 		require.NoError(t, err, "Could not deposit to deposit contract")
 
@@ -326,7 +326,7 @@ func TestProcessETH2GenesisLog(t *testing.T) {
 	// is 2**14
 	for i := 0; i < depositsReqForChainStart; i++ {
 		data := deposits[i].Data
-		testAcc.TxOpts.Value = mock.Amount32Eth()
+		testAcc.TxOpts.Value = mock.Amount3200Wat()
 		testAcc.TxOpts.GasLimit = 1000000
 		_, err = testAcc.Contract.Deposit(testAcc.TxOpts, data.PublicKey, data.WithdrawalCredentials, data.Signature, roots[i])
 		require.NoError(t, err, "Could not deposit to deposit contract")
@@ -429,7 +429,7 @@ func TestProcessETH2GenesisLog_CorrectNumOfDeposits(t *testing.T) {
 	// is 2**14
 	for i := 0; i < totalNumOfDeposits; i++ {
 		data := deposits[i].Data
-		testAcc.TxOpts.Value = mock.Amount32Eth()
+		testAcc.TxOpts.Value = mock.Amount3200Wat()
 		testAcc.TxOpts.GasLimit = 1000000
 		_, err = testAcc.Contract.Deposit(testAcc.TxOpts, data.PublicKey, data.WithdrawalCredentials, data.Signature, depositRoots[i])
 		require.NoError(t, err, "Could not deposit to deposit contract")
@@ -526,7 +526,7 @@ func TestProcessETH2GenesisLog_LargePeriodOfNoLogs(t *testing.T) {
 	// is 2**14
 	for i := 0; i < totalNumOfDeposits; i++ {
 		data := deposits[i].Data
-		testAcc.TxOpts.Value = mock.Amount32Eth()
+		testAcc.TxOpts.Value = mock.Amount3200Wat()
 		testAcc.TxOpts.GasLimit = 1000000
 		_, err = testAcc.Contract.Deposit(testAcc.TxOpts, data.PublicKey, data.WithdrawalCredentials, data.Signature, depositRoots[i])
 		require.NoError(t, err, "Could not deposit to deposit contract")
