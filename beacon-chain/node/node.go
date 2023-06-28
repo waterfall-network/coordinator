@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/prevote"
 	"math"
 	"os"
 	"os/signal"
@@ -91,6 +92,7 @@ type BeaconNode struct {
 	db                      db.Database
 	slasherDB               db.SlasherDatabase
 	attestationPool         attestations.Pool
+	prevotePool             prevote.Pool
 	exitPool                voluntaryexits.PoolManager
 	slashingsPool           slashings.PoolManager
 	syncCommitteePool       synccommittee.Pool
@@ -151,6 +153,7 @@ func New(cliCtx *cli.Context, opts ...Option) (*BeaconNode, error) {
 		blockFeed:               new(event.Feed),
 		opFeed:                  new(event.Feed),
 		attestationPool:         attestations.NewPool(),
+		prevotePool:             prevote.NewPool(),
 		exitPool:                voluntaryexits.NewPool(),
 		slashingsPool:           slashings.NewPool(),
 		syncCommitteePool:       synccommittee.NewPool(),

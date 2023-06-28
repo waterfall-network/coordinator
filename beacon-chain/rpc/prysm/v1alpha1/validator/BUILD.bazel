@@ -22,6 +22,7 @@ go_library(
         "status.go",
         "sync_committee.go",
         "prevote.go",
+        "proposer_prevoting.go"
     ],
     importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc/prysm/v1alpha1/validator",
     visibility = ["//beacon-chain:__subpackages__"],

@@ -8,7 +8,7 @@ import (
 type Pool interface {
 	HasPrevote(att *ethpb.PreVote) (bool, error)
 	SavePrevote(att *ethpb.PreVote) error
-	GetPrevoteBySlot(slot types.Slot) []*ethpb.PreVote
+	GetPrevoteBySlot(slot types.Slot) ([]*ethpb.PreVote, error)
 }
 
 func NewPool() *PrevoteCache {

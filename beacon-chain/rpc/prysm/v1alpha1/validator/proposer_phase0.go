@@ -141,6 +141,21 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		return nil, errWrap
 	}
 
+	prevoteData, err := vs.PvPool.GetPrevoteBySlot(req.Slot)
+	if err != nil {
+		log.WithError(err).Warnf("build block data: no prevote data was retrieved for slot %v", req.Slot)
+	} else {
+		// Process received prevote data and calculate longest chains of spines with enough votes
+		bestChains := vs.processPrevoteData(prevoteData, optSpines)
+
+		if len(bestChains) > 0 {
+			optSpines = make([]gwatCommon.HashArray, len(bestChains))
+			for _, chain := range bestChains {
+				optSpines = append(optSpines, chain.Value)
+			}
+		}
+	}
+
 	//prepend current optimistic finalization to optimistic spine to calc parent
 	optFinalisation := make([]gwatCommon.HashArray, len(cpSt.SpineData().Finalization)/gwatCommon.HashLength)
 	for i, h := range gwatCommon.HashArrayFromBytes(cpSt.SpineData().Finalization) {

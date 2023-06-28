@@ -77,7 +77,7 @@ func (c *PrevoteCache) hasSeenBit(pv *ethpb.PreVote) (bool, error) {
 	return false, nil
 }
 
-func (c *PrevoteCache) GetPrevoteBySlot(slot types.Slot) []*ethpb.PreVote {
+func (c *PrevoteCache) GetPrevoteBySlot(slot types.Slot) ([]*ethpb.PreVote, error) {
 	c.prevoteCacheLock.RLock()
 	defer c.prevoteCacheLock.RUnlock()
 
@@ -89,5 +89,9 @@ func (c *PrevoteCache) GetPrevoteBySlot(slot types.Slot) []*ethpb.PreVote {
 		}
 	}
 
-	return pv
+	if len(pv) == 0 {
+		return []*ethpb.PreVote{}, errors.Errorf("No prevote data for %v", slot)
+	}
+
+	return pv, nil
 }
