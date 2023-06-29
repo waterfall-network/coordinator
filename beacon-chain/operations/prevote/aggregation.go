@@ -1,10 +1,12 @@
 package prevote
 
 import (
+	"context"
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/go-bitfield"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"go.opencensus.io/trace"
 )
 
 func (c *PrevoteCache) HasPrevote(pv *ethpb.PreVote) (bool, error) {
@@ -77,7 +79,10 @@ func (c *PrevoteCache) hasSeenBit(pv *ethpb.PreVote) (bool, error) {
 	return false, nil
 }
 
-func (c *PrevoteCache) GetPrevoteBySlot(slot types.Slot) ([]*ethpb.PreVote, error) {
+func (c *PrevoteCache) GetPrevoteBySlot(ctx context.Context, slot types.Slot) ([]*ethpb.PreVote, error) {
+	_, span := trace.StartSpan(ctx, "operations.prevote.GetPrevoteBySlot")
+	defer span.End()
+
 	c.prevoteCacheLock.RLock()
 	defer c.prevoteCacheLock.RUnlock()
 
