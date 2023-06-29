@@ -37,11 +37,11 @@ func TestRegister_Below1ETH(t *testing.T) {
 	assert.ErrorContains(t, "execution reverted", err, "Validator registration should have failed with insufficient deposit")
 }
 
-// normal test case, test depositing 32 ETH and verify HashChainValue event is correctly emitted.
+// normal test case, test depositing 3200 WAT and verify HashChainValue event is correctly emitted.
 func TestValidatorRegister_OK(t *testing.T) {
 	testAccount, err := mock.Setup()
 	require.NoError(t, err)
-	testAccount.TxOpts.Value = mock.Amount32Eth()
+	testAccount.TxOpts.Value = mock.Amount3200Wat()
 
 	// Generate deposit data
 	privKeys, pubKeys, err := interop.DeterministicallyGenerateKeys(0 /*startIndex*/, 1)

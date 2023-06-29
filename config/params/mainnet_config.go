@@ -93,10 +93,10 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	HysteresisUpwardMultiplier:     5,
 
 	// Gwei value constants.
-	MinDepositAmount:          1000 * 1e9,
-	MaxEffectiveBalance:       32000 * 1e9,
-	EjectionBalance:           16000 * 1e9,
-	EffectiveBalanceIncrement: 1000 * 1e9,
+	MinDepositAmount:          100 * 1e9,
+	MaxEffectiveBalance:       3200 * 1e9,
+	EjectionBalance:           1600 * 1e9,
+	EffectiveBalanceIncrement: 100 * 1e9,
 
 	// Initial value constants.
 	BLSWithdrawalPrefixByte: byte(0),
