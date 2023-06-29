@@ -2,6 +2,7 @@ package validator
 
 import (
 	"bytes"
+	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
@@ -52,6 +53,10 @@ func (vs *Server) processPrevoteData(prevoteData []*ethpb.PreVote, optSpines []g
 			bestChains = append(bestChains, val)
 		}
 	}
+	log.WithFields(logrus.Fields{
+		"1.bestChains": bestChains,
+	}).Info("processPrevoteData: longest subchains with votes > thresholdVotes")
+
 	return bestChains
 }
 
@@ -82,6 +87,11 @@ func (vs *Server) getChainsAndVotes(prevote []*ethpb.PreVote) (map[[gwatCommon.H
 		}
 	}
 
+	log.WithFields(logrus.Fields{
+		"1.subchains": hashAndChain,
+		"2.votes":     hashAndVotes,
+	}).Info("getChainsAndVotes: prevote subchains and votes amount")
+
 	return hashAndChain, hashAndVotes
 }
 
@@ -95,6 +105,10 @@ func (vs *Server) sortByChainLen(chainsMap map[[gwatCommon.HashLength]byte]gwatC
 	sort.Slice(pairs, func(i, j int) bool {
 		return len(pairs[i].Value) > len(pairs[j].Value)
 	})
+
+	log.WithFields(logrus.Fields{
+		"1.sorted subchains": pairs,
+	}).Info("sortByChainLen: prevote subchains sorted by length")
 
 	return pairs
 }
