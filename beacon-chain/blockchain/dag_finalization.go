@@ -98,7 +98,6 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 	//todo work by state
 	//var currStateRoot []byte
 
-	//gwatSearchEpoch := types.Epoch(gwatCheckpoint.Epoch)
 	gwatSearchEpoch := types.Epoch(gwatCheckpoint.Epoch)
 
 	for {
@@ -229,6 +228,26 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 			"headRoot": fmt.Sprintf("%#x", headState),
 		}).Error("Gwat sync: head sync failed")
 		return err
+	}
+
+	// if while sync finalization checkpoint was updated
+	// recursively repeat sync procedure.
+	checkHeadState, err := s.HeadState(ctx)
+	if err != nil {
+		// reset if failed
+		log.WithError(err).WithFields(logrus.Fields{
+			"headRoot": fmt.Sprintf("%#x", s.headRoot()),
+		}).Error("Gwat sync: get head state to sync head")
+		return err
+	}
+	if !bytes.Equal(headJustRoot[:], checkHeadState.CurrentJustifiedCheckpoint().Root) {
+		log.WithError(err).WithFields(logrus.Fields{
+			"syncCpEpoch": fmt.Sprintf("%d", headState.CurrentJustifiedCheckpoint().Epoch),
+			"headCpEpoch": fmt.Sprintf("%d", checkHeadState.CurrentJustifiedCheckpoint().Epoch),
+			"syncCpRoot":  fmt.Sprintf("%#x", headJustRoot),
+			"headCpRoot":  fmt.Sprintf("%#x", checkHeadState.CurrentJustifiedCheckpoint().Root),
+		}).Warn("Gwat sync: recursive recync due to cp changed")
+		return s.runGwatSynchronization(ctx)
 	}
 
 	log.WithFields(logrus.Fields{
