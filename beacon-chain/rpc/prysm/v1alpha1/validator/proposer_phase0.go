@@ -141,7 +141,7 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		return nil, errWrap
 	}
 
-	prevoteData, err := vs.PvPool.GetPrevoteBySlot(ctx, req.Slot)
+	prevoteData, err := vs.PrevotePool.GetPrevoteBySlot(ctx, req.Slot)
 	if err != nil {
 		log.WithError(err).Warnf("build block data: no prevote data was retrieved for slot %v", req.Slot)
 	} else {

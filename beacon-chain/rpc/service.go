@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/prevote"
 	"net"
 	"sync"
 
@@ -92,6 +93,7 @@ type Config struct {
 	EnableDebugRPCEndpoints bool
 	MockEth1Votes           bool
 	AttestationsPool        attestations.Pool
+	PrevotePool             prevote.Pool
 	ExitPool                voluntaryexits.PoolManager
 	SlashingsPool           slashings.PoolManager
 	SlashingChecker         slasherservice.SlashingChecker
@@ -185,6 +187,7 @@ func (s *Service) Start() {
 		AttestationCache:       cache.NewAttestationCache(),
 		PrevoteCache:           cache.NewPrevoteCache(),
 		AttPool:                s.cfg.AttestationsPool,
+		PrevotePool:            s.cfg.PrevotePool,
 		ExitPool:               s.cfg.ExitPool,
 		HeadFetcher:            s.cfg.HeadFetcher,
 		ForkFetcher:            s.cfg.ForkFetcher,
