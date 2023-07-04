@@ -514,11 +514,7 @@ func (s *Service) processDagFinalization(headState state.BeaconState) error {
 	var finalizedSeq gwatCommon.HashArray
 
 	if s.IsSynced() {
-		coordState := s.GetCachedGwatCoordinatedState()
-		if coordState == nil {
-			return errNoCoordState
-		}
-		finParams, err := s.collectFinalizationParams(ctx, headState, coordState)
+		finParams, err := s.collectFinalizationParams(ctx, headState)
 		if err != nil {
 			log.WithError(err).Error("Dag finalization: get finalization params failed")
 			return errors.Wrap(err, "Dag finalization: get finalization params failed")
@@ -641,7 +637,6 @@ func (s *Service) processDagFinalization(headState state.BeaconState) error {
 func (s *Service) collectFinalizationParams(
 	ctx context.Context,
 	headState state.BeaconState,
-	coordCheckpoint *gwatTypes.Checkpoint,
 ) (*gwatTypes.FinalizationParams, error) {
 	if headState == nil || headState.IsNil() {
 		return nil, errors.New("Collect finalization params: nil head state received")
@@ -852,6 +847,7 @@ func (s *Service) initCoordinatedState(ctx context.Context) error {
 	if len(finSeq) == 0 {
 		finSeq = gwatCommon.HashArrayFromBytes(cpState.SpineData().CpFinalized)
 	}
+	lfspine := gwatCommon.Hash{}
 	if len(finSeq) == 0 {
 		log.WithFields(logrus.Fields{
 			"cpSlot":   cpState.Slot(),
@@ -859,14 +855,16 @@ func (s *Service) initCoordinatedState(ctx context.Context) error {
 			"cpRoot":   fmt.Sprintf("%#x", cpRoot),
 			"cpFinSeq": finSeq,
 		}).Error("Init coordinated state: finalization empty")
-		return errors.Wrap(err, "Init coordinated state: finalization empty")
+		//return errors.Wrap(err, "Init coordinated state: finalization empty")
+	} else {
+		lfspine = finSeq[len(finSeq)-1]
 	}
 
 	// cache coordinated checkpoint
 	s.CacheGwatCoordinatedState(&gwatTypes.Checkpoint{
 		Epoch: uint64(slots.ToEpoch(cpState.Slot())),
 		Root:  gwatCommon.BytesToHash(cpRoot[:]),
-		Spine: finSeq[len(finSeq)-1],
+		Spine: lfspine,
 	})
 	return nil
 }
