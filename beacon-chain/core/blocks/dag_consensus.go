@@ -106,6 +106,7 @@ func ProcessDagConsensus(ctx context.Context, beaconState state.BeaconState, sig
 		blockVoting = removeBlockVoting(blockVoting, staleRoots)
 
 		log.WithFields(logrus.Fields{
+			"slot":             beaconState.Slot(),
 			"BlockVoting":      len(blockVoting),
 			"StateBlockVoting": len(beaconState.BlockVoting()),
 			"staleRoots":       fmt.Sprintf("%#x", staleRoots),
@@ -145,6 +146,7 @@ func calcFinalization(ctx context.Context, beaconState state.BeaconState, blockV
 		candidates := gwatCommon.HashArrayFromBytes(bv.Candidates)
 		if !candidates.IsUniq() {
 			log.WithFields(logrus.Fields{
+				"slot":         beaconState.Slot(),
 				"root":         fmt.Sprintf("%#x", bv.GetRoot()),
 				"candidates":   candidates,
 				"lastFinSpine": lastFinSpine.Hex(),
@@ -172,6 +174,7 @@ func calcFinalization(ctx context.Context, beaconState state.BeaconState, blockV
 	}
 
 	log.WithFields(logrus.Fields{
+		"slot":                  beaconState.Slot(),
 		"total-BlockVoting":     len(blockVotings),
 		"supported-BlockVoting": len(supportedVotes),
 		"VotingRequiredSlots":   params.BeaconConfig().VotingRequiredSlots,
@@ -189,6 +192,7 @@ func calcFinalization(ctx context.Context, beaconState state.BeaconState, blockV
 		// if all current candidates handled
 		if len(candidates) == 0 && fullLen > len(candidates) {
 			log.WithFields(logrus.Fields{
+				"slot":         beaconState.Slot(),
 				"root":         fmt.Sprintf("%#x", bv.GetRoot()),
 				"candidates":   candidates,
 				"lastFinSpine": lastFinSpine.Hex(),
@@ -251,6 +255,7 @@ func calcFinalization(ctx context.Context, beaconState state.BeaconState, blockV
 	}
 
 	log.WithFields(logrus.Fields{
+		"slot":         beaconState.Slot(),
 		"lastFinSpine": lastFinSpine.Hex(),
 		"finalization": tabCandidates[resKey],
 	}).Info("Calculation of finalization sequence")

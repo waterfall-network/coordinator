@@ -847,6 +847,9 @@ func (s *Service) initCoordinatedState(ctx context.Context) error {
 
 	finSeq := gwatCommon.HashArrayFromBytes(cpState.SpineData().Finalization)
 	if len(finSeq) == 0 {
+		finSeq = gwatCommon.HashArrayFromBytes(cpState.SpineData().CpFinalized)
+	}
+	if len(finSeq) == 0 {
 		log.WithFields(logrus.Fields{
 			"cpSlot":   cpState.Slot(),
 			"cpEpoch":  uint64(slots.ToEpoch(cpState.Slot())),
