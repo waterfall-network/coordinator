@@ -2437,7 +2437,8 @@ def prysm_deps():
     go_repository(
         name = "com_github_lucas_clemente_quic_go",
         importpath = "github.com/lucas-clemente/quic-go",
-        sum = "h1:ToR7SIIEdrgOhgVTHvPgdVRJfgVy+N0wQAagH7L4d5g=",
+        replace = "github.com/quic-go/quic-go",
+        sum = "h1:1QSpnOmi2Kia1QZjx/NN/IzdBP7JqBh58YoEOmR6PDY=",
         version = "v0.24.0",
     )
     go_repository(
