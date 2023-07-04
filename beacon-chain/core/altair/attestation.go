@@ -301,7 +301,7 @@ func RewardBeaconBlockRootProposer(
 				"attestationRoot": fmt.Sprintf("%#x", attRoot),
 				"reward":          reward,
 				"canonical":       false,
-			}).Info("Reward proposer: skip reward of voting for root (not found)")
+			}).Debug("Reward proposer: skip reward of voting for root (not found)")
 			return nil
 		}
 		return err
@@ -325,7 +325,7 @@ func RewardBeaconBlockRootProposer(
 			"attestationRoot": fmt.Sprintf("%#x", attRoot),
 			"reward":          reward,
 			"canonical":       false,
-		}).Info("Reward proposer: skip reward of voting for root (not canonical)")
+		}).Debug("Reward proposer: skip reward of voting for root (not canonical)")
 		return nil
 	}
 
@@ -335,7 +335,7 @@ func RewardBeaconBlockRootProposer(
 		"attestationRoot":        fmt.Sprintf("%#x", attRoot),
 		"Proposer":               proposerIndex,
 		"reward":                 reward,
-	}).Info("Reward proposer: voting for root incr")
+	}).Debug("Reward proposer: voting for root incr")
 
 	// write Rewards And Penalties log
 	if err = helpers.LogBeforeRewardsAndPenalties(beaconState, proposerIndex, reward, indices, helpers.BalanceIncrease, helpers.OpBlockAttested); err != nil {
