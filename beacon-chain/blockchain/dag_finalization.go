@@ -572,6 +572,9 @@ func (s *Service) processDagFinalization(headState state.BeaconState) error {
 				cpRoot := gwatCommon.BytesToHash(finRes.CpRoot.Bytes())
 				cpEpoch := uint64(slots.ToEpoch(cpState.Slot()))
 				finSeq := gwatCommon.HashArrayFromBytes(cpState.SpineData().Finalization)
+				if len(finSeq) == 0 {
+					finSeq = gwatCommon.HashArrayFromBytes(cpState.SpineData().CpFinalized)
+				}
 				var spine gwatCommon.Hash
 				if len(finSeq) > 0 {
 					spine = finSeq[len(finSeq)-1]
