@@ -4,17 +4,60 @@ import (
 	"bytes"
 	"sync"
 
+	lru "github.com/hashicorp/golang-lru"
 	types "github.com/prysmaticlabs/eth2-types"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
 )
 
 type spineData struct {
+	optSpines   *lru.Cache
+	optSpinesMu sync.RWMutex
+
 	lastValidRoot []byte
 	lastValidSlot types.Slot
 	//finalizedSpines gwatCommon.HashArray  //successfully finalized spines from checkpoint
 	gwatCheckpoint *gwatTypes.Checkpoint //cache for current finalization request checkpoint param
 	coordState     *gwatTypes.Checkpoint //cache for current gwat coordinated state
 	sync.RWMutex
+}
+
+// setCacheOptimisticSpines cashes current optSpines.
+func (s *Service) setCacheOptimisticSpines(baseSpine gwatCommon.Hash, optSpines []gwatCommon.HashArray) {
+	s.spineData.optSpinesMu.RLock()
+	defer s.spineData.optSpinesMu.RUnlock()
+	if s.spineData.optSpines == nil {
+		var err error
+		s.spineData.optSpines, err = lru.New(8)
+		if err != nil {
+			log.WithError(err).Error("create optSpines failed")
+		}
+	}
+	s.spineData.optSpines.Remove(baseSpine)
+	s.spineData.optSpines.Add(baseSpine, optSpines)
+}
+
+// GetCacheOptimisticSpines returns current optSpines.
+func (s *Service) GetCacheOptimisticSpines(baseSpine gwatCommon.Hash) []gwatCommon.HashArray {
+	s.spineData.optSpinesMu.RLock()
+	defer s.spineData.optSpinesMu.RUnlock()
+
+	if s.spineData.optSpines == nil {
+		return []gwatCommon.HashArray{}
+	}
+
+	data, ok := s.spineData.optSpines.Get(baseSpine)
+	if !ok {
+		return []gwatCommon.HashArray{}
+	}
+	optSpines, ok := data.([]gwatCommon.HashArray)
+	if !ok {
+		return []gwatCommon.HashArray{}
+	}
+	if optSpines != nil {
+		return optSpines
+	}
+	return []gwatCommon.HashArray{}
 }
 
 // SetValidatedBlockInfo caches info of the latest success validated block.

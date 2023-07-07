@@ -79,6 +79,7 @@ go_library(
         "//runtime/version:go_default_library",
         "//time:go_default_library",
         "//time/slots:go_default_library",
+        "@com_github_hashicorp_golang_lru//:go_default_library",
         "@network_waterfall_gitlab_waterfall_protocol_gwat//common:go_default_library",
         "@network_waterfall_gitlab_waterfall_protocol_gwat//common/hexutil:go_default_library",
         "@network_waterfall_gitlab_waterfall_protocol_gwat//core/types:go_default_library",
