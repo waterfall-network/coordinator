@@ -496,6 +496,9 @@ func (f *ForkChoice) GetFork(root [32]byte) *Fork {
 	}
 
 	for {
+	    if !f.HasNode(currIndex) {
+            break
+        }
 		node := f.store.nodes[currIndex]
 		if node == nil {
 			break
