@@ -95,7 +95,7 @@ func (c *PrevoteCache) GetPrevoteBySlot(ctx context.Context, slot types.Slot) ([
 	}
 
 	if len(pv) == 0 {
-		return []*ethpb.PreVote{}, errors.Errorf("No prevote data for %v", slot)
+		return []*ethpb.PreVote{}, errors.Errorf("No prevote data for slot %v", slot)
 	}
 
 	return pv, nil

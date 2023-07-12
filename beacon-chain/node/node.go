@@ -665,6 +665,7 @@ func (b *BeaconNode) registerSyncService() error {
 		regularsync.WithAttestationNotifier(b),
 		regularsync.WithOperationNotifier(b),
 		regularsync.WithAttestationPool(b.attestationPool),
+		regularsync.WithPrevotePool(b.prevotePool),
 		regularsync.WithExitPool(b.exitPool),
 		regularsync.WithSlashingPool(b.slashingsPool),
 		regularsync.WithSyncCommsPool(b.syncCommitteePool),

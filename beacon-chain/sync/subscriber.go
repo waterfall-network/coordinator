@@ -454,18 +454,22 @@ func (s *Service) subscribeAggregatorSubnet(
 ) {
 	// do not subscribe if we have no peers in the same
 	// subnet
-	topic := p2p.GossipTypeMapping[reflect.TypeOf(&ethpb.Attestation{})]
-	subnetTopic := fmt.Sprintf(topic, digest, idx)
-	// check if subscription exists and if not subscribe the relevant subnet.
-	if _, exists := subscriptions[idx]; !exists {
-		subscriptions[idx] = s.subscribeWithBase(subnetTopic, validate, handle)
-	}
-	if !s.validPeersExist(subnetTopic) {
-		log.Debugf("No peers found subscribed to attestation gossip subnet with "+
-			"committee index %d. Searching network for peers subscribed to the subnet.", idx)
-		_, err := s.cfg.p2p.FindPeersWithSubnet(s.ctx, subnetTopic, idx, flags.Get().MinimumPeersPerSubnet)
-		if err != nil {
-			log.WithError(err).Debug("Could not search for peers")
+	topics := make([]string, 0, 2)
+	topics = append(topics, p2p.GossipTypeMapping[reflect.TypeOf(&ethpb.Attestation{})])
+	topics = append(topics, p2p.GossipTypeMapping[reflect.TypeOf(&ethpb.PreVote{})])
+	for _, topic := range topics {
+		subnetTopic := fmt.Sprintf(topic, digest, idx)
+		// check if subscription exists and if not subscribe the relevant subnet.
+		if _, exists := subscriptions[idx]; !exists {
+			subscriptions[idx] = s.subscribeWithBase(subnetTopic, validate, handle)
+		}
+		if !s.validPeersExist(subnetTopic) {
+			log.Debugf("No peers found subscribed to attestation gossip subnet with "+
+				"committee index %d. Searching network for peers subscribed to the subnet.", idx)
+			_, err := s.cfg.p2p.FindPeersWithSubnet(s.ctx, subnetTopic, idx, flags.Get().MinimumPeersPerSubnet)
+			if err != nil {
+				log.WithError(err).Debug("Could not search for peers")
+			}
 		}
 	}
 }

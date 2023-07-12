@@ -40,7 +40,7 @@ type PrevoteCache struct {
 // NewPrevoteCache initializes the map and underlying cache.
 func NewPrevoteCache() *PrevoteCache {
 	return &PrevoteCache{
-		cache:      cache.NewFIFO(wrapperToKey),
+		cache:      cache.NewFIFO(wrapperPrevoteToKey),
 		inProgress: make(map[string]bool),
 	}
 }
@@ -130,6 +130,20 @@ func (c *PrevoteCache) Put(_ context.Context, req *ethpb.PreVoteRequest, res *et
 
 	prevoteCacheSize.Set(float64(len(c.cache.List())))
 	return nil
+}
+
+func wrapperPrevoteToKey(i interface{}) (string, error) {
+	w, ok := i.(*prevoteReqResWrapper)
+	if !ok {
+		return "", errors.New("key is not of type *prevoteReqResWrapper")
+	}
+	if w == nil {
+		return "", errors.New("nil wrapper")
+	}
+	if w.req == nil {
+		return "", errors.New("nil wrapper.request")
+	}
+	return reqToKeyPrevote(w.req)
 }
 
 func reqToKeyPrevote(req *ethpb.PreVoteRequest) (string, error) {

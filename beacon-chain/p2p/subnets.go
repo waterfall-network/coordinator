@@ -54,6 +54,8 @@ func (s *Service) FindPeersWithSubnet(ctx context.Context, topic string,
 		iterator = filterNodes(ctx, iterator, s.filterPeerForAttSubnet(index))
 	case strings.Contains(topic, GossipSyncCommitteeMessage):
 		iterator = filterNodes(ctx, iterator, s.filterPeerForSyncSubnet(index))
+	case strings.Contains(topic, GossipPrevoteMessage):
+		iterator = filterNodes(ctx, iterator, s.filterPeerForSyncSubnet(index))
 	default:
 		return false, errors.New("no subnet exists for provided topic")
 	}

@@ -7,6 +7,7 @@ import (
 	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/attestations"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/prevote"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/slashings"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/synccommittee"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/voluntaryexits"
@@ -40,6 +41,13 @@ func WithDatabase(db db.NoHeadAccessDatabase) Option {
 func WithAttestationPool(attPool attestations.Pool) Option {
 	return func(s *Service) error {
 		s.cfg.attPool = attPool
+		return nil
+	}
+}
+
+func WithPrevotePool(pvPool prevote.Pool) Option {
+	return func(s *Service) error {
+		s.cfg.prevotePool = pvPool
 		return nil
 	}
 }
