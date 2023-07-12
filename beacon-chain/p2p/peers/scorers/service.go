@@ -138,7 +138,7 @@ func (s *Service) IsBadPeerNoLock(pid peer.ID) bool {
 			"func":  "IsBadPeerNoLock",
 			"peer":  pid,
 			"score": "badResponsesScorer",
-		}).Info("Disconnect: peer is bad")
+		}).Debug("Disconnect: peer is bad")
 		return true
 	}
 	if s.scorers.peerStatusScorer.isBadPeer(pid) {
@@ -146,7 +146,7 @@ func (s *Service) IsBadPeerNoLock(pid peer.ID) bool {
 			"func":  "IsBadPeerNoLock",
 			"peer":  pid,
 			"score": "peerStatusScorer",
-		}).Info("Disconnect: peer is bad")
+		}).Debug("Disconnect: peer is bad")
 		return true
 	}
 	if features.Get().EnablePeerScorer {
@@ -155,7 +155,7 @@ func (s *Service) IsBadPeerNoLock(pid peer.ID) bool {
 				"func":  "IsBadPeerNoLock",
 				"peer":  pid,
 				"score": "gossipScorer",
-			}).Info("Disconnect: peer is bad")
+			}).Debug("Disconnect: peer is bad")
 			return true
 		}
 	}

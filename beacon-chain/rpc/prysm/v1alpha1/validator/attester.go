@@ -38,12 +38,13 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 	if vs.SyncChecker.Syncing() {
 		return nil, status.Errorf(codes.Unavailable, "Syncing to latest head, not ready to respond")
 	}
-	if vs.HeadFetcher.IsGwatSynchronizing() {
-		log.WithError(fmt.Errorf("GWAT synchronization process is running, not ready to respond")).WithFields(logrus.Fields{
-			"Syncing": vs.HeadFetcher.IsGwatSynchronizing(),
-		}).Warn("GetAttestationData: Proposing skipped (synchronizing)")
-		return nil, status.Errorf(codes.Unavailable, "Syncing to latest head, not ready to respond")
-	}
+
+	//if vs.HeadFetcher.IsGwatSynchronizing() {
+	//	log.WithError(fmt.Errorf("GWAT synchronization process is running, not ready to respond")).WithFields(logrus.Fields{
+	//		"Syncing": vs.HeadFetcher.IsGwatSynchronizing(),
+	//	}).Warn("GetAttestationData: Proposing skipped (synchronizing)")
+	//	return nil, status.Errorf(codes.Unavailable, "Syncing to latest head, not ready to respond")
+	//}
 
 	// An optimistic validator MUST NOT participate in attestation. (i.e., sign across the DOMAIN_BEACON_ATTESTER, DOMAIN_SELECTION_PROOF or DOMAIN_AGGREGATE_AND_PROOF domains).
 	if err := vs.optimisticStatus(ctx); err != nil {
@@ -110,14 +111,17 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 
 	//request optimistic spine
 	baseSpine := helpers.GetTerminalFinalizedSpine(cpSt)
-	optSpines, err := vs.ExecutionEngineCaller.ExecutionDagGetOptimisticSpines(ctx, baseSpine)
-	if err != nil {
-		errWrap := fmt.Errorf("could not get gwat candidates: %v", err)
-		log.WithError(errWrap).WithFields(logrus.Fields{
-			"baseSpine": baseSpine,
-		}).Error("Get attestation data: Could not retrieve of gwat optimistic spines")
-		return nil, status.Errorf(codes.Internal, "Could not retrieve of gwat optimistic spines: %v", err)
-	}
+
+	optSpines := vs.HeadFetcher.GetCacheOptimisticSpines(baseSpine)
+
+	//optSpines, err := vs.ExecutionEngineCaller.ExecutionDagGetOptimisticSpines(ctx, baseSpine)
+	//if err != nil {
+	//	errWrap := fmt.Errorf("could not get gwat candidates: %v", err)
+	//	log.WithError(errWrap).WithFields(logrus.Fields{
+	//		"baseSpine": baseSpine,
+	//	}).Error("Get attestation data: Could not retrieve of gwat optimistic spines")
+	//	return nil, status.Errorf(codes.Internal, "Could not retrieve of gwat optimistic spines: %v", err)
+	//}
 
 	//prepend current optimistic finalization to optimistic spine to calc parent
 	optFinalisation := make([]gwatCommon.HashArray, len(cpSt.SpineData().Finalization)/gwatCommon.HashLength)

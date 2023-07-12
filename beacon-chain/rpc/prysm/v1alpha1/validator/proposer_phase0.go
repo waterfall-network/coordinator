@@ -99,12 +99,12 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		}).Warn("Proposing skipped (synchronizing)")
 		return nil, fmt.Errorf("syncing to latest head, not ready to respond")
 	}
-	if vs.HeadFetcher.IsGwatSynchronizing() {
-		log.WithError(fmt.Errorf("GWAT synchronization process is running, not ready to respond")).WithFields(logrus.Fields{
-			"Syncing": vs.HeadFetcher.IsGwatSynchronizing(),
-		}).Warn("Proposing skipped (synchronizing)")
-		return nil, fmt.Errorf("GWAT synchronization process is running, not ready to respond")
-	}
+	//if vs.HeadFetcher.IsGwatSynchronizing() {
+	//	log.WithError(fmt.Errorf("GWAT synchronization process is running, not ready to respond")).WithFields(logrus.Fields{
+	//		"Syncing": vs.HeadFetcher.IsGwatSynchronizing(),
+	//	}).Warn("Proposing skipped (synchronizing)")
+	//	return nil, fmt.Errorf("GWAT synchronization process is running, not ready to respond")
+	//}
 
 	// calculate the parent block by optimistic spine.
 	currHead, err := vs.HeadFetcher.HeadState(ctx)
@@ -132,14 +132,17 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 
 	//request optimistic spine
 	baseSpine := helpers.GetTerminalFinalizedSpine(cpSt)
-	optSpines, err := vs.ExecutionEngineCaller.ExecutionDagGetOptimisticSpines(ctx, baseSpine)
-	if err != nil {
-		errWrap := fmt.Errorf("could not get gwat candidates: %v", err)
-		log.WithError(errWrap).WithFields(logrus.Fields{
-			"baseSpine": baseSpine,
-		}).Error("build block data: retrieving of parent failed")
-		return nil, errWrap
-	}
+
+	optSpines := vs.HeadFetcher.GetCacheOptimisticSpines(baseSpine)
+
+	//optSpines, err := vs.ExecutionEngineCaller.ExecutionDagGetOptimisticSpines(ctx, baseSpine)
+	//if err != nil {
+	//	errWrap := fmt.Errorf("could not get gwat candidates: %v", err)
+	//	log.WithError(errWrap).WithFields(logrus.Fields{
+	//		"baseSpine": baseSpine,
+	//	}).Error("build block data: retrieving of parent failed")
+	//	return nil, errWrap
+	//}
 
 	//prepend current optimistic finalization to optimistic spine to calc parent
 	optFinalisation := make([]gwatCommon.HashArray, len(cpSt.SpineData().Finalization)/gwatCommon.HashLength)
