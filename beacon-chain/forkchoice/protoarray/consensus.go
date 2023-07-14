@@ -497,6 +497,10 @@ func (f *ForkChoice) GetFork(root [32]byte) *Fork {
 
 	for {
 		if currIndex >= uint64(len(f.store.nodes)) {
+			log.WithFields(logrus.Fields{
+				"currIndex":          currIndex,
+				"len(f.store.nodes)": len(f.store.nodes),
+			}).Error("FC: get fork oun of range")
 			break
 		}
 		node := f.store.nodes[currIndex]
