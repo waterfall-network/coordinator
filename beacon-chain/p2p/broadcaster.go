@@ -259,7 +259,8 @@ func (s *Service) broadcastPrevoting(ctx context.Context, subnet uint64, prevote
 	// In the event our prevote is outdated and beyond the
 	// acceptable threshold, we exit early and do not broadcast it.
 	currSlot := slots.CurrentSlot(uint64(s.genesisTime.Unix()))
-	if prevote.Data.Slot+params.BeaconConfig().SlotsPerEpoch < currSlot {
+
+	if prevote.Data.Slot <= currSlot {
 		log.Warnf("Prevote is too old to broadcast, discarding it. Current Slot: %d , Attestation Slot: %d", currSlot, prevote.Data.Slot)
 		return
 	}
