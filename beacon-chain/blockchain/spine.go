@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"sync"
+	"time"
 
 	lru "github.com/hashicorp/golang-lru"
 	types "github.com/prysmaticlabs/eth2-types"
@@ -11,8 +13,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
-	"sync"
-	"time"
 )
 
 type spineData struct {
