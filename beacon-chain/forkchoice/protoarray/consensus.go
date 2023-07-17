@@ -51,6 +51,9 @@ func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines 
 	ctx, span := trace.StartSpan(ctx, "protoArrayForkChoice.GetParentByOptimisticSpines")
 	defer span.End()
 
+	f.mu.Lock()
+	defer f.mu.Unlock()
+
 	//removes empty values
 	_optSpines := make([]gwatCommon.HashArray, 0, len(optSpines))
 	for _, ha := range optSpines {
@@ -390,6 +393,8 @@ func indexOfOptimisticSpines(hash gwatCommon.Hash, optSpines []gwatCommon.HashAr
 
 // CollectForkExcludedAttestations collect attestations
 func (f *ForkChoice) CollectForkExcludedBlkRoots(leaf gwatCommon.Hash) gwatCommon.HashArray {
+	f.mu.Lock()
+	defer f.mu.Unlock()
 	// collect nodes excluded from fork
 	fork := f.GetFork(leaf)
 	exIndices := make(map[[32]byte]uint64, len(f.store.nodesIndices))
@@ -552,6 +557,8 @@ func (f *ForkChoice) GetCommonAncestor() (node *Node) {
 }
 
 func (f *ForkChoice) SetFinalizationValid(root [32]byte, isValid bool) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
 	if !f.HasNode(root) {
 		return
 	}
