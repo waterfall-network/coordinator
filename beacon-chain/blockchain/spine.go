@@ -2,24 +2,63 @@ package blockchain
 
 import (
 	"bytes"
-	"sync"
+	"context"
+	"fmt"
 
 	lru "github.com/hashicorp/golang-lru"
 	types "github.com/prysmaticlabs/eth2-types"
+	"github.com/sirupsen/logrus"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
+	"sync"
+	"time"
 )
 
 type spineData struct {
 	optSpines   *lru.Cache
 	optSpinesMu sync.RWMutex
 
-	lastValidRoot []byte
-	lastValidSlot types.Slot
-	//finalizedSpines gwatCommon.HashArray  //successfully finalized spines from checkpoint
+	lastValidRoot  []byte
+	lastValidSlot  types.Slot
 	gwatCheckpoint *gwatTypes.Checkpoint //cache for current finalization request checkpoint param
 	coordState     *gwatTypes.Checkpoint //cache for current gwat coordinated state
 	sync.RWMutex
+}
+
+func (s *Service) GetOptimisticSpines(ctx context.Context, baseSpine gwatCommon.Hash) ([]gwatCommon.HashArray, error) {
+	if s.isSynchronizing() {
+		log.WithError(fmt.Errorf("Node syncing to latest head, not ready to respond")).WithFields(logrus.Fields{
+			"Syncing": s.isSynchronizing(),
+		}).Warn("Get Optimistic Spines: skipped (synchronizing)")
+		return s.GetCacheOptimisticSpines(baseSpine), nil
+	}
+	if s.IsGwatSynchronizing() {
+		log.WithError(fmt.Errorf("GWAT synchronization process is running, not ready to respond")).WithFields(logrus.Fields{
+			"Syncing": s.IsGwatSynchronizing(),
+		}).Warn("Get Optimistic Spines: skipped (gwat synchronizing)")
+		return s.GetCacheOptimisticSpines(baseSpine), nil
+	}
+
+	tout := time.Duration((params.BeaconConfig().SecondsPerSlot*1000)/4) * time.Millisecond
+	reqCtx, cancel := context.WithTimeout(ctx, tout)
+	defer cancel()
+	optSpines, err := s.cfg.ExecutionEngineCaller.ExecutionDagGetOptimisticSpines(reqCtx, baseSpine)
+	if err != nil {
+		errWrap := fmt.Errorf("could not get gwat optSpines: %v", err)
+		log.WithError(errWrap).WithFields(logrus.Fields{
+			"baseSpine": baseSpine,
+		}).Error("Get Optimistic Spines: retrieving opt spine failed")
+		return s.GetCacheOptimisticSpines(baseSpine), nil
+	}
+	s.setCacheOptimisticSpines(baseSpine, optSpines)
+
+	log.WithFields(logrus.Fields{
+		"baseSpine": fmt.Sprintf("%#x", baseSpine),
+		"opSpines":  optSpines,
+	}).Info("Get Optimistic Spines: success")
+
+	return s.GetCacheOptimisticSpines(baseSpine), nil
 }
 
 // setCacheOptimisticSpines cashes current optSpines.
@@ -76,63 +115,6 @@ func (s *Service) GetValidatedBlockInfo() ([]byte, types.Slot) {
 
 	return s.spineData.lastValidRoot, s.spineData.lastValidSlot
 }
-
-//// SetFinalizedSpinesCheckpoint set spine hash of checkpoint
-//func (s *Service) SetFinalizedSpinesCheckpoint(cpSpine gwatCommon.Hash) {
-//	s.spineData.RLock()
-//	defer s.spineData.RUnlock()
-//
-//	finalizedSpines := make(gwatCommon.HashArray, 0, 4*params.BeaconConfig().SlotsPerEpoch)
-//	isCpFound := false
-//	for _, h := range s.spineData.finalizedSpines {
-//		if h == cpSpine || isCpFound {
-//			isCpFound = true
-//			finalizedSpines = append(finalizedSpines, h)
-//		}
-//	}
-//	if len(finalizedSpines) == 0 {
-//		finalizedSpines = append(finalizedSpines, cpSpine)
-//	}
-//	s.spineData.finalizedSpines = finalizedSpines.Uniq()
-//}
-
-//// AddFinalizedSpines append finalized spines to cache
-//func (s *Service) AddFinalizedSpines(finSpines gwatCommon.HashArray) {
-//	s.spineData.RLock()
-//	defer s.spineData.RUnlock()
-//
-//	if len(finSpines) == 0 {
-//		return
-//	}
-//	firstSpine := finSpines[0]
-//	finalizedSpines := make(gwatCommon.HashArray, 0, 4*params.BeaconConfig().SlotsPerEpoch)
-//	for _, h := range s.spineData.finalizedSpines {
-//		if h == firstSpine {
-//			break
-//		}
-//		finalizedSpines = append(finalizedSpines, h)
-//	}
-//	finalizedSpines = append(finalizedSpines, finSpines...)
-//	s.spineData.finalizedSpines = finalizedSpines.Uniq()
-//}
-
-//func (s *Service) SetFinalizedSpinesHead(headSpine gwatCommon.Hash) {
-//	s.AddFinalizedSpines(gwatCommon.HashArray{headSpine})
-//}
-
-//func (s *Service) GetFinalizedSpines() gwatCommon.HashArray {
-//	s.spineData.RLock()
-//	defer s.spineData.RUnlock()
-//	return s.spineData.finalizedSpines.Copy()
-//}
-
-//func (s *Service) ResetFinalizedSpines() {
-//	s.spineData.RLock()
-//	defer s.spineData.RUnlock()
-//
-//	finalizedSpines := make(gwatCommon.HashArray, 0, 4*params.BeaconConfig().SlotsPerEpoch)
-//	s.spineData.finalizedSpines = finalizedSpines
-//}
 
 // CacheGwatCheckpoint caches the current gwat checkpoint.
 func (s *Service) CacheGwatCheckpoint(gwatCheckpoint *gwatTypes.Checkpoint) {

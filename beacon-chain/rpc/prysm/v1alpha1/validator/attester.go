@@ -112,16 +112,14 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 	//request optimistic spine
 	baseSpine := helpers.GetTerminalFinalizedSpine(cpSt)
 
-	optSpines := vs.HeadFetcher.GetCacheOptimisticSpines(baseSpine)
-
-	//optSpines, err := vs.ExecutionEngineCaller.ExecutionDagGetOptimisticSpines(ctx, baseSpine)
-	//if err != nil {
-	//	errWrap := fmt.Errorf("could not get gwat candidates: %v", err)
-	//	log.WithError(errWrap).WithFields(logrus.Fields{
-	//		"baseSpine": baseSpine,
-	//	}).Error("Get attestation data: Could not retrieve of gwat optimistic spines")
-	//	return nil, status.Errorf(codes.Internal, "Could not retrieve of gwat optimistic spines: %v", err)
-	//}
+	optSpines, err := vs.HeadFetcher.GetOptimisticSpines(ctx, baseSpine)
+	if err != nil {
+		errWrap := fmt.Errorf("could not get gwat optimistic spines: %v", err)
+		log.WithError(errWrap).WithFields(logrus.Fields{
+			"slot": req.Slot,
+		}).Error("Get attestation data: Could not retrieve of gwat optimistic spines")
+		return nil, errWrap
+	}
 
 	//prepend current optimistic finalization to optimistic spine to calc parent
 	optFinalisation := make([]gwatCommon.HashArray, len(cpSt.SpineData().Finalization)/gwatCommon.HashLength)
