@@ -496,6 +496,9 @@ func (f *ForkChoice) GetFork(root [32]byte) *Fork {
 	}
 
 	for {
+		if currIndex >= uint64(len(f.store.nodes)) {
+			break
+		}
 		node := f.store.nodes[currIndex]
 		if node == nil {
 			break

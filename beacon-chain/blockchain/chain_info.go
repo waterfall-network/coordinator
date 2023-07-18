@@ -16,6 +16,7 @@ import (
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	"go.opencensus.io/trace"
 )
 
@@ -64,6 +65,7 @@ type HeadFetcher interface {
 	GetValidatedBlockInfo() ([]byte, types.Slot)
 	SetValidatedBlockInfo([]byte, types.Slot)
 	IsGwatSynchronizing() bool
+	GetCacheOptimisticSpines(baseSpine gwatCommon.Hash) []gwatCommon.HashArray
 }
 
 // ForkFetcher retrieves the current fork information of the Ethereum beacon chain.
