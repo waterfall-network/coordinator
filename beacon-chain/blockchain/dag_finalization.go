@@ -356,9 +356,8 @@ func (s *Service) createGwatSyncParam(ctx context.Context, blockRoot [32]byte) e
 				lastSpine = prevSpines[len(prevSpines)-1]
 			}
 			prevCp = &gwatTypes.Checkpoint{
-				Epoch: uint64(prevCheckParam.Epoch()),
-				//FinEpoch: uint64(prevCheckParam.FinEpoch()),
-				FinEpoch: uint64(curEpoch),
+				Epoch:    uint64(prevCheckParam.Epoch()),
+				FinEpoch: uint64(prevCheckParam.FinEpoch()),
 				Root:     gwatCommon.BytesToHash(prevCheckParam.Root()),
 				Spine:    lastSpine,
 			}
@@ -426,7 +425,7 @@ func (s *Service) createGwatSyncParam(ctx context.Context, blockRoot [32]byte) e
 	return nil
 }
 
-// todo work by params
+//todo work by params
 // processGwatSync implements gwat sync procedure.
 func (s *Service) processGwatSync(gsp *wrapper.GwatSyncParam) error {
 	ctx, span := trace.StartSpan(s.ctx, "blockChain.processGwatSync")
