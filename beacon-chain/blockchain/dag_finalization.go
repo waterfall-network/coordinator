@@ -193,6 +193,33 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 		return err
 	}
 
+	headFinRoot := bytesutil.ToBytes32(headState.FinalizedCheckpoint().Root)
+
+	// sync to current justified cp
+	if headFinRoot != params.BeaconConfig().ZeroHash {
+		finState, err := s.cfg.StateGen.StateByRoot(ctx, headFinRoot)
+		if err != nil {
+			// reset if failed
+			log.WithError(err).WithFields(logrus.Fields{
+				"headFinRoot": fmt.Sprintf("%#x", headFinRoot),
+			}).Error("Gwat sync: get finalized state")
+			return err
+		}
+
+		err = s.processDagFinalization(finState)
+		if err != nil {
+			// reset if failed
+			log.WithError(err).WithFields(logrus.Fields{
+				"headFinRoot": fmt.Sprintf("%#x", headFinRoot),
+			}).Error("Gwat sync: sync to finalized cp failed")
+			return err
+		}
+
+		log.WithFields(logrus.Fields{
+			"headFinRoot": fmt.Sprintf("%#x", headFinRoot),
+		}).Info("Gwat sync: sync to finalized cp success")
+	}
+
 	headJustRoot := bytesutil.ToBytes32(headState.CurrentJustifiedCheckpoint().Root)
 
 	// sync to current justified cp
