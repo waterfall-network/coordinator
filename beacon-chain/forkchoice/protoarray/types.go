@@ -13,6 +13,7 @@ type ForkChoice struct {
 	votes     []Vote // tracks individual validator's last vote.
 	votesLock sync.RWMutex
 	balances  []uint64 // tracks individual validator's last justified balances.
+	mu        sync.RWMutex
 }
 
 // Store defines the fork choice store which includes block nodes and the last view of checkpoint information.

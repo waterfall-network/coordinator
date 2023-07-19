@@ -65,7 +65,7 @@ type HeadFetcher interface {
 	GetValidatedBlockInfo() ([]byte, types.Slot)
 	SetValidatedBlockInfo([]byte, types.Slot)
 	IsGwatSynchronizing() bool
-	GetCacheOptimisticSpines(baseSpine gwatCommon.Hash) []gwatCommon.HashArray
+	GetOptimisticSpines(ctx context.Context, baseSpine gwatCommon.Hash) ([]gwatCommon.HashArray, error)
 }
 
 // ForkFetcher retrieves the current fork information of the Ethereum beacon chain.

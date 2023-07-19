@@ -3,13 +3,9 @@ package blockchain
 import (
 	"bytes"
 	"context"
-	"fmt"
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/sirupsen/logrus"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 )
 
@@ -35,9 +31,6 @@ import (
 //	    if ancestor_at_finalized_slot == store.finalized_checkpoint.root:
 //	        store.justified_checkpoint = store.best_justified_checkpoint
 func (s *Service) NewSlot(ctx context.Context, slot types.Slot) error {
-
-	go s.updateOptimisticSpineData(ctx, slot)
-
 	// Reset proposer boost root in fork choice.
 	if err := s.cfg.ForkChoiceStore.ResetBoostedProposerRoot(ctx); err != nil {
 		return errors.Wrap(err, "could not reset boosted proposer root in fork choice")
@@ -76,64 +69,4 @@ func (s *Service) NewSlot(ctx context.Context, slot types.Slot) error {
 	}
 	return nil
 
-}
-
-func (s *Service) updateOptimisticSpineData(ctx context.Context, slot types.Slot) {
-	if s.isSynchronizing() {
-		log.WithError(fmt.Errorf("Node syncing to latest head, not ready to respond")).WithFields(logrus.Fields{
-			"Syncing": s.isSynchronizing(),
-		}).Warn("Optimistic Spines update skipped (synchronizing)")
-		return
-	}
-	if s.IsGwatSynchronizing() {
-		log.WithError(fmt.Errorf("GWAT synchronization process is running, not ready to respond")).WithFields(logrus.Fields{
-			"Syncing": s.IsGwatSynchronizing(),
-		}).Warn("Optimistic Spines update skipped (gwat synchronizing)")
-		return
-	}
-
-	// calculate the parent block by optimistic spine.
-	currHead, err := s.HeadState(ctx)
-	if err != nil {
-		log.WithError(fmt.Errorf("could not get head state %v", err)).Error("Optimistic Spines update: retrieving of head state failed")
-		return
-	}
-
-	jCpRoot := bytesutil.ToBytes32(currHead.CurrentJustifiedCheckpoint().Root)
-	if currHead.CurrentJustifiedCheckpoint().Epoch == 0 {
-		jCpRoot, err = s.cfg.BeaconDB.GenesisBlockRoot(ctx)
-		if err != nil {
-			log.WithError(errors.Wrap(err, "get genesis root failed")).Error("Optimistic Spines update: retrieving of genesis root failed")
-			return
-		}
-	}
-
-	cpSt, err := s.cfg.StateGen.StateByRoot(ctx, jCpRoot)
-	if err != nil {
-		log.WithError(fmt.Errorf("could not get head state %v", err)).WithFields(logrus.Fields{
-			"jCpRoot": fmt.Sprintf("%#x", jCpRoot),
-		}).Error("Optimistic Spines update: retrieving of cp state failed")
-		return
-	}
-
-	//request optimistic spine
-	baseSpine := helpers.GetTerminalFinalizedSpine(cpSt)
-
-	optSpines, err := s.cfg.ExecutionEngineCaller.ExecutionDagGetOptimisticSpines(s.ctx, baseSpine)
-	if err != nil {
-		errWrap := fmt.Errorf("could not get gwat optSpines: %v", err)
-		log.WithError(errWrap).WithFields(logrus.Fields{
-			"baseSpine": baseSpine,
-		}).Error("Optimistic Spines update: retrieving opt spine failed")
-		return
-	}
-	s.setCacheOptimisticSpines(baseSpine, optSpines)
-
-	log.WithFields(logrus.Fields{
-		"slot":      slot,
-		"baseSpine": fmt.Sprintf("%#x", baseSpine),
-		"opSpines":  optSpines,
-	}).Info("Optimistic Spines updated")
-
-	return
 }

@@ -263,7 +263,7 @@ func TestProcessAttestationNoVerify_SourceTargetHead(t *testing.T) {
 	copy(ckp.Root, make([]byte, fieldparams.RootLength))
 	require.NoError(t, beaconState.SetCurrentJustifiedCheckpoint(ckp))
 
-	beaconState, err = altair.ProcessAttestationNoVerifySignature(context.Background(), beaconState, att)
+	beaconState, err = altair.ProcessAttestationNoVerifySignature(context.Background(), beaconState, att, nil)
 	require.NoError(t, err)
 
 	p, err := beaconState.CurrentEpochParticipation()

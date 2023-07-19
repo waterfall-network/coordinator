@@ -174,6 +174,8 @@ func (f *ForkChoice) InsertOptimisticBlock(
 // Prune prunes the fork choice store with the new finalized root. The store is only pruned if the input
 // root is different than the current store finalized root, and the number of the store has met prune threshold.
 func (f *ForkChoice) Prune(ctx context.Context, finalizedRoot [32]byte) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
 	return f.store.prune(ctx, finalizedRoot)
 }
 
