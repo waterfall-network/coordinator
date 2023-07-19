@@ -305,7 +305,7 @@ func (s *Service) createGwatSyncParam(ctx context.Context, blockRoot [32]byte) e
 		}).Error("Save gwat sync params: get block state")
 		return err
 	}
-	cp := blState.CurrentJustifiedCheckpoint()
+	cp := blState.FinalizedCheckpoint()
 	curEpoch := slots.ToEpoch(blState.Slot())
 
 	//save gwat sync params
