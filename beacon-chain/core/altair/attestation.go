@@ -31,10 +31,11 @@ func ProcessAttestationsNoVerifySignature(
 	if err := helpers.BeaconBlockIsNil(b); err != nil {
 		return nil, err
 	}
+	handledIndexes := map[[32]byte]map[uint64]bool{}
 	body := b.Block().Body()
 	for idx, att := range body.Attestations() {
 		var err error
-		beaconState, err = ProcessAttestationNoVerifySignature(ctx, beaconState, att)
+		beaconState, err = ProcessAttestationNoVerifySignature(ctx, beaconState, att, handledIndexes)
 		if err != nil {
 			log.WithError(err).WithFields(log.Fields{
 				"i":        idx,
@@ -55,6 +56,7 @@ func ProcessAttestationNoVerifySignature(
 	ctx context.Context,
 	beaconState state.BeaconStateAltair,
 	att *ethpb.Attestation,
+	handledIndexes map[[32]byte]map[uint64]bool,
 ) (state.BeaconStateAltair, error) {
 	ctx, span := trace.StartSpan(ctx, "altair.ProcessAttestationNoVerifySignature")
 	defer span.End()
@@ -83,7 +85,49 @@ func ProcessAttestationNoVerifySignature(
 		return nil, err
 	}
 
-	return SetParticipationAndRewardProposer(ctx, beaconState, att.Data.Target.Epoch, indices, participatedFlags, att.Data.BeaconBlockRoot)
+	//rm handled indexes
+	var attDataRoot [32]byte
+	if handledIndexes != nil {
+		attDataRoot, err = att.Data.HashTreeRoot()
+		if err != nil {
+			log.WithError(err).WithFields(log.Fields{
+				"att.slot":            att.Data.Slot,
+				"att.CommitteeIndex":  att.Data.CommitteeIndex,
+				"att.AggregationBits": fmt.Sprintf("%b", att.AggregationBits),
+			}).Error("Calc attestation HashTreeRoot failed")
+			return beaconState, err
+		}
+
+		if hixs, ok := handledIndexes[attDataRoot]; ok {
+			upIxs := make([]uint64, 0, len(indices))
+			for _, ix := range indices {
+				isHandled := hixs[ix]
+				if !isHandled {
+					upIxs = append(upIxs, ix)
+				} else {
+					log.WithFields(log.Fields{
+						"att.slot":           att.Data.Slot,
+						"att.CommitteeIndex": att.Data.CommitteeIndex,
+						"validator":          ix,
+					}).Info("Handled attestation detected")
+				}
+			}
+			indices = upIxs
+		}
+	}
+
+	bState, err := SetParticipationAndRewardProposer(ctx, beaconState, att.Data.Target.Epoch, indices, participatedFlags, att.Data.BeaconBlockRoot)
+
+	//update handledIndexes
+	if err == nil && handledIndexes != nil {
+		if _, ok := handledIndexes[attDataRoot]; !ok {
+			handledIndexes[attDataRoot] = map[uint64]bool{}
+		}
+		for _, ix := range indices {
+			handledIndexes[attDataRoot][ix] = true
+		}
+	}
+	return bState, err
 }
 
 // SetParticipationAndRewardProposer performs

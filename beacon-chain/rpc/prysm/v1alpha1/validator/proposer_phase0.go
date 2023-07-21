@@ -133,16 +133,14 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 	//request optimistic spine
 	baseSpine := helpers.GetTerminalFinalizedSpine(cpSt)
 
-	optSpines := vs.HeadFetcher.GetCacheOptimisticSpines(baseSpine)
-
-	//optSpines, err := vs.ExecutionEngineCaller.ExecutionDagGetOptimisticSpines(ctx, baseSpine)
-	//if err != nil {
-	//	errWrap := fmt.Errorf("could not get gwat candidates: %v", err)
-	//	log.WithError(errWrap).WithFields(logrus.Fields{
-	//		"baseSpine": baseSpine,
-	//	}).Error("build block data: retrieving of parent failed")
-	//	return nil, errWrap
-	//}
+	optSpines, err := vs.HeadFetcher.GetOptimisticSpines(ctx, baseSpine)
+	if err != nil {
+		errWrap := fmt.Errorf("could not get gwat candidates: %v", err)
+		log.WithError(errWrap).WithFields(logrus.Fields{
+			"baseSpine": baseSpine,
+		}).Error("build block data: retrieving of parent failed")
+		return nil, errWrap
+	}
 
 	//prepend current optimistic finalization to optimistic spine to calc parent
 	optFinalisation := make([]gwatCommon.HashArray, len(cpSt.SpineData().Finalization)/gwatCommon.HashLength)
