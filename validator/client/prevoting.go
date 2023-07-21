@@ -80,7 +80,7 @@ func (v *validator) SubmitPrevote(ctx context.Context, slot types.Slot, pubKey [
 		Data:             data,
 	}
 
-	domain, signingRoot, err := v.getDomainAndSigningRootPrevote(ctx, indexedPrevote.Data)
+	domain, signingRoot, err := v.getDomainAndSigningRootPrevote(ctx, indexedPrevote)
 	if err != nil {
 		log.WithError(err).Error("Could not get domain and signing root from prevote")
 		if v.emitAccountMetrics {
@@ -151,12 +151,12 @@ func (v *validator) SubmitPrevote(ctx context.Context, slot types.Slot, pubKey [
 	}
 }
 
-func (v *validator) getDomainAndSigningRootPrevote(ctx context.Context, data *ethpb.PreVoteData) (*ethpb.DomainResponse, [32]byte, error) {
-	domain, err := v.domainData(ctx, slots.ToEpoch(data.Slot), params.BeaconConfig().DomainBeaconAttester[:])
+func (v *validator) getDomainAndSigningRootPrevote(ctx context.Context, data *ethpb.IndexedPreVote) (*ethpb.DomainResponse, [32]byte, error) {
+	domain, err := v.domainData(ctx, slots.ToEpoch(data.Data.Slot), params.BeaconConfig().DomainBeaconAttester[:])
 	if err != nil {
 		return nil, [32]byte{}, err
 	}
-	root, err := signing.ComputeSigningRoot(data, domain.SignatureDomain)
+	root, err := signing.ComputeSigningRoot(data.Data, domain.SignatureDomain)
 	if err != nil {
 		return nil, [32]byte{}, err
 	}

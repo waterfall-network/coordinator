@@ -16,7 +16,7 @@ option php_namespace = "Ethereum\\Eth\\v1alpha1";
 message PreVoteData {
   // Slot of collect data.
   uint64 slot = 1 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Slot"];
-  // The committee index that submitted this attestation.
+  // The committee index that submitted this prevote.
   uint64 index = 2 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.CommitteeIndex"];
   // The 32 byte array of hashes presented sequence of the GWAT spines candidates.
   // ssz_max = 32 * 128

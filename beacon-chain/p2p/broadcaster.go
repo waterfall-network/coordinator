@@ -261,7 +261,7 @@ func (s *Service) broadcastPrevoting(ctx context.Context, subnet uint64, prevote
 	currSlot := slots.CurrentSlot(uint64(s.genesisTime.Unix()))
 
 	if prevote.Data.Slot <= currSlot {
-		log.Warnf("Prevote is too old to broadcast, discarding it. Current Slot: %d , Attestation Slot: %d", currSlot, prevote.Data.Slot)
+		log.Warnf("Prevote is too old to broadcast, discarding it. Current Slot: %d , Prevote Slot: %d", currSlot, prevote.Data.Slot)
 		return
 	}
 

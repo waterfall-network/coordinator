@@ -292,13 +292,17 @@ func PrevoteSignatureBatch(ctx context.Context, beaconState state.ReadOnlyBeacon
 		return bls.NewSet(), nil
 	}
 
-	fork := beaconState.Fork()
+	epoch := slots.ToEpoch(prevotes[0].Data.Slot)
+	fork, err := forks.Fork(epoch)
+	if err != nil {
+		log.Warnf("No fork version was returned for slot %v", epoch)
+	}
 	gvr := beaconState.GenesisValidatorsRoot()
 	dt := params.BeaconConfig().DomainBeaconAttester
 
 	set := bls.NewSet()
 
-	domain, err := signing.Domain(fork, fork.Epoch, dt, gvr)
+	domain, err := signing.Domain(fork, epoch, dt, gvr)
 	if err != nil {
 		return nil, err
 	}

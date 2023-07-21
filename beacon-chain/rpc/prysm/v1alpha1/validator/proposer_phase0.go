@@ -141,6 +141,9 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		}).Error("build block data: retrieving of parent failed")
 		return nil, errWrap
 	}
+	if len(optSpines) == 0 {
+		log.Errorf("Empty list of optimistic spines was retrieved for slot: %v", req.Slot)
+	}
 
 	//prepend current optimistic finalization to optimistic spine to calc parent
 	optFinalisation := make([]gwatCommon.HashArray, len(cpSt.SpineData().Finalization)/gwatCommon.HashLength)

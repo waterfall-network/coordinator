@@ -31,6 +31,11 @@ func (vs *Server) processPrevoteData(prevoteData []*ethpb.PreVote, optSpines []g
 	// Define thresholdVotes and exclude chains that have less votes
 	voters := prevoteData[0].GetAggregationBits().Len()
 	thresholdVotes := voters/2 + 1
+
+	log.WithFields(logrus.Fields{
+		"1.thresholdVotes": thresholdVotes,
+	}).Info("processPrevoteData: threshold of votes which is 50% + 1 vote")
+
 	for k, v := range votes {
 		if v < thresholdVotes {
 			delete(votes, k)
@@ -67,11 +72,6 @@ func (vs *Server) getChainsAndVotes(prevote []*ethpb.PreVote) (map[[gwatCommon.H
 			}
 		}
 	}
-
-	log.WithFields(logrus.Fields{
-		"1.subchains": hashAndChain,
-		"2.votes":     hashAndVotes,
-	}).Info("getChainsAndVotes: prevote subchains and votes amount")
 
 	return hashAndChain, hashAndVotes
 }
