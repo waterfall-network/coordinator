@@ -179,6 +179,7 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 	}
 
 	log.WithFields(logrus.Fields{
+		"headSlot": s.headSlot(),
 		"headRoot": fmt.Sprintf("%#x", s.headRoot()),
 	}).Info("Gwat sync: head sync start")
 
@@ -188,10 +189,19 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 	if err != nil {
 		// reset if failed
 		log.WithError(err).WithFields(logrus.Fields{
+			"headSlot": s.headSlot(),
 			"headRoot": fmt.Sprintf("%#x", s.headRoot()),
 		}).Error("Gwat sync: get head state")
 		return err
 	}
+
+	log.WithFields(logrus.Fields{
+		"headSlot":     s.headSlot(),
+		"headRoot":     fmt.Sprintf("%#x", s.headRoot()),
+		"CpFinalized":  headState.SpineData().CpFinalized,
+		"Finalization": headState.SpineData().Finalization,
+		"Prefix":       headState.SpineData().Prefix,
+	}).Info("Gwat sync: head state info")
 
 	headFinRoot := bytesutil.ToBytes32(headState.FinalizedCheckpoint().Root)
 
@@ -201,6 +211,7 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 		if err != nil {
 			// reset if failed
 			log.WithError(err).WithFields(logrus.Fields{
+				"headSlot":    s.headSlot(),
 				"headFinRoot": fmt.Sprintf("%#x", headFinRoot),
 			}).Error("Gwat sync: get finalized state")
 			return err
@@ -210,6 +221,7 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 		if err != nil {
 			// reset if failed
 			log.WithError(err).WithFields(logrus.Fields{
+				"headSlot":    s.headSlot(),
 				"headFinRoot": fmt.Sprintf("%#x", headFinRoot),
 			}).Error("Gwat sync: sync to finalized cp failed")
 			return err
@@ -228,6 +240,7 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 		if err != nil {
 			// reset if failed
 			log.WithError(err).WithFields(logrus.Fields{
+				"headSlot":     s.headSlot(),
 				"headJustRoot": fmt.Sprintf("%#x", headJustRoot),
 			}).Error("Gwat sync: get justified state")
 			return err
@@ -237,12 +250,14 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 		if err != nil {
 			// reset if failed
 			log.WithError(err).WithFields(logrus.Fields{
+				"headSlot":     s.headSlot(),
 				"headJustRoot": fmt.Sprintf("%#x", headJustRoot),
 			}).Error("Gwat sync: sync to justified cp failed")
 			return err
 		}
 
 		log.WithFields(logrus.Fields{
+			"headSlot":     s.headSlot(),
 			"headJustRoot": fmt.Sprintf("%#x", headJustRoot),
 		}).Info("Gwat sync: sync to justified cp success")
 	}
@@ -252,6 +267,7 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 	if err != nil {
 		// reset if failed
 		log.WithError(err).WithFields(logrus.Fields{
+			"headSlot": headState.Slot(),
 			"headRoot": fmt.Sprintf("%#x", headState),
 		}).Error("Gwat sync: head sync failed")
 		return err
@@ -263,21 +279,27 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 	if err != nil {
 		// reset if failed
 		log.WithError(err).WithFields(logrus.Fields{
-			"headRoot": fmt.Sprintf("%#x", s.headRoot()),
+			"headSlot":            s.headSlot(),
+			"checkHeadState.Slot": checkHeadState.Slot(),
+			"headRoot":            fmt.Sprintf("%#x", s.headRoot()),
 		}).Error("Gwat sync: get head state to sync head")
 		return err
 	}
 	if !bytes.Equal(headJustRoot[:], checkHeadState.CurrentJustifiedCheckpoint().Root) {
 		log.WithError(err).WithFields(logrus.Fields{
+			"syncCpSlot":  fmt.Sprintf("%d", headState.Slot()),
+			"headCpSlot":  fmt.Sprintf("%d", checkHeadState.Slot()),
 			"syncCpEpoch": fmt.Sprintf("%d", headState.CurrentJustifiedCheckpoint().Epoch),
 			"headCpEpoch": fmt.Sprintf("%d", checkHeadState.CurrentJustifiedCheckpoint().Epoch),
 			"syncCpRoot":  fmt.Sprintf("%#x", headJustRoot),
 			"headCpRoot":  fmt.Sprintf("%#x", checkHeadState.CurrentJustifiedCheckpoint().Root),
-		}).Warn("Gwat sync: recursive recync due to cp changed")
+		}).Warn("Gwat sync: recursive resync due to cp changed")
 		return s.runGwatSynchronization(ctx)
 	}
 
 	log.WithFields(logrus.Fields{
+		"curSlot":  fmt.Sprintf("%#x", s.CurrentSlot()),
+		"headSlot": fmt.Sprintf("%#x", s.HeadSlot()),
 		"headRoot": fmt.Sprintf("%#x", s.headRoot()),
 	}).Info("Gwat sync: head sync success")
 

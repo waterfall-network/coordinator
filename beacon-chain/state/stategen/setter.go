@@ -53,18 +53,27 @@ func (s *State) saveStateByRoot(ctx context.Context, blockRoot [32]byte, st stat
 	duration := uint64(math.Max(float64(s.saveHotStateDB.duration), 1))
 
 	s.saveHotStateDB.lock.Lock()
-	if s.saveHotStateDB.enabled && st.Slot().Mod(duration) == 0 {
-		if err := s.beaconDB.SaveState(ctx, st, blockRoot); err != nil {
-			s.saveHotStateDB.lock.Unlock()
-			return err
-		}
-		s.saveHotStateDB.savedStateRoots = append(s.saveHotStateDB.savedStateRoots, blockRoot)
 
-		log.WithFields(logrus.Fields{
-			"slot":                   st.Slot(),
-			"totalHotStateSavedInDB": len(s.saveHotStateDB.savedStateRoots),
-		}).Info("Saving hot state to DB")
+	log.WithFields(logrus.Fields{
+		"stSlot":        st.Slot(),
+		"duration":      duration,
+		"saveHotState":  s.saveHotStateDB.enabled,
+		"saveCondition": s.saveHotStateDB.enabled && st.Slot().Mod(duration) == 0,
+		"cond2":         st.Slot().Mod(duration) == 0,
+	}).Info("Saving hot state to DB: check condition (ignoring!!!)")
+
+	//if s.saveHotStateDB.enabled && st.Slot().Mod(duration) == 0 {
+	if err := s.beaconDB.SaveState(ctx, st, blockRoot); err != nil {
+		s.saveHotStateDB.lock.Unlock()
+		return err
 	}
+	s.saveHotStateDB.savedStateRoots = append(s.saveHotStateDB.savedStateRoots, blockRoot)
+
+	log.WithFields(logrus.Fields{
+		"slot":                   st.Slot(),
+		"totalHotStateSavedInDB": len(s.saveHotStateDB.savedStateRoots),
+	}).Info("Saving hot state to DB: success")
+	//}
 	s.saveHotStateDB.lock.Unlock()
 
 	// If the hot state is already in cache, one can be sure the state was processed and in the DB.
