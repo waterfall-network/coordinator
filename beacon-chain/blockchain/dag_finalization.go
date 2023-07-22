@@ -99,6 +99,7 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 	//var currStateRoot []byte
 
 	gwatSearchEpoch := types.Epoch(gwatCheckpoint.Epoch)
+	var cpEpoch types.Epoch
 
 	for {
 		select {
@@ -176,6 +177,7 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 		//	return err
 		//}
 		gwatSearchEpoch = syncParams.FinEpoch()
+		cpEpoch = syncParams.Epoch()
 	}
 
 	log.WithFields(logrus.Fields{
@@ -183,119 +185,227 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 		"headRoot": fmt.Sprintf("%#x", s.headRoot()),
 	}).Info("Gwat sync: head sync start")
 
-	// sync finalization:
-	// after synced upto last finalized checkpoint - sync up to current justified checkpoint
-	headState, err := s.HeadState(ctx)
-	if err != nil {
-		// reset if failed
+	syncSlot, err := slots.EpochStart(cpEpoch)
+	for syncSlot < s.HeadSlot() {
+
 		log.WithError(err).WithFields(logrus.Fields{
+			"syncSlot": syncSlot,
 			"headSlot": s.headSlot(),
+		}).Info("Gwat sync: head sync gap 000")
+
+		syncRoot := params.BeaconConfig().ZeroHash
+		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"syncSlot": syncSlot,
+				"headSlot": s.headSlot(),
+				"headRoot": fmt.Sprintf("%#x", s.headRoot()),
+			}).Error("Gwat sync: head sync gap")
+			return err
+		}
+		_, roots, err := s.cfg.BeaconDB.BlockRootsBySlot(ctx, syncSlot)
+		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"syncSlot": syncSlot,
+				"headSlot": s.headSlot(),
+				"headRoot": fmt.Sprintf("%#x", s.headRoot()),
+			}).Error("Gwat sync: head sync gap")
+			return err
+		}
+		if len(roots) == 0 {
+			syncSlot++
+			continue
+		}
+		if len(roots) == 1 {
+			syncRoot = roots[0]
+		} else {
+			for _, r := range roots {
+				canonical, err := s.IsCanonical(ctx, r)
+				if err != nil {
+					log.WithError(err).WithFields(logrus.Fields{
+						"syncSlot": syncSlot,
+						"headSlot": s.headSlot(),
+						"headRoot": fmt.Sprintf("%#x", s.headRoot()),
+					}).Error("Gwat sync: head sync gap")
+					return err
+				}
+				if canonical {
+					syncRoot = r
+					break
+				}
+			}
+		}
+
+		log.WithError(err).WithFields(logrus.Fields{
+			"syncSlot": syncSlot,
+			"headSlot": s.headSlot(),
+			"syncRoot": fmt.Sprintf("%#x", syncRoot),
 			"headRoot": fmt.Sprintf("%#x", s.headRoot()),
-		}).Error("Gwat sync: get head state")
-		return err
-	}
+		}).Info("Gwat sync: head sync gap 111")
 
-	log.WithFields(logrus.Fields{
-		"headSlot":     s.headSlot(),
-		"headRoot":     fmt.Sprintf("%#x", s.headRoot()),
-		"CpFinalized":  headState.SpineData().CpFinalized,
-		"Finalization": headState.SpineData().Finalization,
-		"Prefix":       headState.SpineData().Prefix,
-	}).Info("Gwat sync: head state info")
-
-	headFinRoot := bytesutil.ToBytes32(headState.FinalizedCheckpoint().Root)
-
-	// sync to current justified cp
-	if headFinRoot != params.BeaconConfig().ZeroHash {
-		finState, err := s.cfg.StateGen.StateByRoot(ctx, headFinRoot)
-		if err != nil {
-			// reset if failed
-			log.WithError(err).WithFields(logrus.Fields{
-				"headSlot":    s.headSlot(),
-				"headFinRoot": fmt.Sprintf("%#x", headFinRoot),
-			}).Error("Gwat sync: get finalized state")
-			return err
+		if syncRoot == params.BeaconConfig().ZeroHash {
+			syncSlot++
+			continue
 		}
 
-		err = s.processDagFinalization(finState)
+		syncState, err := s.cfg.StateGen.StateByRoot(ctx, syncRoot)
 		if err != nil {
-			// reset if failed
 			log.WithError(err).WithFields(logrus.Fields{
-				"headSlot":    s.headSlot(),
-				"headFinRoot": fmt.Sprintf("%#x", headFinRoot),
-			}).Error("Gwat sync: sync to finalized cp failed")
-			return err
-		}
-
-		log.WithFields(logrus.Fields{
-			"headFinRoot": fmt.Sprintf("%#x", headFinRoot),
-		}).Info("Gwat sync: sync to finalized cp success")
-	}
-
-	headJustRoot := bytesutil.ToBytes32(headState.CurrentJustifiedCheckpoint().Root)
-
-	// sync to current justified cp
-	if headJustRoot != params.BeaconConfig().ZeroHash {
-		justifiedState, err := s.cfg.StateGen.StateByRoot(ctx, headJustRoot)
-		if err != nil {
-			// reset if failed
-			log.WithError(err).WithFields(logrus.Fields{
+				"syncSlot":     syncSlot,
 				"headSlot":     s.headSlot(),
-				"headJustRoot": fmt.Sprintf("%#x", headJustRoot),
-			}).Error("Gwat sync: get justified state")
+				"syncRoot":     fmt.Sprintf("%#x", syncRoot),
+				"headRoot":     fmt.Sprintf("%#x", s.headRoot()),
+				"Prefix":       gwatCommon.HashArrayFromBytes(syncState.SpineData().Prefix),
+				"Finalization": gwatCommon.HashArrayFromBytes(syncState.SpineData().Finalization),
+				"CpFinalized":  gwatCommon.HashArrayFromBytes(syncState.SpineData().CpFinalized),
+			}).Error("Gwat sync: head sync gap")
 			return err
 		}
 
-		err = s.processDagFinalization(justifiedState)
-		if err != nil {
-			// reset if failed
-			log.WithError(err).WithFields(logrus.Fields{
-				"headSlot":     s.headSlot(),
-				"headJustRoot": fmt.Sprintf("%#x", headJustRoot),
-			}).Error("Gwat sync: sync to justified cp failed")
-			return err
-		}
-
-		log.WithFields(logrus.Fields{
+		log.WithError(err).WithFields(logrus.Fields{
+			"syncSlot":     syncSlot,
 			"headSlot":     s.headSlot(),
-			"headJustRoot": fmt.Sprintf("%#x", headJustRoot),
-		}).Info("Gwat sync: sync to justified cp success")
+			"syncRoot":     fmt.Sprintf("%#x", syncRoot),
+			"headRoot":     fmt.Sprintf("%#x", s.headRoot()),
+			"Prefix":       gwatCommon.HashArrayFromBytes(syncState.SpineData().Prefix),
+			"Finalization": gwatCommon.HashArrayFromBytes(syncState.SpineData().Finalization),
+			"CpFinalized":  gwatCommon.HashArrayFromBytes(syncState.SpineData().CpFinalized),
+		}).Info("Gwat sync: head sync gap 222")
+
+		err = s.processDagFinalization(syncState)
+		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"syncSlot": syncSlot,
+				"headSlot": s.headSlot(),
+				"syncRoot": fmt.Sprintf("%#x", syncRoot),
+				"headRoot": fmt.Sprintf("%#x", s.headRoot()),
+			}).Error("Gwat sync: head sync gap")
+			return err
+		}
+
+		// sync next epoch
+		syncSlot += params.BeaconConfig().SlotsPerEpoch
+
+		log.WithFields(logrus.Fields{
+			"syncSlot": syncSlot,
+			"headSlot": s.headSlot(),
+			"syncRoot": fmt.Sprintf("%#x", syncRoot),
+			"headRoot": fmt.Sprintf("%#x", s.headRoot()),
+		}).Info("Gwat sync: head sync gap success")
 	}
 
-	// sync up to current chain head
-	err = s.processDagFinalization(headState)
-	if err != nil {
-		// reset if failed
-		log.WithError(err).WithFields(logrus.Fields{
-			"headSlot": headState.Slot(),
-			"headRoot": fmt.Sprintf("%#x", headState),
-		}).Error("Gwat sync: head sync failed")
-		return err
-	}
-
-	// if while sync finalization checkpoint was updated
-	// recursively repeat sync procedure.
-	checkHeadState, err := s.HeadState(ctx)
-	if err != nil {
-		// reset if failed
-		log.WithError(err).WithFields(logrus.Fields{
-			"headSlot":            s.headSlot(),
-			"checkHeadState.Slot": checkHeadState.Slot(),
-			"headRoot":            fmt.Sprintf("%#x", s.headRoot()),
-		}).Error("Gwat sync: get head state to sync head")
-		return err
-	}
-	if !bytes.Equal(headJustRoot[:], checkHeadState.CurrentJustifiedCheckpoint().Root) {
-		log.WithError(err).WithFields(logrus.Fields{
-			"syncCpSlot":  fmt.Sprintf("%d", headState.Slot()),
-			"headCpSlot":  fmt.Sprintf("%d", checkHeadState.Slot()),
-			"syncCpEpoch": fmt.Sprintf("%d", headState.CurrentJustifiedCheckpoint().Epoch),
-			"headCpEpoch": fmt.Sprintf("%d", checkHeadState.CurrentJustifiedCheckpoint().Epoch),
-			"syncCpRoot":  fmt.Sprintf("%#x", headJustRoot),
-			"headCpRoot":  fmt.Sprintf("%#x", checkHeadState.CurrentJustifiedCheckpoint().Root),
-		}).Warn("Gwat sync: recursive resync due to cp changed")
-		return s.runGwatSynchronization(ctx)
-	}
+	//// sync finalization:
+	//// after synced upto last finalized checkpoint - sync up to current justified checkpoint
+	//headState, err := s.HeadState(ctx)
+	//if err != nil {
+	//	// reset if failed
+	//	log.WithError(err).WithFields(logrus.Fields{
+	//		"headSlot": s.headSlot(),
+	//		"headRoot": fmt.Sprintf("%#x", s.headRoot()),
+	//	}).Error("Gwat sync: get head state")
+	//	return err
+	//}
+	//
+	//log.WithFields(logrus.Fields{
+	//	"headSlot":     s.headSlot(),
+	//	"headRoot":     fmt.Sprintf("%#x", s.headRoot()),
+	//	"CpFinalized":  headState.SpineData().CpFinalized,
+	//	"Finalization": headState.SpineData().Finalization,
+	//	"Prefix":       headState.SpineData().Prefix,
+	//}).Info("Gwat sync: head state info")
+	//
+	//headFinRoot := bytesutil.ToBytes32(headState.FinalizedCheckpoint().Root)
+	//
+	//// sync to current justified cp
+	//if headFinRoot != params.BeaconConfig().ZeroHash {
+	//	finState, err := s.cfg.StateGen.StateByRoot(ctx, headFinRoot)
+	//	if err != nil {
+	//		// reset if failed
+	//		log.WithError(err).WithFields(logrus.Fields{
+	//			"headSlot":    s.headSlot(),
+	//			"headFinRoot": fmt.Sprintf("%#x", headFinRoot),
+	//		}).Error("Gwat sync: get finalized state")
+	//		return err
+	//	}
+	//
+	//	err = s.processDagFinalization(finState)
+	//	if err != nil {
+	//		// reset if failed
+	//		log.WithError(err).WithFields(logrus.Fields{
+	//			"headSlot":    s.headSlot(),
+	//			"headFinRoot": fmt.Sprintf("%#x", headFinRoot),
+	//		}).Error("Gwat sync: sync to finalized cp failed")
+	//		return err
+	//	}
+	//
+	//	log.WithFields(logrus.Fields{
+	//		"headFinRoot": fmt.Sprintf("%#x", headFinRoot),
+	//	}).Info("Gwat sync: sync to finalized cp success")
+	//}
+	//
+	//headJustRoot := bytesutil.ToBytes32(headState.CurrentJustifiedCheckpoint().Root)
+	//
+	//// sync to current justified cp
+	//if headJustRoot != params.BeaconConfig().ZeroHash {
+	//	justifiedState, err := s.cfg.StateGen.StateByRoot(ctx, headJustRoot)
+	//	if err != nil {
+	//		// reset if failed
+	//		log.WithError(err).WithFields(logrus.Fields{
+	//			"headSlot":     s.headSlot(),
+	//			"headJustRoot": fmt.Sprintf("%#x", headJustRoot),
+	//		}).Error("Gwat sync: get justified state")
+	//		return err
+	//	}
+	//
+	//	err = s.processDagFinalization(justifiedState)
+	//	if err != nil {
+	//		// reset if failed
+	//		log.WithError(err).WithFields(logrus.Fields{
+	//			"headSlot":     s.headSlot(),
+	//			"headJustRoot": fmt.Sprintf("%#x", headJustRoot),
+	//		}).Error("Gwat sync: sync to justified cp failed")
+	//		return err
+	//	}
+	//
+	//	log.WithFields(logrus.Fields{
+	//		"headSlot":     s.headSlot(),
+	//		"headJustRoot": fmt.Sprintf("%#x", headJustRoot),
+	//	}).Info("Gwat sync: sync to justified cp success")
+	//}
+	//
+	//// sync up to current chain head
+	//err = s.processDagFinalization(headState)
+	//if err != nil {
+	//	// reset if failed
+	//	log.WithError(err).WithFields(logrus.Fields{
+	//		"headSlot": headState.Slot(),
+	//		"headRoot": fmt.Sprintf("%#x", headState),
+	//	}).Error("Gwat sync: head sync failed")
+	//	return err
+	//}
+	//
+	//// if while sync finalization checkpoint was updated
+	//// recursively repeat sync procedure.
+	//checkHeadState, err := s.HeadState(ctx)
+	//if err != nil {
+	//	// reset if failed
+	//	log.WithError(err).WithFields(logrus.Fields{
+	//		"headSlot":            s.headSlot(),
+	//		"checkHeadState.Slot": checkHeadState.Slot(),
+	//		"headRoot":            fmt.Sprintf("%#x", s.headRoot()),
+	//	}).Error("Gwat sync: get head state to sync head")
+	//	return err
+	//}
+	//if !bytes.Equal(headJustRoot[:], checkHeadState.CurrentJustifiedCheckpoint().Root) {
+	//	log.WithError(err).WithFields(logrus.Fields{
+	//		"syncCpSlot":  fmt.Sprintf("%d", headState.Slot()),
+	//		"headCpSlot":  fmt.Sprintf("%d", checkHeadState.Slot()),
+	//		"syncCpEpoch": fmt.Sprintf("%d", headState.CurrentJustifiedCheckpoint().Epoch),
+	//		"headCpEpoch": fmt.Sprintf("%d", checkHeadState.CurrentJustifiedCheckpoint().Epoch),
+	//		"syncCpRoot":  fmt.Sprintf("%#x", headJustRoot),
+	//		"headCpRoot":  fmt.Sprintf("%#x", checkHeadState.CurrentJustifiedCheckpoint().Root),
+	//	}).Warn("Gwat sync: recursive resync due to cp changed")
+	//	return s.runGwatSynchronization(ctx)
+	//}
 
 	log.WithFields(logrus.Fields{
 		"curSlot":  fmt.Sprintf("%#x", s.CurrentSlot()),
