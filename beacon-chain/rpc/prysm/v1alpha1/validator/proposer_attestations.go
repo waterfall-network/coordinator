@@ -44,15 +44,16 @@ func (vs *Server) packAttestations(ctx context.Context, latestState state.Beacon
 	}
 	atts = append(atts, uAtts...)
 
-	excludedAtts, err := vs.CollectForkExcludedAttestations(ctx, parentRoot)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not get excluded attestations")
-	}
-	excludedAtts, err = vs.validateAndDeleteAttsInPool(ctx, latestState, excludedAtts)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not filter excluded attestations")
-	}
-	atts = append(atts, excludedAtts...)
+	// todo temporary commented for test purposes
+	//excludedAtts, err := vs.CollectForkExcludedAttestations(ctx, parentRoot)
+	//if err != nil {
+	//	return nil, errors.Wrap(err, "could not get excluded attestations")
+	//}
+	//excludedAtts, err = vs.validateAndDeleteAttsInPool(ctx, latestState, excludedAtts)
+	//if err != nil {
+	//	return nil, errors.Wrap(err, "could not filter excluded attestations")
+	//}
+	//atts = append(atts, excludedAtts...)
 
 	// Remove duplicates from both aggregated/unaggregated attestations. This
 	// prevents inefficient aggregates being created.
