@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc/eth/helpers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpbv "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc/codes"
@@ -28,32 +29,20 @@ func (bs *Server) ListBlockVotings(ctx context.Context, req *ethpbv.StateBlockVo
 	blockVotings := st.BlockVoting()
 	data := make([]*ethpbv.BlockVoting, len(blockVotings))
 	for _, blockVoting := range blockVotings {
-		attestations := make([]*ethpbv.Attestation, len(blockVoting.Attestations))
-		for _, att := range blockVoting.Attestations {
-			attestations = append(attestations, &ethpbv.Attestation{
-				AggregationBits: att.AggregationBits,
-				Data: &ethpbv.AttestationData{
-					Slot:            att.Data.Slot,
-					Index:           att.Data.CommitteeIndex,
-					BeaconBlockRoot: att.Data.BeaconBlockRoot,
-					Source: &ethpbv.Checkpoint{
-						Epoch: att.Data.Source.Epoch,
-						Root:  att.Data.Source.Root,
-					},
-					Target: &ethpbv.Checkpoint{
-						Epoch: att.Data.Target.Epoch,
-						Root:  att.Data.Target.Root,
-					},
-				},
-				Signature: att.Signature,
+		committeeVotes := make([]*ethpbv.CommitteeVote, len(blockVoting.Votes))
+		for _, vote := range blockVoting.Votes {
+			committeeVotes = append(committeeVotes, &ethpbv.CommitteeVote{
+				AggregationBits: bytesutil.SafeCopyBytes(vote.AggregationBits),
+				Slot:            vote.Slot,
+				Index:           vote.Index,
 			})
 		}
 
 		data = append(data, &ethpbv.BlockVoting{
-			Root:         blockVoting.Root,
-			Slot:         blockVoting.Slot,
-			Candidates:   blockVoting.Candidates,
-			Attestations: attestations,
+			Root:       blockVoting.Root,
+			Slot:       blockVoting.Slot,
+			Candidates: blockVoting.Candidates,
+			Votes:      committeeVotes,
 		})
 	}
 
