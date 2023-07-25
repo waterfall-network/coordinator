@@ -385,9 +385,7 @@ func getBlockVotingRootsLtSlot(blockVoting []*ethpb.BlockVoting, slot types.Slot
 func cleanBlockVotingStaleVotes(ctx context.Context, blockVoting []*ethpb.BlockVoting, bState state.BeaconState) ([]*ethpb.BlockVoting, error) {
 	// define slot of deprecation
 	targetEpoch := slots.ToEpoch(bState.Slot())
-	if targetEpoch > 2 {
-		targetEpoch -= 2
-	} else {
+	if targetEpoch <= 2 {
 		return blockVoting, nil
 	}
 	staleVotesSlot, err := slots.EpochStart(targetEpoch - 2)
