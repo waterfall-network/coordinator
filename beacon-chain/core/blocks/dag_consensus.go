@@ -95,13 +95,23 @@ func ProcessDagConsensus(ctx context.Context, beaconState state.BeaconState, sig
 	deprecatedRoots := getBlockVotingsDeprecatedRoots(blockVoting, finalization)
 	blockVoting = removeBlockVoting(blockVoting, deprecatedRoots)
 
+	if blockVoting, err = handleBlockVotingVotesLimit(ctx, blockVoting, beaconState); err != nil {
+		return nil, err
+	}
+
 	// if it's a new epoch - removes stale BlockVoting.
 	if slots.IsEpochStart(beaconBlock.Slot()) {
+
+		if blockVoting, err = cleanBlockVotingStaleVotes(ctx, blockVoting, beaconState); err != nil {
+			return nil, err
+		}
+
 		cpSlot, err := slots.EpochStart(beaconState.FinalizedCheckpointEpoch())
 		if err != nil {
 			return nil, err
 		}
 		staleRoots := getBlockVotingRootsLtSlot(blockVoting, cpSlot)
+
 		blockVoting = removeBlockVoting(blockVoting, staleRoots)
 
 		log.WithFields(logrus.Fields{
@@ -369,6 +379,140 @@ func getBlockVotingRootsLtSlot(blockVoting []*ethpb.BlockVoting, slot types.Slot
 		i++
 	}
 	return roots
+}
+
+// cleanBlockVotingStaleVotes removes unsupported BlockVoting.Votes and empty BlockVoting older than 2 epochs.
+func cleanBlockVotingStaleVotes(ctx context.Context, blockVoting []*ethpb.BlockVoting, bState state.BeaconState) ([]*ethpb.BlockVoting, error) {
+	// define slot of deprecation
+	targetEpoch := slots.ToEpoch(bState.Slot())
+	if targetEpoch > 2 {
+		targetEpoch -= 2
+	} else {
+		return blockVoting, nil
+	}
+	staleVotesSlot, err := slots.EpochStart(targetEpoch - 2)
+	if err != nil {
+		return []*ethpb.BlockVoting{}, err
+	}
+	for i, bv := range blockVoting {
+		// check blockVoting slot is older of stale slot
+		if bv.Slot < staleVotesSlot {
+			resLen := len(bv.Votes)
+			slotMap := map[types.Slot][]*ethpb.CommitteeVote{}
+			slotsArr := make([]types.Slot, 0, len(bv.Votes))
+			for _, vote := range bv.Votes {
+				slot := vote.Slot
+				slotsArr = append(slotsArr, slot)
+				if slotMap[slot] == nil {
+					slotMap[slot] = []*ethpb.CommitteeVote{}
+				}
+				slotMap[slot] = append(slotMap[slot], vote)
+			}
+			// asc sort slotsArr
+			sort.Slice(slotsArr, func(i, j int) bool {
+				return slotsArr[i] < slotsArr[j]
+			})
+			// find min unsupported slot
+			for _, slot := range slotsArr {
+				if slot >= staleVotesSlot {
+					continue
+				}
+				votes := slotMap[slot]
+				// find unsupported with min slot
+				//unsupported BlockVoting and older 2 epochs
+				minSupport, err := BlockVotingMinSupport(ctx, bState, slot)
+				if err != nil {
+					return []*ethpb.BlockVoting{}, err
+				}
+				// if no enough support rm slot votes
+				if helpers.CountCommitteeVotes(votes) < uint64(minSupport) {
+
+					log.WithFields(logrus.Fields{
+						"staleVotesSlot": staleVotesSlot,
+						"rmSlot":         slot,
+						"blVoting":       helpers.PrintBlockVoting(bv),
+					}).Info("BlockVoting votes clean stale votes")
+
+					resLen -= len(slotMap[slot])
+					delete(slotMap, slot)
+				}
+			}
+			resVotes := make([]*ethpb.CommitteeVote, 0, resLen)
+			for _, slot := range slotsArr {
+				if len(slotMap[slot]) > 0 {
+					resVotes = append(resVotes, slotMap[slot]...)
+				}
+			}
+			blockVoting[i].Votes = resVotes
+		}
+	}
+	// rm stale empty BlockVoting
+	res := make([]*ethpb.BlockVoting, 0, len(blockVoting))
+	for _, bv := range blockVoting {
+		// check blockVoting slot is older of stale slot
+		if bv.Slot >= staleVotesSlot || len(bv.Votes) > 0 {
+			res = append(res, bv)
+		} else {
+			log.WithFields(logrus.Fields{
+				"staleVotesSlot": staleVotesSlot,
+				"blVoting":       helpers.PrintBlockVoting(bv),
+			}).Info("BlockVoting votes clean empty item")
+		}
+	}
+	return res, nil
+}
+
+// handleBlockVotingVotesLimit checks BlockVoting.Votes len limitation and reduces len in needed.
+func handleBlockVotingVotesLimit(ctx context.Context, blockVoting []*ethpb.BlockVoting, bState state.BeaconState) ([]*ethpb.BlockVoting, error) {
+	for i, bv := range blockVoting {
+		// check Votes len limit
+		if len(bv.Votes) > 64 {
+			// reduce len
+			resLen := len(bv.Votes)
+			slotMap := map[types.Slot][]*ethpb.CommitteeVote{}
+			slotsArr := make([]types.Slot, 0, len(bv.Votes))
+			for _, vote := range bv.Votes {
+				slot := vote.Slot
+				slotsArr = append(slotsArr, slot)
+				if slotMap[slot] == nil {
+					slotMap[slot] = []*ethpb.CommitteeVote{}
+				}
+				slotMap[slot] = append(slotMap[slot], vote)
+			}
+			// asc sort slotsArr
+			sort.Slice(slotsArr, func(i, j int) bool {
+				return slotsArr[i] < slotsArr[j]
+			})
+			// find min unsupported slot
+			for _, slot := range slotsArr {
+				votes := slotMap[slot]
+				// find unsupported with min slot
+				//unsupported BlockVoting and older 2 epochs
+				minSupport, err := BlockVotingMinSupport(ctx, bState, slot)
+				if err != nil {
+					return []*ethpb.BlockVoting{}, err
+				}
+				// if no enough support rm slot votes
+				if helpers.CountCommitteeVotes(votes) < uint64(minSupport) {
+					resLen -= len(slotMap[slot])
+					delete(slotMap, slot)
+					break
+				}
+			}
+			resVotes := make([]*ethpb.CommitteeVote, 0, resLen)
+			for _, slot := range slotsArr {
+				if len(slotMap[slot]) > 0 {
+					resVotes = append(resVotes, slotMap[slot]...)
+				}
+			}
+			blockVoting[i].Votes = resVotes
+
+			log.WithFields(logrus.Fields{
+				"blVoting": helpers.PrintBlockVoting(bv),
+			}).Info("BlockVoting votes reduced")
+		}
+	}
+	return blockVoting, nil
 }
 
 func isBlockVotingExists(votes []*ethpb.BlockVoting, root []byte) bool {
