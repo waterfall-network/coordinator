@@ -67,7 +67,7 @@ func (v *validator) SubmitPrevote(ctx context.Context, slot types.Slot, pubKey [
 	}
 	data, err := v.validatorClient.GetPrevoteData(ctx, req)
 	if err != nil {
-		log.WithError(err).Error("Could not request prevote data to sign at slot")
+		log.WithError(err).Errorf("Could not request prevote data to sign at slot %v", req.Slot)
 		if v.emitAccountMetrics {
 			ValidatorAttestFailVec.WithLabelValues(fmtKey).Inc()
 		}
@@ -82,7 +82,7 @@ func (v *validator) SubmitPrevote(ctx context.Context, slot types.Slot, pubKey [
 
 	domain, signingRoot, err := v.getDomainAndSigningRootPrevote(ctx, indexedPrevote)
 	if err != nil {
-		log.WithError(err).Error("Could not get domain and signing root from prevote")
+		log.WithError(err).Errorf("Could not get domain and signing root from prevote at slot %v", req.Slot)
 		if v.emitAccountMetrics {
 			ValidatorAttestFailVec.WithLabelValues(fmtKey).Inc()
 		}
@@ -92,7 +92,7 @@ func (v *validator) SubmitPrevote(ctx context.Context, slot types.Slot, pubKey [
 
 	sig, _, err := v.signPrevote(ctx, pubKey, data, slot, domain, signingRoot)
 	if err != nil {
-		log.WithError(err).Error("Could not sign prevote")
+		log.WithError(err).Errorf("Could not sign prevote at slot %v", req.Slot)
 		if v.emitAccountMetrics {
 			ValidatorAttestFailVec.WithLabelValues(fmtKey).Inc()
 		}
@@ -130,7 +130,7 @@ func (v *validator) SubmitPrevote(ctx context.Context, slot types.Slot, pubKey [
 
 	pvResp, err := v.validatorClient.ProposePrevote(ctx, prevote)
 	if err != nil {
-		log.WithError(err).Error("Could not submit prevote to beacon node")
+		log.WithError(err).Errorf("Could not submit prevote to beacon node at slot %v", req.Slot)
 		if v.emitAccountMetrics {
 			ValidatorAttestFailVec.WithLabelValues(fmtKey).Inc()
 		}
