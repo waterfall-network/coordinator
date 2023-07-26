@@ -557,20 +557,7 @@ func appendBlockVotingAtt(votes []*ethpb.BlockVoting, val *ethpb.Attestation) []
 	cpy := helpers.BlockVotingArrCopy(votes)
 	for _, itm := range cpy {
 		if bytes.Equal(itm.Root, root) {
-
-			log.WithFields(logrus.Fields{
-				"blVoting": helpers.PrintBlockVoting(itm),
-				"slot":     itm.GetSlot(),
-				"root":     fmt.Sprintf("%#x", itm.GetRoot()),
-			}).Info("appendBlockVotingAtt op=000")
-
 			itm.Votes = helpers.AggregateCommitteeVote(append(itm.GetVotes(), newVote))
-
-			log.WithFields(logrus.Fields{
-				"blVoting": helpers.PrintBlockVoting(itm),
-				"slot":     itm.GetSlot(),
-				"root":     fmt.Sprintf("%#x", itm.GetRoot()),
-			}).Info("appendBlockVotingAtt op=111")
 		}
 	}
 	return cpy
