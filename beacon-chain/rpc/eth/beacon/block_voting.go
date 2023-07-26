@@ -27,22 +27,21 @@ func (bs *Server) ListBlockVotings(ctx context.Context, req *ethpbv.StateBlockVo
 
 	blockVotings := st.BlockVoting()
 	data := make([]*ethpbv.BlockVoting, len(blockVotings))
-	for _, blockVoting := range blockVotings {
+	for i, blockVoting := range blockVotings {
 		committeeVotes := make([]*ethpbv.CommitteeVote, len(blockVoting.Votes))
-		for _, vote := range blockVoting.Votes {
-			committeeVotes = append(committeeVotes, &ethpbv.CommitteeVote{
+		for j, vote := range blockVoting.Votes {
+			committeeVotes[j] = &ethpbv.CommitteeVote{
 				AggregationBits: bytesutil.SafeCopyBytes(vote.AggregationBits),
 				Slot:            vote.Slot,
 				Index:           vote.Index,
-			})
+			}
 		}
-
-		data = append(data, &ethpbv.BlockVoting{
+		data[i] = &ethpbv.BlockVoting{
 			Root:       blockVoting.Root,
 			Slot:       blockVoting.Slot,
 			Candidates: blockVoting.Candidates,
 			Votes:      committeeVotes,
-		})
+		}
 	}
 
 	return &ethpbv.StateBlockVotingsResponse{
