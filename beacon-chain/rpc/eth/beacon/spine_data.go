@@ -6,8 +6,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc/eth/helpers"
 	ethpbv "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
 	"go.opencensus.io/trace"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 // GetSpineData retrieves the spine data for the given state.
@@ -22,7 +20,8 @@ func (bs *Server) GetSpineData(ctx context.Context, req *ethpbv.StateSpineDataRe
 
 	isOptimistic, err := helpers.IsOptimistic(ctx, st, bs.HeadFetcher)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Could not check if slot's block is optimistic: %v", err)
+		isOptimistic = false
+		//return nil, status.Errorf(codes.Internal, "Could not check if slot's block is optimistic: %v", err)
 	}
 
 	spineData := st.SpineData()
