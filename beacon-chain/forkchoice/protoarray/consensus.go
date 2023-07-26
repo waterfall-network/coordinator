@@ -101,10 +101,13 @@ func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines 
 	if err != nil {
 		return [32]byte{}, err
 	}
-	// head must be one of calculated leafs
-	if _, ok := acceptableLeafs[headRoot]; !ok {
-		return [32]byte{}, errConsensusCalcHeadFailed
-	}
+
+	// todo check & rm
+	//// head must be one of calculated leafs
+	//if _, ok := acceptableLeafs[headRoot]; !ok {
+	//	return [32]byte{}, errConsensusCalcHeadFailed
+	//}
+
 	return headRoot, nil
 	//return f.GetNode(headRoot), nil
 }
