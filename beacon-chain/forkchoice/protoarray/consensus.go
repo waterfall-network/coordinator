@@ -109,7 +109,6 @@ func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines 
 	//}
 
 	return headRoot, nil
-	//return f.GetNode(headRoot), nil
 }
 
 // calculateHeadRootOfForks retrieves root of head of passed forks.
@@ -256,7 +255,7 @@ func collectTgTreeNodesByOptimisticSpines(fc *ForkChoice, optSpines []gwatCommon
 	rootIndexMap = make(map[[32]byte]uint64, fc.NodeCount())
 	leafs = make(map[[32]byte]int, len(forks))
 
-	for _, frk := range forks {
+	for frkNr, frk := range forks {
 		if frk == nil {
 			continue
 		}
@@ -265,6 +264,8 @@ func collectTgTreeNodesByOptimisticSpines(fc *ForkChoice, optSpines []gwatCommon
 
 			if len(node.spinesData.cpFinalized) == 0 {
 				log.WithFields(logrus.Fields{
+					"frkNr":             frkNr,
+					"node.index":        i,
 					"node.slot":         node.slot,
 					"node.root":         fmt.Sprintf("%#x", node.root),
 					"node.cpFinalized":  node.spinesData.cpFinalized,
@@ -290,6 +291,10 @@ func collectTgTreeNodesByOptimisticSpines(fc *ForkChoice, optSpines []gwatCommon
 
 			log.WithFields(logrus.Fields{
 				"ok":           ok,
+				"frkNr":        frkNr,
+				"node.index":   i,
+				"node.slot":    node.slot,
+				"node.root":    fmt.Sprintf("%#x", node.root),
 				"finalization": len(finalization),
 				"optSpines":    len(optSpines),
 			}).Info("collectTgTreeNodesByOptimisticSpines: check finalization")
@@ -307,7 +312,11 @@ func collectTgTreeNodesByOptimisticSpines(fc *ForkChoice, optSpines []gwatCommon
 			ok = isSequenceMatchOptimisticSpines(prefix, prefOptSpines)
 
 			log.WithFields(logrus.Fields{
-				"ok": ok,
+				"ok":         ok,
+				"frkNr":      frkNr,
+				"node.index": i,
+				"node.slot":  node.slot,
+				"node.root":  fmt.Sprintf("%#x", node.root),
 			}).Info("collectTgTreeNodesByOptimisticSpines: check prefix")
 
 			if !ok {
@@ -325,7 +334,11 @@ func collectTgTreeNodesByOptimisticSpines(fc *ForkChoice, optSpines []gwatCommon
 				}
 
 				log.WithFields(logrus.Fields{
-					"ok": ok,
+					"ok":         ok,
+					"frkNr":      frkNr,
+					"node.index": i,
+					"node.slot":  node.slot,
+					"node.root":  fmt.Sprintf("%#x", node.root),
 				}).Info("collectTgTreeNodesByOptimisticSpines: check prefix extension: success")
 
 				leafs[frk.roots[i]] = len(forkRoots)
@@ -339,7 +352,11 @@ func collectTgTreeNodesByOptimisticSpines(fc *ForkChoice, optSpines []gwatCommon
 			}
 
 			log.WithFields(logrus.Fields{
-				"continue": len(pubOptSpines) == 0,
+				"continue":   len(pubOptSpines) == 0,
+				"frkNr":      frkNr,
+				"node.index": i,
+				"node.slot":  node.slot,
+				"node.root":  fmt.Sprintf("%#x", node.root),
 			}).Info("collectTgTreeNodesByOptimisticSpines: check published spines length")
 
 			if len(pubOptSpines) == 0 {
@@ -351,6 +368,10 @@ func collectTgTreeNodesByOptimisticSpines(fc *ForkChoice, optSpines []gwatCommon
 				"published":    published,
 				"pubOptSpines": pubOptSpines,
 				"optSpines[0]": optSpines[0],
+				"frkNr":        frkNr,
+				"node.index":   i,
+				"node.slot":    node.slot,
+				"node.root":    fmt.Sprintf("%#x", node.root),
 			}).Info("collectTgTreeNodesByOptimisticSpines: check the first published spine")
 
 			if !pubOptSpines[0].Has(published[0]) {
@@ -364,6 +385,10 @@ func collectTgTreeNodesByOptimisticSpines(fc *ForkChoice, optSpines []gwatCommon
 
 			log.WithFields(logrus.Fields{
 				"frk.roots[i]": frk.roots[i],
+				"frkNr":        frkNr,
+				"node.index":   i,
+				"node.slot":    node.slot,
+				"node.root":    fmt.Sprintf("%#x", node.root),
 			}).Info("collectTgTreeNodesByOptimisticSpines: check the first published spine: success")
 
 			leafs[frk.roots[i]] = len(forkRoots)
