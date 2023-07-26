@@ -75,27 +75,27 @@ message BeaconState {
 message SpineData {
 
   // The 32 byte array of hashes presented sequence of the GWAT spines candidates.
-  // ssz_max = 32 * 128
-  bytes spines = 1 [(ethereum.eth.ext.ssz_max) = "4096"];
+  // ssz_max = 32 * 1024
+  bytes spines = 1 [(ethereum.eth.ext.ssz_max) = "32768"];
 
   // The 32 byte array of hashes presented sequence of the GWAT spines candidates.
-  // ssz_max = 32 * 128
-  bytes prefix = 2 [(ethereum.eth.ext.ssz_max) = "4096"];
+  // ssz_max = 32 * 1024
+  bytes prefix = 2 [(ethereum.eth.ext.ssz_max) = "32768"];
 
   //The 32 byte array of hashes presented sequence of the GWAT spines to finalization.
-  // ssz_max = 32 * 128
-  bytes finalization = 3 [(ethereum.eth.ext.ssz_max) = "4096"];
+  // ssz_max = 32 * 1024
+  bytes finalization = 3 [(ethereum.eth.ext.ssz_max) = "32768"];
 
   //The 32 byte array of hashes presented sequence of the GWAT spines
   // finalized from finalized to justified checkpoint.
-  // ssz_max = 32 * 128
-  bytes cp_finalized = 4 [(ethereum.eth.ext.ssz_max) = "4096"];
+  // ssz_max = 32 * 1024
+  bytes cp_finalized = 4 [(ethereum.eth.ext.ssz_max) = "32768"];
 
   // The array of 32 byte arrays of hashes.
   // Presents the sequences of the GWAT spines of ancestors.
   // The hashes of finalization and prefix excluded.
-  // ssz_max = 32 * 128 * 128
-  repeated SpinesSeq parent_spines = 5 [(ethereum.eth.ext.ssz_max) = "128"];
+  // ssz_max = 524288
+  repeated SpinesSeq parent_spines = 5 [(ethereum.eth.ext.ssz_max) = "524288"];
 }
 
 message SpinesSeq {
@@ -108,11 +108,24 @@ message BlockVoting {
   // slot
   uint64 slot = 2 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Slot"];
   // The 32 byte array of hashes presented sequence of the GWAT spines candidates.
-  // ssz_max = 32 * 128
-  bytes candidates = 3 [(ethereum.eth.ext.ssz_max) = "4096"];
-  // block attestations
-  repeated Attestation attestations = 4 [(ethereum.eth.ext.ssz_max) = "128"];
+  // ssz_max = 32 * 1024
+  bytes candidates = 3 [(ethereum.eth.ext.ssz_max) = "32768"];
+  // CommitteeVote array
+  repeated CommitteeVote votes = 4 [(ethereum.eth.ext.ssz_max) = "32768"];
 }
+
+message CommitteeVote {
+  // A bitfield representation of validator indices that have voted exactly
+  // the same vote and have been aggregated into this attestation.
+  bytes aggregation_bits = 1 [(ethereum.eth.ext.ssz_max) = "2048", (ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/go-bitfield.Bitlist"];
+
+  // Slot of the committee attesting for.
+  uint64 slot = 2 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Slot"];
+
+  // The committee index that submitted this attestation.
+  uint64 index = 3 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.CommitteeIndex"];
+}
+
 
 message PendingAttestation {
   // Bitfield representation of validator indices that have voted exactly

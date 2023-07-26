@@ -20,7 +20,7 @@ func BlockVotingDataRootWithHasher(hasher ssz.HashFn, blockVoting *ethpb.BlockVo
 	fixedFldsCount := 2
 
 	attBytes := append([]byte{}, blockVoting.GetCandidates()...)
-	for _, att := range blockVoting.GetAttestations() {
+	for _, att := range blockVoting.GetVotes() {
 		attBytes = []byte(att.String())
 	}
 	finLen := len(attBytes)

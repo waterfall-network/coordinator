@@ -250,8 +250,8 @@ message Eth1Data {
     bytes block_hash = 3 [(ethereum.eth.ext.ssz_size) = "32"];
 
     // The 32 byte array of hashes presented sequence of the GWAT spines candidates.
-    // ssz_max = 32 * 128
-    bytes candidates = 4 [(ethereum.eth.ext.ssz_max) = "4096"];
+    // ssz_max = 32 * 1024
+    bytes candidates = 4 [(ethereum.eth.ext.ssz_max) = "32768"];
 }
 
 // A beacon block header is essentially a beacon block with only a reference to

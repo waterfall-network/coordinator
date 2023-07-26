@@ -57,10 +57,10 @@ func CopyBlockVoting(data *BlockVoting) *BlockVoting {
 		return nil
 	}
 	return &BlockVoting{
-		Root:         bytesutil.SafeCopyBytes(data.Root),
-		Slot:         data.Slot,
-		Candidates:   bytesutil.SafeCopyBytes(data.Candidates),
-		Attestations: CopyAttestations(data.Attestations),
+		Root:       bytesutil.SafeCopyBytes(data.Root),
+		Slot:       data.Slot,
+		Candidates: bytesutil.SafeCopyBytes(data.Candidates),
+		Votes:      CopyCommitteeVotesArray(data.Votes),
 	}
 }
 
@@ -305,6 +305,30 @@ func CopyAttestations(attestations []*Attestation) []*Attestation {
 		newAttestations[i] = CopyAttestation(att)
 	}
 	return newAttestations
+}
+
+// CopyCommitteeVotesArray copies the provided CommitteeVote array.
+func CopyCommitteeVotesArray(votes []*CommitteeVote) []*CommitteeVote {
+	if votes == nil {
+		return nil
+	}
+	cpy := make([]*CommitteeVote, len(votes))
+	for i, att := range votes {
+		cpy[i] = CopyCommitteeVotes(att)
+	}
+	return cpy
+}
+
+// CopyCommitteeVotes copies the provided CommitteeVote object.
+func CopyCommitteeVotes(votes *CommitteeVote) *CommitteeVote {
+	if votes == nil {
+		return nil
+	}
+	return &CommitteeVote{
+		AggregationBits: bytesutil.SafeCopyBytes(votes.AggregationBits),
+		Slot:            votes.Slot,
+		Index:           votes.Index,
+	}
 }
 
 // CopyDeposits copies the provided deposit array.

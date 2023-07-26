@@ -958,8 +958,14 @@ type syncDetails struct {
 }
 
 type blockVotingJson struct {
-	Root         string             `json:"root" hex:"true"`
-	Slot         string             `json:"slot"`
-	Candidates   string             `json:"candidates" hex:"true"`
-	Attestations []*attestationJson `json:"attestations"`
+	Root       string               `json:"root" hex:"true"`
+	Slot       string               `json:"slot"`
+	Candidates string               `json:"candidates" hex:"true"`
+	Votes      []*committeeVoteJson `json:"votes"`
+}
+
+type committeeVoteJson struct {
+	AggregationBits string `json:"aggregation_bits" hex:"true"`
+	Slot            string `json:"slot"`
+	Index           string `json:"index"`
 }
