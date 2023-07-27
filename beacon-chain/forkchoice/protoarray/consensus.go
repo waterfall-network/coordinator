@@ -255,10 +255,10 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 	return headRoot, nil
 }
 
-func collectTgTreeNodesByOptimisticSpines(fc *ForkChoice, optSpines []gwatCommon.HashArray) (rootIndexMap map[[32]byte]uint64, leafs map[[32]byte]int) {
+func collectTgTreeNodesByOptimisticSpines(fc *ForkChoice, optSpines []gwatCommon.HashArray) (map[[32]byte]uint64, map[[32]byte]int) {
 	forks := fc.GetForks()
-	rootIndexMap = make(map[[32]byte]uint64, fc.NodeCount())
-	leafs = make(map[[32]byte]int, len(forks))
+	rootIndexMap := make(map[[32]byte]uint64)
+	leafs := make(map[[32]byte]int)
 
 	for frkNr, frk := range forks {
 		if frk == nil {
