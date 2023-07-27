@@ -259,6 +259,7 @@ func collectTgTreeNodesByOptimisticSpines(fc *ForkChoice, optSpines []gwatCommon
 	forks := fc.GetForks()
 	rootIndexMap := make(map[[32]byte]uint64)
 	leafs := make(map[[32]byte]int)
+	nodesIndices := fc.store.cpyNodesIndices()
 
 	for frkNr, frk := range forks {
 		if frk == nil {
@@ -335,7 +336,7 @@ func collectTgTreeNodesByOptimisticSpines(fc *ForkChoice, optSpines []gwatCommon
 				//collect roots of acceptable forks
 				forkRoots := frk.roots[i:]
 				for _, root := range forkRoots {
-					rootIndexMap[root] = fc.store.nodesIndices[root]
+					rootIndexMap[root] = nodesIndices[root]
 				}
 
 				log.WithFields(logrus.Fields{
@@ -385,7 +386,7 @@ func collectTgTreeNodesByOptimisticSpines(fc *ForkChoice, optSpines []gwatCommon
 			//collect roots of acceptable forks
 			forkRoots := frk.roots[i:]
 			for _, root := range forkRoots {
-				rootIndexMap[root] = fc.store.nodesIndices[root]
+				rootIndexMap[root] = nodesIndices[root]
 			}
 
 			log.WithFields(logrus.Fields{
@@ -431,7 +432,7 @@ func (f *ForkChoice) CollectForkExcludedBlkRoots(leaf gwatCommon.Hash) gwatCommo
 	// collect nodes excluded from fork
 	fork := f.GetFork(leaf)
 	exIndices := make(map[[32]byte]uint64, len(f.store.nodesIndices))
-	for k, v := range f.store.nodesIndices {
+	for k, v := range f.store.cpyNodesIndices() {
 		exIndices[k] = v
 	}
 	for _, r := range fork.roots {
@@ -474,8 +475,8 @@ func (s *Store) insertNode(ctx context.Context, node *Node) error {
 
 // GetRoots get roots of nodes of forkchoice sorted by indexes.
 func (f *ForkChoice) GetRoots() gwatCommon.HashArray {
-	nodeIndexes := make(gwatCommon.SorterAscU64, 0, len(f.store.nodesIndices))
-	for _, index := range f.store.nodesIndices {
+	nodeIndexes := make(gwatCommon.SorterAscU64, 0, len(f.store.cpyNodesIndices()))
+	for _, index := range f.store.cpyNodesIndices() {
 		nodeIndexes = append(nodeIndexes, index)
 	}
 	sort.Sort(nodeIndexes)
