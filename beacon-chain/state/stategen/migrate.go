@@ -2,12 +2,10 @@ package stategen
 
 import (
 	"context"
-	"encoding/hex"
 	"fmt"
 
 	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"go.opencensus.io/trace"
 )
 
@@ -98,11 +96,10 @@ func (s *State) MigrateToCold(ctx context.Context, fRoot [32]byte) error {
 			if err := s.beaconDB.SaveState(ctx, aState, aRoot); err != nil {
 				return err
 			}
-			log.WithFields(
-				logrus.Fields{
-					"slot": aState.Slot(),
-					"root": hex.EncodeToString(bytesutil.Trunc(aRoot[:])),
-				}).Info("Saved state in DB")
+			log.WithFields(logrus.Fields{
+				"slot": aState.Slot(),
+				"root": fmt.Sprintf("%#x", aRoot), //hex.EncodeToString(bytesutil.Trunc(aRoot[:])),
+			}).Info("Saved state in DB")
 		}
 	}
 
@@ -113,6 +110,13 @@ func (s *State) MigrateToCold(ctx context.Context, fRoot [32]byte) error {
 	}
 	if ok {
 		s.SaveFinalizedState(fSlot, fRoot, fInfo.state)
+		if err := s.beaconDB.SaveState(ctx, fInfo.state, fRoot); err != nil {
+			return err
+		}
+		log.WithFields(logrus.Fields{
+			"slot": fInfo.state.Slot(),
+			"root": fmt.Sprintf("%#x", fRoot),
+		}).Info("Saved state of fin cp in DB")
 	}
 
 	return nil
