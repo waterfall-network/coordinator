@@ -212,7 +212,7 @@ func (vs *Server) WaitForChainStart(_ *emptypb.Empty, stream ethpb.BeaconNodeVal
 func (vs *Server) getOptimisticSpine(ctx context.Context) ([]gwatCommon.HashArray, error) {
 	currHead, err := vs.HeadFetcher.HeadState(ctx)
 	if err != nil {
-		log.WithError(err).Error("Get optimistic spites failed: could not retrieve head state")
+		log.WithError(err).Error("Get optimistic spines failed: could not retrieve head state")
 		return nil, status.Errorf(codes.Internal, "Could not retrieve head state: %v", err)
 	}
 
@@ -220,7 +220,7 @@ func (vs *Server) getOptimisticSpine(ctx context.Context) ([]gwatCommon.HashArra
 	if currHead.CurrentJustifiedCheckpoint().Epoch == 0 {
 		jCpRoot, err = vs.BeaconDB.GenesisBlockRoot(ctx)
 		if err != nil {
-			log.WithError(err).Error("Get optimistic spites failed: retrieving of genesis root")
+			log.WithError(err).Error("Get optimistic spines failed: retrieving of genesis root")
 			return nil, status.Errorf(codes.Internal, "Could not retrieve of genesis root: %v", err)
 		}
 	}
@@ -229,7 +229,7 @@ func (vs *Server) getOptimisticSpine(ctx context.Context) ([]gwatCommon.HashArra
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"jCpRoot": fmt.Sprintf("%#x", jCpRoot),
-		}).Error("Get optimistic spites failed: Could not retrieve of cp state")
+		}).Error("Get optimistic spines failed: Could not retrieve of cp state")
 		return nil, status.Errorf(codes.Internal, "Could not retrieve of cp state: %v", err)
 	}
 
@@ -243,7 +243,7 @@ func (vs *Server) getOptimisticSpine(ctx context.Context) ([]gwatCommon.HashArra
 			"head.Slot": currHead.Slot(),
 			"jcp.Slot":  cpSt.Slot(),
 			"baseSpine": fmt.Sprintf("%#x", baseSpine),
-		}).Error("Get optimistic spites failed: Could not retrieve of gwat optimistic spines")
+		}).Error("Get optimistic spines failed: Could not retrieve of gwat optimistic spines")
 		return nil, errWrap
 	}
 
@@ -254,7 +254,7 @@ func (vs *Server) getOptimisticSpine(ctx context.Context) ([]gwatCommon.HashArra
 		//"jcp.Finalization": fmt.Sprintf("%#x", cpSt.SpineData().Finalization),
 		//"jcp.CpFinalized":  fmt.Sprintf("%#x", cpSt.SpineData().CpFinalized),
 		//"optSpines":        optSpines,
-	}).Error("Get optimistic spites: data retrieved")
+	}).Info("Get optimistic spines: data retrieved")
 
 	//prepend current optimistic finalization to optimistic spine to calc parent
 	cpf := gwatCommon.HashArrayFromBytes(cpSt.SpineData().CpFinalized)
