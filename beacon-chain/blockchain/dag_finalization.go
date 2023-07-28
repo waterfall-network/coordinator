@@ -55,7 +55,20 @@ func (s *Service) initGwatSync() {
 			}
 			log.Info("Gwat sync: coordinator synchronization success")
 
-			// 2. Init coordinated state
+			// 2. sync slot info
+			slotInfo := &gwatTypes.SlotInfo{
+				GenesisTime:    uint64(s.GenesisTime().Unix()),
+				SecondsPerSlot: params.BeaconConfig().SecondsPerSlot,
+				SlotsPerEpoch:  uint64(params.BeaconConfig().SlotsPerEpoch),
+			}
+			isSet, err := s.cfg.ExecutionEngineCaller.ExecutionDagSyncSlotInfo(s.ctx, slotInfo)
+			if err != nil || !isSet {
+				log.WithError(err).Warning("Gwat sync: attempt to sync slot info failed ...")
+				continue
+			}
+			log.Info("Gwat sync: sync slot info successful")
+
+			// 3. Init coordinated state
 			err = s.initCoordinatedState(s.ctx)
 			if err != nil {
 				log.WithError(err).Warning("Gwat sync: attempt to get gwat coordinated state failed ...")
@@ -63,7 +76,7 @@ func (s *Service) initGwatSync() {
 			}
 			log.Info("Gwat sync: coordinated state initialization successful")
 
-			// 3. sync gwat to current finalized checkpoint
+			// 4. sync gwat to current finalized checkpoint
 			err = s.runGwatSynchronization(s.ctx)
 			if err != nil {
 				log.WithError(err).Warning("Gwat sync: attempt failed ...")
@@ -71,7 +84,7 @@ func (s *Service) initGwatSync() {
 			}
 			log.Info("Gwat sync: success")
 
-			// 4. start main work process
+			// 5. start main work process
 			s.runProcessDagFinalize()
 			return
 		}
@@ -98,8 +111,8 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 	//todo work by state
 	//var currStateRoot []byte
 
+	cpEpoch := types.Epoch(gwatCheckpoint.Epoch)
 	gwatSearchEpoch := types.Epoch(gwatCheckpoint.Epoch)
-	var cpEpoch types.Epoch
 
 	for {
 		select {
@@ -185,8 +198,8 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 		"headRoot": fmt.Sprintf("%#x", s.headRoot()),
 	}).Info("Gwat sync: head sync start")
 
-	syncSlot, err := slots.EpochStart(cpEpoch)
-	for syncSlot < s.HeadSlot() {
+	syncSlot, err := slots.EpochStart(cpEpoch + 1)
+	for syncSlot <= s.HeadSlot() {
 
 		log.WithError(err).WithFields(logrus.Fields{
 			"syncSlot": syncSlot,
@@ -271,7 +284,13 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 			"CpFinalized":  gwatCommon.HashArrayFromBytes(syncState.SpineData().CpFinalized),
 		}).Info("Gwat sync: head sync gap 222")
 
-		err = s.processDagFinalization(syncState)
+		//syncMode := gwatTypes.HeadSync
+		syncMode := gwatTypes.MainSync
+		// sync next epoch
+		if syncSlot+params.BeaconConfig().SlotsPerEpoch >= s.HeadSlot() {
+			syncMode = gwatTypes.HeadSync
+		}
+		err = s.processDagFinalization(syncState, syncMode)
 		if err != nil {
 			log.WithError(err).WithFields(logrus.Fields{
 				"syncSlot": syncSlot,
@@ -431,7 +450,7 @@ func (s *Service) runProcessDagFinalize() {
 					continue
 				}
 
-				err := s.processDagFinalization(newHead.state)
+				err := s.processDagFinalization(newHead.state, gwatTypes.NoSync)
 				if err != nil {
 					// reset if failed
 					log.WithError(err).WithFields(logrus.Fields{
@@ -592,6 +611,7 @@ func (s *Service) processGwatSync(gsp *wrapper.GwatSyncParam) error {
 
 	var finalizedSeq gwatCommon.HashArray
 	syncParams := gsp.Param()
+	syncParams.SyncMode = gwatTypes.MainSync
 	paramCp := syncParams.Checkpoint.Copy()
 
 	log.WithFields(logrus.Fields{
@@ -602,6 +622,7 @@ func (s *Service) processGwatSync(gsp *wrapper.GwatSyncParam) error {
 		"syncParams.CP.FinEpoch": gsp.Param().Checkpoint.FinEpoch,
 		"syncParams.CP.Spine":    fmt.Sprintf("%#x", gsp.Param().Checkpoint.Spine),
 		"syncParams.CP.Root":     fmt.Sprintf("%#x", gsp.Param().Checkpoint.Root),
+		"syncParams.SyncMode":    syncParams.SyncMode,
 	}).Info("Gwat sync: gwat sync param")
 
 	finRes, err := s.cfg.ExecutionEngineCaller.ExecutionDagFinalize(ctx, syncParams)
@@ -666,7 +687,7 @@ func (s *Service) processGwatSync(gsp *wrapper.GwatSyncParam) error {
 }
 
 // processDagFinalization implements dag finalization procedure.
-func (s *Service) processDagFinalization(headState state.BeaconState) error {
+func (s *Service) processDagFinalization(headState state.BeaconState, syncMode gwatTypes.SyncMode) error {
 	ctx, span := trace.StartSpan(s.ctx, "blockChain.processDagFinalization")
 	defer span.End()
 
@@ -678,6 +699,7 @@ func (s *Service) processDagFinalization(headState state.BeaconState) error {
 			log.WithError(err).Error("Dag finalization: get finalization params failed")
 			return errors.Wrap(err, "Dag finalization: get finalization params failed")
 		}
+		finParams.SyncMode = syncMode
 		paramCp := finParams.Checkpoint.Copy()
 
 		log.WithFields(logrus.Fields{
@@ -687,6 +709,7 @@ func (s *Service) processDagFinalization(headState state.BeaconState) error {
 			"cp.Epoch":         finParams.Checkpoint.Epoch,
 			"cp.Root":          finParams.Checkpoint.Root.Hex(),
 			"cp.Spine":         finParams.Checkpoint.Spine.Hex(),
+			"params.SyncMode":  finParams.SyncMode,
 		}).Info("Dag finalization: finalization params")
 
 		finRes, err := s.cfg.ExecutionEngineCaller.ExecutionDagFinalize(ctx, finParams)
@@ -1097,6 +1120,7 @@ func (s *Service) collectGwatSyncParams(
 		BaseSpine:   &baseSpine,
 		Checkpoint:  coordCheckpoint,
 		ValSyncData: valSyncData,
+		SyncMode:    gwatTypes.MainSync,
 	}, nil
 }
 
