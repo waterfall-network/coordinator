@@ -152,7 +152,6 @@ func createDepositData(privKey bls.SecretKey, pubKey bls.PublicKey) (*ethpb.Depo
 		PublicKey:             pubKey.Marshal(),
 		CreatorAddress:        withdrawalCredentialsHash(pubKey.Marshal()),
 		WithdrawalCredentials: withdrawalCredentialsHash(pubKey.Marshal()),
-		Amount:                params.BeaconConfig().MaxEffectiveBalance,
 	}
 	sr, err := depositMessage.HashTreeRoot()
 	if err != nil {
@@ -170,7 +169,7 @@ func createDepositData(privKey bls.SecretKey, pubKey bls.PublicKey) (*ethpb.Depo
 		PublicKey:             depositMessage.PublicKey,
 		CreatorAddress:        depositMessage.CreatorAddress,
 		WithdrawalCredentials: depositMessage.WithdrawalCredentials,
-		Amount:                depositMessage.Amount,
+		Amount:                params.BeaconConfig().MaxEffectiveBalance,
 		Signature:             privKey.Sign(root[:]).Marshal(),
 	}
 	return di, nil
