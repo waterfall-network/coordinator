@@ -4,6 +4,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/rand"
 	"fmt"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
 	"io/ioutil"
 	"testing"
 	"time"
@@ -67,7 +68,8 @@ func TestPrivateKey_ParsesCorrectly(t *testing.T) {
 
 	extractedKey := extractPrivateKey()
 
-	rawKey := (*ecdsa.PrivateKey)(privKey.(*crypto.Secp256k1PrivateKey))
+	rawKey, err := p2p.ConvertFromInterfacePrivKey(privKey)
+	require.NoError(t, err)
 
 	r, s, err := ecdsa.Sign(rand.Reader, extractedKey, []byte{'t', 'e', 's', 't'})
 	require.NoError(t, err)

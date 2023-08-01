@@ -3,9 +3,9 @@
 package main
 
 import (
-	"crypto/ecdsa"
 	"encoding/hex"
 	"flag"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
 	"net"
 
 	"github.com/libp2p/go-libp2p/core/crypto"
@@ -38,7 +38,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	ecdsaPrivKey := (*ecdsa.PrivateKey)(unmarshalledKey.(*crypto.Secp256k1PrivateKey))
+	ecdsaPrivKey, err := p2p.ConvertFromInterfacePrivKey(unmarshalledKey)
+	if err != nil {
+		panic(err)
+	}
 
 	if net.ParseIP(*ipAddr).To4() == nil {
 		log.Fatalf("Invalid ipv4 address given: %v\n", err)

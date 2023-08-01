@@ -47,7 +47,7 @@ func SerializeENR(record *enr.Record) (string, error) {
 	return enrString, nil
 }
 
-func convertFromInterfacePrivKey(privkey crypto.PrivKey) (*ecdsa.PrivateKey, error) {
+func ConvertFromInterfacePrivKey(privkey crypto.PrivKey) (*ecdsa.PrivateKey, error) {
 	secpKey := (privkey.(*crypto.Secp256k1PrivateKey))
 	rawKey, err := secpKey.Raw()
 	if err != nil {
@@ -97,7 +97,7 @@ func privKey(cfg *Config) (*ecdsa.PrivateKey, error) {
 		if err != nil {
 			return nil, err
 		}
-		convertedKey, err := convertFromInterfacePrivKey(priv)
+		convertedKey, err := ConvertFromInterfacePrivKey(priv)
 		if err != nil {
 			return nil, errors.Wrap(err, "could not get private key")
 		}
@@ -125,7 +125,7 @@ func privKeyFromFile(path string) (*ecdsa.PrivateKey, error) {
 	if err != nil {
 		return nil, err
 	}
-	k, err := convertFromInterfacePrivKey(unmarshalledKey)
+	k, err := ConvertFromInterfacePrivKey(unmarshalledKey)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get private key")
 	}
