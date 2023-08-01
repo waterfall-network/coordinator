@@ -205,7 +205,7 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 		log.WithError(err).WithFields(logrus.Fields{
 			"syncSlot": syncSlot,
 			"headSlot": s.headSlot(),
-		}).Info("Gwat sync: head sync gap 000")
+		}).Info("Gwat sync: 000")
 
 		syncRoot := params.BeaconConfig().ZeroHash
 		if err != nil {
@@ -213,7 +213,7 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 				"syncSlot": syncSlot,
 				"headSlot": s.headSlot(),
 				"headRoot": fmt.Sprintf("%#x", s.headRoot()),
-			}).Error("Gwat sync: head sync gap")
+			}).Error("Gwat sync: failed 0")
 			return err
 		}
 		_, roots, err := s.cfg.BeaconDB.BlockRootsBySlot(ctx, syncSlot)
@@ -222,7 +222,7 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 				"syncSlot": syncSlot,
 				"headSlot": s.headSlot(),
 				"headRoot": fmt.Sprintf("%#x", s.headRoot()),
-			}).Error("Gwat sync: head sync gap")
+			}).Error("Gwat sync: failed 1")
 			return err
 		}
 		if len(roots) == 0 {
@@ -239,7 +239,7 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 						"syncSlot": syncSlot,
 						"headSlot": s.headSlot(),
 						"headRoot": fmt.Sprintf("%#x", s.headRoot()),
-					}).Error("Gwat sync: head sync gap")
+					}).Error("Gwat sync: failed 2")
 					return err
 				}
 				if canonical {
@@ -254,7 +254,7 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 			"headSlot": s.headSlot(),
 			"syncRoot": fmt.Sprintf("%#x", syncRoot),
 			"headRoot": fmt.Sprintf("%#x", s.headRoot()),
-		}).Info("Gwat sync: head sync gap 111")
+		}).Info("Gwat sync: 111")
 
 		if syncRoot == params.BeaconConfig().ZeroHash {
 			syncSlot++
@@ -271,7 +271,7 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 				"Prefix":       gwatCommon.HashArrayFromBytes(syncState.SpineData().Prefix),
 				"Finalization": gwatCommon.HashArrayFromBytes(syncState.SpineData().Finalization),
 				"CpFinalized":  gwatCommon.HashArrayFromBytes(syncState.SpineData().CpFinalized),
-			}).Error("Gwat sync: head sync gap")
+			}).Error("Gwat sync: failed 3")
 			return err
 		}
 
@@ -289,34 +289,56 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 			"Prefix":       gwatCommon.HashArrayFromBytes(syncState.SpineData().Prefix),
 			"Finalization": gwatCommon.HashArrayFromBytes(syncState.SpineData().Finalization),
 			"CpFinalized":  gwatCommon.HashArrayFromBytes(syncState.SpineData().CpFinalized),
-		}).Info("Gwat sync: head sync gap 222")
+		}).Info("Gwat sync: 222")
 
-		//syncMode := gwatTypes.HeadSync
-		syncMode := gwatTypes.MainSync
-		// sync next epoch
-		if syncSlot+params.BeaconConfig().SlotsPerEpoch >= s.HeadSlot() {
-			syncMode = gwatTypes.HeadSync
-		}
-		err = s.processDagFinalization(syncState, syncMode)
+		err = s.processDagFinalization(syncState, gwatTypes.MainSync)
 		if err != nil {
 			log.WithError(err).WithFields(logrus.Fields{
 				"syncSlot": syncSlot,
 				"headSlot": s.headSlot(),
 				"syncRoot": fmt.Sprintf("%#x", syncRoot),
 				"headRoot": fmt.Sprintf("%#x", s.headRoot()),
-			}).Error("Gwat sync: head sync gap")
+			}).Error("Gwat sync: failed 4")
 			return err
 		}
 
 		// sync next epoch
-		syncSlot += params.BeaconConfig().SlotsPerEpoch
+		syncEpoch := slots.ToEpoch(syncSlot)
+		syncSlot, err = slots.EpochStart(syncEpoch + 1)
+		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"syncSlot": syncSlot,
+				"headSlot": s.headSlot(),
+				"syncRoot": fmt.Sprintf("%#x", syncRoot),
+				"headRoot": fmt.Sprintf("%#x", s.headRoot()),
+			}).Error("Gwat sync: failed 5")
+			return err
+		}
 
 		log.WithFields(logrus.Fields{
 			"syncSlot": syncSlot,
 			"headSlot": s.headSlot(),
 			"syncRoot": fmt.Sprintf("%#x", syncRoot),
 			"headRoot": fmt.Sprintf("%#x", s.headRoot()),
-		}).Info("Gwat sync: head sync gap success")
+		}).Info("Gwat sync: main success")
+	}
+
+	// head sync
+	headState, err := s.HeadState(ctx)
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"headSlot": s.headSlot(),
+			"headRoot": fmt.Sprintf("%#x", s.headRoot()),
+		}).Error("Gwat sync: head state failed")
+		return err
+	}
+	err = s.processDagFinalization(headState, gwatTypes.HeadSync)
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"headSlot": s.headSlot(),
+			"headRoot": fmt.Sprintf("%#x", s.headRoot()),
+		}).Error("Gwat sync: head failed")
+		return err
 	}
 
 	//// sync finalization:
@@ -437,7 +459,7 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 		"curSlot":  fmt.Sprintf("%#x", s.CurrentSlot()),
 		"headSlot": fmt.Sprintf("%#x", s.HeadSlot()),
 		"headRoot": fmt.Sprintf("%#x", s.headRoot()),
-	}).Info("Gwat sync: head sync success")
+	}).Info("Gwat sync: head success")
 
 	return nil
 }
