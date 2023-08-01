@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/kevinms/leakybucket-go"
-	libp2pcore "github.com/libp2p/go-libp2p-core"
-	"github.com/libp2p/go-libp2p-core/network"
+	libp2pcore "github.com/libp2p/go-libp2p/core"
+	"github.com/libp2p/go-libp2p/core/network"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
 	logTest "github.com/sirupsen/logrus/hooks/test"

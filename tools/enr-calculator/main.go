@@ -8,7 +8,7 @@ import (
 	"flag"
 	"net"
 
-	"github.com/libp2p/go-libp2p-core/crypto"
+	"github.com/libp2p/go-libp2p/core/crypto"
 	log "github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/file"
 	_ "gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/maxprocs"

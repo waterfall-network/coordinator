@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/libp2p/go-libp2p-core/peer"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
+	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/pkg/errors"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/beacon-chain/flags"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"

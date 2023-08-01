@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/kevinms/leakybucket-go"
-	"github.com/libp2p/go-libp2p-core/network"
+	"github.com/libp2p/go-libp2p/core/network"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/trailofbits/go-mutexasserts"
