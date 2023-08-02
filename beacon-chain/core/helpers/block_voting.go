@@ -4,50 +4,90 @@ import (
 	"bytes"
 	"fmt"
 
+	"github.com/prysmaticlabs/go-bitfield"
+	log "github.com/sirupsen/logrus"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
-// CountAttestationsVotes counts votes of BlockVoting
-func CountAttestationsVotes(attestations []*ethpb.Attestation) uint64 {
+// CountCommitteeVotes counts votes of BlockVoting
+func CountCommitteeVotes(committeeVotes []*ethpb.CommitteeVote) uint64 {
 	count := uint64(0)
-	for _, att := range attestations {
-		if IsAggregated(att) {
-			count += att.GetAggregationBits().Count()
-		} else {
-			count++
-		}
+	for _, att := range committeeVotes {
+		count += att.GetAggregationBits().Count()
 	}
 	return count
 }
 
+// CommitteeVoteKey create key for CommitteeVote instance.
+func CommitteeVoteKey(committeeVote *ethpb.CommitteeVote) [32]byte {
+	if committeeVote == nil {
+		return [32]byte{}
+	}
+	bf := bytesutil.Bytes8(uint64(committeeVote.AggregationBits.Len()))
+	slot := bytesutil.Bytes8(uint64(committeeVote.Slot))
+	index := bytesutil.Bytes8(uint64(committeeVote.Index))
+	rawKey := append(bf, slot...)
+	rawKey = append(rawKey, index...)
+	key := hash.Hash(rawKey)
+	return key
+}
+
+// CommitteeVoteKey create key for CommitteeVote instance.
+func AggregateCommitteeVote(committeeVotes []*ethpb.CommitteeVote) []*ethpb.CommitteeVote {
+	var err error
+	// mapping by keys
+	votesMap := map[[32]byte][]*ethpb.CommitteeVote{}
+	for _, v := range committeeVotes {
+		k := CommitteeVoteKey(v)
+		if votesMap[k] == nil {
+			votesMap[k] = []*ethpb.CommitteeVote{}
+		}
+		votesMap[k] = append(votesMap[k], v)
+	}
+	//aggregate
+	res := make([]*ethpb.CommitteeVote, len(votesMap))
+	i := 0
+	for _, avs := range votesMap {
+		baseData := avs[0]
+		aggrBits := bitfield.NewBitlist(baseData.AggregationBits.Len())
+		if len(avs) > 1 {
+			for _, v := range avs {
+				aggrBits, err = aggrBits.Or(v.AggregationBits)
+				if err != nil {
+					log.WithError(err).Error("CommitteeVotes aggregation failed: should never happened")
+					panic("CommitteeVotes aggregation failed: should never happened")
+				}
+			}
+		} else {
+			aggrBits = bytesutil.SafeCopyBytes(baseData.AggregationBits)
+		}
+		res[i] = &ethpb.CommitteeVote{
+			AggregationBits: aggrBits,
+			Slot:            baseData.Slot,
+			Index:           baseData.Index,
+		}
+		i++
+	}
+	return res
+}
+
 func BlockVotingCopy(vote *ethpb.BlockVoting) *ethpb.BlockVoting {
-	attestations := make([]*ethpb.Attestation, len(vote.Attestations))
-	for i, att := range vote.Attestations {
-		attestations[i] = &ethpb.Attestation{
-			AggregationBits: att.AggregationBits,
-			Data: &ethpb.AttestationData{
-				Slot:            att.GetData().GetSlot(),
-				CommitteeIndex:  att.GetData().GetCommitteeIndex(),
-				BeaconBlockRoot: bytesutil.SafeCopyBytes(att.GetData().BeaconBlockRoot),
-				Source: &ethpb.Checkpoint{
-					Epoch: att.GetData().GetSource().GetEpoch(),
-					Root:  bytesutil.SafeCopyBytes(att.GetData().GetSource().GetRoot()),
-				},
-				Target: &ethpb.Checkpoint{
-					Epoch: att.GetData().GetTarget().GetEpoch(),
-					Root:  bytesutil.SafeCopyBytes(att.GetData().GetTarget().GetRoot()),
-				},
-			},
-			Signature: bytesutil.SafeCopyBytes(att.Signature),
+	cpyVotes := make([]*ethpb.CommitteeVote, len(vote.Votes))
+	for i, att := range vote.Votes {
+		cpyVotes[i] = &ethpb.CommitteeVote{
+			AggregationBits: bytesutil.SafeCopyBytes(att.AggregationBits),
+			Slot:            vote.Slot,
+			Index:           att.Index,
 		}
 	}
 	return &ethpb.BlockVoting{
-		Root:         bytesutil.SafeCopyBytes(vote.Root),
-		Slot:         vote.Slot,
-		Candidates:   bytesutil.SafeCopyBytes(vote.Candidates),
-		Attestations: attestations,
+		Root:       bytesutil.SafeCopyBytes(vote.Root),
+		Slot:       vote.Slot,
+		Candidates: bytesutil.SafeCopyBytes(vote.Candidates),
+		Votes:      cpyVotes,
 	}
 }
 
@@ -65,7 +105,7 @@ func BlockVotingArrStateOrder(votes []*ethpb.BlockVoting) ([]*ethpb.BlockVoting,
 	cpyAttOrd := make([]*ethpb.BlockVoting, len(votes))
 	for i, itm := range votes {
 		cpyItm := BlockVotingCopy(itm)
-		cpyItm.Attestations, err = AttestationArrSort(cpyItm.Attestations)
+		cpyItm.Votes, err = CommitteeVoteArrSort(cpyItm.Votes)
 		if err != nil {
 			return nil, err
 		}
@@ -96,11 +136,11 @@ func BlockVotingArrSort(votes []*ethpb.BlockVoting) ([]*ethpb.BlockVoting, error
 	return sorted, nil
 }
 
-// AttestationArrSort sorts attestations array.
-func AttestationArrSort(atts []*ethpb.Attestation) ([]*ethpb.Attestation, error) {
+// CommitteeVoteArrSort sorts attestations array.
+func CommitteeVoteArrSort(votes []*ethpb.CommitteeVote) ([]*ethpb.CommitteeVote, error) {
 	keys := gwatCommon.HashArray{}
-	mapKeyData := map[[32]byte]*ethpb.Attestation{}
-	for _, itm := range atts {
+	mapKeyData := map[[32]byte]*ethpb.CommitteeVote{}
+	for _, itm := range votes {
 		k, err := itm.HashTreeRoot()
 		if err != nil {
 			return nil, err
@@ -111,7 +151,7 @@ func AttestationArrSort(atts []*ethpb.Attestation) ([]*ethpb.Attestation, error)
 		keys = append(keys, k)
 	}
 	keys = keys.Sort()
-	sorted := make([]*ethpb.Attestation, len(keys))
+	sorted := make([]*ethpb.CommitteeVote, len(keys))
 	for i, k := range keys {
 		sorted[i] = mapKeyData[k]
 	}
@@ -156,16 +196,16 @@ func PrintBlockVoting(blockVoting *ethpb.BlockVoting) string {
 	str += fmt.Sprintf("root: \"%#x\",", blockVoting.Root)
 	str += fmt.Sprintf("candidates: %s,", candStr)
 	str += fmt.Sprintf("slot: %d,", blockVoting.GetSlot())
-	str += fmt.Sprintf("attestations: [")
-	for i, att := range blockVoting.Attestations {
+	str += fmt.Sprintf("Votes: [")
+	for i, att := range blockVoting.Votes {
 		str += "{"
-		str += fmt.Sprintf("aggrBitLen: %d,", att.GetAggregationBits().Count())
+		str += fmt.Sprintf("aggrBits: %b,", att.GetAggregationBits())
+		str += fmt.Sprintf("aggrBitLen: %d,", att.GetAggregationBits().Len())
 		str += fmt.Sprintf("aggrBitCount: %d,", att.GetAggregationBits().Count())
-		str += fmt.Sprintf("slot: %d,", att.Data.GetSlot())
-		str += fmt.Sprintf("committeeIndex: %d", att.Data.GetCommitteeIndex())
-		//str += fmt.Sprintf("beaconBlockRoot: \"%#x\"", att.Data.GetBeaconBlockRoot())
+		str += fmt.Sprintf("slot: %d,", att.GetSlot())
+		str += fmt.Sprintf("committeeIndex: %d", att.GetIndex())
 		str += "}"
-		if i < len(blockVoting.Attestations)-1 {
+		if i < len(blockVoting.Votes)-1 {
 			str += ","
 		}
 	}

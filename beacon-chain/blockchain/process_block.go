@@ -99,7 +99,8 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	defer span.End()
 
 	log.WithFields(logrus.Fields{
-		"block.slot": signed.Block().Slot(),
+		"slot":       signed.Block().Slot(),
+		"root":       fmt.Sprintf("%#x", blockRoot),
 		"ParentRoot": fmt.Sprintf("%#x", signed.Block().ParentRoot()),
 		"\u2692":     version.BuildId,
 	}).Info("<<< onBlock:START >>> ")

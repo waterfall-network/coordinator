@@ -12,10 +12,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stateutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
-	attaggregation "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/attestation/aggregation/attestations"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
@@ -96,13 +95,23 @@ func ProcessDagConsensus(ctx context.Context, beaconState state.BeaconState, sig
 	deprecatedRoots := getBlockVotingsDeprecatedRoots(blockVoting, finalization)
 	blockVoting = removeBlockVoting(blockVoting, deprecatedRoots)
 
+	if blockVoting, err = handleBlockVotingVotesLimit(ctx, blockVoting, beaconState); err != nil {
+		return nil, err
+	}
+
 	// if it's a new epoch - removes stale BlockVoting.
 	if slots.IsEpochStart(beaconBlock.Slot()) {
+
+		if blockVoting, err = cleanBlockVotingStaleVotes(ctx, blockVoting, beaconState); err != nil {
+			return nil, err
+		}
+
 		cpSlot, err := slots.EpochStart(beaconState.FinalizedCheckpointEpoch())
 		if err != nil {
 			return nil, err
 		}
 		staleRoots := getBlockVotingRootsLtSlot(blockVoting, cpSlot)
+
 		blockVoting = removeBlockVoting(blockVoting, staleRoots)
 
 		log.WithFields(logrus.Fields{
@@ -156,9 +165,9 @@ func calcFinalization(ctx context.Context, beaconState state.BeaconState, blockV
 		}
 
 		// handle data for each attestations' slot
-		mapSlotAtt := map[types.Slot][]*ethpb.Attestation{}
-		for _, att := range bv.GetAttestations() {
-			mapSlotAtt[att.GetData().GetSlot()] = append(mapSlotAtt[att.GetData().GetSlot()], att)
+		mapSlotAtt := map[types.Slot][]*ethpb.CommitteeVote{}
+		for _, att := range bv.GetVotes() {
+			mapSlotAtt[att.GetSlot()] = append(mapSlotAtt[att.GetSlot()], att)
 		}
 		for slot, atts := range mapSlotAtt {
 			minSupport, err := BlockVotingMinSupport(ctx, beaconState, slot)
@@ -166,7 +175,7 @@ func calcFinalization(ctx context.Context, beaconState state.BeaconState, blockV
 				return nil, err
 			}
 			// if provided enough support for slot adds data as separated item
-			if helpers.CountAttestationsVotes(atts) >= uint64(minSupport) {
+			if helpers.CountCommitteeVotes(atts) >= uint64(minSupport) {
 				supportedVotes = append(supportedVotes, helpers.BlockVotingCopy(bv))
 				break
 			}
@@ -372,6 +381,138 @@ func getBlockVotingRootsLtSlot(blockVoting []*ethpb.BlockVoting, slot types.Slot
 	return roots
 }
 
+// cleanBlockVotingStaleVotes removes unsupported BlockVoting.Votes and empty BlockVoting older than 2 epochs.
+func cleanBlockVotingStaleVotes(ctx context.Context, blockVoting []*ethpb.BlockVoting, bState state.BeaconState) ([]*ethpb.BlockVoting, error) {
+	// define slot of deprecation
+	targetEpoch := slots.ToEpoch(bState.Slot())
+	if targetEpoch <= 2 {
+		return blockVoting, nil
+	}
+	staleVotesSlot, err := slots.EpochStart(targetEpoch - 2)
+	if err != nil {
+		return []*ethpb.BlockVoting{}, err
+	}
+	for i, bv := range blockVoting {
+		// check blockVoting slot is older of stale slot
+		if bv.Slot < staleVotesSlot {
+			resLen := len(bv.Votes)
+			slotMap := map[types.Slot][]*ethpb.CommitteeVote{}
+			slotsArr := make([]types.Slot, 0, len(bv.Votes))
+			for _, vote := range bv.Votes {
+				slot := vote.Slot
+				slotsArr = append(slotsArr, slot)
+				if slotMap[slot] == nil {
+					slotMap[slot] = []*ethpb.CommitteeVote{}
+				}
+				slotMap[slot] = append(slotMap[slot], vote)
+			}
+			// asc sort slotsArr
+			sort.Slice(slotsArr, func(i, j int) bool {
+				return slotsArr[i] < slotsArr[j]
+			})
+			// find min unsupported slot
+			for _, slot := range slotsArr {
+				if slot >= staleVotesSlot {
+					continue
+				}
+				votes := slotMap[slot]
+				// find unsupported with min slot
+				//unsupported BlockVoting and older 2 epochs
+				minSupport, err := BlockVotingMinSupport(ctx, bState, slot)
+				if err != nil {
+					return []*ethpb.BlockVoting{}, err
+				}
+				// if no enough support rm slot votes
+				if helpers.CountCommitteeVotes(votes) < uint64(minSupport) {
+
+					log.WithFields(logrus.Fields{
+						"staleVotesSlot": staleVotesSlot,
+						"rmSlot":         slot,
+						"blVoting":       helpers.PrintBlockVoting(bv),
+					}).Info("BlockVoting votes clean stale votes")
+
+					resLen -= len(slotMap[slot])
+					delete(slotMap, slot)
+				}
+			}
+			resVotes := make([]*ethpb.CommitteeVote, 0, resLen)
+			for _, slot := range slotsArr {
+				if len(slotMap[slot]) > 0 {
+					resVotes = append(resVotes, slotMap[slot]...)
+				}
+			}
+			blockVoting[i].Votes = resVotes
+		}
+	}
+	// rm stale empty BlockVoting
+	res := make([]*ethpb.BlockVoting, 0, len(blockVoting))
+	for _, bv := range blockVoting {
+		// check blockVoting slot is older of stale slot
+		if bv.Slot >= staleVotesSlot || len(bv.Votes) > 0 {
+			res = append(res, bv)
+		} else {
+			log.WithFields(logrus.Fields{
+				"staleVotesSlot": staleVotesSlot,
+				"blVoting":       helpers.PrintBlockVoting(bv),
+			}).Info("BlockVoting votes clean empty item")
+		}
+	}
+	return res, nil
+}
+
+// handleBlockVotingVotesLimit checks BlockVoting.Votes len limitation and reduces len in needed.
+func handleBlockVotingVotesLimit(ctx context.Context, blockVoting []*ethpb.BlockVoting, bState state.BeaconState) ([]*ethpb.BlockVoting, error) {
+	for i, bv := range blockVoting {
+		// check Votes len limit
+		if len(bv.Votes) > 64 {
+			// reduce len
+			resLen := len(bv.Votes)
+			slotMap := map[types.Slot][]*ethpb.CommitteeVote{}
+			slotsArr := make([]types.Slot, 0, len(bv.Votes))
+			for _, vote := range bv.Votes {
+				slot := vote.Slot
+				slotsArr = append(slotsArr, slot)
+				if slotMap[slot] == nil {
+					slotMap[slot] = []*ethpb.CommitteeVote{}
+				}
+				slotMap[slot] = append(slotMap[slot], vote)
+			}
+			// asc sort slotsArr
+			sort.Slice(slotsArr, func(i, j int) bool {
+				return slotsArr[i] < slotsArr[j]
+			})
+			// find min unsupported slot
+			for _, slot := range slotsArr {
+				votes := slotMap[slot]
+				// find unsupported with min slot
+				//unsupported BlockVoting and older 2 epochs
+				minSupport, err := BlockVotingMinSupport(ctx, bState, slot)
+				if err != nil {
+					return []*ethpb.BlockVoting{}, err
+				}
+				// if no enough support rm slot votes
+				if helpers.CountCommitteeVotes(votes) < uint64(minSupport) {
+					resLen -= len(slotMap[slot])
+					delete(slotMap, slot)
+					break
+				}
+			}
+			resVotes := make([]*ethpb.CommitteeVote, 0, resLen)
+			for _, slot := range slotsArr {
+				if len(slotMap[slot]) > 0 {
+					resVotes = append(resVotes, slotMap[slot]...)
+				}
+			}
+			blockVoting[i].Votes = resVotes
+
+			log.WithFields(logrus.Fields{
+				"blVoting": helpers.PrintBlockVoting(bv),
+			}).Info("BlockVoting votes reduced")
+		}
+	}
+	return blockVoting, nil
+}
+
 func isBlockVotingExists(votes []*ethpb.BlockVoting, root []byte) bool {
 	for _, itm := range votes {
 		if bytes.Equal(itm.Root, root) {
@@ -385,10 +526,10 @@ func addBlockVoting(votes []*ethpb.BlockVoting, root []byte, slot types.Slot, ca
 	cpy := helpers.BlockVotingArrCopy(votes)
 	if !isBlockVotingExists(cpy, root) {
 		newItem := &ethpb.BlockVoting{
-			Root:         root,
-			Attestations: []*ethpb.Attestation{},
-			Slot:         slot,
-			Candidates:   candidates,
+			Root:       root,
+			Votes:      []*ethpb.CommitteeVote{},
+			Slot:       slot,
+			Candidates: candidates,
 		}
 		cpy = append(cpy, newItem)
 		return cpy
@@ -407,81 +548,16 @@ func appendBlockVotingAtt(votes []*ethpb.BlockVoting, val *ethpb.Attestation) []
 	if !isBlockVotingExists(votes, root) {
 		return votes
 	}
+	newVote := &ethpb.CommitteeVote{
+		AggregationBits: bytesutil.SafeCopyBytes(val.AggregationBits),
+		Slot:            val.Data.Slot,
+		Index:           val.Data.CommitteeIndex,
+	}
+
 	cpy := helpers.BlockVotingArrCopy(votes)
 	for _, itm := range cpy {
 		if bytes.Equal(itm.Root, root) {
-
-			log.WithFields(logrus.Fields{
-				"atts": helpers.PrintBlockVoting(itm),
-				"slot": itm.GetSlot(),
-				"root": fmt.Sprintf("%#x", itm.GetRoot()),
-			}).Debug("appendBlockVotingAtt op=000")
-
-			valDataRoot, err := val.Data.HashTreeRoot()
-			if err != nil {
-				log.WithError(err).WithFields(logrus.Fields{
-					"slot": itm.GetSlot(),
-					"root": fmt.Sprintf("%#x", itm.GetRoot()),
-				}).Error("append attestation to block voting failed (val HashTreeRoot)")
-				return votes
-			}
-			attsByDataRoot := make(map[[32]byte][]*ethpb.Attestation, len(itm.GetAttestations()))
-			for _, att := range itm.GetAttestations() {
-				attDataRoot, err := att.Data.HashTreeRoot()
-				if err != nil {
-					log.WithError(err).WithFields(logrus.Fields{
-						"slot": itm.GetSlot(),
-						"root": fmt.Sprintf("%#x", itm.GetRoot()),
-					}).Error("append attestation to block voting failed (val HashTreeRoot)")
-					continue
-					//return votes
-				}
-				attsByDataRoot[attDataRoot] = append(attsByDataRoot[attDataRoot], att)
-			}
-			if attsByDataRoot[valDataRoot] != nil {
-				datts, err := attaggregation.Aggregate(append(attsByDataRoot[valDataRoot], val))
-				if err != nil {
-					log.WithError(err).WithFields(logrus.Fields{
-						"slot": itm.GetSlot(),
-						"root": fmt.Sprintf("%#x", itm.GetRoot()),
-					}).Error("append attestation to block voting failed (aggregation)")
-					return votes
-				}
-				attsByDataRoot[valDataRoot] = datts
-			} else {
-				attsByDataRoot[valDataRoot] = []*ethpb.Attestation{val}
-			}
-
-			atts := make([]*ethpb.Attestation, 0, len(attsByDataRoot))
-			for _, datts := range attsByDataRoot {
-				atts = append(atts, datts...)
-			}
-
-			ccc := helpers.BlockVotingCopy(itm)
-			ccc.Attestations = atts
-			log.WithFields(logrus.Fields{
-				"BlockVoting": helpers.PrintBlockVoting(ccc),
-				"slot":        itm.GetSlot(),
-				"root":        fmt.Sprintf("%#x", itm.GetRoot()),
-			}).Debug("appendBlockVotingAtt op=1 aggregation")
-
-			atts, err = stateutil.Dedup(atts)
-			if err != nil {
-				log.WithError(err).WithFields(logrus.Fields{
-					"slot": itm.GetSlot(),
-					"root": fmt.Sprintf("%#x", itm.GetRoot()),
-				}).Error("append attestation to block voting failed (deduplication)")
-				return votes
-			}
-
-			ccc.Attestations = atts
-			log.WithFields(logrus.Fields{
-				"BlockVoting": helpers.PrintBlockVoting(ccc),
-				"slot":        itm.GetSlot(),
-				"root":        fmt.Sprintf("%#x", itm.GetRoot()),
-			}).Debug("appendBlockVotingAtt op=2 deduplication")
-
-			itm.Attestations = atts
+			itm.Votes = helpers.AggregateCommitteeVote(append(itm.GetVotes(), newVote))
 		}
 	}
 	return cpy

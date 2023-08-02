@@ -106,51 +106,17 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 	//	return nil, fmt.Errorf("GWAT synchronization process is running, not ready to respond")
 	//}
 
-	// calculate the parent block by optimistic spine.
-	currHead, err := vs.HeadFetcher.HeadState(ctx)
+	optSpines, err := vs.getOptimisticSpine(ctx)
 	if err != nil {
-		log.WithError(err).Error("build block data: retrieving of head state failed")
-		return nil, fmt.Errorf("could not get head state %v", err)
-	}
-
-	jCpRoot := bytesutil.ToBytes32(currHead.CurrentJustifiedCheckpoint().Root)
-	if currHead.CurrentJustifiedCheckpoint().Epoch == 0 {
-		jCpRoot, err = vs.BeaconDB.GenesisBlockRoot(ctx)
-		if err != nil {
-			log.WithError(err).Error("build block data: retrieving of genesis root")
-			return nil, errors.Wrap(err, "get genesis root failed")
-		}
-	}
-
-	cpSt, err := vs.StateGen.StateByRoot(ctx, jCpRoot)
-	if err != nil {
-		log.WithError(err).WithFields(logrus.Fields{
-			"jCpRoot": fmt.Sprintf("%#x", jCpRoot),
-		}).Error("build block data: retrieving of cp state failed")
-		return nil, err
-	}
-
-	//request optimistic spine
-	baseSpine := helpers.GetTerminalFinalizedSpine(cpSt)
-
-	optSpines, err := vs.HeadFetcher.GetOptimisticSpines(ctx, baseSpine)
-	if err != nil {
-		errWrap := fmt.Errorf("could not get gwat candidates: %v", err)
+		errWrap := fmt.Errorf("could not get gwat optimistic spines: %v", err)
 		log.WithError(errWrap).WithFields(logrus.Fields{
-			"baseSpine": baseSpine,
-		}).Error("build block data: retrieving of parent failed")
+			"slot": req.Slot,
+		}).Error("build block data: Could not retrieve of gwat optimistic spines")
 		return nil, errWrap
 	}
 	if len(optSpines) == 0 {
 		log.Errorf("Empty list of optimistic spines was retrieved for slot: %v", req.Slot)
 	}
-
-	//prepend current optimistic finalization to optimistic spine to calc parent
-	optFinalisation := make([]gwatCommon.HashArray, len(cpSt.SpineData().Finalization)/gwatCommon.HashLength)
-	for i, h := range gwatCommon.HashArrayFromBytes(cpSt.SpineData().Finalization) {
-		optFinalisation[i] = gwatCommon.HashArray{h}
-	}
-	optSpines = append(optFinalisation, optSpines...)
 
 	//calculate optimistic parent root
 	parentRoot, err := vs.HeadFetcher.ForkChoicer().GetParentByOptimisticSpines(ctx, optSpines)

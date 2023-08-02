@@ -1,6 +1,8 @@
 package protoarray
 
 import (
+	"sync"
+
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
@@ -15,6 +17,7 @@ type AttestationsData struct {
 	justifiedRoot [32]byte
 	finalizedRoot [32]byte
 	votes         map[uint64]Vote
+	mu            sync.Mutex
 }
 
 func copyVotes(votes map[uint64]Vote) map[uint64]Vote {
@@ -30,13 +33,19 @@ func copyVotes(votes map[uint64]Vote) map[uint64]Vote {
 }
 
 func (ad *AttestationsData) Votes() map[uint64]Vote {
+	ad.mu.Lock()
+	defer ad.mu.Unlock()
 	return copyVotes(ad.votes)
 }
 
 func (ad *AttestationsData) JustifiedRoot() [32]byte {
+	ad.mu.Lock()
+	defer ad.mu.Unlock()
 	return bytesutil.ToBytes32(bytesutil.SafeCopyBytes(ad.justifiedRoot[:]))
 }
 func (ad *AttestationsData) FinalizedRoot() [32]byte {
+	ad.mu.Lock()
+	defer ad.mu.Unlock()
 	return bytesutil.ToBytes32(bytesutil.SafeCopyBytes(ad.finalizedRoot[:]))
 }
 

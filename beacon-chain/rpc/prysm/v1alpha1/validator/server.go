@@ -5,9 +5,11 @@ package validator
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache/depositcache"
@@ -15,6 +17,7 @@ import (
 	blockfeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/block"
 	opfeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/operation"
 	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/signing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/attestations"
@@ -30,6 +33,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/network/forks"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -203,4 +207,74 @@ func (vs *Server) WaitForChainStart(_ *emptypb.Empty, stream ethpb.BeaconNodeVal
 			return status.Error(codes.Canceled, "Context canceled")
 		}
 	}
+}
+
+// getOptimisticSpine retrieves optimistic spines from gwat or cached
+// and extend by finalized chain to use with forkchoice
+// to calculate the parent block by optimistic spine.
+func (vs *Server) getOptimisticSpine(ctx context.Context) ([]gwatCommon.HashArray, error) {
+	currHead, err := vs.HeadFetcher.HeadState(ctx)
+	if err != nil {
+		log.WithError(err).Error("Get optimistic spines failed: could not retrieve head state")
+		return nil, status.Errorf(codes.Internal, "Could not retrieve head state: %v", err)
+	}
+
+	jCpRoot := bytesutil.ToBytes32(currHead.CurrentJustifiedCheckpoint().Root)
+	if currHead.CurrentJustifiedCheckpoint().Epoch == 0 {
+		jCpRoot, err = vs.BeaconDB.GenesisBlockRoot(ctx)
+		if err != nil {
+			log.WithError(err).Error("Get optimistic spines failed: retrieving of genesis root")
+			return nil, status.Errorf(codes.Internal, "Could not retrieve of genesis root: %v", err)
+		}
+	}
+
+	cpSt, err := vs.StateGen.StateByRoot(ctx, jCpRoot)
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"jCpRoot": fmt.Sprintf("%#x", jCpRoot),
+		}).Error("Get optimistic spines failed: Could not retrieve of cp state")
+		return nil, status.Errorf(codes.Internal, "Could not retrieve of cp state: %v", err)
+	}
+
+	//request optimistic spine
+	baseSpine := helpers.GetTerminalFinalizedSpine(cpSt)
+
+	optSpines, err := vs.HeadFetcher.GetOptimisticSpines(ctx, baseSpine)
+	if err != nil {
+		errWrap := fmt.Errorf("could not get gwat optimistic spines: %v", err)
+		log.WithError(errWrap).WithFields(logrus.Fields{
+			"head.Slot": currHead.Slot(),
+			"jcp.Slot":  cpSt.Slot(),
+			"baseSpine": fmt.Sprintf("%#x", baseSpine),
+		}).Error("Get optimistic spines failed: Could not retrieve of gwat optimistic spines")
+		return nil, errWrap
+	}
+
+	log.WithFields(logrus.Fields{
+		"head.Slot": currHead.Slot(),
+		"jcp.Slot":  cpSt.Slot(),
+		"baseSpine": fmt.Sprintf("%#x", baseSpine),
+		//"jcp.Finalization": fmt.Sprintf("%#x", cpSt.SpineData().Finalization),
+		//"jcp.CpFinalized":  fmt.Sprintf("%#x", cpSt.SpineData().CpFinalized),
+		//"optSpines":        optSpines,
+	}).Info("Get optimistic spines: data retrieved")
+
+	//prepend current optimistic finalization to optimistic spine to calc parent
+	cpf := gwatCommon.HashArrayFromBytes(cpSt.SpineData().CpFinalized)
+	fin := gwatCommon.HashArrayFromBytes(cpSt.SpineData().Finalization)
+	extOptSpines := make([]gwatCommon.HashArray, len(cpf)+len(fin)+len(optSpines))
+	ofs := 0
+	for i, offset, a := 0, ofs, cpf; i < len(a); i++ {
+		ofs++
+		extOptSpines[offset+i] = gwatCommon.HashArray{a[i]}
+	}
+	for i, offset, a := 0, ofs, fin; i < len(a); i++ {
+		ofs++
+		extOptSpines[offset+i] = gwatCommon.HashArray{a[i]}
+	}
+	for i, offset, a := 0, ofs, optSpines; i < len(a); i++ {
+		ofs++
+		extOptSpines[offset+i] = a[i].Copy()
+	}
+	return optSpines, nil
 }
