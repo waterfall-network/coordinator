@@ -3788,8 +3788,8 @@ def prysm_deps():
     go_repository(
         name = "com_github_trailofbits_go_mutexasserts",
         importpath = "github.com/trailofbits/go-mutexasserts",
-        sum = "h1:8LRP+2JK8piIUU16ZDgWDXwjJcuJNTtCzadjTZj8Jf0=",
-        version = "v0.0.0-20200708152505-19999e7d3cef",
+        sum = "h1:+LynomhWB+14Plp/bOONEAZCtvCZk4leRbTvNzNVkL0=",
+        version = "v0.0.0-20230328101604-8cdbc5f3d279",
     )
     go_repository(
         name = "com_github_twitchtv_twirp",
