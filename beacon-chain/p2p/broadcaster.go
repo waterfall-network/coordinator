@@ -9,6 +9,7 @@ import (
 
 	ssz "github.com/ferranbt/fastssz"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/altair"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
@@ -75,6 +76,16 @@ func (s *Service) BroadcastAttestation(ctx context.Context, subnet uint64, att *
 func (s *Service) BroadcastPrevoting(ctx context.Context, subnet uint64, prevote *ethpb.PreVote) error {
 	ctx, span := trace.StartSpan(ctx, "p2p.BroadcastPrevoting")
 	defer span.End()
+
+	log.WithFields(logrus.Fields{
+		"subnet":             subnet,
+		"curSlot":            slots.CurrentSlot(uint64(s.genesisTime.Unix())),
+		"pv.AggregationBits": fmt.Sprintf("%b", prevote.AggregationBits),
+		"pv.Data.Slot":       prevote.Data.Slot,
+		"pv.Data.Index":      prevote.Data.Index,
+		//"pv.Candidates":      fmt.Sprintf("%#x", prevote.Data.Candidates),
+	}).Info("Prevote: BroadcastPrevoting")
+
 	forkDigest, err := s.currentForkDigest()
 	if err != nil {
 		err := errors.Wrap(err, "could not retrieve fork digest")
@@ -110,6 +121,15 @@ func (s *Service) broadcastAttestation(ctx context.Context, subnet uint64, att *
 	ctx, span := trace.StartSpan(ctx, "p2p.broadcastAttestation")
 	defer span.End()
 	ctx = trace.NewContext(context.Background(), span) // clear parent context / deadline.
+
+	log.WithFields(logrus.Fields{
+		"subnet":             subnet,
+		"curSlot":            slots.CurrentSlot(uint64(s.genesisTime.Unix())),
+		"pv.AggregationBits": fmt.Sprintf("%b", att.AggregationBits),
+		"pv.Data.Slot":       att.Data.Slot,
+		"pv.Data.Index":      att.Data.CommitteeIndex,
+		//"pv.Candidates":      fmt.Sprintf("%#x", prevote.Data.Candidates),
+	}).Info("Prevote: broadcastAttestation")
 
 	oneEpoch := time.Duration(1*params.BeaconConfig().SlotsPerEpoch.Mul(params.BeaconConfig().SecondsPerSlot)) * time.Second
 	ctx, cancel := context.WithTimeout(ctx, oneEpoch)

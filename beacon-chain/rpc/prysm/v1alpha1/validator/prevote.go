@@ -9,7 +9,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
@@ -31,19 +30,8 @@ func (vs *Server) GetPrevoteData(ctx context.Context, req *ethpb.PreVoteRequest)
 	if vs.SyncChecker.Syncing() {
 		return nil, status.Errorf(codes.Unavailable, "Syncing to latest head, not ready to respond")
 	}
-	if vs.HeadFetcher.IsGwatSynchronizing() {
-		log.WithError(fmt.Errorf("GWAT synchronization process is running, not ready to respond")).WithFields(logrus.Fields{
-			"Syncing": vs.HeadFetcher.IsGwatSynchronizing(),
-		}).Warn("GetPrevoteData: Proposing skipped (synchronizing)")
-		return nil, status.Errorf(codes.Unavailable, "Syncing to latest head, not ready to respond")
-	}
-
-	if err := vs.optimisticStatus(ctx); err != nil {
-		return nil, err
-	}
 
 	// result is not depending on CommitteeIndex
-	req.CommitteeIndex = 0
 	res, err := vs.PrevoteCache.Get(ctx, req)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Could not retrieve data from prevote cache: %v", err)
@@ -73,48 +61,24 @@ func (vs *Server) GetPrevoteData(ctx context.Context, req *ethpb.PreVoteRequest)
 		}
 	}()
 
-	// todo check
-	// calculate the parent block by optimistic spine.
-	currHead, err := vs.HeadFetcher.HeadState(ctx)
+	optSpines, err := vs.getOptimisticSpine(ctx)
 	if err != nil {
-		log.WithError(err).Error("Get prevote data: Could not retrieve head state")
-		return nil, status.Errorf(codes.Internal, "Could not retrieve head state: %v", err)
-	}
-
-	jCpRoot := bytesutil.ToBytes32(currHead.CurrentJustifiedCheckpoint().Root)
-	if currHead.CurrentJustifiedCheckpoint().Epoch == 0 {
-		jCpRoot, err = vs.BeaconDB.GenesisBlockRoot(ctx)
-		if err != nil {
-			log.WithError(err).Error("Get prevote data: retrieving of genesis root")
-			return nil, status.Errorf(codes.Internal, "Could not retrieve of genesis root: %v", err)
-		}
-	}
-
-	cpSt, err := vs.StateGen.StateByRoot(ctx, jCpRoot)
-	if err != nil {
-		log.WithError(err).WithFields(logrus.Fields{
-			"jCpRoot": fmt.Sprintf("%#x", jCpRoot),
-		}).Error("Could not retrieve of cp state while prevote")
-		return nil, status.Errorf(codes.Internal, "Could not retrieve of cp state: %v", err)
-	}
-
-	//request optimistic spine
-	baseSpine := helpers.GetTerminalFinalizedSpine(cpSt)
-	optSpines, err := vs.ExecutionEngineCaller.ExecutionDagGetOptimisticSpines(ctx, baseSpine)
-	if err != nil {
-		errWrap := fmt.Errorf("could not get gwat candidates: %v", err)
+		errWrap := fmt.Errorf("could not get gwat optimistic spines: %v", err)
 		log.WithError(errWrap).WithFields(logrus.Fields{
-			"baseSpine": baseSpine,
-		}).Error("Get attestation data: Could not retrieve of gwat optimistic spines while prevote")
-		return nil, status.Errorf(codes.Internal, "Could not retrieve of gwat optimistic spines: %v", err)
+			"slot": req.Slot,
+		}).Error("Collect prevote data: Could not retrieve of gwat optimistic spines")
+		return nil, errWrap
 	}
+	if len(optSpines) == 0 {
+		log.Errorf("Empty list of optimistic spines was retrieved for slot: %v", req.Slot)
+	}
+
 	candidates := make(gwatCommon.HashArray, 0, len(optSpines))
 	for _, spines := range optSpines {
 		if len(spines) != 0 {
 			candidates = append(candidates, spines[0])
 		}
 	}
-	// todo check ^^^^^^^^^^
 
 	res = &ethpb.PreVoteData{
 		Slot:       req.Slot,

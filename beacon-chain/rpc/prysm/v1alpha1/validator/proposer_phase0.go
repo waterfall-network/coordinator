@@ -152,9 +152,9 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 	}
 
 	var candidates gwatCommon.HashArray
-	prevoteData, err := vs.PrevotePool.GetPrevoteBySlot(ctx, req.Slot)
-	if err != nil {
-		log.WithError(err).Warnf("build block data: no prevote data was retrieved for slot %v", req.Slot)
+	prevoteData := vs.PrevotePool.GetPrevoteBySlot(ctx, req.Slot)
+	if len(prevoteData) == 0 {
+		log.Warnf("build block data: no prevote data was retrieved for slot %v", req.Slot)
 	} else {
 		// Process received prevote data and calculate longest chain of spines with enough votes
 		candidates = vs.processPrevoteData(prevoteData, optSpines)

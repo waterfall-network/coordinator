@@ -7,6 +7,7 @@ import (
 
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/go-bitfield"
+	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/async"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/signing"
 	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
@@ -74,6 +75,14 @@ func (v *validator) SubmitPrevote(ctx context.Context, slot types.Slot, pubKey [
 		tracing.AnnotateError(span, err)
 		return
 	}
+
+	log.WithFields(logrus.Fields{
+		"req.Slot":           req.Slot,
+		"req.CommitteeIndex": req.CommitteeIndex,
+		"data.Slot":          data.Slot,
+		"data.Index":         data.Index,
+		"data.Candidates":    fmt.Sprintf("%#x", data.Candidates),
+	}).Info("Prevote: SubmitPrevote")
 
 	indexedPrevote := &ethpb.IndexedPreVote{
 		AttestingIndices: []uint64{uint64(duty.ValidatorIndex)},

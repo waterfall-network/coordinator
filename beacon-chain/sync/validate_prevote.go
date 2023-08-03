@@ -3,6 +3,9 @@ package sync
 import (
 	"context"
 	"fmt"
+	"reflect"
+	"strings"
+
 	"github.com/libp2p/go-libp2p-core/peer"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
 	"github.com/pkg/errors"
@@ -20,8 +23,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/prevote"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	"go.opencensus.io/trace"
-	"reflect"
-	"strings"
 )
 
 func (s *Service) validateCommitteeIndexPrevote(ctx context.Context, pid peer.ID, msg *pubsub.Message) (pubsub.ValidationResult, error) {

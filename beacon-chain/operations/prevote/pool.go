@@ -11,7 +11,7 @@ import (
 type Pool interface {
 	HasPrevote(att *ethpb.PreVote) (bool, error)
 	SavePrevote(att *ethpb.PreVote) error
-	GetPrevoteBySlot(ctx context.Context, slot types.Slot) ([]*ethpb.PreVote, error)
+	GetPrevoteBySlot(ctx context.Context, slot types.Slot) []*ethpb.PreVote
 	PurgeOutdatedPrevote(t time.Time) error
 }
 

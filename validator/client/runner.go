@@ -221,23 +221,22 @@ func run(ctx context.Context, v iface.Validator) {
 					}(role, pubKey)
 				}
 			}
-			//todo check flow
+			// run pre voting process
 			nextRoles, err := v.RolesAt(ctx, slot+1)
-			if err != nil {
-				log.WithError(err).Error("Could not get validator next roles")
-				span.End()
-				continue
-			}
-			for pubKey, roles := range nextRoles {
-				wg.Add(len(roles))
-				for _, role := range roles {
-					go func(role iface.ValidatorRole, pubKey [fieldparams.BLSPubkeyLength]byte) {
-						defer wg.Done()
-						if role == iface.RoleAttester {
-							v.SubmitPrevote(slotCtx, slot+1, pubKey)
-						}
-					}(role, pubKey)
+			if err == nil {
+				for pubKey, roles := range nextRoles {
+					wg.Add(len(roles))
+					for _, role := range roles {
+						go func(role iface.ValidatorRole, pubKey [fieldparams.BLSPubkeyLength]byte) {
+							defer wg.Done()
+							if role == iface.RoleAttester {
+								v.SubmitPrevote(slotCtx, slot+1, pubKey)
+							}
+						}(role, pubKey)
+					}
 				}
+			} else {
+				log.WithError(err).Error("Prevote: get validators failed")
 			}
 
 			// Wait for all processes to complete, then report span complete.

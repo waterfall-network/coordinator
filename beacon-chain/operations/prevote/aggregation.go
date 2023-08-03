@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/go-bitfield"
+	"github.com/sirupsen/logrus"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	"go.opencensus.io/trace"
@@ -22,10 +23,12 @@ func (c *PrevoteCache) HasPrevote(pv *ethpb.PreVote) (bool, error) {
 	defer c.prevoteCacheLock.RUnlock()
 	if p, ok := c.prevoteCache[pv.Data.Slot]; ok {
 		for _, v := range p {
-			if c, err := v.AggregationBits.Contains(pv.AggregationBits); err != nil {
-				return false, err
-			} else if c {
-				return true, nil
+			if pv.Data.Index == v.Data.Index {
+				if c, err := v.AggregationBits.Contains(pv.AggregationBits); err != nil {
+					return false, err
+				} else if c {
+					return true, nil
+				}
 			}
 		}
 	}
@@ -34,6 +37,14 @@ func (c *PrevoteCache) HasPrevote(pv *ethpb.PreVote) (bool, error) {
 }
 
 func (c *PrevoteCache) SavePrevote(pv *ethpb.PreVote) error {
+
+	logrus.WithFields(logrus.Fields{
+		"pv.slot":              pv.Data.Slot,
+		"pv.index":             pv.Data.Index,
+		"c.prevoteCache[slot]": c.prevoteCache[pv.Data.Slot],
+		"len(cache)":           len(c.prevoteCache),
+	}).Info("Prevote: SavePrevote 000")
+
 	if pv == nil {
 		return nil
 	}
@@ -42,6 +53,13 @@ func (c *PrevoteCache) SavePrevote(pv *ethpb.PreVote) error {
 	if err != nil {
 		return err
 	}
+
+	logrus.WithFields(logrus.Fields{
+		"seen":     seen,
+		"pv.slot":  pv.Data.Slot,
+		"pv.index": pv.Data.Index,
+	}).Info("Prevote: SavePrevote 111")
+
 	if seen {
 		return nil
 	}
@@ -57,6 +75,13 @@ func (c *PrevoteCache) SavePrevote(pv *ethpb.PreVote) error {
 	} else {
 		c.prevoteCache[pv.Data.Slot] = append(c.prevoteCache[pv.Data.Slot], copiedPv)
 	}
+
+	logrus.WithFields(logrus.Fields{
+		"pv.slot":              pv.Data.Slot,
+		"pv.index":             pv.Data.Index,
+		"c.prevoteCache[slot]": c.prevoteCache[pv.Data.Slot],
+		"len(cache)":           len(c.prevoteCache),
+	}).Info("Prevote: SavePrevote 222")
 
 	return nil
 }
@@ -84,31 +109,33 @@ func (c *PrevoteCache) hasSeenBit(pv *ethpb.PreVote) (bool, error) {
 	return false, nil
 }
 
-func (c *PrevoteCache) GetPrevoteBySlot(ctx context.Context, slot types.Slot) ([]*ethpb.PreVote, error) {
+func (c *PrevoteCache) GetPrevoteBySlot(ctx context.Context, slot types.Slot) []*ethpb.PreVote {
 	_, span := trace.StartSpan(ctx, "operations.prevote.GetPrevoteBySlot")
 	defer span.End()
 
 	c.prevoteCacheLock.RLock()
 	defer c.prevoteCacheLock.RUnlock()
 
-	pv := make([]*ethpb.PreVote, 0)
+	logrus.WithFields(logrus.Fields{
+		"slot":                 slot,
+		"c.prevoteCache[slot]": c.prevoteCache[slot],
+		"len(cache)":           len(c.prevoteCache),
+	}).Info("Prevote: GetPrevoteBySlot")
 
-	for k, v := range c.prevoteCache {
-		if k == slot {
-			pv = v
-		}
+	pv := c.prevoteCache[slot]
+	if pv == nil || len(pv) == 0 {
+		return []*ethpb.PreVote{}
 	}
-
-	if len(pv) == 0 {
-		return []*ethpb.PreVote{}, errors.Errorf("No prevote data for slot %v", slot)
-	}
-
-	return pv, nil
+	return pv
 }
 
 func (c *PrevoteCache) PurgeOutdatedPrevote(t time.Time) error {
 	c.prevoteCacheLock.RLock()
 	defer c.prevoteCacheLock.RUnlock()
+
+	logrus.WithFields(logrus.Fields{
+		"len(cache)": len(c.prevoteCache),
+	}).Info("Prevote: PurgeOutdatedPrevote 000")
 
 	for k, v := range c.prevoteCache {
 		if k < slots.CurrentSlot(uint64(t.Unix())) {
@@ -121,6 +148,11 @@ func (c *PrevoteCache) PurgeOutdatedPrevote(t time.Time) error {
 			delete(c.prevoteCache, k)
 		}
 	}
+
+	logrus.WithFields(logrus.Fields{
+		"len(cache)": len(c.prevoteCache),
+	}).Info("Prevote: PurgeOutdatedPrevote 111")
+
 	return nil
 }
 
