@@ -77,7 +77,7 @@ func (s *Service) FindPeersWithSubnet(ctx context.Context, topic string,
 			wg.Add(1)
 			go func() {
 				if err := s.connectWithPeer(ctx, *info); err != nil {
-					log.WithError(err).Info("Could not connect with peer %s", info.String())
+					log.WithError(err).Infof("Could not connect with peer %s", info.String())
 				}
 				wg.Done()
 			}()
