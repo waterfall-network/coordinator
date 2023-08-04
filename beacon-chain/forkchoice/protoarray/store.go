@@ -158,6 +158,9 @@ func (f *ForkChoice) InsertOptimisticBlock(
 	ctx, span := trace.StartSpan(ctx, "protoArrayForkChoice.InsertOptimisticBlock")
 	defer span.End()
 
+	f.mu.Lock()
+	defer f.mu.Unlock()
+
 	return f.store.insert(ctx,
 		slot,
 		blockRoot,
@@ -240,6 +243,17 @@ func (f *ForkChoice) AncestorRoot(ctx context.Context, root [32]byte, slot types
 	}
 
 	return f.store.nodes[i].root[:], nil
+}
+
+// NodesIndicesCopy of fork choice store.
+func (s *Store) cpyNodesIndices() map[[32]byte]uint64 {
+	s.nodesLock.RLock()
+	defer s.nodesLock.RUnlock()
+	cpy := make(map[[32]byte]uint64, len(s.nodesIndices))
+	for k, v := range s.nodesIndices {
+		cpy[k] = v
+	}
+	return cpy
 }
 
 // PruneThreshold of fork choice store.

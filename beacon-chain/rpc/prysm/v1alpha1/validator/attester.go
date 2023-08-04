@@ -85,34 +85,7 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 		}
 	}()
 
-	// calculate the parent block by optimistic spine.
-	currHead, err := vs.HeadFetcher.HeadState(ctx)
-	if err != nil {
-		log.WithError(err).Error("Get attestation data: Could not retrieve head state")
-		return nil, status.Errorf(codes.Internal, "Could not retrieve head state: %v", err)
-	}
-
-	jCpRoot := bytesutil.ToBytes32(currHead.CurrentJustifiedCheckpoint().Root)
-	if currHead.CurrentJustifiedCheckpoint().Epoch == 0 {
-		jCpRoot, err = vs.BeaconDB.GenesisBlockRoot(ctx)
-		if err != nil {
-			log.WithError(err).Error("Get attestation data: retrieving of genesis root")
-			return nil, status.Errorf(codes.Internal, "Could not retrieve of genesis root: %v", err)
-		}
-	}
-
-	cpSt, err := vs.StateGen.StateByRoot(ctx, jCpRoot)
-	if err != nil {
-		log.WithError(err).WithFields(logrus.Fields{
-			"jCpRoot": fmt.Sprintf("%#x", jCpRoot),
-		}).Error("Could not retrieve of cp state")
-		return nil, status.Errorf(codes.Internal, "Could not retrieve of cp state: %v", err)
-	}
-
-	//request optimistic spine
-	baseSpine := helpers.GetTerminalFinalizedSpine(cpSt)
-
-	optSpines, err := vs.HeadFetcher.GetOptimisticSpines(ctx, baseSpine)
+	optSpines, err := vs.getOptimisticSpine(ctx)
 	if err != nil {
 		errWrap := fmt.Errorf("could not get gwat optimistic spines: %v", err)
 		log.WithError(errWrap).WithFields(logrus.Fields{
@@ -120,13 +93,6 @@ func (vs *Server) GetAttestationData(ctx context.Context, req *ethpb.Attestation
 		}).Error("Get attestation data: Could not retrieve of gwat optimistic spines")
 		return nil, errWrap
 	}
-
-	//prepend current optimistic finalization to optimistic spine to calc parent
-	optFinalisation := make([]gwatCommon.HashArray, len(cpSt.SpineData().Finalization)/gwatCommon.HashLength)
-	for i, h := range gwatCommon.HashArrayFromBytes(cpSt.SpineData().Finalization) {
-		optFinalisation[i] = gwatCommon.HashArray{h}
-	}
-	optSpines = append(optFinalisation, optSpines...)
 
 	//calculate optimistic parent root
 	supportedRoot, err := vs.HeadFetcher.ForkChoicer().GetParentByOptimisticSpines(ctx, optSpines)
