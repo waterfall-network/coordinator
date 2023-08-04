@@ -9,6 +9,7 @@ import (
 
 	ssz "github.com/ferranbt/fastssz"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/altair"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
@@ -108,12 +109,35 @@ func (s *Service) broadcastAttestation(ctx context.Context, subnet uint64, att *
 		trace.Int64Attribute("subnet", int64(subnet)),      // lint:ignore uintcast -- It's safe to do this for tracing.
 	)
 
+	log.WithFields(logrus.Fields{
+		"subnet":             subnet,
+		"curSlot":            slots.CurrentSlot(uint64(s.genesisTime.Unix())),
+		"pv.AggregationBits": fmt.Sprintf("%b", att.AggregationBits),
+		"pv.Data.Slot":       att.Data.Slot,
+		"pv.Data.Index":      att.Data.CommitteeIndex,
+		"hasPeer":            hasPeer,
+		//"pv.Candidates":      fmt.Sprintf("%#x", prevote.Data.Candidates),
+	}).Info("Att: broadcastAttestation")
+
 	if !hasPeer {
 		attestationBroadcastAttempts.Inc()
 		if err := func() error {
 			s.subnetLocker(subnet).Lock()
 			defer s.subnetLocker(subnet).Unlock()
 			ok, err := s.FindPeersWithSubnet(ctx, attestationToTopic(subnet, forkDigest), subnet, 1)
+
+			log.WithError(err).WithFields(logrus.Fields{
+				"topic":   attestationToTopic(subnet, forkDigest),
+				"ok":      ok,
+				"subnet":  subnet,
+				"curSlot": slots.CurrentSlot(uint64(s.genesisTime.Unix())),
+				//"pv.AggregationBits": fmt.Sprintf("%b", prevote.AggregationBits),
+				"pv.Data.Slot": att.Data.Slot,
+				//"pv.Data.Index":      prevote.Data.Index,
+				//"hasPeer":            hasPeer,
+				//"pv.Candidates":      fmt.Sprintf("%#x", prevote.Data.Candidates),
+			}).Info("Att: broadcastAttestation: FindPeersWithSubnet")
+
 			if err != nil {
 				return err
 			}
