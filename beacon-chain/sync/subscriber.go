@@ -595,6 +595,7 @@ func (s *Service) subscribeAggregatorSubnet(
 	topic := p2p.GossipTypeMapping[reflect.TypeOf(&ethpb.Attestation{})]
 	subnetTopic := fmt.Sprintf(topic, digest, idx)
 
+	//todo RM
 	log.WithFields(logrus.Fields{
 		"digest":  fmt.Sprintf("%#x", digest),
 		"idx":     idx,
@@ -607,6 +608,7 @@ func (s *Service) subscribeAggregatorSubnet(
 		subscriptions[idx] = s.subscribeWithBase(subnetTopic, validate, handle)
 	}
 
+	//todo RM
 	log.WithFields(logrus.Fields{
 		"digest":  fmt.Sprintf("%#x", digest),
 		"idx":     idx,
@@ -614,6 +616,7 @@ func (s *Service) subscribeAggregatorSubnet(
 		"exists":  exists,
 	}).Info("Prevote: subscribeAggregatorSubnet: 222")
 
+	//todo RM
 	log.WithFields(logrus.Fields{
 		"digest":          fmt.Sprintf("%#x", digest),
 		"idx":             idx,
@@ -630,6 +633,7 @@ func (s *Service) subscribeAggregatorSubnet(
 		}
 	}
 
+	//todo RM
 	log.WithFields(logrus.Fields{
 		"digest":  fmt.Sprintf("%#x", digest),
 		"idx":     idx,
@@ -860,14 +864,14 @@ func (s *Service) filterNeededPeers(pids []peer.ID) []peer.ID {
 
 	for _, sub := range wantedSubs {
 		subnetTopic := fmt.Sprintf(topic, digest, sub) + s.cfg.p2p.Encoding().ProtocolSuffix()
-		peers := s.cfg.p2p.PubSub().ListPeers(subnetTopic)
-		if len(peers) > flags.Get().MinimumPeersPerSubnet {
+		subPeers := s.cfg.p2p.PubSub().ListPeers(subnetTopic)
+		if len(subPeers) > flags.Get().MinimumPeersPerSubnet {
 			// In the event we have more than the minimum, we can
 			// mark the remaining as viable for pruning.
-			peers = peers[:flags.Get().MinimumPeersPerSubnet]
+			subPeers = subPeers[:flags.Get().MinimumPeersPerSubnet]
 		}
 		// Add peer to peer map.
-		for _, p := range peers {
+		for _, p := range subPeers {
 			// Even if the peer id has
 			// already been seen we still set
 			// it, as the outcome is the same.

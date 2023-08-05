@@ -275,13 +275,13 @@ func (s *Service) filterPeer(node *enode.Node) bool {
 	// do not dial nodes with their tcp ports not set
 	if err := node.Record().Load(enr.WithEntry("tcp", new(enr.TCP))); err != nil {
 		if !enr.IsNotFound(err) {
-			log.WithError(err).Debug("Could not retrieve tcp port")
+			log.WithError(err).Error("Could not retrieve tcp port")
 		}
 		return false
 	}
 	peerData, multiAddr, err := convertToAddrInfo(node)
 	if err != nil {
-		log.WithError(err).Debug("Could not convert to peer data")
+		log.WithError(err).Error("Could not convert to peer data")
 		return false
 	}
 	if s.peers.IsBad(peerData.ID) {
