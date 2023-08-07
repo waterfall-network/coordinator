@@ -3,6 +3,7 @@ package sync
 import (
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
+	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/network/forks"
@@ -52,12 +53,36 @@ func (s *Service) registerForUpcomingFork(currEpoch types.Epoch) error {
 		switch nextEpoch {
 		case params.BeaconConfig().AltairForkEpoch:
 			digest, err := forks.ForkDigestFromEpoch(nextEpoch, genRoot[:])
+
+			//todo RM
+			log.WithError(err).WithFields(logrus.Fields{
+				"currEpoch": currEpoch,
+				"nextEpoch": nextEpoch,
+				"curSlot":   s.cfg.chain.CurrentSlot(),
+			}).Info("Prevote: registerForUpcomingFork: Altair 000")
+
 			if err != nil {
 				return errors.Wrap(err, "Could not retrieve fork digest")
 			}
 			if s.subHandler.digestExists(digest) {
+
+				//todo RM
+				log.WithError(err).WithFields(logrus.Fields{
+					"currEpoch": currEpoch,
+					"nextEpoch": nextEpoch,
+					"curSlot":   s.cfg.chain.CurrentSlot(),
+				}).Info("Prevote: registerForUpcomingFork: Altair 111 digestExists")
+
 				return nil
 			}
+
+			//todo RM
+			log.WithError(err).WithFields(logrus.Fields{
+				"currEpoch": currEpoch,
+				"nextEpoch": nextEpoch,
+				"curSlot":   s.cfg.chain.CurrentSlot(),
+			}).Info("Prevote: registerForUpcomingFork: Altair 333 registerSubscribers")
+
 			s.registerSubscribers(nextEpoch, digest)
 			s.registerRPCHandlersAltair()
 		case params.BeaconConfig().BellatrixForkEpoch:
