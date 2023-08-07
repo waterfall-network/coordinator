@@ -172,7 +172,6 @@ func signedDeposit(
 	creatorAddr := gwatCommon.BytesToAddress(withdrawalKey)
 	depositMessage := &ethpb.DepositMessage{
 		PublicKey:             publicKey,
-		Amount:                balance,
 		CreatorAddress:        creatorAddr[:],
 		WithdrawalCredentials: withdrawalCreds[:],
 	}
@@ -345,7 +344,6 @@ func DeterministicDepositsAndKeysSameValidator(numDeposits uint64) ([]*ethpb.Dep
 
 			depositMessage := &ethpb.DepositMessage{
 				PublicKey:             publicKeys[1].Marshal(),
-				Amount:                params.BeaconConfig().MaxEffectiveBalance,
 				CreatorAddress:        creatorAddr[:],
 				WithdrawalCredentials: withdrawalCreds[:],
 			}
@@ -365,7 +363,7 @@ func DeterministicDepositsAndKeysSameValidator(numDeposits uint64) ([]*ethpb.Dep
 			// Always use the same validator to sign
 			depositData := &ethpb.Deposit_Data{
 				PublicKey:             depositMessage.PublicKey,
-				Amount:                depositMessage.Amount,
+				Amount:                params.BeaconConfig().MaxEffectiveBalance,,
 				CreatorAddress:        depositMessage.CreatorAddress,
 				WithdrawalCredentials: depositMessage.WithdrawalCredentials,
 				Signature:             secretKeys[1].Sign(sigRoot[:]).Marshal(),
