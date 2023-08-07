@@ -24,11 +24,17 @@ type filterIter struct {
 // Next looks up for the next valid node according to our
 // filter criteria.
 func (f *filterIter) Next() bool {
+	seen := make(map[enode.ID]struct{})
 	for f.Iterator.Next() {
 		if f.Context.Err() != nil {
 			return false
 		}
-		if f.check(f.Node()) {
+		pNode := f.Node()
+		if _, ok := seen[pNode.ID()]; ok {
+			return false
+		}
+		seen[pNode.ID()] = struct{}{}
+		if f.check(pNode) {
 			return true
 		}
 	}

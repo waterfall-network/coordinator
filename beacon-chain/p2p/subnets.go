@@ -2,20 +2,22 @@ package p2p
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"sync"
 
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/go-bitfield"
+	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/beacon-chain/flags"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	mathutil "gitlab.waterfall.network/waterfall/protocol/coordinator/math"
+	pb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enode"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enr"
 	"go.opencensus.io/trace"
-
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
-	pb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 var attestationSubnetCount = params.BeaconNetworkConfig().AttestationSubnetCount
@@ -57,35 +59,76 @@ func (s *Service) FindPeersWithSubnet(ctx context.Context, topic string,
 	default:
 		return false, errors.New("no subnet exists for provided topic")
 	}
-
 	currNum := len(s.pubsub.ListPeers(topic))
+
 	wg := new(sync.WaitGroup)
-	for {
-		if err := ctx.Err(); err != nil {
-			return false, errors.Errorf("unable to find requisite number of peers for topic %s - "+
-				"only %d out of %d peers were able to be found", topic, currNum, threshold)
+
+	// removed cycle to waite required numbers of subnets
+	//for {
+	//	if err := ctx.Err(); err != nil {
+	//		return false, errors.Errorf("unable to find requisite number of peers for topic %s - "+
+	//			"only %d out of %d peers were able to be found", topic, currNum, threshold)
+	//	}
+	//	if currNum >= threshold {
+	//		break
+	//	}
+
+	nodes := enode.ReadNodes(iterator, int(params.BeaconNetworkConfig().MinimumPeersInSubnetSearch))
+
+	log.WithFields(logrus.Fields{
+		"len(nodes)": len(nodes),
+		"curSlot":    slots.CurrentSlot(uint64(s.genesisTime.Unix())),
+		"idx":        index,
+		"threshold":  threshold,
+		"currNum":    currNum,
+	}).Info("Validator subscription: FindPeersWithSubnet: 0")
+
+	// removed cycle to waite required numbers of subnets
+	//if len(nodes) == 0 {
+	//	time.Sleep(time.Duration(20) * time.Millisecond)
+	//}
+
+	for j, node := range nodes {
+		info, _, err := convertToAddrInfo(node)
+		if err != nil {
+			log.WithFields(logrus.Fields{
+				"j":         j,
+				"curSlot":   slots.CurrentSlot(uint64(s.genesisTime.Unix())),
+				"idx":       index,
+				"threshold": threshold,
+				"currNum":   currNum,
+			}).WithError(err).Error("Validator subscription: FindPeersWithSubnet: error 1")
+			continue
 		}
-		if currNum >= threshold {
-			break
-		}
-		nodes := enode.ReadNodes(iterator, int(params.BeaconNetworkConfig().MinimumPeersInSubnetSearch))
-		for _, node := range nodes {
-			info, _, err := convertToAddrInfo(node)
-			if err != nil {
-				continue
+		wg.Add(1)
+		go func() {
+			if err := s.connectWithPeer(ctx, *info); err != nil {
+				log.WithFields(logrus.Fields{
+					"curSlot":   slots.CurrentSlot(uint64(s.genesisTime.Unix())),
+					"idx":       index,
+					"threshold": threshold,
+					"currNum":   currNum,
+					"nodeInf":   fmt.Sprintf("%s", info.String()),
+				}).WithError(err).Error("Validator subscription: FindPeersWithSubnet: error 2")
+				log.WithError(err).Tracef("Could not connect with peer %s", info.String())
 			}
-			wg.Add(1)
-			go func() {
-				if err := s.connectWithPeer(ctx, *info); err != nil {
-					log.WithError(err).Infof("Could not connect with peer %s", info.String())
-				}
-				wg.Done()
-			}()
-		}
-		// Wait for all dials to be completed.
-		wg.Wait()
-		currNum = len(s.pubsub.ListPeers(topic))
+			wg.Done()
+		}()
 	}
+
+	// Wait for all dials to be completed.
+	wg.Wait()
+	currNum = len(s.pubsub.ListPeers(topic))
+	// removed cycle to waite required numbers of subnets
+	//}
+
+	log.WithFields(logrus.Fields{
+		"curSlot":   slots.CurrentSlot(uint64(s.genesisTime.Unix())),
+		"idx":       index,
+		"threshold": threshold,
+		"currNum":   currNum,
+	}).Info("Validator subscription: FindPeersWithSubnet: success")
+
 	return true, nil
 }
 
