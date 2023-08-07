@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/go-bitfield"
@@ -45,15 +44,6 @@ func (s *Service) FindPeersWithSubnet(ctx context.Context, topic string,
 
 	span.AddAttributes(trace.Int64Attribute("index", int64(index))) // lint:ignore uintcast -- It's safe to do this for tracing.
 
-	//todo RM
-	log.WithFields(logrus.Fields{
-		"curSlot":              slots.CurrentSlot(uint64(s.genesisTime.Unix())),
-		"idx":                  index,
-		"digest":               fmt.Sprintf("%s", topic),
-		"threshold":            threshold,
-		"s.dv5Listener == nil": s.dv5Listener == nil,
-	}).Info("Prevote: FindPeersWithSubnet: 000")
-
 	if s.dv5Listener == nil {
 		// return if discovery isn't set
 		return false, nil
@@ -71,331 +61,94 @@ func (s *Service) FindPeersWithSubnet(ctx context.Context, topic string,
 	}
 	currNum := len(s.pubsub.ListPeers(topic))
 
-	//todo RM
-	log.WithFields(logrus.Fields{
-		"curSlot":   slots.CurrentSlot(uint64(s.genesisTime.Unix())),
-		"idx":       index,
-		"digest":    fmt.Sprintf("%s", topic),
-		"threshold": threshold,
-		"currNum":   currNum,
-	}).Info("Prevote: FindPeersWithSubnet: 111")
-
 	wg := new(sync.WaitGroup)
-	actionCounter := 0
 
-	//TODO ++++++++
+	// removed cycle to waite required numbers of subnets
 	//for {
 	//	if err := ctx.Err(); err != nil {
-	//
-	//		//todo RM
-	//		log.WithFields(logrus.Fields{
-	//			"curSlot": slots.CurrentSlot(uint64(s.genesisTime.Unix())),
-	//			"idx":     index,
-	//			"currNum": currNum,
-	//		}).WithError(err).Error("Prevote: FindPeersWithSubnet: CYCLi-000 err")
-	//
 	//		return false, errors.Errorf("unable to find requisite number of peers for topic %s - "+
 	//			"only %d out of %d peers were able to be found", topic, currNum, threshold)
 	//	}
 	//	if currNum >= threshold {
-	//
-	//		//todo RM
-	//		log.WithFields(logrus.Fields{
-	//			"curSlot":   slots.CurrentSlot(uint64(s.genesisTime.Unix())),
-	//			"idx":       index,
-	//			"threshold": threshold,
-	//			"currNum":   currNum,
-	//		}).Info("Prevote: FindPeersWithSubnet: CYCLi-999 SUCCESS")
-	//
 	//		break
 	//	}
-	//TODO ++++++++
 
-	//todo RM
-	log.WithFields(logrus.Fields{
-		"curSlot":   slots.CurrentSlot(uint64(s.genesisTime.Unix())),
-		"idx":       index,
-		"threshold": threshold,
-		"currNum":   currNum,
-	}).Info("Prevote: FindPeersWithSubnet: CYCLi-00000")
+	nodes := enode.ReadNodes(iterator, int(params.BeaconNetworkConfig().MinimumPeersInSubnetSearch))
 
-	//todo recomment rm
-	//nodes := enode.ReadNodes(iterator, int(params.BeaconNetworkConfig().MinimumPeersInSubnetSearch))
-	nodes := ReadNodes(iterator, int(params.BeaconNetworkConfig().MinimumPeersInSubnetSearch), index)
-
-	//todo RM
 	log.WithFields(logrus.Fields{
 		"len(nodes)": len(nodes),
 		"curSlot":    slots.CurrentSlot(uint64(s.genesisTime.Unix())),
 		"idx":        index,
 		"threshold":  threshold,
 		"currNum":    currNum,
-	}).Info("Prevote: FindPeersWithSubnet: CYCLi-111")
+	}).Info("Validator subscription: FindPeersWithSubnet: 0")
 
-	// if no nodes
-	if len(nodes) == 0 {
-		time.Sleep(time.Duration(20) * time.Millisecond)
-	}
+	// removed cycle to waite required numbers of subnets
+	//if len(nodes) == 0 {
+	//	time.Sleep(time.Duration(20) * time.Millisecond)
+	//}
 
 	for j, node := range nodes {
-
-		//todo RM
-		log.WithFields(logrus.Fields{
-			"j":         j,
-			"curSlot":   slots.CurrentSlot(uint64(s.genesisTime.Unix())),
-			"idx":       index,
-			"threshold": threshold,
-			"currNum":   currNum,
-		}).Info("Prevote: FindPeersWithSubnet: CYCLij-000")
-
 		info, _, err := convertToAddrInfo(node)
 		if err != nil {
-
-			//todo RM
 			log.WithFields(logrus.Fields{
 				"j":         j,
 				"curSlot":   slots.CurrentSlot(uint64(s.genesisTime.Unix())),
 				"idx":       index,
 				"threshold": threshold,
 				"currNum":   currNum,
-			}).WithError(err).Error("Prevote: FindPeersWithSubnet: CYCLij-111 CONTINUE")
-
+			}).WithError(err).Error("Validator subscription: FindPeersWithSubnet: error 1")
 			continue
 		}
 		wg.Add(1)
-		actionCounter++
 		go func() {
-
-			//todo RM
-			log.WithFields(logrus.Fields{
-				"curSlot":   slots.CurrentSlot(uint64(s.genesisTime.Unix())),
-				"idx":       index,
-				"threshold": threshold,
-				"currNum":   currNum,
-				"nodeInf":   fmt.Sprintf("%s", info.String()),
-			}).Info("Prevote: FindPeersWithSubnet: CYCLij-222")
-
 			if err := s.connectWithPeer(ctx, *info); err != nil {
-
-				//todo RM
 				log.WithFields(logrus.Fields{
 					"curSlot":   slots.CurrentSlot(uint64(s.genesisTime.Unix())),
 					"idx":       index,
 					"threshold": threshold,
 					"currNum":   currNum,
 					"nodeInf":   fmt.Sprintf("%s", info.String()),
-				}).WithError(err).Error("Prevote: FindPeersWithSubnet: CYCLij-333 ERR")
-
-				log.WithError(err).Errorf("Could not connect with peer %s", info.String())
+				}).WithError(err).Error("Validator subscription: FindPeersWithSubnet: error 2")
+				log.WithError(err).Tracef("Could not connect with peer %s", info.String())
 			}
-
-			//todo RM
-			log.WithFields(logrus.Fields{
-				"curSlot":   slots.CurrentSlot(uint64(s.genesisTime.Unix())),
-				"idx":       index,
-				"threshold": threshold,
-				"currNum":   currNum,
-				"nodeInf":   fmt.Sprintf("%s", info.String()),
-			}).Info("Prevote: FindPeersWithSubnet: CYCLij-444")
-
 			wg.Done()
-			actionCounter--
 		}()
 	}
 
-	//todo RM
-	log.WithFields(logrus.Fields{
-		"curSlot":   slots.CurrentSlot(uint64(s.genesisTime.Unix())),
-		"idx":       index,
-		"threshold": threshold,
-		"currNum":   currNum,
-	}).Info("Prevote: FindPeersWithSubnet: CYCLij-222")
-
 	// Wait for all dials to be completed.
 	wg.Wait()
-
-	//todo RM
-	log.WithFields(logrus.Fields{
-		"curSlot":   slots.CurrentSlot(uint64(s.genesisTime.Unix())),
-		"idx":       index,
-		"threshold": threshold,
-		"currNum":   currNum,
-	}).Info("Prevote: FindPeersWithSubnet: CYCLij-333")
-
 	currNum = len(s.pubsub.ListPeers(topic))
-
-	//todo RM
-	log.WithFields(logrus.Fields{
-		"curSlot":   slots.CurrentSlot(uint64(s.genesisTime.Unix())),
-		"idx":       index,
-		"threshold": threshold,
-		"currNum":   currNum,
-	}).Info("Prevote: FindPeersWithSubnet: CYCLij-333")
-
-	//TODO ++++++++
+	// removed cycle to waite required numbers of subnets
 	//}
 
-	return true, nil
-}
-
-// ReadNodes reads at most n nodes from the given iterator. The return value contains no
-// duplicates and no nil values. To prevent looping indefinitely for small repeating node
-// sequences, this function calls Next at most n times.
-func ReadNodes(it enode.Iterator, n int, index uint64) []*enode.Node {
-	seen := make(map[enode.ID]*enode.Node, n)
-
-	//todo RM
 	log.WithFields(logrus.Fields{
-		"idx": index,
-		"n":   n,
-	}).Info("Prevote: ReadNodes: 000")
-
-	for i := 0; i < n && it.Next(); i++ {
-
-		//todo RM
-		log.WithFields(logrus.Fields{
-			"i":   i,
-			"idx": index,
-			"n":   n,
-		}).Info("Prevote: ReadNodes: 111")
-
-		// Remove duplicates, keeping the node with higher seq.
-		node := it.Node()
-		prevNode, ok := seen[node.ID()]
-
-		//todo RM
-		log.WithFields(logrus.Fields{
-			"i":            i,
-			"idx":          index,
-			"n":            n,
-			"continue":     ok && prevNode.Seq() > node.Seq(),
-			"ok":           ok,
-			"prevNode.Seq": prevNode.Seq(),
-			"node.Seq":     node.Seq(),
-		}).Info("Prevote: ReadNodes: 222")
-
-		if ok && prevNode.Seq() > node.Seq() {
-			continue
-		}
-		seen[node.ID()] = node
-
-		//todo RM
-		log.WithFields(logrus.Fields{
-			"i":   i,
-			"idx": index,
-			"n":   n,
-		}).Info("Prevote: ReadNodes: 333")
-	}
-
-	log.WithFields(logrus.Fields{
+		"curSlot":   slots.CurrentSlot(uint64(s.genesisTime.Unix())),
 		"idx":       index,
-		"n":         n,
-		"len(seen)": len(seen),
-	}).Info("Prevote: ReadNodes: 555")
+		"threshold": threshold,
+		"currNum":   currNum,
+	}).Info("Validator subscription: FindPeersWithSubnet: success")
 
-	result := make([]*enode.Node, 0, len(seen))
-	for i, node := range seen {
-
-		log.WithFields(logrus.Fields{
-			"i":    i,
-			"idx":  index,
-			"n":    n,
-			"node": node.ID(),
-		}).Info("Prevote: ReadNodes: 666 iter")
-
-		result = append(result, node)
-	}
-
-	log.WithFields(logrus.Fields{
-		"idx":         index,
-		"n":           n,
-		"len(result)": len(result),
-	}).Info("Prevote: ReadNodes: 777")
-
-	return result
+	return true, nil
 }
 
 // returns a method with filters peers specifically for a particular attestation subnet.
 func (s *Service) filterPeerForAttSubnet(index uint64) func(node *enode.Node) bool {
 	return func(node *enode.Node) bool {
-
-		//todo RM
-		log.WithFields(logrus.Fields{
-			"curSlot": slots.CurrentSlot(uint64(s.genesisTime.Unix())),
-			"idx":     index,
-			"node":    node.ID(),
-		}).Info("Prevote: filterPeerForAttSubnet: 000")
-
 		if !s.filterPeer(node) {
-
-			//todo RM
-			log.WithFields(logrus.Fields{
-				"curSlot": slots.CurrentSlot(uint64(s.genesisTime.Unix())),
-				"idx":     index,
-				"node":    node.ID(),
-			}).Info("Prevote: filterPeerForAttSubnet: 111 ret F")
-
-			//if index > 10 {
-			//	panic("Prevote: filterPeerForAttSubnet: 111 ret F")
-			//}
-
 			return false
 		}
-
-		//todo RM
-		log.WithFields(logrus.Fields{
-			"curSlot": slots.CurrentSlot(uint64(s.genesisTime.Unix())),
-			"idx":     index,
-			"node":    node.ID(),
-		}).Info("Prevote: filterPeerForAttSubnet: 222")
-
 		subnets, err := attSubnets(node.Record())
 		if err != nil {
-
-			//todo RM
-			log.WithFields(logrus.Fields{
-				"curSlot": slots.CurrentSlot(uint64(s.genesisTime.Unix())),
-				"idx":     index,
-				"node":    node.ID(),
-			}).Info("Prevote: filterPeerForAttSubnet: 333 ret F")
-
 			return false
 		}
-
-		//todo RM
-		log.WithFields(logrus.Fields{
-			"curSlot": slots.CurrentSlot(uint64(s.genesisTime.Unix())),
-			"idx":     index,
-			"node":    node.ID(),
-		}).Info("Prevote: filterPeerForAttSubnet: 444")
-
 		indExists := false
-		for i, comIdx := range subnets {
-
-			//todo RM
-			log.WithFields(logrus.Fields{
-				"i":             i,
-				"comIdx":        comIdx,
-				"curSlot":       slots.CurrentSlot(uint64(s.genesisTime.Unix())),
-				"idx":           index,
-				"node":          node.ID(),
-				"comIdx==index": comIdx == index,
-			}).Info("Prevote: filterPeerForAttSubnet: 444")
-
+		for _, comIdx := range subnets {
 			if comIdx == index {
 				indExists = true
 				break
 			}
 		}
-
-		//todo RM
-		log.WithFields(logrus.Fields{
-			"indExists": indExists,
-			"curSlot":   slots.CurrentSlot(uint64(s.genesisTime.Unix())),
-			"idx":       index,
-			"node":      node.ID(),
-		}).Info("Prevote: filterPeerForAttSubnet: 444")
-
 		return indExists
 	}
 }
