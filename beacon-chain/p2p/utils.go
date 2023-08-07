@@ -8,12 +8,14 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io/ioutil"
+	"math/big"
 	"net"
 	"os"
 	"path"
 	"time"
 
-	"github.com/libp2p/go-libp2p-core/crypto"
+	"github.com/btcsuite/btcd/btcec/v2"
+	"github.com/libp2p/go-libp2p/core/crypto"
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/go-bitfield"
 	"github.com/sirupsen/logrus"
@@ -45,20 +47,37 @@ func SerializeENR(record *enr.Record) (string, error) {
 	return enrString, nil
 }
 
-func convertFromInterfacePrivKey(privkey crypto.PrivKey) *ecdsa.PrivateKey {
-	typeAssertedKey := (*ecdsa.PrivateKey)(privkey.(*crypto.Secp256k1PrivateKey))
-	typeAssertedKey.Curve = gcrypto.S256() // Temporary hack, so libp2p Secp256k1 is recognized as geth Secp256k1 in disc v5.1.
-	return typeAssertedKey
+func ConvertFromInterfacePrivKey(privkey crypto.PrivKey) (*ecdsa.PrivateKey, error) {
+	secpKey := (privkey.(*crypto.Secp256k1PrivateKey))
+	rawKey, err := secpKey.Raw()
+	if err != nil {
+		return nil, err
+	}
+	privKey := new(ecdsa.PrivateKey)
+	k := new(big.Int).SetBytes(rawKey)
+	privKey.D = k
+	privKey.Curve = gcrypto.S256() // Temporary hack, so libp2p Secp256k1 is recognized as geth Secp256k1 in disc v5.1.
+	privKey.X, privKey.Y = gcrypto.S256().ScalarBaseMult(rawKey)
+	return privKey, nil
 }
 
-func convertToInterfacePrivkey(privkey *ecdsa.PrivateKey) crypto.PrivKey {
-	typeAssertedKey := crypto.PrivKey((*crypto.Secp256k1PrivateKey)(privkey))
-	return typeAssertedKey
+func convertToInterfacePrivkey(privkey *ecdsa.PrivateKey) (crypto.PrivKey, error) {
+	return crypto.UnmarshalSecp256k1PrivateKey(privkey.D.Bytes())
 }
 
-func convertToInterfacePubkey(pubkey *ecdsa.PublicKey) crypto.PubKey {
-	typeAssertedKey := crypto.PubKey((*crypto.Secp256k1PublicKey)(pubkey))
-	return typeAssertedKey
+func convertToInterfacePubkey(pubkey *ecdsa.PublicKey) (crypto.PubKey, error) {
+	xVal, yVal := new(btcec.FieldVal), new(btcec.FieldVal)
+	if xVal.SetByteSlice(pubkey.X.Bytes()) {
+		return nil, errors.Errorf("X value overflows")
+	}
+	if yVal.SetByteSlice(pubkey.Y.Bytes()) {
+		return nil, errors.Errorf("Y value overflows")
+	}
+	newKey := crypto.PubKey((*crypto.Secp256k1PublicKey)(btcec.NewPublicKey(xVal, yVal)))
+	// Zero out temporary values.
+	xVal.Zero()
+	yVal.Zero()
+	return newKey, nil
 }
 
 // Determines a private key for p2p networking from the p2p service's
@@ -78,7 +97,10 @@ func privKey(cfg *Config) (*ecdsa.PrivateKey, error) {
 		if err != nil {
 			return nil, err
 		}
-		convertedKey := convertFromInterfacePrivKey(priv)
+		convertedKey, err := ConvertFromInterfacePrivKey(priv)
+		if err != nil {
+			return nil, errors.Wrap(err, "could not get private key")
+		}
 		return convertedKey, nil
 	}
 	if defaultKeysExist && privateKeyPath == "" {
@@ -103,7 +125,11 @@ func privKeyFromFile(path string) (*ecdsa.PrivateKey, error) {
 	if err != nil {
 		return nil, err
 	}
-	return convertFromInterfacePrivKey(unmarshalledKey), nil
+	k, err := ConvertFromInterfacePrivKey(unmarshalledKey)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not get private key")
+	}
+	return k, nil
 }
 
 // Retrieves node p2p metadata from a set of configuration values
