@@ -3,11 +3,11 @@ package p2p
 import (
 	"context"
 
-	"github.com/libp2p/go-libp2p-core/connmgr"
-	"github.com/libp2p/go-libp2p-core/host"
-	"github.com/libp2p/go-libp2p-core/network"
-	"github.com/libp2p/go-libp2p-core/peer"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
+	"github.com/libp2p/go-libp2p/core/connmgr"
+	"github.com/libp2p/go-libp2p/core/host"
+	"github.com/libp2p/go-libp2p/core/network"
+	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/multiformats/go-multiaddr"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/encoder"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers"

@@ -3,8 +3,8 @@ package sync
 import (
 	"context"
 
-	"github.com/libp2p/go-libp2p-core/peer"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
+	"github.com/libp2p/go-libp2p/core/peer"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/container/slice"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/tracing"

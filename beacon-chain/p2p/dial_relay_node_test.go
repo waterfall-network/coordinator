@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	bh "github.com/libp2p/go-libp2p-blankhost"
-	swarmt "github.com/libp2p/go-libp2p-swarm/testing"
+	bh "github.com/libp2p/go-libp2p/p2p/host/blank"
+	swarmt "github.com/libp2p/go-libp2p/p2p/net/swarm/testing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )

@@ -7,7 +7,7 @@ import (
 
 	"github.com/kevinms/leakybucket-go"
 	"github.com/libp2p/go-libp2p"
-	"github.com/libp2p/go-libp2p-core/peer"
+	"github.com/libp2p/go-libp2p/core/peer"
 	ma "github.com/multiformats/go-multiaddr"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers/peerdata"

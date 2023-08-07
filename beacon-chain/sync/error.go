@@ -3,10 +3,8 @@ package sync
 import (
 	"bytes"
 	"errors"
-
-	libp2pcore "github.com/libp2p/go-libp2p-core"
-	"github.com/libp2p/go-libp2p-core/mux"
-	"github.com/libp2p/go-libp2p-core/network"
+	libp2pcore "github.com/libp2p/go-libp2p/core"
+	"github.com/libp2p/go-libp2p/core/network"
 	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/encoder"
@@ -95,7 +93,7 @@ func readStatusCodeNoDeadline(stream network.Stream, encoding encoder.NetworkEnc
 func isValidStreamError(err error) bool {
 	// check the error message itself as well as libp2p doesn't currently
 	// return the correct error type from Close{Read,Write,}.
-	return err != nil && !errors.Is(err, mux.ErrReset) && err.Error() != mux.ErrReset.Error()
+	return err != nil && !errors.Is(err, network.ErrReset) && err.Error() != network.ErrReset.Error()
 }
 
 func closeStream(stream network.Stream, log *logrus.Entry) {

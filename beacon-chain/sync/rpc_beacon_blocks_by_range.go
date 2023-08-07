@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	libp2pcore "github.com/libp2p/go-libp2p-core"
+	libp2pcore "github.com/libp2p/go-libp2p/core"
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/filters"
