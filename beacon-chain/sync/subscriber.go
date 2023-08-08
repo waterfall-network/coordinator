@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/libp2p/go-libp2p-core/host"
-	"github.com/libp2p/go-libp2p-core/peer"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
+	"github.com/libp2p/go-libp2p/core/host"
+	"github.com/libp2p/go-libp2p/core/peer"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache"
@@ -326,10 +326,24 @@ func (s *Service) subscribeStaticWithSubnets(topic string, validator wrappedVal,
 				}
 				valid, err := isDigestValid(digest, genesis, genRoot)
 				if err != nil {
-					log.Error(err)
+					log.WithError(err).WithFields(logrus.Fields{
+						"digest":        fmt.Sprintf("%#x", digest),
+						"isDigestValid": valid,
+						"topic":         topic,
+						"s.curSlot":     s.cfg.chain.CurrentSlot(),
+						"curSlot":       slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+					}).Info("Validator subscription: subscribeStaticWithSubnets: error 0")
 					continue
 				}
 				if !valid {
+					log.WithError(err).WithFields(logrus.Fields{
+						"digest":        fmt.Sprintf("%#x", digest),
+						"isDigestValid": valid,
+						"topic":         topic,
+						"s.curSlot":     s.cfg.chain.CurrentSlot(),
+						"curSlot":       slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+					}).Warn("Validator subscription: subscribeStaticWithSubnets: invalid digest")
+
 					log.Warnf("Attestation subnets with digest %#x are no longer valid, unsubscribing from all of them.", digest)
 					// Unsubscribes from all our current subnets.
 					for i := uint64(0); i < params.BeaconNetworkConfig().AttestationSubnetCount; i++ {
@@ -339,11 +353,22 @@ func (s *Service) subscribeStaticWithSubnets(topic string, validator wrappedVal,
 					ticker.Done()
 					return
 				}
+
+				log.WithError(err).WithFields(logrus.Fields{
+					"digest":                 fmt.Sprintf("%#x", digest),
+					"isDigestValid":          valid,
+					"topic":                  topic,
+					"s.curSlot":              s.cfg.chain.CurrentSlot(),
+					"curSlot":                slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+					"AttestationSubnetCount": params.BeaconNetworkConfig().AttestationSubnetCount,
+				}).Info("Validator subscription: subscribeStaticWithSubnets: 1")
+
 				// Check every slot that there are enough peers
 				for i := uint64(0); i < params.BeaconNetworkConfig().AttestationSubnetCount; i++ {
 					if !s.validPeersExist(s.addDigestAndIndexToTopic(topic, digest, i)) {
-						log.Debugf("No peers found subscribed to attestation gossip subnet with "+
+						log.Infof("No peers found subscribed to attestation gossip subnet with "+
 							"committee index %d. Searching network for peers subscribed to the subnet.", i)
+
 						_, err := s.cfg.p2p.FindPeersWithSubnet(
 							s.ctx,
 							s.addDigestAndIndexToTopic(topic, digest, i),
@@ -351,7 +376,7 @@ func (s *Service) subscribeStaticWithSubnets(topic string, validator wrappedVal,
 							flags.Get().MinimumPeersPerSubnet,
 						)
 						if err != nil {
-							log.WithError(err).Debug("Could not search for peers")
+							log.WithError(err).Info("Could not search for peers")
 							return
 						}
 					}
@@ -389,8 +414,25 @@ func (s *Service) subscribeDynamicWithSubnets(
 			select {
 			case <-s.ctx.Done():
 				ticker.Done()
+
+				log.WithFields(logrus.Fields{
+					"topic":     topicFormat,
+					"digest":    fmt.Sprintf("%#x", digest),
+					"s.curSlot": s.cfg.chain.CurrentSlot(),
+					"calcSlot":  slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+				}).Info("Validator subscription: subscribeDynamicWithSubnets: ticker.Done")
+
 				return
 			case currentSlot := <-ticker.C():
+
+				log.WithFields(logrus.Fields{
+					"topic":       topicFormat,
+					"digest":      fmt.Sprintf("%#x", digest),
+					"currentSlot": currentSlot,
+					"s.curSlot":   s.cfg.chain.CurrentSlot(),
+					"calcSlot":    slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+				}).Info("Validator subscription: subscribeDynamicWithSubnets: slot ticker 0")
+
 				if s.chainStarted.IsSet() && s.cfg.initialSync.Syncing() {
 					continue
 				}
@@ -400,6 +442,14 @@ func (s *Service) subscribeDynamicWithSubnets(
 					continue
 				}
 				if !valid {
+					log.WithFields(logrus.Fields{
+						"digest":        fmt.Sprintf("%#x", digest),
+						"isDigestValid": valid,
+						"topic":         topicFormat,
+						"s.curSlot":     s.cfg.chain.CurrentSlot(),
+						"curSlot":       slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+					}).Warn("Validator subscription: subscribeDynamicWithSubnets: invalid digest")
+
 					log.Warnf("Attestation subnets with digest %#x are no longer valid, unsubscribing from all of them.", digest)
 					// Unsubscribes from all our current subnets.
 					s.reValidateSubscriptions(subscriptions, []uint64{}, topicFormat, digest)
@@ -410,15 +460,40 @@ func (s *Service) subscribeDynamicWithSubnets(
 				// Resize as appropriate.
 				s.reValidateSubscriptions(subscriptions, wantedSubs, topicFormat, digest)
 
+				log.WithError(err).WithFields(logrus.Fields{
+					"digest":     fmt.Sprintf("%#x", digest),
+					"wantedSubs": wantedSubs,
+					"topic":      topicFormat,
+					"s.curSlot":  s.cfg.chain.CurrentSlot(),
+					"curSlot":    slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+				}).Info("Validator subscription: subscribeDynamicWithSubnets: start subscribe aggregator subnet 2")
+
 				// subscribe desired aggregator subnets.
 				for _, idx := range wantedSubs {
 					s.subscribeAggregatorSubnet(subscriptions, idx, digest, validate, handle)
 				}
 				// find desired subs for attesters
 				attesterSubs := s.attesterSubnetIndices(currentSlot)
+
+				log.WithError(err).WithFields(logrus.Fields{
+					"digest":       fmt.Sprintf("%#x", digest),
+					"attesterSubs": attesterSubs,
+					"topic":        topicFormat,
+					"s.curSlot":    s.cfg.chain.CurrentSlot(),
+					"curSlot":      slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+				}).Info("Validator subscription: subscribeDynamicWithSubnets: start lookup Attester Subnets 3")
+
 				for _, idx := range attesterSubs {
 					s.lookupAttesterSubnets(digest, idx)
 				}
+
+				log.WithError(err).WithFields(logrus.Fields{
+					"digest":       fmt.Sprintf("%#x", digest),
+					"attesterSubs": attesterSubs,
+					"topic":        topicFormat,
+					"s.curSlot":    s.cfg.chain.CurrentSlot(),
+					"curSlot":      slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+				}).Info("Validator subscription: subscribeDynamicWithSubnets: success 4")
 			}
 		}
 	}()
@@ -464,7 +539,7 @@ func (s *Service) subscribeAggregatorSubnet(
 			subscriptions[idx] = s.subscribeWithBase(subnetTopic, validate, handle)
 		}
 		if !s.validPeersExist(subnetTopic) {
-			log.Debugf("No peers found subscribed to attestation gossip subnet with "+
+			log.Infof("No peers found subscribed to attestation gossip subnet with "+
 				"committee index %d. Searching network for peers subscribed to the subnet.", idx)
 			_, err := s.cfg.p2p.FindPeersWithSubnet(s.ctx, subnetTopic, idx, flags.Get().MinimumPeersPerSubnet)
 			if err != nil {
@@ -491,7 +566,7 @@ func (s *Service) subscribeSyncSubnet(
 		subscriptions[idx] = s.subscribeWithBase(subnetTopic, validate, handle)
 	}
 	if !s.validPeersExist(subnetTopic) {
-		log.Debugf("No peers found subscribed to sync gossip subnet with "+
+		log.Infof("No peers found subscribed to sync gossip subnet with "+
 			"committee index %d. Searching network for peers subscribed to the subnet.", idx)
 		_, err := s.cfg.p2p.FindPeersWithSubnet(s.ctx, subnetTopic, idx, flags.Get().MinimumPeersPerSubnet)
 		if err != nil {
@@ -546,7 +621,7 @@ func (s *Service) subscribeStaticWithSyncSubnets(topic string, validator wrapped
 				// Check every slot that there are enough peers
 				for i := uint64(0); i < params.BeaconConfig().SyncCommitteeSubnetCount; i++ {
 					if !s.validPeersExist(s.addDigestAndIndexToTopic(topic, digest, i)) {
-						log.Debugf("No peers found subscribed to sync gossip subnet with "+
+						log.Infof("No peers found subscribed to sync gossip subnet with "+
 							"committee index %d. Searching network for peers subscribed to the subnet.", i)
 						_, err := s.cfg.p2p.FindPeersWithSubnet(
 							s.ctx,
@@ -628,7 +703,7 @@ func (s *Service) lookupAttesterSubnets(digest [4]byte, idx uint64) {
 	topic := p2p.GossipTypeMapping[reflect.TypeOf(&ethpb.Attestation{})]
 	subnetTopic := fmt.Sprintf(topic, digest, idx)
 	if !s.validPeersExist(subnetTopic) {
-		log.Debugf("No peers found subscribed to attestation gossip subnet with "+
+		log.Infof("No peers found subscribed to attestation gossip subnet with "+
 			"committee index %d. Searching network for peers subscribed to the subnet.", idx)
 		// perform a search for peers with the desired committee index.
 		_, err := s.cfg.p2p.FindPeersWithSubnet(s.ctx, subnetTopic, idx, flags.Get().MinimumPeersPerSubnet)
@@ -696,14 +771,14 @@ func (s *Service) filterNeededPeers(pids []peer.ID) []peer.ID {
 
 	for _, sub := range wantedSubs {
 		subnetTopic := fmt.Sprintf(topic, digest, sub) + s.cfg.p2p.Encoding().ProtocolSuffix()
-		peers := s.cfg.p2p.PubSub().ListPeers(subnetTopic)
-		if len(peers) > flags.Get().MinimumPeersPerSubnet {
+		subPeers := s.cfg.p2p.PubSub().ListPeers(subnetTopic)
+		if len(subPeers) > flags.Get().MinimumPeersPerSubnet {
 			// In the event we have more than the minimum, we can
 			// mark the remaining as viable for pruning.
-			peers = peers[:flags.Get().MinimumPeersPerSubnet]
+			subPeers = subPeers[:flags.Get().MinimumPeersPerSubnet]
 		}
 		// Add peer to peer map.
-		for _, p := range peers {
+		for _, p := range subPeers {
 			// Even if the peer id has
 			// already been seen we still set
 			// it, as the outcome is the same.

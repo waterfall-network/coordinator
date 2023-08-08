@@ -6,10 +6,8 @@ import (
 	"testing"
 	"time"
 
-	core "github.com/libp2p/go-libp2p-core"
-	"github.com/libp2p/go-libp2p-core/network"
-	"github.com/libp2p/go-libp2p-core/protocol"
-	swarm "github.com/libp2p/go-libp2p-swarm"
+	"github.com/libp2p/go-libp2p/core"
+	"github.com/libp2p/go-libp2p/core/network"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
 	p2ptest "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/testing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
@@ -105,9 +103,8 @@ func TestValidateVersion(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			stream := new(swarm.Stream)
-			stream.SetProtocol(protocol.ID(tt.protocol))
-			err := validateVersion(tt.version, stream)
+			stream := new(network.Stream)
+			err := validateVersion(tt.version, *stream)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("validateVersion() error = %v, wantErr %v", err, tt.wantErr)
 			}

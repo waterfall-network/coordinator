@@ -6,8 +6,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/libp2p/go-libp2p-core/network"
-	"github.com/libp2p/go-libp2p-core/peer"
+	"github.com/libp2p/go-libp2p/core/network"
+	"github.com/libp2p/go-libp2p/core/peer"
 	ma "github.com/multiformats/go-multiaddr"
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/go-bitfield"
@@ -275,13 +275,13 @@ func (s *Service) filterPeer(node *enode.Node) bool {
 	// do not dial nodes with their tcp ports not set
 	if err := node.Record().Load(enr.WithEntry("tcp", new(enr.TCP))); err != nil {
 		if !enr.IsNotFound(err) {
-			log.WithError(err).Debug("Could not retrieve tcp port")
+			log.WithError(err).Error("Could not retrieve tcp port")
 		}
 		return false
 	}
 	peerData, multiAddr, err := convertToAddrInfo(node)
 	if err != nil {
-		log.WithError(err).Debug("Could not convert to peer data")
+		log.WithError(err).Error("Could not convert to peer data")
 		return false
 	}
 	if s.peers.IsBad(peerData.ID) {
@@ -391,7 +391,10 @@ func convertToAddrInfo(node *enode.Node) (*peer.AddrInfo, ma.Multiaddr, error) {
 
 func convertToSingleMultiAddr(node *enode.Node) (ma.Multiaddr, error) {
 	pubkey := node.Pubkey()
-	assertedKey := convertToInterfacePubkey(pubkey)
+	assertedKey, err := convertToInterfacePubkey(pubkey)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not get pubkey")
+	}
 	id, err := peer.IDFromPublicKey(assertedKey)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get peer id")
@@ -401,7 +404,10 @@ func convertToSingleMultiAddr(node *enode.Node) (ma.Multiaddr, error) {
 
 func convertToUdpMultiAddr(node *enode.Node) ([]ma.Multiaddr, error) {
 	pubkey := node.Pubkey()
-	assertedKey := convertToInterfacePubkey(pubkey)
+	assertedKey, err := convertToInterfacePubkey(pubkey)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not get pubkey")
+	}
 	id, err := peer.IDFromPublicKey(assertedKey)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get peer id")

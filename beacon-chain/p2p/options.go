@@ -6,9 +6,9 @@ import (
 	"net"
 
 	"github.com/libp2p/go-libp2p"
-	"github.com/libp2p/go-libp2p-core/peer"
-	noise "github.com/libp2p/go-libp2p-noise"
-	"github.com/libp2p/go-tcp-transport"
+	"github.com/libp2p/go-libp2p/core/peer"
+	"github.com/libp2p/go-libp2p/p2p/security/noise"
+	"github.com/libp2p/go-libp2p/p2p/transport/tcp"
 	ma "github.com/multiformats/go-multiaddr"
 	"github.com/pkg/errors"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
@@ -30,7 +30,10 @@ func (s *Service) buildOptions(ip net.IP, priKey *ecdsa.PrivateKey) []libp2p.Opt
 			log.Fatalf("Failed to p2p listen: %v", err)
 		}
 	}
-	ifaceKey := convertToInterfacePrivkey(priKey)
+	ifaceKey, err := convertToInterfacePrivkey(priKey)
+	if err != nil {
+		log.Warning(err, "could not get private key")
+	}
 	id, err := peer.IDFromPublicKey(ifaceKey.GetPublic())
 	if err != nil {
 		log.Fatalf("Failed to retrieve peer id: %v", err)
@@ -114,6 +117,10 @@ func multiAddressBuilderWithID(ipAddr, protocol string, port uint, id peer.ID) (
 func privKeyOption(privkey *ecdsa.PrivateKey) libp2p.Option {
 	return func(cfg *libp2p.Config) error {
 		log.Debug("ECDSA private key generated")
-		return cfg.Apply(libp2p.Identity(convertToInterfacePrivkey(privkey)))
+		pk, err := convertToInterfacePrivkey(privkey)
+		if err != nil {
+			log.Warning(err, "could not get private key")
+		}
+		return cfg.Apply(libp2p.Identity(pk))
 	}
 }

@@ -3,8 +3,8 @@ package sync
 import (
 	"context"
 
-	libp2pcore "github.com/libp2p/go-libp2p-core"
-	"github.com/libp2p/go-libp2p-core/peer"
+	libp2pcore "github.com/libp2p/go-libp2p/core"
+	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/pkg/errors"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"

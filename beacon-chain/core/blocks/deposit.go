@@ -269,7 +269,6 @@ func verifyDepositDataWithDomain(ctx context.Context, deps []*ethpb.Deposit, dom
 			PublicKey:             dep.Data.PublicKey,
 			CreatorAddress:        dep.Data.CreatorAddress,
 			WithdrawalCredentials: dep.Data.WithdrawalCredentials,
-			Amount:                dep.Data.Amount,
 		}
 		sr, err := signing.ComputeSigningRoot(depositMessage, domain)
 		if err != nil {
