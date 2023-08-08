@@ -163,6 +163,7 @@ type BeaconBlockBody struct {
 	Attestations      []*Attestation      `json:"attestations"`
 	Deposits          []*Deposit          `json:"deposits"`
 	VoluntaryExits    []*VoluntaryExit    `json:"voluntary_exits"`
+	Withdrawals       []*Withdrawal       `json:"withdrawals"`
 }
 
 // Eth1Data a sub property of BeaconBlockBody.
@@ -231,6 +232,13 @@ type VoluntaryExit struct {
 	ValidatorIndex string `json:"validator_index"` /* uint64 */
 }
 
+// Withdrawal a sub property of Withdrawal.
+type Withdrawal struct {
+	Epoch          string `json:"epoch"`           /* uint64 */
+	ValidatorIndex string `json:"validator_index"` /* uint64 */
+	Amount         string `json:"amount"`          /* uint64 */
+}
+
 // BeaconBlockAltairBlockV2 a sub property of BlockV2AltairSignRequest.
 type BeaconBlockAltairBlockV2 struct {
 	Version string             `json:"version"`
@@ -257,6 +265,7 @@ type BeaconBlockBodyAltair struct {
 	Deposits          []*Deposit          `json:"deposits"`
 	VoluntaryExits    []*VoluntaryExit    `json:"voluntary_exits"`
 	SyncAggregate     *SyncAggregate      `json:"sync_aggregate"`
+	Withdrawals       []*Withdrawal       `json:"withdrawals"`
 }
 
 // SyncAggregate is a sub property of BeaconBlockBodyAltair.
