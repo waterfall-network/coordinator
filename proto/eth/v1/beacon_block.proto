@@ -82,6 +82,8 @@ message BeaconBlockBody {
 
     // At most MAX_VOLUNTARY_EXITS.
     repeated VoluntaryExit voluntary_exits = 8 [(ethereum.eth.ext.ssz_max) = "16"];
+
+    repeated Withdrawal withdrawals  = 9 [(ethereum.eth.ext.ssz_max) = "16"];
 }
 
 // Proposer slashings are proofs that a slashable offense has been committed by
@@ -139,6 +141,21 @@ message VoluntaryExit {
 
     // Index of the exiting validator.
     uint64 validator_index = 2 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.ValidatorIndex"];
+}
+
+// A message that represents a validator signaling that they want to withdrawals:
+// - reward only if validator is active
+// - whole balance if validator is not active
+// The message does not contain a validator signature.
+ message Withdrawal {
+    // The epoch on when withdrawals request becomes valid.
+    uint64 epoch = 1 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Epoch"];
+
+    // Index of the validator.
+    uint64 validator_index = 2 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.ValidatorIndex"];
+
+    // Withdrawal amount in gwei.
+    uint64 amount = 3;
 }
 
 // Eth1Data represents references to the Ethereum 1.x deposit contract.

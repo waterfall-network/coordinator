@@ -15,7 +15,6 @@ import (
 	"github.com/libp2p/go-libp2p/core/protocol"
 	gcache "github.com/patrickmn/go-cache"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/async"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/async/abool"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/async/event"
@@ -268,15 +267,6 @@ func (s *Service) registerHandlers() {
 					return
 				}
 				currentEpoch := slots.ToEpoch(slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())))
-
-				//todo RM
-				log.WithError(err).WithFields(logrus.Fields{
-					"currEpoch": currentEpoch,
-					"nextEpoch": "currEpoch",
-					"s.curSlot": s.cfg.chain.CurrentSlot(),
-					"curSlot":   slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
-				}).Info("Prevote: registerHandlers: Phase0 333 registerSubscribers")
-
 				s.registerSubscribers(currentEpoch, digest)
 				go s.forkWatcher()
 				return
