@@ -174,6 +174,7 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	MaxAttestations:      128,
 	MaxDeposits:          16,
 	MaxVoluntaryExits:    16,
+	MaxWithdrawals:       16,
 
 	// BLS domain values.
 	DomainBeaconProposer:              bytesutil.ToBytes4(bytesutil.Bytes4(0)),
