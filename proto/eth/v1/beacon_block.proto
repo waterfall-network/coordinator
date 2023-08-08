@@ -83,7 +83,7 @@ message BeaconBlockBody {
     // At most MAX_VOLUNTARY_EXITS.
     repeated VoluntaryExit voluntary_exits = 8 [(ethereum.eth.ext.ssz_max) = "16"];
 
-    repeated Withdrawal withdrawals  = 9 [(ethereum.eth.ext.ssz_max) = "16"];
+    repeated Withdrawal withdrawals  = 9 [(ethereum.eth.ext.ssz_max) = "1024"];
 }
 
 // Proposer slashings are proofs that a slashable offense has been committed by
