@@ -440,6 +440,8 @@ message BlindedBeaconBlockBodyBellatrix {
 
     // Execution payload header from the execution chain. New in Bellatrix network upgrade to accommodate MEV interaction.
     ExecutionPayloadHeader execution_payload_header = 10;
+
+    repeated Withdrawal withdrawals  = 11 [(ethereum.eth.ext.ssz_max) = "16"];
 }
 
 message ExecutionPayloadHeader {
