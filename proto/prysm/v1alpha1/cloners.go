@@ -167,6 +167,7 @@ func CopyBeaconBlockBody(body *BeaconBlockBody) *BeaconBlockBody {
 		Attestations:      CopyAttestations(body.Attestations),
 		Deposits:          CopyDeposits(body.Deposits),
 		VoluntaryExits:    CopyVoluntaryExits(body.VoluntaryExits),
+		Withdrawals:       CopyWithdrawals(body.Withdrawals),
 	}
 }
 
@@ -365,6 +366,7 @@ func CopyDepositData(depData *Deposit_Data) *Deposit_Data {
 		WithdrawalCredentials: bytesutil.SafeCopyBytes(depData.WithdrawalCredentials),
 		Amount:                depData.Amount,
 		Signature:             bytesutil.SafeCopyBytes(depData.Signature),
+		InitTxHash:            bytesutil.SafeCopyBytes(depData.InitTxHash),
 	}
 }
 
@@ -388,6 +390,32 @@ func CopyVoluntaryExit(exit *VoluntaryExit) *VoluntaryExit {
 	return &VoluntaryExit{
 		Epoch:          exit.Epoch,
 		ValidatorIndex: exit.ValidatorIndex,
+		InitTxHash:     bytesutil.SafeCopyBytes(exit.InitTxHash),
+	}
+}
+
+// CopyWithdrawals copies the provided Withdrawals array.
+func CopyWithdrawals(withdrawals []*Withdrawal) []*Withdrawal {
+	if withdrawals == nil {
+		return nil
+	}
+	newExits := make([]*Withdrawal, len(withdrawals))
+	for i, exit := range withdrawals {
+		newExits[i] = CopyWithdrawal(exit)
+	}
+	return newExits
+}
+
+// CopyWithdrawal copies the provided Withdrawal.
+func CopyWithdrawal(withdrawal *Withdrawal) *Withdrawal {
+	if withdrawal == nil {
+		return nil
+	}
+	return &Withdrawal{
+		Epoch:          withdrawal.Epoch,
+		ValidatorIndex: withdrawal.ValidatorIndex,
+		Amount:         withdrawal.Amount,
+		InitTxHash:     bytesutil.SafeCopyBytes(withdrawal.InitTxHash),
 	}
 }
 

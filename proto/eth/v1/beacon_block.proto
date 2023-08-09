@@ -123,6 +123,9 @@ message Deposit {
 
         // 96 byte signature from the validators public key.
         bytes signature = 5 [(ethereum.eth.ext.ssz_size) = "96"];
+
+        // hash of transaction initiator of operation
+        bytes init_tx_hash = 6 [(ethereum.eth.ext.ssz_size) = "32"];
     }
 
     // 32 byte roots in the deposit tree branch.
@@ -141,6 +144,9 @@ message VoluntaryExit {
 
     // Index of the exiting validator.
     uint64 validator_index = 2 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.ValidatorIndex"];
+
+    // hash of transaction initiator of operation
+    bytes init_tx_hash = 3 [(ethereum.eth.ext.ssz_size) = "32"];
 }
 
 // A message that represents a validator signaling that they want to withdrawals:
@@ -156,6 +162,9 @@ message VoluntaryExit {
 
     // Withdrawal amount in gwei.
     uint64 amount = 3;
+
+    // hash of transaction initiator of operation
+    bytes init_tx_hash = 4 [(ethereum.eth.ext.ssz_size) = "32"];
 }
 
 // Eth1Data represents references to the Ethereum 1.x deposit contract.
