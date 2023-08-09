@@ -145,7 +145,7 @@ func (_ *BeaconEndpointFactory) Create(path string) (*apimiddleware.Endpoint, er
 		endpoint.PostRequest = &proposerSlashingJson{}
 		endpoint.GetResponse = &proposerSlashingsPoolResponseJson{}
 	case "/eth/v1/beacon/pool/voluntary_exits":
-		endpoint.PostRequest = &voluntaryExitJson{}
+		//endpoint.PostRequest = &voluntaryExitJson{}
 		endpoint.GetResponse = &voluntaryExitsPoolResponseJson{}
 	case "/eth/v1/beacon/pool/sync_committees":
 		endpoint.PostRequest = &submitSyncCommitteeSignaturesRequestJson{}
