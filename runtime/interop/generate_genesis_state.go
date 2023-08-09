@@ -90,6 +90,11 @@ func GenerateDepositsFromData(depositDataItems []*ethpb.Deposit_Data, trie *trie
 func generateDepositsFromData(depositDataItems []*ethpb.Deposit_Data, offset int, trie *trie.SparseMerkleTrie) ([]*ethpb.Deposit, error) {
 	deposits := make([]*ethpb.Deposit, len(depositDataItems))
 	for i, item := range depositDataItems {
+		if item.InitTxHash == nil {
+			empyHash := [32]byte{}
+			item.InitTxHash = empyHash[:]
+		}
+
 		proof, err := trie.MerkleProof(i + offset)
 		if err != nil {
 			return nil, errors.Wrapf(err, "could not generate proof for deposit %d", i+offset)
