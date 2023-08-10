@@ -259,31 +259,31 @@ func (bs *Server) ListPoolVoluntaryExits(ctx context.Context, _ *emptypb.Empty) 
 	}, nil
 }
 
-// SubmitVoluntaryExit submits VoluntaryExit object to node's pool
-// and if passes validation node MUST broadcast it to network.
-func (bs *Server) SubmitVoluntaryExit(ctx context.Context, req *ethpbv1.VoluntaryExit) (*emptypb.Empty, error) {
-	ctx, span := trace.StartSpan(ctx, "beacon.SubmitVoluntaryExit")
-	defer span.End()
-
-	headState, err := bs.ChainInfoFetcher.HeadState(ctx)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Could not get head state: %v", err)
-	}
-
-	validator, err := headState.ValidatorAtIndexReadOnly(req.ValidatorIndex)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Could not get exiting validator: %v", err)
-	}
-	alphaExit := migration.V1ExitToV1Alpha1(req)
-	err = blocks.VerifyExitData(validator, headState.Slot(), alphaExit)
-	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "Invalid voluntary exit: %v", err)
-	}
-
-	bs.VoluntaryExitsPool.InsertVoluntaryExit(ctx, headState, alphaExit)
-	if err := bs.Broadcaster.Broadcast(ctx, alphaExit); err != nil {
-		return nil, status.Errorf(codes.Internal, "Could not broadcast voluntary exit object: %v", err)
-	}
-
-	return &emptypb.Empty{}, nil
-}
+//// SubmitVoluntaryExit submits VoluntaryExit object to node's pool
+//// and if passes validation node MUST broadcast it to network.
+//func (bs *Server) SubmitVoluntaryExit(ctx context.Context, req *ethpbv1.VoluntaryExit) (*emptypb.Empty, error) {
+//	ctx, span := trace.StartSpan(ctx, "beacon.SubmitVoluntaryExit")
+//	defer span.End()
+//
+//	headState, err := bs.ChainInfoFetcher.HeadState(ctx)
+//	if err != nil {
+//		return nil, status.Errorf(codes.Internal, "Could not get head state: %v", err)
+//	}
+//
+//	validator, err := headState.ValidatorAtIndexReadOnly(req.ValidatorIndex)
+//	if err != nil {
+//		return nil, status.Errorf(codes.Internal, "Could not get exiting validator: %v", err)
+//	}
+//	alphaExit := migration.V1ExitToV1Alpha1(req)
+//	err = blocks.VerifyExitData(validator, headState.Slot(), alphaExit)
+//	if err != nil {
+//		return nil, status.Errorf(codes.InvalidArgument, "Invalid voluntary exit: %v", err)
+//	}
+//
+//	bs.VoluntaryExitsPool.InsertVoluntaryExit(ctx, headState, alphaExit)
+//	if err := bs.Broadcaster.Broadcast(ctx, alphaExit); err != nil {
+//		return nil, status.Errorf(codes.Internal, "Could not broadcast voluntary exit object: %v", err)
+//	}
+//
+//	return &emptypb.Empty{}, nil
+//}

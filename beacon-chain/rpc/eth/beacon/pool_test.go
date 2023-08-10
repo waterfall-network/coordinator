@@ -578,107 +578,107 @@ func TestSubmitProposerSlashing_InvalidSlashing(t *testing.T) {
 	assert.Equal(t, false, broadcaster.BroadcastCalled)
 }
 
-func TestSubmitVoluntaryExit_Ok(t *testing.T) {
-	ctx := context.Background()
+//func TestSubmitVoluntaryExit_Ok(t *testing.T) {
+//	ctx := context.Background()
+//
+//	_, keys, err := util.DeterministicDepositsAndKeys(1)
+//	require.NoError(t, err)
+//	validator := &ethpbv1alpha1.Validator{
+//		ExitEpoch: params.BeaconConfig().FarFutureEpoch,
+//		PublicKey: keys[0].PublicKey().Marshal(),
+//	}
+//	bs, err := util.NewBeaconState(func(state *ethpbv1alpha1.BeaconState) error {
+//		state.Validators = []*ethpbv1alpha1.Validator{validator}
+//		// Satisfy activity time required before exiting.
+//		state.Slot = params.BeaconConfig().SlotsPerEpoch.Mul(uint64(params.BeaconConfig().ShardCommitteePeriod))
+//		return nil
+//	})
+//	require.NoError(t, err)
+//
+//	exit := &ethpbv1.VoluntaryExit{
+//		Epoch:          0,
+//		ValidatorIndex: 0,
+//	}
+//
+//	broadcaster := &p2pMock.MockBroadcaster{}
+//	s := &Server{
+//		ChainInfoFetcher:   &blockchainmock.ChainService{State: bs},
+//		VoluntaryExitsPool: &mock.PoolMock{},
+//		Broadcaster:        broadcaster,
+//	}
+//
+//	_, err = s.SubmitVoluntaryExit(ctx, exit)
+//	require.NoError(t, err)
+//	pendingExits := s.VoluntaryExitsPool.PendingExits(bs, bs.Slot(), true)
+//	require.Equal(t, 1, len(pendingExits))
+//	assert.DeepEqual(t, migration.V1ExitToV1Alpha1(exit), pendingExits[0])
+//	assert.Equal(t, true, broadcaster.BroadcastCalled)
+//}
 
-	_, keys, err := util.DeterministicDepositsAndKeys(1)
-	require.NoError(t, err)
-	validator := &ethpbv1alpha1.Validator{
-		ExitEpoch: params.BeaconConfig().FarFutureEpoch,
-		PublicKey: keys[0].PublicKey().Marshal(),
-	}
-	bs, err := util.NewBeaconState(func(state *ethpbv1alpha1.BeaconState) error {
-		state.Validators = []*ethpbv1alpha1.Validator{validator}
-		// Satisfy activity time required before exiting.
-		state.Slot = params.BeaconConfig().SlotsPerEpoch.Mul(uint64(params.BeaconConfig().ShardCommitteePeriod))
-		return nil
-	})
-	require.NoError(t, err)
+//func TestSubmitVoluntaryExit_InvalidValidatorIndex(t *testing.T) {
+//	ctx := context.Background()
+//
+//	_, keys, err := util.DeterministicDepositsAndKeys(1)
+//	require.NoError(t, err)
+//	validator := &ethpbv1alpha1.Validator{
+//		ExitEpoch: params.BeaconConfig().FarFutureEpoch,
+//		PublicKey: keys[0].PublicKey().Marshal(),
+//	}
+//	bs, err := util.NewBeaconState(func(state *ethpbv1alpha1.BeaconState) error {
+//		state.Validators = []*ethpbv1alpha1.Validator{validator}
+//		return nil
+//	})
+//	require.NoError(t, err)
+//
+//	exit := &ethpbv1.VoluntaryExit{
+//
+//		Epoch:          0,
+//		ValidatorIndex: 99,
+//	}
+//
+//	broadcaster := &p2pMock.MockBroadcaster{}
+//	s := &Server{
+//		ChainInfoFetcher:   &blockchainmock.ChainService{State: bs},
+//		VoluntaryExitsPool: &mock.PoolMock{},
+//		Broadcaster:        broadcaster,
+//	}
+//
+//	_, err = s.SubmitVoluntaryExit(ctx, exit)
+//	require.ErrorContains(t, "Could not get exiting validator", err)
+//	assert.Equal(t, false, broadcaster.BroadcastCalled)
+//}
 
-	exit := &ethpbv1.VoluntaryExit{
-		Epoch:          0,
-		ValidatorIndex: 0,
-	}
-
-	broadcaster := &p2pMock.MockBroadcaster{}
-	s := &Server{
-		ChainInfoFetcher:   &blockchainmock.ChainService{State: bs},
-		VoluntaryExitsPool: &mock.PoolMock{},
-		Broadcaster:        broadcaster,
-	}
-
-	_, err = s.SubmitVoluntaryExit(ctx, exit)
-	require.NoError(t, err)
-	pendingExits := s.VoluntaryExitsPool.PendingExits(bs, bs.Slot(), true)
-	require.Equal(t, 1, len(pendingExits))
-	assert.DeepEqual(t, migration.V1ExitToV1Alpha1(exit), pendingExits[0])
-	assert.Equal(t, true, broadcaster.BroadcastCalled)
-}
-
-func TestSubmitVoluntaryExit_InvalidValidatorIndex(t *testing.T) {
-	ctx := context.Background()
-
-	_, keys, err := util.DeterministicDepositsAndKeys(1)
-	require.NoError(t, err)
-	validator := &ethpbv1alpha1.Validator{
-		ExitEpoch: params.BeaconConfig().FarFutureEpoch,
-		PublicKey: keys[0].PublicKey().Marshal(),
-	}
-	bs, err := util.NewBeaconState(func(state *ethpbv1alpha1.BeaconState) error {
-		state.Validators = []*ethpbv1alpha1.Validator{validator}
-		return nil
-	})
-	require.NoError(t, err)
-
-	exit := &ethpbv1.VoluntaryExit{
-
-		Epoch:          0,
-		ValidatorIndex: 99,
-	}
-
-	broadcaster := &p2pMock.MockBroadcaster{}
-	s := &Server{
-		ChainInfoFetcher:   &blockchainmock.ChainService{State: bs},
-		VoluntaryExitsPool: &mock.PoolMock{},
-		Broadcaster:        broadcaster,
-	}
-
-	_, err = s.SubmitVoluntaryExit(ctx, exit)
-	require.ErrorContains(t, "Could not get exiting validator", err)
-	assert.Equal(t, false, broadcaster.BroadcastCalled)
-}
-
-func TestSubmitVoluntaryExit_InvalidExit(t *testing.T) {
-	ctx := context.Background()
-
-	_, keys, err := util.DeterministicDepositsAndKeys(1)
-	require.NoError(t, err)
-	validator := &ethpbv1alpha1.Validator{
-		ExitEpoch: params.BeaconConfig().FarFutureEpoch,
-		PublicKey: keys[0].PublicKey().Marshal(),
-	}
-	bs, err := util.NewBeaconState(func(state *ethpbv1alpha1.BeaconState) error {
-		state.Validators = []*ethpbv1alpha1.Validator{validator}
-		return nil
-	})
-	require.NoError(t, err)
-
-	exit := &ethpbv1.VoluntaryExit{
-		Epoch:          0,
-		ValidatorIndex: 0,
-	}
-
-	broadcaster := &p2pMock.MockBroadcaster{}
-	s := &Server{
-		ChainInfoFetcher:   &blockchainmock.ChainService{State: bs},
-		VoluntaryExitsPool: &mock.PoolMock{},
-		Broadcaster:        broadcaster,
-	}
-
-	_, err = s.SubmitVoluntaryExit(ctx, exit)
-	require.ErrorContains(t, "Invalid voluntary exit", err)
-	assert.Equal(t, false, broadcaster.BroadcastCalled)
-}
+//func TestSubmitVoluntaryExit_InvalidExit(t *testing.T) {
+//	ctx := context.Background()
+//
+//	_, keys, err := util.DeterministicDepositsAndKeys(1)
+//	require.NoError(t, err)
+//	validator := &ethpbv1alpha1.Validator{
+//		ExitEpoch: params.BeaconConfig().FarFutureEpoch,
+//		PublicKey: keys[0].PublicKey().Marshal(),
+//	}
+//	bs, err := util.NewBeaconState(func(state *ethpbv1alpha1.BeaconState) error {
+//		state.Validators = []*ethpbv1alpha1.Validator{validator}
+//		return nil
+//	})
+//	require.NoError(t, err)
+//
+//	exit := &ethpbv1.VoluntaryExit{
+//		Epoch:          0,
+//		ValidatorIndex: 0,
+//	}
+//
+//	broadcaster := &p2pMock.MockBroadcaster{}
+//	s := &Server{
+//		ChainInfoFetcher:   &blockchainmock.ChainService{State: bs},
+//		VoluntaryExitsPool: &mock.PoolMock{},
+//		Broadcaster:        broadcaster,
+//	}
+//
+//	_, err = s.SubmitVoluntaryExit(ctx, exit)
+//	require.ErrorContains(t, "Invalid voluntary exit", err)
+//	assert.Equal(t, false, broadcaster.BroadcastCalled)
+//}
 
 func TestServer_SubmitAttestations_Ok(t *testing.T) {
 	ctx := context.Background()
