@@ -6,7 +6,7 @@ go_library(
         "doc.go",
         "service.go",
     ],
-    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/voluntaryexits",
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/withdrawals",
     visibility = [
         "//beacon-chain:__subpackages__",
     ],

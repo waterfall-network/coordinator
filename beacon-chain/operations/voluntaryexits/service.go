@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	types "github.com/prysmaticlabs/eth2-types"
+	log "github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
@@ -111,6 +112,12 @@ func (p *Pool) InsertVoluntaryExitByGwat(ctx context.Context, exit *ethpb.Volunt
 
 	// Prevent malformed messages from being inserted.
 	if exit == nil {
+		return
+	}
+	if exit.InitTxHash == nil {
+		log.WithFields(log.Fields{
+			"InitTxHash": exit.InitTxHash,
+		}).Warn("InsertVoluntaryExitByGwat malformed data: InitTxHash")
 		return
 	}
 
