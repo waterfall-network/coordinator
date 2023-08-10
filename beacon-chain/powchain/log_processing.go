@@ -124,7 +124,11 @@ func (s *Service) ProcessExitLog(ctx context.Context, exitLog gwatTypes.Log) err
 		return errors.New("unable to find deposit with the provided public key")
 	}
 
-	exit := &ethpb.VoluntaryExit{Epoch: currentEpoch, ValidatorIndex: types.ValidatorIndex(valIndex)}
+	exit := &ethpb.VoluntaryExit{
+		Epoch:          currentEpoch,
+		ValidatorIndex: types.ValidatorIndex(valIndex),
+		InitTxHash:     exitLog.TxHash.Bytes(),
+	}
 
 	s.cfg.exitPool.InsertVoluntaryExitByGwat(s.ctx, exit)
 
@@ -172,6 +176,7 @@ func (s *Service) ProcessDepositLog(ctx context.Context, depositLog gwatTypes.Lo
 		Signature:             signature.Bytes(),
 		CreatorAddress:        creatorAddr.Bytes(),
 		WithdrawalCredentials: withdrawalCredentials.Bytes(),
+		InitTxHash:            depositLog.TxHash.Bytes(),
 	}
 
 	depositHash, err := depositData.HashTreeRoot()
