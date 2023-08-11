@@ -378,7 +378,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 
 	//create gwat synchronization params
 	if currEpoch := slots.ToEpoch(postState.Slot()); currEpoch > s.store.LastEpoch() {
-		if err = s.createGwatSyncParam(ctx, blockRoot); err != nil {
+		if err = s.saveGwatSyncState(ctx, blockRoot); err != nil {
 			return err
 		}
 		s.store.SetLastEpoch(currEpoch)
@@ -612,7 +612,7 @@ func (s *Service) handleBlockAfterBatchVerify(ctx context.Context, signed block.
 	}
 	//create gwat synchronization params
 	if currEpoch := slots.ToEpoch(signed.Block().Slot()); currEpoch > s.store.LastEpoch() {
-		if err := s.createGwatSyncParam(ctx, blockRoot); err != nil {
+		if err := s.saveGwatSyncState(ctx, blockRoot); err != nil {
 			return err
 		}
 		s.store.SetLastEpoch(currEpoch)

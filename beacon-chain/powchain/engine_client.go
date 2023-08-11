@@ -59,6 +59,7 @@ type EngineCaller interface {
 	GetTerminalBlockHash(ctx context.Context) ([]byte, bool, error)
 
 	ExecutionDagFinalize(ctx context.Context, finParams *gwatTypes.FinalizationParams) (*gwatTypes.FinalizationResult, error)
+	ExecutionDagSyncSlotInfo(ctx context.Context, params *gwatTypes.SlotInfo) (bool, error)
 	ExecutionDagCoordinatedState(ctx context.Context) (*gwatTypes.FinalizationResult, error)
 	ExecutionDagGetOptimisticSpines(ctx context.Context, fromSpine gwatCommon.Hash) ([]gwatCommon.HashArray, error)
 	ExecutionDagGetCandidates(ctx context.Context, slot types.Slot) (gwatCommon.HashArray, error)
