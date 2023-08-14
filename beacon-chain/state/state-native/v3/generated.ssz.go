@@ -83,7 +83,7 @@ func (b *BeaconState) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 
 	// Offset (12) 'validators'
 	dst = ssz.WriteOffset(dst, offset)
-	offset += len(b.validators) * 129
+	offset += len(b.validators) * 137
 
 	// Offset (13) 'balances'
 	dst = ssz.WriteOffset(dst, offset)
@@ -521,7 +521,7 @@ func (b *BeaconState) UnmarshalSSZ(buf []byte) error {
 	// Field (12) 'validators'
 	{
 		buf = tail[o12:o13]
-		num, err := ssz.DivideInt2(len(buf), 129, 1099511627776)
+		num, err := ssz.DivideInt2(len(buf), 137, 1099511627776)
 		if err != nil {
 			return err
 		}
@@ -530,7 +530,7 @@ func (b *BeaconState) UnmarshalSSZ(buf []byte) error {
 			if b.validators[ii] == nil {
 				b.validators[ii] = new(ethpb.Validator)
 			}
-			if err = b.validators[ii].UnmarshalSSZ(buf[ii*129 : (ii+1)*129]); err != nil {
+			if err = b.validators[ii].UnmarshalSSZ(buf[ii*137 : (ii+1)*137]); err != nil {
 				return err
 			}
 		}
@@ -636,7 +636,7 @@ func (b *BeaconState) SizeSSZ() (size int) {
 	}
 
 	// Field (12) 'validators'
-	size += len(b.validators) * 129
+	size += len(b.validators) * 137
 
 	// Field (13) 'balances'
 	size += len(b.balances) * 8

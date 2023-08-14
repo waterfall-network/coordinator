@@ -363,7 +363,7 @@ func DeterministicDepositsAndKeysSameValidator(numDeposits uint64) ([]*ethpb.Dep
 			// Always use the same validator to sign
 			depositData := &ethpb.Deposit_Data{
 				PublicKey:             depositMessage.PublicKey,
-				Amount:                params.BeaconConfig().MaxEffectiveBalance,,
+				Amount:                params.BeaconConfig().MaxEffectiveBalance,
 				CreatorAddress:        depositMessage.CreatorAddress,
 				WithdrawalCredentials: depositMessage.WithdrawalCredentials,
 				Signature:             secretKeys[1].Sign(sigRoot[:]).Marshal(),

@@ -666,7 +666,7 @@ func (s *Service) saveGwatSyncState(ctx context.Context, root [32]byte) error {
 	return nil
 }
 
-//todo work by params
+// todo work by params
 // processGwatSync implements gwat sync procedure.
 func (s *Service) processGwatSync(gsp *wrapper.GwatSyncParam) error {
 	ctx, span := trace.StartSpan(s.ctx, "blockChain.processGwatSync")

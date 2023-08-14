@@ -638,6 +638,9 @@ message Validator {
     // FAR_FUTURE_EPOCH is a constant defined by the official Ethereum Beacon Chain specification:
     // https://github.com/ethereum/consensus-specs/blob/v0.9.2/specs/core/0_beacon-chain.md#constants
     uint64 withdrawable_epoch = 9 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Epoch"];
+
+    // withdrawals cumulative balance
+    uint64 withdrawals = 10;
 }
 
 // ValidatorParticipation stores participation metrics during a given epoch.
