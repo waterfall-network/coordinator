@@ -3,11 +3,13 @@ package withdrawals
 import (
 	"bytes"
 	"context"
-	log "github.com/sirupsen/logrus"
+	"fmt"
 	"sort"
 	"sync"
 
 	types "github.com/prysmaticlabs/eth2-types"
+	log "github.com/sirupsen/logrus"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
@@ -19,8 +21,7 @@ import (
 // This pool is used by proposers to insert withdrawals into new blocks.
 type PoolManager interface {
 	PendingWithdrawals(slot types.Slot, noLimit bool) []*ethpb.Withdrawal
-	InsertWithdrawal(ctx context.Context, state state.ReadOnlyBeaconState, withdrawal *ethpb.Withdrawal)
-	InsertWithdrawalByGwat(ctx context.Context, withdrawal *ethpb.Withdrawal)
+	InsertWithdrawal(ctx context.Context, withdrawal *ethpb.Withdrawal)
 	MarkIncluded(withdrawal *ethpb.Withdrawal)
 }
 
@@ -65,7 +66,7 @@ func (p *Pool) PendingWithdrawals(slot types.Slot, noLimit bool) []*ethpb.Withdr
 
 // InsertWithdrawal into the pool. This method is a no-op if the pending withdrawal already exists,
 // or the validator is already withdrawaled.
-func (p *Pool) InsertWithdrawalByGwat(ctx context.Context, withdrawal *ethpb.Withdrawal) {
+func (p *Pool) InsertWithdrawal(ctx context.Context, withdrawal *ethpb.Withdrawal) {
 	_, span := trace.StartSpan(ctx, "withdrawalPool.InsertWithdrawal")
 	defer span.End()
 	p.lock.Lock()
@@ -77,8 +78,11 @@ func (p *Pool) InsertWithdrawalByGwat(ctx context.Context, withdrawal *ethpb.Wit
 	}
 	if withdrawal.InitTxHash == nil {
 		log.WithFields(log.Fields{
-			"InitTxHash": withdrawal.InitTxHash,
-		}).Warn("InsertWithdrawalByGwat malformed data: InitTxHash")
+			"VIndex":     fmt.Sprintf("%d", withdrawal.ValidatorIndex),
+			"Epoch":      fmt.Sprintf("%d", withdrawal.Epoch),
+			"Amount":     fmt.Sprintf("%d", withdrawal.Amount),
+			"InitTxHash": fmt.Sprintf("%#x", withdrawal.InitTxHash),
+		}).Warn("Withdrawal pool: insert malformed data: InitTxHash")
 		return
 	}
 
@@ -118,4 +122,44 @@ func existsInList(pending []*ethpb.Withdrawal, withdrawal *ethpb.Withdrawal) (bo
 		}
 	}
 	return false, -1
+}
+
+// CleanPool removes invalid items from pool
+func (p *Pool) CleanPool(ctx context.Context, st state.ReadOnlyBeaconState) {
+	_, span := trace.StartSpan(ctx, "withdrawalPool.CleanPool")
+	defer span.End()
+	p.lock.Lock()
+	defer p.lock.Unlock()
+
+	pending := make([]*ethpb.Withdrawal, 0, len(p.pending))
+	for _, itm := range p.pending {
+		if validateWithdrawal(itm, st) {
+			pending = append(pending, itm)
+		}
+	}
+	p.pending = pending
+}
+
+func validateWithdrawal(itm *ethpb.Withdrawal, st state.ReadOnlyBeaconState) bool {
+	bal, err := helpers.AvailableWithdrawalAmount(itm.ValidatorIndex, st)
+	if err != nil {
+		log.WithError(err).WithFields(log.Fields{
+			"VIndex":     fmt.Sprintf("%d", itm.ValidatorIndex),
+			"Epoch":      fmt.Sprintf("%d", itm.Epoch),
+			"Amount":     fmt.Sprintf("%d", itm.Amount),
+			"InitTxHash": fmt.Sprintf("%#x", itm.InitTxHash),
+		}).Error("Withdrawal pool: validate error")
+		return false
+	}
+	if bal < itm.Amount {
+		log.WithError(err).WithFields(log.Fields{
+			"VIndex":     fmt.Sprintf("%d", itm.ValidatorIndex),
+			"Epoch":      fmt.Sprintf("%d", itm.Epoch),
+			"Amount":     fmt.Sprintf("%d", itm.Amount),
+			"InitTxHash": fmt.Sprintf("%#x", itm.InitTxHash),
+			"availBal":   bal,
+		}).Warn("Withdrawal pool: validate: low balance")
+		return false
+	}
+	return true
 }

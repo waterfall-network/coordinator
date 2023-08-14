@@ -94,7 +94,48 @@ func (s *Service) ProcessLog(ctx context.Context, depositLog gwatTypes.Log) erro
 		}
 		return nil
 	}
+	if depositLog.Topics[0] == gwatVal.EvtWithdrawalLogSignature {
+		if err := s.ProcessWithdrawalLog(ctx, depositLog); err != nil {
+			return errors.Wrap(err, "Could not process withdrawal log")
+		}
+		return nil
+	}
 	log.WithField("signature", fmt.Sprintf("%#x", depositLog.Topics[0])).Debug("Not a valid event signature")
+	return nil
+}
+
+func (s *Service) ProcessWithdrawalLog(ctx context.Context, wtdLog gwatTypes.Log) error {
+	pubkey, creatorAddr, valIndex, amtGwei, err := gwatVal.UnpackWithdrawalLogData(wtdLog.Data)
+
+	curSlot := slots.CurrentSlot(s.cfg.finalizedStateAtStartup.GenesisTime())
+	curEpoch := slots.ToEpoch(curSlot)
+
+	log.WithError(err).WithFields(logrus.Fields{
+		"valIndex":    valIndex,
+		"amount":      amtGwei,
+		"pubkey":      fmt.Sprintf("%#x", pubkey),
+		"creatorAddr": fmt.Sprintf("%#x", creatorAddr),
+		"curSlot":     curSlot,
+		"curEpoch":    curEpoch,
+	}).Info("Processing withdrawal")
+
+	if err != nil {
+		return errors.Wrap(err, "Could not unpack log (withdrawal)")
+	}
+
+	deposit, _ := s.cfg.depositCache.DepositByPubkey(ctx, pubkey.Bytes())
+	if deposit == nil {
+		return errors.New("unable to find deposit with the provided public key")
+	}
+
+	exit := &ethpb.Withdrawal{
+		Epoch:          curEpoch,
+		ValidatorIndex: types.ValidatorIndex(valIndex),
+		InitTxHash:     wtdLog.TxHash.Bytes(),
+		Amount:         amtGwei,
+	}
+	s.cfg.withdrawalPool.InsertWithdrawal(s.ctx, exit)
+
 	return nil
 }
 
@@ -109,7 +150,7 @@ func (s *Service) ProcessExitLog(ctx context.Context, exitLog gwatTypes.Log) err
 	}).Info("Processing exit")
 
 	if err != nil {
-		return errors.Wrap(err, "Could not unpack log")
+		return errors.Wrap(err, "Could not unpack log (exit)")
 	}
 
 	totalSecondsPassed := uint64(prysmTime.Now().Unix()) - s.cfg.finalizedStateAtStartup.GenesisTime()
@@ -151,7 +192,7 @@ func (s *Service) ProcessDepositLog(ctx context.Context, depositLog gwatTypes.Lo
 	}).Info("Processing deposit")
 
 	if err != nil {
-		return errors.Wrap(err, "Could not unpack log")
+		return errors.Wrap(err, "Could not unpack log (deposit)")
 	}
 	// If we have already seen this Merkle index, skip processing the log.
 	// This can happen sometimes when we receive the same log twice from the
