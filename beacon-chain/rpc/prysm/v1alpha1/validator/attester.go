@@ -274,5 +274,10 @@ func (vs *Server) SubscribeCommitteeSubnets(ctx context.Context, req *ethpb.Comm
 		}
 	}
 
+	for idx, ps := range req.ProposerSlots {
+		cache.SubnetIDs.AddProposerSubnetID(ps,
+			helpers.ComputeSubnetFromCommitteeAndSlot(currValsLen, req.CommitteeIds[idx], ps))
+	}
+
 	return &emptypb.Empty{}, nil
 }

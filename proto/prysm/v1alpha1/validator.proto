@@ -617,6 +617,7 @@ message CommitteeSubnetsSubscribeRequest {
     // Subscribe as an aggregator means to join the subnet.
     // Subscribe as an attester means finding persistent peers on the subnet to be able to publish attestations.
     repeated bool is_aggregator = 3;
+    repeated uint64 proposer_slots = 4 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Slot"];
 }
 
 // An Ethereum validator.

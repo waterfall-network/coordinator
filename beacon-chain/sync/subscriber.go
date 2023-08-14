@@ -483,13 +483,34 @@ func (s *Service) subscribeDynamicWithSubnets(
 					"curSlot":      slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
 				}).Info("Validator subscription: subscribeDynamicWithSubnets: start lookup Attester Subnets 3")
 
+				for _, idx := range attesterSubs {
+					s.lookupAttesterSubnets(digest, idx)
+				}
 				prevoteSubs := s.attesterSubnetIndices(currentSlot + 1)
 				for _, idx := range prevoteSubs {
 					s.lookupAttesterSubnetsPrevote(digest, idx)
 				}
-				for _, idx := range attesterSubs {
-					s.lookupAttesterSubnets(digest, idx)
+
+				log.WithError(err).WithFields(logrus.Fields{
+					"digest":      fmt.Sprintf("%#x", digest),
+					"prevoteSubs": prevoteSubs,
+					"topic":       topicFormat,
+					"s.curSlot":   s.cfg.chain.CurrentSlot(),
+					"curSlot":     slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+				}).Info("Validator subscription: subscribeDynamicWithSubnets: start lookup Prevote Subnets 4")
+
+				proposerPrevoteSubs := s.proposerSubnetIndices(currentSlot)
+				for _, idx := range proposerPrevoteSubs {
+					s.lookupAttesterSubnetsPrevote(digest, idx)
 				}
+
+				log.WithError(err).WithFields(logrus.Fields{
+					"digest":       fmt.Sprintf("%#x", digest),
+					"proposerSubs": proposerPrevoteSubs,
+					"topic":        topicFormat,
+					"s.curSlot":    s.cfg.chain.CurrentSlot(),
+					"curSlot":      slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+				}).Info("Validator subscription: subscribeDynamicWithSubnets: start lookup Proposer prevote Subnets 5")
 
 				log.WithError(err).WithFields(logrus.Fields{
 					"digest":       fmt.Sprintf("%#x", digest),
@@ -497,7 +518,7 @@ func (s *Service) subscribeDynamicWithSubnets(
 					"topic":        topicFormat,
 					"s.curSlot":    s.cfg.chain.CurrentSlot(),
 					"curSlot":      slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
-				}).Info("Validator subscription: subscribeDynamicWithSubnets: success 4")
+				}).Info("Validator subscription: subscribeDynamicWithSubnets: success 6")
 			}
 		}
 	}()

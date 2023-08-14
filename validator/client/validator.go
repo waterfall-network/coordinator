@@ -611,12 +611,14 @@ func (v *validator) subscribeToSubnets(ctx context.Context, res *ethpb.DutiesRes
 	subscribeCommitteeIndices := make([]types.CommitteeIndex, 0, len(res.CurrentEpochDuties)+len(res.NextEpochDuties))
 	subscribeIsAggregator := make([]bool, 0, len(res.CurrentEpochDuties)+len(res.NextEpochDuties))
 	alreadySubscribed := make(map[[64]byte]bool)
+	proposerSlots := make([]types.Slot, 0, len(res.CurrentEpochDuties)+len(res.NextEpochDuties))
 
 	for _, duty := range res.CurrentEpochDuties {
 		pk := bytesutil.ToBytes48(duty.PublicKey)
 		if duty.Status == ethpb.ValidatorStatus_ACTIVE || duty.Status == ethpb.ValidatorStatus_EXITING {
 			attesterSlot := duty.AttesterSlot
 			committeeIndex := duty.CommitteeIndex
+			ps := duty.ProposerSlots
 
 			alreadySubscribedKey := validatorSubscribeKey(attesterSlot, committeeIndex)
 			if _, ok := alreadySubscribed[alreadySubscribedKey]; ok {
@@ -634,6 +636,7 @@ func (v *validator) subscribeToSubnets(ctx context.Context, res *ethpb.DutiesRes
 			subscribeSlots = append(subscribeSlots, attesterSlot)
 			subscribeCommitteeIndices = append(subscribeCommitteeIndices, committeeIndex)
 			subscribeIsAggregator = append(subscribeIsAggregator, aggregator)
+			proposerSlots = append(proposerSlots, ps...)
 		}
 	}
 
@@ -641,6 +644,7 @@ func (v *validator) subscribeToSubnets(ctx context.Context, res *ethpb.DutiesRes
 		if duty.Status == ethpb.ValidatorStatus_ACTIVE || duty.Status == ethpb.ValidatorStatus_EXITING {
 			attesterSlot := duty.AttesterSlot
 			committeeIndex := duty.CommitteeIndex
+			ps := duty.ProposerSlots
 
 			alreadySubscribedKey := validatorSubscribeKey(attesterSlot, committeeIndex)
 			if _, ok := alreadySubscribed[alreadySubscribedKey]; ok {
@@ -658,13 +662,15 @@ func (v *validator) subscribeToSubnets(ctx context.Context, res *ethpb.DutiesRes
 			subscribeSlots = append(subscribeSlots, attesterSlot)
 			subscribeCommitteeIndices = append(subscribeCommitteeIndices, committeeIndex)
 			subscribeIsAggregator = append(subscribeIsAggregator, aggregator)
+			proposerSlots = append(proposerSlots, ps...)
 		}
 	}
 
 	_, err := v.validatorClient.SubscribeCommitteeSubnets(ctx, &ethpb.CommitteeSubnetsSubscribeRequest{
-		Slots:        subscribeSlots,
-		CommitteeIds: subscribeCommitteeIndices,
-		IsAggregator: subscribeIsAggregator,
+		Slots:         subscribeSlots,
+		CommitteeIds:  subscribeCommitteeIndices,
+		IsAggregator:  subscribeIsAggregator,
+		ProposerSlots: proposerSlots,
 	})
 
 	return err

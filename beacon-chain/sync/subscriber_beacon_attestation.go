@@ -59,3 +59,13 @@ func (_ *Service) attesterSubnetIndices(currentSlot types.Slot) []uint64 {
 	}
 	return slice.SetUint64(commIds)
 }
+
+func (_ *Service) proposerSubnetIndices(currentSlot types.Slot) []uint64 {
+	endEpoch := slots.ToEpoch(currentSlot) + 1
+	endSlot := params.BeaconConfig().SlotsPerEpoch.Mul(uint64(endEpoch))
+	var commIds []uint64
+	for i := currentSlot; i <= endSlot; i++ {
+		commIds = append(commIds, cache.SubnetIDs.GetProposerSubnetIDs(i)...)
+	}
+	return slice.SetUint64(commIds)
+}
