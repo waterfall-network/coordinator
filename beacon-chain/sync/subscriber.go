@@ -222,9 +222,9 @@ func (s *Service) subscribeWithBase(topic string, validator wrappedVal, handle s
 				return
 			}
 
-			if msg.ReceivedFrom == s.cfg.p2p.PeerID() {
-				continue
-			}
+			//if msg.ReceivedFrom == s.cfg.p2p.PeerID() {
+			//	continue
+			//}
 
 			go pipeline(msg)
 		}
@@ -470,7 +470,7 @@ func (s *Service) subscribeDynamicWithSubnets(
 
 				// subscribe desired aggregator subnets.
 				for _, idx := range wantedSubs {
-					s.subscribeAggregatorSubnet(subscriptions, idx, digest, validate, handle)
+					s.subscribeAggregatorSubnet(subscriptions, idx, digest, validate, handle, topicFormat)
 				}
 				// find desired subs for attesters
 				attesterSubs := s.attesterSubnetIndices(currentSlot)
@@ -575,41 +575,44 @@ func (s *Service) subscribeAggregatorSubnet(
 	digest [4]byte,
 	validate wrappedVal,
 	handle subHandler,
+	topicFormat string,
 ) {
 	// do not subscribe if we have no peers in the same
 	// subnet
-	topics := make([]string, 0, 2)
-	topics = append(topics, p2p.GossipTypeMapping[reflect.TypeOf(&ethpb.Attestation{})])
-	topics = append(topics, p2p.GossipTypeMapping[reflect.TypeOf(&ethpb.PreVote{})])
-	for _, topic := range topics {
-		subnetTopic := fmt.Sprintf(topic, digest, idx)
-		// check if subscription exists and if not subscribe the relevant subnet.
-		swb := s.subscribeWithBase(subnetTopic, validate, handle)
-		if subs, exists := subscriptions[idx]; !exists && swb != nil {
-			subscriptions[idx] = make([]*pubsub.Subscription, 0)
-			subscriptions[idx] = append(subscriptions[idx], swb)
-		} else {
-			var found bool
-			for _, sub := range subs {
-				if sub != nil && swb != nil {
-					if sub.Topic() == swb.Topic() {
-						found = true
-					}
-				} else {
+	var topic string
+	if strings.Contains(topicFormat, p2p.GossipPrevoteMessage) {
+		topic = p2p.GossipTypeMapping[reflect.TypeOf(&ethpb.PreVote{})]
+	} else {
+		topic = p2p.GossipTypeMapping[reflect.TypeOf(&ethpb.Attestation{})]
+	}
+
+	subnetTopic := fmt.Sprintf(topic, digest, idx)
+	// check if subscription exists and if not subscribe the relevant subnet.
+	swb := s.subscribeWithBase(subnetTopic, validate, handle)
+	if subs, exists := subscriptions[idx]; !exists && swb != nil {
+		subscriptions[idx] = make([]*pubsub.Subscription, 0)
+		subscriptions[idx] = append(subscriptions[idx], swb)
+	} else {
+		var found bool
+		for _, sub := range subs {
+			if sub != nil && swb != nil {
+				if sub.Topic() == swb.Topic() {
 					found = true
 				}
-			}
-			if !found {
-				subscriptions[idx] = append(subscriptions[idx], swb)
+			} else {
+				found = true
 			}
 		}
-		if !s.validPeersExist(subnetTopic) {
-			log.Infof("No peers found subscribed to attestation gossip subnet with "+
-				"committee index %d. Searching network for peers subscribed to the subnet.", idx)
-			_, err := s.cfg.p2p.FindPeersWithSubnet(s.ctx, subnetTopic, idx, flags.Get().MinimumPeersPerSubnet)
-			if err != nil {
-				log.WithError(err).Debug("Could not search for peers")
-			}
+		if !found {
+			subscriptions[idx] = append(subscriptions[idx], swb)
+		}
+	}
+	if !s.validPeersExist(subnetTopic) {
+		log.Infof("No peers found subscribed to attestation gossip subnet with "+
+			"committee index %d. Searching network for peers subscribed to the subnet.", idx)
+		_, err := s.cfg.p2p.FindPeersWithSubnet(s.ctx, subnetTopic, idx, flags.Get().MinimumPeersPerSubnet)
+		if err != nil {
+			log.WithError(err).Debug("Could not search for peers")
 		}
 	}
 }
