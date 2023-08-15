@@ -713,6 +713,7 @@ type validatorJson struct {
 	ActivationEpoch            string `json:"activation_epoch"`
 	ExitEpoch                  string `json:"exit_epoch"`
 	WithdrawableEpoch          string `json:"withdrawable_epoch"`
+	Withdrawals                string `json:"withdrawals"`
 }
 
 type validatorBalanceJson struct {

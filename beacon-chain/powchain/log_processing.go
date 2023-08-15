@@ -123,18 +123,14 @@ func (s *Service) ProcessWithdrawalLog(ctx context.Context, wtdLog gwatTypes.Log
 		return errors.Wrap(err, "Could not unpack log (withdrawal)")
 	}
 
-	deposit, _ := s.cfg.depositCache.DepositByPubkey(ctx, pubkey.Bytes())
-	if deposit == nil {
-		return errors.New("unable to find deposit with the provided public key")
-	}
-
 	exit := &ethpb.Withdrawal{
-		Epoch:          curEpoch,
+		PublicKey:      pubkey.Bytes(),
 		ValidatorIndex: types.ValidatorIndex(valIndex),
 		InitTxHash:     wtdLog.TxHash.Bytes(),
 		Amount:         amtGwei,
+		Epoch:          curEpoch,
 	}
-	s.cfg.withdrawalPool.InsertWithdrawal(s.ctx, exit)
+	s.cfg.withdrawalPool.InsertWithdrawal(ctx, exit)
 
 	return nil
 }
@@ -171,7 +167,7 @@ func (s *Service) ProcessExitLog(ctx context.Context, exitLog gwatTypes.Log) err
 		InitTxHash:     exitLog.TxHash.Bytes(),
 	}
 
-	s.cfg.exitPool.InsertVoluntaryExitByGwat(s.ctx, exit)
+	s.cfg.exitPool.InsertVoluntaryExitByGwat(ctx, exit)
 
 	return nil
 }

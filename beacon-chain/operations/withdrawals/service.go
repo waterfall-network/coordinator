@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"math"
 	"sort"
 	"sync"
 
@@ -12,6 +13,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	"go.opencensus.io/trace"
@@ -23,7 +25,7 @@ type PoolManager interface {
 	PendingWithdrawals(slot types.Slot, noLimit bool) []*ethpb.Withdrawal
 	InsertWithdrawal(ctx context.Context, withdrawal *ethpb.Withdrawal)
 	MarkIncluded(withdrawal *ethpb.Withdrawal)
-	CleanPool(st state.ReadOnlyBeaconState)
+	OnSlot(st state.ReadOnlyBeaconState)
 }
 
 // Pool is a concrete implementation of PoolManager.
@@ -53,11 +55,15 @@ func (p *Pool) PendingWithdrawals(slot types.Slot, noLimit bool) []*ethpb.Withdr
 		maxWithdrawals = uint64(len(p.pending))
 	}
 	pending := make([]*ethpb.Withdrawal, 0, maxWithdrawals)
-	for _, e := range p.pending {
-		if e.Epoch > slots.ToEpoch(slot) {
+	for _, itm := range p.pending {
+		// not activated validator withdrawal
+		if itm.ValidatorIndex == math.MaxUint64 {
 			continue
 		}
-		pending = append(pending, e)
+		if itm.Epoch > slots.ToEpoch(slot) {
+			continue
+		}
+		pending = append(pending, itm)
 		if uint64(len(pending)) == maxWithdrawals {
 			break
 		}
@@ -126,11 +132,15 @@ func existsInList(pending []*ethpb.Withdrawal, withdrawal *ethpb.Withdrawal) (bo
 	return false, -1
 }
 
-// CleanPool removes invalid items from pool
-func (p *Pool) CleanPool(st state.ReadOnlyBeaconState) {
+// OnSlot removes invalid items from pool
+func (p *Pool) OnSlot(st state.ReadOnlyBeaconState) {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
+	// check validator activation
+	p.handleValidatorActivation(st)
+
+	// remove invalid or stale items
 	pending := make([]*ethpb.Withdrawal, 0, len(p.pending))
 	for _, itm := range p.pending {
 		if validateWithdrawal(itm, st) {
@@ -140,44 +150,49 @@ func (p *Pool) CleanPool(st state.ReadOnlyBeaconState) {
 	p.pending = pending
 }
 
-func validateWithdrawal(itm *ethpb.Withdrawal, st state.ReadOnlyBeaconState) bool {
-	bal, err := helpers.AvailableWithdrawalAmount(itm.ValidatorIndex, st)
-	if err != nil {
-		log.WithError(err).WithFields(log.Fields{
-			"VIndex":     fmt.Sprintf("%d", itm.ValidatorIndex),
-			"PublicKey":  fmt.Sprintf("%#x", itm.PublicKey),
-			"Epoch":      fmt.Sprintf("%d", itm.Epoch),
-			"Amount":     fmt.Sprintf("%d", itm.Amount),
-			"InitTxHash": fmt.Sprintf("%#x", itm.InitTxHash),
-		}).Error("WithdrawalPool pool: validate error")
-		return false
+// handleValidatorActivation set validator index for activated validators.
+func (p *Pool) handleValidatorActivation(st state.ReadOnlyBeaconState) {
+	for i, itm := range p.pending {
+		if itm.ValidatorIndex != math.MaxUint64 {
+			continue
+		}
+		vix, ok := st.ValidatorIndexByPubkey(bytesutil.ToBytes48(itm.PublicKey))
+		if ok {
+			p.pending[i].ValidatorIndex = vix
+			log.WithFields(log.Fields{
+				"PublicKey":  fmt.Sprintf("%d", itm.PublicKey),
+				"VIndex":     fmt.Sprintf("%d", itm.ValidatorIndex),
+				"Epoch":      fmt.Sprintf("%d", itm.Epoch),
+				"Amount":     fmt.Sprintf("%d", itm.Amount),
+				"InitTxHash": fmt.Sprintf("%#x", itm.InitTxHash),
+			}).Info("WithdrawalPool pool: validator activation")
+		}
 	}
-	if bal < itm.Amount {
-		log.WithError(err).WithFields(log.Fields{
-			"VIndex":     fmt.Sprintf("%d", itm.ValidatorIndex),
-			"PublicKey":  fmt.Sprintf("%#x", itm.PublicKey),
-			"Epoch":      fmt.Sprintf("%d", itm.Epoch),
-			"Amount":     fmt.Sprintf("%d", itm.Amount),
-			"InitTxHash": fmt.Sprintf("%#x", itm.InitTxHash),
-			"availBal":   bal,
-		}).Warn("WithdrawalPool pool: validate: low balance")
-		return false
-	}
-	return true
 }
 
-func checkWithdrawalIndex(itm *ethpb.Withdrawal, st state.ReadOnlyBeaconState) bool {
-	if itm.ValidatorIndex != math.MaxUint64 {
+func validateWithdrawal(itm *ethpb.Withdrawal, st state.ReadOnlyBeaconState) bool {
+	// stale not activated validator withdrawal
+	if itm.ValidatorIndex == math.MaxUint64 && itm.Epoch < st.FinalizedCheckpointEpoch() {
+		log.WithFields(log.Fields{
+			"VIndex":     fmt.Sprintf("%d", itm.ValidatorIndex),
+			"PublicKey":  fmt.Sprintf("%#x", itm.PublicKey),
+			"Epoch":      fmt.Sprintf("%d", itm.Epoch),
+			"Amount":     fmt.Sprintf("%d", itm.Amount),
+			"InitTxHash": fmt.Sprintf("%#x", itm.InitTxHash),
+		}).Warn("WithdrawalPool pool: validate: stale not activated validator")
+		return false
+	}
+	// not activated validator withdrawal
+	if itm.ValidatorIndex == math.MaxUint64 {
 		return true
 	}
 
-	st.ValidatorIndexByPubkey(itm.)
-
-
+	// check validator balance
 	bal, err := helpers.AvailableWithdrawalAmount(itm.ValidatorIndex, st)
 	if err != nil {
 		log.WithError(err).WithFields(log.Fields{
 			"VIndex":     fmt.Sprintf("%d", itm.ValidatorIndex),
+			"PublicKey":  fmt.Sprintf("%#x", itm.PublicKey),
 			"Epoch":      fmt.Sprintf("%d", itm.Epoch),
 			"Amount":     fmt.Sprintf("%d", itm.Amount),
 			"InitTxHash": fmt.Sprintf("%#x", itm.InitTxHash),
@@ -187,6 +202,7 @@ func checkWithdrawalIndex(itm *ethpb.Withdrawal, st state.ReadOnlyBeaconState) b
 	if bal < itm.Amount {
 		log.WithError(err).WithFields(log.Fields{
 			"VIndex":     fmt.Sprintf("%d", itm.ValidatorIndex),
+			"PublicKey":  fmt.Sprintf("%#x", itm.PublicKey),
 			"Epoch":      fmt.Sprintf("%d", itm.Epoch),
 			"Amount":     fmt.Sprintf("%d", itm.Amount),
 			"InitTxHash": fmt.Sprintf("%#x", itm.InitTxHash),
