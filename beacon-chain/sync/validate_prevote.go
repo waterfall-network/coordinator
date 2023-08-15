@@ -26,6 +26,7 @@ import (
 )
 
 func (s *Service) validateCommitteeIndexPrevote(ctx context.Context, pid peer.ID, msg *pubsub.Message) (pubsub.ValidationResult, error) {
+	log.Infof("Validation of prevote for with topic %v started", *msg.Topic)
 	if pid == s.cfg.p2p.PeerID() {
 		return pubsub.ValidationAccept, nil
 	}
@@ -92,6 +93,7 @@ func (s *Service) validateCommitteeIndexPrevote(ctx context.Context, pid peer.ID
 	s.setSeenCommitteeIndicesSlot(prevote.Data.Slot, prevote.Data.Index, prevote.AggregationBits)
 
 	msg.ValidatorData = prevote
+	log.Infof("Validation of prevote for slot %d complete", prevote.Data.Slot)
 	return pubsub.ValidationAccept, nil
 }
 

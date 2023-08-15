@@ -37,30 +37,23 @@ func (c *PrevoteCache) HasPrevote(pv *ethpb.PreVote) (bool, error) {
 }
 
 func (c *PrevoteCache) SavePrevote(pv *ethpb.PreVote) error {
-
-	logrus.WithFields(logrus.Fields{
-		"pv.slot":              pv.Data.Slot,
-		"pv.index":             pv.Data.Index,
-		"c.prevoteCache[slot]": c.prevoteCache[pv.Data.Slot],
-		"len(cache)":           len(c.prevoteCache),
-	}).Info("Prevote: SavePrevote 000")
-
 	if pv == nil {
 		return nil
 	}
+
+	logrus.WithFields(logrus.Fields{
+		"pv.slot":    pv.Data.Slot,
+		"pv.index":   pv.Data.Index,
+		"len(cache)": len(c.prevoteCache),
+	}).Info("Prevote: SavePrevote start")
 
 	seen, err := c.hasSeenBit(pv)
 	if err != nil {
 		return err
 	}
 
-	logrus.WithFields(logrus.Fields{
-		"seen":     seen,
-		"pv.slot":  pv.Data.Slot,
-		"pv.index": pv.Data.Index,
-	}).Info("Prevote: SavePrevote 111")
-
 	if seen {
+		logrus.Infof("Has seen bits in prevote fro slot %d", pv.Data.Slot)
 		return nil
 	}
 
@@ -77,11 +70,10 @@ func (c *PrevoteCache) SavePrevote(pv *ethpb.PreVote) error {
 	}
 
 	logrus.WithFields(logrus.Fields{
-		"pv.slot":              pv.Data.Slot,
-		"pv.index":             pv.Data.Index,
-		"c.prevoteCache[slot]": c.prevoteCache[pv.Data.Slot],
-		"len(cache)":           len(c.prevoteCache),
-	}).Info("Prevote: SavePrevote 222")
+		"pv.slot":    pv.Data.Slot,
+		"pv.index":   pv.Data.Index,
+		"len(cache)": len(c.prevoteCache),
+	}).Info("Prevote: SavePrevote done")
 
 	return nil
 }
@@ -117,9 +109,8 @@ func (c *PrevoteCache) GetPrevoteBySlot(ctx context.Context, slot types.Slot) []
 	defer c.prevoteCacheLock.RUnlock()
 
 	logrus.WithFields(logrus.Fields{
-		"slot":                 slot,
-		"c.prevoteCache[slot]": c.prevoteCache[slot],
-		"len(cache)":           len(c.prevoteCache),
+		"slot":       slot,
+		"len(cache)": len(c.prevoteCache),
 	}).Info("Prevote: GetPrevoteBySlot")
 
 	pv := c.prevoteCache[slot]
@@ -135,7 +126,7 @@ func (c *PrevoteCache) PurgeOutdatedPrevote(t time.Time) error {
 
 	logrus.WithFields(logrus.Fields{
 		"len(cache)": len(c.prevoteCache),
-	}).Info("Prevote: PurgeOutdatedPrevote 000")
+	}).Info("Prevote: PurgeOutdatedPrevote start")
 
 	for k, v := range c.prevoteCache {
 		if k < slots.CurrentSlot(uint64(t.Unix())) {
@@ -151,7 +142,7 @@ func (c *PrevoteCache) PurgeOutdatedPrevote(t time.Time) error {
 
 	logrus.WithFields(logrus.Fields{
 		"len(cache)": len(c.prevoteCache),
-	}).Info("Prevote: PurgeOutdatedPrevote 111")
+	}).Info("Prevote: PurgeOutdatedPrevote done")
 
 	return nil
 }

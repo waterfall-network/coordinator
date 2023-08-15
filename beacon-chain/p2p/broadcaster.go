@@ -83,7 +83,6 @@ func (s *Service) BroadcastPrevoting(ctx context.Context, subnet uint64, prevote
 		"pv.AggregationBits": fmt.Sprintf("%b", prevote.AggregationBits),
 		"pv.Data.Slot":       prevote.Data.Slot,
 		"pv.Data.Index":      prevote.Data.Index,
-		//"pv.Candidates":      fmt.Sprintf("%#x", prevote.Data.Candidates),
 	}).Info("Prevote: BroadcastPrevoting")
 
 	forkDigest, err := s.currentForkDigest()
