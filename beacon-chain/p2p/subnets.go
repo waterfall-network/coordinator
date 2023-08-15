@@ -77,14 +77,6 @@ func (s *Service) FindPeersWithSubnet(ctx context.Context, topic string, index u
 
 	nodes := enode.ReadNodes(iterator, int(params.BeaconNetworkConfig().MinimumPeersInSubnetSearch))
 
-	log.WithFields(logrus.Fields{
-		"len(nodes)": len(nodes),
-		"curSlot":    slots.CurrentSlot(uint64(s.genesisTime.Unix())),
-		"idx":        index,
-		"threshold":  threshold,
-		"currNum":    currNum,
-	}).Info("Validator subscription: FindPeersWithSubnet: 0")
-
 	// removed cycle to waite required numbers of subnets
 	//if len(nodes) == 0 {
 	//	time.Sleep(time.Duration(20) * time.Millisecond)
