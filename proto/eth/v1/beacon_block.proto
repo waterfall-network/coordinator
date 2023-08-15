@@ -154,8 +154,8 @@ message VoluntaryExit {
 // - whole balance if validator is not active
 // The message does not contain a validator signature.
  message Withdrawal {
-    // The epoch on when withdrawals request becomes valid.
-    uint64 epoch = 1 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Epoch"];
+     // 48 byte validator public key.
+     bytes public_key = 1 [(ethereum.eth.ext.ssz_size) = "48"];
 
     // Index of the validator.
     uint64 validator_index = 2 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.ValidatorIndex"];
@@ -165,7 +165,10 @@ message VoluntaryExit {
 
     // hash of transaction initiator of operation
     bytes init_tx_hash = 4 [(ethereum.eth.ext.ssz_size) = "32"];
-}
+
+     // The epoch on when withdrawals request becomes valid.
+     uint64 epoch = 5 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Epoch"];
+ }
 
 // Eth1Data represents references to the Ethereum 1.x deposit contract.
 message Eth1Data {

@@ -14,7 +14,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
-	"gitlab.waterfall.network/waterfall/protocol/gwat/common/math"
 	"go.opencensus.io/trace"
 )
 
@@ -81,6 +80,7 @@ func (p *Pool) InsertWithdrawal(ctx context.Context, withdrawal *ethpb.Withdrawa
 	if withdrawal.InitTxHash == nil {
 		log.WithFields(log.Fields{
 			"VIndex":     fmt.Sprintf("%d", withdrawal.ValidatorIndex),
+			"PublicKey":  fmt.Sprintf("%#x", withdrawal.PublicKey),
 			"Epoch":      fmt.Sprintf("%d", withdrawal.Epoch),
 			"Amount":     fmt.Sprintf("%d", withdrawal.Amount),
 			"InitTxHash": fmt.Sprintf("%#x", withdrawal.InitTxHash),
@@ -145,6 +145,7 @@ func validateWithdrawal(itm *ethpb.Withdrawal, st state.ReadOnlyBeaconState) boo
 	if err != nil {
 		log.WithError(err).WithFields(log.Fields{
 			"VIndex":     fmt.Sprintf("%d", itm.ValidatorIndex),
+			"PublicKey":  fmt.Sprintf("%#x", itm.PublicKey),
 			"Epoch":      fmt.Sprintf("%d", itm.Epoch),
 			"Amount":     fmt.Sprintf("%d", itm.Amount),
 			"InitTxHash": fmt.Sprintf("%#x", itm.InitTxHash),
@@ -154,6 +155,7 @@ func validateWithdrawal(itm *ethpb.Withdrawal, st state.ReadOnlyBeaconState) boo
 	if bal < itm.Amount {
 		log.WithError(err).WithFields(log.Fields{
 			"VIndex":     fmt.Sprintf("%d", itm.ValidatorIndex),
+			"PublicKey":  fmt.Sprintf("%#x", itm.PublicKey),
 			"Epoch":      fmt.Sprintf("%d", itm.Epoch),
 			"Amount":     fmt.Sprintf("%d", itm.Amount),
 			"InitTxHash": fmt.Sprintf("%#x", itm.InitTxHash),
