@@ -32,12 +32,12 @@ func (vs *Server) processPrevoteData(prevoteData []*ethpb.PreVote, optSpines []g
 	voters := prevoteData[0].GetAggregationBits().Len()
 	thresholdVotes := voters/2 + 1
 
-	log.WithFields(logrus.Fields{
-		"1.thresholdVotes": thresholdVotes,
-	}).Info("processPrevoteData: threshold of votes which is 50% + 1 vote")
-
 	for k, v := range votes {
 		if v < thresholdVotes {
+			log.WithFields(logrus.Fields{
+				"1.thresholdVotes": thresholdVotes,
+				"2.votesAmount":    v,
+			}).Info("processPrevoteData: chain has less votes than thresholdVotes")
 			delete(votes, k)
 			delete(chains, k)
 		}
