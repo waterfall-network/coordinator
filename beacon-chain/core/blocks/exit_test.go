@@ -22,7 +22,8 @@ func TestProcessVoluntaryExits_NotActiveLongEnoughToExit(t *testing.T) {
 	exits := []*ethpb.VoluntaryExit{{ValidatorIndex: 0, Epoch: 0}}
 	registry := []*ethpb.Validator{
 		{
-			ExitEpoch: params.BeaconConfig().FarFutureEpoch,
+			ExitEpoch:   params.BeaconConfig().FarFutureEpoch,
+			Withdrawals: 0,
 		},
 	}
 	state, err := v1.InitializeFromProto(&ethpb.BeaconState{
@@ -46,7 +47,8 @@ func TestProcessVoluntaryExits_ExitAlreadySubmitted(t *testing.T) {
 	exits := []*ethpb.VoluntaryExit{{Epoch: 10}}
 	registry := []*ethpb.Validator{
 		{
-			ExitEpoch: 10,
+			ExitEpoch:   10,
+			Withdrawals: 0,
 		},
 	}
 	state, err := v1.InitializeFromProto(&ethpb.BeaconState{
@@ -76,6 +78,7 @@ func TestProcessVoluntaryExits_AppliesCorrectStatus(t *testing.T) {
 		{
 			ExitEpoch:       params.BeaconConfig().FarFutureEpoch,
 			ActivationEpoch: 0,
+			Withdrawals:     0,
 		},
 	}
 	state, err := v1.InitializeFromProto(&ethpb.BeaconState{

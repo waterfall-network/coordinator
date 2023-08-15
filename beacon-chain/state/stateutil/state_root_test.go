@@ -77,6 +77,7 @@ func setupGenesisState(tb testing.TB, count uint64) *ethpb.BeaconState {
 			ActivationEpoch:            1,
 			ExitEpoch:                  1,
 			WithdrawableEpoch:          1,
+			Withdrawals:                0,
 		})
 		genesisState.Balances = append(genesisState.Balances, params.BeaconConfig().MaxEffectiveBalance)
 	}

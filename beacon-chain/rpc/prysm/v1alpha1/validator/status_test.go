@@ -97,6 +97,7 @@ func TestValidatorStatus_Deposited(t *testing.T) {
 			{
 				PublicKey:                  pubKey1,
 				ActivationEligibilityEpoch: 1,
+				Withdrawals:                0,
 			},
 		},
 	})
@@ -148,6 +149,7 @@ func TestValidatorStatus_PartiallyDeposited(t *testing.T) {
 			{
 				PublicKey:                  pubKey1,
 				ActivationEligibilityEpoch: 1,
+				Withdrawals:                0,
 			},
 		},
 	})
@@ -187,6 +189,7 @@ func TestValidatorStatus_Pending(t *testing.T) {
 			PublicKey:             pubKey,
 			CreatorAddress:        make([]byte, 20),
 			WithdrawalCredentials: make([]byte, 20),
+			Withdrawals:           0,
 		},
 	})
 	require.NoError(t, err)
@@ -518,17 +521,20 @@ func TestActivationStatus_OK(t *testing.T) {
 				ActivationEpoch: 0,
 				ExitEpoch:       params.BeaconConfig().FarFutureEpoch,
 				PublicKey:       pubKeys[0],
+				Withdrawals:     0,
 			},
 			{
 				ActivationEpoch: 0,
 				ExitEpoch:       params.BeaconConfig().FarFutureEpoch,
 				PublicKey:       pubKeys[1],
+				Withdrawals:     0,
 			},
 			{
 				ActivationEligibilityEpoch: 700,
 				ExitEpoch:                  params.BeaconConfig().FarFutureEpoch,
 				PublicKey:                  pubKeys[3],
 				EffectiveBalance:           params.BeaconConfig().MaxEffectiveBalance,
+				Withdrawals:                0,
 			},
 		},
 	})
@@ -631,6 +637,7 @@ func TestValidatorStatus_CorrectActivationQueue(t *testing.T) {
 			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			WithdrawableEpoch:     params.BeaconConfig().FarFutureEpoch,
+			Withdrawals:           0,
 		},
 		{
 			ActivationEpoch:       0,
@@ -639,6 +646,7 @@ func TestValidatorStatus_CorrectActivationQueue(t *testing.T) {
 			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			WithdrawableEpoch:     params.BeaconConfig().FarFutureEpoch,
+			Withdrawals:           0,
 		},
 		{
 			ActivationEpoch:       0,
@@ -647,6 +655,7 @@ func TestValidatorStatus_CorrectActivationQueue(t *testing.T) {
 			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			WithdrawableEpoch:     params.BeaconConfig().FarFutureEpoch,
+			Withdrawals:           0,
 		},
 		{
 			ActivationEpoch:       0,
@@ -655,6 +664,7 @@ func TestValidatorStatus_CorrectActivationQueue(t *testing.T) {
 			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			WithdrawableEpoch:     params.BeaconConfig().FarFutureEpoch,
+			Withdrawals:           0,
 		},
 		{
 			ActivationEpoch:       types.Epoch(currentSlot/params.BeaconConfig().SlotsPerEpoch + 1),
@@ -663,6 +673,7 @@ func TestValidatorStatus_CorrectActivationQueue(t *testing.T) {
 			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			WithdrawableEpoch:     params.BeaconConfig().FarFutureEpoch,
+			Withdrawals:           0,
 		},
 		{
 			ActivationEpoch:       types.Epoch(currentSlot/params.BeaconConfig().SlotsPerEpoch + 4),
@@ -671,6 +682,7 @@ func TestValidatorStatus_CorrectActivationQueue(t *testing.T) {
 			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			WithdrawableEpoch:     params.BeaconConfig().FarFutureEpoch,
+			Withdrawals:           0,
 		},
 	}
 	state, err := util.NewBeaconState()
@@ -740,28 +752,33 @@ func TestMultipleValidatorStatus_Pubkeys(t *testing.T) {
 				ActivationEpoch: 0,
 				ExitEpoch:       params.BeaconConfig().FarFutureEpoch,
 				PublicKey:       pubKeys[0],
+				Withdrawals:     0,
 			},
 			{
 				ActivationEpoch: 0,
 				ExitEpoch:       params.BeaconConfig().FarFutureEpoch,
 				PublicKey:       pubKeys[1],
+				Withdrawals:     0,
 			},
 			{
 				ActivationEligibilityEpoch: 700,
 				ExitEpoch:                  params.BeaconConfig().FarFutureEpoch,
 				PublicKey:                  pubKeys[3],
 				EffectiveBalance:           params.BeaconConfig().MaxEffectiveBalance,
+				Withdrawals:                0,
 			},
 			{
 				ActivationEligibilityEpoch: 700,
 				ExitEpoch:                  params.BeaconConfig().FarFutureEpoch,
 				PublicKey:                  pubKeys[4],
 				EffectiveBalance:           params.BeaconConfig().MinDepositAmount,
+				Withdrawals:                0,
 			},
 			{
 				ActivationEligibilityEpoch: 700,
 				ExitEpoch:                  params.BeaconConfig().FarFutureEpoch,
 				PublicKey:                  pubKeys[5],
+				Withdrawals:                0,
 			},
 		},
 	})
@@ -839,33 +856,39 @@ func TestMultipleValidatorStatus_Indices(t *testing.T) {
 				ActivationEpoch: 0,
 				ExitEpoch:       params.BeaconConfig().FarFutureEpoch,
 				PublicKey:       pubKeys[0],
+				Withdrawals:     0,
 			},
 			{
 				ActivationEpoch: 0,
 				ExitEpoch:       params.BeaconConfig().FarFutureEpoch,
 				PublicKey:       pubKeys[1],
+				Withdrawals:     0,
 			},
 			{
 				ActivationEligibilityEpoch: 700,
 				ExitEpoch:                  params.BeaconConfig().FarFutureEpoch,
 				PublicKey:                  pubKeys[2],
 				EffectiveBalance:           params.BeaconConfig().MaxEffectiveBalance,
+				Withdrawals:                0,
 			},
 			{
-				Slashed:   true,
-				ExitEpoch: epoch + 1,
-				PublicKey: pubKeys[3],
+				Slashed:     true,
+				ExitEpoch:   epoch + 1,
+				PublicKey:   pubKeys[3],
+				Withdrawals: 0,
 			},
 			{
 				ActivationEligibilityEpoch: 700,
 				ExitEpoch:                  params.BeaconConfig().FarFutureEpoch,
 				PublicKey:                  pubKeys[4],
 				EffectiveBalance:           params.BeaconConfig().MinDepositAmount,
+				Withdrawals:                0,
 			},
 			{
 				ActivationEligibilityEpoch: 700,
 				ExitEpoch:                  params.BeaconConfig().FarFutureEpoch,
 				PublicKey:                  pubKeys[5],
+				Withdrawals:                0,
 			},
 		},
 	}

@@ -41,6 +41,7 @@ func Test_processQueuedBlocks_DetectsDoubleProposals(t *testing.T) {
 			PublicKey:             privKey.PublicKey().Marshal(),
 			CreatorAddress:        make([]byte, 20),
 			WithdrawalCredentials: make([]byte, 20),
+			Withdrawals:           0,
 		}
 	}
 	err = beaconState.SetValidators(validators)

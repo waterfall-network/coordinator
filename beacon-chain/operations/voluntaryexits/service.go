@@ -20,6 +20,7 @@ type PoolManager interface {
 	PendingExits(state state.ReadOnlyBeaconState, slot types.Slot, noLimit bool) []*ethpb.VoluntaryExit
 	InsertVoluntaryExitByGwat(ctx context.Context, exit *ethpb.VoluntaryExit)
 	MarkIncluded(exit *ethpb.VoluntaryExit)
+	CleanPool(st state.ReadOnlyBeaconState)
 	// Deprecated
 	InsertVoluntaryExit(ctx context.Context, state state.ReadOnlyBeaconState, exit *ethpb.VoluntaryExit)
 }
@@ -166,9 +167,7 @@ func existsInList(pending []*ethpb.VoluntaryExit, searchingFor types.ValidatorIn
 }
 
 // CleanPool removes invalid items from pool
-func (p *Pool) CleanPool(ctx context.Context, st state.ReadOnlyBeaconState) {
-	_, span := trace.StartSpan(ctx, "exitPool.CleanPool")
-	defer span.End()
+func (p *Pool) CleanPool(st state.ReadOnlyBeaconState) {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 

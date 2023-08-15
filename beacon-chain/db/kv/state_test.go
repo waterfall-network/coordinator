@@ -721,6 +721,7 @@ func validators(limit int) []*ethpb.Validator {
 			ActivationEpoch:            types.Epoch(rand.Uint64()),
 			ExitEpoch:                  types.Epoch(rand.Uint64()),
 			WithdrawableEpoch:          types.Epoch(rand.Uint64()),
+			Withdrawals:                0,
 		}
 		vals = append(vals, val)
 	}

@@ -628,6 +628,7 @@ func genValidator() *v1alpha1.Validator {
 		ActivationEpoch:            14325,
 		ExitEpoch:                  23425,
 		WithdrawableEpoch:          30000,
+		Withdrawals:                0,
 	}
 }
 

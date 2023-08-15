@@ -162,7 +162,7 @@ func (s *Service) ProcessExitLog(ctx context.Context, exitLog gwatTypes.Log) err
 
 	deposit, _ := s.cfg.depositCache.DepositByPubkey(ctx, pubkey.Bytes())
 	if deposit == nil {
-		return errors.New("unable to find deposit with the provided public key")
+		return errors.New("unable to find deposit with the provided public key (exit)")
 	}
 
 	exit := &ethpb.VoluntaryExit{

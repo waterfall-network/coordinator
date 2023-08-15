@@ -31,6 +31,7 @@ type blockData struct {
 	ProposerSlashings []*ethpb.ProposerSlashing
 	AttesterSlashings []*ethpb.AttesterSlashing
 	VoluntaryExits    []*ethpb.VoluntaryExit
+	Withdrawals       []*ethpb.Withdrawal
 }
 
 func (vs *Server) getPhase0BeaconBlock(ctx context.Context, req *ethpb.BlockRequest) (*ethpb.BeaconBlock, error) {
@@ -184,20 +185,25 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		}
 		validAttSlashings = append(validAttSlashings, slashing)
 	}
-	exits := vs.ExitPool.PendingExits(head, req.Slot, false /*noLimit*/)
+
+	vs.ExitPool.CleanPool(head)
+	exits := vs.ExitPool.PendingExits(head, req.Slot, false)
 	validExits := make([]*ethpb.VoluntaryExit, 0, len(exits))
 	for _, exit := range exits {
 		val, err := head.ValidatorAtIndexReadOnly(exit.ValidatorIndex)
 		if err != nil {
-			log.WithError(err).Warn("Proposer: invalid exit")
+			log.WithError(err).Warn("Proposer: invalid withdrawal")
 			continue
 		}
 		if err := blocks.VerifyExitData(val, head.Slot(), exit); err != nil {
-			log.WithError(err).Warn("Proposer: invalid exit")
+			log.WithError(err).Warn("Proposer: invalid withdrawal")
 			continue
 		}
 		validExits = append(validExits, exit)
 	}
+
+	vs.WithdrawalPool.CleanPool(head)
+	withdrawals := vs.WithdrawalPool.PendingWithdrawals(req.Slot, false)
 
 	return &blockData{
 		ParentRoot:        parentRoot[:],
@@ -209,5 +215,6 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		ProposerSlashings: validProposerSlashings,
 		AttesterSlashings: validAttSlashings,
 		VoluntaryExits:    validExits,
+		Withdrawals:       withdrawals,
 	}, nil
 }

@@ -401,6 +401,7 @@ func Test_V1Alpha1ValidatorToV1(t *testing.T) {
 		ActivationEpoch:            11,
 		ExitEpoch:                  111,
 		WithdrawableEpoch:          1111,
+		Withdrawals:                0,
 	}
 
 	v1Validator := V1Alpha1ValidatorToV1(v1Alpha1Validator)
@@ -427,6 +428,7 @@ func Test_V1ValidatorToV1Alpha1(t *testing.T) {
 		ActivationEpoch:            11,
 		ExitEpoch:                  111,
 		WithdrawableEpoch:          1111,
+		Withdrawals:                0,
 	}
 
 	v1Alpha1Validator := V1ValidatorToV1Alpha1(v1Validator)

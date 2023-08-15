@@ -309,6 +309,7 @@ func V1Alpha1ValidatorToV1(v1Alpha1Validator *ethpbalpha.Validator) *ethpbv1.Val
 		ActivationEpoch:            v1Alpha1Validator.ActivationEpoch,
 		ExitEpoch:                  v1Alpha1Validator.ExitEpoch,
 		WithdrawableEpoch:          v1Alpha1Validator.WithdrawableEpoch,
+		Withdrawals:                v1Alpha1Validator.Withdrawals,
 	}
 }
 
@@ -327,6 +328,7 @@ func V1ValidatorToV1Alpha1(v1Validator *ethpbv1.Validator) *ethpbalpha.Validator
 		ActivationEpoch:            v1Validator.ActivationEpoch,
 		ExitEpoch:                  v1Validator.ExitEpoch,
 		WithdrawableEpoch:          v1Validator.WithdrawableEpoch,
+		Withdrawals:                v1Validator.Withdrawals,
 	}
 }
 
@@ -388,6 +390,7 @@ func BeaconStateToProto(state state.BeaconState) (*ethpbv1.BeaconState, error) {
 			ActivationEpoch:            validator.ActivationEpoch,
 			ExitEpoch:                  validator.ExitEpoch,
 			WithdrawableEpoch:          validator.WithdrawableEpoch,
+			Withdrawals:                validator.Withdrawals,
 		}
 	}
 	resultPrevEpochAtts := make([]*ethpbv1.PendingAttestation, len(sourcePrevEpochAtts))

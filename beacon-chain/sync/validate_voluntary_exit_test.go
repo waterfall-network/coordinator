@@ -35,6 +35,7 @@ func setupValidExit(t *testing.T) (*ethpb.VoluntaryExit, state.BeaconState) {
 		{
 			ExitEpoch:       params.BeaconConfig().FarFutureEpoch,
 			ActivationEpoch: 0,
+			Withdrawals:     0,
 		},
 	}
 	state, err := v1.InitializeFromProto(&ethpb.BeaconState{

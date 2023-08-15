@@ -70,6 +70,7 @@ func setupGenesisState(tb testing.TB, count uint64) *ethpb.BeaconState {
 			ActivationEpoch:            1,
 			ExitEpoch:                  1,
 			WithdrawableEpoch:          1,
+			Withdrawals:                0,
 		})
 		genesisState.Balances = append(genesisState.Balances, params.BeaconConfig().MaxEffectiveBalance)
 	}
@@ -92,6 +93,7 @@ func BenchmarkCloneValidators_Proto(b *testing.B) {
 			ActivationEpoch:            3,
 			ExitEpoch:                  4,
 			WithdrawableEpoch:          5,
+			Withdrawals:                0,
 		}
 	}
 	b.StartTimer()
@@ -116,6 +118,7 @@ func BenchmarkCloneValidators_Manual(b *testing.B) {
 			ActivationEpoch:            3,
 			ExitEpoch:                  4,
 			WithdrawableEpoch:          5,
+			Withdrawals:                0,
 		}
 	}
 	b.StartTimer()
@@ -175,6 +178,7 @@ func cloneValidatorsManually(vals []*ethpb.Validator) []*ethpb.Validator {
 			ActivationEpoch:            val.ActivationEpoch,
 			ExitEpoch:                  val.ExitEpoch,
 			WithdrawableEpoch:          val.WithdrawableEpoch,
+			Withdrawals:                0,
 		}
 	}
 	return res

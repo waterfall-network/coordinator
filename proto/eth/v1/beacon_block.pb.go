@@ -536,7 +536,7 @@ func (x *Withdrawal) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Withdrawal.ProtoReflect.Descriptor instead.
+// Deprecated: Use WithdrawalPool.ProtoReflect.Descriptor instead.
 func (*Withdrawal) Descriptor() ([]byte, []int) {
 	return file_proto_eth_v1_beacon_block_proto_rawDescGZIP(), []int{7}
 }
@@ -1225,7 +1225,7 @@ var file_proto_eth_v1_beacon_block_proto_goTypes = []interface{}{
 	(*AttesterSlashing)(nil),        // 4: ethereum.eth.v1.AttesterSlashing
 	(*Deposit)(nil),                 // 5: ethereum.eth.v1.Deposit
 	(*VoluntaryExit)(nil),           // 6: ethereum.eth.v1.VoluntaryExit
-	(*Withdrawal)(nil),              // 7: ethereum.eth.v1.Withdrawal
+	(*Withdrawal)(nil),              // 7: ethereum.eth.v1.WithdrawalPool
 	(*Eth1Data)(nil),                // 8: ethereum.eth.v1.Eth1Data
 	(*BeaconBlockHeader)(nil),       // 9: ethereum.eth.v1.BeaconBlockHeader
 	(*SignedBeaconBlockHeader)(nil), // 10: ethereum.eth.v1.SignedBeaconBlockHeader
@@ -1244,7 +1244,7 @@ var file_proto_eth_v1_beacon_block_proto_depIdxs = []int32{
 	14, // 5: ethereum.eth.v1.BeaconBlockBody.attestations:type_name -> ethereum.eth.v1.Attestation
 	5,  // 6: ethereum.eth.v1.BeaconBlockBody.deposits:type_name -> ethereum.eth.v1.Deposit
 	6,  // 7: ethereum.eth.v1.BeaconBlockBody.voluntary_exits:type_name -> ethereum.eth.v1.VoluntaryExit
-	7,  // 8: ethereum.eth.v1.BeaconBlockBody.withdrawals:type_name -> ethereum.eth.v1.Withdrawal
+	7,  // 8: ethereum.eth.v1.BeaconBlockBody.withdrawals:type_name -> ethereum.eth.v1.WithdrawalPool
 	10, // 9: ethereum.eth.v1.ProposerSlashing.signed_header_1:type_name -> ethereum.eth.v1.SignedBeaconBlockHeader
 	10, // 10: ethereum.eth.v1.ProposerSlashing.signed_header_2:type_name -> ethereum.eth.v1.SignedBeaconBlockHeader
 	11, // 11: ethereum.eth.v1.AttesterSlashing.attestation_1:type_name -> ethereum.eth.v1.IndexedAttestation

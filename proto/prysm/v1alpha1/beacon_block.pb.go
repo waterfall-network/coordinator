@@ -1007,7 +1007,7 @@ func (x *Withdrawal) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Withdrawal.ProtoReflect.Descriptor instead.
+// Deprecated: Use WithdrawalPool.ProtoReflect.Descriptor instead.
 func (*Withdrawal) Descriptor() ([]byte, []int) {
 	return file_proto_prysm_v1alpha1_beacon_block_proto_rawDescGZIP(), []int{12}
 }
@@ -2705,7 +2705,7 @@ var file_proto_prysm_v1alpha1_beacon_block_proto_goTypes = []interface{}{
 	(*AttesterSlashing)(nil),                  // 9: ethereum.eth.v1alpha1.AttesterSlashing
 	(*Deposit)(nil),                           // 10: ethereum.eth.v1alpha1.Deposit
 	(*VoluntaryExit)(nil),                     // 11: ethereum.eth.v1alpha1.VoluntaryExit
-	(*Withdrawal)(nil),                        // 12: ethereum.eth.v1alpha1.Withdrawal
+	(*Withdrawal)(nil),                        // 12: ethereum.eth.v1alpha1.WithdrawalPool
 	(*Eth1Data)(nil),                          // 13: ethereum.eth.v1alpha1.Eth1Data
 	(*BeaconBlockHeader)(nil),                 // 14: ethereum.eth.v1alpha1.BeaconBlockHeader
 	(*SignedBeaconBlockHeader)(nil),           // 15: ethereum.eth.v1alpha1.SignedBeaconBlockHeader
@@ -2742,7 +2742,7 @@ var file_proto_prysm_v1alpha1_beacon_block_proto_depIdxs = []int32{
 	26, // 15: ethereum.eth.v1alpha1.BeaconBlockBody.attestations:type_name -> ethereum.eth.v1alpha1.Attestation
 	10, // 16: ethereum.eth.v1alpha1.BeaconBlockBody.deposits:type_name -> ethereum.eth.v1alpha1.Deposit
 	11, // 17: ethereum.eth.v1alpha1.BeaconBlockBody.voluntary_exits:type_name -> ethereum.eth.v1alpha1.VoluntaryExit
-	12, // 18: ethereum.eth.v1alpha1.BeaconBlockBody.withdrawals:type_name -> ethereum.eth.v1alpha1.Withdrawal
+	12, // 18: ethereum.eth.v1alpha1.BeaconBlockBody.withdrawals:type_name -> ethereum.eth.v1alpha1.WithdrawalPool
 	13, // 19: ethereum.eth.v1alpha1.BeaconBlockBodyAltair.eth1_data:type_name -> ethereum.eth.v1alpha1.Eth1Data
 	8,  // 20: ethereum.eth.v1alpha1.BeaconBlockBodyAltair.proposer_slashings:type_name -> ethereum.eth.v1alpha1.ProposerSlashing
 	9,  // 21: ethereum.eth.v1alpha1.BeaconBlockBodyAltair.attester_slashings:type_name -> ethereum.eth.v1alpha1.AttesterSlashing
@@ -2750,7 +2750,7 @@ var file_proto_prysm_v1alpha1_beacon_block_proto_depIdxs = []int32{
 	10, // 23: ethereum.eth.v1alpha1.BeaconBlockBodyAltair.deposits:type_name -> ethereum.eth.v1alpha1.Deposit
 	11, // 24: ethereum.eth.v1alpha1.BeaconBlockBodyAltair.voluntary_exits:type_name -> ethereum.eth.v1alpha1.VoluntaryExit
 	17, // 25: ethereum.eth.v1alpha1.BeaconBlockBodyAltair.sync_aggregate:type_name -> ethereum.eth.v1alpha1.SyncAggregate
-	12, // 26: ethereum.eth.v1alpha1.BeaconBlockBodyAltair.withdrawals:type_name -> ethereum.eth.v1alpha1.Withdrawal
+	12, // 26: ethereum.eth.v1alpha1.BeaconBlockBodyAltair.withdrawals:type_name -> ethereum.eth.v1alpha1.WithdrawalPool
 	15, // 27: ethereum.eth.v1alpha1.ProposerSlashing.header_1:type_name -> ethereum.eth.v1alpha1.SignedBeaconBlockHeader
 	15, // 28: ethereum.eth.v1alpha1.ProposerSlashing.header_2:type_name -> ethereum.eth.v1alpha1.SignedBeaconBlockHeader
 	16, // 29: ethereum.eth.v1alpha1.AttesterSlashing.attestation_1:type_name -> ethereum.eth.v1alpha1.IndexedAttestation
@@ -2768,7 +2768,7 @@ var file_proto_prysm_v1alpha1_beacon_block_proto_depIdxs = []int32{
 	11, // 41: ethereum.eth.v1alpha1.BeaconBlockBodyBellatrix.voluntary_exits:type_name -> ethereum.eth.v1alpha1.VoluntaryExit
 	17, // 42: ethereum.eth.v1alpha1.BeaconBlockBodyBellatrix.sync_aggregate:type_name -> ethereum.eth.v1alpha1.SyncAggregate
 	28, // 43: ethereum.eth.v1alpha1.BeaconBlockBodyBellatrix.execution_payload:type_name -> ethereum.engine.v1.ExecutionPayload
-	12, // 44: ethereum.eth.v1alpha1.BeaconBlockBodyBellatrix.withdrawals:type_name -> ethereum.eth.v1alpha1.Withdrawal
+	12, // 44: ethereum.eth.v1alpha1.BeaconBlockBodyBellatrix.withdrawals:type_name -> ethereum.eth.v1alpha1.WithdrawalPool
 	22, // 45: ethereum.eth.v1alpha1.SignedBlindedBeaconBlockBellatrix.block:type_name -> ethereum.eth.v1alpha1.BlindedBeaconBlockBellatrix
 	23, // 46: ethereum.eth.v1alpha1.BlindedBeaconBlockBellatrix.body:type_name -> ethereum.eth.v1alpha1.BlindedBeaconBlockBodyBellatrix
 	13, // 47: ethereum.eth.v1alpha1.BlindedBeaconBlockBodyBellatrix.eth1_data:type_name -> ethereum.eth.v1alpha1.Eth1Data
@@ -2779,7 +2779,7 @@ var file_proto_prysm_v1alpha1_beacon_block_proto_depIdxs = []int32{
 	11, // 52: ethereum.eth.v1alpha1.BlindedBeaconBlockBodyBellatrix.voluntary_exits:type_name -> ethereum.eth.v1alpha1.VoluntaryExit
 	17, // 53: ethereum.eth.v1alpha1.BlindedBeaconBlockBodyBellatrix.sync_aggregate:type_name -> ethereum.eth.v1alpha1.SyncAggregate
 	24, // 54: ethereum.eth.v1alpha1.BlindedBeaconBlockBodyBellatrix.execution_payload_header:type_name -> ethereum.eth.v1alpha1.ExecutionPayloadHeader
-	12, // 55: ethereum.eth.v1alpha1.BlindedBeaconBlockBodyBellatrix.withdrawals:type_name -> ethereum.eth.v1alpha1.Withdrawal
+	12, // 55: ethereum.eth.v1alpha1.BlindedBeaconBlockBodyBellatrix.withdrawals:type_name -> ethereum.eth.v1alpha1.WithdrawalPool
 	56, // [56:56] is the sub-list for method output_type
 	56, // [56:56] is the sub-list for method input_type
 	56, // [56:56] is the sub-list for extension type_name

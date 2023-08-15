@@ -209,16 +209,20 @@ func TestPool_InsertVoluntaryExit(t *testing.T) {
 	ctx := context.Background()
 	validators := []*ethpb.Validator{
 		{ // 0
-			ExitEpoch: params.BeaconConfig().FarFutureEpoch,
+			ExitEpoch:   params.BeaconConfig().FarFutureEpoch,
+			Withdrawals: 0,
 		},
 		{ // 1
-			ExitEpoch: params.BeaconConfig().FarFutureEpoch,
+			ExitEpoch:   params.BeaconConfig().FarFutureEpoch,
+			Withdrawals: 0,
 		},
 		{ // 2 - Already exited.
-			ExitEpoch: 15,
+			ExitEpoch:   15,
+			Withdrawals: 0,
 		},
 		{ // 3
-			ExitEpoch: params.BeaconConfig().FarFutureEpoch,
+			ExitEpoch:   params.BeaconConfig().FarFutureEpoch,
+			Withdrawals: 0,
 		},
 	}
 	for _, tt := range tests {

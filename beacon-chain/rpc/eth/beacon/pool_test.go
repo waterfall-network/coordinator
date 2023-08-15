@@ -486,6 +486,7 @@ func TestSubmitProposerSlashing_Ok(t *testing.T) {
 	validator := &ethpbv1alpha1.Validator{
 		PublicKey:         keys[0].PublicKey().Marshal(),
 		WithdrawableEpoch: eth2types.Epoch(1),
+		Withdrawals:       0,
 	}
 	bs, err := util.NewBeaconState(func(state *ethpbv1alpha1.BeaconState) error {
 		state.Validators = []*ethpbv1alpha1.Validator{validator}
@@ -692,8 +693,9 @@ func TestServer_SubmitAttestations_Ok(t *testing.T) {
 	require.NoError(t, err)
 	validators := []*ethpbv1alpha1.Validator{
 		{
-			PublicKey: keys[0].PublicKey().Marshal(),
-			ExitEpoch: params.BeaconConfig().FarFutureEpoch,
+			PublicKey:   keys[0].PublicKey().Marshal(),
+			ExitEpoch:   params.BeaconConfig().FarFutureEpoch,
+			Withdrawals: 0,
 		},
 	}
 	bs, err := util.NewBeaconState(func(state *ethpbv1alpha1.BeaconState) error {
@@ -798,8 +800,9 @@ func TestServer_SubmitAttestations_ValidAttestationSubmitted(t *testing.T) {
 	require.NoError(t, err)
 	validators := []*ethpbv1alpha1.Validator{
 		{
-			PublicKey: keys[0].PublicKey().Marshal(),
-			ExitEpoch: params.BeaconConfig().FarFutureEpoch,
+			PublicKey:   keys[0].PublicKey().Marshal(),
+			ExitEpoch:   params.BeaconConfig().FarFutureEpoch,
+			Withdrawals: 0,
 		},
 	}
 	bs, err := util.NewBeaconState(func(state *ethpbv1alpha1.BeaconState) error {
@@ -898,8 +901,9 @@ func TestServer_SubmitAttestations_InvalidAttestationGRPCHeader(t *testing.T) {
 	require.NoError(t, err)
 	validators := []*ethpbv1alpha1.Validator{
 		{
-			PublicKey: keys[0].PublicKey().Marshal(),
-			ExitEpoch: params.BeaconConfig().FarFutureEpoch,
+			PublicKey:   keys[0].PublicKey().Marshal(),
+			ExitEpoch:   params.BeaconConfig().FarFutureEpoch,
+			Withdrawals: 0,
 		},
 	}
 	bs, err := util.NewBeaconState(func(state *ethpbv1alpha1.BeaconState) error {

@@ -103,6 +103,7 @@ func TestServer_ListAssignments_Pagination_InputOutOfRange(t *testing.T) {
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			EffectiveBalance:      params.BeaconConfig().MaxEffectiveBalance,
 			ActivationEpoch:       0,
+			Withdrawals:           0,
 		})
 	}
 
@@ -172,6 +173,7 @@ func TestServer_ListAssignments_Pagination_DefaultPageSize_NoArchive(t *testing.
 				ExitEpoch:             0,
 				ActivationEpoch:       0,
 				EffectiveBalance:      params.BeaconConfig().MaxEffectiveBalance,
+				Withdrawals:           0,
 			})
 		} else {
 			validators = append(validators, &ethpb.Validator{
@@ -181,6 +183,7 @@ func TestServer_ListAssignments_Pagination_DefaultPageSize_NoArchive(t *testing.
 				ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 				EffectiveBalance:      params.BeaconConfig().MaxEffectiveBalance,
 				ActivationEpoch:       0,
+				Withdrawals:           0,
 			})
 		}
 	}
@@ -254,6 +257,7 @@ func TestServer_ListAssignments_FilterPubkeysIndices_NoPagination(t *testing.T) 
 			CreatorAddress:        creatorAddress,
 			WithdrawalCredentials: withdrawCreds,
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
+			Withdrawals:           0,
 		}
 		validators = append(validators, val)
 	}
@@ -326,6 +330,7 @@ func TestServer_ListAssignments_CanFilterPubkeysIndices_WithPagination(t *testin
 			CreatorAddress:        creatorAddress,
 			WithdrawalCredentials: withdrawalCred,
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
+			Withdrawals:           0,
 		}
 		validators = append(validators, val)
 	}

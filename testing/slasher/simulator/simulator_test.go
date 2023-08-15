@@ -30,6 +30,7 @@ func setupService(t *testing.T, params *Parameters) *Simulator {
 			PublicKey:             privKey.PublicKey().Marshal(),
 			CreatorAddress:        make([]byte, 20),
 			WithdrawalCredentials: make([]byte, 20),
+			Withdrawals:           0,
 		}
 	}
 	err = beaconState.SetValidators(validators)

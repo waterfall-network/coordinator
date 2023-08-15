@@ -189,7 +189,7 @@ func TestPool_InsertWithdrawal(t *testing.T) {
 			},
 		},
 		{
-			name: "Withdrawal for already withdrawaled validator",
+			name: "WithdrawalPool for already withdrawaled validator",
 			fields: fields{
 				pending: []*ethpb.Withdrawal{},
 			},

@@ -113,6 +113,7 @@ func TestWaitForActivation_ValidatorOriginallyExists(t *testing.T) {
 				PublicKey:             pubKey1,
 				CreatorAddress:        make([]byte, 20),
 				WithdrawalCredentials: make([]byte, 20),
+				Withdrawals:           0,
 			},
 		},
 	}
@@ -201,18 +202,21 @@ func TestWaitForActivation_MultipleStatuses(t *testing.T) {
 				PublicKey:       pubKey1,
 				ActivationEpoch: 1,
 				ExitEpoch:       params.BeaconConfig().FarFutureEpoch,
+				Withdrawals:     0,
 			},
 			{
 				PublicKey:                  pubKey2,
 				ActivationEpoch:            params.BeaconConfig().FarFutureEpoch,
 				ActivationEligibilityEpoch: 6,
 				ExitEpoch:                  params.BeaconConfig().FarFutureEpoch,
+				Withdrawals:                0,
 			},
 			{
 				PublicKey:                  pubKey3,
 				ActivationEpoch:            0,
 				ActivationEligibilityEpoch: 0,
 				ExitEpoch:                  0,
+				Withdrawals:                0,
 			},
 		},
 	}

@@ -56,6 +56,12 @@ func (v readOnlyValidator) WithdrawableEpoch() types.Epoch {
 	return v.validator.WithdrawableEpoch
 }
 
+// Withdrawals returns the cumulative value of withdrawals
+// read only validator.
+func (v readOnlyValidator) Withdrawals() uint64 {
+	return v.validator.Withdrawals
+}
+
 // ExitEpoch returns the exit epoch of the
 // read only validator.
 func (v readOnlyValidator) ExitEpoch() types.Epoch {

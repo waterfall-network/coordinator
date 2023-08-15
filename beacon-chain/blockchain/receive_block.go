@@ -149,6 +149,11 @@ func (s *Service) handlePostBlockOperations(b block.BeaconBlock) error {
 		s.cfg.ExitPool.MarkIncluded(e)
 	}
 
+	// Mark block withdrawals as seen so we don't include same ones in future blocks.
+	for _, w := range b.Body().Withdrawals() {
+		s.cfg.WithdrawalPool.MarkIncluded(w)
+	}
+
 	//  Mark attester slashings as seen so we don't include same ones in future blocks.
 	for _, as := range b.Body().AttesterSlashings() {
 		s.cfg.SlashingPool.MarkIncludedAttesterSlashing(as)

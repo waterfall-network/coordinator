@@ -273,6 +273,7 @@ func genState(t *testing.T, valCount, avgBalance uint64) state.BeaconState {
 			WithdrawalCredentials: make([]byte, 20),
 			EffectiveBalance:      avgBalance * 1e9,
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
+			Withdrawals:           0,
 		}
 		balances[i] = validators[i].EffectiveBalance
 	}

@@ -3000,7 +3000,7 @@ var file_proto_eth_v1_beacon_chain_proto_goTypes = []interface{}{
 	(*AttesterSlashing)(nil),      // 59: ethereum.eth.v1.AttesterSlashing
 	(*ProposerSlashing)(nil),      // 60: ethereum.eth.v1.ProposerSlashing
 	(*VoluntaryExit)(nil),         // 61: ethereum.eth.v1.VoluntaryExit
-	(*Withdrawal)(nil),            // 62: ethereum.eth.v1.Withdrawal
+	(*Withdrawal)(nil),            // 62: ethereum.eth.v1.WithdrawalPool
 	(*Checkpoint)(nil),            // 63: ethereum.eth.v1.Checkpoint
 	(*timestamppb.Timestamp)(nil), // 64: google.protobuf.Timestamp
 }
@@ -3030,7 +3030,7 @@ var file_proto_eth_v1_beacon_chain_proto_depIdxs = []int32{
 	59, // 22: ethereum.eth.v1.AttesterSlashingsPoolResponse.data:type_name -> ethereum.eth.v1.AttesterSlashing
 	60, // 23: ethereum.eth.v1.ProposerSlashingPoolResponse.data:type_name -> ethereum.eth.v1.ProposerSlashing
 	61, // 24: ethereum.eth.v1.VoluntaryExitsPoolResponse.data:type_name -> ethereum.eth.v1.VoluntaryExit
-	62, // 25: ethereum.eth.v1.WithdrawalsPoolResponse.data:type_name -> ethereum.eth.v1.Withdrawal
+	62, // 25: ethereum.eth.v1.WithdrawalsPoolResponse.data:type_name -> ethereum.eth.v1.WithdrawalPool
 	49, // 26: ethereum.eth.v1.ForkScheduleResponse.data:type_name -> ethereum.eth.v1.Fork
 	48, // 27: ethereum.eth.v1.SpecResponse.data:type_name -> ethereum.eth.v1.SpecResponse.DataEntry
 	42, // 28: ethereum.eth.v1.DepositContractResponse.data:type_name -> ethereum.eth.v1.DepositContract

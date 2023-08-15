@@ -35,6 +35,7 @@ func TestProcessBlockHeader_ImproperBlockSlot(t *testing.T) {
 			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			Slashed:               true,
+			Withdrawals:           0,
 		}
 	}
 
@@ -113,6 +114,7 @@ func TestProcessBlockHeader_DifferentSlots(t *testing.T) {
 			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			Slashed:               true,
+			Withdrawals:           0,
 		}
 	}
 
@@ -158,6 +160,7 @@ func TestProcessBlockHeader_PreviousBlockRootNotSignedRoot(t *testing.T) {
 			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			Slashed:               true,
+			Withdrawals:           0,
 		}
 	}
 
@@ -200,6 +203,7 @@ func TestProcessBlockHeader_SlashedProposer(t *testing.T) {
 			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			Slashed:               true,
+			Withdrawals:           0,
 		}
 	}
 
@@ -245,6 +249,7 @@ func TestProcessBlockHeader_OK(t *testing.T) {
 			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			Slashed:               true,
+			Withdrawals:           0,
 		}
 	}
 
@@ -306,6 +311,7 @@ func TestBlockSignatureSet_OK(t *testing.T) {
 			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			Slashed:               true,
+			Withdrawals:           0,
 		}
 	}
 

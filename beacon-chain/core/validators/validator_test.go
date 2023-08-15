@@ -59,10 +59,14 @@ func TestInitiateValidatorExit_ProperExit(t *testing.T) {
 	exitedEpoch := types.Epoch(100)
 	idx := types.ValidatorIndex(3)
 	base := &ethpb.BeaconState{Validators: []*ethpb.Validator{
-		{ExitEpoch: exitedEpoch},
-		{ExitEpoch: exitedEpoch + 1},
-		{ExitEpoch: exitedEpoch + 2},
-		{ExitEpoch: params.BeaconConfig().FarFutureEpoch},
+		{Withdrawals: 0,
+			ExitEpoch: exitedEpoch},
+		{Withdrawals: 0,
+			ExitEpoch: exitedEpoch + 1},
+		{Withdrawals: 0,
+			ExitEpoch: exitedEpoch + 2},
+		{Withdrawals: 0,
+			ExitEpoch: params.BeaconConfig().FarFutureEpoch},
 	}}
 	state, err := v1.InitializeFromProto(base)
 	require.NoError(t, err)
@@ -77,11 +81,16 @@ func TestInitiateValidatorExit_ChurnOverflow(t *testing.T) {
 	exitedEpoch := types.Epoch(100)
 	idx := types.ValidatorIndex(4)
 	base := &ethpb.BeaconState{Validators: []*ethpb.Validator{
-		{ExitEpoch: exitedEpoch + 2},
-		{ExitEpoch: exitedEpoch + 2},
-		{ExitEpoch: exitedEpoch + 2},
-		{ExitEpoch: exitedEpoch + 2}, // overflow here
-		{ExitEpoch: params.BeaconConfig().FarFutureEpoch},
+		{Withdrawals: 0,
+			ExitEpoch: exitedEpoch + 2},
+		{Withdrawals: 0,
+			ExitEpoch: exitedEpoch + 2},
+		{Withdrawals: 0,
+			ExitEpoch: exitedEpoch + 2},
+		{Withdrawals: 0,
+			ExitEpoch: exitedEpoch + 2}, // overflow here
+		{Withdrawals: 0,
+			ExitEpoch: params.BeaconConfig().FarFutureEpoch},
 	}}
 	state, err := v1.InitializeFromProto(base)
 	require.NoError(t, err)
@@ -108,6 +117,7 @@ func TestSlashValidator_OK(t *testing.T) {
 			ActivationEpoch:  0,
 			ExitEpoch:        params.BeaconConfig().FarFutureEpoch,
 			EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance,
+			Withdrawals:      0,
 		})
 		balances = append(balances, params.BeaconConfig().MaxEffectiveBalance)
 	}
@@ -164,17 +174,21 @@ func TestActivatedValidatorIndices(t *testing.T) {
 					{
 						ActivationEpoch: 0,
 						ExitEpoch:       1,
+						Withdrawals:     0,
 					},
 					{
 						ActivationEpoch: 0,
 						ExitEpoch:       1,
+						Withdrawals:     0,
 					},
 					{
 						ActivationEpoch: 5,
+						Withdrawals:     0,
 					},
 					{
 						ActivationEpoch: 0,
 						ExitEpoch:       1,
+						Withdrawals:     0,
 					},
 				},
 			},
@@ -185,6 +199,7 @@ func TestActivatedValidatorIndices(t *testing.T) {
 				Validators: []*ethpb.Validator{
 					{
 						ActivationEpoch: helpers.ActivationExitEpoch(10),
+						Withdrawals:     0,
 					},
 				},
 			},
@@ -196,6 +211,7 @@ func TestActivatedValidatorIndices(t *testing.T) {
 					{
 						ActivationEpoch: 0,
 						ExitEpoch:       1,
+						Withdrawals:     0,
 					},
 				},
 			},
@@ -221,14 +237,17 @@ func TestSlashedValidatorIndices(t *testing.T) {
 					{
 						WithdrawableEpoch: params.BeaconConfig().EpochsPerSlashingsVector,
 						Slashed:           true,
+						Withdrawals:       0,
 					},
 					{
 						WithdrawableEpoch: params.BeaconConfig().EpochsPerSlashingsVector,
 						Slashed:           false,
+						Withdrawals:       0,
 					},
 					{
 						WithdrawableEpoch: params.BeaconConfig().EpochsPerSlashingsVector,
 						Slashed:           true,
+						Withdrawals:       0,
 					},
 				},
 			},
@@ -239,6 +258,7 @@ func TestSlashedValidatorIndices(t *testing.T) {
 				Validators: []*ethpb.Validator{
 					{
 						WithdrawableEpoch: params.BeaconConfig().EpochsPerSlashingsVector,
+						Withdrawals:       0,
 					},
 				},
 			},
@@ -250,6 +270,7 @@ func TestSlashedValidatorIndices(t *testing.T) {
 					{
 						WithdrawableEpoch: params.BeaconConfig().EpochsPerSlashingsVector,
 						Slashed:           true,
+						Withdrawals:       0,
 					},
 				},
 			},
@@ -276,16 +297,19 @@ func TestExitedValidatorIndices(t *testing.T) {
 						EffectiveBalance:  params.BeaconConfig().MaxEffectiveBalance,
 						ExitEpoch:         0,
 						WithdrawableEpoch: params.BeaconConfig().MinValidatorWithdrawabilityDelay,
+						Withdrawals:       0,
 					},
 					{
 						EffectiveBalance:  params.BeaconConfig().MaxEffectiveBalance,
 						ExitEpoch:         0,
 						WithdrawableEpoch: 10,
+						Withdrawals:       0,
 					},
 					{
 						EffectiveBalance:  params.BeaconConfig().MaxEffectiveBalance,
 						ExitEpoch:         0,
 						WithdrawableEpoch: params.BeaconConfig().MinValidatorWithdrawabilityDelay,
+						Withdrawals:       0,
 					},
 				},
 			},
@@ -298,6 +322,7 @@ func TestExitedValidatorIndices(t *testing.T) {
 						EffectiveBalance:  params.BeaconConfig().MaxEffectiveBalance,
 						ExitEpoch:         params.BeaconConfig().FarFutureEpoch,
 						WithdrawableEpoch: params.BeaconConfig().MinValidatorWithdrawabilityDelay,
+						Withdrawals:       0,
 					},
 				},
 			},
@@ -310,6 +335,7 @@ func TestExitedValidatorIndices(t *testing.T) {
 						EffectiveBalance:  params.BeaconConfig().MaxEffectiveBalance,
 						ExitEpoch:         0,
 						WithdrawableEpoch: params.BeaconConfig().MinValidatorWithdrawabilityDelay,
+						Withdrawals:       0,
 					},
 				},
 			},

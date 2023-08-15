@@ -1172,7 +1172,7 @@ var file_proto_eth_v2_beacon_block_proto_goTypes = []interface{}{
 	(*v1.VoluntaryExit)(nil),             // 18: ethereum.eth.v1.VoluntaryExit
 	(*v1.SyncAggregate)(nil),             // 19: ethereum.eth.v1.SyncAggregate
 	(*v11.ExecutionPayload)(nil),         // 20: ethereum.engine.v1.ExecutionPayload
-	(*v1.Withdrawal)(nil),                // 21: ethereum.eth.v1.Withdrawal
+	(*v1.Withdrawal)(nil),                // 21: ethereum.eth.v1.WithdrawalPool
 }
 var file_proto_eth_v2_beacon_block_proto_depIdxs = []int32{
 	11, // 0: ethereum.eth.v2.BlockResponseV2.version:type_name -> ethereum.eth.v2.Version
@@ -1196,7 +1196,7 @@ var file_proto_eth_v2_beacon_block_proto_depIdxs = []int32{
 	18, // 18: ethereum.eth.v2.BeaconBlockBodyBellatrix.voluntary_exits:type_name -> ethereum.eth.v1.VoluntaryExit
 	19, // 19: ethereum.eth.v2.BeaconBlockBodyBellatrix.sync_aggregate:type_name -> ethereum.eth.v1.SyncAggregate
 	20, // 20: ethereum.eth.v2.BeaconBlockBodyBellatrix.execution_payload:type_name -> ethereum.engine.v1.ExecutionPayload
-	21, // 21: ethereum.eth.v2.BeaconBlockBodyBellatrix.withdrawals:type_name -> ethereum.eth.v1.Withdrawal
+	21, // 21: ethereum.eth.v2.BeaconBlockBodyBellatrix.withdrawals:type_name -> ethereum.eth.v1.WithdrawalPool
 	13, // 22: ethereum.eth.v2.BeaconBlockBodyAltair.eth1_data:type_name -> ethereum.eth.v1.Eth1Data
 	14, // 23: ethereum.eth.v2.BeaconBlockBodyAltair.proposer_slashings:type_name -> ethereum.eth.v1.ProposerSlashing
 	15, // 24: ethereum.eth.v2.BeaconBlockBodyAltair.attester_slashings:type_name -> ethereum.eth.v1.AttesterSlashing
@@ -1204,7 +1204,7 @@ var file_proto_eth_v2_beacon_block_proto_depIdxs = []int32{
 	17, // 26: ethereum.eth.v2.BeaconBlockBodyAltair.deposits:type_name -> ethereum.eth.v1.Deposit
 	18, // 27: ethereum.eth.v2.BeaconBlockBodyAltair.voluntary_exits:type_name -> ethereum.eth.v1.VoluntaryExit
 	19, // 28: ethereum.eth.v2.BeaconBlockBodyAltair.sync_aggregate:type_name -> ethereum.eth.v1.SyncAggregate
-	21, // 29: ethereum.eth.v2.BeaconBlockBodyAltair.withdrawals:type_name -> ethereum.eth.v1.Withdrawal
+	21, // 29: ethereum.eth.v2.BeaconBlockBodyAltair.withdrawals:type_name -> ethereum.eth.v1.WithdrawalPool
 	30, // [30:30] is the sub-list for method output_type
 	30, // [30:30] is the sub-list for method input_type
 	30, // [30:30] is the sub-list for extension type_name
