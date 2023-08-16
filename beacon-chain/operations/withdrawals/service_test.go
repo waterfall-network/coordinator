@@ -250,29 +250,12 @@ func TestPool_InsertWithdrawal(t *testing.T) {
 		},
 	}
 	ctx := context.Background()
-	//validators := []*ethpb.Validator{
-	//	{ // 0
-	//		WithdrawalEpoch: params.BeaconConfig().FarFutureEpoch,
-	//	},
-	//	{ // 1
-	//		WithdrawalEpoch: params.BeaconConfig().FarFutureEpoch,
-	//	},
-	//	{ // 2 - Already withdrawaled.
-	//		WithdrawalEpoch: 15,
-	//	},
-	//	{ // 3
-	//		WithdrawalEpoch: params.BeaconConfig().FarFutureEpoch,
-	//	},
-	//}
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Pool{
 				pending: tt.fields.pending,
 			}
-			//s, err := v1.InitializeFromProtoUnsafe(&ethpb.BeaconState{Validators: validators})
-			//require.NoError(t, err)
-			p.InsertWithdrawalByGwat(ctx, tt.args.withdrawal)
+			p.InsertWithdrawal(ctx, tt.args.withdrawal)
 			if len(p.pending) != len(tt.want) {
 				t.Fatalf("Mismatched lengths of pending list. Got %d, wanted %d.", len(p.pending), len(tt.want))
 			}

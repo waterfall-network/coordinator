@@ -99,11 +99,12 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	defer span.End()
 
 	log.WithFields(logrus.Fields{
-		"slot":       signed.Block().Slot(),
-		"root":       fmt.Sprintf("%#x", blockRoot),
-		"ParentRoot": fmt.Sprintf("%#x", signed.Block().ParentRoot()),
-		"\u2692":     version.BuildId,
-	}).Info("<<< onBlock:START >>> ")
+		"slot":        signed.Block().Slot(),
+		"root":        fmt.Sprintf("%#x", blockRoot),
+		"ParentRoot":  fmt.Sprintf("%#x", signed.Block().ParentRoot()),
+		"Withdrawals": fmt.Sprintf("%d", len(signed.Block().Body().Withdrawals())),
+		"\u2692":      version.BuildId,
+	}).Info("<<< onBlock:START >>>")
 
 	if err := helpers.BeaconBlockIsNil(signed); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{

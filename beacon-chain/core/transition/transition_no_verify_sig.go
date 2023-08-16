@@ -311,6 +311,8 @@ func ProcessBlockForStateRoot(
 
 	log.WithFields(logrus.Fields{
 		"slot":         blk.Slot(),
+		"Withdrawals":  fmt.Sprintf("%d", len(blk.Body().Withdrawals())),
+		"bodyRoot":     fmt.Sprintf("%#x", bodyRoot),
 		"ParentRoot":   fmt.Sprintf("%#x", blk.ParentRoot()),
 		"sigRoot":      fmt.Sprintf("%#x", sigRoot),
 		"Attestations": len(blk.Body().Attestations()),

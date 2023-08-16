@@ -160,7 +160,7 @@ func (p *Pool) handleValidatorActivation(st state.ReadOnlyBeaconState) {
 		if ok {
 			p.pending[i].ValidatorIndex = vix
 			log.WithFields(log.Fields{
-				"PublicKey":  fmt.Sprintf("%d", itm.PublicKey),
+				"PublicKey":  fmt.Sprintf("%#x", itm.PublicKey),
 				"VIndex":     fmt.Sprintf("%d", itm.ValidatorIndex),
 				"Epoch":      fmt.Sprintf("%d", itm.Epoch),
 				"Amount":     fmt.Sprintf("%d", itm.Amount),

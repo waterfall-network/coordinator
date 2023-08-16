@@ -210,6 +210,7 @@ func CopyBeaconBlockBodyAltair(body *BeaconBlockBodyAltair) *BeaconBlockBodyAlta
 		Attestations:      CopyAttestations(body.Attestations),
 		Deposits:          CopyDeposits(body.Deposits),
 		VoluntaryExits:    CopyVoluntaryExits(body.VoluntaryExits),
+		Withdrawals:       CopyWithdrawals(body.Withdrawals),
 		SyncAggregate:     CopySyncAggregate(body.SyncAggregate),
 	}
 }
@@ -416,6 +417,7 @@ func CopyWithdrawal(withdrawal *Withdrawal) *Withdrawal {
 		ValidatorIndex: withdrawal.ValidatorIndex,
 		Amount:         withdrawal.Amount,
 		InitTxHash:     bytesutil.SafeCopyBytes(withdrawal.InitTxHash),
+		PublicKey:      bytesutil.SafeCopyBytes(withdrawal.PublicKey),
 	}
 }
 
@@ -540,6 +542,7 @@ func CopyBeaconBlockBodyBellatrix(body *BeaconBlockBodyBellatrix) *BeaconBlockBo
 		Attestations:      CopyAttestations(body.Attestations),
 		Deposits:          CopyDeposits(body.Deposits),
 		VoluntaryExits:    CopyVoluntaryExits(body.VoluntaryExits),
+		Withdrawals:       CopyWithdrawals(body.Withdrawals),
 		SyncAggregate:     CopySyncAggregate(body.SyncAggregate),
 		ExecutionPayload:  CopyExecutionPayload(body.ExecutionPayload),
 	}
