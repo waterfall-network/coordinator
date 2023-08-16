@@ -89,7 +89,7 @@ func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines 
 		"balances":             len(fc.balances),
 		"store.justifiedEpoch": fc.store.justifiedEpoch,
 		"store.finalizedEpoch": fc.store.finalizedEpoch,
-		"store.[0].root":       fmt.Sprintf("%#x", fc.store.nodes[0].root),
+		//"store.[0].root":       fmt.Sprintf("%#x", fc.store.nodes[0].root),
 		//"fork[0]":              frkRoots_0,
 	}).Info("**************  GetParentByOptimisticSpines")
 
@@ -100,17 +100,6 @@ func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines 
 	headRoot, err := f.calculateHeadRootByNodesIndexes(ctx, acceptableRootIndexMap)
 	if err != nil {
 		return [32]byte{}, err
-	}
-
-	// todo check & rm
-	// head must be one of calculated leafs
-	if _, ok := acceptableLeafs[headRoot]; !ok {
-		log.WithFields(logrus.Fields{
-			"acceptableLeafs":           acceptableLeafs,
-			"acceptableLeafs[headRoot]": acceptableLeafs[headRoot],
-			"headRoot":                  fmt.Sprintf("%#x", headRoot),
-		}).Info("=== acceptableLeafs: headRoot ===")
-		//return [32]byte{}, errConsensusCalcHeadFailed
 	}
 
 	return headRoot, nil
