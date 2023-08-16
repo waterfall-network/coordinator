@@ -374,7 +374,7 @@ type beaconBlockBodyJson struct {
 	Attestations      []*attestationJson      `json:"attestations"`
 	Deposits          []*depositJson          `json:"deposits"`
 	VoluntaryExits    []*voluntaryExitJson    `json:"voluntary_exits"`
-	Withdrawals       []*Withdrawal           `json:"withdrawals"`
+	Withdrawals       []*withdrawalJson       `json:"withdrawals"`
 }
 
 type signedBeaconBlockContainerV2Json struct {
@@ -426,7 +426,7 @@ type beaconBlockBodyAltairJson struct {
 	Deposits          []*depositJson          `json:"deposits"`
 	VoluntaryExits    []*voluntaryExitJson    `json:"voluntary_exits"`
 	SyncAggregate     *syncAggregateJson      `json:"sync_aggregate"`
-	Withdrawals       []*Withdrawal           `json:"withdrawals"`
+	Withdrawals       []*withdrawalJson       `json:"withdrawals"`
 }
 
 type beaconBlockBodyBellatrixJson struct {
@@ -440,7 +440,7 @@ type beaconBlockBodyBellatrixJson struct {
 	VoluntaryExits    []*voluntaryExitJson    `json:"voluntary_exits"`
 	SyncAggregate     *syncAggregateJson      `json:"sync_aggregate"`
 	ExecutionPayload  *executionPayloadJson   `json:"execution_payload"`
-	Withdrawals       []*Withdrawal           `json:"withdrawals"`
+	Withdrawals       []*withdrawalJson       `json:"withdrawals"`
 }
 
 type executionPayloadJson struct {
@@ -566,11 +566,13 @@ type voluntaryExitJson struct {
 	ValidatorIndex string `json:"validator_index"`
 }
 
-// Withdrawal a sub property of Withdrawal.
-type Withdrawal struct {
-	Epoch          string `json:"epoch"`
-	ValidatorIndex string `json:"validator_index"`
+// withdrawalJson a sub property of Withdrawal.
+type withdrawalJson struct {
 	Amount         string `json:"amount"`
+	ValidatorIndex string `json:"validator_index"`
+	PublicKey      string `json:"public_key" hex:"true"`
+	InitTxHash     string `json:"init_tx_hash" hex:"true"`
+	Epoch          string `json:"epoch"`
 }
 
 type syncCommitteeMessageJson struct {

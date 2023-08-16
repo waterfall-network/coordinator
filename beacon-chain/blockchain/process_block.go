@@ -106,6 +106,18 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		"\u2692":      version.BuildId,
 	}).Info("<<< onBlock:START >>>")
 
+	if len(signed.Block().Body().Withdrawals()) > 0 {
+		log.WithFields(logrus.Fields{
+			"slot":           signed.Block().Slot(),
+			"Withdrawals":    fmt.Sprintf("%d", len(signed.Block().Body().Withdrawals())),
+			"Amount":         fmt.Sprintf("%d", signed.Block().Body().Withdrawals()[0].Amount),
+			"Epoch":          fmt.Sprintf("%d", signed.Block().Body().Withdrawals()[0].Epoch),
+			"InitTxHash":     fmt.Sprintf("%#x", signed.Block().Body().Withdrawals()[0].InitTxHash),
+			"PublicKey":      fmt.Sprintf("%#x", signed.Block().Body().Withdrawals()[0].PublicKey),
+			"ValidatorIndex": fmt.Sprintf("%d", signed.Block().Body().Withdrawals()[0].ValidatorIndex),
+		}).Info("onBlock:: Withdrawals")
+	}
+
 	if err := helpers.BeaconBlockIsNil(signed); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"block.slot": signed.Block().Slot(),

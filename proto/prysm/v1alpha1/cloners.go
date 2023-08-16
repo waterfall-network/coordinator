@@ -2,7 +2,6 @@ package eth
 
 import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
-	enginev1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/engine/v1"
 )
 
 // CopyETH1Data copies the provided eth1data object.
@@ -544,31 +543,6 @@ func CopyBeaconBlockBodyBellatrix(body *BeaconBlockBodyBellatrix) *BeaconBlockBo
 		VoluntaryExits:    CopyVoluntaryExits(body.VoluntaryExits),
 		Withdrawals:       CopyWithdrawals(body.Withdrawals),
 		SyncAggregate:     CopySyncAggregate(body.SyncAggregate),
-		ExecutionPayload:  CopyExecutionPayload(body.ExecutionPayload),
-	}
-}
-
-// CopyExecutionPayload copies the provided ApplicationPayload.
-func CopyExecutionPayload(payload *enginev1.ExecutionPayload) *enginev1.ExecutionPayload {
-	if payload == nil {
-		return nil
-	}
-
-	return &enginev1.ExecutionPayload{
-		ParentHash:    bytesutil.SafeCopyBytes(payload.ParentHash),
-		FeeRecipient:  bytesutil.SafeCopyBytes(payload.FeeRecipient),
-		StateRoot:     bytesutil.SafeCopyBytes(payload.StateRoot),
-		ReceiptsRoot:  bytesutil.SafeCopyBytes(payload.ReceiptsRoot),
-		LogsBloom:     bytesutil.SafeCopyBytes(payload.LogsBloom),
-		PrevRandao:    bytesutil.SafeCopyBytes(payload.PrevRandao),
-		BlockNumber:   payload.BlockNumber,
-		GasLimit:      payload.GasLimit,
-		GasUsed:       payload.GasUsed,
-		Timestamp:     payload.Timestamp,
-		ExtraData:     bytesutil.SafeCopyBytes(payload.ExtraData),
-		BaseFeePerGas: bytesutil.SafeCopyBytes(payload.BaseFeePerGas),
-		BlockHash:     bytesutil.SafeCopyBytes(payload.BlockHash),
-		Transactions:  bytesutil.SafeCopy2dBytes(payload.Transactions),
 	}
 }
 
