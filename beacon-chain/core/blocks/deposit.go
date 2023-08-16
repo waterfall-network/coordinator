@@ -196,7 +196,9 @@ func ProcessDeposit(beaconState state.BeaconState, deposit *ethpb.Deposit, verif
 			ExitEpoch:                  params.BeaconConfig().FarFutureEpoch,
 			WithdrawableEpoch:          params.BeaconConfig().FarFutureEpoch,
 			EffectiveBalance:           effectiveBalance,
-			Withdrawals:                0,
+			ActivationHash:             (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:                   (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:              []*ethpb.WithdrawalOp{},
 		}); err != nil {
 			return nil, newValidator, err
 		}

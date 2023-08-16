@@ -53,7 +53,9 @@ func TestProposeAttestation_OK(t *testing.T) {
 			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			EffectiveBalance:      params.BeaconConfig().MaxEffectiveBalance,
-			Withdrawals:           0,
+			ActivationHash:        make([]byte, 32),
+			ExitHash:              make([]byte, 32),
+			WithdrawalOps:         make([]*ethpb.WithdrawalOp, 0),
 		}
 	}
 
@@ -591,7 +593,9 @@ func TestServer_SubscribeCommitteeSubnets_MultipleSlots(t *testing.T) {
 		validators[i] = &ethpb.Validator{
 			ExitEpoch:        params.BeaconConfig().FarFutureEpoch,
 			EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance,
-			Withdrawals:      0,
+			ActivationHash:   make([]byte, 32),
+			ExitHash:         make([]byte, 32),
+			WithdrawalOps:    make([]*ethpb.WithdrawalOp, 0),
 		}
 	}
 

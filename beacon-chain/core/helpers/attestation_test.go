@@ -97,7 +97,9 @@ func TestAttestation_ComputeSubnetForAttestation(t *testing.T) {
 			CreatorAddress:        make([]byte, 20),
 			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
-			Withdrawals:           0,
+			ActivationHash:        make([]byte, 32),
+			ExitHash:              make([]byte, 32),
+			WithdrawalOps:         make([]*ethpb.WithdrawalOp, 0),
 		}
 	}
 

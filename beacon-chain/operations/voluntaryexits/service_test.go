@@ -209,20 +209,28 @@ func TestPool_InsertVoluntaryExit(t *testing.T) {
 	ctx := context.Background()
 	validators := []*ethpb.Validator{
 		{ // 0
-			ExitEpoch:   params.BeaconConfig().FarFutureEpoch,
-			Withdrawals: 0,
+			ExitEpoch:      params.BeaconConfig().FarFutureEpoch,
+			ActivationHash: (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:       (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:  []*ethpb.WithdrawalOp{},
 		},
 		{ // 1
-			ExitEpoch:   params.BeaconConfig().FarFutureEpoch,
-			Withdrawals: 0,
+			ExitEpoch:      params.BeaconConfig().FarFutureEpoch,
+			ActivationHash: (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:       (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:  []*ethpb.WithdrawalOp{},
 		},
 		{ // 2 - Already exited.
-			ExitEpoch:   15,
-			Withdrawals: 0,
+			ExitEpoch:      15,
+			ActivationHash: (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:       (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:  []*ethpb.WithdrawalOp{},
 		},
 		{ // 3
-			ExitEpoch:   params.BeaconConfig().FarFutureEpoch,
-			Withdrawals: 0,
+			ExitEpoch:      params.BeaconConfig().FarFutureEpoch,
+			ActivationHash: (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:       (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:  []*ethpb.WithdrawalOp{},
 		},
 	}
 	for _, tt := range tests {

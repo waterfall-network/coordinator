@@ -393,7 +393,9 @@ func populateValidators(cfg *params.BeaconChainConfig, st state.BeaconState, val
 			WithdrawalCredentials: make([]byte, 20),
 			EffectiveBalance:      avgBalance * 1e9,
 			ExitEpoch:             cfg.FarFutureEpoch,
-			Withdrawals:           0,
+			ActivationHash:        make([]byte, 32),
+			ExitHash:              make([]byte, 32),
+			WithdrawalOps:         make([]*ethpb.WithdrawalOp, 0),
 		}
 		balances[i] = validators[i].EffectiveBalance
 	}

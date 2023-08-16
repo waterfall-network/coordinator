@@ -35,7 +35,9 @@ func TestValidatorMap_DistinctCopy(t *testing.T) {
 			ActivationEpoch:            1,
 			ExitEpoch:                  1,
 			WithdrawableEpoch:          1,
-			Withdrawals:                0,
+			ActivationHash:             (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:                   (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:              []*ethpb.WithdrawalOp{},
 		})
 	}
 	handler := stateutil.NewValMapHandler(vals)
@@ -65,7 +67,9 @@ func TestBeaconState_NoDeadlock(t *testing.T) {
 			ActivationEpoch:            1,
 			ExitEpoch:                  1,
 			WithdrawableEpoch:          1,
-			Withdrawals:                0,
+			ActivationHash:             (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:                   (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:              []*ethpb.WithdrawalOp{},
 		})
 	}
 	newState, err := InitializeFromProtoUnsafe(&ethpb.BeaconState{
@@ -135,7 +139,9 @@ func TestBeaconState_AppendBalanceWithTrie(t *testing.T) {
 			ActivationEpoch:            1,
 			ExitEpoch:                  1,
 			WithdrawableEpoch:          1,
-			Withdrawals:                0,
+			ActivationHash:             (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:                   (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:              []*ethpb.WithdrawalOp{},
 		})
 		bals = append(bals, params.BeaconConfig().MaxEffectiveBalance)
 	}

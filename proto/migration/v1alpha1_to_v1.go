@@ -299,6 +299,15 @@ func V1Alpha1ValidatorToV1(v1Alpha1Validator *ethpbalpha.Validator) *ethpbv1.Val
 	if v1Alpha1Validator == nil {
 		return &ethpbv1.Validator{}
 	}
+
+	wops := make([]*ethpbv1.WithdrawalOp, len(v1Alpha1Validator.WithdrawalOps))
+	for i, op := range v1Alpha1Validator.WithdrawalOps {
+		wops[i] = &ethpbv1.WithdrawalOp{
+			Amount: op.Amount,
+			Hash:   op.Hash,
+		}
+	}
+
 	return &ethpbv1.Validator{
 		Pubkey:                     v1Alpha1Validator.PublicKey,
 		CreatorAddress:             v1Alpha1Validator.CreatorAddress,
@@ -309,7 +318,9 @@ func V1Alpha1ValidatorToV1(v1Alpha1Validator *ethpbalpha.Validator) *ethpbv1.Val
 		ActivationEpoch:            v1Alpha1Validator.ActivationEpoch,
 		ExitEpoch:                  v1Alpha1Validator.ExitEpoch,
 		WithdrawableEpoch:          v1Alpha1Validator.WithdrawableEpoch,
-		Withdrawals:                v1Alpha1Validator.Withdrawals,
+		ActivationHash:             v1Alpha1Validator.ActivationHash,
+		ExitHash:                   v1Alpha1Validator.ExitHash,
+		WithdrawalOps:              wops,
 	}
 }
 
@@ -318,6 +329,15 @@ func V1ValidatorToV1Alpha1(v1Validator *ethpbv1.Validator) *ethpbalpha.Validator
 	if v1Validator == nil {
 		return &ethpbalpha.Validator{}
 	}
+
+	wops := make([]*ethpbalpha.WithdrawalOp, len(v1Validator.WithdrawalOps))
+	for i, op := range v1Validator.WithdrawalOps {
+		wops[i] = &ethpbalpha.WithdrawalOp{
+			Amount: op.Amount,
+			Hash:   op.Hash,
+		}
+	}
+
 	return &ethpbalpha.Validator{
 		PublicKey:                  v1Validator.Pubkey,
 		CreatorAddress:             v1Validator.CreatorAddress,
@@ -328,7 +348,9 @@ func V1ValidatorToV1Alpha1(v1Validator *ethpbv1.Validator) *ethpbalpha.Validator
 		ActivationEpoch:            v1Validator.ActivationEpoch,
 		ExitEpoch:                  v1Validator.ExitEpoch,
 		WithdrawableEpoch:          v1Validator.WithdrawableEpoch,
-		Withdrawals:                v1Validator.Withdrawals,
+		ActivationHash:             v1Validator.ActivationHash,
+		ExitHash:                   v1Validator.ExitHash,
+		WithdrawalOps:              wops,
 	}
 }
 
@@ -380,6 +402,14 @@ func BeaconStateToProto(state state.BeaconState) (*ethpbv1.BeaconState, error) {
 	}
 	resultValidators := make([]*ethpbv1.Validator, len(sourceValidators))
 	for i, validator := range sourceValidators {
+		wops := make([]*ethpbv1.WithdrawalOp, len(validator.WithdrawalOps))
+		for j, op := range validator.WithdrawalOps {
+			wops[j] = &ethpbv1.WithdrawalOp{
+				Amount: op.Amount,
+				Hash:   op.Hash,
+			}
+		}
+
 		resultValidators[i] = &ethpbv1.Validator{
 			Pubkey:                     bytesutil.SafeCopyBytes(validator.PublicKey),
 			CreatorAddress:             bytesutil.SafeCopyBytes(validator.CreatorAddress),
@@ -390,7 +420,9 @@ func BeaconStateToProto(state state.BeaconState) (*ethpbv1.BeaconState, error) {
 			ActivationEpoch:            validator.ActivationEpoch,
 			ExitEpoch:                  validator.ExitEpoch,
 			WithdrawableEpoch:          validator.WithdrawableEpoch,
-			Withdrawals:                validator.Withdrawals,
+			ActivationHash:             validator.ActivationHash,
+			ExitHash:                   validator.ExitHash,
+			WithdrawalOps:              wops,
 		}
 	}
 	resultPrevEpochAtts := make([]*ethpbv1.PendingAttestation, len(sourcePrevEpochAtts))

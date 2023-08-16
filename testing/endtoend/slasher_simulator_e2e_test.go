@@ -75,7 +75,9 @@ func TestEndToEnd_SlasherSimulator(t *testing.T) {
 			PublicKey:             privKey.PublicKey().Marshal(),
 			CreatorAddress:        make([]byte, 20),
 			WithdrawalCredentials: make([]byte, 20),
-			Withdrawals:           0,
+			ActivationHash:        make([]byte, 32),
+			ExitHash:              make([]byte, 32),
+			WithdrawalOps:         make([]*ethpb.WithdrawalOp, 0),
 		}
 	}
 	err = beaconState.SetValidators(validators)

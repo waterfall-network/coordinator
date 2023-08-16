@@ -437,6 +437,29 @@ func CopyValidator(val *Validator) *Validator {
 		ActivationEpoch:            val.ActivationEpoch,
 		ExitEpoch:                  val.ExitEpoch,
 		WithdrawableEpoch:          val.WithdrawableEpoch,
+		ActivationHash:             bytesutil.SafeCopyBytes(val.ActivationHash),
+		ExitHash:                   bytesutil.SafeCopyBytes(val.ExitHash),
+		WithdrawalOps:              CopyWithdrawalOps(val.WithdrawalOps),
+	}
+}
+
+// CopyWithdrawalOps copies the provided WithdrawalOp array.
+func CopyWithdrawalOps(withdrawalOps []*WithdrawalOp) []*WithdrawalOp {
+	wops := make([]*WithdrawalOp, len(withdrawalOps))
+	for i, w := range withdrawalOps {
+		wops[i] = CopyWithdrawalOp(w)
+	}
+	return wops
+}
+
+// CopyWithdrawalOp copies the provided WithdrawalOp object.
+func CopyWithdrawalOp(withdrawalOp *WithdrawalOp) *WithdrawalOp {
+	if withdrawalOp == nil {
+		return nil
+	}
+	return &WithdrawalOp{
+		Amount: withdrawalOp.Amount,
+		Hash:   bytesutil.SafeCopyBytes(withdrawalOp.Hash),
 	}
 }
 

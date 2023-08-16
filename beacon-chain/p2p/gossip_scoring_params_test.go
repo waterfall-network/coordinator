@@ -34,7 +34,9 @@ func TestCorrect_ActiveValidatorsCount(t *testing.T) {
 				WithdrawalCredentials: make([]byte, 20),
 				ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 				Slashed:               false,
-				Withdrawals:           0,
+				ActivationHash:        make([]byte, 32),
+				ExitHash:              make([]byte, 32),
+				WithdrawalOps:         make([]*ethpb.WithdrawalOp, 0),
 			}
 		}
 		state.Validators = validators
@@ -53,7 +55,9 @@ func TestCorrect_ActiveValidatorsCount(t *testing.T) {
 			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			Slashed:               false,
-			Withdrawals:           0,
+			ActivationHash:        make([]byte, 32),
+			ExitHash:              make([]byte, 32),
+			WithdrawalOps:         make([]*ethpb.WithdrawalOp, 0),
 		}))
 	}
 	require.NoError(t, bState.SetSlot(10000))

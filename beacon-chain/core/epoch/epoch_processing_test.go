@@ -39,8 +39,10 @@ func TestUnslashedAttestingIndices_CanSortAndFilter(t *testing.T) {
 	validators := make([]*ethpb.Validator, validatorCount)
 	for i := 0; i < len(validators); i++ {
 		validators[i] = &ethpb.Validator{
-			ExitEpoch:   params.BeaconConfig().FarFutureEpoch,
-			Withdrawals: 0,
+			ExitEpoch:      params.BeaconConfig().FarFutureEpoch,
+			ActivationHash: make([]byte, 32),
+			ExitHash:       make([]byte, 32),
+			WithdrawalOps:  make([]*ethpb.WithdrawalOp, 0),
 		}
 	}
 	base := &ethpb.BeaconState{
@@ -86,8 +88,10 @@ func TestUnslashedAttestingIndices_DuplicatedAttestations(t *testing.T) {
 	validators := make([]*ethpb.Validator, validatorCount)
 	for i := 0; i < len(validators); i++ {
 		validators[i] = &ethpb.Validator{
-			ExitEpoch:   params.BeaconConfig().FarFutureEpoch,
-			Withdrawals: 0,
+			ExitEpoch:      params.BeaconConfig().FarFutureEpoch,
+			ActivationHash: make([]byte, 32),
+			ExitHash:       make([]byte, 32),
+			WithdrawalOps:  make([]*ethpb.WithdrawalOp, 0),
 		}
 	}
 	base := &ethpb.BeaconState{
@@ -130,7 +134,9 @@ func TestAttestingBalance_CorrectBalance(t *testing.T) {
 		validators[i] = &ethpb.Validator{
 			ExitEpoch:        params.BeaconConfig().FarFutureEpoch,
 			EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance,
-			Withdrawals:      0,
+			ActivationHash:   make([]byte, 32),
+			ExitHash:         make([]byte, 32),
+			WithdrawalOps:    make([]*ethpb.WithdrawalOp, 0),
 		}
 		balances[i] = params.BeaconConfig().MaxEffectiveBalance
 	}
@@ -174,14 +180,18 @@ func TestProcessSlashings_SlashedLess(t *testing.T) {
 			state: &ethpb.BeaconState{
 				Validators: []*ethpb.Validator{
 					{
-						Withdrawals:       0,
+						ActivationHash:    make([]byte, 32),
+						ExitHash:          make([]byte, 32),
+						WithdrawalOps:     make([]*ethpb.WithdrawalOp, 0),
 						Slashed:           true,
 						WithdrawableEpoch: params.BeaconConfig().EpochsPerSlashingsVector / 2,
 						EffectiveBalance:  params.BeaconConfig().MaxEffectiveBalance,
 					},
 					{
-						Withdrawals: 0,
-						ExitEpoch:   params.BeaconConfig().FarFutureEpoch, EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance}},
+						ActivationHash: make([]byte, 32),
+						ExitHash:       make([]byte, 32),
+						WithdrawalOps:  make([]*ethpb.WithdrawalOp, 0),
+						ExitEpoch:      params.BeaconConfig().FarFutureEpoch, EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance}},
 				Balances:  []uint64{params.BeaconConfig().MaxEffectiveBalance, params.BeaconConfig().MaxEffectiveBalance},
 				Slashings: []uint64{0, 1e9},
 			},
@@ -193,16 +203,22 @@ func TestProcessSlashings_SlashedLess(t *testing.T) {
 			state: &ethpb.BeaconState{
 				Validators: []*ethpb.Validator{
 					{
-						Withdrawals:       0,
+						ActivationHash:    (params.BeaconConfig().ZeroHash)[:],
+						ExitHash:          (params.BeaconConfig().ZeroHash)[:],
+						WithdrawalOps:     []*ethpb.WithdrawalOp{},
 						Slashed:           true,
 						WithdrawableEpoch: params.BeaconConfig().EpochsPerSlashingsVector / 2,
 						EffectiveBalance:  params.BeaconConfig().MaxEffectiveBalance},
 					{
-						Withdrawals: 0,
-						ExitEpoch:   params.BeaconConfig().FarFutureEpoch, EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance},
+						ActivationHash: (params.BeaconConfig().ZeroHash)[:],
+						ExitHash:       (params.BeaconConfig().ZeroHash)[:],
+						WithdrawalOps:  []*ethpb.WithdrawalOp{},
+						ExitEpoch:      params.BeaconConfig().FarFutureEpoch, EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance},
 					{
-						Withdrawals: 0,
-						ExitEpoch:   params.BeaconConfig().FarFutureEpoch, EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance},
+						ActivationHash: (params.BeaconConfig().ZeroHash)[:],
+						ExitHash:       (params.BeaconConfig().ZeroHash)[:],
+						WithdrawalOps:  []*ethpb.WithdrawalOp{},
+						ExitEpoch:      params.BeaconConfig().FarFutureEpoch, EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance},
 				},
 				Balances:  []uint64{params.BeaconConfig().MaxEffectiveBalance, params.BeaconConfig().MaxEffectiveBalance},
 				Slashings: []uint64{0, 1e9},
@@ -215,16 +231,22 @@ func TestProcessSlashings_SlashedLess(t *testing.T) {
 			state: &ethpb.BeaconState{
 				Validators: []*ethpb.Validator{
 					{
-						Withdrawals:       0,
+						ActivationHash:    (params.BeaconConfig().ZeroHash)[:],
+						ExitHash:          (params.BeaconConfig().ZeroHash)[:],
+						WithdrawalOps:     []*ethpb.WithdrawalOp{},
 						Slashed:           true,
 						WithdrawableEpoch: params.BeaconConfig().EpochsPerSlashingsVector / 2,
 						EffectiveBalance:  params.BeaconConfig().MaxEffectiveBalance},
 					{
-						Withdrawals: 0,
-						ExitEpoch:   params.BeaconConfig().FarFutureEpoch, EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance},
+						ActivationHash: (params.BeaconConfig().ZeroHash)[:],
+						ExitHash:       (params.BeaconConfig().ZeroHash)[:],
+						WithdrawalOps:  []*ethpb.WithdrawalOp{},
+						ExitEpoch:      params.BeaconConfig().FarFutureEpoch, EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance},
 					{
-						Withdrawals: 0,
-						ExitEpoch:   params.BeaconConfig().FarFutureEpoch, EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance},
+						ActivationHash: (params.BeaconConfig().ZeroHash)[:],
+						ExitHash:       (params.BeaconConfig().ZeroHash)[:],
+						WithdrawalOps:  []*ethpb.WithdrawalOp{},
+						ExitEpoch:      params.BeaconConfig().FarFutureEpoch, EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance},
 				},
 				Balances:  []uint64{params.BeaconConfig().MaxEffectiveBalance, params.BeaconConfig().MaxEffectiveBalance},
 				Slashings: []uint64{0, 2 * 1e9},
@@ -237,13 +259,17 @@ func TestProcessSlashings_SlashedLess(t *testing.T) {
 			state: &ethpb.BeaconState{
 				Validators: []*ethpb.Validator{
 					{
-						Withdrawals:       0,
+						ActivationHash:    (params.BeaconConfig().ZeroHash)[:],
+						ExitHash:          (params.BeaconConfig().ZeroHash)[:],
+						WithdrawalOps:     []*ethpb.WithdrawalOp{},
 						Slashed:           true,
 						WithdrawableEpoch: params.BeaconConfig().EpochsPerSlashingsVector / 2,
 						EffectiveBalance:  params.BeaconConfig().MaxEffectiveBalance - params.BeaconConfig().EffectiveBalanceIncrement},
 					{
-						Withdrawals: 0,
-						ExitEpoch:   params.BeaconConfig().FarFutureEpoch, EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance - params.BeaconConfig().EffectiveBalanceIncrement}},
+						ActivationHash: (params.BeaconConfig().ZeroHash)[:],
+						ExitHash:       (params.BeaconConfig().ZeroHash)[:],
+						WithdrawalOps:  []*ethpb.WithdrawalOp{},
+						ExitEpoch:      params.BeaconConfig().FarFutureEpoch, EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance - params.BeaconConfig().EffectiveBalanceIncrement}},
 				Balances:  []uint64{params.BeaconConfig().MaxEffectiveBalance - params.BeaconConfig().EffectiveBalanceIncrement, params.BeaconConfig().MaxEffectiveBalance - params.BeaconConfig().EffectiveBalanceIncrement},
 				Slashings: []uint64{0, 1e9},
 			},
@@ -309,11 +335,15 @@ func TestProcessRegistryUpdates_NoRotation(t *testing.T) {
 		Slot: 5 * params.BeaconConfig().SlotsPerEpoch,
 		Validators: []*ethpb.Validator{
 			{
-				Withdrawals: 0,
-				ExitEpoch:   params.BeaconConfig().MaxSeedLookahead},
+				ActivationHash: (params.BeaconConfig().ZeroHash)[:],
+				ExitHash:       (params.BeaconConfig().ZeroHash)[:],
+				WithdrawalOps:  []*ethpb.WithdrawalOp{},
+				ExitEpoch:      params.BeaconConfig().MaxSeedLookahead},
 			{
-				Withdrawals: 0,
-				ExitEpoch:   params.BeaconConfig().MaxSeedLookahead},
+				ActivationHash: (params.BeaconConfig().ZeroHash)[:],
+				ExitHash:       (params.BeaconConfig().ZeroHash)[:],
+				WithdrawalOps:  []*ethpb.WithdrawalOp{},
+				ExitEpoch:      params.BeaconConfig().MaxSeedLookahead},
 		},
 		Balances: []uint64{
 			params.BeaconConfig().MaxEffectiveBalance,
@@ -342,7 +372,9 @@ func TestProcessRegistryUpdates_EligibleToActivate(t *testing.T) {
 			ActivationEligibilityEpoch: params.BeaconConfig().FarFutureEpoch,
 			EffectiveBalance:           params.BeaconConfig().MaxEffectiveBalance,
 			ActivationEpoch:            params.BeaconConfig().FarFutureEpoch,
-			Withdrawals:                0,
+			ActivationHash:             (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:                   (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:              []*ethpb.WithdrawalOp{},
 		})
 	}
 	beaconState, err := v1.InitializeFromProto(base)
@@ -368,11 +400,15 @@ func TestProcessRegistryUpdates_ActivationCompletes(t *testing.T) {
 		Slot: 5 * params.BeaconConfig().SlotsPerEpoch,
 		Validators: []*ethpb.Validator{
 			{
-				Withdrawals:     0,
+				ActivationHash:  (params.BeaconConfig().ZeroHash)[:],
+				ExitHash:        (params.BeaconConfig().ZeroHash)[:],
+				WithdrawalOps:   []*ethpb.WithdrawalOp{},
 				ExitEpoch:       params.BeaconConfig().MaxSeedLookahead,
 				ActivationEpoch: 5 + params.BeaconConfig().MaxSeedLookahead + 1},
 			{
-				Withdrawals:     0,
+				ActivationHash:  (params.BeaconConfig().ZeroHash)[:],
+				ExitHash:        (params.BeaconConfig().ZeroHash)[:],
+				WithdrawalOps:   []*ethpb.WithdrawalOp{},
 				ExitEpoch:       params.BeaconConfig().MaxSeedLookahead,
 				ActivationEpoch: 5 + params.BeaconConfig().MaxSeedLookahead + 1},
 		},
@@ -394,12 +430,16 @@ func TestProcessRegistryUpdates_ValidatorsEjected(t *testing.T) {
 			{
 				ExitEpoch:        params.BeaconConfig().FarFutureEpoch,
 				EffectiveBalance: params.BeaconConfig().EjectionBalance - 1,
-				Withdrawals:      0,
+				ActivationHash:   (params.BeaconConfig().ZeroHash)[:],
+				ExitHash:         (params.BeaconConfig().ZeroHash)[:],
+				WithdrawalOps:    []*ethpb.WithdrawalOp{},
 			},
 			{
 				ExitEpoch:        params.BeaconConfig().FarFutureEpoch,
 				EffectiveBalance: params.BeaconConfig().EjectionBalance - 1,
-				Withdrawals:      0,
+				ActivationHash:   (params.BeaconConfig().ZeroHash)[:],
+				ExitHash:         (params.BeaconConfig().ZeroHash)[:],
+				WithdrawalOps:    []*ethpb.WithdrawalOp{},
 			},
 		},
 		FinalizedCheckpoint: &ethpb.Checkpoint{Root: make([]byte, fieldparams.RootLength)},
@@ -421,11 +461,15 @@ func TestProcessRegistryUpdates_CanExits(t *testing.T) {
 		Slot: params.BeaconConfig().SlotsPerEpoch.Mul(uint64(e)),
 		Validators: []*ethpb.Validator{
 			{
-				Withdrawals:       0,
+				ActivationHash:    (params.BeaconConfig().ZeroHash)[:],
+				ExitHash:          (params.BeaconConfig().ZeroHash)[:],
+				WithdrawalOps:     []*ethpb.WithdrawalOp{},
 				ExitEpoch:         exitEpoch,
 				WithdrawableEpoch: exitEpoch + minWithdrawalDelay},
 			{
-				Withdrawals:       0,
+				ActivationHash:    (params.BeaconConfig().ZeroHash)[:],
+				ExitHash:          (params.BeaconConfig().ZeroHash)[:],
+				WithdrawalOps:     []*ethpb.WithdrawalOp{},
 				ExitEpoch:         exitEpoch,
 				WithdrawableEpoch: exitEpoch + minWithdrawalDelay},
 		},
@@ -444,7 +488,9 @@ func buildState(t testing.TB, slot types.Slot, validatorCount uint64) state.Beac
 	validators := make([]*ethpb.Validator, validatorCount)
 	for i := 0; i < len(validators); i++ {
 		validators[i] = &ethpb.Validator{
-			Withdrawals:      0,
+			ActivationHash:   (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:         (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:    []*ethpb.WithdrawalOp{},
 			ExitEpoch:        params.BeaconConfig().FarFutureEpoch,
 			EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance,
 		}

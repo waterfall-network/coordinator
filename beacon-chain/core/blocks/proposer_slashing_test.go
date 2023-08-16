@@ -95,7 +95,9 @@ func TestProcessProposerSlashings_ValidatorNotSlashable(t *testing.T) {
 			Slashed:           true,
 			ActivationEpoch:   0,
 			WithdrawableEpoch: 0,
-			Withdrawals:       0,
+			ActivationHash:    (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:          (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:     []*ethpb.WithdrawalOp{},
 		},
 	}
 	currentSlot := types.Slot(0)

@@ -35,7 +35,9 @@ func TestProcessBlockHeader_ImproperBlockSlot(t *testing.T) {
 			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			Slashed:               true,
-			Withdrawals:           0,
+			ActivationHash:        (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:              (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:         []*ethpb.WithdrawalOp{},
 		}
 	}
 
@@ -114,7 +116,9 @@ func TestProcessBlockHeader_DifferentSlots(t *testing.T) {
 			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			Slashed:               true,
-			Withdrawals:           0,
+			ActivationHash:        (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:              (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:         []*ethpb.WithdrawalOp{},
 		}
 	}
 
@@ -160,7 +164,9 @@ func TestProcessBlockHeader_PreviousBlockRootNotSignedRoot(t *testing.T) {
 			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			Slashed:               true,
-			Withdrawals:           0,
+			ActivationHash:        (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:              (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:         []*ethpb.WithdrawalOp{},
 		}
 	}
 
@@ -203,7 +209,9 @@ func TestProcessBlockHeader_SlashedProposer(t *testing.T) {
 			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			Slashed:               true,
-			Withdrawals:           0,
+			ActivationHash:        (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:              (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:         []*ethpb.WithdrawalOp{},
 		}
 	}
 
@@ -249,7 +257,9 @@ func TestProcessBlockHeader_OK(t *testing.T) {
 			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			Slashed:               true,
-			Withdrawals:           0,
+			ActivationHash:        (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:              (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:         []*ethpb.WithdrawalOp{},
 		}
 	}
 
@@ -311,7 +321,9 @@ func TestBlockSignatureSet_OK(t *testing.T) {
 			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			Slashed:               true,
-			Withdrawals:           0,
+			ActivationHash:        (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:              (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:         []*ethpb.WithdrawalOp{},
 		}
 	}
 
