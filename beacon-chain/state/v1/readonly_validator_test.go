@@ -52,6 +52,30 @@ func TestReadOnlyValidator_ExitEpoch(t *testing.T) {
 	assert.Equal(t, epoch, v.ExitEpoch())
 }
 
+func TestReadOnlyValidator_WithdrawalOps(t *testing.T) {
+	val := []*ethpb.WithdrawalOp{
+		{Amount: 123456, Hash: []byte{0xFA, 0xCC}},
+		{Amount: 6554478, Hash: []byte{0x77, 0x77}},
+	}
+	v, err := v1.NewValidator(&ethpb.Validator{WithdrawalOps: val})
+	require.NoError(t, err)
+	assert.DeepEqual(t, val, v.WithdrawalOps())
+}
+
+func TestReadOnlyValidator_ActivationHash(t *testing.T) {
+	val := []byte{0xFA, 0xCC}
+	v, err := v1.NewValidator(&ethpb.Validator{ActivationHash: val})
+	require.NoError(t, err)
+	assert.DeepEqual(t, val, v.ActivationHash())
+}
+
+func TestReadOnlyValidator_ExitHash(t *testing.T) {
+	val := []byte{0xFA, 0xCC}
+	v, err := v1.NewValidator(&ethpb.Validator{ExitHash: val})
+	require.NoError(t, err)
+	assert.DeepEqual(t, val, v.ExitHash())
+}
+
 func TestReadOnlyValidator_PublicKey(t *testing.T) {
 	key := [fieldparams.BLSPubkeyLength]byte{0xFA, 0xCC}
 	v, err := v1.NewValidator(&ethpb.Validator{PublicKey: key[:]})
@@ -74,8 +98,7 @@ func TestReadOnlyValidator_CreatorAddress(t *testing.T) {
 }
 
 func TestReadOnlyValidator_Slashed(t *testing.T) {
-	slashed := true
-	v, err := v1.NewValidator(&ethpb.Validator{Slashed: slashed})
+	v, err := v1.NewValidator(&ethpb.Validator{Slashed: true})
 	require.NoError(t, err)
-	assert.Equal(t, slashed, v.Slashed())
+	assert.Equal(t, true, v.Slashed())
 }

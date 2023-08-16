@@ -56,10 +56,42 @@ func (v readOnlyValidator) WithdrawableEpoch() types.Epoch {
 	return v.validator.WithdrawableEpoch
 }
 
-// Withdrawals returns the cumulative value of withdrawals
+// WithdrawalOps returns the array of withdrawal operation from finalized checkpoint of the
 // read only validator.
-func (v readOnlyValidator) Withdrawals() uint64 {
-	return v.validator.Withdrawals
+func (v readOnlyValidator) WithdrawalOps() []*ethpb.WithdrawalOp {
+	srcVal := v.validator.WithdrawalOps
+	cpy := make([]*ethpb.WithdrawalOp, len(srcVal))
+
+	for i, sv := range srcVal {
+		if sv == nil {
+			continue
+		}
+		h := make([]byte, len(sv.Hash))
+		copy(h, sv.Hash)
+		cpy[i] = &ethpb.WithdrawalOp{
+			Amount: sv.Amount,
+			Hash:   h,
+		}
+	}
+	return cpy
+}
+
+// ActivationHash returns the tx hash of activation of
+// read only validator.
+func (v readOnlyValidator) ActivationHash() []byte {
+	srcVal := v.validator.ActivationHash
+	cpy := make([]byte, len(srcVal))
+	copy(cpy, srcVal)
+	return cpy
+}
+
+// ExitHash returns the tx hash of deactivation of
+// read only validator.
+func (v readOnlyValidator) ExitHash() []byte {
+	srcVal := v.validator.ExitHash
+	cpy := make([]byte, len(srcVal))
+	copy(cpy, srcVal)
+	return cpy
 }
 
 // ExitEpoch returns the exit epoch of the
