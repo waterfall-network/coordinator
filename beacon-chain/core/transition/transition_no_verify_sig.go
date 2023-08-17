@@ -406,6 +406,9 @@ func altairOperations(
 	if _, err := altair.ProcessDeposits(ctx, state, signedBeaconBlock.Block().Body().Deposits()); err != nil {
 		return nil, errors.Wrap(err, "could not process altair deposit")
 	}
+	if _, err := b.ProcessWithdrawal(ctx, state, signedBeaconBlock.Block().Body().Withdrawals()); err != nil {
+		return nil, errors.Wrap(err, "could not process altair withdrawals")
+	}
 	return b.ProcessVoluntaryExits(ctx, state, signedBeaconBlock.Block().Body().VoluntaryExits())
 }
 
@@ -428,6 +431,9 @@ func phase0Operations(
 	}
 	if _, err := b.ProcessDeposits(ctx, state, signedBeaconBlock.Block().Body().Deposits()); err != nil {
 		return nil, errors.Wrap(err, "could not process deposits")
+	}
+	if _, err := b.ProcessWithdrawal(ctx, state, signedBeaconBlock.Block().Body().Withdrawals()); err != nil {
+		return nil, errors.Wrap(err, "could not process withdrawals")
 	}
 	return b.ProcessVoluntaryExits(ctx, state, signedBeaconBlock.Block().Body().VoluntaryExits())
 }

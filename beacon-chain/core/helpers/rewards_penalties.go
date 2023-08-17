@@ -230,6 +230,7 @@ const (
 	OpBlockAttested   = "blk-attsd"
 	OpSyncCommittee   = "sync-comm"
 	OpSyncAggregation = "sync-aggr"
+	OpWithdrawal      = "withdrawal"
 	MetaGlobalParams  = "META"
 )
 

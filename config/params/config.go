@@ -87,6 +87,7 @@ type BeaconChainConfig struct {
 	EpochsPerSlashingsVector  types.Epoch `yaml:"EPOCHS_PER_SLASHINGS_VECTOR" spec:"true"`  // EpochsPerSlashingsVector defines max length in epoch to store old stats to recompute slashing witness.
 	HistoricalRootsLimit      uint64      `yaml:"HISTORICAL_ROOTS_LIMIT" spec:"true"`       // HistoricalRootsLimit defines max historical roots that can be saved in state before roll over.
 	ValidatorRegistryLimit    uint64      `yaml:"VALIDATOR_REGISTRY_LIMIT" spec:"true"`     // ValidatorRegistryLimit defines the upper bound of validators can participate in eth2.
+	WithdrawalOpsLimit        uint64      `yaml:"WITHDRAWAL_OPS_LIMIT" spec:"true"`         // WithdrawalOpsLimit defines the max length of list of latest withdrawals op of validator.
 
 	// Reward and penalty quotients constants.
 	BaseRewardFactor               uint64  `yaml:"BASE_REWARD_FACTOR" spec:"true"`               // BaseRewardFactor is used to calculate validator per-slot interest rate.
