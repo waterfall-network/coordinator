@@ -65,25 +65,30 @@ func ProcessWithdrawal(
 		}
 
 		// apply withdrawal
+		amount := withdrawal.Amount
+		// if amount is zero - withdraw the entire available balance
+		if amount == 0 {
+			amount = availableBalance
+		}
 
 		// write Rewards And Penalties log
 		if err = helpers.LogBeforeRewardsAndPenalties(
 			beaconState,
 			withdrawal.ValidatorIndex,
-			withdrawal.Amount,
+			amount,
 			nil,
 			helpers.BalanceDecrease,
 			helpers.OpWithdrawal,
 		); err != nil {
 			log.WithError(err).WithFields(logrus.Fields{
-				"Slot":           beaconState.Slot(),
-				"Validator":      withdrawal.ValidatorIndex,
-				"ProposerReward": withdrawal.Amount,
+				"Slot":       beaconState.Slot(),
+				"Validator":  withdrawal.ValidatorIndex,
+				"withdrawal": amount,
 			}).Error("Log rewards and penalties failed: ProcessWithdrawal")
 		}
 
 		// update balance
-		if err = helpers.DecreaseBalance(beaconState, withdrawal.ValidatorIndex, withdrawal.Amount); err != nil {
+		if err = helpers.DecreaseBalance(beaconState, withdrawal.ValidatorIndex, amount); err != nil {
 			return nil, err
 		}
 		// update validator
@@ -100,7 +105,7 @@ func ProcessWithdrawal(
 		}
 
 		upVal.WithdrawalOps = append(upVal.WithdrawalOps, &ethpb.WithdrawalOp{
-			Amount: withdrawal.Amount,
+			Amount: amount,
 			Hash:   bytesutil.SafeCopyBytes(withdrawal.InitTxHash),
 		})
 		if err = beaconState.UpdateValidatorAtIndex(withdrawal.ValidatorIndex, upVal); err != nil {

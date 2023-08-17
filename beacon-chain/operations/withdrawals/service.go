@@ -143,8 +143,16 @@ func (p *Pool) OnSlot(st state.ReadOnlyBeaconState) {
 	// remove invalid or stale items
 	pending := make([]*ethpb.Withdrawal, 0, len(p.pending))
 	for _, itm := range p.pending {
-		if validateWithdrawal(itm, st) {
+		if err := validateWithdrawal(itm, st); err == nil {
 			pending = append(pending, itm)
+		} else {
+			log.WithError(err).WithFields(log.Fields{
+				"VIndex":     fmt.Sprintf("%d", itm.ValidatorIndex),
+				"PublicKey":  fmt.Sprintf("%#x", itm.PublicKey),
+				"Epoch":      fmt.Sprintf("%d", itm.Epoch),
+				"Amount":     fmt.Sprintf("%d", itm.Amount),
+				"InitTxHash": fmt.Sprintf("%#x", itm.InitTxHash),
+			}).Warn("WithdrawalPool pool: validation failed")
 		}
 	}
 	p.pending = pending
@@ -170,45 +178,39 @@ func (p *Pool) handleValidatorActivation(st state.ReadOnlyBeaconState) {
 	}
 }
 
-func validateWithdrawal(itm *ethpb.Withdrawal, st state.ReadOnlyBeaconState) bool {
+func validateWithdrawal(itm *ethpb.Withdrawal, st state.ReadOnlyBeaconState) error {
 	// stale not activated validator withdrawal
 	if itm.ValidatorIndex == math.MaxUint64 && itm.Epoch < st.FinalizedCheckpointEpoch() {
-		log.WithFields(log.Fields{
-			"VIndex":     fmt.Sprintf("%d", itm.ValidatorIndex),
-			"PublicKey":  fmt.Sprintf("%#x", itm.PublicKey),
-			"Epoch":      fmt.Sprintf("%d", itm.Epoch),
-			"Amount":     fmt.Sprintf("%d", itm.Amount),
-			"InitTxHash": fmt.Sprintf("%#x", itm.InitTxHash),
-		}).Warn("WithdrawalPool pool: validate: stale not activated validator")
-		return false
+		return fmt.Errorf("stale not activated validator")
 	}
 	// not activated validator withdrawal
 	if itm.ValidatorIndex == math.MaxUint64 {
-		return true
+		return nil
+	}
+	// check validator data
+	vld, err := st.ValidatorAtIndexReadOnly(itm.ValidatorIndex)
+	if err != nil {
+		return err
+	}
+	if vld == nil {
+		return fmt.Errorf("validator not found by index=%d", itm.ValidatorIndex)
+	}
+	if vld.PublicKey() != bytesutil.ToBytes48(itm.PublicKey) {
+		return fmt.Errorf("mismatch public keys validator=%#x withdrawal=%#x", vld.PublicKey(), itm.PublicKey)
+	}
+	for _, wop := range vld.WithdrawalOps() {
+		if bytes.Equal(wop.Hash, itm.InitTxHash) {
+			return fmt.Errorf("withdrawal already applied")
+		}
 	}
 
 	// check validator balance
 	bal, err := helpers.AvailableWithdrawalAmount(itm.ValidatorIndex, st)
 	if err != nil {
-		log.WithError(err).WithFields(log.Fields{
-			"VIndex":     fmt.Sprintf("%d", itm.ValidatorIndex),
-			"PublicKey":  fmt.Sprintf("%#x", itm.PublicKey),
-			"Epoch":      fmt.Sprintf("%d", itm.Epoch),
-			"Amount":     fmt.Sprintf("%d", itm.Amount),
-			"InitTxHash": fmt.Sprintf("%#x", itm.InitTxHash),
-		}).Error("WithdrawalPool pool: validate error")
-		return false
+		return err
 	}
 	if bal < itm.Amount {
-		log.WithError(err).WithFields(log.Fields{
-			"VIndex":     fmt.Sprintf("%d", itm.ValidatorIndex),
-			"PublicKey":  fmt.Sprintf("%#x", itm.PublicKey),
-			"Epoch":      fmt.Sprintf("%d", itm.Epoch),
-			"Amount":     fmt.Sprintf("%d", itm.Amount),
-			"InitTxHash": fmt.Sprintf("%#x", itm.InitTxHash),
-			"availBal":   bal,
-		}).Warn("WithdrawalPool pool: validate: low balance")
-		return false
+		return fmt.Errorf("validate: low balance bal=%d < amt=%d", bal, itm.Amount)
 	}
-	return true
+	return nil
 }

@@ -398,3 +398,50 @@ func TestProcessWithdrawal_WithdrawalOpsLimit(t *testing.T) {
 	require.Equal(t, withdrawals[3].Amount, gotVal.WithdrawalOps()[1].Amount)
 	require.DeepEqual(t, withdrawals[3].InitTxHash, gotVal.WithdrawalOps()[1].Hash)
 }
+
+func TestProcessWithdrawal_WithdrawalEntireAvailableBalance(t *testing.T) {
+	withdrawals := []*ethpb.Withdrawal{{
+		PublicKey:      bytesutil.PadTo([]byte{0x11}, 48),
+		ValidatorIndex: 0,
+		Amount:         0,
+		InitTxHash:     bytesutil.PadTo([]byte{0x77}, 32),
+		Epoch:          0,
+	}}
+	registry := []*ethpb.Validator{
+		{
+			PublicKey:      bytesutil.PadTo([]byte{0x11}, 48),
+			ExitEpoch:      params.BeaconConfig().FarFutureEpoch,
+			ActivationHash: make([]byte, 32),
+			ExitHash:       make([]byte, 32),
+			WithdrawalOps:  make([]*ethpb.WithdrawalOp, 0),
+		},
+	}
+	state, err := v1.InitializeFromProto(&ethpb.BeaconState{
+		Validators: registry,
+		Slot:       10,
+		Balances:   []uint64{3_290_000_000_000},
+	})
+	require.NoError(t, err)
+	b := util.NewBeaconBlock()
+	b.Block = &ethpb.BeaconBlock{
+		Body: &ethpb.BeaconBlockBody{
+			Withdrawals: withdrawals,
+		},
+	}
+
+	_, err = blocks.ProcessWithdrawal(context.Background(), state, b.Block.Body.Withdrawals)
+	require.NoError(t, err)
+
+	//check balance
+	expBal := params.BeaconConfig().MaxEffectiveBalance
+	gotBal, err := state.BalanceAtIndex(withdrawals[0].ValidatorIndex)
+	require.NoError(t, err)
+	require.Equal(t, expBal, gotBal)
+
+	//check validator
+	gotVal, err := state.ValidatorAtIndexReadOnly(withdrawals[0].ValidatorIndex)
+	require.NoError(t, err)
+	require.Equal(t, 1, len(gotVal.WithdrawalOps()))
+	require.Equal(t, 3_290_000_000_000-params.BeaconConfig().MaxEffectiveBalance, gotVal.WithdrawalOps()[0].Amount)
+	require.DeepEqual(t, withdrawals[0].InitTxHash, gotVal.WithdrawalOps()[0].Hash)
+}
