@@ -128,7 +128,7 @@ func (s *Service) ProcessWithdrawalLog(ctx context.Context, wtdLog gwatTypes.Log
 		ValidatorIndex: types.ValidatorIndex(valIndex),
 		InitTxHash:     wtdLog.TxHash.Bytes(),
 		Amount:         amtGwei,
-		Epoch:          curEpoch,
+		Epoch:          curEpoch + 2, // min 1 epoch to propagate op by network
 	}
 	s.cfg.withdrawalPool.InsertWithdrawal(ctx, exit)
 
