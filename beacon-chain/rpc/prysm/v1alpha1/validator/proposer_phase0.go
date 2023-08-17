@@ -188,7 +188,6 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		validAttSlashings = append(validAttSlashings, slashing)
 	}
 
-	vs.ExitPool.OnSlot(head)
 	exits := vs.ExitPool.PendingExits(head, req.Slot, false)
 	validExits := make([]*ethpb.VoluntaryExit, 0, len(exits))
 	for _, exit := range exits {
@@ -204,7 +203,6 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		validExits = append(validExits, exit)
 	}
 
-	vs.WithdrawalPool.OnSlot(head)
 	withdrawals := vs.WithdrawalPool.PendingWithdrawals(req.Slot, false)
 
 	if len(withdrawals) > 0 {
