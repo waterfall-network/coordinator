@@ -461,6 +461,7 @@ func CopyWithdrawalOp(withdrawalOp *WithdrawalOp) *WithdrawalOp {
 	return &WithdrawalOp{
 		Amount: withdrawalOp.Amount,
 		Hash:   bytesutil.SafeCopyBytes(withdrawalOp.Hash),
+		Slot:   withdrawalOp.Slot,
 	}
 }
 

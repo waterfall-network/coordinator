@@ -253,6 +253,7 @@ func TestProcessWithdrawal_Ok(t *testing.T) {
 	require.Equal(t, 1, len(gotVal.WithdrawalOps()))
 	require.Equal(t, withdrawals[0].Amount, gotVal.WithdrawalOps()[0].Amount)
 	require.DeepEqual(t, withdrawals[0].InitTxHash, gotVal.WithdrawalOps()[0].Hash)
+	require.Equal(t, state.Slot(), gotVal.WithdrawalOps()[0].GetSlot())
 }
 
 func TestProcessWithdrawal_SkippingAlreadyApplied(t *testing.T) {
@@ -317,6 +318,7 @@ func TestProcessWithdrawal_SkippingAlreadyApplied(t *testing.T) {
 	require.Equal(t, 1, len(gotVal.WithdrawalOps()))
 	require.Equal(t, withdrawals[0].Amount, gotVal.WithdrawalOps()[0].Amount)
 	require.DeepEqual(t, withdrawals[0].InitTxHash, gotVal.WithdrawalOps()[0].Hash)
+	require.Equal(t, state.Slot(), gotVal.WithdrawalOps()[0].GetSlot())
 }
 
 func TestProcessWithdrawal_WithdrawalOpsLimit(t *testing.T) {
@@ -397,6 +399,9 @@ func TestProcessWithdrawal_WithdrawalOpsLimit(t *testing.T) {
 	require.DeepEqual(t, withdrawals[2].InitTxHash, gotVal.WithdrawalOps()[0].Hash)
 	require.Equal(t, withdrawals[3].Amount, gotVal.WithdrawalOps()[1].Amount)
 	require.DeepEqual(t, withdrawals[3].InitTxHash, gotVal.WithdrawalOps()[1].Hash)
+
+	require.Equal(t, state.Slot(), gotVal.WithdrawalOps()[0].GetSlot())
+	require.Equal(t, state.Slot(), gotVal.WithdrawalOps()[1].GetSlot())
 }
 
 func TestProcessWithdrawal_WithdrawalEntireAvailableBalance(t *testing.T) {
@@ -444,4 +449,5 @@ func TestProcessWithdrawal_WithdrawalEntireAvailableBalance(t *testing.T) {
 	require.Equal(t, 1, len(gotVal.WithdrawalOps()))
 	require.Equal(t, 3_290_000_000_000-params.BeaconConfig().MaxEffectiveBalance, gotVal.WithdrawalOps()[0].Amount)
 	require.DeepEqual(t, withdrawals[0].InitTxHash, gotVal.WithdrawalOps()[0].Hash)
+	require.Equal(t, state.Slot(), gotVal.WithdrawalOps()[0].GetSlot())
 }

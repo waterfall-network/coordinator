@@ -54,8 +54,8 @@ func TestReadOnlyValidator_ExitEpoch(t *testing.T) {
 
 func TestReadOnlyValidator_WithdrawalOps(t *testing.T) {
 	val := []*ethpb.WithdrawalOp{
-		{Amount: 123456, Hash: []byte{0xFA, 0xCC}},
-		{Amount: 6554478, Hash: []byte{0x77, 0x77}},
+		{Amount: 123456, Hash: []byte{0xFA, 0xCC}, Slot: 10},
+		{Amount: 6554478, Hash: []byte{0x77, 0x77}, Slot: 12},
 	}
 	v, err := v1.NewValidator(&ethpb.Validator{WithdrawalOps: val})
 	require.NoError(t, err)

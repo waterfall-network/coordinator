@@ -305,6 +305,7 @@ func V1Alpha1ValidatorToV1(v1Alpha1Validator *ethpbalpha.Validator) *ethpbv1.Val
 		wops[i] = &ethpbv1.WithdrawalOp{
 			Amount: op.Amount,
 			Hash:   op.Hash,
+			Slot:   op.Slot,
 		}
 	}
 
@@ -335,6 +336,7 @@ func V1ValidatorToV1Alpha1(v1Validator *ethpbv1.Validator) *ethpbalpha.Validator
 		wops[i] = &ethpbalpha.WithdrawalOp{
 			Amount: op.Amount,
 			Hash:   op.Hash,
+			Slot:   op.Slot,
 		}
 	}
 
@@ -407,6 +409,7 @@ func BeaconStateToProto(state state.BeaconState) (*ethpbv1.BeaconState, error) {
 			wops[j] = &ethpbv1.WithdrawalOp{
 				Amount: op.Amount,
 				Hash:   op.Hash,
+				Slot:   op.Slot,
 			}
 		}
 

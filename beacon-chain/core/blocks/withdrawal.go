@@ -107,6 +107,7 @@ func ProcessWithdrawal(
 		upVal.WithdrawalOps = append(upVal.WithdrawalOps, &ethpb.WithdrawalOp{
 			Amount: amount,
 			Hash:   bytesutil.SafeCopyBytes(withdrawal.InitTxHash),
+			Slot:   beaconState.Slot(),
 		})
 		if err = beaconState.UpdateValidatorAtIndex(withdrawal.ValidatorIndex, upVal); err != nil {
 			return nil, err

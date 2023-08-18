@@ -109,6 +109,7 @@ func BeaconStateAltairToProto(altairState state.BeaconStateAltair) (*ethpbv2.Bea
 			wops[j] = &ethpbv1.WithdrawalOp{
 				Amount: op.Amount,
 				Hash:   op.Hash,
+				Slot:   op.Slot,
 			}
 		}
 
@@ -255,6 +256,7 @@ func BeaconStateBellatrixToProto(st state.BeaconStateBellatrix) (*ethpbv2.Beacon
 			wops[j] = &ethpbv1.WithdrawalOp{
 				Amount: op.Amount,
 				Hash:   op.Hash,
+				Slot:   op.Slot,
 			}
 		}
 

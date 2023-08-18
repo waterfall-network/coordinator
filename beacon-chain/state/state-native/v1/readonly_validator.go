@@ -71,6 +71,7 @@ func (v readOnlyValidator) WithdrawalOps() []*ethpb.WithdrawalOp {
 		cpy[i] = &ethpb.WithdrawalOp{
 			Amount: sv.Amount,
 			Hash:   h,
+			Slot:   sv.Slot,
 		}
 	}
 	return cpy
