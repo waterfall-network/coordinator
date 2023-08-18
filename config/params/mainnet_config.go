@@ -156,7 +156,7 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	EpochsPerSlashingsVector:  8192,
 	HistoricalRootsLimit:      16777216,
 	ValidatorRegistryLimit:    1099511627776,
-	WithdrawalOpsLimit:        256,
+	WithdrawalOpsLimit:        1024,
 
 	// Reward and penalty quotients constants.
 	BaseRewardFactor:               64,

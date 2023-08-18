@@ -646,7 +646,8 @@ message Validator {
     bytes exit_hash = 11 [(ethereum.eth.ext.ssz_size) = "32"];
 
     // array of withdrawals operations from finalized checkpoint
-    repeated WithdrawalOp withdrawal_ops = 12  [(ethereum.eth.ext.ssz_max) = "32768"];
+    // 1024 * 48(data len) = 49152
+    repeated WithdrawalOp withdrawal_ops = 12  [(ethereum.eth.ext.ssz_max) = "49152"];
 }
 
 // represents validator withdrawal operation
@@ -655,6 +656,8 @@ message WithdrawalOp {
     uint64 amount = 1;
     // hash of transaction initiator of withdrawal
     bytes hash = 2 [(ethereum.eth.ext.ssz_size) = "32"];
+    // The slot of apply.
+    uint64 slot = 3 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Slot"];
 }
 
 // ValidatorParticipation stores participation metrics during a given epoch.
