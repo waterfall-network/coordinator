@@ -168,6 +168,8 @@ func DecreaseBalance(state state.BeaconState, idx types.ValidatorIndex, delta ui
 	return state.UpdateBalancesAtIndex(idx, DecreaseBalanceWithVal(balAtIdx, delta))
 }
 
+// IsWithdrawBalanceLocked define period to block all rewards and penalties operations
+// of balance while procedure of exit.
 func IsWithdrawBalanceLocked(state state.BeaconState, idx types.ValidatorIndex) (bool, error) {
 	val, err := state.ValidatorAtIndexReadOnly(idx)
 	if err != nil {
@@ -176,11 +178,6 @@ func IsWithdrawBalanceLocked(state state.BeaconState, idx types.ValidatorIndex) 
 	stateEpoche := slots.ToEpoch(state.Slot())
 	lockEpoch := val.WithdrawableEpoch() - params.BeaconConfig().WithdrawalBalanceLockPeriod
 	return stateEpoche >= lockEpoch && stateEpoche < val.WithdrawableEpoch(), nil
-}
-
-// ResetBalance set zero balance
-func ResetBalance(state state.BeaconState, idx types.ValidatorIndex) error {
-	return state.UpdateBalancesAtIndex(idx, 0)
 }
 
 // DecreaseBalanceWithVal decreases validator with the given 'index' balance by 'delta' in Gwei.

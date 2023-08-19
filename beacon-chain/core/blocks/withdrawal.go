@@ -88,7 +88,7 @@ func ProcessWithdrawal(
 		}
 
 		// update balance
-		if err = helpers.DecreaseBalance(beaconState, withdrawal.ValidatorIndex, amount); err != nil {
+		if err = ApplyWithdrawals(beaconState, withdrawal.ValidatorIndex, amount); err != nil {
 			return nil, err
 		}
 		// update validator
@@ -112,6 +112,17 @@ func ProcessWithdrawal(
 		if err = beaconState.UpdateValidatorAtIndex(withdrawal.ValidatorIndex, upVal); err != nil {
 			return nil, err
 		}
+
+		log.WithFields(logrus.Fields{
+			"VIndex":           fmt.Sprintf("%d", withdrawal.ValidatorIndex),
+			"PublicKey":        fmt.Sprintf("%#x", withdrawal.PublicKey),
+			"Epoch":            fmt.Sprintf("%d", withdrawal.Epoch),
+			"Amount":           fmt.Sprintf("%d", withdrawal.Amount),
+			"InitTxHash":       fmt.Sprintf("%#x", withdrawal.InitTxHash),
+			"availableBalance": availableBalance,
+			"WithdrawalOps":    len(upVal.WithdrawalOps),
+		}).Info("Withdrawal transition: success")
+
 	}
 	return beaconState, nil
 }
@@ -149,4 +160,12 @@ func VerifyWithdrawalData(
 	}
 
 	return nil
+}
+
+func ApplyWithdrawals(state state.BeaconState, idx types.ValidatorIndex, delta uint64) error {
+	balAtIdx, err := state.BalanceAtIndex(idx)
+	if err != nil {
+		return err
+	}
+	return state.UpdateBalancesAtIndex(idx, helpers.DecreaseBalanceWithVal(balAtIdx, delta))
 }

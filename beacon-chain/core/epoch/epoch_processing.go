@@ -308,18 +308,39 @@ func ProcessEffectiveBalanceUpdates(state state.BeaconState) (state.BeaconState,
 	return state, nil
 }
 
-func ProcessWithdrawal(state state.BeaconState) (state.BeaconState, error) {
-	currentEpoch := time.CurrentEpoch(state)
-	err := state.ApplyToEveryValidator(func(idx int, val *ethpb.Validator) (bool, *ethpb.Validator, error) {
-		if val.WithdrawableEpoch == currentEpoch {
-			if err := helpers.ResetBalance(state, types.ValidatorIndex(idx)); err != nil {
-				return false, val, err
-			}
-			return true, val, nil
-		}
-		return false, val, nil
-	})
-	return state, err
+func ProcessWithdrawalOps(state state.BeaconState) (state.BeaconState, error) {
+	//todo: IMPORTANT: the operations totally removes withdrawals data over all state
+	// including that should contain it.
+	//minSlot, err := slots.EpochStart(state.FinalizedCheckpointEpoch() + 1)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//err = state.ApplyToEveryValidator(func(idx int, val *ethpb.Validator) (bool, *ethpb.Validator, error) {
+	//	upWops := make([]*ethpb.WithdrawalOp, 0, len(val.WithdrawalOps))
+	//	for _, wop := range val.WithdrawalOps {
+	//		if wop.Slot >= minSlot {
+	//			upWops = append(upWops, wop)
+	//		}
+	//
+	//		logrus.WithFields(logrus.Fields{
+	//			"rm":            !(wop.Slot >= minSlot),
+	//			"state.Slot":    fmt.Sprintf("%d", wop.Slot),
+	//			"w.Slot":        fmt.Sprintf("%d", wop.Slot),
+	//			"w.Amount":      fmt.Sprintf("%d", wop.Amount),
+	//			"w.Hash":        fmt.Sprintf("%#x", wop.Hash),
+	//			"val.Index":     fmt.Sprintf("%d", idx),
+	//			"val.PublicKey": fmt.Sprintf("%#x", val.PublicKey),
+	//		}).Info("WithdrawalOps transition: success")
+	//
+	//	}
+	//	isDirty := len(val.WithdrawalOps) != len(upWops)
+	//	if isDirty {
+	//		val.WithdrawalOps = upWops
+	//	}
+	//	return isDirty, val, nil
+	//})
+	//return state, err
+	return state, nil
 }
 
 // ProcessSlashingsReset processes the total slashing balances updates during epoch processing.
@@ -455,7 +476,7 @@ func ProcessFinalUpdates(state state.BeaconState) (state.BeaconState, error) {
 		return nil, err
 	}
 
-	state, err = ProcessWithdrawal(state)
+	state, err = ProcessWithdrawalOps(state)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not process withdrawal")
 	}

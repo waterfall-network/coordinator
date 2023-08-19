@@ -723,6 +723,7 @@ type validatorJson struct {
 type withdrawalOpJson struct {
 	Amount string `json:"amount"`
 	Hash   string `json:"hash" hex:"true"`
+	Slot   string `json:"slot"`
 }
 
 type validatorBalanceJson struct {
