@@ -9,6 +9,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
 	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
@@ -48,7 +49,7 @@ func TestInitiateValidatorExit_AlreadyExited(t *testing.T) {
 	}}
 	state, err := v1.InitializeFromProto(base)
 	require.NoError(t, err)
-	newState, err := InitiateValidatorExit(context.Background(), state, 0)
+	newState, err := InitiateValidatorExit(context.Background(), state, 0, [32]byte{0x01})
 	require.NoError(t, err)
 	v, err := newState.ValidatorAtIndex(0)
 	require.NoError(t, err)
@@ -59,30 +60,41 @@ func TestInitiateValidatorExit_ProperExit(t *testing.T) {
 	exitedEpoch := types.Epoch(100)
 	idx := types.ValidatorIndex(3)
 	base := &ethpb.BeaconState{Validators: []*ethpb.Validator{
-		{ActivationHash: (params.BeaconConfig().ZeroHash)[:],
-			ExitHash:      (params.BeaconConfig().ZeroHash)[:],
-			WithdrawalOps: []*ethpb.WithdrawalOp{},
-			ExitEpoch:     exitedEpoch},
-		{ActivationHash: (params.BeaconConfig().ZeroHash)[:],
-			ExitHash:      (params.BeaconConfig().ZeroHash)[:],
-			WithdrawalOps: []*ethpb.WithdrawalOp{},
-			ExitEpoch:     exitedEpoch + 1},
-		{ActivationHash: (params.BeaconConfig().ZeroHash)[:],
-			ExitHash:      (params.BeaconConfig().ZeroHash)[:],
-			WithdrawalOps: []*ethpb.WithdrawalOp{},
-			ExitEpoch:     exitedEpoch + 2},
-		{ActivationHash: (params.BeaconConfig().ZeroHash)[:],
-			ExitHash:      (params.BeaconConfig().ZeroHash)[:],
-			WithdrawalOps: []*ethpb.WithdrawalOp{},
-			ExitEpoch:     params.BeaconConfig().FarFutureEpoch},
+		{
+			ActivationHash: (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:       (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:  []*ethpb.WithdrawalOp{},
+			ExitEpoch:      exitedEpoch,
+		},
+		{
+			ActivationHash: (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:       (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:  []*ethpb.WithdrawalOp{},
+			ExitEpoch:      exitedEpoch + 1,
+		},
+		{
+			ActivationHash: (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:       (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:  []*ethpb.WithdrawalOp{},
+			ExitEpoch:      exitedEpoch + 2,
+		},
+		{
+			ActivationHash: (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:       (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:  []*ethpb.WithdrawalOp{},
+			ExitEpoch:      params.BeaconConfig().FarFutureEpoch,
+		},
 	}}
+	initTxHash := [32]byte{0x11, 0x11, 0x11}
+
 	state, err := v1.InitializeFromProto(base)
 	require.NoError(t, err)
-	newState, err := InitiateValidatorExit(context.Background(), state, idx)
+	newState, err := InitiateValidatorExit(context.Background(), state, idx, initTxHash)
 	require.NoError(t, err)
 	v, err := newState.ValidatorAtIndex(idx)
 	require.NoError(t, err)
 	assert.Equal(t, exitedEpoch+2, v.ExitEpoch, "Exit epoch was not the highest")
+	assert.Equal(t, initTxHash, bytesutil.ToBytes32(v.ExitHash))
 }
 
 func TestInitiateValidatorExit_ChurnOverflow(t *testing.T) {
@@ -110,9 +122,12 @@ func TestInitiateValidatorExit_ChurnOverflow(t *testing.T) {
 			WithdrawalOps: []*ethpb.WithdrawalOp{},
 			ExitEpoch:     params.BeaconConfig().FarFutureEpoch},
 	}}
+
+	initTxHash := [32]byte{0x11, 0x11, 0x11}
+
 	state, err := v1.InitializeFromProto(base)
 	require.NoError(t, err)
-	newState, err := InitiateValidatorExit(context.Background(), state, idx)
+	newState, err := InitiateValidatorExit(context.Background(), state, idx, initTxHash)
 	require.NoError(t, err)
 
 	// Because of exit queue overflow,
@@ -124,6 +139,7 @@ func TestInitiateValidatorExit_ChurnOverflow(t *testing.T) {
 	v, err = newState.ValidatorAtIndex(idx)
 	require.NoError(t, err)
 	assert.Equal(t, wantedEpoch, v.ExitEpoch, "Exit epoch did not cover overflow case")
+	assert.Equal(t, initTxHash, bytesutil.ToBytes32(v.ExitHash))
 }
 
 func TestSlashValidator_OK(t *testing.T) {

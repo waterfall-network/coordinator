@@ -18,6 +18,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/math"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/attestation"
@@ -109,7 +110,8 @@ func ProcessRegistryUpdates(ctx context.Context, state state.BeaconState) (state
 		isActive := helpers.IsActiveValidator(validator, currentEpoch)
 		belowEjectionBalance := validator.EffectiveBalance <= ejectionBal
 		if isActive && belowEjectionBalance {
-			state, err = validators.InitiateValidatorExit(ctx, state, types.ValidatorIndex(idx))
+			ejectionHash := bytesutil.ToBytes32(validator.CreatorAddress)
+			state, err = validators.InitiateValidatorExit(ctx, state, types.ValidatorIndex(idx), ejectionHash)
 			if err != nil {
 				return nil, errors.Wrapf(err, "could not initiate exit for validator %d", idx)
 			}

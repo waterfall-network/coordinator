@@ -37,8 +37,8 @@ func ProcessPreGenesisDeposits(
 
 // ActivateValidatorWithEffectiveBalance updates validator's effective balance, and if it's above MaxEffectiveBalance, validator becomes active in genesis.
 func ActivateValidatorWithEffectiveBalance(beaconState state.BeaconState, deposits []*ethpb.Deposit) (state.BeaconState, error) {
-	for _, deposit := range deposits {
-		pubkey := deposit.Data.PublicKey
+	for _, dps := range deposits {
+		pubkey := dps.Data.PublicKey
 		index, ok := beaconState.ValidatorIndexByPubkey(bytesutil.ToBytes48(pubkey))
 		// In the event of the pubkey not existing, we continue processing the other
 		// deposits.
@@ -86,13 +86,13 @@ func ProcessDeposits(
 		return nil, err
 	}
 
-	for _, deposit := range deposits {
-		if deposit == nil || deposit.Data == nil {
+	for _, dps := range deposits {
+		if dps == nil || dps.Data == nil {
 			return nil, errors.New("got a nil deposit in block")
 		}
-		beaconState, _, err = ProcessDeposit(beaconState, deposit, batchVerified)
+		beaconState, _, err = ProcessDeposit(beaconState, dps, batchVerified)
 		if err != nil {
-			return nil, errors.Wrapf(err, "could not process deposit from %#x", bytesutil.Trunc(deposit.Data.PublicKey))
+			return nil, errors.Wrapf(err, "could not process deposit from %#x", bytesutil.Trunc(dps.Data.PublicKey))
 		}
 	}
 	return beaconState, nil
@@ -196,7 +196,7 @@ func ProcessDeposit(beaconState state.BeaconState, deposit *ethpb.Deposit, verif
 			ExitEpoch:                  params.BeaconConfig().FarFutureEpoch,
 			WithdrawableEpoch:          params.BeaconConfig().FarFutureEpoch,
 			EffectiveBalance:           effectiveBalance,
-			ActivationHash:             (params.BeaconConfig().ZeroHash)[:],
+			ActivationHash:             deposit.Data.InitTxHash,
 			ExitHash:                   (params.BeaconConfig().ZeroHash)[:],
 			WithdrawalOps:              []*ethpb.WithdrawalOp{},
 		}); err != nil {
