@@ -2,48 +2,26 @@ package validator
 
 import (
 	"bytes"
-
 	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
-// processPrevoteData method processes received prevote data to define longest chain of spines which have enough votes
-func (vs *Server) processPrevoteData(prevoteData []*ethpb.PreVote, optSpines []gwatCommon.HashArray) gwatCommon.HashArray {
-	// Divide prevote candidates to subchains of spines and calculate amount of votes
+// processPrevoteData method processes prevote data to define chain which has most votes
+func (vs *Server) processPrevoteData(optCandidates gwatCommon.HashArray, prevoteData []*ethpb.PreVote) gwatCommon.HashArray {
+	// Divide prevote candidates to subchains of spines
 	chains, votes := vs.getChainsAndVotes(prevoteData)
+
 	// Remove invalid subchains
 	for k, v := range chains {
-		var found bool
-		for _, spine := range optSpines {
-			if bytes.Contains(spine.ToBytes(), v.ToBytes()) {
-				found = true
-				break
-			}
-		}
-		if !found {
+		if !bytes.Contains(optCandidates.ToBytes(), v.ToBytes()) {
 			delete(chains, k)
 			delete(votes, k)
 		}
 	}
 
-	// Define thresholdVotes and exclude chains that have less votes
-	voters := prevoteData[0].GetAggregationBits().Len()
-	thresholdVotes := voters/2 + 1
-
-	for k, v := range votes {
-		if v < thresholdVotes {
-			log.WithFields(logrus.Fields{
-				"1.thresholdVotes": thresholdVotes,
-				"2.votesAmount":    v,
-			}).Info("processPrevoteData: chain has less votes than thresholdVotes")
-			delete(votes, k)
-			delete(chains, k)
-		}
-	}
-
-	return vs.defineLongestSubchain(chains)
+	return vs.defineMostVotedChain(chains, votes)
 }
 
 // getChainsAndVotes receives an array of prevote structs, defines unique subchains of spines and calculates total
@@ -56,7 +34,7 @@ func (vs *Server) getChainsAndVotes(prevote []*ethpb.PreVote) (map[[gwatCommon.H
 
 	for _, pv := range prevote {
 		can := gwatCommon.HashArrayFromBytes(pv.Data.Candidates)
-		for i := 1; i < len(can); i++ {
+		for i := 1; i <= len(can); i++ {
 			chain := can[:i]
 
 			if chain.IsUniq() {
@@ -76,19 +54,37 @@ func (vs *Server) getChainsAndVotes(prevote []*ethpb.PreVote) (map[[gwatCommon.H
 	return hashAndChain, hashAndVotes
 }
 
-// defineLongestSubchain defines and return longest subchain of spines which has amount of votes > votes threshold
-func (vs *Server) defineLongestSubchain(chainsMap map[[gwatCommon.HashLength]byte]gwatCommon.HashArray) gwatCommon.HashArray {
-	chain := gwatCommon.HashArray{}
+// defineMostVotedChain defines and returns longest subchain with most of the votes
+func (vs *Server) defineMostVotedChain(chainsMap map[[gwatCommon.HashLength]byte]gwatCommon.HashArray,
+	votesMap map[[gwatCommon.HashLength]byte]uint64) gwatCommon.HashArray {
 
-	for _, c := range chainsMap {
-		if len(c) > len(chain) {
-			chain = c
+	// Define most votes number
+	var mostVotes uint64
+	for _, v := range votesMap {
+		if v > mostVotes {
+			mostVotes = v
+		}
+	}
+
+	// Define subchains which have most of the votes
+	chains := make([]gwatCommon.HashArray, 0, len(chainsMap))
+	for k, v := range votesMap {
+		if v >= mostVotes {
+			chains = append(chains, chainsMap[k])
+		}
+	}
+
+	// Define longest subchain with most of votes
+	var chain gwatCommon.HashArray
+	for _, v := range chains {
+		if len(v) > len(chain) {
+			chain = v
 		}
 	}
 
 	log.WithFields(logrus.Fields{
-		"1.subchain": chain,
-	}).Info("defineLongestSubcain: longest subchain with votes > thresholdVotes")
-
+		"1.votesAmount": mostVotes,
+		"2.chain":       chain,
+	}).Info("defineMostVotedChain: longest prevote candidates chain with the most votes")
 	return chain
 }

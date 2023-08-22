@@ -12,6 +12,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition/interop"
 	v "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/validators"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
@@ -151,24 +152,27 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		log.WithError(err).Warnf("build block data: could not clear prevote pool from outdated data on slot %v", req.Slot)
 	}
 
-	var candidates gwatCommon.HashArray
 	prevoteData := vs.PrevotePool.GetPrevoteBySlot(ctx, req.Slot)
+	candidates := helpers.CalculateCandidates(head, optSpines)
+	log.Infof("build block data: candidates received using optimistic spines: %s", candidates)
+
 	if len(prevoteData) == 0 {
 		log.Warnf("build block data: no prevote data was retrieved for slot %v", req.Slot)
 	} else {
-		// Process received prevote data and calculate longest chain of spines with enough votes
-		candidates = vs.processPrevoteData(prevoteData, optSpines)
-	}
-
-	if len(candidates) == 0 {
-		candidates = helpers.CalculateCandidates(head, optSpines)
+		prevoteCandidates := vs.prepareAndProcessPrevoteData(candidates, prevoteData, head)
+		if len(prevoteCandidates) == 0 {
+			log.Warn("build block data: prevote data was processed but returned empty candidates array, fallback to candidates" +
+				" retrieved using optimistic spines")
+		} else {
+			candidates = prevoteCandidates
+		}
 	}
 
 	eth1Data.Candidates = candidates.ToBytes()
 	log.WithFields(logrus.Fields{
 		"1.req.Slot":   req.Slot,
 		"2.candidates": candidates,
-	}).Info("build block data: retrieving of gwat candidates")
+	}).Info("build block data: candidates which will be added to block")
 
 	deposits, atts, err := vs.packDepositsAndAttestations(ctx, head, eth1Data, parentRoot)
 	if err != nil {
@@ -230,4 +234,30 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		AttesterSlashings: validAttSlashings,
 		VoluntaryExits:    validExits,
 	}, nil
+}
+
+func (vs *Server) prepareAndProcessPrevoteData(optCandidates gwatCommon.HashArray, prevoteData []*ethpb.PreVote, head state.BeaconState) gwatCommon.HashArray {
+	// Make every prevote candidate hash as a separate hasharray to trim non-relevant spines
+	// using head
+	prevoteToProcess := make([]gwatCommon.HashArray, 0, len(prevoteData))
+	for _, v := range prevoteData {
+		prevoteSpines := make([]gwatCommon.HashArray, 0, len(gwatCommon.HashArrayFromBytes(v.Data.Candidates)))
+		for i := 0; i < len(v.Data.Candidates); i += gwatCommon.HashLength {
+			h := gwatCommon.BytesToHash(v.Data.Candidates[i : i+gwatCommon.HashLength])
+			prevoteSpines = append(prevoteSpines, gwatCommon.HashArray{h})
+		}
+		prevoteCandidates := helpers.CalculateCandidates(head, prevoteSpines)
+		arr := make(gwatCommon.HashArray, 0, len(prevoteCandidates))
+		for _, val := range prevoteCandidates {
+			arr = append(arr, val)
+		}
+		prevoteToProcess = append(prevoteToProcess, arr)
+	}
+	// Replace initial prevote candidates with corresponding processed ones to save candidates-votes mapping
+	for i, can := range prevoteToProcess {
+		prevoteData[i].Data.Candidates = can.ToBytes()
+	}
+
+	// Process prevote data and calculate longest chain of spines with most of the votes
+	return vs.processPrevoteData(optCandidates, prevoteData)
 }

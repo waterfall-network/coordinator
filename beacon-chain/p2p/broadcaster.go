@@ -122,13 +122,13 @@ func (s *Service) broadcastAttestation(ctx context.Context, subnet uint64, att *
 	ctx = trace.NewContext(context.Background(), span) // clear parent context / deadline.
 
 	log.WithFields(logrus.Fields{
-		"subnet":             subnet,
-		"curSlot":            slots.CurrentSlot(uint64(s.genesisTime.Unix())),
-		"pv.AggregationBits": fmt.Sprintf("%b", att.AggregationBits),
-		"pv.Data.Slot":       att.Data.Slot,
-		"pv.Data.Index":      att.Data.CommitteeIndex,
+		"subnet":              subnet,
+		"curSlot":             slots.CurrentSlot(uint64(s.genesisTime.Unix())),
+		"att.AggregationBits": fmt.Sprintf("%b", att.AggregationBits),
+		"att.Data.Slot":       att.Data.Slot,
+		"att.Data.Index":      att.Data.CommitteeIndex,
 		//"pv.Candidates":      fmt.Sprintf("%#x", prevote.Data.Candidates),
-	}).Info("Prevote: broadcastAttestation")
+	}).Info("Attestation: broadcastAttestation")
 
 	oneEpoch := time.Duration(1*params.BeaconConfig().SlotsPerEpoch.Mul(params.BeaconConfig().SecondsPerSlot)) * time.Second
 	ctx, cancel := context.WithTimeout(ctx, oneEpoch)

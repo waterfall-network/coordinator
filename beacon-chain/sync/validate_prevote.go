@@ -27,9 +27,9 @@ import (
 
 func (s *Service) validateCommitteeIndexPrevote(ctx context.Context, pid peer.ID, msg *pubsub.Message) (pubsub.ValidationResult, error) {
 	log.Infof("Validation of prevote for with topic %v started", *msg.Topic)
-	if pid == s.cfg.p2p.PeerID() {
-		return pubsub.ValidationAccept, nil
-	}
+	//if pid == s.cfg.p2p.PeerID() {
+	//	return pubsub.ValidationAccept, nil
+	//}
 
 	// Prevote processing requires the target block to be present in the database, so we'll skip
 	// validating or processing prevote until fully synced.
