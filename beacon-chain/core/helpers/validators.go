@@ -430,6 +430,13 @@ func AvailableWithdrawalAmount(vInderx types.ValidatorIndex, st state.ReadOnlyBe
 	if vld == nil {
 		return 0, nil
 	}
+
+	// refunds of insufficient deposit to activate validator
+	if vld.ActivationEligibilityEpoch() == params.BeaconConfig().FarFutureEpoch &&
+		bal < params.BeaconConfig().MaxEffectiveBalance {
+		return bal, nil
+	}
+
 	//if validator id deactivated
 	if vld.ExitEpoch() <= slots.ToEpoch(st.Slot()) {
 		return bal, nil

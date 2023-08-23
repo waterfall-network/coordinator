@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"math"
 
 	"github.com/pkg/errors"
@@ -12,6 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
@@ -23,6 +23,7 @@ var (
 	ErrWithdrawalBadPublicKey      = errors.New("withdrawal bad PublicKey")
 	ErrWithdrawalBadEpoch          = errors.New("withdrawal bad Epoch")
 	ErrWithdrawalLowBalance        = errors.New("withdrawal low balance")
+	ErrWithdrawalBadAmount         = errors.New("withdrawal bad amount")
 	ErrWithdrawalAlreadyApplied    = errors.New("withdrawal already applied")
 )
 
@@ -147,6 +148,16 @@ func VerifyWithdrawalData(
 	currentEpoch := slots.ToEpoch(currentSlot)
 	if withdrawal.Epoch > currentEpoch {
 		return ErrWithdrawalBadEpoch
+	}
+
+	// refunds of insufficient deposit to activate validator
+	if validator.ActivationEligibilityEpoch() == params.BeaconConfig().FarFutureEpoch &&
+		availableBalance < params.BeaconConfig().MaxEffectiveBalance {
+		// for this mod amount must be strictly defined by shard node.
+		// withdrawal whole balance (by set op.Amount to 0) is not acceptable.
+		if withdrawal.Amount == 0 {
+			return ErrWithdrawalBadAmount
+		}
 	}
 
 	if availableBalance < withdrawal.Amount {
