@@ -9,13 +9,14 @@ import (
 )
 
 // processPrevoteData method processes prevote data to define chain which has most votes
-func (vs *Server) processPrevoteData(optCandidates gwatCommon.HashArray, prevoteData []*ethpb.PreVote) gwatCommon.HashArray {
+func (vs *Server) processPrevoteData(prevoteData []*ethpb.PreVote, optCandidates gwatCommon.HashArray) gwatCommon.HashArray {
 	// Divide prevote candidates to subchains of spines
 	chains, votes := vs.getChainsAndVotes(prevoteData)
 
 	// Remove invalid subchains
+	opc := optCandidates.ToBytes()
 	for k, v := range chains {
-		if !bytes.Contains(optCandidates.ToBytes(), v.ToBytes()) {
+		if !bytes.Contains(opc, v.ToBytes()) {
 			delete(chains, k)
 			delete(votes, k)
 		}

@@ -239,25 +239,18 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 func (vs *Server) prepareAndProcessPrevoteData(optCandidates gwatCommon.HashArray, prevoteData []*ethpb.PreVote, head state.BeaconState) gwatCommon.HashArray {
 	// Make every prevote candidate hash as a separate hasharray to trim non-relevant spines
 	// using head
-	prevoteToProcess := make([]gwatCommon.HashArray, 0, len(prevoteData))
-	for _, v := range prevoteData {
+	for i, v := range prevoteData {
 		prevoteSpines := make([]gwatCommon.HashArray, 0, len(gwatCommon.HashArrayFromBytes(v.Data.Candidates)))
 		for i := 0; i < len(v.Data.Candidates); i += gwatCommon.HashLength {
 			h := gwatCommon.BytesToHash(v.Data.Candidates[i : i+gwatCommon.HashLength])
 			prevoteSpines = append(prevoteSpines, gwatCommon.HashArray{h})
 		}
 		prevoteCandidates := helpers.CalculateCandidates(head, prevoteSpines)
-		arr := make(gwatCommon.HashArray, 0, len(prevoteCandidates))
-		for _, val := range prevoteCandidates {
-			arr = append(arr, val)
-		}
-		prevoteToProcess = append(prevoteToProcess, arr)
-	}
-	// Replace initial prevote candidates with corresponding processed ones to save candidates-votes mapping
-	for i, can := range prevoteToProcess {
-		prevoteData[i].Data.Candidates = can.ToBytes()
+
+		// Replace initial prevote candidates with corresponding processed ones to save candidates-votes mapping
+		prevoteData[i].Data.Candidates = prevoteCandidates.ToBytes()
 	}
 
 	// Process prevote data and calculate longest chain of spines with most of the votes
-	return vs.processPrevoteData(optCandidates, prevoteData)
+	return vs.processPrevoteData(prevoteData, optCandidates)
 }
