@@ -26,6 +26,7 @@ type PoolManager interface {
 	InsertWithdrawal(ctx context.Context, withdrawal *ethpb.Withdrawal)
 	MarkIncluded(withdrawal *ethpb.Withdrawal)
 	OnSlot(st state.ReadOnlyBeaconState)
+	Verify(withdrawal *ethpb.Withdrawal) error
 }
 
 // Pool is a concrete implementation of PoolManager.
@@ -117,6 +118,33 @@ func (p *Pool) MarkIncluded(withdrawal *ethpb.Withdrawal) {
 		// WithdrawalPool we want is present at p.pending[index], so we remove it.
 		p.pending = append(p.pending[:index], p.pending[index+1:]...)
 	}
+}
+
+func (p *Pool) Verify(withdrawal *ethpb.Withdrawal) error {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	exists, index := existsInList(p.pending, withdrawal)
+	if !exists {
+		return fmt.Errorf("not found")
+	}
+	poolItm := p.pending[index]
+
+	if poolItm.Epoch != withdrawal.Epoch {
+		return fmt.Errorf("mismatch epochs pool=%d received=%d", poolItm.Epoch, withdrawal.Epoch)
+	}
+	if poolItm.Amount != withdrawal.Amount {
+		return fmt.Errorf("mismatch amounts pool=%d received=%d", poolItm.Amount, withdrawal.Amount)
+	}
+	if poolItm.ValidatorIndex != withdrawal.ValidatorIndex {
+		return fmt.Errorf("mismatch validators indices pool=%d received=%d", poolItm.ValidatorIndex, withdrawal.ValidatorIndex)
+	}
+	if bytes.Equal(poolItm.PublicKey, withdrawal.PublicKey) {
+		return fmt.Errorf("mismatch publick keys pool=%#x received=%#x", poolItm.PublicKey, withdrawal.PublicKey)
+	}
+	if bytes.Equal(poolItm.InitTxHash, withdrawal.InitTxHash) {
+		return fmt.Errorf("mismatch init tx hashes pool=%#x received=%#x", poolItm.InitTxHash, withdrawal.InitTxHash)
+	}
+	return nil
 }
 
 // Binary search to check if the index exists in the list of pending withdrawals.

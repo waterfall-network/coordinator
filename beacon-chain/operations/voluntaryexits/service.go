@@ -1,7 +1,9 @@
 package voluntaryexits
 
 import (
+	"bytes"
 	"context"
+	"fmt"
 	"sort"
 	"sync"
 
@@ -21,6 +23,7 @@ type PoolManager interface {
 	InsertVoluntaryExitByGwat(ctx context.Context, exit *ethpb.VoluntaryExit)
 	MarkIncluded(exit *ethpb.VoluntaryExit)
 	OnSlot(st state.ReadOnlyBeaconState)
+	Verify(exit *ethpb.VoluntaryExit) error
 	// Deprecated
 	InsertVoluntaryExit(ctx context.Context, state state.ReadOnlyBeaconState, exit *ethpb.VoluntaryExit)
 }
@@ -153,6 +156,27 @@ func (p *Pool) MarkIncluded(exit *ethpb.VoluntaryExit) {
 		// Exit we want is present at p.pending[index], so we remove it.
 		p.pending = append(p.pending[:index], p.pending[index+1:]...)
 	}
+}
+
+func (p *Pool) Verify(exit *ethpb.VoluntaryExit) error {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	exists, index := existsInList(p.pending, exit.ValidatorIndex)
+	if !exists {
+		return fmt.Errorf("not found")
+	}
+	poolItm := p.pending[index]
+
+	if poolItm.Epoch != exit.Epoch {
+		return fmt.Errorf("mismatch epochs pool=%d received=%d", poolItm.Epoch, exit.Epoch)
+	}
+	if poolItm.ValidatorIndex != exit.ValidatorIndex {
+		return fmt.Errorf("mismatch validators indices pool=%d received=%d", poolItm.ValidatorIndex, exit.ValidatorIndex)
+	}
+	if bytes.Equal(poolItm.InitTxHash, exit.InitTxHash) {
+		return fmt.Errorf("mismatch init tx hashes pool=%#x received=%#x", poolItm.InitTxHash, exit.InitTxHash)
+	}
+	return nil
 }
 
 // Binary search to check if the index exists in the list of pending exits.
