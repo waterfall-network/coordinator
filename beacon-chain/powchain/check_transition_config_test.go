@@ -9,17 +9,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/holiman/uint256"
 	logTest "github.com/sirupsen/logrus/hooks/test"
 	mockChain "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain/testing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed"
-	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
 	mocks "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain/testing"
-	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	pb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/engine/v1"
-	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/rpc"
@@ -46,42 +41,6 @@ func Test_checkTransitionConfiguration(t *testing.T) {
 		<-time.After(100 * time.Millisecond)
 		cancel()
 		require.LogsContain(t, hook, "Could not check configuration values")
-	})
-
-	t.Run("block containing execution payload exits routine", func(t *testing.T) {
-		ctx := context.Background()
-		m := &mocks.EngineClient{}
-		m.Err = errors.New("something went wrong")
-		srv := setupTransitionConfigTest(t)
-		srv.cfg.stateNotifier = &mockChain.MockStateNotifier{}
-
-		checkTransitionPollingInterval = time.Millisecond
-		ctx, cancel := context.WithCancel(ctx)
-		exit := make(chan bool)
-		notification := make(chan *feed.Event)
-		go func() {
-			srv.checkTransitionConfiguration(ctx, notification)
-			exit <- true
-		}()
-		payload := emptyPayload()
-		payload.GasUsed = 21000
-		wrappedBlock, err := wrapper.WrappedSignedBeaconBlock(&ethpb.SignedBeaconBlockBellatrix{
-			Block: &ethpb.BeaconBlockBellatrix{
-				Body: &ethpb.BeaconBlockBodyBellatrix{
-					ExecutionPayload: payload,
-				},
-			}},
-		)
-		require.NoError(t, err)
-		notification <- &feed.Event{
-			Data: &statefeed.BlockProcessedData{
-				SignedBlock: wrappedBlock,
-			},
-			Type: statefeed.BlockProcessed,
-		}
-		<-exit
-		cancel()
-		require.LogsContain(t, hook, "PoS transition is complete, no longer checking")
 	})
 }
 
@@ -152,87 +111,4 @@ func setupTransitionConfigTest(t testing.TB) *Service {
 	}
 	service.rpcClient = rpcClient
 	return service
-}
-
-func TestService_logTtdStatus(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		defer func() {
-			require.NoError(t, r.Body.Close())
-		}()
-
-		resp := &pb.ExecutionBlock{TotalDifficulty: "0x12345678"}
-		respJSON := map[string]interface{}{
-			"jsonrpc": "2.0",
-			"id":      1,
-			"result":  resp,
-		}
-		require.NoError(t, json.NewEncoder(w).Encode(respJSON))
-	}))
-	defer srv.Close()
-
-	rpcClient, err := rpc.DialHTTP(srv.URL)
-	require.NoError(t, err)
-	defer rpcClient.Close()
-
-	service := &Service{
-		cfg: &config{},
-	}
-	service.rpcClient = rpcClient
-
-	ttd := new(uint256.Int)
-	reached, err := service.logTtdStatus(context.Background(), ttd.SetUint64(24343))
-	require.NoError(t, err)
-	require.Equal(t, true, reached)
-
-	reached, err = service.logTtdStatus(context.Background(), ttd.SetUint64(323423484))
-	require.NoError(t, err)
-	require.Equal(t, false, reached)
-}
-
-func TestService_logTtdStatus_NotSyncedClient(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		defer func() {
-			require.NoError(t, r.Body.Close())
-		}()
-
-		resp := (*pb.ExecutionBlock)(nil) // Nil response when a client is not synced
-		respJSON := map[string]interface{}{
-			"jsonrpc": "2.0",
-			"id":      1,
-			"result":  resp,
-		}
-		require.NoError(t, json.NewEncoder(w).Encode(respJSON))
-	}))
-	defer srv.Close()
-
-	rpcClient, err := rpc.DialHTTP(srv.URL)
-	require.NoError(t, err)
-	defer rpcClient.Close()
-
-	service := &Service{
-		cfg: &config{},
-	}
-	service.rpcClient = rpcClient
-
-	ttd := new(uint256.Int)
-	reached, err := service.logTtdStatus(context.Background(), ttd.SetUint64(24343))
-	require.NoError(t, err)
-	require.Equal(t, false, reached)
-}
-
-func emptyPayload() *pb.ExecutionPayload {
-	return &pb.ExecutionPayload{
-		ParentHash:    make([]byte, fieldparams.RootLength),
-		FeeRecipient:  make([]byte, fieldparams.FeeRecipientLength),
-		StateRoot:     make([]byte, fieldparams.RootLength),
-		ReceiptsRoot:  make([]byte, fieldparams.RootLength),
-		LogsBloom:     make([]byte, fieldparams.LogsBloomLength),
-		PrevRandao:    make([]byte, fieldparams.RootLength),
-		BaseFeePerGas: make([]byte, fieldparams.RootLength),
-		BlockHash:     make([]byte, fieldparams.RootLength),
-		Transactions:  make([][]byte, 0),
-		ExtraData:     make([]byte, 0),
-	}
 }

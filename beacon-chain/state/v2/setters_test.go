@@ -86,6 +86,9 @@ func TestBeaconState_AppendBalanceWithTrie(t *testing.T) {
 			ActivationEpoch:            1,
 			ExitEpoch:                  1,
 			WithdrawableEpoch:          1,
+			ActivationHash:             (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:                   (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:              []*ethpb.WithdrawalOp{},
 		})
 		bals = append(bals, params.BeaconConfig().MaxEffectiveBalance)
 	}
@@ -218,6 +221,9 @@ func createState(count uint64) *ethpb.BeaconStateAltair {
 			ActivationEpoch:            1,
 			ExitEpoch:                  1,
 			WithdrawableEpoch:          1,
+			ActivationHash:             (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:                   (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:              []*ethpb.WithdrawalOp{},
 		})
 		bals = append(bals, params.BeaconConfig().MaxEffectiveBalance)
 	}

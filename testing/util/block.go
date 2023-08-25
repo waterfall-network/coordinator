@@ -62,6 +62,15 @@ func NewBeaconBlock() *ethpb.SignedBeaconBlock {
 				Deposits:          []*ethpb.Deposit{},
 				ProposerSlashings: []*ethpb.ProposerSlashing{},
 				VoluntaryExits:    []*ethpb.VoluntaryExit{},
+				Withdrawals: []*ethpb.Withdrawal{
+					{
+						PublicKey:      bytesutil.PadTo([]byte{0x77}, 48),
+						ValidatorIndex: 0,
+						Amount:         123456789,
+						InitTxHash:     bytesutil.PadTo([]byte{0x77}, 32),
+						Epoch:          5,
+					},
+				},
 			},
 		},
 		Signature: make([]byte, fieldparams.BLSSignatureLength),

@@ -149,6 +149,8 @@ message BeaconBlockBodyBellatrix {
 
   // Execution payload: the embedded execution payload of the block [New in Bellatrix]
   ethereum.engine.v1.ExecutionPayload execution_payload = 10;
+
+  repeated v1.Withdrawal withdrawals  = 11 [(ethereum.eth.ext.ssz_max) = "1024"];
 }
 
 message BeaconBlockBodyAltair {
@@ -182,4 +184,6 @@ message BeaconBlockBodyAltair {
 
   // Sync aggregate object to track sync committee votes for light client support. [New in ]
   v1.SyncAggregate sync_aggregate = 9;
+
+  repeated v1.Withdrawal withdrawals  = 10 [(ethereum.eth.ext.ssz_max) = "1024"];
 }

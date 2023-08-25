@@ -288,6 +288,10 @@ message VoluntaryExitsPoolResponse {
     repeated VoluntaryExit data = 1;
 }
 
+message WithdrawalsPoolResponse {
+    repeated Withdrawal data = 1;
+}
+
 // Beacon Config API related messages.
 
 message ForkScheduleResponse {

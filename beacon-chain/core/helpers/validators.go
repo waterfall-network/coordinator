@@ -411,3 +411,39 @@ func isEligibleForActivation(activationEligibilityEpoch, activationEpoch, finali
 	return activationEligibilityEpoch <= finalizedEpoch &&
 		activationEpoch == params.BeaconConfig().FarFutureEpoch
 }
+
+// AvailableWithdrawalAmount returns the available withdrawal amount in gwei.
+// if validator is deactivated: amt = balance,
+// otherwise: amt = balance - Effective Balance.
+func AvailableWithdrawalAmount(vInderx types.ValidatorIndex, st state.ReadOnlyBeaconState) (uint64, error) {
+	bal, err := st.BalanceAtIndex(vInderx)
+	if err != nil {
+		return 0, err
+	}
+	if bal == 0 {
+		return 0, nil
+	}
+	vld, err := st.ValidatorAtIndexReadOnly(vInderx)
+	if err != nil {
+		return 0, err
+	}
+	if vld == nil {
+		return 0, nil
+	}
+
+	// refunds of insufficient deposit to activate validator
+	if vld.ActivationEligibilityEpoch() == params.BeaconConfig().FarFutureEpoch &&
+		bal < params.BeaconConfig().MaxEffectiveBalance {
+		return bal, nil
+	}
+
+	//if validator id deactivated
+	if vld.ExitEpoch() <= slots.ToEpoch(st.Slot()) {
+		return bal, nil
+	}
+	//if validator is not deactivated
+	if bal <= params.BeaconConfig().MaxEffectiveBalance {
+		return 0, nil
+	}
+	return bal - params.BeaconConfig().MaxEffectiveBalance, nil
+}

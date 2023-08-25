@@ -289,28 +289,43 @@ func TestListValidators_Status(t *testing.T) {
 		{
 			ActivationEpoch:            farFutureEpoch,
 			ActivationEligibilityEpoch: farFutureEpoch,
+			ActivationHash:             make([]byte, 32),
+			ExitHash:                   make([]byte, 32),
+			WithdrawalOps:              make([]*eth.WithdrawalOp, 0),
 		},
 		// Pending queued.
 		{
 			ActivationEpoch:            10,
 			ActivationEligibilityEpoch: 4,
+			ActivationHash:             make([]byte, 32),
+			ExitHash:                   make([]byte, 32),
+			WithdrawalOps:              make([]*eth.WithdrawalOp, 0),
 		},
 		// Active ongoing.
 		{
 			ActivationEpoch: 0,
 			ExitEpoch:       farFutureEpoch,
+			ActivationHash:  make([]byte, 32),
+			ExitHash:        make([]byte, 32),
+			WithdrawalOps:   make([]*eth.WithdrawalOp, 0),
 		},
 		// Active slashed.
 		{
 			ActivationEpoch: 0,
 			ExitEpoch:       30,
 			Slashed:         true,
+			ActivationHash:  make([]byte, 32),
+			ExitHash:        make([]byte, 32),
+			WithdrawalOps:   make([]*eth.WithdrawalOp, 0),
 		},
 		// Active exiting.
 		{
 			ActivationEpoch: 3,
 			ExitEpoch:       30,
 			Slashed:         false,
+			ActivationHash:  make([]byte, 32),
+			ExitHash:        make([]byte, 32),
+			WithdrawalOps:   make([]*eth.WithdrawalOp, 0),
 		},
 		// Exit slashed (at epoch 35).
 		{
@@ -318,6 +333,9 @@ func TestListValidators_Status(t *testing.T) {
 			ExitEpoch:         30,
 			WithdrawableEpoch: 40,
 			Slashed:           true,
+			ActivationHash:    make([]byte, 32),
+			ExitHash:          make([]byte, 32),
+			WithdrawalOps:     make([]*eth.WithdrawalOp, 0),
 		},
 		// Exit unslashed (at epoch 35).
 		{
@@ -325,6 +343,9 @@ func TestListValidators_Status(t *testing.T) {
 			ExitEpoch:         30,
 			WithdrawableEpoch: 40,
 			Slashed:           false,
+			ActivationHash:    make([]byte, 32),
+			ExitHash:          make([]byte, 32),
+			WithdrawalOps:     make([]*eth.WithdrawalOp, 0),
 		},
 		// Withdrawable (at epoch 45).
 		{
@@ -333,14 +354,20 @@ func TestListValidators_Status(t *testing.T) {
 			WithdrawableEpoch: 40,
 			EffectiveBalance:  params.BeaconConfig().MaxEffectiveBalance,
 			Slashed:           false,
+			ActivationHash:    make([]byte, 32),
+			ExitHash:          make([]byte, 32),
+			WithdrawalOps:     make([]*eth.WithdrawalOp, 0),
 		},
-		// Withdrawal done (at epoch 45).
+		// WithdrawalPool done (at epoch 45).
 		{
 			ActivationEpoch:   3,
 			ExitEpoch:         30,
 			WithdrawableEpoch: 40,
 			EffectiveBalance:  0,
 			Slashed:           false,
+			ActivationHash:    make([]byte, 32),
+			ExitHash:          make([]byte, 32),
+			WithdrawalOps:     make([]*eth.WithdrawalOp, 0),
 		},
 	}
 	for _, validator := range validators {

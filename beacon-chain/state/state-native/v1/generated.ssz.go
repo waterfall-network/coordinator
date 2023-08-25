@@ -83,7 +83,10 @@ func (b *BeaconState) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 
 	// Offset (12) 'validators'
 	dst = ssz.WriteOffset(dst, offset)
-	offset += len(b.validators) * 129
+	for ii := 0; ii < len(b.validators); ii++ {
+		offset += 4
+		offset += b.validators[ii].SizeSSZ()
+	}
 
 	// Offset (13) 'balances'
 	dst = ssz.WriteOffset(dst, offset)
@@ -209,6 +212,13 @@ func (b *BeaconState) MarshalSSZTo(buf []byte) (dst []byte, err error) {
 	if len(b.validators) > 1099511627776 {
 		err = ssz.ErrListTooBig
 		return
+	}
+	{
+		offset = 4 * len(b.validators)
+		for ii := 0; ii < len(b.validators); ii++ {
+			dst = ssz.WriteOffset(dst, offset)
+			offset += b.validators[ii].SizeSSZ()
+		}
 	}
 	for ii := 0; ii < len(b.validators); ii++ {
 		if dst, err = b.validators[ii].MarshalSSZTo(dst); err != nil {
@@ -482,18 +492,22 @@ func (b *BeaconState) UnmarshalSSZ(buf []byte) error {
 	// Field (12) 'validators'
 	{
 		buf = tail[o12:o13]
-		num, err := ssz.DivideInt2(len(buf), 129, 1099511627776)
+		num, err := ssz.DecodeDynamicLength(buf, 1099511627776)
 		if err != nil {
 			return err
 		}
 		b.validators = make([]*ethpb.Validator, num)
-		for ii := 0; ii < num; ii++ {
-			if b.validators[ii] == nil {
-				b.validators[ii] = new(ethpb.Validator)
+		err = ssz.UnmarshalDynamic(buf, num, func(indx int, buf []byte) (err error) {
+			if b.validators[indx] == nil {
+				b.validators[indx] = new(ethpb.Validator)
 			}
-			if err = b.validators[ii].UnmarshalSSZ(buf[ii*129 : (ii+1)*129]); err != nil {
+			if err = b.validators[indx].UnmarshalSSZ(buf); err != nil {
 				return err
 			}
+			return nil
+		})
+		if err != nil {
+			return err
 		}
 	}
 
@@ -593,7 +607,10 @@ func (b *BeaconState) SizeSSZ() (size int) {
 	}
 
 	// Field (12) 'validators'
-	size += len(b.validators) * 129
+	for ii := 0; ii < len(b.validators); ii++ {
+		size += 4
+		size += b.validators[ii].SizeSSZ()
+	}
 
 	// Field (13) 'balances'
 	size += len(b.balances) * 8

@@ -10,6 +10,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/slashings"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/synccommittee"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/voluntaryexits"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/withdrawals"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen"
 )
@@ -47,6 +48,13 @@ func WithAttestationPool(attPool attestations.Pool) Option {
 func WithExitPool(exitPool voluntaryexits.PoolManager) Option {
 	return func(s *Service) error {
 		s.cfg.exitPool = exitPool
+		return nil
+	}
+}
+
+func WithWithdrawalPool(withdrawalPool withdrawals.PoolManager) Option {
+	return func(s *Service) error {
+		s.cfg.withdrawalPool = withdrawalPool
 		return nil
 	}
 }

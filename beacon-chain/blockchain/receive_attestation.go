@@ -150,6 +150,10 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 					return
 				}
 
+				// update pools
+				s.cfg.WithdrawalPool.OnSlot(s.headState(s.ctx))
+				s.cfg.ExitPool.OnSlot(s.headState(s.ctx))
+
 				// Continue when there's no fork choice attestation, there's nothing to process and update head.
 				// This covers the condition when the node is still initial syncing to the head of the chain.
 				if s.cfg.AttPool.ForkchoiceAttestationCount() == 0 {

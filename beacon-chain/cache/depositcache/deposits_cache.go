@@ -88,6 +88,16 @@ func (dc *DepositCache) InsertDeposit(ctx context.Context, d *ethpb.Deposit, blo
 		}).Warn("Ignoring nil deposit insertion")
 		return errors.New("nil deposit inserted into the cache")
 	}
+	if d.Data.InitTxHash == nil {
+		log.WithFields(logrus.Fields{
+			"block":        blockNum,
+			"deposit":      d,
+			"index":        index,
+			"deposit root": hex.EncodeToString(depositRoot[:]),
+		}).Warn("Ignoring deposit insertion nil InitTxHash")
+		return errors.New("deposit nil InitTxHash inserted into the cache")
+	}
+
 	dc.depositsLock.Lock()
 	defer dc.depositsLock.Unlock()
 

@@ -141,6 +141,8 @@ message BeaconBlockBody {
 
     // At most MAX_VOLUNTARY_EXITS.
     repeated VoluntaryExit voluntary_exits = 8 [(ethereum.eth.ext.ssz_max) = "16"];
+
+    repeated Withdrawal withdrawals  = 9 [(ethereum.eth.ext.ssz_max) = "1024"];
 }
 
 
@@ -177,6 +179,8 @@ message BeaconBlockBodyAltair {
 
     // Sync aggregate object to track sync committee votes for light client support. [New in ]
     SyncAggregate sync_aggregate = 9;
+
+    repeated Withdrawal withdrawals  = 10 [(ethereum.eth.ext.ssz_max) = "1024"];
 }
 
 // Proposer slashings are proofs that a slashable offense has been committed by
@@ -217,6 +221,9 @@ message Deposit {
 
         // 96 byte signature from the validators public key.
         bytes signature = 5 [(ethereum.eth.ext.ssz_size) = "96"];
+
+        // hash of transaction initiator of operation
+        bytes init_tx_hash = 6 [(ethereum.eth.ext.ssz_size) = "32"];
     }
     // 32 byte roots in the deposit tree branch.
     repeated bytes proof = 1 [(ethereum.eth.ext.ssz_size) = "33,32"];
@@ -233,6 +240,30 @@ message VoluntaryExit {
 
     // Index of the exiting validator.
     uint64 validator_index = 2 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.ValidatorIndex"];
+
+    // hash of transaction initiator of operation
+    bytes init_tx_hash = 3 [(ethereum.eth.ext.ssz_size) = "32"];
+}
+
+// A message that represents a validator signaling that they want to withdrawals:
+// - reward only if validator is active
+// - whole balance if validator is not active
+// The message does not contain a validator signature.
+message Withdrawal {
+    // 48 byte validator public key.
+    bytes public_key = 1 [(ethereum.eth.ext.ssz_size) = "48"];
+
+    // Index of the validator.
+    uint64 validator_index = 2 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.ValidatorIndex"];
+
+    // Withdrawal amount in gwei.
+    uint64 amount = 3;
+
+    // hash of transaction initiator of operation
+    bytes init_tx_hash = 4 [(ethereum.eth.ext.ssz_size) = "32"];
+
+    // The epoch on when withdrawals request becomes valid.
+    uint64 epoch = 5 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Epoch"];
 }
 
 // Eth1Data represents references to the Ethereum 1.x deposit contract.
@@ -361,6 +392,8 @@ message BeaconBlockBodyBellatrix {
 
     // Execution payload from the execution chain. New in Bellatrix network upgrade.
     ethereum.engine.v1.ExecutionPayload execution_payload = 10;
+
+    repeated Withdrawal withdrawals  = 11 [(ethereum.eth.ext.ssz_max) = "1024"];
 }
 
 message SignedBlindedBeaconBlockBellatrix {
@@ -419,6 +452,8 @@ message BlindedBeaconBlockBodyBellatrix {
 
     // Execution payload header from the execution chain. New in Bellatrix network upgrade to accommodate MEV interaction.
     ExecutionPayloadHeader execution_payload_header = 10;
+
+    repeated Withdrawal withdrawals  = 11 [(ethereum.eth.ext.ssz_max) = "1024"];
 }
 
 message ExecutionPayloadHeader {

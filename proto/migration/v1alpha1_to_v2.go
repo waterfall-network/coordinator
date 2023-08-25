@@ -103,6 +103,16 @@ func BeaconStateAltairToProto(altairState state.BeaconStateAltair) (*ethpbv2.Bea
 	}
 	resultValidators := make([]*ethpbv1.Validator, len(sourceValidators))
 	for i, validator := range sourceValidators {
+
+		wops := make([]*ethpbv1.WithdrawalOp, len(validator.WithdrawalOps))
+		for j, op := range validator.WithdrawalOps {
+			wops[j] = &ethpbv1.WithdrawalOp{
+				Amount: op.Amount,
+				Hash:   op.Hash,
+				Slot:   op.Slot,
+			}
+		}
+
 		resultValidators[i] = &ethpbv1.Validator{
 			Pubkey:                     bytesutil.SafeCopyBytes(validator.PublicKey),
 			WithdrawalCredentials:      bytesutil.SafeCopyBytes(validator.WithdrawalCredentials),
@@ -112,6 +122,9 @@ func BeaconStateAltairToProto(altairState state.BeaconStateAltair) (*ethpbv2.Bea
 			ActivationEpoch:            validator.ActivationEpoch,
 			ExitEpoch:                  validator.ExitEpoch,
 			WithdrawableEpoch:          validator.WithdrawableEpoch,
+			ActivationHash:             validator.ActivationHash,
+			ExitHash:                   validator.ExitHash,
+			WithdrawalOps:              wops,
 		}
 	}
 
@@ -237,6 +250,16 @@ func BeaconStateBellatrixToProto(st state.BeaconStateBellatrix) (*ethpbv2.Beacon
 	}
 	resultValidators := make([]*ethpbv1.Validator, len(sourceValidators))
 	for i, validator := range sourceValidators {
+
+		wops := make([]*ethpbv1.WithdrawalOp, len(validator.WithdrawalOps))
+		for j, op := range validator.WithdrawalOps {
+			wops[j] = &ethpbv1.WithdrawalOp{
+				Amount: op.Amount,
+				Hash:   op.Hash,
+				Slot:   op.Slot,
+			}
+		}
+
 		resultValidators[i] = &ethpbv1.Validator{
 			Pubkey:                     bytesutil.SafeCopyBytes(validator.PublicKey),
 			WithdrawalCredentials:      bytesutil.SafeCopyBytes(validator.WithdrawalCredentials),
@@ -246,6 +269,9 @@ func BeaconStateBellatrixToProto(st state.BeaconStateBellatrix) (*ethpbv2.Beacon
 			ActivationEpoch:            validator.ActivationEpoch,
 			ExitEpoch:                  validator.ExitEpoch,
 			WithdrawableEpoch:          validator.WithdrawableEpoch,
+			ActivationHash:             validator.ActivationHash,
+			ExitHash:                   validator.ExitHash,
+			WithdrawalOps:              wops,
 		}
 	}
 

@@ -31,6 +31,7 @@ type blockData struct {
 	ProposerSlashings []*ethpb.ProposerSlashing
 	AttesterSlashings []*ethpb.AttesterSlashing
 	VoluntaryExits    []*ethpb.VoluntaryExit
+	Withdrawals       []*ethpb.Withdrawal
 }
 
 func (vs *Server) getPhase0BeaconBlock(ctx context.Context, req *ethpb.BlockRequest) (*ethpb.BeaconBlock, error) {
@@ -39,7 +40,8 @@ func (vs *Server) getPhase0BeaconBlock(ctx context.Context, req *ethpb.BlockRequ
 	blkData, err := vs.buildPhase0BlockData(ctx, req)
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
-			"req": req,
+			"req":         req,
+			"withdrawals": len(blkData.Withdrawals),
 		}).Error("#### build-Phase0-BeaconBlock: could not build block data ###")
 		return nil, fmt.Errorf("could not build block data: %v", err)
 	}
@@ -66,6 +68,7 @@ func (vs *Server) getPhase0BeaconBlock(ctx context.Context, req *ethpb.BlockRequ
 			AttesterSlashings: blkData.AttesterSlashings,
 			VoluntaryExits:    blkData.VoluntaryExits,
 			Graffiti:          blkData.Graffiti[:],
+			Withdrawals:       blkData.Withdrawals,
 		},
 	}
 
@@ -184,19 +187,29 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		}
 		validAttSlashings = append(validAttSlashings, slashing)
 	}
-	exits := vs.ExitPool.PendingExits(head, req.Slot, false /*noLimit*/)
+
+	exits := vs.ExitPool.PendingExits(head, req.Slot, false)
 	validExits := make([]*ethpb.VoluntaryExit, 0, len(exits))
 	for _, exit := range exits {
 		val, err := head.ValidatorAtIndexReadOnly(exit.ValidatorIndex)
 		if err != nil {
-			log.WithError(err).Warn("Proposer: invalid exit")
+			log.WithError(err).Warn("Proposer: invalid withdrawal")
 			continue
 		}
 		if err := blocks.VerifyExitData(val, head.Slot(), exit); err != nil {
-			log.WithError(err).Warn("Proposer: invalid exit")
+			log.WithError(err).Warn("Proposer: invalid withdrawal")
 			continue
 		}
 		validExits = append(validExits, exit)
+	}
+
+	withdrawals := vs.WithdrawalPool.PendingWithdrawals(req.Slot, false)
+
+	if len(withdrawals) > 0 {
+		log.WithFields(logrus.Fields{
+			"req.Slot":    req.Slot,
+			"withdrawals": len(withdrawals),
+		}).Info("build block data: add withdrawals")
 	}
 
 	return &blockData{
@@ -209,5 +222,6 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		ProposerSlashings: validProposerSlashings,
 		AttesterSlashings: validAttSlashings,
 		VoluntaryExits:    validExits,
+		Withdrawals:       withdrawals,
 	}, nil
 }

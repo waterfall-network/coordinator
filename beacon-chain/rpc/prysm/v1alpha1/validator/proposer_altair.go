@@ -32,6 +32,7 @@ func (vs *Server) buildAltairBeaconBlock(ctx context.Context, req *ethpb.BlockRe
 	log.WithError(err).WithFields(logrus.Fields{
 		"req.slot":           req.Slot,
 		"blkData.Candidates": gwatCommon.HashArrayFromBytes(blkData.Eth1Data.Candidates),
+		"withdrawals":        len(blkData.Withdrawals),
 	}).Info("#### build-Altair-BeaconBlock ###")
 
 	// Use zero hash as stub for state root to compute later.
@@ -59,6 +60,7 @@ func (vs *Server) buildAltairBeaconBlock(ctx context.Context, req *ethpb.BlockRe
 			VoluntaryExits:    blkData.VoluntaryExits,
 			Graffiti:          blkData.Graffiti[:],
 			SyncAggregate:     syncAggregate,
+			Withdrawals:       blkData.Withdrawals,
 		},
 	}, nil
 }

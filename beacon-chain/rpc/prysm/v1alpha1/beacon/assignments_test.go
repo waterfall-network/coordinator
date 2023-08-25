@@ -103,6 +103,9 @@ func TestServer_ListAssignments_Pagination_InputOutOfRange(t *testing.T) {
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			EffectiveBalance:      params.BeaconConfig().MaxEffectiveBalance,
 			ActivationEpoch:       0,
+			ActivationHash:        make([]byte, 32),
+			ExitHash:              make([]byte, 32),
+			WithdrawalOps:         make([]*ethpb.WithdrawalOp, 0),
 		})
 	}
 
@@ -172,6 +175,9 @@ func TestServer_ListAssignments_Pagination_DefaultPageSize_NoArchive(t *testing.
 				ExitEpoch:             0,
 				ActivationEpoch:       0,
 				EffectiveBalance:      params.BeaconConfig().MaxEffectiveBalance,
+				ActivationHash:        make([]byte, 32),
+				ExitHash:              make([]byte, 32),
+				WithdrawalOps:         make([]*ethpb.WithdrawalOp, 0),
 			})
 		} else {
 			validators = append(validators, &ethpb.Validator{
@@ -181,6 +187,9 @@ func TestServer_ListAssignments_Pagination_DefaultPageSize_NoArchive(t *testing.
 				ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 				EffectiveBalance:      params.BeaconConfig().MaxEffectiveBalance,
 				ActivationEpoch:       0,
+				ActivationHash:        make([]byte, 32),
+				ExitHash:              make([]byte, 32),
+				WithdrawalOps:         make([]*ethpb.WithdrawalOp, 0),
 			})
 		}
 	}
@@ -254,6 +263,9 @@ func TestServer_ListAssignments_FilterPubkeysIndices_NoPagination(t *testing.T) 
 			CreatorAddress:        creatorAddress,
 			WithdrawalCredentials: withdrawCreds,
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
+			ActivationHash:        make([]byte, 32),
+			ExitHash:              make([]byte, 32),
+			WithdrawalOps:         make([]*ethpb.WithdrawalOp, 0),
 		}
 		validators = append(validators, val)
 	}
@@ -326,6 +338,9 @@ func TestServer_ListAssignments_CanFilterPubkeysIndices_WithPagination(t *testin
 			CreatorAddress:        creatorAddress,
 			WithdrawalCredentials: withdrawalCred,
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
+			ActivationHash:        make([]byte, 32),
+			ExitHash:              make([]byte, 32),
+			WithdrawalOps:         make([]*ethpb.WithdrawalOp, 0),
 		}
 		validators = append(validators, val)
 	}

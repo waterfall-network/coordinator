@@ -266,6 +266,9 @@ func buildState(slot types.Slot, validatorCount uint64) *ethpb.BeaconState {
 		validators[i] = &ethpb.Validator{
 			ExitEpoch:        params.BeaconConfig().FarFutureEpoch,
 			EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance,
+			ActivationHash:   (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:         (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:    []*ethpb.WithdrawalOp{},
 		}
 	}
 	validatorBalances := make([]uint64, len(validators))

@@ -38,6 +38,9 @@ func TestProcessDeposits_SameValidatorMultipleDepositsSameBlock(t *testing.T) {
 			PublicKey:             []byte{1},
 			CreatorAddress:        []byte{1, 2, 3},
 			WithdrawalCredentials: []byte{1, 2, 3},
+			ActivationHash:        make([]byte, 32),
+			ExitHash:              make([]byte, 32),
+			WithdrawalOps:         make([]*ethpb.WithdrawalOp, 0),
 		},
 	}
 	balances := []uint64{0}
@@ -112,6 +115,9 @@ func TestProcessDeposits_AddsNewValidatorDeposit(t *testing.T) {
 			PublicKey:             []byte{1},
 			CreatorAddress:        []byte{1, 2, 3},
 			WithdrawalCredentials: []byte{1, 2, 3},
+			ActivationHash:        make([]byte, 32),
+			ExitHash:              make([]byte, 32),
+			WithdrawalOps:         make([]*ethpb.WithdrawalOp, 0),
 		},
 	}
 	balances := []uint64{0}
@@ -176,6 +182,9 @@ func TestProcessDeposits_RepeatedDeposit_IncreasesValidatorBalance(t *testing.T)
 			PublicKey:             sk.PublicKey().Marshal(),
 			CreatorAddress:        []byte{1},
 			WithdrawalCredentials: []byte{1},
+			ActivationHash:        make([]byte, 32),
+			ExitHash:              make([]byte, 32),
+			WithdrawalOps:         make([]*ethpb.WithdrawalOp, 0),
 		},
 	}
 	balances := []uint64{0, 50}
@@ -207,6 +216,9 @@ func TestProcessDeposit_AddsNewValidatorDeposit(t *testing.T) {
 			PublicKey:             []byte{1},
 			CreatorAddress:        []byte{1, 2, 3},
 			WithdrawalCredentials: []byte{1, 2, 3},
+			ActivationHash:        (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:              (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:         []*ethpb.WithdrawalOp{},
 		},
 	}
 	balances := []uint64{0}
@@ -251,6 +263,9 @@ func TestProcessDeposit_SkipsInvalidDeposit(t *testing.T) {
 			PublicKey:             []byte{1},
 			CreatorAddress:        []byte{1, 2, 3},
 			WithdrawalCredentials: []byte{1, 2, 3},
+			ActivationHash:        (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:              (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:         []*ethpb.WithdrawalOp{},
 		},
 	}
 	balances := []uint64{0}
@@ -308,6 +323,9 @@ func TestPreGenesisDeposits_SkipInvalidDeposit(t *testing.T) {
 			PublicKey:             []byte{1},
 			CreatorAddress:        []byte{1, 2, 3},
 			WithdrawalCredentials: []byte{1, 2, 3},
+			ActivationHash:        (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:              (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:         []*ethpb.WithdrawalOp{},
 		},
 	}
 	balances := []uint64{0}
@@ -385,6 +403,9 @@ func TestProcessDeposit_RepeatedDeposit_IncreasesValidatorBalance(t *testing.T) 
 			PublicKey:             sk.PublicKey().Marshal(),
 			CreatorAddress:        []byte{1},
 			WithdrawalCredentials: []byte{1},
+			ActivationHash:        (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:              (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:         []*ethpb.WithdrawalOp{},
 		},
 	}
 	balances := []uint64{0, 50}

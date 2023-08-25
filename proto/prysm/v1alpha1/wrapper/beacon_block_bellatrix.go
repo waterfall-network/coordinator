@@ -284,6 +284,11 @@ func (w bellatrixBeaconBlockBody) VoluntaryExits() []*eth.VoluntaryExit {
 	return w.b.VoluntaryExits
 }
 
+// Withdrawals returns the withdrawals in the block.
+func (w bellatrixBeaconBlockBody) Withdrawals() []*eth.Withdrawal {
+	return w.b.Withdrawals
+}
+
 // SyncAggregate returns the sync aggregate in the block.
 func (w bellatrixBeaconBlockBody) SyncAggregate() (*eth.SyncAggregate, error) {
 	return w.b.SyncAggregate, nil

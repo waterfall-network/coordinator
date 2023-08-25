@@ -84,6 +84,9 @@ type ReadOnlyValidator interface {
 	ActivationEligibilityEpoch() types.Epoch
 	ActivationEpoch() types.Epoch
 	WithdrawableEpoch() types.Epoch
+	WithdrawalOps() []*ethpb.WithdrawalOp
+	ActivationHash() []byte
+	ExitHash() []byte
 	ExitEpoch() types.Epoch
 	PublicKey() [fieldparams.BLSPubkeyLength]byte
 	CreatorAddress() []byte

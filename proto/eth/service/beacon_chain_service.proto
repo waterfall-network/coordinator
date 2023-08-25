@@ -260,15 +260,6 @@ service BeaconChain {
     };
   }
 
-  // SubmitVoluntaryExit submits VoluntaryExit object to node's pool
-  // and if passes validation node MUST broadcast it to network.
-  rpc SubmitVoluntaryExit(v1.VoluntaryExit) returns (google.protobuf.Empty) {
-    option (google.api.http) = {
-      post: "/internal/eth/v1/beacon/pool/voluntary_exits"
-      body: "*"
-    };
-  }
-
   // Submits sync committee signature objects to the node.
   rpc SubmitPoolSyncCommitteeSignatures(v2.SubmitPoolSyncCommitteeSignatures) returns (google.protobuf.Empty) {
     option (google.api.http) = {

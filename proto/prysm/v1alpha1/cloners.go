@@ -2,7 +2,6 @@ package eth
 
 import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
-	enginev1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/engine/v1"
 )
 
 // CopyETH1Data copies the provided eth1data object.
@@ -167,6 +166,7 @@ func CopyBeaconBlockBody(body *BeaconBlockBody) *BeaconBlockBody {
 		Attestations:      CopyAttestations(body.Attestations),
 		Deposits:          CopyDeposits(body.Deposits),
 		VoluntaryExits:    CopyVoluntaryExits(body.VoluntaryExits),
+		Withdrawals:       CopyWithdrawals(body.Withdrawals),
 	}
 }
 
@@ -209,6 +209,7 @@ func CopyBeaconBlockBodyAltair(body *BeaconBlockBodyAltair) *BeaconBlockBodyAlta
 		Attestations:      CopyAttestations(body.Attestations),
 		Deposits:          CopyDeposits(body.Deposits),
 		VoluntaryExits:    CopyVoluntaryExits(body.VoluntaryExits),
+		Withdrawals:       CopyWithdrawals(body.Withdrawals),
 		SyncAggregate:     CopySyncAggregate(body.SyncAggregate),
 	}
 }
@@ -365,6 +366,7 @@ func CopyDepositData(depData *Deposit_Data) *Deposit_Data {
 		WithdrawalCredentials: bytesutil.SafeCopyBytes(depData.WithdrawalCredentials),
 		Amount:                depData.Amount,
 		Signature:             bytesutil.SafeCopyBytes(depData.Signature),
+		InitTxHash:            bytesutil.SafeCopyBytes(depData.InitTxHash),
 	}
 }
 
@@ -388,6 +390,33 @@ func CopyVoluntaryExit(exit *VoluntaryExit) *VoluntaryExit {
 	return &VoluntaryExit{
 		Epoch:          exit.Epoch,
 		ValidatorIndex: exit.ValidatorIndex,
+		InitTxHash:     bytesutil.SafeCopyBytes(exit.InitTxHash),
+	}
+}
+
+// CopyWithdrawals copies the provided Withdrawals array.
+func CopyWithdrawals(withdrawals []*Withdrawal) []*Withdrawal {
+	if withdrawals == nil {
+		return nil
+	}
+	newExits := make([]*Withdrawal, len(withdrawals))
+	for i, exit := range withdrawals {
+		newExits[i] = CopyWithdrawal(exit)
+	}
+	return newExits
+}
+
+// CopyWithdrawal copies the provided Withdrawal.
+func CopyWithdrawal(withdrawal *Withdrawal) *Withdrawal {
+	if withdrawal == nil {
+		return nil
+	}
+	return &Withdrawal{
+		Epoch:          withdrawal.Epoch,
+		ValidatorIndex: withdrawal.ValidatorIndex,
+		Amount:         withdrawal.Amount,
+		InitTxHash:     bytesutil.SafeCopyBytes(withdrawal.InitTxHash),
+		PublicKey:      bytesutil.SafeCopyBytes(withdrawal.PublicKey),
 	}
 }
 
@@ -409,6 +438,30 @@ func CopyValidator(val *Validator) *Validator {
 		ActivationEpoch:            val.ActivationEpoch,
 		ExitEpoch:                  val.ExitEpoch,
 		WithdrawableEpoch:          val.WithdrawableEpoch,
+		ActivationHash:             bytesutil.SafeCopyBytes(val.ActivationHash),
+		ExitHash:                   bytesutil.SafeCopyBytes(val.ExitHash),
+		WithdrawalOps:              CopyWithdrawalOps(val.WithdrawalOps),
+	}
+}
+
+// CopyWithdrawalOps copies the provided WithdrawalOp array.
+func CopyWithdrawalOps(withdrawalOps []*WithdrawalOp) []*WithdrawalOp {
+	wops := make([]*WithdrawalOp, len(withdrawalOps))
+	for i, w := range withdrawalOps {
+		wops[i] = CopyWithdrawalOp(w)
+	}
+	return wops
+}
+
+// CopyWithdrawalOp copies the provided WithdrawalOp object.
+func CopyWithdrawalOp(withdrawalOp *WithdrawalOp) *WithdrawalOp {
+	if withdrawalOp == nil {
+		return nil
+	}
+	return &WithdrawalOp{
+		Amount: withdrawalOp.Amount,
+		Hash:   bytesutil.SafeCopyBytes(withdrawalOp.Hash),
+		Slot:   withdrawalOp.Slot,
 	}
 }
 
@@ -489,32 +542,8 @@ func CopyBeaconBlockBodyBellatrix(body *BeaconBlockBodyBellatrix) *BeaconBlockBo
 		Attestations:      CopyAttestations(body.Attestations),
 		Deposits:          CopyDeposits(body.Deposits),
 		VoluntaryExits:    CopyVoluntaryExits(body.VoluntaryExits),
+		Withdrawals:       CopyWithdrawals(body.Withdrawals),
 		SyncAggregate:     CopySyncAggregate(body.SyncAggregate),
-		ExecutionPayload:  CopyExecutionPayload(body.ExecutionPayload),
-	}
-}
-
-// CopyExecutionPayload copies the provided ApplicationPayload.
-func CopyExecutionPayload(payload *enginev1.ExecutionPayload) *enginev1.ExecutionPayload {
-	if payload == nil {
-		return nil
-	}
-
-	return &enginev1.ExecutionPayload{
-		ParentHash:    bytesutil.SafeCopyBytes(payload.ParentHash),
-		FeeRecipient:  bytesutil.SafeCopyBytes(payload.FeeRecipient),
-		StateRoot:     bytesutil.SafeCopyBytes(payload.StateRoot),
-		ReceiptsRoot:  bytesutil.SafeCopyBytes(payload.ReceiptsRoot),
-		LogsBloom:     bytesutil.SafeCopyBytes(payload.LogsBloom),
-		PrevRandao:    bytesutil.SafeCopyBytes(payload.PrevRandao),
-		BlockNumber:   payload.BlockNumber,
-		GasLimit:      payload.GasLimit,
-		GasUsed:       payload.GasUsed,
-		Timestamp:     payload.Timestamp,
-		ExtraData:     bytesutil.SafeCopyBytes(payload.ExtraData),
-		BaseFeePerGas: bytesutil.SafeCopyBytes(payload.BaseFeePerGas),
-		BlockHash:     bytesutil.SafeCopyBytes(payload.BlockHash),
-		Transactions:  bytesutil.SafeCopy2dBytes(payload.Transactions),
 	}
 }
 

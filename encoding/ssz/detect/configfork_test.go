@@ -340,6 +340,7 @@ func testBlockAltair() *ethpb.SignedBeaconBlockAltair {
 					SyncCommitteeBits:      make([]byte, 64),
 					SyncCommitteeSignature: make([]byte, 96),
 				},
+				Withdrawals: make([]*ethpb.Withdrawal, 0),
 			},
 		},
 		Signature: make([]byte, 96),

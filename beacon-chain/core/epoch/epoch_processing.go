@@ -11,12 +11,14 @@ import (
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
+	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/validators"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/math"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/attestation"
@@ -108,7 +110,8 @@ func ProcessRegistryUpdates(ctx context.Context, state state.BeaconState) (state
 		isActive := helpers.IsActiveValidator(validator, currentEpoch)
 		belowEjectionBalance := validator.EffectiveBalance <= ejectionBal
 		if isActive && belowEjectionBalance {
-			state, err = validators.InitiateValidatorExit(ctx, state, types.ValidatorIndex(idx))
+			ejectionHash := bytesutil.ToBytes32(validator.CreatorAddress)
+			state, err = validators.InitiateValidatorExit(ctx, state, types.ValidatorIndex(idx), ejectionHash)
 			if err != nil {
 				return nil, errors.Wrapf(err, "could not initiate exit for validator %d", idx)
 			}
@@ -308,18 +311,40 @@ func ProcessEffectiveBalanceUpdates(state state.BeaconState) (state.BeaconState,
 	return state, nil
 }
 
-func ProcessWithdrawal(state state.BeaconState) (state.BeaconState, error) {
-	currentEpoch := time.CurrentEpoch(state)
-	err := state.ApplyToEveryValidator(func(idx int, val *ethpb.Validator) (bool, *ethpb.Validator, error) {
-		if val.WithdrawableEpoch == currentEpoch {
-			if err := helpers.ResetBalance(state, types.ValidatorIndex(idx)); err != nil {
-				return false, val, err
+func ProcessWithdrawalOps(bState state.BeaconState) (state.BeaconState, error) {
+	// Note: the operations totally removes withdrawals data over all bState
+	// including that should contain it.
+	var (
+		minSlot         types.Slot
+		staleAfterSlots = 100 * params.BeaconConfig().SlotsPerEpoch
+	)
+	if bState.Slot() > staleAfterSlots {
+		minSlot = bState.Slot() - staleAfterSlots
+	}
+	err := bState.ApplyToEveryValidator(func(idx int, val *ethpb.Validator) (bool, *ethpb.Validator, error) {
+		upWops := make([]*ethpb.WithdrawalOp, 0, len(val.WithdrawalOps))
+		for _, wop := range val.WithdrawalOps {
+			if wop.Slot >= minSlot {
+				upWops = append(upWops, wop)
+			} else {
+				logrus.WithFields(logrus.Fields{
+					"rm":            !(wop.Slot >= minSlot),
+					"bState.Slot":   fmt.Sprintf("%d", wop.Slot),
+					"w.Slot":        fmt.Sprintf("%d", wop.Slot),
+					"w.Amount":      fmt.Sprintf("%d", wop.Amount),
+					"w.Hash":        fmt.Sprintf("%#x", wop.Hash),
+					"val.Index":     fmt.Sprintf("%d", idx),
+					"val.PublicKey": fmt.Sprintf("%#x", val.PublicKey),
+				}).Info("WithdrawalOps transition: rm stale (epoch proc)")
 			}
-			return true, val, nil
 		}
-		return false, val, nil
+		isDirty := len(val.WithdrawalOps) != len(upWops)
+		if isDirty {
+			val.WithdrawalOps = upWops
+		}
+		return isDirty, val, nil
 	})
-	return state, err
+	return bState, err
 }
 
 // ProcessSlashingsReset processes the total slashing balances updates during epoch processing.
@@ -455,7 +480,7 @@ func ProcessFinalUpdates(state state.BeaconState) (state.BeaconState, error) {
 		return nil, err
 	}
 
-	state, err = ProcessWithdrawal(state)
+	state, err = ProcessWithdrawalOps(state)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not process withdrawal")
 	}

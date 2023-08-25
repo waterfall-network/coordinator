@@ -13,6 +13,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 )
@@ -41,7 +42,7 @@ import (
 //	  # Set validator exit epoch and withdrawable epoch
 //	  validator.exit_epoch = exit_queue_epoch
 //	  validator.withdrawable_epoch = Epoch(validator.exit_epoch + MIN_VALIDATOR_WITHDRAWABILITY_DELAY)
-func InitiateValidatorExit(ctx context.Context, s state.BeaconState, idx types.ValidatorIndex) (state.BeaconState, error) {
+func InitiateValidatorExit(ctx context.Context, s state.BeaconState, idx types.ValidatorIndex, InitTxHash [32]byte) (state.BeaconState, error) {
 	validator, err := s.ValidatorAtIndex(idx)
 	if err != nil {
 		return nil, err
@@ -94,6 +95,8 @@ func InitiateValidatorExit(ctx context.Context, s state.BeaconState, idx types.V
 	}
 	validator.ExitEpoch = exitQueueEpoch
 	validator.WithdrawableEpoch = exitQueueEpoch + params.BeaconConfig().MinValidatorWithdrawabilityDelay
+	validator.ExitHash = InitTxHash[:]
+
 	if err := s.UpdateValidatorAtIndex(idx, validator); err != nil {
 		return nil, err
 	}
@@ -132,8 +135,14 @@ func SlashValidator(
 	s state.BeaconState,
 	slashedIdx types.ValidatorIndex,
 	penaltyQuotient uint64,
-	proposerRewardQuotient uint64) (state.BeaconState, error) {
-	s, err := InitiateValidatorExit(ctx, s, slashedIdx)
+	proposerRewardQuotient uint64,
+) (state.BeaconState, error) {
+	val, err := s.ValidatorAtIndex(slashedIdx)
+	if err != nil {
+		return nil, err
+	}
+	slashedHash := bytesutil.ToBytes32(val.CreatorAddress)
+	s, err = InitiateValidatorExit(ctx, s, slashedIdx, slashedHash)
 	if err != nil {
 		return nil, errors.Wrapf(err, "could not initiate validator %d exit", slashedIdx)
 	}

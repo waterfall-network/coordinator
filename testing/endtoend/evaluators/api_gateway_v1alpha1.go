@@ -273,16 +273,23 @@ func withCompareListAttestations(beaconNodeIdx int, conn *grpc.ClientConn) error
 }
 
 func withCompareValidators(beaconNodeIdx int, conn *grpc.ClientConn) error {
+	type withdrawalOpJson struct {
+		Amount string `json:"amount"`
+		Hash   string `json:"hash" hex:"true"`
+		Slot   string `json:"slot"`
+	}
+
 	type validatorJSON struct {
-		PublicKey                  string `json:"publicKey"`
-		CreatorAddress             string `json:"creatorAddress"`
-		WithdrawalCredentials      string `json:"withdrawalCredentials"`
-		EffectiveBalance           string `json:"effectiveBalance"`
-		Slashed                    bool   `json:"slashed"`
-		ActivationEligibilityEpoch string `json:"activationEligibilityEpoch"`
-		ActivationEpoch            string `json:"activationEpoch"`
-		ExitEpoch                  string `json:"exitEpoch"`
-		WithdrawableEpoch          string `json:"withdrawableEpoch"`
+		PublicKey                  string              `json:"publicKey"`
+		CreatorAddress             string              `json:"creatorAddress"`
+		WithdrawalCredentials      string              `json:"withdrawalCredentials"`
+		EffectiveBalance           string              `json:"effectiveBalance"`
+		Slashed                    bool                `json:"slashed"`
+		ActivationEligibilityEpoch string              `json:"activationEligibilityEpoch"`
+		ActivationEpoch            string              `json:"activationEpoch"`
+		ExitEpoch                  string              `json:"exitEpoch"`
+		WithdrawableEpoch          string              `json:"withdrawableEpoch"`
+		WithdrawalOps              []*withdrawalOpJson `json:"withdrawalOps"`
 	}
 	type validatorContainerJSON struct {
 		Index     string         `json:"index"`

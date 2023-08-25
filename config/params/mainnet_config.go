@@ -156,6 +156,7 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	EpochsPerSlashingsVector:  8192,
 	HistoricalRootsLimit:      16777216,
 	ValidatorRegistryLimit:    1099511627776,
+	WithdrawalOpsLimit:        1024,
 
 	// Reward and penalty quotients constants.
 	BaseRewardFactor:               64,
@@ -174,6 +175,7 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	MaxAttestations:      128,
 	MaxDeposits:          16,
 	MaxVoluntaryExits:    16,
+	MaxWithdrawals:       1024,
 
 	// BLS domain values.
 	DomainBeaconProposer:              bytesutil.ToBytes4(bytesutil.Bytes4(0)),
