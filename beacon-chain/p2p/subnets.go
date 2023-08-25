@@ -81,7 +81,7 @@ func (s *Service) FindPeersWithSubnet(ctx context.Context, topic string,
 		"idx":        index,
 		"threshold":  threshold,
 		"currNum":    currNum,
-	}).Info("Validator subscription: FindPeersWithSubnet: 0")
+	}).Debug("Validator subscription: FindPeersWithSubnet: 0")
 
 	// removed cycle to waite required numbers of subnets
 	//if len(nodes) == 0 {
@@ -127,7 +127,7 @@ func (s *Service) FindPeersWithSubnet(ctx context.Context, topic string,
 		"idx":       index,
 		"threshold": threshold,
 		"currNum":   currNum,
-	}).Info("Validator subscription: FindPeersWithSubnet: success")
+	}).Debug("Validator subscription: FindPeersWithSubnet: success")
 
 	return true, nil
 }
