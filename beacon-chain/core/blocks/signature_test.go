@@ -27,6 +27,9 @@ func TestVerifyBlockHeaderSignature(t *testing.T) {
 		CreatorAddress:        make([]byte, 20),
 		WithdrawalCredentials: make([]byte, 20),
 		EffectiveBalance:      params.BeaconConfig().MaxEffectiveBalance,
+		ActivationHash:        (params.BeaconConfig().ZeroHash)[:],
+		ExitHash:              (params.BeaconConfig().ZeroHash)[:],
+		WithdrawalOps:         []*ethpb.WithdrawalOp{},
 	}
 	err = beaconState.SetValidators(validators)
 	require.NoError(t, err)

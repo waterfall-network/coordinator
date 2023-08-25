@@ -39,6 +39,9 @@ func TestValidatorMap_DistinctCopy(t *testing.T) {
 			ActivationEpoch:            1,
 			ExitEpoch:                  1,
 			WithdrawableEpoch:          1,
+			ActivationHash:             (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:                   (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:              []*ethpb.WithdrawalOp{},
 		})
 	}
 	handler := stateutil.NewValMapHandler(vals)
@@ -105,6 +108,9 @@ func TestBeaconState_NoDeadlock(t *testing.T) {
 			ActivationEpoch:            1,
 			ExitEpoch:                  1,
 			WithdrawableEpoch:          1,
+			ActivationHash:             (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:                   (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:              []*ethpb.WithdrawalOp{},
 		})
 	}
 	st, err := InitializeFromProtoUnsafe(&ethpb.BeaconStateAltair{

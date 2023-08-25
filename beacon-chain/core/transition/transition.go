@@ -367,6 +367,15 @@ func VerifyOperationLengths(_ context.Context, state state.BeaconState, b block.
 			params.BeaconConfig().MaxVoluntaryExits,
 		)
 	}
+
+	if uint64(len(body.Withdrawals())) > params.BeaconConfig().MaxWithdrawals {
+		return nil, fmt.Errorf(
+			"number of withdrawals requests (%d) in block body exceeds allowed threshold of %d",
+			len(body.VoluntaryExits()),
+			params.BeaconConfig().MaxWithdrawals,
+		)
+	}
+
 	eth1Data := state.Eth1Data()
 	if eth1Data == nil {
 		return nil, errors.New("nil eth1data in state")

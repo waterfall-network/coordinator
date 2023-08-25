@@ -1,6 +1,7 @@
 package mock
 
 import (
+	"bytes"
 	"context"
 
 	types "github.com/prysmaticlabs/eth2-types"
@@ -14,8 +15,7 @@ type PoolMock struct {
 }
 
 func (m *PoolMock) InsertVoluntaryExitByGwat(ctx context.Context, exit *eth.VoluntaryExit) {
-	//TODO implement me
-	panic("implement me")
+	m.Exits = append(m.Exits, exit)
 }
 
 // PendingExits --
@@ -29,6 +29,13 @@ func (m *PoolMock) InsertVoluntaryExit(_ context.Context, _ state.ReadOnlyBeacon
 }
 
 // MarkIncluded --
-func (*PoolMock) MarkIncluded(_ *eth.VoluntaryExit) {
-	panic("implement me")
+func (m *PoolMock) MarkIncluded(exit *eth.VoluntaryExit) {
+	res := make([]*eth.VoluntaryExit, 0, len(m.Exits))
+	for _, w := range m.Exits {
+		if bytes.Equal(w.InitTxHash, exit.InitTxHash) {
+			continue
+		}
+		res = append(res, w)
+	}
+	m.Exits = res
 }

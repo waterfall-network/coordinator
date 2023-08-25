@@ -1005,38 +1005,6 @@
 			"response": []
 		},
 		{
-			"name": "/beacon/pool/voluntary_exits",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"message\": {\n        \"epoch\": \"1\",\n        \"validator_index\": \"1\"\n    },\n    \"signature\": \"0x1b66ac1fb663c9bc59509846d6ec05345bd908eda73e670af888da41af171505cc411d61252fb6cb3fa0017b679f8bb2305b26a285fa2737f175668d0dff91cc1b66ac1fb663c9bc59509846d6ec05345bd908eda73e670af888da41af171505\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:3500/eth/v1/beacon/pool/voluntary_exits",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3500",
-					"path": [
-						"eth",
-						"v1",
-						"beacon",
-						"pool",
-						"voluntary_exits"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "/config/fork_schedule",
 			"request": {
 				"method": "GET",

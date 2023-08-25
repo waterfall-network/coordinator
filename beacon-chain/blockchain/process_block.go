@@ -101,9 +101,61 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	log.WithFields(logrus.Fields{
 		"slot":       signed.Block().Slot(),
 		"root":       fmt.Sprintf("%#x", blockRoot),
-		"ParentRoot": fmt.Sprintf("%#x", signed.Block().ParentRoot()),
+		"parentRoot": fmt.Sprintf("%#x", signed.Block().ParentRoot()),
 		"\u2692":     version.BuildId,
-	}).Info("<<< onBlock:START >>> ")
+	}).Info("<<< onBlock:START >>>")
+
+	if len(signed.Block().Body().Withdrawals()) > 0 {
+		for i, itm := range signed.Block().Body().Withdrawals() {
+			log.WithFields(logrus.Fields{
+				"i":              i,
+				"slot":           signed.Block().Slot(),
+				"Amount":         fmt.Sprintf("%d", itm.Amount),
+				"Epoch":          fmt.Sprintf("%d", itm.Epoch),
+				"InitTxHash":     fmt.Sprintf("%#x", itm.InitTxHash),
+				"PublicKey":      fmt.Sprintf("%#x", itm.PublicKey),
+				"ValidatorIndex": fmt.Sprintf("%d", itm.ValidatorIndex),
+			}).Info("onBlock:: withdrawal")
+
+			////todo req. fork change handling
+			//if err := s.cfg.WithdrawalPool.Verify(itm); err != nil {
+			//	log.WithError(err).WithFields(logrus.Fields{
+			//		"i":              i,
+			//		"slot":           signed.Block().Slot(),
+			//		"Amount":         fmt.Sprintf("%d", itm.Amount),
+			//		"Epoch":          fmt.Sprintf("%d", itm.Epoch),
+			//		"InitTxHash":     fmt.Sprintf("%#x", itm.InitTxHash),
+			//		"PublicKey":      fmt.Sprintf("%#x", itm.PublicKey),
+			//		"ValidatorIndex": fmt.Sprintf("%d", itm.ValidatorIndex),
+			//	}).Error("onBlock:: withdrawal")
+			//	return err
+			//}
+		}
+	}
+
+	if len(signed.Block().Body().VoluntaryExits()) > 0 {
+		for i, itm := range signed.Block().Body().VoluntaryExits() {
+			log.WithFields(logrus.Fields{
+				"i":              i,
+				"slot":           signed.Block().Slot(),
+				"Epoch":          fmt.Sprintf("%d", itm.Epoch),
+				"InitTxHash":     fmt.Sprintf("%#x", itm.InitTxHash),
+				"ValidatorIndex": fmt.Sprintf("%d", itm.ValidatorIndex),
+			}).Info("onBlock:: exit")
+
+			////todo req. fork change handling
+			//if err := s.cfg.ExitPool.Verify(itm); err != nil {
+			//	log.WithError(err).WithFields(logrus.Fields{
+			//		"i":              i,
+			//		"slot":           signed.Block().Slot(),
+			//		"Epoch":          fmt.Sprintf("%d", itm.Epoch),
+			//		"InitTxHash":     fmt.Sprintf("%#x", itm.InitTxHash),
+			//		"ValidatorIndex": fmt.Sprintf("%d", itm.ValidatorIndex),
+			//	}).Error("onBlock:: exit")
+			//	return err
+			//}
+		}
+	}
 
 	if err := helpers.BeaconBlockIsNil(signed); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{

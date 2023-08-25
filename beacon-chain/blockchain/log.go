@@ -34,6 +34,9 @@ func logStateTransitionData(b block.BeaconBlock) error {
 	if len(b.Body().VoluntaryExits()) > 0 {
 		log = log.WithField("voluntaryExits", len(b.Body().VoluntaryExits()))
 	}
+	if len(b.Body().Withdrawals()) > 0 {
+		log = log.WithField("withdrawals", len(b.Body().Withdrawals()))
+	}
 	if b.Version() == version.Altair {
 		agg, err := b.Body().SyncAggregate()
 		if err != nil {

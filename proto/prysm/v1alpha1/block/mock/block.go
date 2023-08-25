@@ -179,6 +179,10 @@ func (BeaconBlockBody) VoluntaryExits() []*eth.VoluntaryExit {
 	panic("implement me")
 }
 
+func (BeaconBlockBody) Withdrawals() []*eth.Withdrawal {
+	panic("implement me")
+}
+
 func (BeaconBlockBody) SyncAggregate() (*eth.SyncAggregate, error) {
 	panic("implement me")
 }

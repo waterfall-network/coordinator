@@ -56,6 +56,7 @@ func MinimalSpecConfig() *BeaconChainConfig {
 	minimalConfig.EpochsPerSlashingsVector = 64
 	minimalConfig.HistoricalRootsLimit = 16777216
 	minimalConfig.ValidatorRegistryLimit = 1099511627776
+	minimalConfig.WithdrawalOpsLimit = 1024
 
 	// Reward and penalty quotients
 	minimalConfig.BaseRewardFactor = 64
@@ -74,6 +75,7 @@ func MinimalSpecConfig() *BeaconChainConfig {
 	minimalConfig.MaxAttestations = 128
 	minimalConfig.MaxDeposits = 16
 	minimalConfig.MaxVoluntaryExits = 16
+	minimalConfig.MaxWithdrawals = 1024
 
 	// Signature domains
 	minimalConfig.DomainBeaconProposer = bytesutil.ToBytes4(bytesutil.Bytes4(0))

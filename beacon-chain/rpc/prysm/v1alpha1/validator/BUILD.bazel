@@ -50,6 +50,7 @@ go_library(
         "//beacon-chain/operations/synccommittee:go_default_library",
         "//beacon-chain/operations/voluntaryexits:go_default_library",
         "//beacon-chain/operations/prevote:go_default_library",
+        "//beacon-chain/operations/withdrawals:go_default_library",
         "//beacon-chain/p2p:go_default_library",
         "//beacon-chain/powchain:go_default_library",
         "//beacon-chain/state:go_default_library",

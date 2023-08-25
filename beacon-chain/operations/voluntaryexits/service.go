@@ -1,11 +1,14 @@
 package voluntaryexits
 
 import (
+	"bytes"
 	"context"
+	"fmt"
 	"sort"
 	"sync"
 
 	types "github.com/prysmaticlabs/eth2-types"
+	log "github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
@@ -17,9 +20,12 @@ import (
 // This pool is used by proposers to insert voluntary exits into new blocks.
 type PoolManager interface {
 	PendingExits(state state.ReadOnlyBeaconState, slot types.Slot, noLimit bool) []*ethpb.VoluntaryExit
-	InsertVoluntaryExit(ctx context.Context, state state.ReadOnlyBeaconState, exit *ethpb.VoluntaryExit)
 	InsertVoluntaryExitByGwat(ctx context.Context, exit *ethpb.VoluntaryExit)
 	MarkIncluded(exit *ethpb.VoluntaryExit)
+	OnSlot(st state.ReadOnlyBeaconState)
+	Verify(exit *ethpb.VoluntaryExit) error
+	// Deprecated
+	InsertVoluntaryExit(ctx context.Context, state state.ReadOnlyBeaconState, exit *ethpb.VoluntaryExit)
 }
 
 // Pool is a concrete implementation of PoolManager.
@@ -66,6 +72,7 @@ func (p *Pool) PendingExits(state state.ReadOnlyBeaconState, slot types.Slot, no
 
 // InsertVoluntaryExit into the pool. This method is a no-op if the pending exit already exists,
 // or the validator is already exited.
+// Deprecated
 func (p *Pool) InsertVoluntaryExit(ctx context.Context, state state.ReadOnlyBeaconState, exit *ethpb.VoluntaryExit) {
 	_, span := trace.StartSpan(ctx, "exitPool.InsertVoluntaryExit")
 	defer span.End()
@@ -113,6 +120,12 @@ func (p *Pool) InsertVoluntaryExitByGwat(ctx context.Context, exit *ethpb.Volunt
 	if exit == nil {
 		return
 	}
+	if exit.InitTxHash == nil {
+		log.WithFields(log.Fields{
+			"InitTxHash": exit.InitTxHash,
+		}).Warn("InsertVoluntaryExitByGwat malformed data: InitTxHash")
+		return
+	}
 
 	existsInPending, index := existsInList(p.pending, exit.ValidatorIndex)
 	// If the item exists in the pending list and includes a more favorable, earlier
@@ -124,12 +137,6 @@ func (p *Pool) InsertVoluntaryExitByGwat(ctx context.Context, exit *ethpb.Volunt
 		}
 		return
 	}
-
-	//// Has the validator been exited already?
-	//if v, err := state.ValidatorAtIndexReadOnly(exit.ValidatorIndex); err != nil ||
-	//	v.ExitEpoch() != params.BeaconConfig().FarFutureEpoch {
-	//	return
-	//}
 
 	// Insert into pending list and sort.
 	p.pending = append(p.pending, exit)
@@ -151,6 +158,27 @@ func (p *Pool) MarkIncluded(exit *ethpb.VoluntaryExit) {
 	}
 }
 
+func (p *Pool) Verify(exit *ethpb.VoluntaryExit) error {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	exists, index := existsInList(p.pending, exit.ValidatorIndex)
+	if !exists {
+		return fmt.Errorf("not found")
+	}
+	poolItm := p.pending[index]
+
+	if poolItm.Epoch != exit.Epoch {
+		return fmt.Errorf("mismatch epochs pool=%d received=%d", poolItm.Epoch, exit.Epoch)
+	}
+	if poolItm.ValidatorIndex != exit.ValidatorIndex {
+		return fmt.Errorf("mismatch validators indices pool=%d received=%d", poolItm.ValidatorIndex, exit.ValidatorIndex)
+	}
+	if bytes.Equal(poolItm.InitTxHash, exit.InitTxHash) {
+		return fmt.Errorf("mismatch init tx hashes pool=%#x received=%#x", poolItm.InitTxHash, exit.InitTxHash)
+	}
+	return nil
+}
+
 // Binary search to check if the index exists in the list of pending exits.
 func existsInList(pending []*ethpb.VoluntaryExit, searchingFor types.ValidatorIndex) (bool, int) {
 	i := sort.Search(len(pending), func(j int) bool {
@@ -160,4 +188,26 @@ func existsInList(pending []*ethpb.VoluntaryExit, searchingFor types.ValidatorIn
 		return true, i
 	}
 	return false, -1
+}
+
+// OnSlot removes invalid items from pool
+func (p *Pool) OnSlot(st state.ReadOnlyBeaconState) {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+
+	pending := make([]*ethpb.VoluntaryExit, 0, len(p.pending))
+	for _, itm := range p.pending {
+		if validateVoluntaryExit(itm, st) {
+			pending = append(pending, itm)
+		}
+	}
+	p.pending = pending
+}
+
+func validateVoluntaryExit(itm *ethpb.VoluntaryExit, st state.ReadOnlyBeaconState) bool {
+	v, err := st.ValidatorAtIndexReadOnly(itm.ValidatorIndex)
+	if err != nil || v == nil || v.ExitEpoch() != params.BeaconConfig().FarFutureEpoch {
+		return false
+	}
+	return true
 }

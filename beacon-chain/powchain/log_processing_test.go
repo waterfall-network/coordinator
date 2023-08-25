@@ -207,7 +207,7 @@ func TestUnpackDepositLogData_OK(t *testing.T) {
 	require.Equal(t, uint64(0), binary.LittleEndian.Uint64(index), "Retrieved merkle tree index is incorrect")
 	require.DeepEqual(t, data.PublicKey, loggedPubkey, "Pubkey is not the same as the data that was put in")
 	require.DeepEqual(t, data.Signature, loggedSig, "Proof of Possession is not the same as the data that was put in")
-	require.DeepEqual(t, data.WithdrawalCredentials, withCreds, "Withdrawal Credentials is not the same as the data that was put in")
+	require.DeepEqual(t, data.WithdrawalCredentials, withCreds, "WithdrawalPool Credentials is not the same as the data that was put in")
 }
 
 func TestProcessETH2GenesisLog_8DuplicatePubkeys(t *testing.T) {

@@ -24,6 +24,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/voluntaryexits"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/withdrawals"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	nativev1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/state-native/v1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen"
@@ -133,6 +134,7 @@ type config struct {
 	beaconDB                db.HeadAccessDatabase
 	depositCache            *depositcache.DepositCache
 	exitPool                voluntaryexits.PoolManager
+	withdrawalPool          withdrawals.PoolManager
 	stateNotifier           statefeed.Notifier
 	stateGen                *stategen.State
 	eth1HeaderReqLimit      uint64

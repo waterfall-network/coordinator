@@ -658,6 +658,26 @@ message Validator {
     // FAR_FUTURE_EPOCH is a constant defined by the official Ethereum Beacon Chain specification:
     // https://github.com/ethereum/consensus-specs/blob/v0.9.2/specs/core/0_beacon-chain.md#constants
     uint64 withdrawable_epoch = 9 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Epoch"];
+
+    // hash of activation tx
+    bytes activation_hash = 10 [(ethereum.eth.ext.ssz_size) = "32"];
+
+    // hash of exit tx
+    bytes exit_hash = 11 [(ethereum.eth.ext.ssz_size) = "32"];
+
+    // array of withdrawals operations from finalized checkpoint
+    // 1024 * 48(data len) = 49152
+    repeated WithdrawalOp withdrawal_ops = 12  [(ethereum.eth.ext.ssz_max) = "49152"];
+}
+
+// represents validator withdrawal operation
+message WithdrawalOp {
+    // Withdrawal amount in gwei.
+    uint64 amount = 1;
+    // hash of transaction initiator of withdrawal
+    bytes hash = 2 [(ethereum.eth.ext.ssz_size) = "32"];
+    // The slot of apply.
+    uint64 slot = 3 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Slot"];
 }
 
 // ValidatorParticipation stores participation metrics during a given epoch.

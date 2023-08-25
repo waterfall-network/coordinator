@@ -63,7 +63,7 @@ type stateFinalityCheckpointResponse_StateFinalityCheckpointJson struct {
 	Finalized         *checkpointJson `json:"finalized"`
 }
 
-// stateValidatorResponseJson is used in /beacon/states/{state_id}/validators API endpoint.
+// stateValidatorsResponseJson is used in /beacon/states/{state_id}/validators API endpoint.
 type stateValidatorsResponseJson struct {
 	Data                []*validatorContainerJson `json:"data"`
 	ExecutionOptimistic bool                      `json:"execution_optimistic"`
@@ -374,6 +374,7 @@ type beaconBlockBodyJson struct {
 	Attestations      []*attestationJson      `json:"attestations"`
 	Deposits          []*depositJson          `json:"deposits"`
 	VoluntaryExits    []*voluntaryExitJson    `json:"voluntary_exits"`
+	Withdrawals       []*withdrawalJson       `json:"withdrawals"`
 }
 
 type signedBeaconBlockContainerV2Json struct {
@@ -425,6 +426,7 @@ type beaconBlockBodyAltairJson struct {
 	Deposits          []*depositJson          `json:"deposits"`
 	VoluntaryExits    []*voluntaryExitJson    `json:"voluntary_exits"`
 	SyncAggregate     *syncAggregateJson      `json:"sync_aggregate"`
+	Withdrawals       []*withdrawalJson       `json:"withdrawals"`
 }
 
 type beaconBlockBodyBellatrixJson struct {
@@ -438,6 +440,7 @@ type beaconBlockBodyBellatrixJson struct {
 	VoluntaryExits    []*voluntaryExitJson    `json:"voluntary_exits"`
 	SyncAggregate     *syncAggregateJson      `json:"sync_aggregate"`
 	ExecutionPayload  *executionPayloadJson   `json:"execution_payload"`
+	Withdrawals       []*withdrawalJson       `json:"withdrawals"`
 }
 
 type executionPayloadJson struct {
@@ -561,6 +564,15 @@ type deposit_DataJson struct {
 type voluntaryExitJson struct {
 	Epoch          string `json:"epoch"`
 	ValidatorIndex string `json:"validator_index"`
+}
+
+// withdrawalJson a sub property of Withdrawal.
+type withdrawalJson struct {
+	Amount         string `json:"amount"`
+	ValidatorIndex string `json:"validator_index"`
+	PublicKey      string `json:"public_key" hex:"true"`
+	InitTxHash     string `json:"init_tx_hash" hex:"true"`
+	Epoch          string `json:"epoch"`
 }
 
 type syncCommitteeMessageJson struct {
@@ -694,15 +706,24 @@ type validatorContainerJson struct {
 }
 
 type validatorJson struct {
-	PublicKey                  string `json:"pubkey" hex:"true"`
-	CreatorAddress             string `json:"creator_address" hex:"true"`
-	WithdrawalCredentials      string `json:"withdrawal_credentials" hex:"true"`
-	EffectiveBalance           string `json:"effective_balance"`
-	Slashed                    bool   `json:"slashed"`
-	ActivationEligibilityEpoch string `json:"activation_eligibility_epoch"`
-	ActivationEpoch            string `json:"activation_epoch"`
-	ExitEpoch                  string `json:"exit_epoch"`
-	WithdrawableEpoch          string `json:"withdrawable_epoch"`
+	PublicKey                  string              `json:"pubkey" hex:"true"`
+	CreatorAddress             string              `json:"creator_address" hex:"true"`
+	WithdrawalCredentials      string              `json:"withdrawal_credentials" hex:"true"`
+	EffectiveBalance           string              `json:"effective_balance"`
+	Slashed                    bool                `json:"slashed"`
+	ActivationEligibilityEpoch string              `json:"activation_eligibility_epoch"`
+	ActivationEpoch            string              `json:"activation_epoch"`
+	ExitEpoch                  string              `json:"exit_epoch"`
+	WithdrawableEpoch          string              `json:"withdrawable_epoch"`
+	ActivationHash             string              `json:"activation_hash" hex:"true"`
+	ExitHash                   string              `json:"exit_hash" hex:"true"`
+	WithdrawalOps              []*withdrawalOpJson `json:"withdrawal_ops"`
+}
+
+type withdrawalOpJson struct {
+	Amount string `json:"amount"`
+	Hash   string `json:"hash" hex:"true"`
+	Slot   string `json:"slot"`
 }
 
 type validatorBalanceJson struct {

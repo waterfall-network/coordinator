@@ -29,6 +29,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/slashings"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/synccommittee"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/voluntaryexits"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/withdrawals"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen"
 	lruwrpr "gitlab.waterfall.network/waterfall/protocol/coordinator/cache/lru"
@@ -75,6 +76,7 @@ type config struct {
 	attPool                 attestations.Pool
 	prevotePool             prevote.Pool
 	exitPool                voluntaryexits.PoolManager
+	withdrawalPool          withdrawals.PoolManager
 	slashingPool            slashings.PoolManager
 	syncCommsPool           synccommittee.Pool
 	chain                   blockchainService

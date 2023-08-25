@@ -104,7 +104,7 @@ func ProcessEpoch(ctx context.Context, state state.BeaconState) (state.BeaconSta
 	if err != nil {
 		return nil, err
 	}
-	state, err = e.ProcessWithdrawal(state)
+	state, err = e.ProcessWithdrawalOps(state)
 	if err != nil {
 		return nil, err
 	}

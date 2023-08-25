@@ -401,6 +401,9 @@ func Test_V1Alpha1ValidatorToV1(t *testing.T) {
 		ActivationEpoch:            11,
 		ExitEpoch:                  111,
 		WithdrawableEpoch:          1111,
+		ActivationHash:             make([]byte, 32),
+		ExitHash:                   make([]byte, 32),
+		WithdrawalOps:              make([]*ethpbalpha.WithdrawalOp, 0),
 	}
 
 	v1Validator := V1Alpha1ValidatorToV1(v1Alpha1Validator)
@@ -427,6 +430,9 @@ func Test_V1ValidatorToV1Alpha1(t *testing.T) {
 		ActivationEpoch:            11,
 		ExitEpoch:                  111,
 		WithdrawableEpoch:          1111,
+		ActivationHash:             make([]byte, 32),
+		ExitHash:                   make([]byte, 32),
+		WithdrawalOps:              make([]*ethpbv1.WithdrawalOp, 0),
 	}
 
 	v1Alpha1Validator := V1ValidatorToV1Alpha1(v1Validator)

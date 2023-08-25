@@ -16,6 +16,7 @@ go_library(
         "proposer_slashing.go",
         "randao.go",
         "signature.go",
+        "withdrawal.go",
     ],
     importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks",
     visibility = [
@@ -81,6 +82,7 @@ go_test(
         "proposer_slashing_test.go",
         "randao_test.go",
         "signature_test.go",
+        "withdrawal_test.go",
     ],
     data = glob(["testdata/**"]),
     embed = [":go_default_library"],

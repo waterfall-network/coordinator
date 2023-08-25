@@ -10,6 +10,7 @@ import (
 	v "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/validators"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 )
@@ -60,7 +61,7 @@ func ProcessVoluntaryExits(
 		if err := VerifyExitData(val, beaconState.Slot(), exit); err != nil {
 			return nil, errors.Wrapf(err, "could not verify exit %d", idx)
 		}
-		beaconState, err = v.InitiateValidatorExit(ctx, beaconState, exit.ValidatorIndex)
+		beaconState, err = v.InitiateValidatorExit(ctx, beaconState, exit.ValidatorIndex, bytesutil.ToBytes32(exit.InitTxHash))
 		if err != nil {
 			return nil, err
 		}

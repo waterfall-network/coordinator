@@ -152,6 +152,8 @@ func TestExecuteAltairStateTransitionNoVerifySignature_CouldNotVerifyStateRoot(t
 	block.Block.Body.RandaoReveal = randaoReveal
 	block.Block.Body.Eth1Data = eth1Data
 
+	block.Block.Body.Withdrawals = make([]*ethpb.Withdrawal, 0)
+
 	syncBits := bitfield.NewBitvector512()
 	for i := range syncBits {
 		syncBits[i] = 0xff

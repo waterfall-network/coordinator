@@ -347,18 +347,6 @@ func TestBellatrixBlindedBeaconBlockBody_Proto(t *testing.T) {
 	assert.Equal(t, body, wbb.Proto())
 }
 
-func TestBellatrixBlindedBeaconBlockBody_ExecutionPayloadHeader(t *testing.T) {
-	payloads := &ethpb.ExecutionPayloadHeader{
-		BlockNumber: 100,
-	}
-	body := &ethpb.BlindedBeaconBlockBodyBellatrix{ExecutionPayloadHeader: payloads}
-	wbb, err := wrapper.WrappedBellatrixBlindedBeaconBlockBody(body)
-	require.NoError(t, err)
-
-	_, err = wbb.ExecutionPayload()
-	require.ErrorContains(t, wrapper.ErrUnsupportedField.Error(), err)
-}
-
 func TestBellatrixBlindedBeaconBlock_PbGenericBlock(t *testing.T) {
 	abb := &ethpb.SignedBlindedBeaconBlockBellatrix{
 		Block: util.HydrateBlindedBeaconBlockBellatrix(&ethpb.BlindedBeaconBlockBellatrix{}),

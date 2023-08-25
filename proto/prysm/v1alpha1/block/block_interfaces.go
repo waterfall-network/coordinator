@@ -3,7 +3,6 @@ package block
 import (
 	ssz "github.com/ferranbt/fastssz"
 	types "github.com/prysmaticlabs/eth2-types"
-	enginev1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/engine/v1"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	validatorpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/validator-client"
 	"google.golang.org/protobuf/proto"
@@ -57,10 +56,9 @@ type BeaconBlockBody interface {
 	Attestations() []*ethpb.Attestation
 	Deposits() []*ethpb.Deposit
 	VoluntaryExits() []*ethpb.VoluntaryExit
+	Withdrawals() []*ethpb.Withdrawal
 	SyncAggregate() (*ethpb.SyncAggregate, error)
 	IsNil() bool
 	HashTreeRoot() ([32]byte, error)
 	Proto() proto.Message
-	ExecutionPayload() (*enginev1.ExecutionPayload, error)
-	ExecutionPayloadHeader() (*ethpb.ExecutionPayloadHeader, error)
 }

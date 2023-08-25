@@ -188,7 +188,10 @@ func TestConvertToIndexed_OK(t *testing.T) {
 	validators := make([]*ethpb.Validator, 2*params.BeaconConfig().SlotsPerEpoch)
 	for i := 0; i < len(validators); i++ {
 		validators[i] = &ethpb.Validator{
-			ExitEpoch: params.BeaconConfig().FarFutureEpoch,
+			ExitEpoch:      params.BeaconConfig().FarFutureEpoch,
+			ActivationHash: (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:       (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:  []*ethpb.WithdrawalOp{},
 		}
 	}
 
@@ -248,6 +251,9 @@ func TestVerifyIndexedAttestation_OK(t *testing.T) {
 			PublicKey:             keys[i].PublicKey().Marshal(),
 			CreatorAddress:        make([]byte, 20),
 			WithdrawalCredentials: make([]byte, 20),
+			ActivationHash:        (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:              (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:         []*ethpb.WithdrawalOp{},
 		}
 	}
 
@@ -398,6 +404,9 @@ func TestVerifyAttestations_HandlesPlannedFork(t *testing.T) {
 			PublicKey:             keys[i].PublicKey().Marshal(),
 			CreatorAddress:        make([]byte, 20),
 			WithdrawalCredentials: make([]byte, 20),
+			ActivationHash:        (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:              (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:         []*ethpb.WithdrawalOp{},
 		}
 	}
 
@@ -463,6 +472,9 @@ func TestRetrieveAttestationSignatureSet_VerifiesMultipleAttestations(t *testing
 			PublicKey:             keys[i].PublicKey().Marshal(),
 			CreatorAddress:        make([]byte, 20),
 			WithdrawalCredentials: make([]byte, 20),
+			ActivationHash:        (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:              (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:         []*ethpb.WithdrawalOp{},
 		}
 	}
 
@@ -527,6 +539,9 @@ func TestRetrieveAttestationSignatureSet_AcrossFork(t *testing.T) {
 			PublicKey:             keys[i].PublicKey().Marshal(),
 			CreatorAddress:        make([]byte, 20),
 			WithdrawalCredentials: make([]byte, 20),
+			ActivationHash:        (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:              (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:         []*ethpb.WithdrawalOp{},
 		}
 	}
 

@@ -6,7 +6,6 @@ import (
 
 	types "github.com/prysmaticlabs/eth2-types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
-	enginev1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/engine/v1"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	validatorpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/validator-client"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
@@ -336,19 +335,6 @@ func TestBellatrixBeaconBlockBody_Proto(t *testing.T) {
 	assert.Equal(t, body, wbb.Proto())
 }
 
-func TestBellatrixBeaconBlockBody_ExecutionPayload(t *testing.T) {
-	payloads := &enginev1.ExecutionPayload{
-		BlockNumber: 100,
-	}
-	body := &ethpb.BeaconBlockBodyBellatrix{ExecutionPayload: payloads}
-	wbb, err := wrapper.WrappedBellatrixBeaconBlockBody(body)
-	require.NoError(t, err)
-
-	got, err := wbb.ExecutionPayload()
-	require.NoError(t, err)
-	assert.DeepEqual(t, payloads, got)
-}
-
 func TestBellatrixBeaconBlock_PbGenericBlock(t *testing.T) {
 	abb := &ethpb.SignedBeaconBlockBellatrix{
 		Block: util.HydrateBeaconBlockBellatrix(&ethpb.BeaconBlockBellatrix{}),
@@ -380,14 +366,4 @@ func TestBellatrixBeaconBlock_PbBlindedBellatrixBlock(t *testing.T) {
 	require.NoError(t, err)
 	_, err = wsb.PbBlindedBellatrixBlock()
 	require.ErrorContains(t, "unsupported blinded bellatrix block", err)
-}
-
-func TestBellatrixBeaconBlock_ExecutionPayloadHeader(t *testing.T) {
-	sb := &ethpb.SignedBeaconBlockBellatrix{
-		Block: &ethpb.BeaconBlockBellatrix{Slot: 66},
-	}
-	wsb, err := wrapper.WrappedSignedBeaconBlock(sb)
-	require.NoError(t, err)
-	_, err = wsb.Block().Body().ExecutionPayloadHeader()
-	require.ErrorContains(t, "unsupported field for block type", err)
 }

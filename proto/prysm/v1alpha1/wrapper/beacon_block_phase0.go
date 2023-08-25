@@ -277,6 +277,11 @@ func (w Phase0BeaconBlockBody) VoluntaryExits() []*eth.VoluntaryExit {
 	return w.b.VoluntaryExits
 }
 
+// Withdrawals returns the withdrawals in the block.
+func (w Phase0BeaconBlockBody) Withdrawals() []*eth.Withdrawal {
+	return w.b.Withdrawals
+}
+
 // SyncAggregate returns the sync aggregate in the block.
 func (Phase0BeaconBlockBody) SyncAggregate() (*eth.SyncAggregate, error) {
 	return nil, errors.New("Sync aggregate is not supported in phase 0 block")

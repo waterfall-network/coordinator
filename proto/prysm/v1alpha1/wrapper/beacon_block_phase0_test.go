@@ -79,8 +79,6 @@ func TestPhase0BeaconBlock_ExecutionPayloadHeader(t *testing.T) {
 	sb := &ethpb.SignedBeaconBlock{
 		Block: &ethpb.BeaconBlock{Slot: 66},
 	}
-	wsb, err := wrapper.WrappedSignedBeaconBlock(sb)
+	_, err := wrapper.WrappedSignedBeaconBlock(sb)
 	require.NoError(t, err)
-	_, err = wsb.Block().Body().ExecutionPayloadHeader()
-	require.ErrorContains(t, "unsupported field for block type", err)
 }

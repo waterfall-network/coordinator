@@ -39,6 +39,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/slashings"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/synccommittee"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/voluntaryexits"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/withdrawals"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc"
@@ -94,6 +95,7 @@ type BeaconNode struct {
 	attestationPool         attestations.Pool
 	prevotePool             prevote.Pool
 	exitPool                voluntaryexits.PoolManager
+	withdrawalPool          withdrawals.PoolManager
 	slashingsPool           slashings.PoolManager
 	syncCommitteePool       synccommittee.Pool
 	depositCache            *depositcache.DepositCache
@@ -155,6 +157,7 @@ func New(cliCtx *cli.Context, opts ...Option) (*BeaconNode, error) {
 		attestationPool:         attestations.NewPool(),
 		prevotePool:             prevote.NewPool(),
 		exitPool:                voluntaryexits.NewPool(),
+		withdrawalPool:          withdrawals.NewPool(),
 		slashingsPool:           slashings.NewPool(),
 		syncCommitteePool:       synccommittee.NewPool(),
 		slasherBlockHeadersFeed: new(event.Feed),
@@ -588,6 +591,7 @@ func (b *BeaconNode) registerBlockchainService() error {
 		blockchain.WithExecutionEngineCaller(web3Service),
 		blockchain.WithAttestationPool(b.attestationPool),
 		blockchain.WithExitPool(b.exitPool),
+		blockchain.WithWithdrawalPool(b.withdrawalPool),
 		blockchain.WithSlashingPool(b.slashingsPool),
 		blockchain.WithP2PBroadcaster(b.fetchP2P()),
 		blockchain.WithStateNotifier(b),
@@ -629,6 +633,7 @@ func (b *BeaconNode) registerPOWChainService() error {
 		powchain.WithBeaconNodeStatsUpdater(bs),
 		powchain.WithFinalizedStateAtStartup(b.finalizedStateAtStartUp),
 		powchain.WithExitPool(b.exitPool),
+		powchain.WithWithdrawalPool(b.withdrawalPool),
 	)
 	web3Service, err := powchain.NewService(b.ctx, opts...)
 	if err != nil {
@@ -667,6 +672,7 @@ func (b *BeaconNode) registerSyncService() error {
 		regularsync.WithAttestationPool(b.attestationPool),
 		regularsync.WithPrevotePool(b.prevotePool),
 		regularsync.WithExitPool(b.exitPool),
+		regularsync.WithWithdrawalPool(b.withdrawalPool),
 		regularsync.WithSlashingPool(b.slashingsPool),
 		regularsync.WithSyncCommsPool(b.syncCommitteePool),
 		regularsync.WithStateGen(b.stateGen),
@@ -800,6 +806,7 @@ func (b *BeaconNode) registerRPCService() error {
 		AttestationsPool:        b.attestationPool,
 		PrevotePool:             b.prevotePool,
 		ExitPool:                b.exitPool,
+		WithdrawalPool:          b.withdrawalPool,
 		SlashingsPool:           b.slashingsPool,
 		SlashingChecker:         slasherService,
 		SyncCommitteeObjectPool: b.syncCommitteePool,
