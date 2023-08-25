@@ -62,6 +62,9 @@ func (v *validator) SubmitPrevote(ctx context.Context, slot types.Slot, pubKey [
 		return
 	}
 
+	// Pass slot-1 because this parameter enters SubmitPrevote method as current slot+1
+	v.waitToSlotTwoThirds(ctx, slot-1)
+
 	req := &ethpb.PreVoteRequest{
 		Slot:           slot,
 		CommitteeIndex: duty.CommitteeIndex,
