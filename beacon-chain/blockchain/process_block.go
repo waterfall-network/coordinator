@@ -294,6 +294,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 
 	log.WithError(err).WithFields(logrus.Fields{
 		"block.slot": signed.Block().Slot(),
+		"headRoot":   fmt.Sprintf("%#x", headRoot),
 		//"postBlockVoting": helpers.PrintBlockVotingArr(postState.BlockVoting()),
 		"headState.Finalization": gwatCommon.HashArrayFromBytes(s.head.state.SpineData().Finalization),
 	}).Info("onBlock: update head")
@@ -310,18 +311,18 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	}
 	headState, err := s.cfg.StateGen.StateByRoot(ctx, headRoot)
 
-	log.WithError(err).WithFields(logrus.Fields{
-		"block.slot":             signed.Block().Slot(),
-		"headRoot":               fmt.Sprintf("%#x", headRoot),
-		"headState.Finalization": gwatCommon.HashArrayFromBytes(headState.SpineData().Finalization),
-	}).Info("onBlock: get state by root")
-
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"block.slot": signed.Block().Slot(),
 		}).Error("onBlock error")
 		return err
 	}
+
+	log.WithFields(logrus.Fields{
+		"block.slot":             signed.Block().Slot(),
+		"headRoot":               fmt.Sprintf("%#x", headRoot),
+		"headState.Finalization": gwatCommon.HashArrayFromBytes(headState.SpineData().Finalization),
+	}).Info("onBlock: get state by root")
 
 	if err := s.saveHead(ctx, headRoot, headBlock, headState); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
