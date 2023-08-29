@@ -177,4 +177,8 @@ func (s *subnetIDs) EmptyAllCaches() {
 	s.subnetsLock.Lock()
 	s.persistentSubnets.Flush()
 	s.subnetsLock.Unlock()
+
+	s.proposerLock.Lock()
+	s.proposer.Purge()
+	s.proposerLock.Unlock()
 }

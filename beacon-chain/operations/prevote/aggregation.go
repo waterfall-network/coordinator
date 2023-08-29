@@ -41,6 +41,9 @@ func (c *PrevoteCache) SavePrevote(pv *ethpb.PreVote) error {
 		return nil
 	}
 
+	c.prevoteCacheLock.Lock()
+	defer c.prevoteCacheLock.Unlock()
+
 	logrus.WithFields(logrus.Fields{
 		"pv.slot":    pv.Data.Slot,
 		"pv.index":   pv.Data.Index,
@@ -58,9 +61,6 @@ func (c *PrevoteCache) SavePrevote(pv *ethpb.PreVote) error {
 	}
 
 	copiedPv := ethpb.CopyPrevote(pv) // Copied.
-
-	c.prevoteCacheLock.Lock()
-	defer c.prevoteCacheLock.Unlock()
 
 	if val, exists := c.prevoteCache[pv.Data.Slot]; exists {
 		newVal := append(val, copiedPv)

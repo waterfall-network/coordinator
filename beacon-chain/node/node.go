@@ -601,6 +601,7 @@ func (b *BeaconNode) registerBlockchainService() error {
 		blockchain.WithSlasherAttestationsFeed(b.slasherAttestationsFeed),
 		blockchain.WithFinalizedStateAtStartUp(b.finalizedStateAtStartUp),
 		blockchain.WithProposerIdsCache(b.proposerIdsCache),
+		blockchain.WithPrevotePool(b.prevotePool),
 	)
 	blockchainService, err := blockchain.NewService(b.ctx, opts...)
 	if err != nil {

@@ -154,6 +154,12 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 				s.cfg.WithdrawalPool.OnSlot(s.headState(s.ctx))
 				s.cfg.ExitPool.OnSlot(s.headState(s.ctx))
 
+				// TODO consider moving of prevote cleanup to other place
+				err := s.cfg.PrevotePool.PurgeOutdatedPrevote(s.GenesisTime())
+				if err != nil {
+					log.WithError(err).Warnf("could not clear prevote pool from outdated data on slot %v", s.CurrentSlot())
+				}
+
 				// Continue when there's no fork choice attestation, there's nothing to process and update head.
 				// This covers the condition when the node is still initial syncing to the head of the chain.
 				if s.cfg.AttPool.ForkchoiceAttestationCount() == 0 {

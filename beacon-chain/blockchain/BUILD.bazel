@@ -56,6 +56,7 @@ go_library(
         "//beacon-chain/forkchoice/protoarray:go_default_library",
         "//beacon-chain/forkchoice/types:go_default_library",
         "//beacon-chain/operations/attestations:go_default_library",
+        "//beacon-chain/operations/prevote:go_default_library",
         "//beacon-chain/operations/slashings:go_default_library",
         "//beacon-chain/operations/voluntaryexits:go_default_library",
         "//beacon-chain/operations/withdrawals:go_default_library",

@@ -150,11 +150,6 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		return nil, fmt.Errorf("could not get ETH1 data: %v", err)
 	}
 
-	err = vs.PrevotePool.PurgeOutdatedPrevote(vs.TimeFetcher.GenesisTime())
-	if err != nil {
-		log.WithError(err).Warnf("build block data: could not clear prevote pool from outdated data on slot %v", req.Slot)
-	}
-
 	prevoteData := vs.PrevotePool.GetPrevoteBySlot(ctx, req.Slot)
 	candidates := helpers.CalculateCandidates(head, optSpines)
 	log.Infof("build block data: candidates received using optimistic spines: %s", candidates)
