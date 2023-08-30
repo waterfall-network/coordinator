@@ -14,11 +14,11 @@ func (s *Store) ReadSpines(ctx context.Context, key [32]byte) (wrapper.Spines, e
 	defer span.End()
 
 	var err error
-	var data []byte
+	var data wrapper.Spines
 
 	// Return from cache if it exists.
-	if v, ok := s.spinesCache.Get(string(key[:])); v != nil && ok {
-		return v.([]byte), nil
+	if v, ok := s.spinesCache.Get(key); v != nil && ok {
+		return v.(wrapper.Spines), nil
 	}
 
 	err = s.db.View(func(tx *bolt.Tx) error {
@@ -27,7 +27,7 @@ func (s *Store) ReadSpines(ctx context.Context, key [32]byte) (wrapper.Spines, e
 		return err
 	})
 	// cache it.
-	s.spinesCache.Set(string(key[:]), data, int64(len(data)))
+	s.spinesCache.Add(key, data)
 	return data, err
 }
 
@@ -43,7 +43,7 @@ func (s *Store) WriteSpines(ctx context.Context, spines wrapper.Spines) error {
 			return err
 		}
 		// cache it.
-		s.spinesCache.Set(string(key[:]), spines, int64(len(spines)))
+		s.spinesCache.Add(key, spines)
 		return nil
 	})
 }
@@ -53,7 +53,7 @@ func (s *Store) DeleteSpines(ctx context.Context, key [32]byte) error {
 	ctx, span := trace.StartSpan(ctx, "BeaconDB.DeleteSpines")
 	defer span.End()
 
-	s.spinesCache.Del(string(key[:]))
+	s.spinesCache.Remove(key)
 	return s.db.Update(func(tx *bolt.Tx) error {
 		if err := tx.Bucket(spinesBucket).Delete(key[:]); err != nil {
 			return err

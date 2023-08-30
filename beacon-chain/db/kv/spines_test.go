@@ -1,8 +1,8 @@
 package kv
 
 import (
-	"bytes"
 	"context"
+	"fmt"
 	"testing"
 
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
@@ -11,20 +11,20 @@ import (
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
-var paramSpinesTests = []struct {
-	name           string
-	newSpinesParam func() wrapper.Spines
-}{
-	{
-		name: "gwat sync param",
-		newSpinesParam: func() wrapper.Spines {
-			return NewSpinesParam()
-		},
-	},
-}
-
 func TestStore_GwatSyncParamCRUD(t *testing.T) {
 	ctx := context.Background()
+
+	var paramSpinesTests = []struct {
+		name           string
+		newSpinesParam func() wrapper.Spines
+	}{
+		{
+			name: "gwat sync param",
+			newSpinesParam: func() wrapper.Spines {
+				return NewSpinesParam()
+			},
+		},
+	}
 
 	for _, tt := range paramSpinesTests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -35,12 +35,24 @@ func TestStore_GwatSyncParamCRUD(t *testing.T) {
 			retrievedSpines, err := db.ReadSpines(ctx, key)
 			require.NoError(t, err)
 			var nilGsp wrapper.Spines
-			assert.Equal(t, nilGsp, retrievedSpines, "Expected nil ReadSpines")
+			assert.Equal(t, fmt.Sprintf("%v", nilGsp), fmt.Sprintf("%v", retrievedSpines), "Expected nil ReadSpines")
 			require.NoError(t, db.WriteSpines(ctx, spines))
+			// check in cache.
+			cached, ok := db.spinesCache.Get(key)
+			assert.Equal(t, true, ok, "Wanted: %v, received: %v", true, ok)
+			assert.Equal(t, fmt.Sprintf("%#x", spines), fmt.Sprintf("%#x", cached.(wrapper.Spines)), "Wanted: %#x, received: %#x", spines, cached)
+
+			//no cache
+			db.spinesCache.Remove(key)
 			retrievedSpines, err = db.ReadSpines(ctx, key)
 			require.NoError(t, err)
+			assert.Equal(t, fmt.Sprintf("%#x", spines), fmt.Sprintf("%#x", retrievedSpines), "Wanted: %#x, received: %#x", spines, retrievedSpines)
 
-			assert.Equal(t, true, bytes.Equal(spines, retrievedSpines), "Wanted: %v, received: %v", spines, retrievedSpines)
+			// check cache is updated.
+			cached, ok = db.spinesCache.Get(key)
+			assert.Equal(t, true, ok, "Wanted: %v, received: %v", true, ok)
+			assert.Equal(t, fmt.Sprintf("%#x", spines), fmt.Sprintf("%#x", cached.(wrapper.Spines)), "Wanted: %#x, received: %#x", spines, cached)
+
 		})
 	}
 }
