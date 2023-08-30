@@ -90,10 +90,9 @@ type NoHeadAccessDatabase interface {
 
 	CleanUpDirtyStates(ctx context.Context, slotsPerArchivedPoint types.Slot) error
 
-	//GwatSyncParam
-	GwatSyncParam(ctx context.Context, epoch types.Epoch) (*wrapper.GwatSyncParam, error)
-	SaveGwatSyncParam(ctx context.Context, gsp wrapper.GwatSyncParam) error
-	DeleteGwatSyncParam(ctx context.Context, epoch types.Epoch) error
+	ReadSpines(ctx context.Context, key [32]byte) (wrapper.Spines, error)
+	WriteSpines(ctx context.Context, spines wrapper.Spines) error
+	DeleteSpines(ctx context.Context, key [32]byte) error
 }
 
 // HeadAccessDatabase defines a struct with access to reading chain head data.

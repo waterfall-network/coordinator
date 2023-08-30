@@ -80,6 +80,7 @@ type Store struct {
 	db                  *bolt.DB
 	databasePath        string
 	blockCache          *ristretto.Cache
+	spinesCache         *ristretto.Cache
 	validatorEntryCache *ristretto.Cache
 	stateSummaryCache   *stateSummaryCache
 	ctx                 context.Context
@@ -195,8 +196,8 @@ func NewKVStore(ctx context.Context, dirPath string, config *Config) (*Store, er
 			migrationsBucket,
 
 			feeRecipientBucket,
-			// gwat sync params
-			gwatSyncParamBucket,
+			// spines lists bucket
+			spinesBucket,
 		)
 	}); err != nil {
 		log.WithField("elapsed", time.Since(start)).Error("Failed to update db and create buckets")

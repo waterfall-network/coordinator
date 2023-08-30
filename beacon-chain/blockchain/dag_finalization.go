@@ -14,7 +14,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
@@ -694,28 +693,4 @@ func (s *Service) createGenesisCoordinatedCheckpoint(ctx context.Context, cpFinE
 		Root:     cpRoot,
 		Spine:    lfSpine,
 	}, nil
-}
-
-// searchNextGwatSyncParam procedure to find next gwat synchronization param
-// starting from passed gwatEpoch.
-func (s *Service) searchNextGwatSyncParam(ctx context.Context, gwatEpoch types.Epoch) (*wrapper.GwatSyncParam, error) {
-	nextEpoch := gwatEpoch
-	for {
-		nextEpoch++
-		syncParam, err := s.cfg.BeaconDB.GwatSyncParam(ctx, nextEpoch)
-		if err != nil {
-			log.WithError(err).WithFields(logrus.Fields{
-				"gwatEpoch": gwatEpoch,
-				"nextEpoch": nextEpoch,
-			}).Error("Gwat sync: search next gwat sync param failed")
-			return nil, err
-		}
-		if syncParam != nil {
-			return syncParam, nil
-		}
-		// current epoch reached
-		if nextEpoch >= slots.ToEpoch(s.CurrentSlot()) {
-			return nil, nil
-		}
-	}
 }
