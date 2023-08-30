@@ -12,6 +12,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
@@ -56,17 +57,19 @@ func (s *Service) initGwatSync() {
 			log.Info("Gwat sync: coordinator synchronization success")
 
 			// 2. sync slot info
-			slotInfo := &gwatTypes.SlotInfo{
-				GenesisTime:    uint64(s.GenesisTime().Unix()),
-				SecondsPerSlot: params.BeaconConfig().SecondsPerSlot,
-				SlotsPerEpoch:  uint64(params.BeaconConfig().SlotsPerEpoch),
+			if features.Get().EnablePassSlotInfoToGwat {
+				slotInfo := &gwatTypes.SlotInfo{
+					GenesisTime:    uint64(s.GenesisTime().Unix()),
+					SecondsPerSlot: params.BeaconConfig().SecondsPerSlot,
+					SlotsPerEpoch:  uint64(params.BeaconConfig().SlotsPerEpoch),
+				}
+				isSet, err := s.cfg.ExecutionEngineCaller.ExecutionDagSyncSlotInfo(s.ctx, slotInfo)
+				if err != nil || !isSet {
+					log.WithError(err).Warning("Gwat sync: attempt to sync slot info failed ...")
+					continue
+				}
+				log.Info("Gwat sync: sync slot info successful")
 			}
-			isSet, err := s.cfg.ExecutionEngineCaller.ExecutionDagSyncSlotInfo(s.ctx, slotInfo)
-			if err != nil || !isSet {
-				log.WithError(err).Warning("Gwat sync: attempt to sync slot info failed ...")
-				continue
-			}
-			log.Info("Gwat sync: sync slot info successful")
 
 			// 3. Init coordinated state
 			err = s.initCoordinatedState(s.ctx)
