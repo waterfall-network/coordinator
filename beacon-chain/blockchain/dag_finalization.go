@@ -56,22 +56,7 @@ func (s *Service) initGwatSync() {
 			}
 			log.Info("Gwat sync: coordinator synchronization success")
 
-			// 2. sync slot info
-			if features.Get().EnablePassSlotInfoToGwat {
-				slotInfo := &gwatTypes.SlotInfo{
-					GenesisTime:    uint64(s.GenesisTime().Unix()),
-					SecondsPerSlot: params.BeaconConfig().SecondsPerSlot,
-					SlotsPerEpoch:  uint64(params.BeaconConfig().SlotsPerEpoch),
-				}
-				isSet, err := s.cfg.ExecutionEngineCaller.ExecutionDagSyncSlotInfo(s.ctx, slotInfo)
-				if err != nil || !isSet {
-					log.WithError(err).Warning("Gwat sync: attempt to sync slot info failed ...")
-					continue
-				}
-				log.Info("Gwat sync: sync slot info successful")
-			}
-
-			// 3. Init coordinated state
+			// 2. Init coordinated state
 			err = s.initCoordinatedState(s.ctx)
 			if err != nil {
 				log.WithError(err).Warning("Gwat sync: attempt to get gwat coordinated state failed ...")
@@ -79,7 +64,7 @@ func (s *Service) initGwatSync() {
 			}
 			log.Info("Gwat sync: coordinated state initialization successful")
 
-			// 4. sync gwat to current finalized checkpoint
+			// 3. sync gwat to current finalized checkpoint
 			err = s.runGwatSynchronization(s.ctx)
 			if err != nil {
 				log.WithError(err).Warning("Gwat sync: attempt failed ...")
@@ -87,11 +72,35 @@ func (s *Service) initGwatSync() {
 			}
 			log.Info("Gwat sync: success")
 
-			// 5. start main work process
+			// 4. start main work process
 			s.runProcessDagFinalize()
 			return
 		}
 	}
+}
+
+// initParallelGwatSync launches parallel gwat synchronization process
+// which doesn't depend on if coordinator is synced or not
+func (s *Service) initParallelGwatSync() {
+	log.Info("Parallel Gwat sync: start ...")
+
+	var err error
+
+	// 1. Init coordinated state
+	err = s.initCoordinatedState(s.ctx)
+	if err != nil {
+		log.WithError(err).Warning("Parallel Gwat sync: attempt to get gwat coordinated state failed ...")
+		return
+	}
+	log.Info("Parallel Gwat sync: coordinated state initialization successful")
+
+	// 2. sync gwat to current finalized checkpoint
+	err = s.runGwatSynchronization(s.ctx)
+	if err != nil {
+		log.WithError(err).Warning("Parallel Gwat sync: attempt failed ...")
+		return
+	}
+	log.Info("Parallel Gwat sync: success")
 }
 
 // runGwatSynchronization procedure of gwat synchronization.
@@ -119,6 +128,7 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 	}).Info("Gwat sync: head sync start")
 
 	syncSlot, err := slots.EpochStart(cpEpoch + 1)
+	// todo check correct head
 	for syncSlot <= s.HeadSlot() {
 
 		log.WithError(err).WithFields(logrus.Fields{
@@ -242,6 +252,15 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 		}).Info("Gwat sync: main success")
 	}
 
+	// todo
+	//if s.headSlot() < s.CurrentSlot() {
+	//	return nil
+	//}
+
+	if !s.IsSynced() {
+		return nil
+	}
+
 	// head sync
 	headState, err := s.HeadState(ctx)
 	if err != nil {
@@ -346,7 +365,7 @@ func (s *Service) processDagFinalization(headState state.BeaconState, syncMode g
 
 	var finalizedSeq gwatCommon.HashArray
 
-	if s.IsSynced() {
+	if s.IsSynced() || syncMode == gwatTypes.MainSync {
 		finParams, err := s.collectFinalizationParams(ctx, headState)
 		if err != nil {
 			log.WithError(err).Error("Dag finalization: get finalization params failed")
@@ -597,6 +616,19 @@ func (s *Service) collectValidatorSyncData(ctx context.Context, st state.BeaconS
 
 // initCoordinatedState initialize coordinated state on start up sync and finalization processing
 func (s *Service) initCoordinatedState(ctx context.Context) error {
+	if features.Get().EnablePassSlotInfoToGwat {
+		slotInfo := &gwatTypes.SlotInfo{
+			GenesisTime:    uint64(s.GenesisTime().Unix()),
+			SecondsPerSlot: params.BeaconConfig().SecondsPerSlot,
+			SlotsPerEpoch:  uint64(params.BeaconConfig().SlotsPerEpoch),
+		}
+		isSet, err := s.cfg.ExecutionEngineCaller.ExecutionDagSyncSlotInfo(s.ctx, slotInfo)
+		if err != nil || !isSet {
+			log.WithError(err).Warning("Gwat sync: attempt to sync slot info failed ...")
+			return err
+		}
+		log.Info("Gwat sync: sync slot info successful")
+	}
 	var coordCp *gwatTypes.Checkpoint
 	coordState, err := s.cfg.ExecutionEngineCaller.ExecutionDagCoordinatedState(ctx)
 	if err != nil || coordState.LFSpine == nil {
