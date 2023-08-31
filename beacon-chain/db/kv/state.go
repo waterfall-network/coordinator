@@ -8,6 +8,7 @@ import (
 	"github.com/golang/snappy"
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
+	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/genesis"
@@ -43,8 +44,39 @@ func (s *Store) State(ctx context.Context, blockRoot [32]byte) (state.BeaconStat
 	if valErr != nil {
 		return nil, valErr
 	}
+	st, err := s.unmarshalState(ctx, enc, valEntries)
+	if err != nil {
+		return nil, err
+	}
 
-	return s.unmarshalState(ctx, enc, valEntries)
+	// load spines
+	spines, err := s.ReadSpines(ctx, bytesutil.ToBytes32(st.SpineData().Spines))
+	if err != nil {
+		return nil, err
+	}
+	prefix, err := s.ReadSpines(ctx, bytesutil.ToBytes32(st.SpineData().Prefix))
+	if err != nil {
+		return nil, err
+	}
+	finalization, err := s.ReadSpines(ctx, bytesutil.ToBytes32(st.SpineData().Finalization))
+	if err != nil {
+		return nil, err
+	}
+	cpFinalized, err := s.ReadSpines(ctx, bytesutil.ToBytes32(st.SpineData().CpFinalized))
+	if err != nil {
+		return nil, err
+	}
+
+	// set complete spineData
+	err = st.SetSpineData(&ethpb.SpineData{
+		Spines:       spines,
+		Prefix:       prefix,
+		Finalization: finalization,
+		CpFinalized:  cpFinalized,
+		ParentSpines: st.SpineData().ParentSpines,
+	})
+
+	return st, err
 }
 
 // StateOrError is just like State(), except it only returns a non-error response
@@ -129,6 +161,12 @@ func (s *Store) SaveStates(ctx context.Context, states []state.ReadOnlyBeaconSta
 	}
 	multipleEncs := make([][]byte, len(states))
 	for i, st := range states {
+
+		log.WithFields(logrus.Fields{
+			"i":    i,
+			"Slot": st.Slot(),
+		}).Info("kv state: SaveStates")
+
 		stateBytes, err := marshalState(ctx, st)
 		if err != nil {
 			return err
@@ -210,6 +248,24 @@ func (s *Store) SaveStatesEfficient(ctx context.Context, states []state.ReadOnly
 				return errors.Wrap(err, "could not update DB indices")
 			}
 
+			//store the spines data and replace it by keys
+			keySpines, err := s.WriteSpines(ctx, states[i].SpineData().Spines)
+			if err != nil {
+				return err
+			}
+			keyPrefix, err := s.WriteSpines(ctx, states[i].SpineData().Prefix)
+			if err != nil {
+				return err
+			}
+			keyFinalization, err := s.WriteSpines(ctx, states[i].SpineData().Finalization)
+			if err != nil {
+				return err
+			}
+			keyCpFinalized, err := s.WriteSpines(ctx, states[i].SpineData().CpFinalized)
+			if err != nil {
+				return err
+			}
+
 			// There is a gap when the states that are passed are used outside this
 			// thread. But while storing the state object, we should not store the
 			// validator entries.To bring the gap closer, we empty the validators
@@ -224,6 +280,18 @@ func (s *Store) SaveStatesEfficient(ctx context.Context, states []state.ReadOnly
 				if pbState == nil {
 					return errors.New("nil state")
 				}
+
+				log.WithFields(logrus.Fields{
+					"i":    i,
+					"Slot": pbState.Slot,
+				}).Info("kv state: SaveStatesEfficient BeaconState")
+
+				// replace spines it by keys
+				pbState.SpineData.Spines = keySpines[:]
+				pbState.SpineData.Prefix = keyPrefix[:]
+				pbState.SpineData.Finalization = keyFinalization[:]
+				pbState.SpineData.CpFinalized = keyCpFinalized[:]
+
 				valEntries := pbState.Validators
 				pbState.Validators = make([]*ethpb.Validator, 0)
 				encodedState, err := encode(ctx, pbState)
@@ -245,6 +313,18 @@ func (s *Store) SaveStatesEfficient(ctx context.Context, states []state.ReadOnly
 				if pbState == nil {
 					return errors.New("nil state")
 				}
+
+				log.WithFields(logrus.Fields{
+					"i":    i,
+					"Slot": pbState.Slot,
+				}).Info("kv state: SaveStatesEfficient BeaconStateAltair")
+
+				// replace spines it by keys
+				pbState.SpineData.Spines = keySpines[:]
+				pbState.SpineData.Prefix = keyPrefix[:]
+				pbState.SpineData.Finalization = keyFinalization[:]
+				pbState.SpineData.CpFinalized = keyCpFinalized[:]
+
 				valEntries := pbState.Validators
 				pbState.Validators = make([]*ethpb.Validator, 0)
 				rawObj, err := pbState.MarshalSSZ()
@@ -259,28 +339,35 @@ func (s *Store) SaveStatesEfficient(ctx context.Context, states []state.ReadOnly
 				if err := valIdxBkt.Put(rt[:], validatorKeys[i]); err != nil {
 					return err
 				}
-			case *ethpb.BeaconStateBellatrix:
-				pbState, err := v3.ProtobufBeaconState(rawType)
-				if err != nil {
-					return err
-				}
-				if pbState == nil {
-					return errors.New("nil state")
-				}
-				valEntries := pbState.Validators
-				pbState.Validators = make([]*ethpb.Validator, 0)
-				rawObj, err := pbState.MarshalSSZ()
-				if err != nil {
-					return err
-				}
-				encodedState := snappy.Encode(nil, append(bellatrixKey, rawObj...))
-				if err := bucket.Put(rt[:], encodedState); err != nil {
-					return err
-				}
-				pbState.Validators = valEntries
-				if err := valIdxBkt.Put(rt[:], validatorKeys[i]); err != nil {
-					return err
-				}
+			//case *ethpb.BeaconStateBellatrix:
+			//	pbState, err := v3.ProtobufBeaconState(rawType)
+			//	if err != nil {
+			//		return err
+			//	}
+			//	if pbState == nil {
+			//		return errors.New("nil state")
+			//	}
+			//
+			//	// replace spines it by keys
+			//	pbState.SpineData.Spines = keySpines[:]
+			//	pbState.SpineData.Prefix = keyPrefix[:]
+			//	pbState.SpineData.Finalization = keyFinalization[:]
+			//	pbState.SpineData.CpFinalized = keyCpFinalized[:]
+			//
+			//	valEntries := pbState.Validators
+			//	pbState.Validators = make([]*ethpb.Validator, 0)
+			//	rawObj, err := pbState.MarshalSSZ()
+			//	if err != nil {
+			//		return err
+			//	}
+			//	encodedState := snappy.Encode(nil, append(bellatrixKey, rawObj...))
+			//	if err := bucket.Put(rt[:], encodedState); err != nil {
+			//		return err
+			//	}
+			//	pbState.Validators = valEntries
+			//	if err := valIdxBkt.Put(rt[:], validatorKeys[i]); err != nil {
+			//		return err
+			//	}
 			default:
 				return errors.New("invalid state type")
 			}

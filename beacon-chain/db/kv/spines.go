@@ -32,13 +32,12 @@ func (s *Store) ReadSpines(ctx context.Context, key [32]byte) (wrapper.Spines, e
 }
 
 // WriteSpines to the db.
-func (s *Store) WriteSpines(ctx context.Context, spines wrapper.Spines) error {
+func (s *Store) WriteSpines(ctx context.Context, spines wrapper.Spines) ([32]byte, error) {
 	ctx, span := trace.StartSpan(ctx, "BeaconDB.WriteSpines")
 	defer span.End()
-
-	return s.db.Update(func(tx *bolt.Tx) error {
+	key := spines.Key()
+	return key, s.db.Update(func(tx *bolt.Tx) error {
 		bkt := tx.Bucket(spinesBucket)
-		key := spines.Key()
 		if err := bkt.Put(key[:], spines); err != nil {
 			return err
 		}

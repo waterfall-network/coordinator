@@ -36,7 +36,9 @@ func TestStore_GwatSyncParamCRUD(t *testing.T) {
 			require.NoError(t, err)
 			var nilGsp wrapper.Spines
 			assert.Equal(t, fmt.Sprintf("%v", nilGsp), fmt.Sprintf("%v", retrievedSpines), "Expected nil ReadSpines")
-			require.NoError(t, db.WriteSpines(ctx, spines))
+			wrKey, err := db.WriteSpines(ctx, spines)
+			require.NoError(t, err)
+			assert.Equal(t, key, wrKey, "Wanted: %#x, received: %#x", key, wrKey)
 			// check in cache.
 			cached, ok := db.spinesCache.Get(key)
 			assert.Equal(t, true, ok, "Wanted: %v, received: %v", true, ok)

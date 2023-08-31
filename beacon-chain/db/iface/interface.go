@@ -91,7 +91,7 @@ type NoHeadAccessDatabase interface {
 	CleanUpDirtyStates(ctx context.Context, slotsPerArchivedPoint types.Slot) error
 
 	ReadSpines(ctx context.Context, key [32]byte) (wrapper.Spines, error)
-	WriteSpines(ctx context.Context, spines wrapper.Spines) error
+	WriteSpines(ctx context.Context, spines wrapper.Spines) ([32]byte, error)
 	DeleteSpines(ctx context.Context, key [32]byte) error
 }
 
