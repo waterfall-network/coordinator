@@ -122,13 +122,14 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 
 	cpEpoch := types.Epoch(gwatCheckpoint.Epoch)
 
+	syncSlot, err := slots.EpochStart(cpEpoch + 1)
+
 	log.WithFields(logrus.Fields{
 		"headSlot": s.headSlot(),
 		"headRoot": fmt.Sprintf("%#x", s.headRoot()),
+		"syncSlot": syncSlot,
 	}).Info("Gwat sync: head sync start")
 
-	syncSlot, err := slots.EpochStart(cpEpoch + 1)
-	// todo check correct head
 	for syncSlot <= s.HeadSlot() {
 
 		log.WithError(err).WithFields(logrus.Fields{
