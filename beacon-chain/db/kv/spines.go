@@ -16,6 +16,10 @@ func (s *Store) ReadSpines(ctx context.Context, key [32]byte) (wrapper.Spines, e
 	var err error
 	var data wrapper.Spines
 
+	if key == (wrapper.Spines{}).Key() {
+		return wrapper.Spines{}, nil
+	}
+
 	// Return from cache if it exists.
 	if v, ok := s.spinesCache.Get(key); v != nil && ok {
 		return v.(wrapper.Spines), nil

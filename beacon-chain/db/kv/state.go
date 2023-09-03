@@ -8,7 +8,6 @@ import (
 	"github.com/golang/snappy"
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/genesis"
@@ -147,9 +146,9 @@ func (s *Store) SaveState(ctx context.Context, st state.ReadOnlyBeaconState, blo
 		return err
 	}
 	if ok {
-		return s.SaveStatesEfficient(ctx, []state.ReadOnlyBeaconState{st}, [][32]byte{blockRoot})
+		return s.SaveStatesEfficient(ctx, []state.ReadOnlyBeaconState{st.Copy()}, [][32]byte{blockRoot})
 	}
-	return s.SaveStates(ctx, []state.ReadOnlyBeaconState{st}, [][32]byte{blockRoot})
+	return s.SaveStates(ctx, []state.ReadOnlyBeaconState{st.Copy()}, [][32]byte{blockRoot})
 }
 
 // SaveStates stores multiple states to the db using the provided corresponding roots.
@@ -161,12 +160,57 @@ func (s *Store) SaveStates(ctx context.Context, states []state.ReadOnlyBeaconSta
 	}
 	multipleEncs := make([][]byte, len(states))
 	for i, st := range states {
+		//store the spines data and replace it by keys
+		keySpines, err := s.WriteSpines(ctx, states[i].SpineData().Spines)
+		if err != nil {
+			return err
+		}
+		keyPrefix, err := s.WriteSpines(ctx, states[i].SpineData().Prefix)
+		if err != nil {
+			return err
+		}
+		keyFinalization, err := s.WriteSpines(ctx, states[i].SpineData().Finalization)
+		if err != nil {
+			return err
+		}
+		keyCpFinalized, err := s.WriteSpines(ctx, states[i].SpineData().CpFinalized)
+		if err != nil {
+			return err
+		}
 
-		log.WithFields(logrus.Fields{
-			"i":    i,
-			"Slot": st.Slot(),
-		}).Info("kv state: SaveStates")
+		switch rawType := states[i].InnerStateUnsafe().(type) {
+		case *ethpb.BeaconState:
+			pbState, err := v1.ProtobufBeaconState(rawType)
+			if err != nil {
+				return err
+			}
+			if pbState == nil {
+				return errors.New("nil state")
+			}
 
+			// replace spines it by keys
+			pbState.SpineData.Spines = keySpines[:]
+			pbState.SpineData.Prefix = keyPrefix[:]
+			pbState.SpineData.Finalization = keyFinalization[:]
+			pbState.SpineData.CpFinalized = keyCpFinalized[:]
+
+		case *ethpb.BeaconStateAltair:
+			pbState, err := v2.ProtobufBeaconState(rawType)
+			if err != nil {
+				return err
+			}
+			if pbState == nil {
+				return errors.New("nil state")
+			}
+			// replace spines it by keys
+			pbState.SpineData.Spines = keySpines[:]
+			pbState.SpineData.Prefix = keyPrefix[:]
+			pbState.SpineData.Finalization = keyFinalization[:]
+			pbState.SpineData.CpFinalized = keyCpFinalized[:]
+
+		default:
+			return errors.New("invalid state type")
+		}
 		stateBytes, err := marshalState(ctx, st)
 		if err != nil {
 			return err
@@ -199,6 +243,24 @@ func (s *Store) SaveStatesEfficient(ctx context.Context, states []state.ReadOnly
 	validatorsEntries := make(map[string]*ethpb.Validator) // It's a map to make sure that you store only new validator entries.
 	validatorKeys := make([][]byte, len(states))           // For every state, this stores a compressed list of validator keys.
 	for i, st := range states {
+		//store the spines data and replace it by keys
+		keySpines, err := s.WriteSpines(ctx, states[i].SpineData().Spines)
+		if err != nil {
+			return err
+		}
+		keyPrefix, err := s.WriteSpines(ctx, states[i].SpineData().Prefix)
+		if err != nil {
+			return err
+		}
+		keyFinalization, err := s.WriteSpines(ctx, states[i].SpineData().Finalization)
+		if err != nil {
+			return err
+		}
+		keyCpFinalized, err := s.WriteSpines(ctx, states[i].SpineData().CpFinalized)
+		if err != nil {
+			return err
+		}
+
 		var validators []*ethpb.Validator
 		switch st.InnerStateUnsafe().(type) {
 		case *ethpb.BeaconState:
@@ -207,18 +269,22 @@ func (s *Store) SaveStatesEfficient(ctx context.Context, states []state.ReadOnly
 				return err
 			}
 			validators = pbState.Validators
+			// replace spines it by keys
+			pbState.SpineData.Spines = keySpines[:]
+			pbState.SpineData.Prefix = keyPrefix[:]
+			pbState.SpineData.Finalization = keyFinalization[:]
+			pbState.SpineData.CpFinalized = keyCpFinalized[:]
 		case *ethpb.BeaconStateAltair:
 			pbState, err := v2.ProtobufBeaconState(st.InnerStateUnsafe())
 			if err != nil {
 				return err
 			}
 			validators = pbState.Validators
-		case *ethpb.BeaconStateBellatrix:
-			pbState, err := v3.ProtobufBeaconState(st.InnerStateUnsafe())
-			if err != nil {
-				return err
-			}
-			validators = pbState.Validators
+			// replace spines it by keys
+			pbState.SpineData.Spines = keySpines[:]
+			pbState.SpineData.Prefix = keyPrefix[:]
+			pbState.SpineData.Finalization = keyFinalization[:]
+			pbState.SpineData.CpFinalized = keyCpFinalized[:]
 		default:
 			return errors.New("invalid state type")
 		}
@@ -248,24 +314,6 @@ func (s *Store) SaveStatesEfficient(ctx context.Context, states []state.ReadOnly
 				return errors.Wrap(err, "could not update DB indices")
 			}
 
-			//store the spines data and replace it by keys
-			keySpines, err := s.WriteSpines(ctx, states[i].SpineData().Spines)
-			if err != nil {
-				return err
-			}
-			keyPrefix, err := s.WriteSpines(ctx, states[i].SpineData().Prefix)
-			if err != nil {
-				return err
-			}
-			keyFinalization, err := s.WriteSpines(ctx, states[i].SpineData().Finalization)
-			if err != nil {
-				return err
-			}
-			keyCpFinalized, err := s.WriteSpines(ctx, states[i].SpineData().CpFinalized)
-			if err != nil {
-				return err
-			}
-
 			// There is a gap when the states that are passed are used outside this
 			// thread. But while storing the state object, we should not store the
 			// validator entries.To bring the gap closer, we empty the validators
@@ -280,18 +328,6 @@ func (s *Store) SaveStatesEfficient(ctx context.Context, states []state.ReadOnly
 				if pbState == nil {
 					return errors.New("nil state")
 				}
-
-				log.WithFields(logrus.Fields{
-					"i":    i,
-					"Slot": pbState.Slot,
-				}).Info("kv state: SaveStatesEfficient BeaconState")
-
-				// replace spines it by keys
-				pbState.SpineData.Spines = keySpines[:]
-				pbState.SpineData.Prefix = keyPrefix[:]
-				pbState.SpineData.Finalization = keyFinalization[:]
-				pbState.SpineData.CpFinalized = keyCpFinalized[:]
-
 				valEntries := pbState.Validators
 				pbState.Validators = make([]*ethpb.Validator, 0)
 				encodedState, err := encode(ctx, pbState)
@@ -313,18 +349,6 @@ func (s *Store) SaveStatesEfficient(ctx context.Context, states []state.ReadOnly
 				if pbState == nil {
 					return errors.New("nil state")
 				}
-
-				log.WithFields(logrus.Fields{
-					"i":    i,
-					"Slot": pbState.Slot,
-				}).Info("kv state: SaveStatesEfficient BeaconStateAltair")
-
-				// replace spines it by keys
-				pbState.SpineData.Spines = keySpines[:]
-				pbState.SpineData.Prefix = keyPrefix[:]
-				pbState.SpineData.Finalization = keyFinalization[:]
-				pbState.SpineData.CpFinalized = keyCpFinalized[:]
-
 				valEntries := pbState.Validators
 				pbState.Validators = make([]*ethpb.Validator, 0)
 				rawObj, err := pbState.MarshalSSZ()
@@ -339,35 +363,6 @@ func (s *Store) SaveStatesEfficient(ctx context.Context, states []state.ReadOnly
 				if err := valIdxBkt.Put(rt[:], validatorKeys[i]); err != nil {
 					return err
 				}
-			//case *ethpb.BeaconStateBellatrix:
-			//	pbState, err := v3.ProtobufBeaconState(rawType)
-			//	if err != nil {
-			//		return err
-			//	}
-			//	if pbState == nil {
-			//		return errors.New("nil state")
-			//	}
-			//
-			//	// replace spines it by keys
-			//	pbState.SpineData.Spines = keySpines[:]
-			//	pbState.SpineData.Prefix = keyPrefix[:]
-			//	pbState.SpineData.Finalization = keyFinalization[:]
-			//	pbState.SpineData.CpFinalized = keyCpFinalized[:]
-			//
-			//	valEntries := pbState.Validators
-			//	pbState.Validators = make([]*ethpb.Validator, 0)
-			//	rawObj, err := pbState.MarshalSSZ()
-			//	if err != nil {
-			//		return err
-			//	}
-			//	encodedState := snappy.Encode(nil, append(bellatrixKey, rawObj...))
-			//	if err := bucket.Put(rt[:], encodedState); err != nil {
-			//		return err
-			//	}
-			//	pbState.Validators = valEntries
-			//	if err := valIdxBkt.Put(rt[:], validatorKeys[i]); err != nil {
-			//		return err
-			//	}
 			default:
 				return errors.New("invalid state type")
 			}
