@@ -81,23 +81,26 @@ func (s *Service) initGwatSync() {
 
 // initParallelGwatSync launches parallel gwat synchronization process
 // which doesn't depend on if coordinator is synced or not
-func (s *Service) initParallelGwatSync() {
+func (s *Service) initParallelGwatSync(ctx context.Context) {
 	log.Info("Parallel Gwat sync: start ...")
 
 	var err error
 
-	// 1. Init coordinated state
-	err = s.initCoordinatedState(s.ctx)
-	if err != nil {
-		log.WithError(err).Warning("Parallel Gwat sync: attempt to get gwat coordinated state failed ...")
-		return
+	// 1. Check and init coordinated state
+	gwatCheckpoint := s.GetCachedGwatCoordinatedState()
+	if gwatCheckpoint == nil {
+		err = s.initCoordinatedState(ctx)
+		if err != nil {
+			log.WithError(err).Warning("Parallel Gwat sync: attempt to get gwat coordinated state failed ...")
+			return
+		}
+		log.Info("Parallel Gwat sync: coordinated state initialization successful")
 	}
-	log.Info("Parallel Gwat sync: coordinated state initialization successful")
-
 	// 2. sync gwat to current finalized checkpoint
-	err = s.runGwatSynchronization(s.ctx)
+	err = s.runGwatSynchronization(ctx)
 	if err != nil {
 		log.WithError(err).Warning("Parallel Gwat sync: attempt failed ...")
+		s.ResetCachedGwatCoordinatedState()
 		return
 	}
 	log.Info("Parallel Gwat sync: success")
@@ -122,17 +125,18 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 
 	cpEpoch := types.Epoch(gwatCheckpoint.Epoch)
 
+	var syncEpoch types.Epoch
 	syncSlot, err := slots.EpochStart(cpEpoch + 1)
 
 	log.WithFields(logrus.Fields{
 		"headSlot": s.headSlot(),
 		"headRoot": fmt.Sprintf("%#x", s.headRoot()),
 		"syncSlot": syncSlot,
-	}).Info("Gwat sync: head sync start")
+	}).Info("Gwat sync: sync start")
 
 	for syncSlot <= s.HeadSlot() {
 
-		log.WithError(err).WithFields(logrus.Fields{
+		log.WithFields(logrus.Fields{
 			"syncSlot": syncSlot,
 			"headSlot": s.headSlot(),
 		}).Info("Gwat sync: 000")
@@ -233,7 +237,7 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 		}
 
 		// sync next epoch
-		syncEpoch := slots.ToEpoch(syncSlot)
+		syncEpoch = slots.ToEpoch(syncSlot)
 		syncSlot, err = slots.EpochStart(syncEpoch + 1)
 		if err != nil {
 			log.WithError(err).WithFields(logrus.Fields{
@@ -253,12 +257,18 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 		}).Info("Gwat sync: main success")
 	}
 
-	// todo
-	//if s.headSlot() < s.CurrentSlot() {
-	//	return nil
-	//}
-
+	//if is parallel gwat sync running
 	if !s.IsSynced() {
+		// set synced epoch to coordinated state to avoid duplication of finalization for next call.
+		gwatCheckpoint = s.GetCachedGwatCoordinatedState()
+		if gwatCheckpoint == nil {
+			return errNoCoordState
+		}
+		if syncEpoch == 0 {
+			return nil
+		}
+		gwatCheckpoint.Epoch = uint64(syncEpoch)
+		s.CacheGwatCoordinatedState(gwatCheckpoint)
 		return nil
 	}
 

@@ -2,7 +2,6 @@ package blockchain
 
 import (
 	"context"
-
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed"
@@ -125,6 +124,8 @@ func (s *Service) ReceiveBlockBatch(ctx context.Context, blocks []block.SignedBe
 		log.Fatalf("Could not verify weak subjectivity checkpoint: %v", err)
 	}
 
+	// run parallel gwat sync
+	go s.initParallelGwatSync(ctx)
 	return nil
 }
 

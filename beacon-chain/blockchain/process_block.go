@@ -587,9 +587,6 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 		}).Error("Block batch handling error")
 		return nil, nil, err
 	}
-
-	s.initParallelGwatSync()
-
 	return fCheckpoints, jCheckpoints, nil
 }
 
