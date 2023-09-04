@@ -222,9 +222,10 @@ func (s *Service) subscribeWithBase(topic string, validator wrappedVal, handle s
 				return
 			}
 
-			//if msg.ReceivedFrom == s.cfg.p2p.PeerID() {
-			//	continue
-			//}
+			// TODO remove second condition in if when saving prevote by node to itselfs pool logic is added
+			if msg.ReceivedFrom == s.cfg.p2p.PeerID() && !strings.Contains(*msg.Topic, p2p.GossipPrevoteMessage) {
+				continue
+			}
 
 			go pipeline(msg)
 		}

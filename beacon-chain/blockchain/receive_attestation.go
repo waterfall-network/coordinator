@@ -155,7 +155,7 @@ func (s *Service) spawnProcessAttestationsRoutine(stateFeed *event.Feed) {
 				s.cfg.ExitPool.OnSlot(s.headState(s.ctx))
 
 				// TODO consider moving of prevote cleanup to other place
-				err := s.cfg.PrevotePool.PurgeOutdatedPrevote(s.GenesisTime())
+				err := s.cfg.PrevotePool.PurgeOutdatedPrevote(s.CurrentSlot())
 				if err != nil {
 					log.WithError(err).Warnf("could not clear prevote pool from outdated data on slot %v", s.CurrentSlot())
 				}

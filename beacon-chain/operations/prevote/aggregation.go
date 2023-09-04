@@ -2,7 +2,6 @@ package prevote
 
 import (
 	"context"
-	"time"
 
 	"github.com/patrickmn/go-cache"
 	"github.com/pkg/errors"
@@ -10,7 +9,6 @@ import (
 	"github.com/prysmaticlabs/go-bitfield"
 	"github.com/sirupsen/logrus"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	"go.opencensus.io/trace"
 )
 
@@ -120,7 +118,7 @@ func (c *PrevoteCache) GetPrevoteBySlot(ctx context.Context, slot types.Slot) []
 	return pv
 }
 
-func (c *PrevoteCache) PurgeOutdatedPrevote(t time.Time) error {
+func (c *PrevoteCache) PurgeOutdatedPrevote(curSlot types.Slot) error {
 	c.prevoteCacheLock.RLock()
 	defer c.prevoteCacheLock.RUnlock()
 
@@ -129,7 +127,7 @@ func (c *PrevoteCache) PurgeOutdatedPrevote(t time.Time) error {
 	}).Info("Prevote: PurgeOutdatedPrevote start")
 
 	for k, v := range c.prevoteCache {
-		if k < slots.CurrentSlot(uint64(t.Unix())) {
+		if k < curSlot {
 			for _, p := range v {
 				err := c.insertSeenBit(p)
 				if err != nil {
