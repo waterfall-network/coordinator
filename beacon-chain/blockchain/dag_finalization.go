@@ -26,10 +26,10 @@ import (
 // then start gwat synchronization
 // and then run finalization processing
 func (s *Service) initGwatSync() {
-	s.isGwatSyncing = true
+	s.isGwatSyncing.Set()
 	ticker := time.NewTicker(time.Duration(params.BeaconConfig().GwatSyncIntervalMs) * time.Millisecond)
 	defer func() {
-		s.isGwatSyncing = false
+		s.isGwatSyncing.UnSet()
 		ticker.Stop()
 	}()
 	log.WithField("interval", fmt.Sprintf("%d", params.BeaconConfig().GwatSyncIntervalMs)).Info("Gwat sync: start ...")
@@ -82,28 +82,36 @@ func (s *Service) initGwatSync() {
 // initParallelGwatSync launches parallel gwat synchronization process
 // which doesn't depend on if coordinator is synced or not
 func (s *Service) initParallelGwatSync(ctx context.Context) {
-	log.Info("Parallel Gwat sync: start ...")
+	if !s.isGwatSyncing.IsSet() {
+		s.isGwatSyncing.Set()
+		defer func() {
+			s.isGwatSyncing.UnSet()
+		}()
 
-	var err error
+		log.Info("Parallel Gwat sync: start ...")
 
-	// 1. Check and init coordinated state
-	gwatCheckpoint := s.GetCachedGwatCoordinatedState()
-	if gwatCheckpoint == nil {
-		err = s.initCoordinatedState(ctx)
+		var err error
+
+		// 1. Check and init coordinated state
+		if s.GetCachedGwatCoordinatedState() == nil {
+			err = s.initCoordinatedState(ctx)
+			if err != nil {
+				log.WithError(err).Warning("Parallel Gwat sync: attempt to get gwat coordinated state failed ...")
+				return
+			}
+			log.Info("Parallel Gwat sync: coordinated state initialization successful")
+		}
+		// 2. sync gwat to current finalized checkpoint
+		err = s.runGwatSynchronization(ctx)
 		if err != nil {
-			log.WithError(err).Warning("Parallel Gwat sync: attempt to get gwat coordinated state failed ...")
+			log.WithError(err).Warning("Parallel Gwat sync: attempt failed ...")
+			s.ResetCachedGwatCoordinatedState()
 			return
 		}
-		log.Info("Parallel Gwat sync: coordinated state initialization successful")
+		log.Info("Parallel Gwat sync: success")
+	} else {
+		log.Info("Parallel Gwat sync is already in progress, skip this call")
 	}
-	// 2. sync gwat to current finalized checkpoint
-	err = s.runGwatSynchronization(ctx)
-	if err != nil {
-		log.WithError(err).Warning("Parallel Gwat sync: attempt failed ...")
-		s.ResetCachedGwatCoordinatedState()
-		return
-	}
-	log.Info("Parallel Gwat sync: success")
 }
 
 // runGwatSynchronization procedure of gwat synchronization.
