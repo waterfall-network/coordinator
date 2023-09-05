@@ -13,7 +13,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/genesis"
 	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
 	v2 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v2"
-	v3 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v3"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
@@ -65,7 +64,6 @@ func (s *Store) State(ctx context.Context, blockRoot [32]byte) (state.BeaconStat
 	if err != nil {
 		return nil, err
 	}
-
 	// set complete spineData
 	err = st.SetSpineData(&ethpb.SpineData{
 		Spines:       spines,
@@ -124,9 +122,34 @@ func (s *Store) GenesisState(ctx context.Context) (state.BeaconState, error) {
 			return valErr
 		}
 
-		var crtErr error
 		st, err = s.unmarshalState(ctx, enc, valEntries)
-		return crtErr
+
+		// load spines
+		spines, err := s.ReadSpines(ctx, bytesutil.ToBytes32(st.SpineData().Spines))
+		if err != nil {
+			return err
+		}
+		prefix, err := s.ReadSpines(ctx, bytesutil.ToBytes32(st.SpineData().Prefix))
+		if err != nil {
+			return err
+		}
+		finalization, err := s.ReadSpines(ctx, bytesutil.ToBytes32(st.SpineData().Finalization))
+		if err != nil {
+			return err
+		}
+		cpFinalized, err := s.ReadSpines(ctx, bytesutil.ToBytes32(st.SpineData().CpFinalized))
+		if err != nil {
+			return err
+		}
+		// set complete spineData
+		err = st.SetSpineData(&ethpb.SpineData{
+			Spines:       spines,
+			Prefix:       prefix,
+			Finalization: finalization,
+			CpFinalized:  cpFinalized,
+			ParentSpines: st.SpineData().ParentSpines,
+		})
+		return err
 	})
 	if err != nil {
 		return nil, err
@@ -522,20 +545,6 @@ func (s *Store) unmarshalState(_ context.Context, enc []byte, validatorEntries [
 	}
 
 	switch {
-	case hasBellatrixKey(enc):
-		// Marshal state bytes to altair beacon state.
-		protoState := &ethpb.BeaconStateBellatrix{}
-		if err := protoState.UnmarshalSSZ(enc[len(bellatrixKey):]); err != nil {
-			return nil, errors.Wrap(err, "failed to unmarshal encoding for altair")
-		}
-		ok, err := s.isStateValidatorMigrationOver()
-		if err != nil {
-			return nil, err
-		}
-		if ok {
-			protoState.Validators = validatorEntries
-		}
-		return v3.InitializeFromProtoUnsafe(protoState)
 	case hasAltairKey(enc):
 		// Marshal state bytes to altair beacon state.
 		protoState := &ethpb.BeaconStateAltair{}

@@ -9,10 +9,3 @@ func hasAltairKey(enc []byte) bool {
 	}
 	return bytes.Equal(enc[:len(altairKey)], altairKey)
 }
-
-func hasBellatrixKey(enc []byte) bool {
-	if len(bellatrixKey) >= len(enc) {
-		return false
-	}
-	return bytes.Equal(enc[:len(bellatrixKey)], bellatrixKey)
-}
