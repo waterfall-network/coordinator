@@ -10,7 +10,6 @@ import (
 	types "github.com/prysmaticlabs/eth2-types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
 )
 
 func TestStore_Backup(t *testing.T) {
@@ -18,7 +17,7 @@ func TestStore_Backup(t *testing.T) {
 	require.NoError(t, err, "Failed to instantiate DB")
 	ctx := context.Background()
 
-	head := util.NewBeaconBlock()
+	head := NewBeaconBlock()
 	head.Block.Slot = 5000
 
 	wsb, err := wrapper.WrappedSignedBeaconBlock(head)
@@ -26,7 +25,7 @@ func TestStore_Backup(t *testing.T) {
 	require.NoError(t, db.SaveBlock(ctx, wsb))
 	root, err := head.Block.HashTreeRoot()
 	require.NoError(t, err)
-	st, err := util.NewBeaconState()
+	st, err := NewBeaconState()
 	require.NoError(t, err)
 	require.NoError(t, db.SaveState(ctx, st, root))
 	require.NoError(t, db.SaveHeadBlockRoot(ctx, root))
@@ -61,14 +60,14 @@ func TestStore_BackupMultipleBuckets(t *testing.T) {
 	startSlot := types.Slot(5000)
 
 	for i := startSlot; i < 5200; i++ {
-		head := util.NewBeaconBlock()
+		head := NewBeaconBlock()
 		head.Block.Slot = i
 		wsb, err := wrapper.WrappedSignedBeaconBlock(head)
 		require.NoError(t, err)
 		require.NoError(t, db.SaveBlock(ctx, wsb))
 		root, err := head.Block.HashTreeRoot()
 		require.NoError(t, err)
-		st, err := util.NewBeaconState()
+		st, err := NewBeaconState()
 		require.NoError(t, st.SetSlot(i))
 		require.NoError(t, err)
 		require.NoError(t, db.SaveState(ctx, st, root))
@@ -95,7 +94,7 @@ func TestStore_BackupMultipleBuckets(t *testing.T) {
 		require.NoError(t, backedDB.Close(), "Failed to close database")
 	})
 	for i := startSlot; i < 5200; i++ {
-		head := util.NewBeaconBlock()
+		head := NewBeaconBlock()
 		head.Block.Slot = i
 		root, err := head.Block.HashTreeRoot()
 		require.NoError(t, err)
