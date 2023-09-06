@@ -10,7 +10,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -22,7 +21,7 @@ func TestStore_JustifiedCheckpoint_CanSaveRetrieve(t *testing.T) {
 		Epoch: 10,
 		Root:  root[:],
 	}
-	st, err := util.NewBeaconState()
+	st, err := NewBeaconState()
 	require.NoError(t, err)
 	require.NoError(t, st.SetSlot(1))
 	require.NoError(t, db.SaveState(ctx, st, root))
@@ -40,7 +39,7 @@ func TestStore_FinalizedCheckpoint_CanSaveRetrieve(t *testing.T) {
 	genesis := bytesutil.ToBytes32([]byte{'G', 'E', 'N', 'E', 'S', 'I', 'S'})
 	require.NoError(t, db.SaveGenesisBlockRoot(ctx, genesis))
 
-	blk := util.NewBeaconBlock()
+	blk := NewBeaconBlock()
 	blk.Block.ParentRoot = genesis[:]
 	blk.Block.Slot = 40
 
@@ -56,7 +55,7 @@ func TestStore_FinalizedCheckpoint_CanSaveRetrieve(t *testing.T) {
 	wsb, err := wrapper.WrappedSignedBeaconBlock(blk)
 	require.NoError(t, err)
 	require.NoError(t, db.SaveBlock(ctx, wsb))
-	st, err := util.NewBeaconState()
+	st, err := NewBeaconState()
 	require.NoError(t, err)
 	require.NoError(t, st.SetSlot(1))
 	// a state is required to save checkpoint
