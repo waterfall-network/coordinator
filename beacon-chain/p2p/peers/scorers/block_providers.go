@@ -9,7 +9,6 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers/peerdata"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/beacon-chain/flags"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/rand"
 	prysmTime "gitlab.waterfall.network/waterfall/protocol/coordinator/time"
 )
@@ -291,9 +290,7 @@ func (s *BlockProviderScorer) mapScoresAndPeers(
 func (s *BlockProviderScorer) FormatScorePretty(pid peer.ID) string {
 	s.store.RLock()
 	defer s.store.RUnlock()
-	if !features.Get().EnablePeerScorer {
-		return "disabled"
-	}
+
 	score := s.score(pid)
 	return fmt.Sprintf("[%0.1f%%, raw: %0.2f,  blocks: %d/%d]",
 		(score/s.MaxScore())*100, score, s.processedBlocks(pid), s.config.ProcessedBlocksCap)

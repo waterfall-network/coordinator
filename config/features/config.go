@@ -42,7 +42,6 @@ type Flags struct {
 	RemoteSlasherProtection             bool // RemoteSlasherProtection utilizes a beacon node with --slasher mode for validator slashing protection.
 	WriteSSZStateTransitions            bool // WriteSSZStateTransitions to tmp directory.
 	SkipBLSVerify                       bool // Skips BLS verification across the runtime.
-	EnablePeerScorer                    bool // EnablePeerScorer enables experimental peer scoring in p2p.
 	EnableLargerGossipHistory           bool // EnableLargerGossipHistory increases the gossip history we store in our caches.
 	WriteWalletPasswordOnWebOnboarding  bool // WriteWalletPasswordOnWebOnboarding writes the password to disk after Prysm web signup.
 	DisableAttestingHistoryDBCache      bool // DisableAttestingHistoryDBCache for the validator client increases disk reads/writes.
@@ -155,10 +154,6 @@ func ConfigureBeaconChain(ctx *cli.Context) {
 	if ctx.IsSet(disableGRPCConnectionLogging.Name) {
 		logDisabled(disableGRPCConnectionLogging)
 		cfg.DisableGRPCConnectionLogs = true
-	}
-	if ctx.Bool(enablePeerScorer.Name) {
-		logEnabled(enablePeerScorer)
-		cfg.EnablePeerScorer = true
 	}
 	if ctx.Bool(checkPtInfoCache.Name) {
 		log.Warn("Advance check point info cache is no longer supported and will soon be deleted")

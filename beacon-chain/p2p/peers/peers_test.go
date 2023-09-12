@@ -6,17 +6,11 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/beacon-chain/flags"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 )
 
 func TestMain(m *testing.M) {
 	logrus.SetLevel(logrus.DebugLevel)
 	logrus.SetOutput(ioutil.Discard)
-
-	resetCfg := features.InitWithReset(&features.Flags{
-		EnablePeerScorer: true,
-	})
-	defer resetCfg()
 
 	resetFlags := flags.Get()
 	flags.Init(&flags.GlobalFlags{

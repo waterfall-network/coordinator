@@ -20,7 +20,6 @@ import (
 	p2pTypes "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/types"
 	beaconsync "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/sync"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/beacon-chain/flags"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/container/slice"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
@@ -54,11 +53,6 @@ type peerData struct {
 func TestMain(m *testing.M) {
 	logrus.SetLevel(logrus.DebugLevel)
 	logrus.SetOutput(ioutil.Discard)
-
-	resetCfg := features.InitWithReset(&features.Flags{
-		EnablePeerScorer: true,
-	})
-	defer resetCfg()
 
 	resetFlags := flags.Get()
 	flags.Init(&flags.GlobalFlags{
