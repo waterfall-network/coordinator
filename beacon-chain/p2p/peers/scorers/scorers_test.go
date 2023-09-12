@@ -1,6 +1,7 @@
 package scorers_test
 
 import (
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"io/ioutil"
 	"math"
 	"testing"
@@ -13,6 +14,11 @@ import (
 func TestMain(m *testing.M) {
 	logrus.SetLevel(logrus.DebugLevel)
 	logrus.SetOutput(ioutil.Discard)
+
+	resetCfg := features.InitWithReset(&features.Flags{
+		EnablePeerScorer: true,
+	})
+	defer resetCfg()
 
 	resetFlags := flags.Get()
 	flags.Init(&flags.GlobalFlags{

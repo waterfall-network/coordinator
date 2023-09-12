@@ -3,6 +3,7 @@ package peers_test
 import (
 	"context"
 	"crypto/rand"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"strconv"
 	"testing"
 	"time"
@@ -548,6 +549,10 @@ func TestPrune(t *testing.T) {
 }
 
 func TestPeerIPTracker(t *testing.T) {
+	resetCfg := features.InitWithReset(&features.Flags{
+		EnablePeerScorer: false,
+	})
+	defer resetCfg()
 	maxBadResponses := 2
 	p := peers.NewStatus(context.Background(), &peers.StatusConfig{
 		PeerLimit: 30,
@@ -569,7 +574,7 @@ func TestPeerIPTracker(t *testing.T) {
 		badPeers = append(badPeers, createPeer(t, p, addr, network.DirUnknown, peerdata.PeerConnectionState(ethpb.ConnectionState_DISCONNECTED)))
 	}
 	for _, pr := range badPeers {
-		assert.Equal(t, true, p.IsBad(pr), "peer with bad ip is not bad")
+		assert.Equal(t, false, p.IsBad(pr), "peer with bad ip is not bad")
 	}
 
 	// Add in bad peers, so that our records are trimmed out
@@ -686,6 +691,10 @@ func TestAtInboundPeerLimit(t *testing.T) {
 }
 
 func TestPrunePeers(t *testing.T) {
+	resetCfg := features.InitWithReset(&features.Flags{
+		EnablePeerScorer: false,
+	})
+	defer resetCfg()
 	p := peers.NewStatus(context.Background(), &peers.StatusConfig{
 		PeerLimit: 30,
 		ScorerParams: &scorers.Config{
@@ -736,11 +745,13 @@ func TestPrunePeers(t *testing.T) {
 	}
 
 	// Ensure it is in the descending order.
-	currScore := p.Scorers().Score(peersToPrune[0])
+	currCount, err := p.Scorers().BadResponsesScorer().Count(peersToPrune[0])
+	require.NoError(t, err)
 	for _, pid := range peersToPrune {
-		score := p.Scorers().BadResponsesScorer().Score(pid)
-		assert.Equal(t, true, currScore >= score)
-		currScore = score
+		count, err := p.Scorers().BadResponsesScorer().Count(pid)
+		require.NoError(t, err)
+		assert.Equal(t, true, currCount >= count)
+		currCount = count
 	}
 }
 

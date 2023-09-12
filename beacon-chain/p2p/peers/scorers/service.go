@@ -2,6 +2,7 @@ package scorers
 
 import (
 	"context"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"math"
 	"time"
 
@@ -148,8 +149,10 @@ func (s *Service) IsBadPeerNoLock(pid peer.ID) bool {
 		}).Debug("Disconnect: peer is bad")
 		return true
 	}
-	if s.scorers.gossipScorer.isBadPeer(pid) {
-		return true
+	if features.Get().EnablePeerScorer {
+		if s.scorers.gossipScorer.isBadPeer(pid) {
+			return true
+		}
 	}
 	return false
 }

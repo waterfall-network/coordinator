@@ -2,6 +2,7 @@ package scorers
 
 import (
 	"fmt"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"math"
 	"sort"
 	"time"
@@ -290,7 +291,9 @@ func (s *BlockProviderScorer) mapScoresAndPeers(
 func (s *BlockProviderScorer) FormatScorePretty(pid peer.ID) string {
 	s.store.RLock()
 	defer s.store.RUnlock()
-
+	if !features.Get().EnablePeerScorer {
+		return "disabled"
+	}
 	score := s.score(pid)
 	return fmt.Sprintf("[%0.1f%%, raw: %0.2f,  blocks: %d/%d]",
 		(score/s.MaxScore())*100, score, s.processedBlocks(pid), s.config.ProcessedBlocksCap)
