@@ -3153,8 +3153,8 @@ def prysm_deps():
     go_repository(
         name = "com_github_prysmaticlabs_gohashtree",
         importpath = "github.com/prysmaticlabs/gohashtree",
-        sum = "h1:920mmUNkTZ9zIWXjArGv6iU45b85gjUvq/4L1ZHWVYQ=",
-        version = "v0.0.1-alpha.0.20220303211031-f753e083138c",
+        sum = "h1:1EVinCWdb3Lorq7xn8DYQHf48nCcdAM3Vb18KsFlRWY=",
+        version = "v0.0.3-alpha",
     )
 
     go_repository(
