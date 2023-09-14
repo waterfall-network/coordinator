@@ -2,13 +2,13 @@ package scorers
 
 import (
 	"context"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"math"
 	"time"
 
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers/peerdata"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 )
 
 var _ Scorer = (*Service)(nil)
@@ -151,6 +151,11 @@ func (s *Service) IsBadPeerNoLock(pid peer.ID) bool {
 	}
 	if features.Get().EnablePeerScorer {
 		if s.scorers.gossipScorer.isBadPeer(pid) {
+			logrus.WithFields(logrus.Fields{
+				"func":  "IsBadPeerNoLock",
+				"peer":  pid,
+				"score": "gossipScorer",
+			}).Debug("Disconnect: peer is bad")
 			return true
 		}
 	}

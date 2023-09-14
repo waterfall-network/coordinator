@@ -2,7 +2,6 @@ package scorers
 
 import (
 	"fmt"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"math"
 	"sort"
 	"time"
@@ -10,6 +9,7 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers/peerdata"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/beacon-chain/flags"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/rand"
 	prysmTime "gitlab.waterfall.network/waterfall/protocol/coordinator/time"
 )

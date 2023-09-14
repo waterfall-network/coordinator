@@ -1,12 +1,12 @@
 package peers_test
 
 import (
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"io/ioutil"
 	"testing"
 
 	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/beacon-chain/flags"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 )
 
 func TestMain(m *testing.M) {

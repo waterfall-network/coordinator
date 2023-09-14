@@ -3,7 +3,6 @@ package initialsync
 import (
 	"context"
 	"fmt"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"io/ioutil"
 	"sync"
 	"testing"
@@ -21,6 +20,7 @@ import (
 	p2pTypes "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/types"
 	beaconsync "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/sync"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/beacon-chain/flags"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/container/slice"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"

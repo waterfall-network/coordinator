@@ -3,7 +3,6 @@ package peers_test
 import (
 	"context"
 	"crypto/rand"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"strconv"
 	"testing"
 	"time"
@@ -16,6 +15,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers/peerdata"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers/scorers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
 	pb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"

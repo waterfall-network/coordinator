@@ -1,7 +1,6 @@
 package scorers_test
 
 import (
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"io/ioutil"
 	"math"
 	"testing"
@@ -9,6 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers/scorers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/beacon-chain/flags"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 )
 
 func TestMain(m *testing.M) {

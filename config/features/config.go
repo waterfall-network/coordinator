@@ -41,8 +41,8 @@ type Flags struct {
 	// Feature related flags.
 	RemoteSlasherProtection             bool // RemoteSlasherProtection utilizes a beacon node with --slasher mode for validator slashing protection.
 	WriteSSZStateTransitions            bool // WriteSSZStateTransitions to tmp directory.
-	EnablePeerScorer                    bool // EnablePeerScorer enables experimental peer scoring in p2p.
 	SkipBLSVerify                       bool // Skips BLS verification across the runtime.
+	EnablePeerScorer                    bool // EnablePeerScorer enables experimental peer scoring in p2p.
 	EnableLargerGossipHistory           bool // EnableLargerGossipHistory increases the gossip history we store in our caches.
 	WriteWalletPasswordOnWebOnboarding  bool // WriteWalletPasswordOnWebOnboarding writes the password to disk after Prysm web signup.
 	DisableAttestingHistoryDBCache      bool // DisableAttestingHistoryDBCache for the validator client increases disk reads/writes.
@@ -156,17 +156,17 @@ func ConfigureBeaconChain(ctx *cli.Context) {
 		logDisabled(disableGRPCConnectionLogging)
 		cfg.DisableGRPCConnectionLogs = true
 	}
+	cfg.EnablePeerScorer = true
+	if ctx.Bool(disablePeerScorer.Name) {
+		logDisabled(disablePeerScorer)
+		cfg.EnablePeerScorer = false
+	}
 	if ctx.Bool(checkPtInfoCache.Name) {
 		log.Warn("Advance check point info cache is no longer supported and will soon be deleted")
 	}
 	if ctx.Bool(enableLargerGossipHistory.Name) {
 		logEnabled(enableLargerGossipHistory)
 		cfg.EnableLargerGossipHistory = true
-	}
-	cfg.EnablePeerScorer = true
-	if ctx.Bool(disablePeerScorer.Name) {
-		logDisabled(disablePeerScorer)
-		cfg.EnablePeerScorer = false
 	}
 	if ctx.Bool(disableBroadcastSlashingFlag.Name) {
 		logDisabled(disableBroadcastSlashingFlag)

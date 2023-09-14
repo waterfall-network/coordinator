@@ -24,7 +24,6 @@ package peers
 
 import (
 	"context"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"math"
 	"sort"
 	"time"
@@ -37,6 +36,7 @@ import (
 	"github.com/prysmaticlabs/go-bitfield"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers/peerdata"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers/scorers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/rand"
 	pmath "gitlab.waterfall.network/waterfall/protocol/coordinator/math"
@@ -544,7 +544,6 @@ func (p *Status) Prune() {
 		p.deprecatedPrune()
 		return
 	}
-
 	// Exit early if there is nothing to prune.
 	if len(p.store.Peers()) <= p.store.Config().MaxPeers {
 		return
