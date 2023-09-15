@@ -125,6 +125,8 @@ func (s *Service) ReceiveBlockBatch(ctx context.Context, blocks []block.SignedBe
 		log.Fatalf("Could not verify weak subjectivity checkpoint: %v", err)
 	}
 
+	// run parallel gwat sync
+	go s.initParallelGwatSync(ctx)
 	return nil
 }
 

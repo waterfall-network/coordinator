@@ -53,6 +53,7 @@ type Flags struct {
 	EnableGetBlockOptimizations         bool // EnableGetBlockOptimizations optimizes some elements of the GetBlock() function.
 	EnableBatchVerification             bool // EnableBatchVerification enables batch signature verification on gossip messages.
 	EnableBalanceTrieComputation        bool // EnableBalanceTrieComputation enables our beacon state to use balance tries for hash tree root operations.
+	EnablePassSlotInfoToGwat            bool // EnablePassSlotInfoToGwat enables passing slot info to GWAT during sync process
 	// Logging related toggles.
 	DisableGRPCConnectionLogs bool // Disables logging when a new grpc client has connected.
 
@@ -219,6 +220,11 @@ func ConfigureBeaconChain(ctx *cli.Context) {
 	if ctx.Bool(disableBalanceTrieComputation.Name) {
 		logDisabled(disableBalanceTrieComputation)
 		cfg.EnableBalanceTrieComputation = false
+	}
+	cfg.EnablePassSlotInfoToGwat = false
+	if ctx.Bool(enablePassSlotInfoToGwat.Name) {
+		logEnabled(enablePassSlotInfoToGwat)
+		cfg.EnablePassSlotInfoToGwat = true
 	}
 	cfg.EnableNativeState = false
 	if ctx.Bool(enableNativeState.Name) {

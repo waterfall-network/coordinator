@@ -151,3 +151,11 @@ func (s *Service) GetCachedGwatCoordinatedState() *gwatTypes.Checkpoint {
 
 	return s.spineData.coordState
 }
+
+// ResetCachedGwatCoordinatedState set the cached gwat coordinated state to nil.
+func (s *Service) ResetCachedGwatCoordinatedState() {
+	s.spineData.RLock()
+	defer s.spineData.RUnlock()
+
+	s.spineData.coordState = nil
+}
