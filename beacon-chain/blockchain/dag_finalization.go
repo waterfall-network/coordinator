@@ -128,6 +128,14 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 
 		var syncEpoch types.Epoch
 		syncSlot, err := slots.EpochStart(cpEpoch + 1)
+		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"syncSlot": syncSlot,
+				"headSlot": s.headSlot(),
+				"headRoot": fmt.Sprintf("%#x", s.headRoot()),
+			}).Error("Gwat sync: calc epoch start failed")
+			return err
+		}
 
 		log.WithFields(logrus.Fields{
 			"headSlot": s.headSlot(),
@@ -140,17 +148,9 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 			log.WithFields(logrus.Fields{
 				"syncSlot": syncSlot,
 				"headSlot": s.headSlot(),
-			}).Info("Gwat sync: 000")
+			}).Debug("Gwat sync: 000")
 
 			syncRoot := params.BeaconConfig().ZeroHash
-			if err != nil {
-				log.WithError(err).WithFields(logrus.Fields{
-					"syncSlot": syncSlot,
-					"headSlot": s.headSlot(),
-					"headRoot": fmt.Sprintf("%#x", s.headRoot()),
-				}).Error("Gwat sync: failed 0")
-				return err
-			}
 			_, roots, err := s.cfg.BeaconDB.BlockRootsBySlot(ctx, syncSlot)
 			if err != nil {
 				log.WithError(err).WithFields(logrus.Fields{
@@ -184,12 +184,12 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 				}
 			}
 
-			log.WithError(err).WithFields(logrus.Fields{
+			log.WithFields(logrus.Fields{
 				"syncSlot": syncSlot,
 				"headSlot": s.headSlot(),
 				"syncRoot": fmt.Sprintf("%#x", syncRoot),
 				"headRoot": fmt.Sprintf("%#x", s.headRoot()),
-			}).Info("Gwat sync: 111")
+			}).Debug("Gwat sync: 111")
 
 			if syncRoot == params.BeaconConfig().ZeroHash {
 				syncSlot++
@@ -216,7 +216,7 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 				"root":  fmt.Sprintf("%#x", syncRoot),
 			}).Info("Sync state: sync")
 
-			log.WithError(err).WithFields(logrus.Fields{
+			log.WithFields(logrus.Fields{
 				"syncSlot":     syncSlot,
 				"headSlot":     s.headSlot(),
 				"syncRoot":     fmt.Sprintf("%#x", syncRoot),
@@ -224,7 +224,7 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 				"Prefix":       gwatCommon.HashArrayFromBytes(syncState.SpineData().Prefix),
 				"Finalization": gwatCommon.HashArrayFromBytes(syncState.SpineData().Finalization),
 				"CpFinalized":  gwatCommon.HashArrayFromBytes(syncState.SpineData().CpFinalized),
-			}).Info("Gwat sync: 222")
+			}).Debug("Gwat sync: 222")
 
 			err = s.processDagFinalization(syncState, gwatTypes.MainSync)
 			if err != nil {
