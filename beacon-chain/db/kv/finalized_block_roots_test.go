@@ -13,7 +13,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
 )
 
 var genesisBlockRoot = bytesutil.ToBytes32([]byte{'G', 'E', 'N', 'E', 'S', 'I', 'S'})
@@ -36,7 +35,7 @@ func TestStore_IsFinalizedBlock(t *testing.T) {
 		Root:  root[:],
 	}
 
-	st, err := util.NewBeaconState()
+	st, err := NewBeaconState()
 	require.NoError(t, err)
 	// a state is required to save checkpoint
 	require.NoError(t, db.SaveState(ctx, st, root))
@@ -59,7 +58,7 @@ func TestStore_IsFinalizedBlockGenesis(t *testing.T) {
 	db := setupDB(t)
 	ctx := context.Background()
 
-	blk := util.NewBeaconBlock()
+	blk := NewBeaconBlock()
 	blk.Block.Slot = 0
 	root, err := blk.Block.HashTreeRoot()
 	require.NoError(t, err)
@@ -105,7 +104,7 @@ func TestStore_IsFinalized_ForkEdgeCase(t *testing.T) {
 		Epoch: 1,
 	}
 
-	st, err := util.NewBeaconState()
+	st, err := NewBeaconState()
 	require.NoError(t, err)
 	// A state is required to save checkpoint
 	require.NoError(t, db.SaveState(ctx, st, bytesutil.ToBytes32(checkpoint1.Root)))
@@ -152,7 +151,7 @@ func TestStore_IsFinalizedChildBlock(t *testing.T) {
 			Root:  root[:],
 		}
 
-		st, err := util.NewBeaconState()
+		st, err := NewBeaconState()
 		require.NoError(t, err)
 		// a state is required to save checkpoint
 		require.NoError(t, db.SaveState(ctx, st, root))
@@ -205,7 +204,7 @@ func makeBlocks(t *testing.T, i, n uint64, previousRoot [32]byte) []block.Signed
 	for j := i; j < n+i; j++ {
 		parentRoot := make([]byte, fieldparams.RootLength)
 		copy(parentRoot, previousRoot[:])
-		blocks[j-i] = util.NewBeaconBlock()
+		blocks[j-i] = NewBeaconBlock()
 		blocks[j-i].Block.Slot = types.Slot(j + 1)
 		blocks[j-i].Block.ParentRoot = parentRoot
 		var err error
@@ -223,7 +222,7 @@ func makeBlocksAltair(t *testing.T, startIdx, num uint64, previousRoot [32]byte)
 	for j := startIdx; j < num+startIdx; j++ {
 		parentRoot := make([]byte, fieldparams.RootLength)
 		copy(parentRoot, previousRoot[:])
-		blocks[j-startIdx] = util.NewBeaconBlockAltair()
+		blocks[j-startIdx] = NewBeaconBlockAltair()
 		blocks[j-startIdx].Block.Slot = types.Slot(j + 1)
 		blocks[j-startIdx].Block.ParentRoot = parentRoot
 		var err error

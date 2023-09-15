@@ -13,6 +13,7 @@ import (
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/async/abool"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/async/event"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain/store"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache"
@@ -77,7 +78,7 @@ type Service struct {
 	store                 *store.Store
 	fnIsSync              func() bool
 	newHeadCh             chan *head
-	isGwatSyncing         bool
+	isGwatSyncing         *abool.AtomicBool
 }
 
 // config options for the service.
@@ -118,6 +119,7 @@ func NewService(ctx context.Context, opts ...Option) (*Service, error) {
 		store:                &store.Store{},
 		spineData:            spineData{},
 		newHeadCh:            make(chan *head),
+		isGwatSyncing:        abool.New(),
 	}
 	for _, opt := range opts {
 		if err := opt(srv); err != nil {
@@ -197,7 +199,7 @@ func (s *Service) IsSynced() bool {
 }
 
 func (s *Service) IsGwatSynchronizing() bool {
-	return s.isGwatSyncing
+	return s.isGwatSyncing.IsSet()
 }
 
 func (s *Service) StartFromSavedState(saved state.BeaconState) error {

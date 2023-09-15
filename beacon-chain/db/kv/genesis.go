@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
 	dbIface "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/iface"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
@@ -80,6 +81,10 @@ func (s *Store) LoadGenesis(ctx context.Context, sb []byte) error {
 		if a == b {
 			return nil
 		}
+		log.WithError(dbIface.ErrExistingGenesisState).WithFields(logrus.Fields{
+			"exist": fmt.Sprintf("%#x", a),
+			"calc":  fmt.Sprintf("%#x", b),
+		}).Error("Load genesis failed")
 		return dbIface.ErrExistingGenesisState
 	}
 
