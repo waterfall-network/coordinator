@@ -14,7 +14,7 @@ var log = logrus.WithField("prefix", "db")
 var Commands = &cli.Command{
 	Name:     "db",
 	Category: "db",
-	Usage:    "defines commands for interacting with the Waterfall Beacon Node database",
+	Usage:    "defines commands for interacting with the Waterfall Coordinate Node database",
 	Subcommands: []*cli.Command{
 		{
 			Name:        "restore",

@@ -322,11 +322,11 @@ func TestHandlePanic_OK(t *testing.T) {
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
 	)
-	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
+	require.NoError(t, err, "unable to setup web3 shard1 chain service")
 	// nil eth1DataFetcher would panic if cached value not used
 	web3Service.eth1DataFetcher = nil
 	web3Service.processBlockHeader(nil)
-	require.LogsContain(t, hook, "Panicked when handling data from Waterfall Chain!")
+	require.LogsContain(t, hook, "Panicked when handling data from shard1 Chain!")
 }
 
 func TestLogTillGenesis_OK(t *testing.T) {

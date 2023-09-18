@@ -164,7 +164,7 @@ var (
 	// ShowDepositDataFlag for accounts.
 	ShowDepositDataFlag = &cli.BoolFlag{
 		Name:  "show-deposit-data",
-		Usage: "Display raw Waterfall tx deposit data for validator accounts",
+		Usage: "Display raw shard1 tx deposit data for coordinator accounts",
 		Value: false,
 	}
 	// ShowPrivateKeysFlag for accounts.
@@ -327,20 +327,20 @@ var (
 	// FeeRecipientConfigFileFlag defines the path or URL to a file with proposer config.
 	FeeRecipientConfigFileFlag = &cli.StringFlag{
 		Name:  "fee-recipient-config-file",
-		Usage: "Set path to a JSON file containing validator mappings to Waterfall addresses for receiving transaction fees when proposing blocks (i.e. --fee-recipient-config-file=/path/to/proposer.json). File format found in docs",
+		Usage: "Set path to a JSON file containing coordinator mappings to Waterfall addresses for receiving transaction fees when proposing blocks (i.e. --fee-recipient-config-file=/path/to/proposer.json). File format found in docs",
 		Value: "",
 	}
 	// FeeRecipientConfigURLFlag defines the path or URL to a file with proposer config.
 	FeeRecipientConfigURLFlag = &cli.StringFlag{
 		Name:  "fee-recipient-config-url",
-		Usage: "Set URL to a REST endpoint containing validator mappings to Waterfall addresses for receiving transaction fees when proposing blocks (i.e. --fee-recipient-config-url=https://example.com/api/getConfig). File format found in docs",
+		Usage: "Set URL to a REST endpoint containing coordinator mappings to Waterfall addresses for receiving transaction fees when proposing blocks (i.e. --fee-recipient-config-url=https://example.com/api/getConfig). File format found in docs",
 		Value: "",
 	}
 
 	// SuggestedFeeRecipientFlag defines the address of the fee recipient.
 	SuggestedFeeRecipientFlag = &cli.StringFlag{
 		Name:  "suggested-fee-recipient",
-		Usage: "Sets ALL validators' mapping to a suggested an Waterfall address to receive gas fees when proposing a block. Overrides the --fee-recipient-config-file flag if set",
+		Usage: "Sets ALL coordinators' mapping to a suggested an Waterfall address to receive gas fees when proposing a block. Overrides the --fee-recipient-config-file flag if set",
 		Value: field_params.EthBurnAddressHex,
 	}
 )

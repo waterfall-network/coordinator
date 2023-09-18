@@ -118,7 +118,7 @@ func init() {
 func main() {
 	app := cli.App{}
 	app.Name = "validator"
-	app.Usage = `launches an Waterfall validator client that interacts with a beacon chain, starts proposer and attester services, p2p connections, and more`
+	app.Usage = `launches an Waterfall coordinator client that interacts with a beacon chain, starts proposer and attester services, p2p connections, and more`
 	app.Version = version.Version()
 	app.Action = startNode
 	app.Commands = []*cli.Command{
