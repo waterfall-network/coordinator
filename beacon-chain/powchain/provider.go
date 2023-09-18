@@ -21,7 +21,7 @@ func HttpEndpoint(eth1Provider string) network.Endpoint {
 	endpoint.Url = strings.TrimSpace(authValues[0])
 	if len(authValues) > 2 {
 		log.Errorf(
-			"ETH1 endpoint string can contain one comma for specifying the authorization header to access the provider."+
+			"Waterfall endpoint string can contain one comma for specifying the authorization header to access the provider."+
 				" String contains too many commas: %d. Skipping authorization.", len(authValues)-1)
 	} else if len(authValues) == 2 {
 		switch network.Method(strings.TrimSpace(authValues[1])) {

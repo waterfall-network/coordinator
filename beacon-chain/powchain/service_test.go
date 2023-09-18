@@ -326,7 +326,7 @@ func TestHandlePanic_OK(t *testing.T) {
 	// nil eth1DataFetcher would panic if cached value not used
 	web3Service.eth1DataFetcher = nil
 	web3Service.processBlockHeader(nil)
-	require.LogsContain(t, hook, "Panicked when handling data from ETH 1.0 Chain!")
+	require.LogsContain(t, hook, "Panicked when handling data from Waterfall Chain!")
 }
 
 func TestLogTillGenesis_OK(t *testing.T) {

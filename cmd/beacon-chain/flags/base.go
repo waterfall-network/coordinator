@@ -108,7 +108,7 @@ var (
 	// ContractDeploymentBlock is the block in which the eth1 deposit contract was deployed.
 	ContractDeploymentBlock = &cli.IntFlag{
 		Name:  "contract-deployment-block",
-		Usage: "The eth1 block in which the deposit contract was deployed.",
+		Usage: "The Waterfall block in which the deposit contract was deployed.",
 		Value: 0,
 	}
 	// SetGCPercent is the percentage of current live allocations at which the garbage collector is to run.
@@ -187,7 +187,7 @@ var (
 	}
 	// Eth1HeaderReqLimit defines a flag to set the maximum number of headers that a deposit log query can fetch. If none is set, 1000 will be the limit.
 	Eth1HeaderReqLimit = &cli.Uint64Flag{
-		Name:  "eth1-header-req-limit",
+		Name:  "waterfall-header-req-limit",
 		Usage: "Sets the maximum number of headers that a deposit log query can fetch.",
 		Value: uint64(1000),
 	}

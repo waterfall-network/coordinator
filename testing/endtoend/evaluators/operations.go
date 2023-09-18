@@ -123,7 +123,7 @@ func processesDepositsInBlocks(conns ...*grpc.ClientConn) error {
 			return errors.New("block neither phase0 nor altair")
 		}
 		fmt.Printf(
-			"Slot: %d with %d deposits, Eth1 block %#x with %d deposits\n",
+			"Slot: %d with %d deposits, Waterfall block %#x with %d deposits\n",
 			slot,
 			len(deposits),
 			eth1Data.BlockHash, eth1Data.DepositCount,
@@ -271,7 +271,7 @@ func depositedValidatorsAreActive(conns ...*grpc.ClientConn) error {
 	}
 	if belowBalanceCount > 0 {
 		return fmt.Errorf(
-			"%d validators did not have a proper balance, expected %d validators to have 32 ETH",
+			"%d validators did not have a proper balance, expected %d validators to have 3200 WATER",
 			belowBalanceCount,
 			params.BeaconConfig().MinGenesisActiveValidatorCount,
 		)
@@ -376,7 +376,7 @@ func validatorsVoteWithTheMajority(conns ...*grpc.ClientConn) error {
 		}
 
 		if !bytes.Equal(vote, expectedEth1DataVote) {
-			return fmt.Errorf("incorrect eth1data vote for slot %d; expected: %#x vs voted: %#x",
+			return fmt.Errorf("incorrect waterfall data vote for slot %d; expected: %#x vs voted: %#x",
 				slot, expectedEth1DataVote, vote)
 		}
 	}
