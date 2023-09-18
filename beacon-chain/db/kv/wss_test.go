@@ -8,7 +8,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
 )
 
 func TestSaveOrigin(t *testing.T) {
@@ -32,11 +31,11 @@ func TestSaveOrigin(t *testing.T) {
 	// so the genesis root key is never written to the db.
 	require.NoError(t, db.EnsureEmbeddedGenesis(ctx))
 
-	cst, err := util.NewBeaconState()
+	cst, err := NewBeaconState()
 	require.NoError(t, err)
 	csb, err := cst.MarshalSSZ()
 	require.NoError(t, err)
-	cb := util.NewBeaconBlock()
+	cb := NewBeaconBlock()
 	scb, err := wrapper.WrappedSignedBeaconBlock(cb)
 	require.NoError(t, err)
 	cbb, err := scb.MarshalSSZ()

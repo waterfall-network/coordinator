@@ -65,7 +65,7 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	github.com/status-im/keycard-go v0.0.0-20200402102358-957c09536969
 	github.com/stretchr/testify v1.8.4
-	github.com/supranational/blst v0.3.5
+	github.com/supranational/blst v0.3.11
 	github.com/thomaso-mirodin/intmath v0.0.0-20160323211736-5dc6d854e46e
 	github.com/trailofbits/go-mutexasserts v0.0.0-20230328101604-8cdbc5f3d279
 	github.com/tyler-smith/go-bip39 v1.1.0
@@ -271,7 +271,7 @@ require (
 	github.com/go-playground/validator/v10 v10.10.0
 	github.com/peterh/liner v1.2.0 // indirect
 	github.com/prometheus/tsdb v0.10.0 // indirect
-	github.com/prysmaticlabs/gohashtree v0.0.1-alpha.0.20220303211031-f753e083138c
+	github.com/prysmaticlabs/gohashtree v0.0.3-alpha
 	golang.org/x/mod v0.12.0
 	golang.org/x/sys v0.10.0 // indirect
 	google.golang.org/api v0.34.0 // indirect

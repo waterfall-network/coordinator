@@ -44,6 +44,10 @@ var (
 		Name:  "enable-peer-scorer",
 		Usage: "Enable experimental P2P peer scorer",
 	}
+	enablePassSlotInfoToGwat = &cli.BoolFlag{
+		Name:  "enable-pass-slot-info-to-gwat",
+		Usage: "Enables passing slot info to GWAT during sync process",
+	}
 	checkPtInfoCache = &cli.BoolFlag{
 		Name:  "use-check-point-cache",
 		Usage: "Enables check point info caching",
@@ -195,6 +199,7 @@ var BeaconChainFlags = append(deprecatedFlags, []cli.Flag{
 	enableNativeState,
 	enableVecHTR,
 	enableForkChoiceDoublyLinkedTree,
+	enablePassSlotInfoToGwat,
 }...)
 
 // E2EBeaconChainFlags contains a list of the beacon chain feature flags to be tested in E2E.

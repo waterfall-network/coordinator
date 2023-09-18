@@ -3153,8 +3153,8 @@ def prysm_deps():
     go_repository(
         name = "com_github_prysmaticlabs_gohashtree",
         importpath = "github.com/prysmaticlabs/gohashtree",
-        sum = "h1:920mmUNkTZ9zIWXjArGv6iU45b85gjUvq/4L1ZHWVYQ=",
-        version = "v0.0.1-alpha.0.20220303211031-f753e083138c",
+        sum = "h1:1EVinCWdb3Lorq7xn8DYQHf48nCcdAM3Vb18KsFlRWY=",
+        version = "v0.0.3-alpha",
     )
 
     go_repository(
@@ -3702,11 +3702,11 @@ def prysm_deps():
     http_archive(
         name = "com_github_supranational_blst",
         urls = [
-            "https://github.com/supranational/blst/archive/0eab29bb46449d45be14df98ce38cbb8f9a05918.tar.gz",
+            "https://github.com/supranational/blst/archive/3dd0f804b1819e5d03fb22ca2e6fac105932043a.tar.gz",
         ],
-        strip_prefix = "blst-0eab29bb46449d45be14df98ce38cbb8f9a05918",
+        strip_prefix = "blst-3dd0f804b1819e5d03fb22ca2e6fac105932043a",
         build_file = "//third_party:blst/blst.BUILD",
-        sha256 = "29e818ea9636a604d86f53a2bab7ad5cba20ff043606edb81f3a384ff58393cd",
+        sha256 = "132124c074e59ead77e1828cc54b587a182ea67b781b72198e802af4696d78fe",
     )
     go_repository(
         name = "com_github_syndtr_goleveldb",

@@ -700,11 +700,6 @@ func unmarshalBlock(_ context.Context, enc []byte) (block.SignedBeaconBlock, err
 		if err := rawBlock.UnmarshalSSZ(enc[len(altairKey):]); err != nil {
 			return nil, err
 		}
-	case hasBellatrixKey(enc):
-		rawBlock = &ethpb.SignedBeaconBlockBellatrix{}
-		if err := rawBlock.UnmarshalSSZ(enc[len(bellatrixKey):]); err != nil {
-			return nil, err
-		}
 	default:
 		// Marshal block bytes to phase 0 beacon block.
 		rawBlock = &ethpb.SignedBeaconBlock{}

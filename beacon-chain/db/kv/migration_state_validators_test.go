@@ -13,7 +13,6 @@ import (
 	v1alpha1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
 	"go.etcd.io/bbolt"
 )
 
@@ -76,7 +75,7 @@ func Test_migrateStateValidators(t *testing.T) {
 
 				// create a new state and save it
 				blockRoot := [32]byte{'B'}
-				st, err := util.NewBeaconState()
+				st, err := NewBeaconState()
 				newValidators := validators(10)
 				assert.NoError(t, err)
 				assert.NoError(t, st.SetSlot(101))
@@ -187,7 +186,7 @@ func Test_migrateStateValidators(t *testing.T) {
 			// add a state with the given validators
 			vals := validators(10)
 			blockRoot := [32]byte{'A'}
-			st, err := util.NewBeaconState()
+			st, err := NewBeaconState()
 			assert.NoError(t, err)
 			assert.NoError(t, st.SetSlot(100))
 			assert.NoError(t, st.SetValidators(vals))
@@ -290,7 +289,7 @@ func Test_migrateAltairStateValidators(t *testing.T) {
 			// add a state with the given validators
 			vals := validators(10)
 			blockRoot := [32]byte{'A'}
-			st, _ := util.DeterministicGenesisStateAltair(t, 20)
+			st, _ := DeterministicGenesisStateAltair(t, 20)
 			assert.NoError(t, st.SetSlot(100))
 			assert.NoError(t, st.SetValidators(vals))
 			assert.NoError(t, dbStore.SaveState(context.Background(), st, blockRoot))
