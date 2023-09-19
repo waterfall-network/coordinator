@@ -127,5 +127,5 @@ func TestPowchainPreregistration_EmptyWeb3Provider(t *testing.T) {
 	set.Var(&fallback, flags.FallbackWeb3ProviderFlag.Name, "")
 	ctx := cli.NewContext(&app, set, nil)
 	parsePowchainEndpoints(ctx)
-	assert.LogsContain(t, hook, "No ETH1 node specified to run with the beacon node")
+	assert.LogsContain(t, hook, "No shard1 node specified to run with the beacon node")
 }

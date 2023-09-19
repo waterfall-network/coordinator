@@ -97,7 +97,7 @@ func (s *Service) BlockHashByHeight(ctx context.Context, height *big.Int) (commo
 			"header.Nr":     header.Nr(),
 			"header.Height": header.Height,
 			"blockHash":     fmt.Sprintf("%#x", s.latestEth1Data.BlockHash),
-		}).Error("Latest eth1 block is not finalized")
+		}).Error("Latest shard1 block is not finalized")
 		return [32]byte{}, errors.Wrap(err, fmt.Sprintf("could not query header with height %d", height.Uint64()))
 	}
 	if err := s.headerCache.AddHeader(header); err != nil {
