@@ -122,19 +122,19 @@ func NewPowchainCollector(ctx context.Context) (*PowchainCollector, error) {
 	c := &PowchainCollector{
 		SyncEth1FallbackConfigured: prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, "", "sync_eth1_fallback_configured"),
-			"Boolean recording whether a fallback eth1 endpoint was configured: 0=false, 1=true.",
+			"Boolean recording whether a fallback shard1 endpoint was configured: 0=false, 1=true.",
 			nil,
 			nil,
 		),
 		SyncEth1FallbackConnected: prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, "", "sync_eth1_fallback_connected"),
-			"Boolean indicating whether a fallback eth1 endpoint is currently connected: 0=false, 1=true.",
+			"Boolean indicating whether a fallback shard1 endpoint is currently connected: 0=false, 1=true.",
 			nil,
 			nil,
 		),
 		SyncEth1Connected: prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, "", "sync_eth1_connected"),
-			"Boolean indicating whether an eth1 endpoint is currently connected: 0=false, 1=true.",
+			"Boolean indicating whether an shard1 endpoint is currently connected: 0=false, 1=true.",
 			nil,
 			nil,
 		),

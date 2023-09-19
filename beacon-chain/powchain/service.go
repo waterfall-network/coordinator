@@ -222,7 +222,7 @@ func NewService(ctx context.Context, opts ...Option) (*Service, error) {
 
 	eth1Data, err := s.cfg.beaconDB.PowchainData(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to retrieve eth1 data")
+		return nil, errors.Wrap(err, "unable to retrieve shard1 data")
 	}
 
 	if err := s.initializeEth1Data(ctx, eth1Data); err != nil {
@@ -246,7 +246,7 @@ func (s *Service) Start() {
 			log.Fatal(err)
 		}
 		if genState == nil || genState.IsNil() {
-			log.Fatal("cannot create genesis state: no eth1 http endpoint defined")
+			log.Fatal("cannot create genesis state: no shard1 http endpoint defined")
 		}
 	}
 
@@ -452,7 +452,7 @@ func (s *Service) processBlockHeader(header *gwatTypes.Header) {
 			"header.Nr":     header.Nr(),
 			"header.Height": header.Height,
 			"blockHash":     hexutil.Encode(s.latestEth1Data.BlockHash),
-		}).Warn("Latest eth1 chain event: skipping not finalized block")
+		}).Warn("Latest shard1 chain event: skipping not finalized block")
 		return
 	}
 	blockNumberGauge.Set(float64(header.Nr()))
@@ -467,7 +467,7 @@ func (s *Service) processBlockHeader(header *gwatTypes.Header) {
 		"height":      header.Height,
 		"blockNumber": s.latestEth1Data.BlockHeight,
 		"blockHash":   hexutil.Encode(s.latestEth1Data.BlockHash),
-	}).Info("Latest eth1 chain event")
+	}).Info("Latest shard1 chain event")
 }
 
 // batchRequestHeaders requests the block range specified in the arguments. Instead of requesting
@@ -520,7 +520,7 @@ func safelyHandlePanic() {
 	if r := recover(); r != nil {
 		log.WithFields(logrus.Fields{
 			"r": r,
-		}).Error("Panicked when handling data from ETH 1.0 Chain! Recovering...")
+		}).Error("Panicked when handling data from shard1 Chain! Recovering...")
 
 		debug.PrintStack()
 	}
@@ -594,7 +594,7 @@ func (s *Service) initPOWService() {
 					"header.Nr":     header.Nr(),
 					"header.Height": header.Height,
 					"blockHash":     hexutil.Encode(s.latestEth1Data.BlockHash),
-				}).Fatal("Latest eth1 block is not finalized")
+				}).Fatal("Latest shard1 block is not finalized")
 			}
 
 			s.latestEth1Data.BlockHeight = header.Nr()
@@ -647,7 +647,7 @@ func (s *Service) run(done <-chan struct{}) {
 			head, err := s.eth1DataFetcher.HeaderByNumber(s.ctx, nil)
 			if err != nil {
 				s.pollConnectionStatus(s.ctx)
-				log.WithError(err).Error("Could not fetch latest eth1 header")
+				log.WithError(err).Error("Could not fetch latest shard1 header")
 				continue
 			}
 			s.processBlockHeader(head)
@@ -755,7 +755,7 @@ func (s *Service) ensureValidPowchainData(ctx context.Context) error {
 	}
 	eth1Data, err := s.cfg.beaconDB.PowchainData(ctx)
 	if err != nil {
-		return errors.Wrap(err, "unable to retrieve eth1 data")
+		return errors.Wrap(err, "unable to retrieve shard1 data")
 	}
 	if eth1Data == nil || !eth1Data.ChainstartData.Chainstarted || !validateDepositContainers(eth1Data.DepositContainers) {
 		pbState, err := v1.ProtobufBeaconState(s.preGenesisState.InnerStateUnsafe())
