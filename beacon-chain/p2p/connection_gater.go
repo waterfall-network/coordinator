@@ -41,6 +41,11 @@ func (s *Service) InterceptAddrDial(pid peer.ID, m multiaddr.Multiaddr) (allow b
 
 // InterceptAccept checks whether the incidental inbound connection is allowed.
 func (s *Service) InterceptAccept(n network.ConnMultiaddrs) (allow bool) {
+	// Avoid connections until service is initialized
+	if !s.started {
+		log.Debug("p2p service is not initialized yet, skip InterceptAccept call")
+		return false
+	}
 	if !s.validateDial(n.RemoteMultiaddr()) {
 		// Allow other go-routines to run in the event
 		// we receive a large amount of junk connections.
