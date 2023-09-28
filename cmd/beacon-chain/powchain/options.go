@@ -66,14 +66,13 @@ func parseJWTSecretFromFile(c *cli.Context) ([]byte, error) {
 func parsePowchainEndpoints(c *cli.Context) []string {
 	if c.String(flags.HTTPWeb3ProviderFlag.Name) == "" && len(c.StringSlice(flags.FallbackWeb3ProviderFlag.Name)) == 0 {
 		log.Error(
-			"No ETH1 node specified to run with the beacon node. " +
-				"Please consider running your own Ethereum proof-of-work node for better uptime, " +
-				"security, and decentralization of Ethereum. Visit " +
-				"https://docs.prylabs.network/docs/prysm-usage/setup-eth1 for more information",
+			"No shard node specified to run with the beacon node. " +
+				"Please consider running your own Waterfall proof-of-work node for better uptime, " +
+				"security, and decentralization of Waterfall.",
 		)
 		log.Error(
 			"You will need to specify --http-web3provider and/or --fallback-web3provider to attach " +
-				"an eth1 node to the prysm node. Without an eth1 node block proposals for your " +
+				"an shard node to the coordinator node. Without a shard node block proposals for your " +
 				"validator will be affected and the beacon node will not be able to initialize the genesis state",
 		)
 	}

@@ -135,7 +135,7 @@ func init() {
 func main() {
 	app := cli.App{}
 	app.Name = "beacon-chain"
-	app.Usage = "this is a beacon chain implementation for Ethereum"
+	app.Usage = "this is a beacon chain implementation for Waterfall"
 	app.Action = startNode
 	app.Version = version.Version()
 	app.Commands = []*cli.Command{

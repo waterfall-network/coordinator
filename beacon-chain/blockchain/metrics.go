@@ -80,8 +80,8 @@ var (
 		Help: "The total effective balance of validators, in GWei",
 	}, []string{"state"})
 	currentEth1DataDepositCount = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "current_eth1_data_deposit_count",
-		Help: "The current eth1 deposit count in the last processed state eth1data field.",
+		Name: "current_waterfall_data_deposit_count",
+		Help: "The current Waterfall deposit count in the last processed state eth1data field.",
 	})
 	processedDepositsCount = promauto.NewGauge(prometheus.GaugeOpts{
 		Name: "beacon_processed_deposits_total",
