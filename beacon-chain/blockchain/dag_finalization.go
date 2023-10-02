@@ -81,6 +81,10 @@ func (s *Service) initGwatSync() {
 func (s *Service) initParallelGwatSync(ctx context.Context) {
 	log.Info("Parallel Gwat sync: start ...")
 
+	if true {
+		return
+	}
+
 	var err error
 
 	// 1. Check and init coordinated state

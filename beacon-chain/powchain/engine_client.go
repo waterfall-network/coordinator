@@ -63,7 +63,6 @@ type EngineCaller interface {
 	ExecutionDagCoordinatedState(ctx context.Context) (*gwatTypes.FinalizationResult, error)
 	ExecutionDagGetOptimisticSpines(ctx context.Context, fromSpine gwatCommon.Hash) ([]gwatCommon.HashArray, error)
 	ExecutionDagGetCandidates(ctx context.Context, slot types.Slot) (gwatCommon.HashArray, error)
-	ExecutionDagValidateFinalization(ctx context.Context, params gwatCommon.HashArray) (bool, error)
 	GetHeaderByHash(ctx context.Context, hash gwatCommon.Hash) (*gwatTypes.Header, error)
 	GetHeaderByNumber(ctx context.Context, nr *big.Int) (*gwatTypes.Header, error)
 }
