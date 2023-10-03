@@ -62,28 +62,25 @@ func (ad *AttestationsData) Copy() *AttestationsData {
 
 // SpinesData represents data related with spines in Node.
 type SpinesData struct {
-	spines              gwatCommon.HashArray // spines from block.Spines
-	prefix              gwatCommon.HashArray // cache for calculated prefix
-	finalization        gwatCommon.HashArray // finalization sequence block.Finalization
-	cpFinalized         gwatCommon.HashArray
-	isFinalizationValid bool
+	spines       gwatCommon.HashArray // spines from block.Spines
+	prefix       gwatCommon.HashArray // cache for calculated prefix
+	finalization gwatCommon.HashArray // finalization sequence block.Finalization
+	cpFinalized  gwatCommon.HashArray
 }
 
 func (rc *SpinesData) Spines() gwatCommon.HashArray       { return rc.spines.Copy() }
 func (rc *SpinesData) Prefix() gwatCommon.HashArray       { return rc.prefix.Copy() }
 func (rc *SpinesData) Finalization() gwatCommon.HashArray { return rc.finalization.Copy() }
 func (rc *SpinesData) CpFinalized() gwatCommon.HashArray  { return rc.cpFinalized.Copy() }
-func (rc *SpinesData) IsValid() bool                      { return rc.isFinalizationValid }
 
 func (rc *SpinesData) Copy() *SpinesData {
 	if rc == nil {
 		return nil
 	}
 	return &SpinesData{
-		isFinalizationValid: rc.isFinalizationValid,
-		spines:              rc.Spines(),
-		prefix:              rc.Prefix(),
-		finalization:        rc.Finalization(),
-		cpFinalized:         rc.CpFinalized(),
+		spines:       rc.Spines(),
+		prefix:       rc.Prefix(),
+		finalization: rc.Finalization(),
+		cpFinalized:  rc.CpFinalized(),
 	}
 }

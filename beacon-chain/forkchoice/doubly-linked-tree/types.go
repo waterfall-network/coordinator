@@ -17,11 +17,6 @@ type ForkChoice struct {
 	balances  []uint64 // tracks individual validator's last justified balances.
 }
 
-func (f *ForkChoice) SetFinalizationValid(root [32]byte, isValid bool) {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (f *ForkChoice) CollectForkExcludedBlkRoots(leaf common.Hash) common.HashArray {
 	//TODO implement me
 	panic("implement me")
