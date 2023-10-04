@@ -55,7 +55,7 @@ func BlockVotingDataRootWithHasher(hasher ssz.HashFn, blockVoting *ethpb.BlockVo
 		}
 	}
 
-	root, err := ssz.BitwiseMerkleize(hasher, fieldRoots, uint64(len(fieldRoots)), uint64(len(fieldRoots)))
+	root, err := ssz.BitwiseMerkleize(fieldRoots, uint64(len(fieldRoots)), uint64(len(fieldRoots)))
 	if err != nil {
 		return [32]byte{}, err
 	}
@@ -75,7 +75,6 @@ func BlockVotingsRoot(blockVotings []*ethpb.BlockVoting) ([32]byte, error) {
 	}
 
 	blockVotingRootsRoot, err := ssz.BitwiseMerkleize(
-		hasher,
 		BlockVotingRoots,
 		uint64(len(BlockVotingRoots)),
 		fieldparams.BlockVotingLength,

@@ -37,7 +37,7 @@ func PendingAttRootWithHasher(hasher ssz.HashFn, att *ethpb.PendingAttestation) 
 
 	fieldRoots = [][32]byte{aggregationRoot, attDataRoot, inclusionRoot, proposerRoot}
 
-	return ssz.BitwiseMerkleize(hasher, fieldRoots, uint64(len(fieldRoots)), uint64(len(fieldRoots)))
+	return ssz.BitwiseMerkleize(fieldRoots, uint64(len(fieldRoots)), uint64(len(fieldRoots)))
 }
 
 func attDataRootWithHasher(hasher ssz.HashFn, data *ethpb.AttestationData) ([32]byte, error) {
@@ -58,18 +58,18 @@ func attDataRootWithHasher(hasher ssz.HashFn, data *ethpb.AttestationData) ([32]
 		fieldRoots[2] = bytesutil.ToBytes32(data.BeaconBlockRoot)
 
 		// Source
-		sourceRoot, err := ssz.CheckpointRoot(hasher, data.Source)
+		sourceRoot, err := ssz.CheckpointRoot(data.Source)
 		if err != nil {
 			return [32]byte{}, errors.Wrap(err, "could not compute source checkpoint merkleization")
 		}
 		fieldRoots[3] = sourceRoot
 
 		// Target
-		fieldRoots[4], err = ssz.CheckpointRoot(hasher, data.Target)
+		fieldRoots[4], err = ssz.CheckpointRoot(data.Target)
 		if err != nil {
 			return [32]byte{}, errors.Wrap(err, "could not compute target checkpoint merkleization")
 		}
 	}
 
-	return ssz.BitwiseMerkleize(hasher, fieldRoots, uint64(len(fieldRoots)), uint64(len(fieldRoots)))
+	return ssz.BitwiseMerkleize(fieldRoots, uint64(len(fieldRoots)), uint64(len(fieldRoots)))
 }

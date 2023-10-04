@@ -16,7 +16,6 @@ import (
 	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/container/slice"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
@@ -316,7 +315,6 @@ func (b *BeaconState) IsNil() bool {
 }
 
 func (b *BeaconState) rootSelector(field types.FieldIndex) ([32]byte, error) {
-	hasher := hash.CustomSHA256Hasher()
 	switch field {
 	case genesisTime:
 		return ssz.Uint64Root(b.genesisTime), nil
@@ -357,9 +355,9 @@ func (b *BeaconState) rootSelector(field types.FieldIndex) ([32]byte, error) {
 		}
 		return ssz.ByteArrayRootWithLimit(hRoots, fieldparams.HistoricalRootsLength)
 	case eth1Data:
-		return stateutil.Eth1Root(hasher, b.eth1Data)
+		return stateutil.Eth1Root(b.eth1Data)
 	case spineData:
-		return stateutil.SpineDataRoot(hasher, b.spineData)
+		return stateutil.SpineDataRoot(b.spineData)
 	case eth1DataVotes:
 		if b.rebuildTrie[field] {
 			err := b.resetFieldTrie(
@@ -433,11 +431,11 @@ func (b *BeaconState) rootSelector(field types.FieldIndex) ([32]byte, error) {
 	case justificationBits:
 		return bytesutil.ToBytes32(b.justificationBits), nil
 	case previousJustifiedCheckpoint:
-		return ssz.CheckpointRoot(hasher, b.previousJustifiedCheckpoint)
+		return ssz.CheckpointRoot(b.previousJustifiedCheckpoint)
 	case currentJustifiedCheckpoint:
-		return ssz.CheckpointRoot(hasher, b.currentJustifiedCheckpoint)
+		return ssz.CheckpointRoot(b.currentJustifiedCheckpoint)
 	case finalizedCheckpoint:
-		return ssz.CheckpointRoot(hasher, b.finalizedCheckpoint)
+		return ssz.CheckpointRoot(b.finalizedCheckpoint)
 	case inactivityScores:
 		return stateutil.Uint64ListRootWithRegistryLimit(b.inactivityScores)
 	case currentSyncCommittee:

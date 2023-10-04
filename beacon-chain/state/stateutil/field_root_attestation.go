@@ -35,7 +35,6 @@ func epochAttestationsRoot(atts []*ethpb.PendingAttestation) ([32]byte, error) {
 	}
 
 	attsRootsRoot, err := ssz.BitwiseMerkleize(
-		hasher,
 		roots,
 		uint64(len(roots)),
 		fieldparams.CurrentEpochAttestationsLength,
