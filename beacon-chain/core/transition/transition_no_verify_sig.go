@@ -45,7 +45,7 @@ import (
 //	      assert block.state_root == hash_tree_root(state)
 func ExecuteStateTransitionNoVerifyAnySig(
 	ctx context.Context,
-	bSate state.BeaconState,
+	bState state.BeaconState,
 	signed block.SignedBeaconBlock,
 ) (*bls.SignatureBatch, state.BeaconState, error) {
 	if ctx.Err() != nil {
@@ -60,21 +60,21 @@ func ExecuteStateTransitionNoVerifyAnySig(
 	var err error
 
 	interop.WriteBlockToDisk(signed, false /* Has the block failed */)
-	interop.WriteStateToDisk(bSate)
+	interop.WriteStateToDisk(bState)
 
-	bSate, err = ProcessSlotsUsingNextSlotCache(ctx, bSate, signed.Block().ParentRoot(), signed.Block().Slot())
+	bState, err = ProcessSlotsUsingNextSlotCache(ctx, bState, signed.Block().ParentRoot(), signed.Block().Slot())
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "could not process slots")
 	}
 
 	// Execute per block transition.
-	set, bSate, err := ProcessBlockNoVerifyAnySig(ctx, bSate, signed)
+	set, bState, err := ProcessBlockNoVerifyAnySig(ctx, bState, signed)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "could not process block")
 	}
 
 	// State root validation.
-	postStateRoot, err := bSate.HashTreeRoot(ctx)
+	postStateRoot, err := bState.HashTreeRoot(ctx)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -83,7 +83,7 @@ func ExecuteStateTransitionNoVerifyAnySig(
 			postStateRoot[:], signed.Block().StateRoot(), signed.Block().Slot())
 	}
 
-	return set, bSate, nil
+	return set, bState, nil
 }
 
 // CalculateStateRoot defines the procedure for a state transition function.
@@ -110,7 +110,7 @@ func ExecuteStateTransitionNoVerifyAnySig(
 //	      assert block.state_root == hash_tree_root(state)
 func CalculateStateRoot(
 	ctx context.Context,
-	state state.BeaconState,
+	bState state.BeaconState,
 	signed block.SignedBeaconBlock,
 ) ([32]byte, error) {
 	ctx, span := trace.StartSpan(ctx, "core.state.CalculateStateRoot")
@@ -119,7 +119,7 @@ func CalculateStateRoot(
 		tracing.AnnotateError(span, ctx.Err())
 		return [32]byte{}, ctx.Err()
 	}
-	if state == nil || state.IsNil() {
+	if bState == nil || bState.IsNil() {
 		return [32]byte{}, errors.New("nil state")
 	}
 	if signed == nil || signed.IsNil() || signed.Block().IsNil() {
@@ -127,22 +127,22 @@ func CalculateStateRoot(
 	}
 
 	// Copy state to avoid mutating the state reference.
-	state = state.Copy()
+	bState = bState.Copy()
 
 	// Execute per slots transition.
 	var err error
-	state, err = ProcessSlotsUsingNextSlotCache(ctx, state, signed.Block().ParentRoot(), signed.Block().Slot())
+	bState, err = ProcessSlotsUsingNextSlotCache(ctx, bState, signed.Block().ParentRoot(), signed.Block().Slot())
 	if err != nil {
 		return [32]byte{}, errors.Wrap(err, "could not process slots")
 	}
 
 	// Execute per block transition.
-	state, err = ProcessBlockForStateRoot(ctx, state, signed)
+	bState, err = ProcessBlockForStateRoot(ctx, bState, signed)
 	if err != nil {
 		return [32]byte{}, errors.Wrap(err, "could not process block")
 	}
 
-	return state.HashTreeRoot(ctx)
+	return bState.HashTreeRoot(ctx)
 }
 
 // ProcessBlockNoVerifyAnySig creates a new, modified beacon state by applying block operation
