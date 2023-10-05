@@ -14,7 +14,7 @@ import (
 const bytesPerChunk = 32
 
 // BitlistRoot returns the mix in length of a bitwise Merkleized bitfield.
-func BitlistRoot(hasher HashFn, bfield bitfield.Bitfield, maxCapacity uint64) ([32]byte, error) {
+func BitlistRoot(bfield bitfield.Bitfield, maxCapacity uint64) ([32]byte, error) {
 	limit := (maxCapacity + 255) / 256
 	if bfield == nil || bfield.Len() == 0 {
 		length := make([]byte, 32)

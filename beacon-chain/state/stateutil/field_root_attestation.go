@@ -7,7 +7,6 @@ import (
 
 	"github.com/pkg/errors"
 	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
@@ -23,11 +22,9 @@ func epochAttestationsRoot(atts []*ethpb.PendingAttestation) ([32]byte, error) {
 	if uint64(len(atts)) > max {
 		return [32]byte{}, fmt.Errorf("epoch attestation exceeds max length %d", max)
 	}
-
-	hasher := hash.CustomSHA256Hasher()
 	roots := make([][32]byte, len(atts))
 	for i := 0; i < len(atts); i++ {
-		pendingRoot, err := pendingAttestationRoot(hasher, atts[i])
+		pendingRoot, err := pendingAttestationRoot(atts[i])
 		if err != nil {
 			return [32]byte{}, errors.Wrap(err, "could not attestation merkleization")
 		}
@@ -53,11 +50,11 @@ func epochAttestationsRoot(atts []*ethpb.PendingAttestation) ([32]byte, error) {
 	return res, nil
 }
 
-func pendingAttestationRoot(hasher ssz.HashFn, att *ethpb.PendingAttestation) ([32]byte, error) {
+func pendingAttestationRoot(att *ethpb.PendingAttestation) ([32]byte, error) {
 	if att == nil {
 		return [32]byte{}, errors.New("nil pending attestation")
 	}
-	return PendingAttRootWithHasher(hasher, att)
+	return PendingAttRootWithHasher(att)
 }
 
 // dedup removes duplicate attestations (ones with the same bits set on).

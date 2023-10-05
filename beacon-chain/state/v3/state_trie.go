@@ -341,7 +341,7 @@ func (b *BeaconState) rootSelector(field types.FieldIndex) ([32]byte, error) {
 				return [32]byte{}, err
 			}
 			delete(b.rebuildTrie, field)
-			return b.stateFieldLeaves[field].TrieRoot()
+			//return b.stateFieldLeaves[field].TrieRoot()
 		}
 		return b.recomputeFieldTrie(field, b.state.BlockVoting)
 	case validators:
@@ -401,7 +401,8 @@ func (b *BeaconState) rootSelector(field types.FieldIndex) ([32]byte, error) {
 	case nextSyncCommittee:
 		return stateutil.SyncCommitteeRoot(b.state.NextSyncCommittee)
 	case latestExecutionPayloadHeader:
-		return b.state.LatestExecutionPayloadHeader.HashTreeRoot()
+		//return b.state.LatestExecutionPayloadHeader.HashTreeRoot()
+		return [32]byte{}, nil
 	}
 	return [32]byte{}, errors.New("invalid field index provided")
 }

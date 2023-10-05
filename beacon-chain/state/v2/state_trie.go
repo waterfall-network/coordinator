@@ -345,7 +345,7 @@ func (b *BeaconState) rootSelector(ctx context.Context, field types.FieldIndex) 
 				return [32]byte{}, err
 			}
 			delete(b.rebuildTrie, field)
-			return b.stateFieldLeaves[field].TrieRoot()
+			//return b.stateFieldLeaves[field].TrieRoot()
 		}
 		return b.recomputeFieldTrie(field, b.state.BlockVoting)
 	case validators:

@@ -12,16 +12,16 @@ import (
 
 // PendingAttRootWithHasher describes a method from which the hash tree root
 // of a pending attestation is returned.
-func PendingAttRootWithHasher(hasher ssz.HashFn, att *ethpb.PendingAttestation) ([32]byte, error) {
+func PendingAttRootWithHasher(att *ethpb.PendingAttestation) ([32]byte, error) {
 	var fieldRoots [][32]byte
 
 	// Bitfield.
-	aggregationRoot, err := ssz.BitlistRoot(hasher, att.AggregationBits, params.BeaconConfig().MaxValidatorsPerCommittee)
+	aggregationRoot, err := ssz.BitlistRoot(att.AggregationBits, params.BeaconConfig().MaxValidatorsPerCommittee)
 	if err != nil {
 		return [32]byte{}, err
 	}
 	// Attestation data.
-	attDataRoot, err := attDataRootWithHasher(hasher, att.Data)
+	attDataRoot, err := attDataRootWithHasher(att.Data)
 	if err != nil {
 		return [32]byte{}, err
 	}
@@ -40,7 +40,7 @@ func PendingAttRootWithHasher(hasher ssz.HashFn, att *ethpb.PendingAttestation) 
 	return ssz.BitwiseMerkleize(fieldRoots, uint64(len(fieldRoots)), uint64(len(fieldRoots)))
 }
 
-func attDataRootWithHasher(hasher ssz.HashFn, data *ethpb.AttestationData) ([32]byte, error) {
+func attDataRootWithHasher(data *ethpb.AttestationData) ([32]byte, error) {
 	fieldRoots := make([][32]byte, 5)
 
 	if data != nil {

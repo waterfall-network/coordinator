@@ -539,11 +539,12 @@ func ComputeFieldRootsWithHasherBellatrix(ctx context.Context, state *ethpb.Beac
 	fieldRoots[25] = nextSyncCommitteeRoot[:]
 
 	// Execution payload root.
-	executionPayloadRoot, err := state.LatestExecutionPayloadHeader.HashTreeRoot()
-	if err != nil {
-		return nil, err
-	}
-	fieldRoots[26] = executionPayloadRoot[:]
+	//executionPayloadRoot, err := state.LatestExecutionPayloadHeader.HashTreeRoot()
+	//if err != nil {
+	//	return nil, err
+	//}
+	//fieldRoots[26] = executionPayloadRoot[:]
+	fieldRoots[26] = bytesutil.PadTo([]byte{0}, 32)
 
 	return fieldRoots, nil
 }

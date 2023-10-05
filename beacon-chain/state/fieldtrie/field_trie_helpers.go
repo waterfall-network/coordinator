@@ -9,7 +9,6 @@ import (
 	customtypes "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/state-native/custom-types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stateutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/types"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz"
 	pmath "gitlab.waterfall.network/waterfall/protocol/coordinator/math"
@@ -276,9 +275,8 @@ func handleBlockVotingSlice(val []*ethpb.BlockVoting, indices []uint64, convertA
 		length = len(val)
 	}
 	roots := make([][32]byte, 0, length)
-	hasher := hash.CustomSHA256Hasher()
 	rootCreator := func(input *ethpb.BlockVoting) error {
-		newRoot, err := stateutil.BlockVotingDataRootWithHasher(hasher, input)
+		newRoot, err := stateutil.BlockVotingDataRootWithHasher(input)
 		if err != nil {
 			return err
 		}
@@ -315,9 +313,8 @@ func handlePendingAttestationSlice(val []*ethpb.PendingAttestation, indices []ui
 		length = len(val)
 	}
 	roots := make([][32]byte, 0, length)
-	hasher := hash.CustomSHA256Hasher()
 	rootCreator := func(input *ethpb.PendingAttestation) error {
-		newRoot, err := stateutil.PendingAttRootWithHasher(hasher, input)
+		newRoot, err := stateutil.PendingAttRootWithHasher(input)
 		if err != nil {
 			return err
 		}

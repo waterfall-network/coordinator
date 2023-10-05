@@ -76,7 +76,7 @@ func BytesRoot(bts []byte) ([32]byte, error) {
 	}
 	btsChunksRoot, err := ssz.BitwiseMerkleize(btsChunks, uint64(len(btsChunks)), uint64(len(btsChunks)))
 	if err != nil {
-		return [32]byte{}, errors.Wrap(err, "could not compute bytes root ops merkleization")
+		return [32]byte{}, errors.Wrap(err, "could not compute bytes root merkleization")
 	}
 	btsLengthRoot := make([]byte, 32)
 	binary.LittleEndian.PutUint64(btsLengthRoot, uint64(len(bts)))
