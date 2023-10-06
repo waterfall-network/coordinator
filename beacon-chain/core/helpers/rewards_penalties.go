@@ -348,7 +348,7 @@ func LogBalanceChanges(
 		return nil
 	}
 	if rpLogCache == nil {
-		panic("Reward and penalty logging is not initialized")
+		return fmt.Errorf("Reward and penalty logging is not initialized")
 	}
 
 	votesIncludedNum := uint64(0)

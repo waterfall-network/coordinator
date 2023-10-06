@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
@@ -34,14 +33,13 @@ func TestForkRoot(t *testing.T) {
 }
 
 func TestCheckPointRoot(t *testing.T) {
-	testHasher := hash.CustomSHA256Hasher()
 	testCheckpoint := ethpb.Checkpoint{
 		Epoch: 1234567890,
 		Root:  []byte{222},
 	}
 	expected := [32]byte{228, 65, 39, 109, 183, 249, 167, 232, 125, 239, 25, 155, 207, 4, 84, 174, 176, 229, 175, 224, 62, 33, 215, 254, 170, 220, 132, 65, 246, 128, 68, 194}
 
-	result, err := ssz.CheckpointRoot(testHasher, &testCheckpoint)
+	result, err := ssz.CheckpointRoot(&testCheckpoint)
 	require.NoError(t, err)
 	assert.Equal(t, expected, result)
 }
