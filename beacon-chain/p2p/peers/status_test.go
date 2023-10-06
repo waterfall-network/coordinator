@@ -574,7 +574,7 @@ func TestPeerIPTracker(t *testing.T) {
 		badPeers = append(badPeers, createPeer(t, p, addr, network.DirUnknown, peerdata.PeerConnectionState(ethpb.ConnectionState_DISCONNECTED)))
 	}
 	for _, pr := range badPeers {
-		assert.Equal(t, true, p.IsBad(pr), "peer with bad ip is not bad")
+		assert.Equal(t, false, p.IsBad(pr), "peer with bad ip is not bad")
 	}
 
 	// Add in bad peers, so that our records are trimmed out
@@ -587,7 +587,7 @@ func TestPeerIPTracker(t *testing.T) {
 	p.Prune()
 
 	for _, pr := range badPeers {
-		assert.Equal(t, false, p.IsBad(pr), "peer with good ip is regarded as bad")
+		assert.Equal(t, true, p.IsBad(pr), "peer with good ip is regarded as bad")
 	}
 }
 

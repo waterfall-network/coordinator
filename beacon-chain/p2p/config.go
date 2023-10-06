@@ -24,6 +24,7 @@ type Config struct {
 	TCPPort             uint
 	UDPPort             uint
 	MaxPeers            uint
+	FindNodesBucketLen  uint
 	AllowListCIDR       string
 	DenyListCIDR        []string
 	StateNotifier       statefeed.Notifier

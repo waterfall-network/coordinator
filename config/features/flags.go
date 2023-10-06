@@ -56,6 +56,10 @@ var (
 		Name:  "enable-larger-gossip-history",
 		Usage: "Enables the node to store a larger amount of gossip messages in its cache.",
 	}
+	disablePeerScorer = &cli.BoolFlag{
+		Name:  "disable-peer-scorer",
+		Usage: "(Danger): Disables P2P peer scorer. Do NOT use this in production!",
+	}
 	writeWalletPasswordOnWebOnboarding = &cli.BoolFlag{
 		Name: "write-wallet-password-on-web-onboarding",
 		Usage: "(Danger): Writes the wallet password to the wallet directory on completing Prysm web onboarding. " +
@@ -182,6 +186,7 @@ var BeaconChainFlags = append(deprecatedFlags, []cli.Flag{
 	PyrmontTestnet,
 	PraterTestnet,
 	Mainnet,
+	disablePeerScorer,
 	enablePeerScorer,
 	enableLargerGossipHistory,
 	checkPtInfoCache,
