@@ -29,7 +29,6 @@ import (
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
@@ -1593,54 +1592,4 @@ func TestRemoveBlockAttestationsInPool_NonCanonical(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, service.pruneCanonicalAttsFromPool(ctx, r, wsb))
 	require.Equal(t, 1, service.cfg.AttPool.AggregatedAttestationCount())
-}
-
-func Test_getStateVersionAndPayload(t *testing.T) {
-	tests := []struct {
-		name    string
-		st      state.BeaconState
-		version int
-		header  *ethpb.ExecutionPayloadHeader
-	}{
-		{
-			name: "phase 0 state",
-			st: func() state.BeaconState {
-				s, _ := util.DeterministicGenesisState(t, 1)
-				return s
-			}(),
-			version: version.Phase0,
-			header:  (*ethpb.ExecutionPayloadHeader)(nil),
-		},
-		{
-			name: "altair state",
-			st: func() state.BeaconState {
-				s, _ := util.DeterministicGenesisStateAltair(t, 1)
-				return s
-			}(),
-			version: version.Altair,
-			header:  (*ethpb.ExecutionPayloadHeader)(nil),
-		},
-		{
-			name: "bellatrix state",
-			st: func() state.BeaconState {
-				s, _ := util.DeterministicGenesisStateBellatrix(t, 1)
-				require.NoError(t, s.SetLatestExecutionPayloadHeader(&ethpb.ExecutionPayloadHeader{
-					BlockNumber: 1,
-				}))
-				return s
-			}(),
-			version: version.Bellatrix,
-			header: &ethpb.ExecutionPayloadHeader{
-				BlockNumber: 1,
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			ver, header, err := getStateVersionAndPayload(tt.st)
-			require.NoError(t, err)
-			require.Equal(t, tt.version, ver)
-			require.DeepEqual(t, tt.header, header)
-		})
-	}
 }

@@ -209,6 +209,18 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 				}).Error("Gwat sync: failed 3")
 				return err
 			}
+			if err = s.cfg.StateGen.SaveState(ctx, syncRoot, syncState); err != nil {
+				log.WithError(err).WithFields(logrus.Fields{
+					"syncSlot":     syncSlot,
+					"headSlot":     s.headSlot(),
+					"syncRoot":     fmt.Sprintf("%#x", syncRoot),
+					"headRoot":     fmt.Sprintf("%#x", s.headRoot()),
+					"Prefix":       gwatCommon.HashArrayFromBytes(syncState.SpineData().Prefix),
+					"Finalization": gwatCommon.HashArrayFromBytes(syncState.SpineData().Finalization),
+					"CpFinalized":  gwatCommon.HashArrayFromBytes(syncState.SpineData().CpFinalized),
+				}).Error("Gwat sync: save sync state failed")
+				return errors.Wrap(err, "could not save state")
+			}
 
 			log.WithFields(logrus.Fields{
 				"epoch": slots.ToEpoch(syncState.Slot()),
@@ -340,39 +352,40 @@ func (s *Service) runProcessDagFinalize() {
 	}()
 }
 
-// createGwatSyncParam calculate and save gwat sync params
-func (s *Service) saveGwatSyncState(ctx context.Context, root [32]byte) error {
-	ctx, span := trace.StartSpan(ctx, "blockChain.saveGwatSyncState")
-	defer span.End()
-
-	if !s.cfg.BeaconDB.HasState(ctx, root) {
-		syncState, err := s.cfg.StateGen.StateByRoot(ctx, root)
-		if err != nil {
-			log.WithError(err).WithFields(logrus.Fields{
-				"blockRoot": fmt.Sprintf("%#x", root),
-			}).Error("Save gwat sync state: get state failed")
-			return err
-		}
-		if err = s.cfg.BeaconDB.SaveState(ctx, syncState, root); err != nil {
-			log.WithError(err).WithFields(logrus.Fields{
-				"blockRoot": fmt.Sprintf("%#x", root),
-			}).Error("Save gwat sync state: save failed")
-			return err
-		}
-		log.WithFields(logrus.Fields{
-			"slot": syncState.Slot(),
-			"root": fmt.Sprintf("%#x", root),
-		}).Info("Saved state in DB for sync")
-
-		log.WithFields(logrus.Fields{
-			"epoch": slots.ToEpoch(syncState.Slot()),
-			"slot":  fmt.Sprintf("%d", syncState.Slot()),
-			"root":  fmt.Sprintf("%#x", root),
-		}).Info("Sync state: save")
-
-	}
-	return nil
-}
+//// createGwatSyncParam calculate and save gwat sync params
+//// Deprecated
+//func (s *Service) saveGwatSyncState(ctx context.Context, root [32]byte) error {
+//	ctx, span := trace.StartSpan(ctx, "blockChain.saveGwatSyncState")
+//	defer span.End()
+//
+//	if !s.cfg.BeaconDB.HasState(ctx, root) {
+//		syncState, err := s.cfg.StateGen.StateByRoot(ctx, root)
+//		if err != nil {
+//			log.WithError(err).WithFields(logrus.Fields{
+//				"blockRoot": fmt.Sprintf("%#x", root),
+//			}).Error("Save gwat sync state: get state failed")
+//			return err
+//		}
+//		if err = s.cfg.BeaconDB.SaveState(ctx, syncState, root); err != nil {
+//			log.WithError(err).WithFields(logrus.Fields{
+//				"blockRoot": fmt.Sprintf("%#x", root),
+//			}).Error("Save gwat sync state: save failed")
+//			return err
+//		}
+//		log.WithFields(logrus.Fields{
+//			"slot": syncState.Slot(),
+//			"root": fmt.Sprintf("%#x", root),
+//		}).Info("Saved state in DB for sync")
+//
+//		log.WithFields(logrus.Fields{
+//			"epoch": slots.ToEpoch(syncState.Slot()),
+//			"slot":  fmt.Sprintf("%d", syncState.Slot()),
+//			"root":  fmt.Sprintf("%#x", root),
+//		}).Info("Sync state: save")
+//
+//	}
+//	return nil
+//}
 
 // processDagFinalization implements dag finalization procedure.
 func (s *Service) processDagFinalization(headState state.BeaconState, syncMode gwatTypes.SyncMode) error {

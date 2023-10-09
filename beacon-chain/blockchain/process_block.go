@@ -429,35 +429,18 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		}()
 	}
 
-	//create gwat synchronization params
-	if currEpoch := slots.ToEpoch(postState.Slot()); currEpoch > s.store.LastEpoch() {
-		if err = s.saveGwatSyncState(ctx, blockRoot); err != nil {
-			return err
-		}
-		s.store.SetLastEpoch(currEpoch)
-	}
+	// Deprecated
+	////create gwat synchronization params
+	//if currEpoch := slots.ToEpoch(postState.Slot()); currEpoch > s.store.LastEpoch() {
+	//	if err = s.saveGwatSyncState(ctx, blockRoot); err != nil {
+	//		return err
+	//	}
+	//	s.store.SetLastEpoch(currEpoch)
+	//}
 
 	defer reportAttestationInclusion(b)
 
 	return s.handleEpochBoundary(ctx, postState)
-}
-
-func getStateVersionAndPayload(st state.BeaconState) (int, *ethpb.ExecutionPayloadHeader, error) {
-	if st == nil {
-		return 0, nil, errors.New("nil state")
-	}
-	var preStateHeader *ethpb.ExecutionPayloadHeader
-	var err error
-	preStateVersion := st.Version()
-	switch preStateVersion {
-	case version.Phase0, version.Altair:
-	default:
-		preStateHeader, err = st.LatestExecutionPayloadHeader()
-		if err != nil {
-			return 0, nil, err
-		}
-	}
-	return preStateVersion, preStateHeader, nil
 }
 
 func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlock, blockRoots [][32]byte) ([]*ethpb.Checkpoint, []*ethpb.Checkpoint, error) {
@@ -663,13 +646,14 @@ func (s *Service) handleBlockAfterBatchVerify(ctx context.Context, signed block.
 		s.store.SetPrevFinalizedCheckpt(finalized)
 		s.store.SetFinalizedCheckpt(fCheckpoint)
 	}
-	//create gwat synchronization params
-	if currEpoch := slots.ToEpoch(signed.Block().Slot()); currEpoch > s.store.LastEpoch() {
-		if err := s.saveGwatSyncState(ctx, blockRoot); err != nil {
-			return err
-		}
-		s.store.SetLastEpoch(currEpoch)
-	}
+	// Deprecated
+	////create gwat synchronization params
+	//if currEpoch := slots.ToEpoch(signed.Block().Slot()); currEpoch > s.store.LastEpoch() {
+	//	if err := s.saveGwatSyncState(ctx, blockRoot); err != nil {
+	//		return err
+	//	}
+	//	s.store.SetLastEpoch(currEpoch)
+	//}
 	return nil
 }
 
