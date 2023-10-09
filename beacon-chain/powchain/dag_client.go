@@ -27,8 +27,6 @@ const (
 	ExecutionDagCoordinatedStateMethod = "dag_coordinatedState"
 	// ExecutionDagSyncSlotInfoMethod request string for JSON-RPC of dag api.
 	ExecutionDagSyncSlotInfoMethod = "dag_syncSlotInfo"
-	// ExecutionDagValidateFinalizationMethod request string for JSON-RPC of dag api.
-	ExecutionDagValidateFinalizationMethod = "dag_validateFinalization"
 	// ExecutionDagValidateSpinesMethod request string for JSON-RPC of dag api.
 	ExecutionDagValidateSpinesMethod = "dag_validateSpines"
 	// ExecutionDepositCountMethod request string for JSON-RPC of validator api.
@@ -211,33 +209,6 @@ func (s *Service) ExecutionDagValidateSpines(ctx context.Context, params gwatCom
 
 	if err != nil {
 		log.WithError(err).Error("ExecutionDagValidateSpines")
-	}
-	return result, handleDagRPCError(err)
-}
-
-// ExecutionDagValidateFinalization executing validation of given spines sequence of finalization
-// by calling dag_validateSpines via JSON-RPC.
-// Checks existence and order by slot of finalization sequence.
-func (s *Service) ExecutionDagValidateFinalization(ctx context.Context, params gwatCommon.HashArray) (bool, error) {
-	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagValidateFinalization")
-	defer span.End()
-	defer func(start time.Time) {
-		log.WithField("api", ExecutionDagValidateFinalizationMethod).WithField("elapsed", time.Since(start)).Info("Request finish")
-	}(time.Now())
-
-	var result bool
-	if s.rpcClient == nil {
-		return result, fmt.Errorf("Rpc Client not init")
-	}
-	err := s.rpcClient.CallContext(
-		ctx,
-		&result,
-		ExecutionDagValidateFinalizationMethod,
-		params,
-	)
-
-	if err != nil {
-		log.WithError(err).Error("ExecutionDagValidateFinalization")
 	}
 	return result, handleDagRPCError(err)
 }

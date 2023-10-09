@@ -755,8 +755,6 @@ func (s *Service) insertBlockToForkChoiceStore(
 	if err := s.fillInForkChoiceMissingBlocks(ctx, blk, fCheckpoint, jCheckpoint); err != nil {
 		return err
 	}
-	// start validation of finalization sequence
-	go s.ValidateFinalization(spineData.Finalization, root)
 
 	// Feed in block to fork choice store.
 	return s.cfg.ForkChoiceStore.InsertOptimisticBlock(ctx,
@@ -813,26 +811,4 @@ func (s *Service) pruneCanonicalAttsFromPool(ctx context.Context, r [32]byte, b 
 		}
 	}
 	return nil
-}
-
-// ValidateFinalization validate given spines sequence of finalization.
-// Checks existence and order by slot of finalization sequence.
-func (s *Service) ValidateFinalization(finalisation []byte, blockRoot [32]byte) {
-	if s.IsGwatSynchronizing() {
-		log.WithFields(logrus.Fields{
-			"Syncing": s.IsGwatSynchronizing(),
-		}).Warn("Validate finalization skipped due to sync")
-		return
-	}
-	finSeq := gwatCommon.HashArrayFromBytes(finalisation)
-	isValid, err := s.cfg.ExecutionEngineCaller.ExecutionDagValidateFinalization(s.ctx, finSeq)
-	if err != nil || !isValid {
-		log.WithError(err).WithFields(logrus.Fields{
-			"finalisation": gwatCommon.HashArrayFromBytes(finalisation),
-			"isValid":      isValid,
-		}).Warn("Validate finalization failed")
-		return
-	}
-	s.cfg.ForkChoiceStore.SetFinalizationValid(blockRoot, isValid)
-	return
 }

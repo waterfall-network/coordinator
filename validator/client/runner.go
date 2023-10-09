@@ -8,6 +8,7 @@ import (
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
+	"github.com/sirupsen/logrus"
 	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
@@ -220,6 +221,20 @@ func run(ctx context.Context, v iface.Validator) {
 						}
 					}(role, pubKey)
 				}
+			}
+
+			// Check if current slot is the last slot of a current epoch if so wait until allRoles cycle
+			// goroutines are done and update duties for the first slot of a next epoch
+			if slots.IsEpochEnd(slot) {
+				wg.Wait()
+				if err := v.UpdateDuties(ctx, slot+1); err != nil {
+					log.WithError(err).WithFields(logrus.Fields{
+						"preVoteSlot": (slot + 1),
+					}).Error("Prevote: update duties failed")
+				}
+				log.WithFields(logrus.Fields{
+					"preVoteSlot": (slot + 1),
+				}).Info("Prevote: update duties success")
 			}
 			// run pre voting process
 			nextRoles, err := v.RolesAt(ctx, slot+1)
