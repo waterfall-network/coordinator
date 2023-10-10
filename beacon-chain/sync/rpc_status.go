@@ -165,6 +165,11 @@ func (s *Service) sendRPCStatusRequest(ctx context.Context, id peer.ID) error {
 		return err
 	}
 
+	log.WithFields(logrus.Fields{
+		"statusCode": code,
+		"func":       "sendRPCStatusRequest",
+	}).Info("Disconnect: call IsBad 000")
+
 	if code != 0 {
 		s.cfg.p2p.Peers().Scorers().BadResponsesScorer().Increment(id)
 		return errors.New(errMsg)
@@ -179,7 +184,11 @@ func (s *Service) sendRPCStatusRequest(ctx context.Context, id peer.ID) error {
 	s.cfg.p2p.Peers().Scorers().PeerStatusScorer().SetPeerStatus(id, msg, err)
 
 	log.WithFields(logrus.Fields{
-		"func": "sendRPCStatusRequest",
+		"IsBad": s.cfg.p2p.Peers().IsBad(id),
+		"func":  "sendRPCStatusRequest",
+
+		"0.msg.HeadSlot":       msg.HeadSlot,
+		"1.msg.FinalizedEpoch": msg.FinalizedEpoch,
 	}).Info("Disconnect: call IsBad")
 
 	if s.cfg.p2p.Peers().IsBad(id) {

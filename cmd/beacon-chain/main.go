@@ -84,6 +84,7 @@ var appFlags = []cli.Flag{
 	cmd.P2PHost,
 	cmd.P2PHostDNS,
 	cmd.P2PMaxPeers,
+	cmd.FindNodesBucketLength,
 	cmd.P2PPrivKey,
 	cmd.P2PMetadata,
 	cmd.P2PAllowList,

@@ -7,7 +7,6 @@ import (
 	"github.com/pkg/errors"
 	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
@@ -22,7 +21,6 @@ func ComputeFieldRootsWithHasherPhase0(ctx context.Context, state *ethpb.BeaconS
 	if state == nil {
 		return nil, errors.New("nil state")
 	}
-	hasher := hash.CustomSHA256Hasher()
 	fieldRoots := make([][]byte, params.BeaconConfig().BeaconStateFieldCount)
 
 	// Genesis time root.
@@ -74,7 +72,7 @@ func ComputeFieldRootsWithHasherPhase0(ctx context.Context, state *ethpb.BeaconS
 	fieldRoots[7] = historicalRootsRt[:]
 
 	// Eth1Data data structure root.
-	eth1HashTreeRoot, err := Eth1Root(hasher, state.Eth1Data)
+	eth1HashTreeRoot, err := Eth1Root(state.Eth1Data)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute eth1data merkleization")
 	}
@@ -101,7 +99,7 @@ func ComputeFieldRootsWithHasherPhase0(ctx context.Context, state *ethpb.BeaconS
 	fieldRoots[11] = validatorsRoot[:]
 
 	// spineData root.
-	spineDataRoot, err := SpineDataRoot(hasher, state.SpineData)
+	spineDataRoot, err := SpineDataRoot(state.SpineData)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute spine data merkleization")
 	}
@@ -147,21 +145,21 @@ func ComputeFieldRootsWithHasherPhase0(ctx context.Context, state *ethpb.BeaconS
 	fieldRoots[18] = justifiedBitsRoot[:]
 
 	// PreviousJustifiedCheckpoint data structure root.
-	prevCheckRoot, err := ssz.CheckpointRoot(hasher, state.PreviousJustifiedCheckpoint)
+	prevCheckRoot, err := ssz.CheckpointRoot(state.PreviousJustifiedCheckpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute previous justified checkpoint merkleization")
 	}
 	fieldRoots[19] = prevCheckRoot[:]
 
 	// CurrentJustifiedCheckpoint data structure root.
-	currJustRoot, err := ssz.CheckpointRoot(hasher, state.CurrentJustifiedCheckpoint)
+	currJustRoot, err := ssz.CheckpointRoot(state.CurrentJustifiedCheckpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute current justified checkpoint merkleization")
 	}
 	fieldRoots[20] = currJustRoot[:]
 
 	// FinalizedCheckpoint data structure root.
-	finalRoot, err := ssz.CheckpointRoot(hasher, state.FinalizedCheckpoint)
+	finalRoot, err := ssz.CheckpointRoot(state.FinalizedCheckpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute finalized checkpoint merkleization")
 	}
@@ -185,7 +183,6 @@ func ComputeFieldRootsWithHasherAltair(ctx context.Context, state *ethpb.BeaconS
 	if state == nil {
 		return nil, errors.New("nil state")
 	}
-	hasher := hash.CustomSHA256Hasher()
 	fieldRoots := make([][]byte, params.BeaconConfig().BeaconStateAltairFieldCount)
 
 	// Genesis time root.
@@ -237,7 +234,7 @@ func ComputeFieldRootsWithHasherAltair(ctx context.Context, state *ethpb.BeaconS
 	fieldRoots[7] = historicalRootsRt[:]
 
 	// Eth1Data data structure root.
-	eth1HashTreeRoot, err := Eth1Root(hasher, state.Eth1Data)
+	eth1HashTreeRoot, err := Eth1Root(state.Eth1Data)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute eth1data merkleization")
 	}
@@ -264,7 +261,7 @@ func ComputeFieldRootsWithHasherAltair(ctx context.Context, state *ethpb.BeaconS
 	fieldRoots[11] = validatorsRoot[:]
 
 	// spineData root.
-	spineDataRoot, err := SpineDataRoot(hasher, state.SpineData)
+	spineDataRoot, err := SpineDataRoot(state.SpineData)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute spine data merkleization")
 	}
@@ -310,21 +307,21 @@ func ComputeFieldRootsWithHasherAltair(ctx context.Context, state *ethpb.BeaconS
 	fieldRoots[18] = justifiedBitsRoot[:]
 
 	// PreviousJustifiedCheckpoint data structure root.
-	prevCheckRoot, err := ssz.CheckpointRoot(hasher, state.PreviousJustifiedCheckpoint)
+	prevCheckRoot, err := ssz.CheckpointRoot(state.PreviousJustifiedCheckpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute previous justified checkpoint merkleization")
 	}
 	fieldRoots[19] = prevCheckRoot[:]
 
 	// CurrentJustifiedCheckpoint data structure root.
-	currJustRoot, err := ssz.CheckpointRoot(hasher, state.CurrentJustifiedCheckpoint)
+	currJustRoot, err := ssz.CheckpointRoot(state.CurrentJustifiedCheckpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute current justified checkpoint merkleization")
 	}
 	fieldRoots[20] = currJustRoot[:]
 
 	// FinalizedCheckpoint data structure root.
-	finalRoot, err := ssz.CheckpointRoot(hasher, state.FinalizedCheckpoint)
+	finalRoot, err := ssz.CheckpointRoot(state.FinalizedCheckpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute finalized checkpoint merkleization")
 	}
@@ -369,7 +366,6 @@ func ComputeFieldRootsWithHasherBellatrix(ctx context.Context, state *ethpb.Beac
 	if state == nil {
 		return nil, errors.New("nil state")
 	}
-	hasher := hash.CustomSHA256Hasher()
 	fieldRoots := make([][]byte, params.BeaconConfig().BeaconStateBellatrixFieldCount)
 
 	// Genesis time root.
@@ -421,7 +417,7 @@ func ComputeFieldRootsWithHasherBellatrix(ctx context.Context, state *ethpb.Beac
 	fieldRoots[7] = historicalRootsRt[:]
 
 	// Eth1Data data structure root.
-	eth1HashTreeRoot, err := Eth1Root(hasher, state.Eth1Data)
+	eth1HashTreeRoot, err := Eth1Root(state.Eth1Data)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute eth1data merkleization")
 	}
@@ -448,7 +444,7 @@ func ComputeFieldRootsWithHasherBellatrix(ctx context.Context, state *ethpb.Beac
 	fieldRoots[11] = validatorsRoot[:]
 
 	// spineData root.
-	spineDataRoot, err := SpineDataRoot(hasher, state.SpineData)
+	spineDataRoot, err := SpineDataRoot(state.SpineData)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute spine data merkleization")
 	}
@@ -494,21 +490,21 @@ func ComputeFieldRootsWithHasherBellatrix(ctx context.Context, state *ethpb.Beac
 	fieldRoots[18] = justifiedBitsRoot[:]
 
 	// PreviousJustifiedCheckpoint data structure root.
-	prevCheckRoot, err := ssz.CheckpointRoot(hasher, state.PreviousJustifiedCheckpoint)
+	prevCheckRoot, err := ssz.CheckpointRoot(state.PreviousJustifiedCheckpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute previous justified checkpoint merkleization")
 	}
 	fieldRoots[19] = prevCheckRoot[:]
 
 	// CurrentJustifiedCheckpoint data structure root.
-	currJustRoot, err := ssz.CheckpointRoot(hasher, state.CurrentJustifiedCheckpoint)
+	currJustRoot, err := ssz.CheckpointRoot(state.CurrentJustifiedCheckpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute current justified checkpoint merkleization")
 	}
 	fieldRoots[20] = currJustRoot[:]
 
 	// FinalizedCheckpoint data structure root.
-	finalRoot, err := ssz.CheckpointRoot(hasher, state.FinalizedCheckpoint)
+	finalRoot, err := ssz.CheckpointRoot(state.FinalizedCheckpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not compute finalized checkpoint merkleization")
 	}
@@ -543,11 +539,12 @@ func ComputeFieldRootsWithHasherBellatrix(ctx context.Context, state *ethpb.Beac
 	fieldRoots[25] = nextSyncCommitteeRoot[:]
 
 	// Execution payload root.
-	executionPayloadRoot, err := state.LatestExecutionPayloadHeader.HashTreeRoot()
-	if err != nil {
-		return nil, err
-	}
-	fieldRoots[26] = executionPayloadRoot[:]
+	//executionPayloadRoot, err := state.LatestExecutionPayloadHeader.HashTreeRoot()
+	//if err != nil {
+	//	return nil, err
+	//}
+	//fieldRoots[26] = executionPayloadRoot[:]
+	fieldRoots[26] = bytesutil.PadTo([]byte{0}, 32)
 
 	return fieldRoots, nil
 }

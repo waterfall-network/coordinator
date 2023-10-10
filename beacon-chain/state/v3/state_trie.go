@@ -15,7 +15,6 @@ import (
 	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/container/slice"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
@@ -278,7 +277,6 @@ func (b *BeaconState) IsNil() bool {
 }
 
 func (b *BeaconState) rootSelector(field types.FieldIndex) ([32]byte, error) {
-	hasher := hash.CustomSHA256Hasher()
 	switch field {
 	case genesisTime:
 		return ssz.Uint64Root(b.state.GenesisTime), nil
@@ -315,9 +313,9 @@ func (b *BeaconState) rootSelector(field types.FieldIndex) ([32]byte, error) {
 	case historicalRoots:
 		return ssz.ByteArrayRootWithLimit(b.state.HistoricalRoots, fieldparams.HistoricalRootsLength)
 	case eth1Data:
-		return stateutil.Eth1Root(hasher, b.state.Eth1Data)
+		return stateutil.Eth1Root(b.state.Eth1Data)
 	case spineData:
-		return stateutil.SpineDataRoot(hasher, b.state.SpineData)
+		return stateutil.SpineDataRoot(b.state.SpineData)
 	case eth1DataVotes:
 		if b.rebuildTrie[field] {
 			err := b.resetFieldTrie(
@@ -343,7 +341,7 @@ func (b *BeaconState) rootSelector(field types.FieldIndex) ([32]byte, error) {
 				return [32]byte{}, err
 			}
 			delete(b.rebuildTrie, field)
-			return b.stateFieldLeaves[field].TrieRoot()
+			//return b.stateFieldLeaves[field].TrieRoot()
 		}
 		return b.recomputeFieldTrie(field, b.state.BlockVoting)
 	case validators:
@@ -391,11 +389,11 @@ func (b *BeaconState) rootSelector(field types.FieldIndex) ([32]byte, error) {
 	case justificationBits:
 		return bytesutil.ToBytes32(b.state.JustificationBits), nil
 	case previousJustifiedCheckpoint:
-		return ssz.CheckpointRoot(hasher, b.state.PreviousJustifiedCheckpoint)
+		return ssz.CheckpointRoot(b.state.PreviousJustifiedCheckpoint)
 	case currentJustifiedCheckpoint:
-		return ssz.CheckpointRoot(hasher, b.state.CurrentJustifiedCheckpoint)
+		return ssz.CheckpointRoot(b.state.CurrentJustifiedCheckpoint)
 	case finalizedCheckpoint:
-		return ssz.CheckpointRoot(hasher, b.state.FinalizedCheckpoint)
+		return ssz.CheckpointRoot(b.state.FinalizedCheckpoint)
 	case inactivityScores:
 		return stateutil.Uint64ListRootWithRegistryLimit(b.state.InactivityScores)
 	case currentSyncCommittee:
@@ -403,7 +401,8 @@ func (b *BeaconState) rootSelector(field types.FieldIndex) ([32]byte, error) {
 	case nextSyncCommittee:
 		return stateutil.SyncCommitteeRoot(b.state.NextSyncCommittee)
 	case latestExecutionPayloadHeader:
-		return b.state.LatestExecutionPayloadHeader.HashTreeRoot()
+		//return b.state.LatestExecutionPayloadHeader.HashTreeRoot()
+		return [32]byte{}, nil
 	}
 	return [32]byte{}, errors.New("invalid field index provided")
 }
