@@ -26,7 +26,6 @@ func TestReturnTrieLayer_OK(t *testing.T) {
 	assert.Equal(t, root, newRoot)
 
 	flags := &features.Flags{}
-	flags.EnableVectorizedHTR = true
 	reset := features.InitWithReset(flags)
 	defer reset()
 
@@ -53,7 +52,6 @@ func BenchmarkReturnTrieLayer_NormalAlgorithm(b *testing.B) {
 
 func BenchmarkReturnTrieLayer_VectorizedAlgorithm(b *testing.B) {
 	flags := &features.Flags{}
-	flags.EnableVectorizedHTR = true
 	reset := features.InitWithReset(flags)
 	defer reset()
 
@@ -89,7 +87,6 @@ func TestReturnTrieLayerVariable_OK(t *testing.T) {
 	assert.Equal(t, root, newRoot)
 
 	flags := &features.Flags{}
-	flags.EnableVectorizedHTR = true
 	reset := features.InitWithReset(flags)
 	defer reset()
 
@@ -124,7 +121,6 @@ func BenchmarkReturnTrieLayerVariable_NormalAlgorithm(b *testing.B) {
 
 func BenchmarkReturnTrieLayerVariable_VectorizedAlgorithm(b *testing.B) {
 	flags := &features.Flags{}
-	flags.EnableVectorizedHTR = true
 	reset := features.InitWithReset(flags)
 	defer reset()
 

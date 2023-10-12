@@ -48,6 +48,8 @@ func (s *Service) goodbyeRPCHandler(_ context.Context, msg interface{}, stream l
 	log := log.WithField("Reason", goodbyeMessage(*m))
 	log.WithField("func", "goodbyeRPCHandler")
 	log.WithField(
+		"SetNextValidTime", goodByeBackoff(*m).Second(),
+	).WithField(
 		"peer", stream.Conn().RemotePeer(),
 	).Info("Disconnect: peer has sent a goodbye message")
 	s.cfg.p2p.Peers().SetNextValidTime(stream.Conn().RemotePeer(), goodByeBackoff(*m))
