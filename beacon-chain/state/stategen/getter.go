@@ -2,9 +2,11 @@ package stategen
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
+	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
@@ -44,8 +46,8 @@ func (s *State) StateByRootIfCachedNoCopy(blockRoot [32]byte) state.BeaconState 
 	if !s.hotStateCache.has(blockRoot) {
 		return nil
 	}
-	state := s.hotStateCache.getWithoutCopy(blockRoot)
-	return state
+	bState := s.hotStateCache.getWithoutCopy(blockRoot)
+	return bState
 }
 
 // StateByRoot retrieves the state using input block root.
@@ -160,6 +162,10 @@ func (s *State) loadStateByRoot(ctx context.Context, blockRoot [32]byte) (state.
 	// First, it checks if the state exists in hot state cache.
 	cachedState := s.hotStateCache.get(blockRoot)
 	if cachedState != nil && !cachedState.IsNil() {
+		log.WithFields(logrus.Fields{
+			"0slot": cachedState.Slot(),
+			"6root": fmt.Sprintf("%#x", blockRoot),
+		}).Debug("Load state by root: from cache 111")
 		return cachedState, nil
 	}
 
@@ -169,13 +175,24 @@ func (s *State) loadStateByRoot(ctx context.Context, blockRoot [32]byte) (state.
 		return nil, err
 	}
 	if ok {
+		log.WithFields(logrus.Fields{
+			"0slot": cachedInfo.state.Slot(),
+			"6root": fmt.Sprintf("%#x", blockRoot),
+		}).Debug("Load state by root: from epoch boundary cache 222")
 		return cachedInfo.state, nil
 	}
 
 	// Short cut if the cachedState is already in the DB.
 	if s.beaconDB.HasState(ctx, blockRoot) {
+		log.WithFields(logrus.Fields{
+			"6root": fmt.Sprintf("%#x", blockRoot),
+		}).Debug("Load state by root: from DB 333")
 		return s.beaconDB.State(ctx, blockRoot)
 	}
+
+	log.WithFields(logrus.Fields{
+		"root": fmt.Sprintf("%#x", blockRoot),
+	}).Info("Load state by root: replay blocks")
 
 	summary, err := s.stateSummary(ctx, blockRoot)
 	if err != nil {

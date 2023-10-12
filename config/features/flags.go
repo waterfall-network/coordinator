@@ -142,10 +142,6 @@ var (
 		Name:  "enable-native-state",
 		Usage: "Enables representing the beacon state as a pure Go struct.",
 	}
-	enableVecHTR = &cli.BoolFlag{
-		Name:  "enable-vectorized-htr",
-		Usage: "Enables new go sha256 library which utilizes optimized routines for merkle trees",
-	}
 	enableForkChoiceDoublyLinkedTree = &cli.BoolFlag{
 		Name:  "enable-forkchoice-doubly-linked-tree",
 		Usage: "Enables new forkchoice store structure that uses doubly linked trees",
@@ -155,7 +151,6 @@ var (
 // devModeFlags holds list of flags that are set when development mode is on.
 var devModeFlags = []cli.Flag{
 	enablePeerScorer,
-	enableVecHTR,
 	enableForkChoiceDoublyLinkedTree,
 }
 
@@ -202,7 +197,6 @@ var BeaconChainFlags = append(deprecatedFlags, []cli.Flag{
 	disableBatchGossipVerification,
 	disableBalanceTrieComputation,
 	enableNativeState,
-	enableVecHTR,
 	enableForkChoiceDoublyLinkedTree,
 	enablePassSlotInfoToGwat,
 }...)
