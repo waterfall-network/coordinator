@@ -2,16 +2,22 @@ package kv
 
 import (
 	"context"
+	"sync"
 
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
 	bolt "go.etcd.io/bbolt"
 	"go.opencensus.io/trace"
 )
 
+var spinesMu sync.RWMutex
+
 // ReadSpines retrieval spines represented by plain bytes array.
 func (s *Store) ReadSpines(ctx context.Context, key [32]byte) (wrapper.Spines, error) {
 	ctx, span := trace.StartSpan(ctx, "BeaconDB.ReadSpines")
 	defer span.End()
+
+	spinesMu.RLock()
+	defer spinesMu.RUnlock()
 
 	var err error
 	var data wrapper.Spines
@@ -31,7 +37,9 @@ func (s *Store) ReadSpines(ctx context.Context, key [32]byte) (wrapper.Spines, e
 		return err
 	})
 	// cache it.
-	s.spinesCache.Add(key, data)
+	if err == nil && data != nil {
+		s.spinesCache.Add(key, data)
+	}
 	return data, err
 }
 

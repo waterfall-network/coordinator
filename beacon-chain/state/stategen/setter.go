@@ -162,7 +162,7 @@ func (s *State) saveStateByRoot(ctx context.Context, blockRoot [32]byte, st stat
 	}
 
 	// Store the copied state in the hot state cache.
-	s.hotStateCache.put(blockRoot, st)
+	s.hotStateCache.put(blockRoot, st.Copy())
 
 	return nil
 }

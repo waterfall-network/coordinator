@@ -199,13 +199,10 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 			syncState, err := s.cfg.StateGen.StateByRoot(ctx, syncRoot)
 			if err != nil {
 				log.WithError(err).WithFields(logrus.Fields{
-					"syncSlot":     syncSlot,
-					"headSlot":     s.headSlot(),
-					"syncRoot":     fmt.Sprintf("%#x", syncRoot),
-					"headRoot":     fmt.Sprintf("%#x", s.headRoot()),
-					"Prefix":       gwatCommon.HashArrayFromBytes(syncState.SpineData().Prefix),
-					"Finalization": gwatCommon.HashArrayFromBytes(syncState.SpineData().Finalization),
-					"CpFinalized":  gwatCommon.HashArrayFromBytes(syncState.SpineData().CpFinalized),
+					"syncSlot": syncSlot,
+					"headSlot": s.headSlot(),
+					"syncRoot": fmt.Sprintf("%#x", syncRoot),
+					"headRoot": fmt.Sprintf("%#x", s.headRoot()),
 				}).Error("Gwat sync: failed 3")
 				return err
 			}
