@@ -2,6 +2,7 @@ package prevote
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/patrickmn/go-cache"
 	"github.com/pkg/errors"
@@ -45,8 +46,9 @@ func (c *PrevoteCache) SavePrevote(pv *ethpb.PreVote) error {
 	logrus.WithFields(logrus.Fields{
 		"pv.slot":    pv.Data.Slot,
 		"pv.index":   pv.Data.Index,
+		"agrBits":    fmt.Sprintf("%b", pv.AggregationBits.Bytes()),
 		"len(cache)": len(c.prevoteCache),
-	}).Info("Prevote: SavePrevote start")
+	}).Debug("Prevote: SavePrevote start")
 
 	seen, err := c.hasSeenBit(pv)
 	if err != nil {
@@ -71,7 +73,7 @@ func (c *PrevoteCache) SavePrevote(pv *ethpb.PreVote) error {
 		"pv.slot":    pv.Data.Slot,
 		"pv.index":   pv.Data.Index,
 		"len(cache)": len(c.prevoteCache),
-	}).Info("Prevote: SavePrevote done")
+	}).Debug("Prevote: SavePrevote done")
 
 	return nil
 }
@@ -124,7 +126,7 @@ func (c *PrevoteCache) PurgeOutdatedPrevote(curSlot types.Slot) error {
 
 	logrus.WithFields(logrus.Fields{
 		"len(cache)": len(c.prevoteCache),
-	}).Info("Prevote: PurgeOutdatedPrevote start")
+	}).Debug("Prevote: PurgeOutdatedPrevote start")
 
 	for k, v := range c.prevoteCache {
 		if k < curSlot {
@@ -140,7 +142,7 @@ func (c *PrevoteCache) PurgeOutdatedPrevote(curSlot types.Slot) error {
 
 	logrus.WithFields(logrus.Fields{
 		"len(cache)": len(c.prevoteCache),
-	}).Info("Prevote: PurgeOutdatedPrevote done")
+	}).Debug("Prevote: PurgeOutdatedPrevote done")
 
 	return nil
 }

@@ -53,7 +53,7 @@ func (s *Service) maintainPeerStatuses() {
 					log.WithFields(logrus.Fields{
 						"func": "maintainPeerStatuses",
 						"peer": id,
-					}).Info("Disconnect: call IsBad")
+					}).Info("Disconnect: bad peer")
 					s.disconnectBadPeer(s.ctx, id)
 					return
 				}
@@ -165,12 +165,11 @@ func (s *Service) sendRPCStatusRequest(ctx context.Context, id peer.ID) error {
 		return err
 	}
 
-	log.WithFields(logrus.Fields{
-		"statusCode": code,
-		"func":       "sendRPCStatusRequest",
-	}).Info("Disconnect: call IsBad 000")
-
 	if code != 0 {
+		log.WithFields(logrus.Fields{
+			"statusCode": code,
+			"func":       "sendRPCStatusRequest",
+		}).Warn("Disconnect: call IsBad: scorer incr by status code")
 		s.cfg.p2p.Peers().Scorers().BadResponsesScorer().Increment(id)
 		return errors.New(errMsg)
 	}
@@ -183,15 +182,13 @@ func (s *Service) sendRPCStatusRequest(ctx context.Context, id peer.ID) error {
 	err = s.validateStatusMessage(ctx, msg)
 	s.cfg.p2p.Peers().Scorers().PeerStatusScorer().SetPeerStatus(id, msg, err)
 
-	log.WithFields(logrus.Fields{
-		"IsBad": s.cfg.p2p.Peers().IsBad(id),
-		"func":  "sendRPCStatusRequest",
-
-		"0.msg.HeadSlot":       msg.HeadSlot,
-		"1.msg.FinalizedEpoch": msg.FinalizedEpoch,
-	}).Info("Disconnect: call IsBad")
-
 	if s.cfg.p2p.Peers().IsBad(id) {
+		log.WithFields(logrus.Fields{
+			"IsBad":                s.cfg.p2p.Peers().IsBad(id),
+			"func":                 "sendRPCStatusRequest",
+			"0.msg.HeadSlot":       msg.HeadSlot,
+			"1.msg.FinalizedEpoch": msg.FinalizedEpoch,
+		}).Warn("Disconnect: bad peer")
 		s.disconnectBadPeer(s.ctx, id)
 	}
 	return err

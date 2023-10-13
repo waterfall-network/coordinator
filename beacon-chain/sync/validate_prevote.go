@@ -26,7 +26,6 @@ import (
 )
 
 func (s *Service) validateCommitteeIndexPrevote(ctx context.Context, pid peer.ID, msg *pubsub.Message) (pubsub.ValidationResult, error) {
-	log.Infof("Validation of prevote for with topic %v started", *msg.Topic)
 	//if pid == s.cfg.p2p.PeerID() {
 	//	return pubsub.ValidationAccept, nil
 	//}
@@ -60,17 +59,17 @@ func (s *Service) validateCommitteeIndexPrevote(ctx context.Context, pid peer.ID
 		return pubsub.ValidationReject, err
 	}
 
-	prevote, ok := m.(*eth.PreVote)
+	pv, ok := m.(*eth.PreVote)
 	if !ok {
 		return pubsub.ValidationReject, errWrongMessage
 	}
 
-	if prevote == nil {
+	if pv == nil {
 		return pubsub.ValidationReject, errNilMessage
 	}
 
 	// Do not process slot 0 prevote.
-	if prevote.Data.Slot == 0 {
+	if pv.Data.Slot == 0 {
 		return pubsub.ValidationIgnore, nil
 	}
 
@@ -80,20 +79,19 @@ func (s *Service) validateCommitteeIndexPrevote(ctx context.Context, pid peer.ID
 		return pubsub.ValidationIgnore, err
 	}
 
-	validationRes, err := s.validateUnaggregatedPrevoteTopic(ctx, prevote, bState, *msg.Topic)
+	validationRes, err := s.validateUnaggregatedPrevoteTopic(ctx, pv, bState, *msg.Topic)
 	if validationRes != pubsub.ValidationAccept {
 		return validationRes, err
 	}
 
-	validationRes, err = s.validateUnaggregatedPrevoteWithState(ctx, prevote, bState)
+	validationRes, err = s.validateUnaggregatedPrevoteWithState(ctx, pv, bState)
 	if validationRes != pubsub.ValidationAccept {
 		return validationRes, err
 	}
 
-	s.setSeenCommitteeIndicesSlot(prevote.Data.Slot, prevote.Data.Index, prevote.AggregationBits)
+	s.setSeenCommitteeIndicesSlot(pv.Data.Slot, pv.Data.Index, pv.AggregationBits)
 
-	msg.ValidatorData = prevote
-	log.Infof("Validation of prevote for slot %d complete", prevote.Data.Slot)
+	msg.ValidatorData = pv
 	return pubsub.ValidationAccept, nil
 }
 

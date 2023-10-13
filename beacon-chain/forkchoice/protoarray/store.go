@@ -70,13 +70,12 @@ func (f *ForkChoice) Head(
 		"bal-prev-equal": fmt.Sprintf("%#v", newBalances) == fmt.Sprintf("%#v", f.getBalances(justifiedRoot)),
 		"bal-FCh-equal":  fmt.Sprintf("%#v", newBalances) == fmt.Sprintf("%#v", f.balances),
 		//"deltas":        deltas,
-		"len(newVotes)": len(newVotes),
-
+		"len(newVotes)":              len(newVotes),
 		"justifiedEpoch":             justifiedEpoch,
 		"justifiedRoot":              fmt.Sprintf("%#x", justifiedRoot),
 		"justifiedStateBalances.len": len(justifiedStateBalances),
 		"finalizedEpoch":             finalizedEpoch,
-	}).Info("--- Head --- 000")
+	}).Debug("Get bc head")
 
 	if err != nil {
 		return [32]byte{}, errors.Wrap(err, "Could not compute deltas")
@@ -128,7 +127,7 @@ func (f *ForkChoice) ProcessAttestation(ctx context.Context, validatorIndices []
 		"blockRoot":        fmt.Sprintf("%#x", blockRoot),
 		"node.votes":       len(f.store.nodes[f.NodeCount()-1].AttestationsData().votes),
 		"node.votesByRoot": len(f.getNodeVotes(f.store.nodes[f.NodeCount()-1].root)),
-	}).Info(">>> GetParentByOptimisticSpines : ProcessAttestation")
+	}).Info("Get parent by optimistic spines: process attestation")
 
 	processedAttestationCount.Inc()
 }

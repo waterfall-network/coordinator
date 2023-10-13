@@ -421,11 +421,11 @@ func ProcessEpochPrecompute(ctx context.Context, state state.BeaconState) (state
 		return nil, errors.Wrap(err, "could not process justification")
 	}
 
-	log.WithField("state.slot", state.Slot()).Info("*** process rewards and penalties *** 0")
+	log.WithField("state.slot", state.Slot()).Info("process rewards and penalties phase0")
 
 	state, err = precompute.ProcessRewardsAndPenaltiesPrecompute(state, bp, vp, precompute.AttestationsDelta, precompute.ProposersDelta)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not process rewards and penalties")
+		return nil, errors.Wrap(err, "could not process rewards and penalties phase0")
 	}
 
 	state, err = e.ProcessRegistryUpdates(ctx, state)

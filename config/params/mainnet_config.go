@@ -125,7 +125,7 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	//Optimistic consensus constants.
 	VotingRequiredSlots:           3,
 	BlockVotingMinSupportPrc:      50,
-	SpinePublicationsPefixSupport: 3,
+	SpinePublicationsPefixSupport: 2,
 
 	// Fork choice algorithm constants.
 	ProposerScoreBoost: 70,

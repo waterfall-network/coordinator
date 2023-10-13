@@ -56,7 +56,7 @@ func (s *Service) GetOptimisticSpines(ctx context.Context, baseSpine gwatCommon.
 	log.WithFields(logrus.Fields{
 		"baseSpine": fmt.Sprintf("%#x", baseSpine),
 		"opSpines":  optSpines,
-	}).Info("Get Optimistic Spines: success")
+	}).Debug("Get Optimistic Spines: success")
 
 	return s.GetCacheOptimisticSpines(baseSpine), nil
 }

@@ -83,7 +83,7 @@ func (s *Service) BroadcastPrevoting(ctx context.Context, subnet uint64, prevote
 		"pv.AggregationBits": fmt.Sprintf("%b", prevote.AggregationBits),
 		"pv.Data.Slot":       prevote.Data.Slot,
 		"pv.Data.Index":      prevote.Data.Index,
-	}).Info("Prevote: BroadcastPrevoting")
+	}).Debug("Prevote: BroadcastPrevoting")
 
 	forkDigest, err := s.currentForkDigest()
 	if err != nil {
@@ -128,7 +128,7 @@ func (s *Service) broadcastAttestation(ctx context.Context, subnet uint64, att *
 		"att.Data.Slot":       att.Data.Slot,
 		"att.Data.Index":      att.Data.CommitteeIndex,
 		//"pv.Candidates":      fmt.Sprintf("%#x", prevote.Data.Candidates),
-	}).Info("Attestation: broadcastAttestation")
+	}).Debug("Attestation: broadcastAttestation")
 
 	oneEpoch := time.Duration(1*params.BeaconConfig().SlotsPerEpoch.Mul(params.BeaconConfig().SecondsPerSlot)) * time.Second
 	ctx, cancel := context.WithTimeout(ctx, oneEpoch)
@@ -153,7 +153,7 @@ func (s *Service) broadcastAttestation(ctx context.Context, subnet uint64, att *
 		"pv.Data.Index":      att.Data.CommitteeIndex,
 		"hasPeer":            hasPeer,
 		//"pv.Candidates":      fmt.Sprintf("%#x", prevote.Data.Candidates),
-	}).Info("Att: broadcastAttestation")
+	}).Debug("Att: broadcastAttestation")
 
 	if !hasPeer {
 		attestationBroadcastAttempts.Inc()
@@ -172,7 +172,7 @@ func (s *Service) broadcastAttestation(ctx context.Context, subnet uint64, att *
 				//"pv.Data.Index":      prevote.Data.Index,
 				//"hasPeer":            hasPeer,
 				//"pv.Candidates":      fmt.Sprintf("%#x", prevote.Data.Candidates),
-			}).Info("Att: broadcastAttestation: FindPeersWithSubnet")
+			}).Debug("Att: broadcastAttestation: FindPeersWithSubnet")
 
 			if err != nil {
 				return err

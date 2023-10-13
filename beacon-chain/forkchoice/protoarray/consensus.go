@@ -91,7 +91,7 @@ func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines 
 		"store.finalizedEpoch": fc.store.finalizedEpoch,
 		//"store.[0].root":       fmt.Sprintf("%#x", fc.store.nodes[0].root),
 		//"fork[0]":              frkRoots_0,
-	}).Info("**************  GetParentByOptimisticSpines")
+	}).Info("Get parent by optimistic spines")
 
 	if len(acceptableRootIndexMap) == 0 {
 		return [32]byte{}, nil
@@ -127,9 +127,9 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 		"balances":             len(f.balances),
 		"store.justifiedEpoch": f.store.justifiedEpoch,
 		"store.finalizedEpoch": f.store.finalizedEpoch,
-		"store.[0].root":       fmt.Sprintf("%#x", f.store.nodes[0].root),
+		//"store.[0].root":       fmt.Sprintf("%#x", f.store.nodes[0].root),
 		//"fork[0]":              frkRoots_0,
-	}).Info("**************  calculateHeadRootByNodesIndexes")
+	}).Info("Calculate head root by nodes indexes")
 
 	// create ForkChoice instance
 	fcInstance := New(f.store.justifiedEpoch, f.store.finalizedEpoch)
@@ -224,7 +224,7 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 		"att.justRoot":        fmt.Sprintf("%#x", topNode.AttestationsData().justifiedRoot),
 		"justifiedRoot":       fmt.Sprintf("%#x", justifiedRoot),
 		"len(node.att.votes)": len(topNode.AttestationsData().votes),
-	}).Info(">>> GetParentByOptimisticSpines 2222")
+	}).Info("Get parent by optimistic spines 1")
 
 	if err != nil {
 		return [32]byte{}, err
@@ -238,8 +238,8 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 		"_balances":            len(f.balances),
 		"store.justifiedEpoch": fcInstance.store.justifiedEpoch,
 		"store.finalizedEpoch": fcInstance.store.finalizedEpoch,
-		"store.[0].root":       fmt.Sprintf("%#x", fcInstance.store.nodes[0].root),
-	}).Info("**************  GetParentByOptimisticSpines 99999")
+		//"store.[0].root":       fmt.Sprintf("%#x", fcInstance.store.nodes[0].root),
+	}).Info("Get parent by optimistic spines res")
 
 	return headRoot, nil
 }
