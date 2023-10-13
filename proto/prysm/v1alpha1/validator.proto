@@ -23,6 +23,7 @@ import "proto/eth/ext/options.proto";
 import "proto/prysm/v1alpha1/beacon_block.proto";
 import "proto/prysm/v1alpha1/sync_committee.proto";
 import "proto/prysm/v1alpha1/attestation.proto";
+import "proto/prysm/v1alpha1/prevoting.proto";
 
 option csharp_namespace = "Ethereum.Eth.V1";
 option go_package = "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1;eth";
@@ -207,6 +208,12 @@ service BeaconNodeValidator {
         };
     }
 
+    rpc GetPrevoteData(PreVoteRequest) returns (PreVoteData) {
+        option (google.api.http) = {
+            get: "/eth/v1alpha1/validator/prevote"
+        };
+    }
+
     // Sends the newly signed attestation to beacon node.
     //
     // The validator sends the newly signed attestation to the beacon node for the attestation to
@@ -215,6 +222,13 @@ service BeaconNodeValidator {
     rpc ProposeAttestation(Attestation) returns (AttestResponse) {
         option (google.api.http) = {
             post: "/eth/v1alpha1/validator/attestation"
+            body: "*"
+        };
+    }
+
+    rpc ProposePrevote(PreVote) returns (PrevoteResponse) {
+        option (google.api.http) = {
+            post: "/eth/v1alpha1/validator/prevote"
             body: "*"
         };
     }
@@ -561,6 +575,11 @@ message AttestResponse {
     bytes attestation_data_root = 1 [(ethereum.eth.ext.ssz_size) = "32"];
 }
 
+message PrevoteResponse {
+    // The root of the prevote data successfully submitted to the beacon node.
+    bytes prevote_data_root = 1 [(ethereum.eth.ext.ssz_size) = "32"];
+}
+
 message AggregateSelectionRequest {
     // Slot for which the aggregation request applies.
     uint64 slot = 1 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Slot"];
@@ -598,6 +617,7 @@ message CommitteeSubnetsSubscribeRequest {
     // Subscribe as an aggregator means to join the subnet.
     // Subscribe as an attester means finding persistent peers on the subnet to be able to publish attestations.
     repeated bool is_aggregator = 3;
+    repeated uint64 proposer_slots = 4 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Slot"];
 }
 
 // An Ethereum validator.

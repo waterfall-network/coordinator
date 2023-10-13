@@ -611,12 +611,14 @@ func (v *validator) subscribeToSubnets(ctx context.Context, res *ethpb.DutiesRes
 	subscribeCommitteeIndices := make([]types.CommitteeIndex, 0, len(res.CurrentEpochDuties)+len(res.NextEpochDuties))
 	subscribeIsAggregator := make([]bool, 0, len(res.CurrentEpochDuties)+len(res.NextEpochDuties))
 	alreadySubscribed := make(map[[64]byte]bool)
+	proposerSlots := make([]types.Slot, 0, len(res.CurrentEpochDuties)+len(res.NextEpochDuties))
 
 	for _, duty := range res.CurrentEpochDuties {
 		pk := bytesutil.ToBytes48(duty.PublicKey)
 		if duty.Status == ethpb.ValidatorStatus_ACTIVE || duty.Status == ethpb.ValidatorStatus_EXITING {
 			attesterSlot := duty.AttesterSlot
 			committeeIndex := duty.CommitteeIndex
+			ps := duty.ProposerSlots
 
 			alreadySubscribedKey := validatorSubscribeKey(attesterSlot, committeeIndex)
 			if _, ok := alreadySubscribed[alreadySubscribedKey]; ok {
@@ -634,6 +636,7 @@ func (v *validator) subscribeToSubnets(ctx context.Context, res *ethpb.DutiesRes
 			subscribeSlots = append(subscribeSlots, attesterSlot)
 			subscribeCommitteeIndices = append(subscribeCommitteeIndices, committeeIndex)
 			subscribeIsAggregator = append(subscribeIsAggregator, aggregator)
+			proposerSlots = append(proposerSlots, ps...)
 		}
 	}
 
@@ -641,6 +644,7 @@ func (v *validator) subscribeToSubnets(ctx context.Context, res *ethpb.DutiesRes
 		if duty.Status == ethpb.ValidatorStatus_ACTIVE || duty.Status == ethpb.ValidatorStatus_EXITING {
 			attesterSlot := duty.AttesterSlot
 			committeeIndex := duty.CommitteeIndex
+			ps := duty.ProposerSlots
 
 			alreadySubscribedKey := validatorSubscribeKey(attesterSlot, committeeIndex)
 			if _, ok := alreadySubscribed[alreadySubscribedKey]; ok {
@@ -658,13 +662,15 @@ func (v *validator) subscribeToSubnets(ctx context.Context, res *ethpb.DutiesRes
 			subscribeSlots = append(subscribeSlots, attesterSlot)
 			subscribeCommitteeIndices = append(subscribeCommitteeIndices, committeeIndex)
 			subscribeIsAggregator = append(subscribeIsAggregator, aggregator)
+			proposerSlots = append(proposerSlots, ps...)
 		}
 	}
 
 	_, err := v.validatorClient.SubscribeCommitteeSubnets(ctx, &ethpb.CommitteeSubnetsSubscribeRequest{
-		Slots:        subscribeSlots,
-		CommitteeIds: subscribeCommitteeIndices,
-		IsAggregator: subscribeIsAggregator,
+		Slots:         subscribeSlots,
+		CommitteeIds:  subscribeCommitteeIndices,
+		IsAggregator:  subscribeIsAggregator,
+		ProposerSlots: proposerSlots,
 	})
 
 	return err
@@ -676,6 +682,71 @@ func (v *validator) subscribeToSubnets(ctx context.Context, res *ethpb.DutiesRes
 func (v *validator) RolesAt(ctx context.Context, slot types.Slot) (map[[fieldparams.BLSPubkeyLength]byte][]iface.ValidatorRole, error) {
 	rolesAt := make(map[[fieldparams.BLSPubkeyLength]byte][]iface.ValidatorRole)
 	for validator, duty := range v.duties.Duties {
+		var roles []iface.ValidatorRole
+
+		if duty == nil {
+			continue
+		}
+		if len(duty.ProposerSlots) > 0 {
+			for _, proposerSlot := range duty.ProposerSlots {
+				if proposerSlot != 0 && proposerSlot == slot {
+					roles = append(roles, iface.RoleProposer)
+					break
+				}
+			}
+		}
+		if duty.AttesterSlot == slot {
+			roles = append(roles, iface.RoleAttester)
+
+			aggregator, err := v.isAggregator(ctx, duty.Committee, slot, bytesutil.ToBytes48(duty.PublicKey))
+			if err != nil {
+				return nil, errors.Wrap(err, "could not check if a validator is an aggregator")
+			}
+			if aggregator {
+				roles = append(roles, iface.RoleAggregator)
+			}
+
+		}
+
+		// Being assigned to a sync committee for a given slot means that the validator produces and
+		// broadcasts signatures for `slot - 1` for inclusion in `slot`. At the last slot of the epoch,
+		// the validator checks whether it's in the sync committee of following epoch.
+		inSyncCommittee := false
+		if slots.IsEpochEnd(slot) {
+			if v.duties.NextEpochDuties[validator].IsSyncCommittee {
+				roles = append(roles, iface.RoleSyncCommittee)
+				inSyncCommittee = true
+			}
+		} else {
+			if duty.IsSyncCommittee {
+				roles = append(roles, iface.RoleSyncCommittee)
+				inSyncCommittee = true
+			}
+		}
+		if inSyncCommittee {
+			aggregator, err := v.isSyncCommitteeAggregator(ctx, slot, bytesutil.ToBytes48(duty.PublicKey))
+			if err != nil {
+				return nil, errors.Wrap(err, "could not check if a validator is a sync committee aggregator")
+			}
+			if aggregator {
+				roles = append(roles, iface.RoleSyncCommitteeAggregator)
+			}
+		}
+
+		if len(roles) == 0 {
+			roles = append(roles, iface.RoleUnknown)
+		}
+
+		var pubKey [fieldparams.BLSPubkeyLength]byte
+		copy(pubKey[:], duty.PublicKey)
+		rolesAt[pubKey] = roles
+	}
+	return rolesAt, nil
+}
+
+func (v *validator) RolesAtNextEpoch(ctx context.Context, slot types.Slot) (map[[fieldparams.BLSPubkeyLength]byte][]iface.ValidatorRole, error) {
+	rolesAt := make(map[[fieldparams.BLSPubkeyLength]byte][]iface.ValidatorRole)
+	for validator, duty := range v.duties.NextEpochDuties {
 		var roles []iface.ValidatorRole
 
 		if duty == nil {

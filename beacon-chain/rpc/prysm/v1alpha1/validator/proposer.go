@@ -41,7 +41,7 @@ func (vs *Server) GetBeaconBlock(ctx context.Context, req *ethpb.BlockRequest) (
 
 	log.WithFields(logrus.Fields{
 		"vs.SyncChecker.Syncing()": vs.SyncChecker.Syncing(),
-	}).Warn("^^^^^^^PROPESER START (()GetBeaconBlock())^^^^^^^^")
+	}).Info("PROPOSER START")
 
 	if slots.ToEpoch(req.Slot) < params.BeaconConfig().AltairForkEpoch {
 		blk, err := vs.getPhase0BeaconBlock(ctx, req)

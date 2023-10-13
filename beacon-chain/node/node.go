@@ -35,6 +35,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/monitor"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/node/registration"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/attestations"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/prevote"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/slashings"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/synccommittee"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/voluntaryexits"
@@ -92,6 +93,7 @@ type BeaconNode struct {
 	db                      db.Database
 	slasherDB               db.SlasherDatabase
 	attestationPool         attestations.Pool
+	prevotePool             prevote.Pool
 	exitPool                voluntaryexits.PoolManager
 	withdrawalPool          withdrawals.PoolManager
 	slashingsPool           slashings.PoolManager
@@ -153,6 +155,7 @@ func New(cliCtx *cli.Context, opts ...Option) (*BeaconNode, error) {
 		blockFeed:               new(event.Feed),
 		opFeed:                  new(event.Feed),
 		attestationPool:         attestations.NewPool(),
+		prevotePool:             prevote.NewPool(),
 		exitPool:                voluntaryexits.NewPool(),
 		withdrawalPool:          withdrawals.NewPool(),
 		slashingsPool:           slashings.NewPool(),
@@ -599,6 +602,7 @@ func (b *BeaconNode) registerBlockchainService() error {
 		blockchain.WithSlasherAttestationsFeed(b.slasherAttestationsFeed),
 		blockchain.WithFinalizedStateAtStartUp(b.finalizedStateAtStartUp),
 		blockchain.WithProposerIdsCache(b.proposerIdsCache),
+		blockchain.WithPrevotePool(b.prevotePool),
 	)
 	blockchainService, err := blockchain.NewService(b.ctx, opts...)
 	if err != nil {
@@ -668,6 +672,7 @@ func (b *BeaconNode) registerSyncService() error {
 		regularsync.WithAttestationNotifier(b),
 		regularsync.WithOperationNotifier(b),
 		regularsync.WithAttestationPool(b.attestationPool),
+		regularsync.WithPrevotePool(b.prevotePool),
 		regularsync.WithExitPool(b.exitPool),
 		regularsync.WithWithdrawalPool(b.withdrawalPool),
 		regularsync.WithSlashingPool(b.slashingsPool),
@@ -801,6 +806,7 @@ func (b *BeaconNode) registerRPCService() error {
 		GenesisTimeFetcher:      chainService,
 		GenesisFetcher:          chainService,
 		AttestationsPool:        b.attestationPool,
+		PrevotePool:             b.prevotePool,
 		ExitPool:                b.exitPool,
 		WithdrawalPool:          b.withdrawalPool,
 		SlashingsPool:           b.slashingsPool,

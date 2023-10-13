@@ -25,6 +25,7 @@ import (
 	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/attestations"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/prevote"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/slashings"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/synccommittee"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/voluntaryexits"
@@ -73,6 +74,7 @@ type config struct {
 	p2p                     p2p.P2P
 	beaconDB                db.NoHeadAccessDatabase
 	attPool                 attestations.Pool
+	prevotePool             prevote.Pool
 	exitPool                voluntaryexits.PoolManager
 	withdrawalPool          withdrawals.PoolManager
 	slashingPool            slashings.PoolManager

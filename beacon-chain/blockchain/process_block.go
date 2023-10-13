@@ -103,7 +103,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		"root":       fmt.Sprintf("%#x", blockRoot),
 		"parentRoot": fmt.Sprintf("%#x", signed.Block().ParentRoot()),
 		"\u2692":     version.BuildId,
-	}).Info("<<< onBlock:START >>>")
+	}).Info("onBlock: staer")
 
 	if len(signed.Block().Body().Withdrawals()) > 0 {
 		for i, itm := range signed.Block().Body().Withdrawals() {

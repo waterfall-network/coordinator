@@ -22,6 +22,7 @@ import (
 	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/attestations"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/prevote"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/slashings"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/synccommittee"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/voluntaryexits"
@@ -93,6 +94,7 @@ type Config struct {
 	EnableDebugRPCEndpoints bool
 	MockEth1Votes           bool
 	AttestationsPool        attestations.Pool
+	PrevotePool             prevote.Pool
 	ExitPool                voluntaryexits.PoolManager
 	WithdrawalPool          withdrawals.PoolManager
 	SlashingsPool           slashings.PoolManager
@@ -185,7 +187,9 @@ func (s *Service) Start() {
 	validatorServer := &validatorv1alpha1.Server{
 		Ctx:                    s.ctx,
 		AttestationCache:       cache.NewAttestationCache(),
+		PrevoteCache:           cache.NewPrevoteCache(),
 		AttPool:                s.cfg.AttestationsPool,
+		PrevotePool:            s.cfg.PrevotePool,
 		ExitPool:               s.cfg.ExitPool,
 		WithdrawalPool:         s.cfg.WithdrawalPool,
 		HeadFetcher:            s.cfg.HeadFetcher,

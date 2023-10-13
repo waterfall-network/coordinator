@@ -43,6 +43,16 @@ var (
 		Name: "p2p_sync_committee_subnet_attempted_broadcasts",
 		Help: "The number of sync committee that were attempted to be broadcast.",
 	})
+	prevoteBroadcastAttempts = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "p2p_prevote_subnet_attempted_broadcasts",
+		Help: "The number of prevote that were attempted to be broadcast.",
+	})
+	savedPrevoteBroadcasts = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "p2p_prevote_subnet_recovered_broadcasts",
+		Help: "The number of prevote messages that were attempted to be broadcast with no peers on " +
+			"the subnet. The beacon node increments this counter when the broadcast is blocked " +
+			"until a subnet peer can be found.",
+	})
 )
 
 func (s *Service) updateMetrics() {

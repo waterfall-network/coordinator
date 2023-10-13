@@ -28,6 +28,27 @@ func (s *Service) voluntaryExitSubscriber(ctx context.Context, msg proto.Message
 	return nil
 }
 
+func (s *Service) committeeIndexBeaconPrevoteSubscriber(_ context.Context, msg proto.Message) error {
+	prevote, ok := msg.(*ethpb.PreVote)
+	if !ok {
+		return fmt.Errorf("wrong type, expected: *ethpb.PreVote got: %T", msg)
+	}
+
+	if prevote.Data == nil {
+		return errors.New("prevote data is nil")
+	}
+
+	exists, err := s.cfg.prevotePool.HasPrevote(prevote)
+	if err != nil {
+		return errors.Wrap(err, "Could not determine if prevote pool has this prevote")
+	}
+	if exists {
+		return nil
+	}
+
+	return s.cfg.prevotePool.SavePrevote(prevote)
+}
+
 func (s *Service) attesterSlashingSubscriber(ctx context.Context, msg proto.Message) error {
 	aSlashing, ok := msg.(*ethpb.AttesterSlashing)
 	if !ok {

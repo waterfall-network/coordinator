@@ -12,6 +12,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition/interop"
 	v "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/validators"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
@@ -42,14 +43,14 @@ func (vs *Server) getPhase0BeaconBlock(ctx context.Context, req *ethpb.BlockRequ
 		log.WithError(err).WithFields(logrus.Fields{
 			"req":         req,
 			"withdrawals": len(blkData.Withdrawals),
-		}).Error("#### build-Phase0-BeaconBlock: could not build block data ###")
+		}).Error("Build beacon block Phase0: could not build data")
 		return nil, fmt.Errorf("could not build block data: %v", err)
 	}
 
 	log.WithFields(logrus.Fields{
 		"req.slot":           req.Slot,
 		"blkData.Candidates": gwatCommon.HashArrayFromBytes(blkData.Eth1Data.Candidates),
-	}).Info("#### get-Phase0Beacon-Block ###")
+	}).Info("Build beacon block Phase0: start")
 
 	// Use zero hash as stub for state root to compute later.
 	stateRoot := params.BeaconConfig().ZeroHash[:]
@@ -114,8 +115,11 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		errWrap := fmt.Errorf("could not get gwat optimistic spines: %v", err)
 		log.WithError(errWrap).WithFields(logrus.Fields{
 			"slot": req.Slot,
-		}).Error("build block data: Could not retrieve of gwat optimistic spines")
+		}).Error("Build block data: Could not retrieve of gwat optimistic spines")
 		return nil, errWrap
+	}
+	if len(optSpines) == 0 {
+		log.Errorf("Empty list of optimistic spines was retrieved for slot: %v", req.Slot)
 	}
 
 	//calculate optimistic parent root
@@ -123,13 +127,13 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"extOptSpines": optSpines,
-		}).Error("build block data: retrieving of gwat optimistic spines failed")
+		}).Error("Build block data: retrieving of gwat optimistic spines failed")
 	}
 
 	log.WithFields(logrus.Fields{
 		"1.parentRoot":   fmt.Sprintf("%#x", parentRoot),
 		"2.extOptSpines": len(optSpines),
-	}).Info("build block data: retrieving of gwat optimistic spines")
+	}).Info("Build block data: retrieving of gwat optimistic spines")
 
 	head, err := vs.StateGen.StateByRoot(ctx, parentRoot)
 	if err != nil {
@@ -146,12 +150,30 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		return nil, fmt.Errorf("could not get ETH1 data: %v", err)
 	}
 
+	prevoteData := vs.PrevotePool.GetPrevoteBySlot(ctx, req.Slot)
 	candidates := helpers.CalculateCandidates(head, optSpines)
+	log.WithFields(logrus.Fields{
+		"0:slot":     req.Slot,
+		"1:prevotes": len(prevoteData),
+	}).Infof("Build block data:")
+
+	if len(prevoteData) == 0 {
+		log.Warnf("Build block data: no prevote data was retrieved for slot %v", req.Slot)
+	} else {
+		prevoteCandidates := vs.prepareAndProcessPrevoteData(candidates, prevoteData, head)
+		if len(prevoteCandidates) == 0 {
+			log.Warn("Build block data: prevote data was processed but returned empty candidates array, fallback to candidates" +
+				" retrieved using optimistic spines")
+		} else {
+			candidates = prevoteCandidates
+		}
+	}
+
 	eth1Data.Candidates = candidates.ToBytes()
 	log.WithFields(logrus.Fields{
 		"1.req.Slot":   req.Slot,
 		"2.candidates": candidates,
-	}).Info("build block data: retrieving of gwat candidates")
+	}).Info("Build block data: candidates which will be added to block")
 
 	deposits, atts, err := vs.packDepositsAndAttestations(ctx, head, eth1Data, parentRoot)
 	if err != nil {
@@ -209,7 +231,7 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		log.WithFields(logrus.Fields{
 			"req.Slot":    req.Slot,
 			"withdrawals": len(withdrawals),
-		}).Info("build block data: add withdrawals")
+		}).Info("Build block data: add withdrawals")
 	}
 
 	return &blockData{
@@ -224,4 +246,23 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		VoluntaryExits:    validExits,
 		Withdrawals:       withdrawals,
 	}, nil
+}
+
+func (vs *Server) prepareAndProcessPrevoteData(optCandidates gwatCommon.HashArray, prevoteData []*ethpb.PreVote, head state.BeaconState) gwatCommon.HashArray {
+	// Make every prevote candidate hash as a separate hasharray to trim non-relevant spines
+	// using head
+	for i, pv := range prevoteData {
+		prevoteSpines := make([]gwatCommon.HashArray, 0, len(gwatCommon.HashArrayFromBytes(pv.Data.Candidates)))
+		for i := 0; i < len(pv.Data.Candidates); i += gwatCommon.HashLength {
+			h := gwatCommon.BytesToHash(pv.Data.Candidates[i : i+gwatCommon.HashLength])
+			prevoteSpines = append(prevoteSpines, gwatCommon.HashArray{h})
+		}
+		prevoteCandidates := helpers.CalculateCandidates(head, prevoteSpines)
+
+		// Replace initial prevote candidates with corresponding processed ones to save candidates-votes mapping
+		prevoteData[i].Data.Candidates = prevoteCandidates.ToBytes()
+	}
+
+	// Process prevote data and calculate longest chain of spines with most of the votes
+	return vs.processPrevoteData(prevoteData, optCandidates)
 }

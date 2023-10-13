@@ -23,6 +23,7 @@ go_library(
         "sync_committee_disabled.go",  # keep
         "sync_committee_head_state.go",
         "sync_subnet_ids.go",
+        "prevote_data.go",
     ],
     importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache",
     visibility = [

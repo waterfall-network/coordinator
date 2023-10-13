@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package ethereum.eth.v1alpha1;
+
+import "proto/eth/ext/options.proto";
+
+option csharp_namespace = "Ethereum.Eth.V1Alpha1";
+option go_package = "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1;eth";
+option java_multiple_files = true;
+option java_outer_classname = "PrevotingProto";
+option java_package = "org.ethereum.eth.v1alpha1";
+option php_namespace = "Ethereum\\Eth\\v1alpha1";
+
+// PreVote represents attestor's view of spine sequence for prevoting process
+
+message PreVoteData {
+  // Slot of collect data.
+  uint64 slot = 1 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Slot"];
+  // The committee index that submitted this prevote.
+  uint64 index = 2 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.CommitteeIndex"];
+  // The 32 byte array of hashes presented sequence of the GWAT spines candidates.
+  // ssz_max = 32 * 128
+  bytes candidates = 3 [(ethereum.eth.ext.ssz_max) = "4096"];
+}
+
+message PreVoteRequest {
+  // Slot for which the prevote should be created.
+  uint64 slot = 1 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Slot"];
+  // Committee index the prevote should be created for.
+  uint64 committee_index = 2  [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.CommitteeIndex"];
+}
+
+message IndexedPreVote {
+  repeated uint64 attesting_indices = 1 [(ethereum.eth.ext.ssz_max) = "2048"];
+  PreVoteData data = 2;
+  // 96 bytes aggregate signature.
+  bytes signature = 3 [(ethereum.eth.ext.ssz_size) = "96"];
+}
+
+message PreVote {
+  bytes aggregation_bits = 1 [(ethereum.eth.ext.ssz_max) = "2048", (ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/go-bitfield.Bitlist"];
+  PreVoteData data = 2;
+  // 96 byte BLS aggregate signature.
+  bytes signature = 3 [(ethereum.eth.ext.ssz_size) = "96"];
+}
+
+message PreVotePacket {
+  repeated PreVote pre_votes = 1;
+}
