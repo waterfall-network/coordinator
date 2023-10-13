@@ -195,6 +195,29 @@ func (v *validator) duty(pubKey [fieldparams.BLSPubkeyLength]byte) (*ethpb.Dutie
 	return nil, fmt.Errorf("pubkey %#x not in duties", bytesutil.Trunc(pubKey[:]))
 }
 
+// Given the validator public key, this gets the validator assignment for next epoch
+func (v *validator) dutyForPrevote(pubKey [fieldparams.BLSPubkeyLength]byte, slot types.Slot) (*ethpb.DutiesResponse_Duty, error) {
+	if v.duties == nil {
+		return nil, errors.New("no duties for validators")
+	}
+
+	if slots.IsEpochStart(slot) {
+		for _, duty := range v.duties.NextEpochDuties {
+			if bytes.Equal(pubKey[:], duty.PublicKey) {
+				return duty, nil
+			}
+		}
+	} else {
+		for _, duty := range v.duties.Duties {
+			if bytes.Equal(pubKey[:], duty.PublicKey) {
+				return duty, nil
+			}
+		}
+	}
+
+	return nil, fmt.Errorf("pubkey %#x not in duties", bytesutil.Trunc(pubKey[:]))
+}
+
 // Given validator's public key, this function returns the signature of an attestation data and its signing root.
 func (v *validator) signAtt(ctx context.Context, pubKey [fieldparams.BLSPubkeyLength]byte, data *ethpb.AttestationData, slot types.Slot) ([]byte, [32]byte, error) {
 	domain, root, err := v.getDomainAndSigningRoot(ctx, data)

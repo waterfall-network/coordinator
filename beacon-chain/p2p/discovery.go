@@ -193,7 +193,8 @@ func (s *Service) createListener(
 		}
 	}
 	dv5Cfg := discover.Config{
-		PrivateKey: privKey,
+		PrivateKey:            privKey,
+		FindNodesBucketLength: s.cfg.FindNodesBucketLen,
 	}
 	dv5Cfg.Bootnodes = []*enode.Node{}
 	for _, addr := range s.cfg.Discv5BootStrapAddr {

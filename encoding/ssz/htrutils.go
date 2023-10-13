@@ -6,7 +6,6 @@ import (
 
 	"github.com/pkg/errors"
 	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
@@ -33,13 +32,13 @@ func ForkRoot(fork *ethpb.Fork) ([32]byte, error) {
 		binary.LittleEndian.PutUint64(forkEpochBuf, uint64(fork.Epoch))
 		fieldRoots[2] = bytesutil.ToBytes32(forkEpochBuf)
 	}
-	return BitwiseMerkleize(hash.CustomSHA256Hasher(), fieldRoots, uint64(len(fieldRoots)), uint64(len(fieldRoots)))
+	return BitwiseMerkleize(fieldRoots, uint64(len(fieldRoots)), uint64(len(fieldRoots)))
 }
 
 // CheckpointRoot computes the HashTreeRoot Merkleization of
 // a InitWithReset struct value according to the Ethereum
 // Simple Serialize specification.
-func CheckpointRoot(hasher HashFn, checkpoint *ethpb.Checkpoint) ([32]byte, error) {
+func CheckpointRoot(checkpoint *ethpb.Checkpoint) ([32]byte, error) {
 	fieldRoots := make([][32]byte, 2)
 	if checkpoint != nil {
 		epochBuf := make([]byte, 8)
@@ -47,7 +46,7 @@ func CheckpointRoot(hasher HashFn, checkpoint *ethpb.Checkpoint) ([32]byte, erro
 		fieldRoots[0] = bytesutil.ToBytes32(epochBuf)
 		fieldRoots[1] = bytesutil.ToBytes32(checkpoint.Root)
 	}
-	return BitwiseMerkleize(hasher, fieldRoots, uint64(len(fieldRoots)), uint64(len(fieldRoots)))
+	return BitwiseMerkleize(fieldRoots, uint64(len(fieldRoots)), uint64(len(fieldRoots)))
 }
 
 // ByteArrayRootWithLimit computes the HashTreeRoot Merkleization of
@@ -58,7 +57,7 @@ func ByteArrayRootWithLimit(roots [][]byte, limit uint64) ([32]byte, error) {
 	for i, r := range roots {
 		copy(newRoots[i][:], r)
 	}
-	result, err := BitwiseMerkleize(hash.CustomSHA256Hasher(), newRoots, uint64(len(newRoots)), limit)
+	result, err := BitwiseMerkleize(newRoots, uint64(len(newRoots)), limit)
 	if err != nil {
 		return [32]byte{}, errors.Wrap(err, "could not compute byte array merkleization")
 	}
@@ -87,14 +86,13 @@ func SlashingsRoot(slashings []uint64) ([32]byte, error) {
 	if err != nil {
 		return [32]byte{}, errors.Wrap(err, "could not pack slashings into chunks")
 	}
-	return BitwiseMerkleize(hash.CustomSHA256Hasher(), slashingChunks, uint64(len(slashingChunks)), uint64(len(slashingChunks)))
+	return BitwiseMerkleize(slashingChunks, uint64(len(slashingChunks)), uint64(len(slashingChunks)))
 }
 
 // TransactionsRoot computes the HTR for the Transactions' property of the ExecutionPayload
 // The code was largely copy/pasted from the code generated to compute the HTR of the entire
 // ExecutionPayload.
 func TransactionsRoot(txs [][]byte) ([32]byte, error) {
-	hasher := hash.CustomSHA256Hasher()
 	txRoots := make([][32]byte, 0)
 	for i := 0; i < len(txs); i++ {
 		rt, err := transactionRoot(txs[i])
@@ -104,7 +102,7 @@ func TransactionsRoot(txs [][]byte) ([32]byte, error) {
 		txRoots = append(txRoots, rt)
 	}
 
-	bytesRoot, err := BitwiseMerkleize(hasher, txRoots, uint64(len(txRoots)), fieldparams.MaxTxsPerPayloadLength)
+	bytesRoot, err := BitwiseMerkleize(txRoots, uint64(len(txRoots)), fieldparams.MaxTxsPerPayloadLength)
 	if err != nil {
 		return [32]byte{}, errors.Wrap(err, "could not compute  merkleization")
 	}
@@ -118,14 +116,13 @@ func TransactionsRoot(txs [][]byte) ([32]byte, error) {
 }
 
 func transactionRoot(tx []byte) ([32]byte, error) {
-	hasher := hash.CustomSHA256Hasher()
 	chunkedRoots, err := PackByChunk([][]byte{tx})
 	if err != nil {
 		return [32]byte{}, err
 	}
 
 	maxLength := (fieldparams.MaxBytesPerTxLength + 31) / 32
-	bytesRoot, err := BitwiseMerkleize(hasher, chunkedRoots, uint64(len(chunkedRoots)), uint64(maxLength))
+	bytesRoot, err := BitwiseMerkleize(chunkedRoots, uint64(len(chunkedRoots)), uint64(maxLength))
 	if err != nil {
 		return [32]byte{}, errors.Wrap(err, "could not compute merkleization")
 	}

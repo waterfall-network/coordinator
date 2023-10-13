@@ -48,7 +48,7 @@ func (v *validator) SubmitPrevote(ctx context.Context, slot types.Slot, pubKey [
 
 	fmtKey := fmt.Sprintf("%#x", pubKey[:])
 	log := log.WithField("pubKey", fmt.Sprintf("%#x", bytesutil.Trunc(pubKey[:]))).WithField("slot", slot)
-	duty, err := v.duty(pubKey)
+	duty, err := v.dutyForPrevote(pubKey, slot)
 	if err != nil {
 		log.WithError(err).Error("Could not fetch validator assignment while prevote")
 		if v.emitAccountMetrics {

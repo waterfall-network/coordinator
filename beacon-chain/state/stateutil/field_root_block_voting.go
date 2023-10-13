@@ -1,20 +1,8 @@
 package stateutil
 
 import (
-	"github.com/pkg/errors"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
-
-// BlockVotingRoot computes the HashTreeRoot Merkleization of
-// a BeaconBlockHeader struct according to the BlockVoting
-// Simple Serialize specification.
-func BlockVotingRoot(hasher ssz.HashFn, blockVoting *ethpb.BlockVoting) ([32]byte, error) {
-	if blockVoting == nil {
-		return [32]byte{}, errors.New("nil blockVoting data")
-	}
-	return BlockVotingDataRootWithHasher(hasher, blockVoting)
-}
 
 // blockVotingsRoot computes the HashTreeRoot Merkleization of
 // a list of BlockVoting structs according to the eth2

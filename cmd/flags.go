@@ -155,6 +155,13 @@ var (
 		Usage: "The max number of p2p peers to maintain.",
 		Value: 45,
 	}
+	// FindNodesBucketLength defines length of known nodes bucket to search until the bucket is full.
+	FindNodesBucketLength = &cli.IntFlag{
+		Name: "find-nodes-bucket-length",
+		Usage: "Length of known nodes bucket to search until the bucket is full. " +
+			"May be fine-tuned to avoid infinite nodes search within small networks.",
+		Value: 16,
+	}
 	// P2PAllowList defines a CIDR subnet to exclusively allow connections.
 	P2PAllowList = &cli.StringFlag{
 		Name: "p2p-allowlist",

@@ -59,4 +59,5 @@ type Validator interface {
 	HandleKeyReload(ctx context.Context, newKeys [][fieldparams.BLSPubkeyLength]byte) (bool, error)
 	CheckDoppelGanger(ctx context.Context) error
 	UpdateFeeRecipient(ctx context.Context, km keymanager.IKeymanager) error
+	RolesAtNextEpoch(ctx context.Context, slot types.Slot) (map[[fieldparams.BLSPubkeyLength]byte][]ValidatorRole, error)
 }
