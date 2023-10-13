@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"sync"
 
 	"github.com/golang/snappy"
 	"github.com/pkg/errors"
@@ -24,11 +25,17 @@ import (
 	"go.opencensus.io/trace"
 )
 
+var stateMu sync.RWMutex
+
 // State returns the saved state using block's signing root,
 // this particular block was used to generate the state.
 func (s *Store) State(ctx context.Context, blockRoot [32]byte) (state.BeaconState, error) {
 	ctx, span := trace.StartSpan(ctx, "BeaconDB.State")
 	defer span.End()
+
+	stateMu.RLock()
+	defer stateMu.RUnlock()
+
 	enc, err := s.stateBytes(ctx, blockRoot)
 	if err != nil {
 		return nil, err
@@ -73,7 +80,7 @@ func (s *Store) State(ctx context.Context, blockRoot [32]byte) (state.BeaconStat
 		ParentSpines: st.SpineData().ParentSpines,
 	})
 
-	return st, err
+	return st.Copy(), err
 }
 
 // StateOrError is just like State(), except it only returns a non-error response
@@ -93,6 +100,9 @@ func (s *Store) StateOrError(ctx context.Context, blockRoot [32]byte) (state.Bea
 func (s *Store) GenesisState(ctx context.Context) (state.BeaconState, error) {
 	ctx, span := trace.StartSpan(ctx, "BeaconDB.GenesisState")
 	defer span.End()
+
+	stateMu.RLock()
+	defer stateMu.RUnlock()
 
 	cached, err := genesis.State(params.BeaconConfig().ConfigName, s.genesisSszPath)
 	if err != nil {
@@ -157,7 +167,7 @@ func (s *Store) GenesisState(ctx context.Context) (state.BeaconState, error) {
 	if st == nil || st.IsNil() {
 		return nil, nil
 	}
-	return st, nil
+	return st.Copy(), nil
 }
 
 // SaveState stores a state to the db using block's signing root which was used to generate the state.
