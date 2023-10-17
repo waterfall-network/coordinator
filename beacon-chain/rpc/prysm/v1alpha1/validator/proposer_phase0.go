@@ -168,6 +168,9 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 			candidates = prevoteCandidates
 		}
 	}
+	if len(candidates) == 0 {
+		candidates = helpers.CalculateCandidates(head, optSpines)
+	}
 
 	eth1Data.Candidates = candidates.ToBytes()
 	log.WithFields(logrus.Fields{

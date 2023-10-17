@@ -138,7 +138,7 @@ func (vs *Server) canonicalEth1Data(
 	}
 	_, canonicalEth1DataHeight, err := vs.Eth1BlockFetcher.BlockExists(ctx, eth1BlockHash)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "could not fetch eth1data height")
+		return nil, nil, errors.Wrapf(err, "could not fetch eth1data by hash=%#x hasSupport=%v", eth1BlockHash, hasSupport)
 	}
 	return canonicalEth1Data, canonicalEth1DataHeight, nil
 }
