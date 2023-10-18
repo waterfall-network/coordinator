@@ -206,6 +206,7 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 				}).Error("Gwat sync: failed 3")
 				return err
 			}
+			go s.handleSyncState(ctx, syncRoot)
 			if err = s.cfg.StateGen.SaveState(ctx, syncRoot, syncState); err != nil {
 				log.WithError(err).WithFields(logrus.Fields{
 					"syncSlot":     syncSlot,

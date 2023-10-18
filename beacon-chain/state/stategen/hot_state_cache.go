@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	// hotStateCacheSize defines the max number of hot state this can cache.
-	hotStateCacheSize = 32
+	// HotStateCacheSize defines the max number of hot state this can cache.
+	HotStateCacheSize = 64
 	// Metrics
 	hotStateCacheHit = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "hot_state_cache_hit",
@@ -33,7 +33,7 @@ type hotStateCache struct {
 // newHotStateCache initializes the map and underlying cache.
 func newHotStateCache() *hotStateCache {
 	return &hotStateCache{
-		cache: lruwrpr.New(hotStateCacheSize),
+		cache: lruwrpr.New(HotStateCacheSize),
 	}
 }
 

@@ -103,7 +103,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		"root":       fmt.Sprintf("%#x", blockRoot),
 		"parentRoot": fmt.Sprintf("%#x", signed.Block().ParentRoot()),
 		"\u2692":     version.BuildId,
-	}).Info("onBlock: staer")
+	}).Info("onBlock: start")
 
 	if len(signed.Block().Body().Withdrawals()) > 0 {
 		for i, itm := range signed.Block().Body().Withdrawals() {
@@ -115,7 +115,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 				"InitTxHash":     fmt.Sprintf("%#x", itm.InitTxHash),
 				"PublicKey":      fmt.Sprintf("%#x", itm.PublicKey),
 				"ValidatorIndex": fmt.Sprintf("%d", itm.ValidatorIndex),
-			}).Info("onBlock:: withdrawal")
+			}).Info("onBlock: withdrawal")
 
 			////todo req. fork change handling
 			//if err := s.cfg.WithdrawalPool.Verify(itm); err != nil {
@@ -141,7 +141,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 				"Epoch":          fmt.Sprintf("%d", itm.Epoch),
 				"InitTxHash":     fmt.Sprintf("%#x", itm.InitTxHash),
 				"ValidatorIndex": fmt.Sprintf("%d", itm.ValidatorIndex),
-			}).Info("onBlock:: exit")
+			}).Info("onBlock: exit")
 
 			////todo req. fork change handling
 			//if err := s.cfg.ExitPool.Verify(itm); err != nil {

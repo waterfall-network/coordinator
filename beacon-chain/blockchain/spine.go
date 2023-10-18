@@ -10,6 +10,7 @@ import (
 	lru "github.com/hashicorp/golang-lru"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
@@ -19,11 +20,42 @@ type spineData struct {
 	optSpines   *lru.Cache
 	optSpinesMu sync.RWMutex
 
+	syncStRoots [][32]byte
+
 	lastValidRoot  []byte
 	lastValidSlot  types.Slot
 	gwatCheckpoint *gwatTypes.Checkpoint //cache for current finalization request checkpoint param
 	coordState     *gwatTypes.Checkpoint //cache for current gwat coordinated state
 	sync.RWMutex
+}
+
+// handleSyncState control states cache usage while sync
+func (s *Service) handleSyncState(ctx context.Context, syncStRoot [32]byte) {
+	limit := stategen.HotStateCacheSize / 2
+	if s.spineData.syncStRoots == nil {
+		s.spineData.syncStRoots = make([][32]byte, 0, limit)
+	}
+	rmRoots := make([][32]byte, 0, 1)
+	syncStRoots := make([][32]byte, 0, len(s.spineData.syncStRoots)+1)
+	syncStRoots = append(syncStRoots, syncStRoot)
+	for _, root := range s.spineData.syncStRoots {
+		if root != syncStRoot {
+			if len(syncStRoots) < limit {
+				syncStRoots = append(syncStRoots, root)
+			} else {
+				rmRoots = append(rmRoots, root)
+			}
+		}
+	}
+	for _, rmRoot := range rmRoots {
+		err := s.cfg.StateGen.DeleteStateFromCaches(ctx, rmRoot)
+		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"root": fmt.Sprintf("%#x", rmRoot),
+			}).Warn("Handle sync state: rm root from cache failed")
+		}
+	}
+	s.spineData.syncStRoots = syncStRoots
 }
 
 func (s *Service) GetOptimisticSpines(ctx context.Context, baseSpine gwatCommon.Hash) ([]gwatCommon.HashArray, error) {
