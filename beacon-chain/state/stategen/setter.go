@@ -20,7 +20,7 @@ func (s *State) SaveState(ctx context.Context, root [32]byte, st state.BeaconSta
 	ctx, span := trace.StartSpan(ctx, "stateGen.SaveState")
 	defer span.End()
 
-	return s.saveStateByRoot(ctx, root, st)
+	return s.saveStateByRoot(ctx, root, st.Copy())
 }
 
 // ForceCheckpoint initiates a cold state save of the given state. This method does not update the
