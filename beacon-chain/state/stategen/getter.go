@@ -47,7 +47,8 @@ func (s *State) StateByRootIfCachedNoCopy(blockRoot [32]byte) state.BeaconState 
 		return nil
 	}
 	bState := s.hotStateCache.getWithoutCopy(blockRoot)
-	return bState
+	//todo check
+	return bState.Copy()
 }
 
 // StateByRoot retrieves the state using input block root.
