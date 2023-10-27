@@ -278,5 +278,5 @@ func (vs *Server) getOptimisticSpine(ctx context.Context) ([]gwatCommon.HashArra
 		ofs++
 		extOptSpines[offset+i] = a[i].Copy()
 	}
-	return optSpines, nil
+	return extOptSpines, nil
 }
