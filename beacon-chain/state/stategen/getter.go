@@ -47,8 +47,7 @@ func (s *State) StateByRootIfCachedNoCopy(blockRoot [32]byte) state.BeaconState 
 		return nil
 	}
 	bState := s.hotStateCache.getWithoutCopy(blockRoot)
-	//todo check
-	return bState.Copy()
+	return bState
 }
 
 // StateByRoot retrieves the state using input block root.
@@ -161,13 +160,15 @@ func (s *State) loadStateByRoot(ctx context.Context, blockRoot [32]byte) (state.
 	defer span.End()
 
 	// First, it checks if the state exists in hot state cache.
-	cachedState := s.hotStateCache.get(blockRoot)
-	if cachedState != nil && !cachedState.IsNil() {
-		log.WithFields(logrus.Fields{
-			"0slot": cachedState.Slot(),
-			"6root": fmt.Sprintf("%#x", blockRoot),
-		}).Debug("Load state by root: from cache 111")
-		return cachedState, nil
+	if s.hotStateCache.isNotMutated(blockRoot) {
+		cachedState := s.hotStateCache.get(blockRoot)
+		if cachedState != nil && !cachedState.IsNil() {
+			log.WithFields(logrus.Fields{
+				"0slot": cachedState.Slot(),
+				"6root": fmt.Sprintf("%#x", blockRoot),
+			}).Debug("Load state by root: from cache 111")
+			return cachedState, nil
+		}
 	}
 
 	// Second, it checks if the state exits in epoch boundary state cache.
@@ -267,7 +268,10 @@ func (s *State) LastAncestorState(ctx context.Context, root [32]byte) (state.Bea
 			return nil, errors.Wrapf(ErrNoDataForSlot, "slot %d not in db due to checkpoint sync", ps)
 		}
 		// Does the state exist in the hot state cache.
-		if s.hotStateCache.has(parentRoot) {
+		//if s.hotStateCache.has(parentRoot) {
+		//	return s.hotStateCache.get(parentRoot), nil
+		//}
+		if s.hotStateCache.isNotMutated(parentRoot) {
 			return s.hotStateCache.get(parentRoot), nil
 		}
 
