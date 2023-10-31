@@ -196,7 +196,7 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 				continue
 			}
 
-			syncState, err := s.cfg.StateGen.StateByRoot(ctx, syncRoot)
+			syncState, err := s.cfg.StateGen.StateByRootNotMutated(ctx, syncRoot)
 			if err != nil {
 				log.WithError(err).WithFields(logrus.Fields{
 					"syncSlot": syncSlot,
@@ -357,7 +357,7 @@ func (s *Service) runProcessDagFinalize() {
 //	defer span.End()
 //
 //	if !s.cfg.BeaconDB.HasState(ctx, root) {
-//		syncState, err := s.cfg.StateGen.StateByRoot(ctx, root)
+//		syncState, err := s.cfg.StateGen.StateByRootNotMutated(ctx, root)
 //		if err != nil {
 //			log.WithError(err).WithFields(logrus.Fields{
 //				"blockRoot": fmt.Sprintf("%#x", root),
@@ -433,7 +433,7 @@ func (s *Service) processDagFinalization(headState state.BeaconState, syncMode g
 				s.CacheGwatCoordinatedState(paramCp)
 			} else {
 				//get gwat matched checkpoint
-				cpState, err := s.cfg.StateGen.StateByRoot(ctx, bytesutil.ToBytes32(finRes.CpRoot.Bytes()))
+				cpState, err := s.cfg.StateGen.StateByRootNotMutated(ctx, bytesutil.ToBytes32(finRes.CpRoot.Bytes()))
 				if err != nil {
 					log.WithError(errors.Wrapf(err,
 						"get gwat checkpoint state failed for epoch=%d root=%x", finRes.CpEpoch, finRes.CpRoot),
@@ -545,7 +545,7 @@ func (s *Service) getRequestGwatCheckpoint(
 	}
 	// create
 	cpRoot := bytesutil.ToBytes32(checkpoint.Root)
-	cpState, err := s.cfg.StateGen.StateByRoot(ctx, cpRoot)
+	cpState, err := s.cfg.StateGen.StateByRootNotMutated(ctx, cpRoot)
 	if err != nil {
 		return cpFinalized, err
 	}
@@ -604,7 +604,7 @@ func (s *Service) collectValidatorSyncData(ctx context.Context, st state.BeaconS
 	// withdrawals (update balance) calculate for finalized cp
 	checkpoint := st.FinalizedCheckpoint()
 	cpRoot := bytesutil.ToBytes32(checkpoint.Root)
-	cpState, err := s.cfg.StateGen.StateByRoot(ctx, cpRoot)
+	cpState, err := s.cfg.StateGen.StateByRootNotMutated(ctx, cpRoot)
 	if err != nil {
 		return nil, err
 	}
@@ -697,7 +697,7 @@ func (s *Service) initCoordinatedState(ctx context.Context) error {
 	// retrieve checkpoint state
 	cpRoot := bytesutil.ToBytes32(coordState.CpRoot.Bytes())
 
-	cpState, err := s.cfg.StateGen.StateByRoot(ctx, cpRoot)
+	cpState, err := s.cfg.StateGen.StateByRootNotMutated(ctx, cpRoot)
 	if err != nil || cpState == nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"cpRoot": fmt.Sprintf("%#x", cpRoot),
@@ -743,7 +743,7 @@ func (s *Service) createGenesisCoordinatedCheckpoint(ctx context.Context, cpFinE
 	if err != nil {
 		return nil, errors.Wrap(err, "get genesis root failed")
 	}
-	genesisSt, err := s.cfg.StateGen.StateByRoot(ctx, genRoot)
+	genesisSt, err := s.cfg.StateGen.StateByRootNotMutated(ctx, genRoot)
 	if err != nil {
 		return nil, errors.Wrap(err, "get genesis state failed")
 	}
