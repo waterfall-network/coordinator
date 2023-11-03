@@ -33,9 +33,8 @@ func (s *Store) ReadSpines(ctx context.Context, key [32]byte) (wrapper.Spines, e
 	})
 	var data wrapper.Spines
 	if err == nil && raw != nil {
-		s.spinesCache.Add(key, wrapper.Spines(raw))
-		cached, _ := s.spinesCache.Get(key)
-		data = bytesutil.SafeCopyBytes(cached.(wrapper.Spines))
+		data = bytesutil.SafeCopyBytes(raw)
+		s.spinesCache.Add(key, data)
 	}
 	return data, err
 }

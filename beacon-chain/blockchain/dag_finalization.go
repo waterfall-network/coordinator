@@ -21,6 +21,10 @@ import (
 	"go.opencensus.io/trace"
 )
 
+var (
+	errGwatSyncInProgress = errors.New("Gwat sync is in progress")
+)
+
 // initGwatSync initialize initial state,
 // then start gwat synchronization
 // and then run finalization processing
@@ -65,6 +69,12 @@ func (s *Service) initGwatSync() {
 			err = s.runGwatSynchronization(s.ctx)
 			if err != nil {
 				log.WithError(err).Warning("Gwat sync: attempt failed ...")
+				if !errors.Is(err, errGwatSyncInProgress) {
+					s.ResetCachedGwatCoordinatedState()
+				}
+				if errors.Is(err, errors.New("invalid base spine")) {
+					s.cfg.StateGen.PurgeSyncStateCache()
+				}
 				continue
 			}
 			log.Info("Gwat sync: success")
@@ -83,6 +93,17 @@ func (s *Service) initParallelGwatSync(ctx context.Context) {
 
 	var err error
 
+	if s.isGwatSyncing.IsSet() {
+		log.WithFields(logrus.Fields{
+			"coordState": s.GetCachedGwatCoordinatedState(),
+		}).Info("Parallel Gwat sync: skip (busy)")
+		return
+	}
+
+	log.WithFields(logrus.Fields{
+		"coordState": s.GetCachedGwatCoordinatedState(),
+	}).Info("Parallel Gwat sync: coordState")
+
 	// 1. Check and init coordinated state
 	if s.GetCachedGwatCoordinatedState() == nil {
 		err = s.initCoordinatedState(ctx)
@@ -96,7 +117,12 @@ func (s *Service) initParallelGwatSync(ctx context.Context) {
 	err = s.runGwatSynchronization(ctx)
 	if err != nil {
 		log.WithError(err).Warning("Parallel Gwat sync: attempt failed ...")
-		s.ResetCachedGwatCoordinatedState()
+		if !errors.Is(err, errGwatSyncInProgress) {
+			s.ResetCachedGwatCoordinatedState()
+		}
+		if errors.Is(err, errors.New("invalid base spine")) {
+			s.cfg.StateGen.PurgeSyncStateCache()
+		}
 		return
 	}
 	log.Info("Parallel Gwat sync: success")
@@ -104,214 +130,206 @@ func (s *Service) initParallelGwatSync(ctx context.Context) {
 
 // runGwatSynchronization procedure of gwat synchronization.
 func (s *Service) runGwatSynchronization(ctx context.Context) error {
-	if !s.isGwatSyncing.IsSet() {
-		s.isGwatSyncing.Set()
-		defer func() {
-			s.isGwatSyncing.UnSet()
-		}()
-		// skip if before genesis time
-		if s.CurrentSlot() == 0 {
-			return nil
+	if s.isGwatSyncing.IsSet() {
+		log.Info("Gwat sync: gwat syn is already in progress, skipping this call")
+		return errGwatSyncInProgress
+	}
+	s.isGwatSyncing.Set()
+	defer func() {
+		s.isGwatSyncing.UnSet()
+	}()
+	// skip if before genesis time
+	if s.CurrentSlot() == 0 {
+		return nil
+	}
+
+	gwatCheckpoint := s.GetCachedGwatCoordinatedState()
+	if gwatCheckpoint == nil {
+		return errNoCoordState
+	}
+	log.WithFields(logrus.Fields{
+		"gwatCoord.Root":  fmt.Sprintf("%#x", gwatCheckpoint.Root),
+		"gwatCoord.Spine": fmt.Sprintf("%#x", gwatCheckpoint.Spine),
+		"gwatCoord.Epoch": gwatCheckpoint.Epoch,
+	}).Info("Gwat sync: gwat coordinated state")
+
+	cpEpoch := types.Epoch(gwatCheckpoint.Epoch)
+
+	var syncEpoch types.Epoch
+	syncSlot, err := slots.EpochStart(cpEpoch + 1)
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"syncSlot": syncSlot,
+			"headSlot": s.headSlot(),
+			"headRoot": fmt.Sprintf("%#x", s.headRoot()),
+		}).Error("Gwat sync: calc epoch start failed")
+		return err
+	}
+
+	log.WithFields(logrus.Fields{
+		"headSlot": s.headSlot(),
+		"headRoot": fmt.Sprintf("%#x", s.headRoot()),
+		"syncSlot": syncSlot,
+	}).Info("Gwat sync: sync start")
+
+	for syncSlot <= s.HeadSlot() {
+
+		log.WithFields(logrus.Fields{
+			"syncSlot": syncSlot,
+			"headSlot": s.headSlot(),
+		}).Debug("Gwat sync: 000")
+
+		syncRoot := params.BeaconConfig().ZeroHash
+		_, roots, err := s.cfg.BeaconDB.BlockRootsBySlot(ctx, syncSlot)
+		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"syncSlot": syncSlot,
+				"headSlot": s.headSlot(),
+				"headRoot": fmt.Sprintf("%#x", s.headRoot()),
+			}).Error("Gwat sync: failed 1")
+			return err
+		}
+		if len(roots) == 0 {
+			syncSlot++
+			continue
+		}
+		if len(roots) == 1 {
+			syncRoot = roots[0]
+		} else {
+			for _, r := range roots {
+				canonical, err := s.IsCanonical(ctx, r)
+				if err != nil {
+					log.WithError(err).WithFields(logrus.Fields{
+						"syncSlot": syncSlot,
+						"headSlot": s.headSlot(),
+						"headRoot": fmt.Sprintf("%#x", s.headRoot()),
+					}).Error("Gwat sync: failed 2")
+					return err
+				}
+				if canonical {
+					syncRoot = r
+					break
+				}
+			}
 		}
 
-		gwatCheckpoint := s.GetCachedGwatCoordinatedState()
+		log.WithFields(logrus.Fields{
+			"syncSlot": syncSlot,
+			"headSlot": s.headSlot(),
+			"syncRoot": fmt.Sprintf("%#x", syncRoot),
+			"headRoot": fmt.Sprintf("%#x", s.headRoot()),
+		}).Debug("Gwat sync: 111")
+
+		if syncRoot == params.BeaconConfig().ZeroHash {
+			syncSlot++
+			continue
+		}
+
+		syncState, err := s.cfg.StateGen.SyncStateByRoot(ctx, syncRoot)
+		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"syncSlot": syncSlot,
+				"headSlot": s.headSlot(),
+				"syncRoot": fmt.Sprintf("%#x", syncRoot),
+				"headRoot": fmt.Sprintf("%#x", s.headRoot()),
+			}).Error("Gwat sync: failed 3")
+			return err
+		}
+
+		if err := s.cfg.StateGen.AddSyncStateCache(syncRoot, syncState); err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"slot": syncState.Slot(),
+				"root": fmt.Sprintf("%#x", syncRoot),
+			}).Error("Gwat sync: cache state failed (sync state)")
+			s.cfg.StateGen.RemoveSyncStateCache(syncRoot)
+		}
+
+		log.WithFields(logrus.Fields{
+			"epoch": slots.ToEpoch(syncState.Slot()),
+			"slot":  fmt.Sprintf("%d", syncState.Slot()),
+			"root":  fmt.Sprintf("%#x", syncRoot),
+		}).Info("Sync state: sync")
+
+		log.WithFields(logrus.Fields{
+			"syncSlot":     syncSlot,
+			"headSlot":     s.headSlot(),
+			"syncRoot":     fmt.Sprintf("%#x", syncRoot),
+			"headRoot":     fmt.Sprintf("%#x", s.headRoot()),
+			"Prefix":       gwatCommon.HashArrayFromBytes(syncState.SpineData().Prefix),
+			"Finalization": gwatCommon.HashArrayFromBytes(syncState.SpineData().Finalization),
+			"CpFinalized":  gwatCommon.HashArrayFromBytes(syncState.SpineData().CpFinalized),
+		}).Debug("Gwat sync: 222")
+
+		err = s.processDagFinalization(syncState, gwatTypes.MainSync)
+		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"syncSlot": syncSlot,
+				"headSlot": s.headSlot(),
+				"syncRoot": fmt.Sprintf("%#x", syncRoot),
+				"headRoot": fmt.Sprintf("%#x", s.headRoot()),
+			}).Error("Gwat sync: failed 4")
+			return err
+		}
+
+		// sync next epoch
+		syncEpoch = slots.ToEpoch(syncSlot)
+		syncSlot, err = slots.EpochStart(syncEpoch + 1)
+		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"syncSlot": syncSlot,
+				"headSlot": s.headSlot(),
+				"syncRoot": fmt.Sprintf("%#x", syncRoot),
+				"headRoot": fmt.Sprintf("%#x", s.headRoot()),
+			}).Error("Gwat sync: failed 5")
+			return err
+		}
+
+		log.WithFields(logrus.Fields{
+			"syncSlot": syncSlot,
+			"syncRoot": fmt.Sprintf("%#x", syncRoot),
+		}).Info("Gwat sync: main success")
+	}
+
+	//if is parallel gwat sync running
+	if !s.IsSynced() {
+		// set synced epoch to coordinated state to avoid duplication of finalization for next call.
+		gwatCheckpoint = s.GetCachedGwatCoordinatedState()
 		if gwatCheckpoint == nil {
 			return errNoCoordState
 		}
-		log.WithFields(logrus.Fields{
-			"gwatCoord.Root":  fmt.Sprintf("%#x", gwatCheckpoint.Root),
-			"gwatCoord.Spine": fmt.Sprintf("%#x", gwatCheckpoint.Spine),
-			"gwatCoord.Epoch": gwatCheckpoint.Epoch,
-		}).Info("Gwat sync: gwat coordinated state")
-
-		cpEpoch := types.Epoch(gwatCheckpoint.Epoch)
-
-		var syncEpoch types.Epoch
-		syncSlot, err := slots.EpochStart(cpEpoch + 1)
-		if err != nil {
-			log.WithError(err).WithFields(logrus.Fields{
-				"syncSlot": syncSlot,
-				"headSlot": s.headSlot(),
-				"headRoot": fmt.Sprintf("%#x", s.headRoot()),
-			}).Error("Gwat sync: calc epoch start failed")
-			return err
-		}
-
-		log.WithFields(logrus.Fields{
-			"headSlot": s.headSlot(),
-			"headRoot": fmt.Sprintf("%#x", s.headRoot()),
-			"syncSlot": syncSlot,
-		}).Info("Gwat sync: sync start")
-
-		for syncSlot <= s.HeadSlot() {
-
-			log.WithFields(logrus.Fields{
-				"syncSlot": syncSlot,
-				"headSlot": s.headSlot(),
-			}).Debug("Gwat sync: 000")
-
-			syncRoot := params.BeaconConfig().ZeroHash
-			_, roots, err := s.cfg.BeaconDB.BlockRootsBySlot(ctx, syncSlot)
-			if err != nil {
-				log.WithError(err).WithFields(logrus.Fields{
-					"syncSlot": syncSlot,
-					"headSlot": s.headSlot(),
-					"headRoot": fmt.Sprintf("%#x", s.headRoot()),
-				}).Error("Gwat sync: failed 1")
-				return err
-			}
-			if len(roots) == 0 {
-				syncSlot++
-				continue
-			}
-			if len(roots) == 1 {
-				syncRoot = roots[0]
-			} else {
-				for _, r := range roots {
-					canonical, err := s.IsCanonical(ctx, r)
-					if err != nil {
-						log.WithError(err).WithFields(logrus.Fields{
-							"syncSlot": syncSlot,
-							"headSlot": s.headSlot(),
-							"headRoot": fmt.Sprintf("%#x", s.headRoot()),
-						}).Error("Gwat sync: failed 2")
-						return err
-					}
-					if canonical {
-						syncRoot = r
-						break
-					}
-				}
-			}
-
-			log.WithFields(logrus.Fields{
-				"syncSlot": syncSlot,
-				"headSlot": s.headSlot(),
-				"syncRoot": fmt.Sprintf("%#x", syncRoot),
-				"headRoot": fmt.Sprintf("%#x", s.headRoot()),
-			}).Debug("Gwat sync: 111")
-
-			if syncRoot == params.BeaconConfig().ZeroHash {
-				syncSlot++
-				continue
-			}
-
-			syncState, err := s.cfg.StateGen.StateByRootNotMutated(ctx, syncRoot)
-			if err != nil {
-				log.WithError(err).WithFields(logrus.Fields{
-					"syncSlot": syncSlot,
-					"headSlot": s.headSlot(),
-					"syncRoot": fmt.Sprintf("%#x", syncRoot),
-					"headRoot": fmt.Sprintf("%#x", s.headRoot()),
-				}).Error("Gwat sync: failed 3")
-				return err
-			}
-			go s.handleSyncState(ctx, syncRoot)
-			if err = s.cfg.StateGen.SaveState(ctx, syncRoot, syncState); err != nil {
-				log.WithError(err).WithFields(logrus.Fields{
-					"syncSlot":     syncSlot,
-					"headSlot":     s.headSlot(),
-					"syncRoot":     fmt.Sprintf("%#x", syncRoot),
-					"headRoot":     fmt.Sprintf("%#x", s.headRoot()),
-					"Prefix":       gwatCommon.HashArrayFromBytes(syncState.SpineData().Prefix),
-					"Finalization": gwatCommon.HashArrayFromBytes(syncState.SpineData().Finalization),
-					"CpFinalized":  gwatCommon.HashArrayFromBytes(syncState.SpineData().CpFinalized),
-				}).Error("Gwat sync: save sync state failed")
-				return errors.Wrap(err, "could not save state")
-			}
-
-			log.WithFields(logrus.Fields{
-				"epoch": slots.ToEpoch(syncState.Slot()),
-				"slot":  fmt.Sprintf("%d", syncState.Slot()),
-				"root":  fmt.Sprintf("%#x", syncRoot),
-			}).Info("Sync state: sync")
-
-			log.WithFields(logrus.Fields{
-				"syncSlot":     syncSlot,
-				"headSlot":     s.headSlot(),
-				"syncRoot":     fmt.Sprintf("%#x", syncRoot),
-				"headRoot":     fmt.Sprintf("%#x", s.headRoot()),
-				"Prefix":       gwatCommon.HashArrayFromBytes(syncState.SpineData().Prefix),
-				"Finalization": gwatCommon.HashArrayFromBytes(syncState.SpineData().Finalization),
-				"CpFinalized":  gwatCommon.HashArrayFromBytes(syncState.SpineData().CpFinalized),
-			}).Debug("Gwat sync: 222")
-
-			err = s.processDagFinalization(syncState, gwatTypes.MainSync)
-			if err != nil {
-				log.WithError(err).WithFields(logrus.Fields{
-					"syncSlot": syncSlot,
-					"headSlot": s.headSlot(),
-					"syncRoot": fmt.Sprintf("%#x", syncRoot),
-					"headRoot": fmt.Sprintf("%#x", s.headRoot()),
-				}).Error("Gwat sync: failed 4")
-				return err
-			}
-
-			// sync next epoch
-			syncEpoch = slots.ToEpoch(syncSlot)
-			syncSlot, err = slots.EpochStart(syncEpoch + 1)
-			if err != nil {
-				log.WithError(err).WithFields(logrus.Fields{
-					"syncSlot": syncSlot,
-					"headSlot": s.headSlot(),
-					"syncRoot": fmt.Sprintf("%#x", syncRoot),
-					"headRoot": fmt.Sprintf("%#x", s.headRoot()),
-				}).Error("Gwat sync: failed 5")
-				return err
-			}
-
-			log.WithFields(logrus.Fields{
-				"syncSlot": syncSlot,
-				"headSlot": s.headSlot(),
-				"syncRoot": fmt.Sprintf("%#x", syncRoot),
-				"headRoot": fmt.Sprintf("%#x", s.headRoot()),
-			}).Info("Gwat sync: main success")
-		}
-
-		//if is parallel gwat sync running
-		if !s.IsSynced() {
-			// set synced epoch to coordinated state to avoid duplication of finalization for next call.
-			gwatCheckpoint = s.GetCachedGwatCoordinatedState()
-			if gwatCheckpoint == nil {
-				return errNoCoordState
-			}
-			if syncEpoch == 0 {
-				return nil
-			}
-			gwatCheckpoint.Epoch = uint64(syncEpoch)
-			s.CacheGwatCoordinatedState(gwatCheckpoint)
+		if syncEpoch == 0 {
 			return nil
 		}
-
-		// head sync
-		headState, err := s.HeadState(ctx)
-		if err != nil {
-			log.WithError(err).WithFields(logrus.Fields{
-				"headSlot": s.headSlot(),
-				"headRoot": fmt.Sprintf("%#x", s.headRoot()),
-			}).Error("Gwat sync: head state failed")
-			return err
-		}
-		err = s.processDagFinalization(headState, gwatTypes.HeadSync)
-		if err != nil {
-			log.WithError(err).WithFields(logrus.Fields{
-				"headSlot": s.headSlot(),
-				"headRoot": fmt.Sprintf("%#x", s.headRoot()),
-			}).Error("Gwat sync: head failed")
-			return err
-		}
-
-		log.WithFields(logrus.Fields{
-			"curSlot":  fmt.Sprintf("%#x", s.CurrentSlot()),
-			"headSlot": fmt.Sprintf("%#x", s.HeadSlot()),
-			"headRoot": fmt.Sprintf("%#x", s.headRoot()),
-		}).Info("Gwat sync: head success")
-
+		gwatCheckpoint.Epoch = uint64(syncEpoch)
+		s.CacheGwatCoordinatedState(gwatCheckpoint)
 		return nil
-	} else {
-		log.Info("Gwat sync: gwat syn is already in progress, skipping this call")
-		return errors.New("Gwat sync is in progress")
 	}
+
+	// head sync
+	headState, err := s.HeadState(ctx)
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"headSlot": s.headSlot(),
+			"headRoot": fmt.Sprintf("%#x", s.headRoot()),
+		}).Error("Gwat sync: head state failed")
+		return err
+	}
+	err = s.processDagFinalization(headState, gwatTypes.HeadSync)
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"headSlot": s.headSlot(),
+			"headRoot": fmt.Sprintf("%#x", s.headRoot()),
+		}).Error("Gwat sync: head failed")
+		return err
+	}
+
+	log.WithFields(logrus.Fields{
+		"curSlot":  fmt.Sprintf("%#x", s.CurrentSlot()),
+		"headSlot": fmt.Sprintf("%#x", s.HeadSlot()),
+		"headRoot": fmt.Sprintf("%#x", s.headRoot()),
+	}).Info("Gwat sync: head success")
+
+	return nil
 }
 
 // runProcessDagFinalize This routine processes gwat finalization process.
@@ -336,6 +354,7 @@ func (s *Service) runProcessDagFinalize() {
 						"newHead.root": fmt.Sprintf("%#x", newHead.root),
 						"newHead.slot": newHead.slot,
 					}).Error("Dag finalization: failed start sync sync procedure")
+					s.ResetCachedGwatCoordinatedState()
 					go s.initGwatSync()
 					return
 				}
@@ -349,41 +368,6 @@ func (s *Service) runProcessDagFinalize() {
 		}
 	}()
 }
-
-//// createGwatSyncParam calculate and save gwat sync params
-//// Deprecated
-//func (s *Service) saveGwatSyncState(ctx context.Context, root [32]byte) error {
-//	ctx, span := trace.StartSpan(ctx, "blockChain.saveGwatSyncState")
-//	defer span.End()
-//
-//	if !s.cfg.BeaconDB.HasState(ctx, root) {
-//		syncState, err := s.cfg.StateGen.StateByRootNotMutated(ctx, root)
-//		if err != nil {
-//			log.WithError(err).WithFields(logrus.Fields{
-//				"blockRoot": fmt.Sprintf("%#x", root),
-//			}).Error("Save gwat sync state: get state failed")
-//			return err
-//		}
-//		if err = s.cfg.BeaconDB.SaveState(ctx, syncState, root); err != nil {
-//			log.WithError(err).WithFields(logrus.Fields{
-//				"blockRoot": fmt.Sprintf("%#x", root),
-//			}).Error("Save gwat sync state: save failed")
-//			return err
-//		}
-//		log.WithFields(logrus.Fields{
-//			"slot": syncState.Slot(),
-//			"root": fmt.Sprintf("%#x", root),
-//		}).Info("Saved state in DB for sync")
-//
-//		log.WithFields(logrus.Fields{
-//			"epoch": slots.ToEpoch(syncState.Slot()),
-//			"slot":  fmt.Sprintf("%d", syncState.Slot()),
-//			"root":  fmt.Sprintf("%#x", root),
-//		}).Info("Sync state: save")
-//
-//	}
-//	return nil
-//}
 
 // processDagFinalization implements dag finalization procedure.
 func (s *Service) processDagFinalization(headState state.BeaconState, syncMode gwatTypes.SyncMode) error {
@@ -433,7 +417,8 @@ func (s *Service) processDagFinalization(headState state.BeaconState, syncMode g
 				s.CacheGwatCoordinatedState(paramCp)
 			} else {
 				//get gwat matched checkpoint
-				cpState, err := s.cfg.StateGen.StateByRootNotMutated(ctx, bytesutil.ToBytes32(finRes.CpRoot.Bytes()))
+				cpRoot32 := bytesutil.ToBytes32(finRes.CpRoot.Bytes())
+				cpState, err := s.cfg.StateGen.SyncStateByRoot(ctx, cpRoot32)
 				if err != nil {
 					log.WithError(errors.Wrapf(err,
 						"get gwat checkpoint state failed for epoch=%d root=%x", finRes.CpEpoch, finRes.CpRoot),
@@ -446,6 +431,15 @@ func (s *Service) processDagFinalization(headState state.BeaconState, syncMode g
 					).Error("Dag finalization: state error")
 					return errors.Wrapf(err, "gwat checkpoint state not found for epoch=%d root=%x", finRes.CpEpoch, finRes.CpRoot)
 				}
+
+				if err := s.cfg.StateGen.AddSyncStateCache(cpRoot32, cpState); err != nil {
+					log.WithError(err).WithFields(logrus.Fields{
+						"slot": cpState.Slot(),
+						"root": fmt.Sprintf("%#x", cpRoot32),
+					}).Error("Gwat sync: cache state failed (cp root)")
+					s.cfg.StateGen.RemoveSyncStateCache(cpRoot32)
+				}
+
 				cpRoot := gwatCommon.BytesToHash(finRes.CpRoot.Bytes())
 				cpEpoch := uint64(slots.ToEpoch(cpState.Slot()))
 				finSeq := gwatCommon.HashArrayFromBytes(cpState.SpineData().Finalization)
@@ -487,8 +481,6 @@ func (s *Service) collectFinalizationParams(
 	}
 	var (
 		paramCpFinalized *gwatTypes.Checkpoint
-		baseSpine        gwatCommon.Hash
-		finalizationSeq  gwatCommon.HashArray
 		err              error
 	)
 
@@ -509,15 +501,10 @@ func (s *Service) collectFinalizationParams(
 		"paramCpFinalized.Epoch":    paramCpFinalized.Epoch,
 		"paramCpFinalized.Root":     fmt.Sprintf("%#x", paramCpFinalized.Root),
 		"paramCpFinalized.Spine":    fmt.Sprintf("%#x", paramCpFinalized.Spine),
-	}).Info("Collect finalization params: finalized checkpoint")
+	}).Debug("Collect finalization params: finalized checkpoint")
 
-	cpFinalized := gwatCommon.HashArrayFromBytes(headState.SpineData().CpFinalized)
-	finalization := gwatCommon.HashArrayFromBytes(headState.SpineData().Finalization)
-	baseSpine = cpFinalized[0]
-	finalizationSeq = append(cpFinalized, finalization...)
-	if baseIx := finalizationSeq.IndexOf(baseSpine); baseIx > -1 {
-		finalizationSeq = finalizationSeq[baseIx+1:]
-	}
+	finalizationSeq := helpers.GetFinalizationSequence(headState)
+	baseSpine := helpers.GetBaseSpine(headState)
 
 	return &gwatTypes.FinalizationParams{
 		Spines:      finalizationSeq.Uniq(),
@@ -545,10 +532,18 @@ func (s *Service) getRequestGwatCheckpoint(
 	}
 	// create
 	cpRoot := bytesutil.ToBytes32(checkpoint.Root)
-	cpState, err := s.cfg.StateGen.StateByRootNotMutated(ctx, cpRoot)
+	cpState, err := s.cfg.StateGen.SyncStateByRoot(ctx, cpRoot)
 	if err != nil {
 		return cpFinalized, err
 	}
+	if err = s.cfg.StateGen.AddSyncStateCache(cpRoot, cpState); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"slot": cpState.Slot(),
+			"root": fmt.Sprintf("%#x", cpRoot),
+		}).Error("Gwat sync: cache state failed (param cp)")
+		s.cfg.StateGen.RemoveSyncStateCache(cpRoot)
+	}
+
 	return &gwatTypes.Checkpoint{
 		FinEpoch: uint64(slots.ToEpoch(headState.Slot())),
 		Epoch:    uint64(checkpoint.Epoch),
@@ -604,7 +599,7 @@ func (s *Service) collectValidatorSyncData(ctx context.Context, st state.BeaconS
 	// withdrawals (update balance) calculate for finalized cp
 	checkpoint := st.FinalizedCheckpoint()
 	cpRoot := bytesutil.ToBytes32(checkpoint.Root)
-	cpState, err := s.cfg.StateGen.StateByRootNotMutated(ctx, cpRoot)
+	cpState, err := s.cfg.StateGen.SyncStateByRoot(ctx, cpRoot)
 	if err != nil {
 		return nil, err
 	}
@@ -664,6 +659,13 @@ func (s *Service) initCoordinatedState(ctx context.Context) error {
 		}).Error("Init coordinated state: get dag coordinated state failed")
 		return errors.Wrap(err, "Init coordinated state: get dag coordinated state failed")
 	}
+
+	log.WithFields(logrus.Fields{
+		"CpEpoch": coordState.CpEpoch,
+		"LFSpine": fmt.Sprintf("%#x", coordState.LFSpine),
+		"CpRoot":  fmt.Sprintf("%#x", coordState.CpRoot),
+	}).Debug("Gwat sync: coordinated state retrieved")
+
 	// if gwat at genesis state
 	if coordState.CpRoot == nil || coordState.CpEpoch == nil || *coordState.CpRoot == (gwatCommon.Hash{}) {
 		coordCp, err = s.createGenesisCoordinatedCheckpoint(ctx, 1)
@@ -697,7 +699,7 @@ func (s *Service) initCoordinatedState(ctx context.Context) error {
 	// retrieve checkpoint state
 	cpRoot := bytesutil.ToBytes32(coordState.CpRoot.Bytes())
 
-	cpState, err := s.cfg.StateGen.StateByRootNotMutated(ctx, cpRoot)
+	cpState, err := s.cfg.StateGen.SyncStateByRoot(ctx, cpRoot)
 	if err != nil || cpState == nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"cpRoot": fmt.Sprintf("%#x", cpRoot),
@@ -711,22 +713,7 @@ func (s *Service) initCoordinatedState(ctx context.Context) error {
 		"cpRoot":  fmt.Sprintf("%#x", cpRoot),
 	}).Debug("Init coordinated state: current result")
 
-	finSeq := gwatCommon.HashArrayFromBytes(cpState.SpineData().Finalization)
-	if len(finSeq) == 0 {
-		finSeq = gwatCommon.HashArrayFromBytes(cpState.SpineData().CpFinalized)
-	}
-	lfspine := gwatCommon.Hash{}
-	if len(finSeq) == 0 {
-		log.WithFields(logrus.Fields{
-			"cpSlot":   cpState.Slot(),
-			"cpEpoch":  uint64(slots.ToEpoch(cpState.Slot())),
-			"cpRoot":   fmt.Sprintf("%#x", cpRoot),
-			"cpFinSeq": finSeq,
-		}).Error("Init coordinated state: finalization empty")
-		//return errors.Wrap(err, "Init coordinated state: finalization empty")
-	} else {
-		lfspine = finSeq[len(finSeq)-1]
-	}
+	lfspine := helpers.GetTerminalFinalizedSpine(cpState)
 
 	// cache coordinated checkpoint
 	s.CacheGwatCoordinatedState(&gwatTypes.Checkpoint{
@@ -743,7 +730,7 @@ func (s *Service) createGenesisCoordinatedCheckpoint(ctx context.Context, cpFinE
 	if err != nil {
 		return nil, errors.Wrap(err, "get genesis root failed")
 	}
-	genesisSt, err := s.cfg.StateGen.StateByRootNotMutated(ctx, genRoot)
+	genesisSt, err := s.cfg.StateGen.SyncStateByRoot(ctx, genRoot)
 	if err != nil {
 		return nil, errors.Wrap(err, "get genesis state failed")
 	}
