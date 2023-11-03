@@ -40,7 +40,6 @@ import (
 	prysmTime "gitlab.waterfall.network/waterfall/protocol/coordinator/time"
 	ethereum "gitlab.waterfall.network/waterfall/protocol/gwat"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/abi/bind"
-	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
@@ -95,9 +94,9 @@ type ChainInfoFetcher interface {
 // POWBlockFetcher defines a struct that can retrieve mainchain blocks.
 type POWBlockFetcher interface {
 	BlockTimeByHeight(ctx context.Context, height *big.Int) (uint64, error)
-	BlockHashByHeight(ctx context.Context, height *big.Int) (common.Hash, error)
-	BlockExists(ctx context.Context, hash common.Hash) (bool, *big.Int, error)
-	BlockExistsWithCache(ctx context.Context, hash common.Hash) (bool, *big.Int, error)
+	BlockHashByHeight(ctx context.Context, height *big.Int) (gwatCommon.Hash, error)
+	BlockExists(ctx context.Context, hash gwatCommon.Hash) (bool, *big.Int, error)
+	BlockExistsWithCache(ctx context.Context, hash gwatCommon.Hash) (bool, *big.Int, error)
 
 	ExecutionDagGetOptimisticSpines(ctx context.Context, fromSpine gwatCommon.Hash) ([]gwatCommon.HashArray, error)
 	ExecutionDagGetCandidates(ctx context.Context, slot ethTypes.Slot) (gwatCommon.HashArray, error)
@@ -117,7 +116,7 @@ type Chain interface {
 type RPCDataFetcher interface {
 	Close()
 	HeaderByNumber(ctx context.Context, number *big.Int) (*gwatTypes.Header, error)
-	HeaderByHash(ctx context.Context, hash common.Hash) (*gwatTypes.Header, error)
+	HeaderByHash(ctx context.Context, hash gwatCommon.Hash) (*gwatTypes.Header, error)
 	SyncProgress(ctx context.Context) (*ethereum.SyncProgress, error)
 }
 
@@ -130,7 +129,7 @@ type RPCClient interface {
 
 // config defines a config struct for dependencies into the service.
 type config struct {
-	depositContractAddr     common.Address
+	depositContractAddr     gwatCommon.Address
 	beaconDB                db.HeadAccessDatabase
 	depositCache            *depositcache.DepositCache
 	exitPool                voluntaryexits.PoolManager
@@ -455,18 +454,21 @@ func (s *Service) processBlockHeader(header *gwatTypes.Header) {
 		}).Warn("Latest shard1 chain event: skipping not finalized block")
 		return
 	}
+	if s.latestEth1Data.BlockHeight > header.CpNumber {
+		return
+	}
 	blockNumberGauge.Set(float64(header.Nr()))
-	s.latestEth1Data.BlockHeight = header.Nr()
-	s.latestEth1Data.BlockHash = header.Hash().Bytes()
+	s.latestEth1Data.BlockHeight = header.CpNumber
+	s.latestEth1Data.BlockHash = header.CpHash.Bytes()
 	s.latestEth1Data.BlockTime = header.Time
-	s.latestEth1Data.CpNr = header.CpNumber
 	s.latestEth1Data.CpHash = header.CpHash.Bytes()
+	s.latestEth1Data.CpNr = header.CpNumber
 
 	log.WithFields(logrus.Fields{
 		"slot":        header.Slot,
 		"height":      header.Height,
 		"blockNumber": s.latestEth1Data.BlockHeight,
-		"blockHash":   hexutil.Encode(s.latestEth1Data.BlockHash),
+		"blockHash":   fmt.Sprintf("%#x", s.latestEth1Data.BlockHash),
 	}).Info("Latest shard1 chain event")
 }
 
@@ -597,8 +599,8 @@ func (s *Service) initPOWService() {
 				}).Fatal("Latest shard1 block is not finalized")
 			}
 
-			s.latestEth1Data.BlockHeight = header.Nr()
-			s.latestEth1Data.BlockHash = header.Hash().Bytes()
+			s.latestEth1Data.BlockHeight = header.CpNumber
+			s.latestEth1Data.BlockHash = header.CpHash.Bytes()
 			s.latestEth1Data.BlockTime = header.Time
 			s.latestEth1Data.CpHash = header.CpHash.Bytes()
 			s.latestEth1Data.CpNr = header.CpNumber
@@ -649,6 +651,15 @@ func (s *Service) run(done <-chan struct{}) {
 				s.pollConnectionStatus(s.ctx)
 				log.WithError(err).Error("Could not fetch latest shard1 header")
 				continue
+			}
+			if head.CpHash == (gwatCommon.Hash{}) {
+				//if genesis
+				if head.Height == 0 {
+					head.CpHash = head.Hash()
+				} else {
+					log.Error("Could not fetch latest shard1 header: bad header")
+					continue
+				}
 			}
 			s.processBlockHeader(head)
 			s.handleETH1FollowDistance()
