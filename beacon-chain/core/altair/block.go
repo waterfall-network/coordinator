@@ -142,11 +142,11 @@ func ApplySyncRewardsPenalties(ctx context.Context, s state.BeaconStateAltair, v
 	earnedProposerReward := uint64(0)
 	for _, index := range votedIndices {
 
-		log.WithFields(log.Fields{
-			"Slot":              s.Slot(),
-			"Validator":         index,
-			"ParticipantReward": participantReward,
-		}).Debug("Reward sync committee: participant incr")
+		//log.WithFields(log.Fields{
+		//	"Slot":              s.Slot(),
+		//	"Validator":         index,
+		//	"ParticipantReward": participantReward,
+		//}).Debug("Reward sync committee: participant incr")
 
 		// write Rewards And Penalties log
 		if err = helpers.LogBeforeRewardsAndPenalties(s, index, participantReward, nil, helpers.BalanceIncrease, helpers.OpSyncCommittee); err != nil {
@@ -167,11 +167,11 @@ func ApplySyncRewardsPenalties(ctx context.Context, s state.BeaconStateAltair, v
 	if err != nil {
 		return nil, err
 	}
-	log.WithFields(log.Fields{
-		"Slot":           s.Slot(),
-		"Proposer":       proposerIndex,
-		"ProposerReward": earnedProposerReward,
-	}).Debug("Reward sync committee: proposer incr")
+	//log.WithFields(log.Fields{
+	//	"Slot":           s.Slot(),
+	//	"Proposer":       proposerIndex,
+	//	"ProposerReward": earnedProposerReward,
+	//}).Debug("Reward sync committee: proposer incr")
 
 	// write Rewards And Penalties log
 	if err = helpers.LogBeforeRewardsAndPenalties(s, proposerIndex, earnedProposerReward, nil, helpers.BalanceIncrease, helpers.OpSyncAggregation); err != nil {
@@ -189,11 +189,11 @@ func ApplySyncRewardsPenalties(ctx context.Context, s state.BeaconStateAltair, v
 	// Apply sync committee penalties.
 	for _, index := range didntVoteIndices {
 
-		log.WithFields(log.Fields{
-			"Slot":           s.Slot(),
-			"Validator":      index,
-			"ProposerReward": participantReward,
-		}).Debug("Reward sync committee: proposer decr")
+		//log.WithFields(log.Fields{
+		//	"Slot":           s.Slot(),
+		//	"Validator":      index,
+		//	"ProposerReward": participantReward,
+		//}).Debug("Reward sync committee: proposer decr")
 
 		// write Rewards And Penalties log
 		if err = helpers.LogBeforeRewardsAndPenalties(s, index, participantReward, nil, helpers.BalanceDecrease, helpers.OpSyncCommittee); err != nil {
