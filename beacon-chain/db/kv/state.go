@@ -29,12 +29,25 @@ var stateMu sync.RWMutex
 
 // State returns the saved state using block's signing root,
 // this particular block was used to generate the state.
-func (s *Store) State(ctx context.Context, blockRoot [32]byte) (state.BeaconState, error) {
+func (s *Store) State(ctx context.Context, blockRoot [32]byte) (_ state.BeaconState, err error) {
 	ctx, span := trace.StartSpan(ctx, "BeaconDB.State")
 	defer span.End()
 
 	stateMu.RLock()
 	defer stateMu.RUnlock()
+	defer func() {
+		if r := recover(); r != nil {
+			log.Errorf("Get db state failed: err=%v", r)
+			switch x := r.(type) {
+			case string:
+				err = errors.New(x)
+			case error:
+				err = x
+			default:
+				err = errors.New("get state failed")
+			}
+		}
+	}()
 
 	enc, err := s.stateBytes(ctx, blockRoot)
 	if err != nil {

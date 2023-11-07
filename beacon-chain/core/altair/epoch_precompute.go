@@ -5,7 +5,6 @@ import (
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
-	log "github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/epoch/precompute"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
@@ -256,11 +255,12 @@ func ProcessRewardsAndPenaltiesPrecompute(
 
 		// Compute the post balance of the validator after accounting for the
 		// attester and proposer rewards and penalties.
-		log.WithFields(log.Fields{
-			"Slot":              beaconState.Slot(),
-			"Validator":         valIndex,
-			"AttestationReward": attsRewards[valIndex],
-		}).Debug("Reward attestor: incr")
+
+		//log.WithFields(log.Fields{
+		//	"Slot":              beaconState.Slot(),
+		//	"Validator":         valIndex,
+		//	"AttestationReward": attsRewards[valIndex],
+		//}).Debug("Reward attestor: incr")
 
 		// write Rewards And Penalties log
 		if attsRewards[valIndex] != 0 {
@@ -278,11 +278,11 @@ func ProcessRewardsAndPenaltiesPrecompute(
 			return nil, err
 		}
 
-		log.WithFields(log.Fields{
-			"Slot":               beaconState.Slot(),
-			"Validator":          valIndex,
-			"AttestationPenalty": attsPenalties[valIndex],
-		}).Debug("Reward attestor: decr")
+		//log.WithFields(log.Fields{
+		//	"Slot":               beaconState.Slot(),
+		//	"Validator":          valIndex,
+		//	"AttestationPenalty": attsPenalties[valIndex],
+		//}).Debug("Reward attestor: decr")
 
 		// write Rewards And Penalties log
 		if attsPenalties[valIndex] != 0 {
@@ -407,17 +407,17 @@ func attestationDelta(
 		penalty += n / inactivityDenominator
 	}
 
-	log.WithFields(log.Fields{
-		"NumValidators":             validatorsNum,
-		"ActiveValidators":          activeValidatorsFroSlot,
-		"BaseReward":                baseReward,
-		"Reward":                    reward,
-		"Penalty":                   penalty,
-		"IsPrevEpochSourceAttester": val.IsPrevEpochSourceAttester,
-		"IsPrevEpochTargetAttester": val.IsPrevEpochTargetAttester,
-		"IsSlashed":                 val.IsSlashed,
-		"inactivityLeak":            inactivityLeak,
-	}).Debug("Reward attestor: calc delta")
+	//log.WithFields(log.Fields{
+	//	"NumValidators":             validatorsNum,
+	//	"ActiveValidators":          activeValidatorsFroSlot,
+	//	"BaseReward":                baseReward,
+	//	"Reward":                    reward,
+	//	"Penalty":                   penalty,
+	//	"IsPrevEpochSourceAttester": val.IsPrevEpochSourceAttester,
+	//	"IsPrevEpochTargetAttester": val.IsPrevEpochTargetAttester,
+	//	"IsSlashed":                 val.IsSlashed,
+	//	"inactivityLeak":            inactivityLeak,
+	//}).Debug("Reward attestor: calc delta")
 
 	return reward, penalty, nil
 }

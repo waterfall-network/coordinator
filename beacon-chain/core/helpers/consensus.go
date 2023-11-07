@@ -77,6 +77,25 @@ func GetTerminalFinalizedSpine(beaconState state.BeaconState) gwatCommon.Hash {
 	return gwatCommon.BytesToHash(cpFinalized[len(cpFinalized)-32:])
 }
 
+// GetTerminalFinalizedSpine returns finalization spines sequence from state.
+func GetFinalizationSequence(beaconState state.BeaconState) gwatCommon.HashArray {
+	cpFinalized := gwatCommon.HashArrayFromBytes(beaconState.SpineData().CpFinalized)
+	finalization := gwatCommon.HashArrayFromBytes(beaconState.SpineData().Finalization)
+	baseSpine := cpFinalized[0]
+	finalizationSeq := append(cpFinalized, finalization...)
+	if baseIx := finalizationSeq.IndexOf(baseSpine); baseIx > -1 {
+		finalizationSeq = finalizationSeq[baseIx+1:]
+	}
+	return finalizationSeq
+}
+
+// GetBaseSpine returns base spine.
+func GetBaseSpine(beaconState state.BeaconState) gwatCommon.Hash {
+	cpFinalized := gwatCommon.HashArrayFromBytes(beaconState.SpineData().CpFinalized)
+	baseSpine := cpFinalized[0]
+	return baseSpine
+}
+
 // ConsensusCalcPrefix calculates sequence of prefix from array of unpublished spines sequences.
 func ConsensusCalcPrefix(unpublishedChains []gwatCommon.HashArray) (gwatCommon.HashArray, error) {
 	if err := ConsensusValidateUnpublishedChains(unpublishedChains); err != nil {

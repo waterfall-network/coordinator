@@ -3,6 +3,7 @@ package kv
 import (
 	"context"
 
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
 	bolt "go.etcd.io/bbolt"
 	"go.opencensus.io/trace"
@@ -14,7 +15,7 @@ func (s *Store) ReadSpines(ctx context.Context, key [32]byte) (wrapper.Spines, e
 	defer span.End()
 
 	var err error
-	var data wrapper.Spines
+	var raw []byte
 
 	if key == (wrapper.Spines{}).Key() {
 		return wrapper.Spines{}, nil
@@ -27,11 +28,12 @@ func (s *Store) ReadSpines(ctx context.Context, key [32]byte) (wrapper.Spines, e
 
 	err = s.db.View(func(tx *bolt.Tx) error {
 		bkt := tx.Bucket(spinesBucket)
-		data = bkt.Get(key[:])
+		raw = bkt.Get(key[:])
 		return err
 	})
-	// cache it.
-	if err == nil && data != nil {
+	var data wrapper.Spines
+	if err == nil && raw != nil {
+		data = bytesutil.SafeCopyBytes(raw)
 		s.spinesCache.Add(key, data)
 	}
 	return data, err

@@ -19,8 +19,7 @@ import (
 func (s *State) SaveState(ctx context.Context, root [32]byte, st state.BeaconState) error {
 	ctx, span := trace.StartSpan(ctx, "stateGen.SaveState")
 	defer span.End()
-
-	return s.saveStateByRoot(ctx, root, st.Copy())
+	return s.saveStateByRoot(ctx, root, st)
 }
 
 // ForceCheckpoint initiates a cold state save of the given state. This method does not update the
@@ -206,4 +205,20 @@ func (s *State) DisableSaveHotStateToDB(ctx context.Context) error {
 	s.saveHotStateDB.savedStateRoots = nil
 
 	return nil
+}
+
+// AddSyncStateCache caches state to sync cache.
+func (s *State) AddSyncStateCache(blockRoot [32]byte, st state.BeaconState) error {
+	s.syncStateCache.put(blockRoot, st.Copy())
+	return nil
+}
+
+// AddSyncStateCache caches state to sync cache.
+func (s *State) RemoveSyncStateCache(blockRoot [32]byte) {
+	s.syncStateCache.delete(blockRoot)
+}
+
+// AddSyncStateCache caches state to sync cache.
+func (s *State) PurgeSyncStateCache() {
+	s.syncStateCache.purge()
 }
