@@ -70,14 +70,30 @@ func (vs *Server) GetPrevoteData(ctx context.Context, req *ethpb.PreVoteRequest)
 		return nil, errWrap
 	}
 	if len(optSpines) == 0 {
-		log.Errorf("Empty list of optimistic spines was retrieved for slot: %v", req.Slot)
+		log.Errorf("Collect prevote data: no optimistic spines was retrieved for slot: %v", req.Slot)
 	}
 
-	candidates := make(gwatCommon.HashArray, 0, len(optSpines))
-	for _, spines := range optSpines {
-		if len(spines) != 0 {
-			candidates = append(candidates, spines[0])
+	candidates := gwatCommon.HashArray{}
+	if len(optSpines) > 0 {
+		//calculate optimistic parent root
+		parentRoot, err := vs.HeadFetcher.ForkChoicer().GetParentByOptimisticSpines(ctx, optSpines)
+		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"extOptSpines": optSpines,
+			}).Error("Collect prevote data: Could not retrieve of supported root")
+			return nil, status.Errorf(codes.Internal, "retrieve of supported root error: %v", err)
 		}
+
+		log.WithFields(logrus.Fields{
+			"1:parentRoot":   fmt.Sprintf("%#x", parentRoot),
+			"2:extOptSpines": len(optSpines),
+		}).Info("Collect prevote data: retrieved gwat optimistic spines")
+
+		parentState, err := vs.StateGen.StateByRoot(ctx, parentRoot)
+		if err != nil {
+			return nil, fmt.Errorf("could not get parent state %v", err)
+		}
+		candidates = helpers.CalculateCandidates(parentState, optSpines)
 	}
 
 	res = &ethpb.PreVoteData{
@@ -86,9 +102,16 @@ func (vs *Server) GetPrevoteData(ctx context.Context, req *ethpb.PreVoteRequest)
 		Candidates: candidates.ToBytes(),
 	}
 
-	if err := vs.PrevoteCache.Put(ctx, req, res); err != nil {
+	if err = vs.PrevoteCache.Put(ctx, req, res); err != nil {
 		return nil, status.Errorf(codes.Internal, "Could not store prevote data in cache: %v", err)
 	}
+
+	log.WithFields(logrus.Fields{
+		"1:req.Slot":           req.Slot,
+		"2:req.CommitteeIndex": req.CommitteeIndex,
+		"3:candidates":         candidates,
+	}).Info("Collect prevote data: success")
+
 	return res, nil
 }
 

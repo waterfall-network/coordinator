@@ -17,7 +17,6 @@ import (
 	blockfeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/block"
 	opfeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/operation"
 	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/signing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/attestations"
@@ -221,56 +220,41 @@ func (vs *Server) getOptimisticSpine(ctx context.Context) ([]gwatCommon.HashArra
 		return nil, status.Errorf(codes.Internal, "Could not retrieve head state: %v", err)
 	}
 
-	jCpRoot := bytesutil.ToBytes32(currHead.CurrentJustifiedCheckpoint().Root)
-	if currHead.CurrentJustifiedCheckpoint().Epoch == 0 {
-		jCpRoot, err = vs.BeaconDB.GenesisBlockRoot(ctx)
-		if err != nil {
-			log.WithError(err).Error("Get optimistic spines failed: retrieving of genesis root")
-			return nil, status.Errorf(codes.Internal, "Could not retrieve of genesis root: %v", err)
-		}
-	}
-
-	cpSt, err := vs.StateGen.StateByRoot(ctx, jCpRoot)
-	if err != nil {
-		log.WithError(err).WithFields(logrus.Fields{
-			"jCpRoot": fmt.Sprintf("%#x", jCpRoot),
-		}).Error("Get optimistic spines failed: Could not retrieve of cp state")
-		return nil, status.Errorf(codes.Internal, "Could not retrieve of cp state: %v", err)
+	if currHead == nil || currHead.SpineData() == nil {
+		err = status.Errorf(codes.Internal, "no spine data of head state")
+		log.WithError(err).Error("Get optimistic spines failed: bad had state")
+		return nil, status.Errorf(codes.Internal, "Could not retrieve head state: %v", err)
 	}
 
 	//request optimistic spine
-	baseSpine := helpers.GetTerminalFinalizedSpine(cpSt)
+	cpFinalized := currHead.SpineData().CpFinalized
+	baseSpine := gwatCommon.BytesToHash(cpFinalized[len(cpFinalized)-32:])
 
 	optSpines, err := vs.HeadFetcher.GetOptimisticSpines(ctx, baseSpine)
 	if err != nil {
 		errWrap := fmt.Errorf("could not get gwat optimistic spines: %v", err)
 		log.WithError(errWrap).WithFields(logrus.Fields{
 			"head.Slot": currHead.Slot(),
-			"jcp.Slot":  cpSt.Slot(),
 			"baseSpine": fmt.Sprintf("%#x", baseSpine),
+			"jcp.Epoch": currHead.CurrentJustifiedCheckpoint().Epoch,
+			"jcp.Root":  fmt.Sprintf("%#x", currHead.CurrentJustifiedCheckpoint().Root),
 		}).Error("Get optimistic spines failed: Could not retrieve of gwat optimistic spines")
 		return nil, errWrap
 	}
 
 	log.WithFields(logrus.Fields{
 		"head.Slot": currHead.Slot(),
-		"jcp.Slot":  cpSt.Slot(),
 		"baseSpine": fmt.Sprintf("%#x", baseSpine),
-		//"jcp.Finalization": fmt.Sprintf("%#x", cpSt.SpineData().Finalization),
-		//"jcp.CpFinalized":  fmt.Sprintf("%#x", cpSt.SpineData().CpFinalized),
+		"jcp.Epoch": currHead.CurrentJustifiedCheckpoint().Epoch,
+		"jcp.Root":  fmt.Sprintf("%#x", currHead.CurrentJustifiedCheckpoint().Root),
 		//"optSpines":        optSpines,
 	}).Info("Get optimistic spines: data retrieved")
 
 	//prepend current optimistic finalization to optimistic spine to calc parent
-	cpf := gwatCommon.HashArrayFromBytes(cpSt.SpineData().CpFinalized)
-	fin := gwatCommon.HashArrayFromBytes(cpSt.SpineData().Finalization)
-	extOptSpines := make([]gwatCommon.HashArray, len(cpf)+len(fin)+len(optSpines))
+	cpf := gwatCommon.HashArrayFromBytes(currHead.SpineData().CpFinalized)
+	extOptSpines := make([]gwatCommon.HashArray, len(cpf)+len(optSpines))
 	ofs := 0
 	for i, offset, a := 0, ofs, cpf; i < len(a); i++ {
-		ofs++
-		extOptSpines[offset+i] = gwatCommon.HashArray{a[i]}
-	}
-	for i, offset, a := 0, ofs, fin; i < len(a); i++ {
 		ofs++
 		extOptSpines[offset+i] = gwatCommon.HashArray{a[i]}
 	}
