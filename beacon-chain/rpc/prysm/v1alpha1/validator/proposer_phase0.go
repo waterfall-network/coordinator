@@ -160,16 +160,13 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 	if len(prevoteData) == 0 {
 		log.Warnf("Build block data: no prevote data was retrieved for slot %v", req.Slot)
 	} else {
-		prevoteCandidates := vs.prepareAndProcessPrevoteData(candidates, prevoteData, head)
+		prevoteCandidates := vs.prepareAndProcessPrevoteData(candidates.Copy(), prevoteData, head)
 		if len(prevoteCandidates) == 0 {
 			log.Warn("Build block data: prevote data was processed but returned empty candidates array, fallback to candidates" +
 				" retrieved using optimistic spines")
 		} else {
 			candidates = prevoteCandidates
 		}
-	}
-	if len(candidates) == 0 {
-		candidates = helpers.CalculateCandidates(head, optSpines)
 	}
 
 	eth1Data.Candidates = candidates.ToBytes()
