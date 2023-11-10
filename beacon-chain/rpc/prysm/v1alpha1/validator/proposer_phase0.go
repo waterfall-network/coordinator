@@ -155,7 +155,7 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 	log.WithFields(logrus.Fields{
 		"0:slot":     req.Slot,
 		"1:prevotes": len(prevoteData),
-	}).Infof("Build block data:")
+	}).Infof("Build block data: get prevotes")
 
 	if len(prevoteData) == 0 {
 		log.Warnf("Build block data: no prevote data was retrieved for slot %v", req.Slot)

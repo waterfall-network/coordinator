@@ -13,8 +13,8 @@ import (
 )
 
 type subnetIDs struct {
-	proposer          *lru.Cache
-	proposerLock      sync.RWMutex
+	prevoting         *lru.Cache
+	prevotingLock     sync.RWMutex
 	attester          *lru.Cache
 	attesterLock      sync.RWMutex
 	aggregator        *lru.Cache
@@ -31,33 +31,38 @@ func newSubnetIDs() *subnetIDs {
 	// Max size is set to 2 epoch length.
 	cacheSize := int(params.BeaconConfig().SlotsPerEpoch.Mul(params.BeaconConfig().MaxCommitteesPerSlot * 2)) // lint:ignore uintcast -- constant values that would panic on startup if negative.
 	attesterCache := lruwrpr.New(cacheSize)
-	proposerCache := lruwrpr.New(cacheSize)
+	prevotingCache := lruwrpr.New(cacheSize)
 	aggregatorCache := lruwrpr.New(cacheSize)
 	epochDuration := time.Duration(params.BeaconConfig().SlotsPerEpoch.Mul(params.BeaconConfig().SecondsPerSlot))
 	subLength := epochDuration * time.Duration(params.BeaconConfig().EpochsPerRandomSubnetSubscription)
 	persistentCache := cache.New(subLength*time.Second, epochDuration*time.Second)
-	return &subnetIDs{attester: attesterCache, aggregator: aggregatorCache, persistentSubnets: persistentCache, proposer: proposerCache}
+	return &subnetIDs{
+		attester:          attesterCache,
+		aggregator:        aggregatorCache,
+		persistentSubnets: persistentCache,
+		prevoting:         prevotingCache,
+	}
 }
 
-// AddProposerSubnetID adds the subnet index for subscribing subnet for the proposer of a given slot.
-func (s *subnetIDs) AddProposerSubnetID(slot types.Slot, subnetID uint64) {
-	s.proposerLock.Lock()
-	defer s.proposerLock.Unlock()
+// AddPrevotingSubnetID adds the subnet index for subscribing subnet for the prevoting of a given slot.
+func (s *subnetIDs) AddPrevotingSubnetID(slot types.Slot, subnetID uint64) {
+	s.prevotingLock.Lock()
+	defer s.prevotingLock.Unlock()
 
 	ids := []uint64{subnetID}
-	val, exists := s.proposer.Get(slot)
+	val, exists := s.prevoting.Get(slot)
 	if exists {
 		ids = slice.UnionUint64(append(val.([]uint64), ids...))
 	}
-	s.proposer.Add(slot, ids)
+	s.prevoting.Add(slot, ids)
 }
 
-// GetProposerSubnetIDs gets the subnet IDs for subscribed subnets for proposer of the slot.
-func (s *subnetIDs) GetProposerSubnetIDs(slot types.Slot) []uint64 {
-	s.proposerLock.RLock()
-	defer s.proposerLock.RUnlock()
+// GetPrevotingSubnetIDs gets the subnet IDs for subscribed subnets for prevoting of the slot.
+func (s *subnetIDs) GetPrevotingSubnetIDs(slot types.Slot) []uint64 {
+	s.prevotingLock.RLock()
+	defer s.prevotingLock.RUnlock()
 
-	val, exists := s.proposer.Get(slot)
+	val, exists := s.prevoting.Get(slot)
 	if !exists {
 		return nil
 	}
@@ -178,7 +183,7 @@ func (s *subnetIDs) EmptyAllCaches() {
 	s.persistentSubnets.Flush()
 	s.subnetsLock.Unlock()
 
-	s.proposerLock.Lock()
-	s.proposer.Purge()
-	s.proposerLock.Unlock()
+	s.prevotingLock.Lock()
+	s.prevoting.Purge()
+	s.prevotingLock.Unlock()
 }

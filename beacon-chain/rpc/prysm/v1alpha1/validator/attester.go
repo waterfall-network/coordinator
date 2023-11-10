@@ -258,6 +258,14 @@ func (vs *Server) SubscribeCommitteeSubnets(ctx context.Context, req *ethpb.Comm
 	}
 	currEpoch := slots.ToEpoch(req.Slots[0])
 
+	log.WithFields(logrus.Fields{
+		"req.slot":          req.Slots,
+		"req.ProposerSlots": req.ProposerSlots,
+		"req.CommitteeIds":  req.CommitteeIds,
+		"req.IsAggregator":  req.IsAggregator,
+		"currValsLen":       currValsLen,
+	}).Info("Validator subscription: SubscribeCommitteeSubnets: slots")
+
 	for i := 0; i < len(req.Slots); i++ {
 		// If epoch has changed, re-request active validators length
 		if currEpoch != slots.ToEpoch(req.Slots[i]) {
@@ -272,11 +280,14 @@ func (vs *Server) SubscribeCommitteeSubnets(ctx context.Context, req *ethpb.Comm
 		if req.IsAggregator[i] {
 			cache.SubnetIDs.AddAggregatorSubnetID(req.Slots[i], subnet)
 		}
+		// prevoting
+		subnetPv := helpers.ComputeSubnetPrevotingBySlot(currValsLen, req.Slots[i])
+		cache.SubnetIDs.AddPrevotingSubnetID(req.Slots[i]-1, subnetPv)
 	}
 
-	for idx, ps := range req.ProposerSlots {
-		cache.SubnetIDs.AddProposerSubnetID(ps,
-			helpers.ComputeSubnetFromCommitteeAndSlot(currValsLen, req.CommitteeIds[idx], ps))
+	for _, ps := range req.ProposerSlots {
+		subnet := helpers.ComputeSubnetPrevotingBySlot(currValsLen, ps)
+		cache.SubnetIDs.AddPrevotingSubnetID(ps-1, subnet)
 	}
 
 	return &emptypb.Empty{}, nil

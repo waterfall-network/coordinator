@@ -166,6 +166,7 @@ func (vs *Server) duties(ctx context.Context, req *ethpb.DutiesRequest) (*ethpb.
 			// The next epoch has no lookup for proposer indexes.
 			nextAssignment.ValidatorIndex = idx
 			nextAssignment.Status = s
+			nextAssignment.ProposerSlots = nextProposerIndexToSlots[idx]
 
 			ca, ok := committeeAssignments[idx]
 			if ok {

@@ -268,11 +268,10 @@ func (s *Service) broadcastPrevoting(ctx context.Context, subnet uint64, prevote
 	// Ensure we have peers with this subnet.
 	// This adds in a special value to the subnet
 	// to ensure that we can re-use the same subnet locker.
-	wrappedSubIdx := subnet + syncLockerVal
-	s.subnetLocker(wrappedSubIdx).RLock()
+	s.subnetLocker(subnet).RLock()
 	ptt := prevoteToTopic(subnet, forkDigest)
 	hasPeer := s.hasPeerWithSubnet(ptt)
-	s.subnetLocker(wrappedSubIdx).RUnlock()
+	s.subnetLocker(subnet).RUnlock()
 
 	span.AddAttributes(
 		trace.BoolAttribute("hasPeer", hasPeer),
@@ -280,11 +279,20 @@ func (s *Service) broadcastPrevoting(ctx context.Context, subnet uint64, prevote
 		trace.Int64Attribute("subnet", int64(subnet)),          // lint:ignore uintcast -- It's safe to do this for tracing.
 	)
 
+	log.WithFields(logrus.Fields{
+		"0:subnet":           subnet,
+		"1:hasPeer":          hasPeer,
+		"curSlot":            slots.CurrentSlot(uint64(s.genesisTime.Unix())),
+		"pv.AggregationBits": fmt.Sprintf("%b", prevote.AggregationBits),
+		"pv.Data.Slot":       prevote.Data.Slot,
+		"pv.Data.Index":      prevote.Data.Index,
+	}).Debug("Prevote: BroadcastPrevoting: broadcastPrevoting 1")
+
 	if !hasPeer {
 		prevoteBroadcastAttempts.Inc()
 		if err := func() error {
-			s.subnetLocker(wrappedSubIdx).Lock()
-			defer s.subnetLocker(wrappedSubIdx).Unlock()
+			s.subnetLocker(subnet).Lock()
+			defer s.subnetLocker(subnet).Unlock()
 			ok, err := s.FindPeersWithSubnet(ctx, ptt, subnet, 1)
 			if err != nil {
 				return err
@@ -295,6 +303,14 @@ func (s *Service) broadcastPrevoting(ctx context.Context, subnet uint64, prevote
 			}
 			return errors.New("failed to find peers for subnet")
 		}(); err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"subnet":             subnet,
+				"hasPeer":            hasPeer,
+				"curSlot":            slots.CurrentSlot(uint64(s.genesisTime.Unix())),
+				"pv.AggregationBits": fmt.Sprintf("%b", prevote.AggregationBits),
+				"pv.Data.Slot":       prevote.Data.Slot,
+				"pv.Data.Index":      prevote.Data.Index,
+			}).Error("Prevote: BroadcastPrevoting: broadcastPrevoting failed")
 			tracing.AnnotateError(span, err)
 		}
 	}
@@ -306,6 +322,14 @@ func (s *Service) broadcastPrevoting(ctx context.Context, subnet uint64, prevote
 		log.Warnf("Prevote is too old to broadcast, discarding it. Current Slot: %d , Prevote Slot: %d", currSlot, prevote.Data.Slot)
 		return
 	}
+
+	log.WithFields(logrus.Fields{
+		"subnet":             subnet,
+		"curSlot":            slots.CurrentSlot(uint64(s.genesisTime.Unix())),
+		"pv.AggregationBits": fmt.Sprintf("%#x", prevote.AggregationBits),
+		"pv.Data.Slot":       prevote.Data.Slot,
+		"pv.Data.Index":      prevote.Data.Index,
+	}).Debug("Prevote: BroadcastPrevoting: broadcastPrevoting 2")
 
 	if err := s.broadcastObject(ctx, prevote, ptt); err != nil {
 		log.WithError(err).Error("Failed to broadcast prevote")
