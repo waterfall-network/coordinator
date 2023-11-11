@@ -135,10 +135,16 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		"2.extOptSpines": len(optSpines),
 	}).Info("Build block data: retrieving of gwat optimistic spines")
 
+	//head, err := vs.StateGen.SyncStateByRoot(ctx, parentRoot)
 	head, err := vs.StateGen.StateByRoot(ctx, parentRoot)
 	if err != nil {
 		return nil, fmt.Errorf("could not get head state %v", err)
 	}
+
+	log.WithFields(logrus.Fields{
+		"0:stSlot":      head.Slot(),
+		"1:stBlockHash": fmt.Sprintf("%#x", head.Eth1Data().BlockHash),
+	}).Info("eth1.BlockHash: buildPhase0BlockData: 000")
 
 	head, err = transition.ProcessSlotsUsingNextSlotCache(ctx, head, parentRoot[:], req.Slot)
 	if err != nil {
