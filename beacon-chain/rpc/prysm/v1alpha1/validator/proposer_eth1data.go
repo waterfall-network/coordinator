@@ -93,6 +93,14 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 			"condition":                   cpDepositCount >= vs.HeadFetcher.HeadETH1Data().DepositCount,
 		}).Info("eth1DataMajorityVote: update deposit eth1 data")
 
+		log.WithFields(logrus.Fields{
+			"0:stSlot":      beaconState.Slot(),
+			"1:lvtHash":     fmt.Sprintf("%#x", lvtHash),
+			"2:stBlockHash": fmt.Sprintf("%#x", beaconState.Eth1Data().BlockHash),
+			"3:cpSpine":     fmt.Sprintf("%#x", cpSpine),
+			"4:cpSpineNum":  fmt.Sprintf("%d", cpSpineNum.Uint64()),
+		}).Info("eth1.BlockHash: ProcessBlockForStateRoot: 000")
+
 		return &ethpb.Eth1Data{
 			BlockHash:    lvtHash.Bytes(),
 			DepositCount: cpDepositCount,
