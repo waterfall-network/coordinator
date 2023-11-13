@@ -3,6 +3,7 @@ package validator
 import (
 	"bytes"
 	"context"
+	"fmt"
 
 	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
@@ -140,11 +141,13 @@ func (vs *Server) SubmitSignedAggregateSelectionProof(
 	}
 
 	log.WithFields(logrus.Fields{
-		"slot":            req.SignedAggregateAndProof.Message.Aggregate.Data.Slot,
-		"committeeIndex":  req.SignedAggregateAndProof.Message.Aggregate.Data.CommitteeIndex,
+		"curSlot": slots.CurrentSlot(uint64(vs.TimeFetcher.GenesisTime().Unix())),
+		"slot":    req.SignedAggregateAndProof.Message.Aggregate.Data.Slot,
+		//"committeeIndex":  req.SignedAggregateAndProof.Message.Aggregate.Data.CommitteeIndex,
 		"validatorIndex":  req.SignedAggregateAndProof.Message.AggregatorIndex,
 		"aggregatedCount": req.SignedAggregateAndProof.Message.Aggregate.AggregationBits.Count(),
-	}).Debug("Broadcasting aggregated attestation and proof")
+		"aggrBits":        fmt.Sprintf("%#x", req.SignedAggregateAndProof.Message.Aggregate.AggregationBits),
+	}).Debug("Atts: Broadcasting aggregated attestation and proof")
 
 	return &ethpb.SignedAggregateSubmitResponse{}, nil
 }

@@ -122,13 +122,12 @@ func (s *Service) broadcastAttestation(ctx context.Context, subnet uint64, att *
 	ctx = trace.NewContext(context.Background(), span) // clear parent context / deadline.
 
 	log.WithFields(logrus.Fields{
-		"subnet":              subnet,
-		"curSlot":             slots.CurrentSlot(uint64(s.genesisTime.Unix())),
-		"att.AggregationBits": fmt.Sprintf("%b", att.AggregationBits),
-		"att.Data.Slot":       att.Data.Slot,
-		"att.Data.Index":      att.Data.CommitteeIndex,
-		//"pv.Candidates":      fmt.Sprintf("%#x", prevote.Data.Candidates),
-	}).Debug("Attestation: broadcastAttestation")
+		"subnet":       subnet,
+		"att.AggrBits": fmt.Sprintf("%#x", att.AggregationBits),
+		"att.Slot":     att.Data.Slot,
+		"att.root":     fmt.Sprintf("%#x", att.Data.BeaconBlockRoot),
+		"curSlot":      slots.CurrentSlot(uint64(s.genesisTime.Unix())),
+	}).Debug("Atts: broadcastAttestation")
 
 	oneEpoch := time.Duration(1*params.BeaconConfig().SlotsPerEpoch.Mul(params.BeaconConfig().SecondsPerSlot)) * time.Second
 	ctx, cancel := context.WithTimeout(ctx, oneEpoch)
@@ -146,14 +145,14 @@ func (s *Service) broadcastAttestation(ctx context.Context, subnet uint64, att *
 	)
 
 	log.WithFields(logrus.Fields{
-		"subnet":             subnet,
-		"curSlot":            slots.CurrentSlot(uint64(s.genesisTime.Unix())),
-		"pv.AggregationBits": fmt.Sprintf("%b", att.AggregationBits),
-		"pv.Data.Slot":       att.Data.Slot,
-		"pv.Data.Index":      att.Data.CommitteeIndex,
-		"hasPeer":            hasPeer,
+		"subnet":        subnet,
+		"att.AggrBits":  fmt.Sprintf("%#x", att.AggregationBits),
+		"curSlot":       slots.CurrentSlot(uint64(s.genesisTime.Unix())),
+		"pv.Data.Slot":  att.Data.Slot,
+		"pv.Data.Index": att.Data.CommitteeIndex,
+		"hasPeer":       hasPeer,
 		//"pv.Candidates":      fmt.Sprintf("%#x", prevote.Data.Candidates),
-	}).Debug("Att: broadcastAttestation")
+	}).Debug("Atts: broadcastAttestation")
 
 	if !hasPeer {
 		attestationBroadcastAttempts.Inc()
@@ -163,16 +162,16 @@ func (s *Service) broadcastAttestation(ctx context.Context, subnet uint64, att *
 			ok, err := s.FindPeersWithSubnet(ctx, attestationToTopic(subnet, forkDigest), subnet, 1)
 
 			log.WithError(err).WithFields(logrus.Fields{
-				"topic":   attestationToTopic(subnet, forkDigest),
-				"ok":      ok,
-				"subnet":  subnet,
-				"curSlot": slots.CurrentSlot(uint64(s.genesisTime.Unix())),
-				//"pv.AggregationBits": fmt.Sprintf("%b", prevote.AggregationBits),
+				"topic":        attestationToTopic(subnet, forkDigest),
+				"ok":           ok,
+				"subnet":       subnet,
+				"curSlot":      slots.CurrentSlot(uint64(s.genesisTime.Unix())),
+				"att.AggrBits": fmt.Sprintf("%#x", att.AggregationBits),
 				"pv.Data.Slot": att.Data.Slot,
 				//"pv.Data.Index":      prevote.Data.Index,
 				//"hasPeer":            hasPeer,
 				//"pv.Candidates":      fmt.Sprintf("%#x", prevote.Data.Candidates),
-			}).Debug("Att: broadcastAttestation: FindPeersWithSubnet")
+			}).Debug("Atts: broadcastAttestation: FindPeersWithSubnet")
 
 			if err != nil {
 				return err
@@ -196,9 +195,18 @@ func (s *Service) broadcastAttestation(ctx context.Context, subnet uint64, att *
 	}
 
 	if err := s.broadcastObject(ctx, att, attestationToTopic(subnet, forkDigest)); err != nil {
-		log.WithError(err).Error("Failed to broadcast attestation")
+		log.WithError(err).Error("Atts: Failed to broadcast attestation")
 		tracing.AnnotateError(span, err)
 	}
+
+	log.WithFields(logrus.Fields{
+		"topic":        attestationToTopic(subnet, forkDigest),
+		"subnet":       subnet,
+		"att.AggrBits": fmt.Sprintf("%#x", att.AggregationBits),
+		"att.Slot":     att.Data.Slot,
+		"att.root":     fmt.Sprintf("%#x", att.Data.BeaconBlockRoot),
+		"curSlot":      slots.CurrentSlot(uint64(s.genesisTime.Unix())),
+	}).Debug("Atts: broadcastAttestation: broadcastObject 999")
 }
 
 func (s *Service) broadcastSyncCommittee(ctx context.Context, subnet uint64, sMsg *ethpb.SyncCommitteeMessage, forkDigest [4]byte) {
