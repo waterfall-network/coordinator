@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	lru "github.com/hashicorp/golang-lru"
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
@@ -55,7 +56,10 @@ type SyncSrv interface {
 
 // headSyncMinEpochsAfterCheckpoint defines how many epochs should elapse after known finalization
 // checkpoint for head sync to be triggered.
-const headSyncMinEpochsAfterCheckpoint = 128
+const (
+	headSyncMinEpochsAfterCheckpoint = 128
+	procBlockSize                    = 32
+)
 
 // Service represents a service that handles the internal
 // logic of managing the full PoS beacon chain.
@@ -74,6 +78,8 @@ type Service struct {
 	checkpointStateCache  *cache.CheckpointStateCache
 	initSyncBlocks        map[[32]byte]block.SignedBeaconBlock
 	initSyncBlocksLock    sync.RWMutex
+	procBlockLock         sync.RWMutex
+	procBlockCache        *lru.Cache
 	justifiedBalances     *stateBalanceCache
 	wsVerifier            *WeakSubjectivityVerifier
 	store                 *store.Store
@@ -111,6 +117,11 @@ type config struct {
 // be registered into a running beacon node.
 func NewService(ctx context.Context, opts ...Option) (*Service, error) {
 	ctx, cancel := context.WithCancel(ctx)
+	var err error
+	procBlockCache, err := lru.New(procBlockSize)
+	if err != nil {
+		panic(fmt.Errorf("lru new failed: %w", err))
+	}
 	srv := &Service{
 		ctx:                  ctx,
 		cancel:               cancel,
@@ -122,13 +133,13 @@ func NewService(ctx context.Context, opts ...Option) (*Service, error) {
 		spineData:            spineData{},
 		newHeadCh:            make(chan *head),
 		isGwatSyncing:        abool.New(),
+		procBlockCache:       procBlockCache,
 	}
 	for _, opt := range opts {
 		if err := opt(srv); err != nil {
 			return nil, err
 		}
 	}
-	var err error
 	if srv.justifiedBalances == nil {
 		srv.justifiedBalances, err = newStateBalanceCache(srv.cfg.StateGen)
 		if err != nil {

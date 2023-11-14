@@ -7,6 +7,7 @@ import (
 	types "github.com/prysmaticlabs/eth2-types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed"
 	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/tracing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time"
@@ -16,6 +17,8 @@ import (
 
 // This defines how many epochs since finality the run time will begin to save hot state on to the DB.
 var epochsSinceFinalitySaveHotStateDB = types.Epoch(100)
+
+var ErrBlockIsProcessing = errors.New("block is processing")
 
 // BlockReceiver interface defines the methods of chain service receive and processing new blocks.
 type BlockReceiver interface {
@@ -32,6 +35,13 @@ type BlockReceiver interface {
 func (s *Service) ReceiveBlock(ctx context.Context, block block.SignedBeaconBlock, blockRoot [32]byte) error {
 	ctx, span := trace.StartSpan(ctx, "blockChain.ReceiveBlock")
 	defer span.End()
+	// ensure that block is not already processing
+	if s.isBlockProcessing(block.Block().Slot(), block.Block().ProposerIndex()) {
+		return ErrBlockIsProcessing
+	}
+	s.setBlockProcessing(block.Block().Slot(), block.Block().ProposerIndex())
+	defer s.rmBlockProcessing(block.Block().Slot(), block.Block().ProposerIndex())
+
 	receivedTime := time.Now()
 	blockCopy := block.Copy()
 
@@ -183,4 +193,29 @@ func (s *Service) checkSaveHotStateDB(ctx context.Context) error {
 	}
 
 	return s.cfg.StateGen.DisableSaveHotStateToDB(ctx)
+}
+
+// Returns true if the block is processing by method ReceiveBlock.
+func (s *Service) isBlockProcessing(slot types.Slot, proposerIdx types.ValidatorIndex) bool {
+	s.procBlockLock.RLock()
+	defer s.procBlockLock.RUnlock()
+
+	key := append(bytesutil.Bytes32(uint64(slot)), bytesutil.Bytes32(uint64(proposerIdx))...)
+	_, isProc := s.procBlockCache.Get(string(key))
+	return isProc
+}
+
+// Set block proposer index and slot as seen for incoming blocks.
+func (s *Service) setBlockProcessing(slot types.Slot, proposerIdx types.ValidatorIndex) {
+	s.procBlockLock.Lock()
+	defer s.procBlockLock.Unlock()
+	key := append(bytesutil.Bytes32(uint64(slot)), bytesutil.Bytes32(uint64(proposerIdx))...)
+	s.procBlockCache.Add(string(key), true)
+}
+
+func (s *Service) rmBlockProcessing(slot types.Slot, proposerIdx types.ValidatorIndex) {
+	s.procBlockLock.Lock()
+	defer s.procBlockLock.Unlock()
+	key := append(bytesutil.Bytes32(uint64(slot)), bytesutil.Bytes32(uint64(proposerIdx))...)
+	s.procBlockCache.Remove(string(key))
 }
