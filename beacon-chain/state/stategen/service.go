@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	types "github.com/prysmaticlabs/eth2-types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/sync/backfill"
@@ -47,6 +48,7 @@ type StateManager interface {
 type State struct {
 	beaconDB                db.NoHeadAccessDatabase
 	slotsPerArchivedPoint   types.Slot
+	loadStateCache          *cache.LoadStateCache
 	hotStateCache           *hotStateCache
 	syncStateCache          *hotStateCache
 	finalizedInfo           *finalizedInfo
@@ -87,6 +89,7 @@ func WithBackfillStatus(bfs *backfill.Status) StateGenOption {
 func New(beaconDB db.NoHeadAccessDatabase, opts ...StateGenOption) *State {
 	s := &State{
 		beaconDB:                beaconDB,
+		loadStateCache:          cache.NewLoadStateCache(),
 		hotStateCache:           newHotStateCache(),
 		syncStateCache:          newHotStateCache(),
 		finalizedInfo:           &finalizedInfo{slot: 0, root: params.BeaconConfig().ZeroHash},
