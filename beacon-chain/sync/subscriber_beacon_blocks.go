@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition/interop"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain"
@@ -18,7 +19,7 @@ func (s *Service) beaconBlockSubscriber(ctx context.Context, msg proto.Message) 
 	if err != nil {
 		return err
 	}
-	if err := helpers.BeaconBlockIsNil(signed); err != nil {
+	if err = helpers.BeaconBlockIsNil(signed); err != nil {
 		return err
 	}
 
@@ -31,17 +32,19 @@ func (s *Service) beaconBlockSubscriber(ctx context.Context, msg proto.Message) 
 		return err
 	}
 
-	if err := s.cfg.chain.ReceiveBlock(ctx, signed, root); err != nil {
-		if !errors.Is(err, powchain.ErrHTTPTimeout) {
-			interop.WriteBlockToDisk(signed, true /*failed*/)
-			s.setBadBlock(ctx, root)
+	if err = s.cfg.chain.ReceiveBlock(ctx, signed, root); err != nil {
+		if errors.Is(err, blockchain.ErrBlockIsProcessing) ||
+			errors.Is(err, powchain.ErrHTTPTimeout) {
+			return err
 		}
+		interop.WriteBlockToDisk(signed, true /*failed*/)
+		s.setBadBlock(ctx, root)
 		return err
 	}
 
 	if !features.Get().CorrectlyPruneCanonicalAtts {
 		// Delete attestations from the block in the pool to avoid inclusion in future block.
-		if err := s.deleteAttsInPool(block.Body().Attestations()); err != nil {
+		if err = s.deleteAttsInPool(block.Body().Attestations()); err != nil {
 			log.Debugf("Could not delete attestations in pool: %v", err)
 			return nil
 		}

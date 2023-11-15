@@ -375,7 +375,7 @@ func collectTgTreeNodesByOptimisticSpines(fc *ForkChoice, optSpines []gwatCommon
 			}
 
 			log.WithFields(logrus.Fields{
-				"frk.roots[i]": frk.roots[i],
+				"frk.roots[i]": fmt.Sprintf("%#x", frk.roots[i]),
 				"frkNr":        frkNr,
 				"node.index":   i,
 				"node.slot":    node.slot,
