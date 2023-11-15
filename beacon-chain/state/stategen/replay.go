@@ -3,7 +3,6 @@ package stategen
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
@@ -35,7 +34,6 @@ func (s *State) ReplayBlocks(
 	defer span.End()
 	var err error
 
-	start := time.Now()
 	log.WithFields(logrus.Fields{
 		"startSlot": state.Slot(),
 		"endSlot":   targetSlot,
@@ -69,13 +67,6 @@ func (s *State) ReplayBlocks(
 			return nil, err
 		}
 	}
-
-	duration := time.Since(start)
-	log.WithFields(logrus.Fields{
-		"duration":     duration,
-		"state.Slot()": state.Slot(),
-	}).Debug("Replayed state")
-
 	return state, nil
 }
 

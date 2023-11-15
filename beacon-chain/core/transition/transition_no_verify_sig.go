@@ -67,6 +67,13 @@ func ExecuteStateTransitionNoVerifyAnySig(
 		return nil, nil, errors.Wrap(err, "could not process slots")
 	}
 
+	log.WithFields(logrus.Fields{
+		"0:Slot":        signed.Block().Slot(),
+		"0:stSlot":      bState.Slot(),
+		"1:stBlockHash": fmt.Sprintf("%#x", bState.Eth1Data().BlockHash),
+		"2:blBlockHash": fmt.Sprintf("%#x", signed.Block().Body().Eth1Data().BlockHash),
+	}).Info("eth1.BlockHash: ExecuteStateTransitionNoVerifyAnySig: 000")
+
 	// Execute per block transition.
 	set, bState, err := ProcessBlockNoVerifyAnySig(ctx, bState, signed)
 	if err != nil {
@@ -78,6 +85,16 @@ func ExecuteStateTransitionNoVerifyAnySig(
 	if err != nil {
 		return nil, nil, err
 	}
+
+	log.WithFields(logrus.Fields{
+		"0:Slot":          signed.Block().Slot(),
+		"0:stSlot":        bState.Slot(),
+		"1:stBlockHash":   fmt.Sprintf("%#x", bState.Eth1Data().BlockHash),
+		"2:blBlockHash":   fmt.Sprintf("%#x", signed.Block().Body().Eth1Data().BlockHash),
+		"3:postStateRoot": fmt.Sprintf("%#x", postStateRoot),
+		"4:isRootOk":      bytes.Equal(postStateRoot[:], signed.Block().StateRoot()),
+	}).Info("eth1.BlockHash: ExecuteStateTransitionNoVerifyAnySig: 111")
+
 	if !bytes.Equal(postStateRoot[:], signed.Block().StateRoot()) {
 		return nil, nil, fmt.Errorf("could not validate state root, wanted: %#x, received: %#x (slot=%d)",
 			postStateRoot[:], signed.Block().StateRoot(), signed.Block().Slot())
@@ -172,26 +189,63 @@ func ProcessBlockNoVerifyAnySig(
 		return nil, nil, fmt.Errorf("state and block are different version. %d != %d", bState.Version(), signed.Block().Version())
 	}
 
+	log.WithFields(logrus.Fields{
+		"0:Slot":        signed.Block().Slot(),
+		"0:stSlot":      bState.Slot(),
+		"1:stBlockHash": fmt.Sprintf("%#x", bState.Eth1Data().BlockHash),
+		"2:blBlockHash": fmt.Sprintf("%#x", signed.Block().Body().Eth1Data().BlockHash),
+	}).Info("eth1.BlockHash: ProcessBlockNoVerifyAnySig: 000")
+
 	blk := signed.Block()
 	bState, err := ProcessBlockForStateRoot(ctx, bState, signed)
 	if err != nil {
 		return nil, nil, err
 	}
 
+	log.WithFields(logrus.Fields{
+		"0:Slot":        signed.Block().Slot(),
+		"0:stSlot":      bState.Slot(),
+		"1:stBlockHash": fmt.Sprintf("%#x", bState.Eth1Data().BlockHash),
+		"2:blBlockHash": fmt.Sprintf("%#x", signed.Block().Body().Eth1Data().BlockHash),
+	}).Info("eth1.BlockHash: ProcessBlockNoVerifyAnySig:ProcessBlockForStateRoot 111")
+
 	bSet, err := b.BlockSignatureBatch(bState, blk.ProposerIndex(), signed.Signature(), blk.HashTreeRoot)
 	if err != nil {
 		tracing.AnnotateError(span, err)
 		return nil, nil, errors.Wrap(err, "could not retrieve block signature set")
 	}
+
+	log.WithFields(logrus.Fields{
+		"0:Slot":        signed.Block().Slot(),
+		"0:stSlot":      bState.Slot(),
+		"1:stBlockHash": fmt.Sprintf("%#x", bState.Eth1Data().BlockHash),
+		"2:blBlockHash": fmt.Sprintf("%#x", signed.Block().Body().Eth1Data().BlockHash),
+	}).Info("eth1.BlockHash: ProcessBlockNoVerifyAnySig:BlockSignatureBatch 222")
+
 	rSet, err := b.RandaoSignatureBatch(ctx, bState, signed.Block().Body().RandaoReveal())
 	if err != nil {
 		tracing.AnnotateError(span, err)
 		return nil, nil, errors.Wrap(err, "could not retrieve randao signature set")
 	}
+
+	log.WithFields(logrus.Fields{
+		"0:Slot":        signed.Block().Slot(),
+		"0:stSlot":      bState.Slot(),
+		"1:stBlockHash": fmt.Sprintf("%#x", bState.Eth1Data().BlockHash),
+		"2:blBlockHash": fmt.Sprintf("%#x", signed.Block().Body().Eth1Data().BlockHash),
+	}).Info("eth1.BlockHash: ProcessBlockNoVerifyAnySig:RandaoSignatureBatch 333")
+
 	aSet, err := b.AttestationSignatureBatch(ctx, bState, signed.Block().Body().Attestations())
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "could not retrieve attestation signature set")
 	}
+
+	log.WithFields(logrus.Fields{
+		"0:Slot":        signed.Block().Slot(),
+		"0:stSlot":      bState.Slot(),
+		"1:stBlockHash": fmt.Sprintf("%#x", bState.Eth1Data().BlockHash),
+		"2:blBlockHash": fmt.Sprintf("%#x", signed.Block().Body().Eth1Data().BlockHash),
+	}).Info("eth1.BlockHash: ProcessBlockNoVerifyAnySig:AttestationSignatureBatch 444")
 
 	// Merge beacon block, randao and attestations signatures into a set.
 	set := bls.NewSet()
@@ -269,7 +323,7 @@ func ProcessOperationsNoVerifyAttsSigs(
 //	process_sync_aggregate(state, block.body.sync_aggregate)
 func ProcessBlockForStateRoot(
 	ctx context.Context,
-	state state.BeaconState,
+	bState state.BeaconState,
 	signed block.SignedBeaconBlock,
 ) (state.BeaconState, error) {
 	ctx, span := trace.StartSpan(ctx, "core.state.ProcessBlockForStateRoot")
@@ -300,13 +354,13 @@ func ProcessBlockForStateRoot(
 		return nil, errors.Wrap(err, "could not hash tree root siBlock")
 	}
 	log.WithFields(logrus.Fields{
-		"slot":         state.Slot(),
-		"Validators":   len(state.Validators()),
-		"BlockVoting":  len(state.BlockVoting()),
-		"Spines":       gwatCommon.HashArrayFromBytes(state.SpineData().Spines),
-		"Prefix":       gwatCommon.HashArrayFromBytes(state.SpineData().Prefix),
-		"Finalization": gwatCommon.HashArrayFromBytes(state.SpineData().Finalization),
-		"CpFinalized":  gwatCommon.HashArrayFromBytes(state.SpineData().CpFinalized),
+		"slot":         bState.Slot(),
+		"Validators":   len(bState.Validators()),
+		"BlockVoting":  len(bState.BlockVoting()),
+		"Spines":       gwatCommon.HashArrayFromBytes(bState.SpineData().Spines),
+		"Prefix":       gwatCommon.HashArrayFromBytes(bState.SpineData().Prefix),
+		"Finalization": gwatCommon.HashArrayFromBytes(bState.SpineData().Finalization),
+		"CpFinalized":  gwatCommon.HashArrayFromBytes(bState.SpineData().CpFinalized),
 	}).Debug("ProcessBlockForStateRoot:state:111")
 
 	log.WithFields(logrus.Fields{
@@ -319,7 +373,14 @@ func ProcessBlockForStateRoot(
 		"Candidates":   gwatCommon.HashArrayFromBytes(blk.Body().Eth1Data().Candidates),
 	}).Debug("ProcessBlockForStateRoot:Block:222")
 
-	state, err = b.ProcessBlockHeaderNoVerify(ctx, state, blk.Slot(), blk.ProposerIndex(), blk.ParentRoot(), bodyRoot[:])
+	log.WithFields(logrus.Fields{
+		"0:Slot":        signed.Block().Slot(),
+		"0:stSlot":      bState.Slot(),
+		"1:stBlockHash": fmt.Sprintf("%#x", bState.Eth1Data().BlockHash),
+		"2:blBlockHash": fmt.Sprintf("%#x", signed.Block().Body().Eth1Data().BlockHash),
+	}).Info("eth1.BlockHash: ProcessBlockForStateRoot: 000")
+
+	bState, err = b.ProcessBlockHeaderNoVerify(ctx, bState, blk.Slot(), blk.ProposerIndex(), blk.ParentRoot(), bodyRoot[:])
 	if err != nil {
 		log.WithError(
 			errors.Wrap(err, "could not process block header"),
@@ -328,7 +389,14 @@ func ProcessBlockForStateRoot(
 		return nil, errors.Wrap(err, "could not process block header")
 	}
 
-	state, err = b.ProcessRandaoNoVerify(state, signed.Block().Body().RandaoReveal())
+	log.WithFields(logrus.Fields{
+		"0:Slot":        signed.Block().Slot(),
+		"0:stSlot":      bState.Slot(),
+		"1:stBlockHash": fmt.Sprintf("%#x", bState.Eth1Data().BlockHash),
+		"2:blBlockHash": fmt.Sprintf("%#x", signed.Block().Body().Eth1Data().BlockHash),
+	}).Info("eth1.BlockHash: ProcessBlockForStateRoot:ProcessBlockHeaderNoVerify 111")
+
+	bState, err = b.ProcessRandaoNoVerify(bState, signed.Block().Body().RandaoReveal())
 	if err != nil {
 		log.WithError(
 			errors.Wrap(err, "could not verify and process randao"),
@@ -337,7 +405,14 @@ func ProcessBlockForStateRoot(
 		return nil, errors.Wrap(err, "could not verify and process randao")
 	}
 
-	state, err = b.ProcessEth1DataInBlock(ctx, state, signed.Block().Body().Eth1Data())
+	log.WithFields(logrus.Fields{
+		"0:Slot":        signed.Block().Slot(),
+		"0:stSlot":      bState.Slot(),
+		"1:stBlockHash": fmt.Sprintf("%#x", bState.Eth1Data().BlockHash),
+		"2:blBlockHash": fmt.Sprintf("%#x", signed.Block().Body().Eth1Data().BlockHash),
+	}).Info("eth1.BlockHash: ProcessBlockForStateRoot:ProcessRandaoNoVerify 222")
+
+	bState, err = b.ProcessEth1DataInBlock(ctx, bState, signed.Block().Body().Eth1Data())
 	if err != nil {
 		log.WithError(
 			errors.Wrap(err, "could not process eth1 data"),
@@ -346,7 +421,14 @@ func ProcessBlockForStateRoot(
 		return nil, errors.Wrap(err, "could not process eth1 data")
 	}
 
-	state, err = b.ProcessDagConsensus(ctx, state, signed)
+	log.WithFields(logrus.Fields{
+		"0:Slot":        signed.Block().Slot(),
+		"0:stSlot":      bState.Slot(),
+		"1:stBlockHash": fmt.Sprintf("%#x", bState.Eth1Data().BlockHash),
+		"2:blBlockHash": fmt.Sprintf("%#x", signed.Block().Body().Eth1Data().BlockHash),
+	}).Info("eth1.BlockHash: ProcessBlockForStateRoot:ProcessEth1DataInBlock 333")
+
+	bState, err = b.ProcessDagConsensus(ctx, bState, signed)
 	if err != nil {
 		log.WithError(
 			errors.Wrap(err, "could not process block voting data"),
@@ -355,7 +437,14 @@ func ProcessBlockForStateRoot(
 		return nil, errors.Wrap(err, "could not process block voting data")
 	}
 
-	state, err = ProcessOperationsNoVerifyAttsSigs(ctx, state, signed)
+	log.WithFields(logrus.Fields{
+		"0:Slot":        signed.Block().Slot(),
+		"0:stSlot":      bState.Slot(),
+		"1:stBlockHash": fmt.Sprintf("%#x", bState.Eth1Data().BlockHash),
+		"2:blBlockHash": fmt.Sprintf("%#x", signed.Block().Body().Eth1Data().BlockHash),
+	}).Info("eth1.BlockHash: ProcessBlockForStateRoot:ProcessDagConsensus 444")
+
+	bState, err = ProcessOperationsNoVerifyAttsSigs(ctx, bState, signed)
 	if err != nil {
 		log.WithError(
 			errors.Wrap(err, "could not process block operation"),
@@ -364,8 +453,15 @@ func ProcessBlockForStateRoot(
 		return nil, errors.Wrap(err, "could not process block operation")
 	}
 
+	log.WithFields(logrus.Fields{
+		"0:Slot":        signed.Block().Slot(),
+		"0:stSlot":      bState.Slot(),
+		"1:stBlockHash": fmt.Sprintf("%#x", bState.Eth1Data().BlockHash),
+		"2:blBlockHash": fmt.Sprintf("%#x", signed.Block().Body().Eth1Data().BlockHash),
+	}).Info("eth1.BlockHash: ProcessBlockForStateRoot:ProcessOperationsNoVerifyAttsSigs 555")
+
 	if signed.Block().Version() == version.Phase0 {
-		return state, nil
+		return bState, nil
 	}
 
 	sa, err := signed.Block().Body().SyncAggregate()
@@ -375,7 +471,15 @@ func ProcessBlockForStateRoot(
 		).Error("ProcessBlockForStateRoot:Err")
 		return nil, errors.Wrap(err, "could not get sync aggregate from block")
 	}
-	state, err = altair.ProcessSyncAggregate(ctx, state, sa)
+
+	log.WithFields(logrus.Fields{
+		"0:Slot":        signed.Block().Slot(),
+		"0:stSlot":      bState.Slot(),
+		"1:stBlockHash": fmt.Sprintf("%#x", bState.Eth1Data().BlockHash),
+		"2:blBlockHash": fmt.Sprintf("%#x", signed.Block().Body().Eth1Data().BlockHash),
+	}).Info("eth1.BlockHash: ProcessBlockForStateRoot:SyncAggregate 666")
+
+	bState, err = altair.ProcessSyncAggregate(ctx, bState, sa)
 	if err != nil {
 		log.WithError(
 			errors.Wrap(err, "process_sync_aggregate failed"),
@@ -383,7 +487,14 @@ func ProcessBlockForStateRoot(
 		return nil, errors.Wrap(err, "process_sync_aggregate failed")
 	}
 
-	return state, nil
+	log.WithFields(logrus.Fields{
+		"0:Slot":        signed.Block().Slot(),
+		"0:stSlot":      bState.Slot(),
+		"1:stBlockHash": fmt.Sprintf("%#x", bState.Eth1Data().BlockHash),
+		"2:blBlockHash": fmt.Sprintf("%#x", signed.Block().Body().Eth1Data().BlockHash),
+	}).Info("eth1.BlockHash: ProcessBlockForStateRoot:ProcessSyncAggregate 777")
+
+	return bState, nil
 }
 
 // This calls altair block operations.

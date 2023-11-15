@@ -271,14 +271,13 @@ func TestRevalidateSubscription_CorrectlyFormatsTopic(t *testing.T) {
 	}
 	digest, err := r.currentForkDigest()
 	require.NoError(t, err)
-	subscriptions := make(map[uint64]*pubsub.Subscription, params.BeaconConfig().MaxCommitteesPerSlot)
 
 	defaultTopic := "/eth2/testing/%#x/committee%d"
 	// committee index 1
 	fullTopic := fmt.Sprintf(defaultTopic, digest, 1) + r.cfg.p2p.Encoding().ProtocolSuffix()
 	_, topVal := r.wrapAndReportValidation(fullTopic, r.noopValidator)
 	require.NoError(t, r.cfg.p2p.PubSub().RegisterTopicValidator(fullTopic, topVal))
-	subscriptions[1], err = r.cfg.p2p.SubscribeToTopic(fullTopic)
+	subscr_1, err := r.cfg.p2p.SubscribeToTopic(fullTopic)
 	require.NoError(t, err)
 
 	// committee index 2
@@ -286,9 +285,13 @@ func TestRevalidateSubscription_CorrectlyFormatsTopic(t *testing.T) {
 	_, topVal = r.wrapAndReportValidation(fullTopic, r.noopValidator)
 	err = r.cfg.p2p.PubSub().RegisterTopicValidator(fullTopic, topVal)
 	require.NoError(t, err)
-	subscriptions[2], err = r.cfg.p2p.SubscribeToTopic(fullTopic)
+	subscr_2, err := r.cfg.p2p.SubscribeToTopic(fullTopic)
 	require.NoError(t, err)
 
+	subscriptions := map[uint64][]*pubsub.Subscription{
+		1: {subscr_1},
+		2: {subscr_2},
+	}
 	r.reValidateSubscriptions(subscriptions, []uint64{2}, defaultTopic, digest)
 	require.LogsDoNotContain(t, hook, "Could not unregister topic validator")
 }

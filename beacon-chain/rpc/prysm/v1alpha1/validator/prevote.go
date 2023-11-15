@@ -134,7 +134,7 @@ func (vs *Server) ProposePrevote(ctx context.Context, pv *ethpb.PreVote) (*ethpb
 	if err != nil {
 		return nil, err
 	}
-	subnet := helpers.ComputeSubnetFromCommitteeAndSlot(uint64(len(vals)), pv.Data.Index, pv.Data.Slot)
+	subnet := helpers.ComputeSubnetPrevotingBySlot(uint64(len(vals)), pv.Data.Slot)
 
 	// Broadcast the new prevote to the network.
 	if err := vs.P2P.BroadcastPrevoting(ctx, subnet, pv); err != nil {

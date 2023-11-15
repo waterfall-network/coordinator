@@ -18,6 +18,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/tracing"
 	eth "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/prevote"
@@ -73,6 +74,11 @@ func (s *Service) validateCommitteeIndexPrevote(ctx context.Context, pid peer.ID
 		return pubsub.ValidationIgnore, nil
 	}
 
+	// Verify this the first attestation received for the participating validator for the slot.
+	if s.hasSeenPrevoteSlot(pv.Data.Slot, pv.Data.Index, pv.AggregationBits) {
+		return pubsub.ValidationIgnore, nil
+	}
+
 	bState, err := s.cfg.chain.HeadState(ctx)
 	if err != nil {
 		tracing.AnnotateError(span, err)
@@ -89,7 +95,7 @@ func (s *Service) validateCommitteeIndexPrevote(ctx context.Context, pid peer.ID
 		return validationRes, err
 	}
 
-	s.setSeenCommitteeIndicesSlot(pv.Data.Slot, pv.Data.Index, pv.AggregationBits)
+	s.setSeenSeenPrevoteSlot(pv.Data.Slot, pv.Data.Index, pv.AggregationBits)
 
 	msg.ValidatorData = pv
 	return pubsub.ValidationAccept, nil
@@ -197,4 +203,23 @@ func VerifyIndexedPrevote(ctx context.Context, beaconState state.ReadOnlyBeaconS
 		pubkeys = append(pubkeys, pk)
 	}
 	return prevote.VerifyIndexedPrevoteSig(ctx, ipv, pubkeys, domain)
+}
+
+// Returns true if the prevote was already seen for the participating validator for the slot.
+func (s *Service) hasSeenPrevoteSlot(slot types.Slot, committeeID types.CommitteeIndex, aggregateBits []byte) bool {
+	s.seenPrevotingLock.RLock()
+	defer s.seenPrevotingLock.RUnlock()
+	b := append(bytesutil.Bytes32(uint64(slot)), bytesutil.Bytes32(uint64(committeeID))...)
+	b = append(b, aggregateBits...)
+	_, seen := s.seenPrevotingCache.Get(string(b))
+	return seen
+}
+
+// Set committee's indices and slot as seen for incoming prevote.
+func (s *Service) setSeenSeenPrevoteSlot(slot types.Slot, committeeID types.CommitteeIndex, aggregateBits []byte) {
+	s.seenPrevotingLock.Lock()
+	defer s.seenPrevotingLock.Unlock()
+	b := append(bytesutil.Bytes32(uint64(slot)), bytesutil.Bytes32(uint64(committeeID))...)
+	b = append(b, aggregateBits...)
+	s.seenPrevotingCache.Add(string(b), true)
 }

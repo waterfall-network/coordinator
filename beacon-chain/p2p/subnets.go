@@ -31,7 +31,7 @@ var syncCommsSubnetEnrKey = params.BeaconNetworkConfig().SyncCommsSubnetKey
 // the relevant lock. This is used to differentiate
 // sync subnets from attestation subnets. This is deliberately
 // chosen as more than 64(attestation subnet count).
-const syncLockerVal = 100
+var syncLockerVal = 2 * params.BeaconNetworkConfig().AttestationSubnetCount
 
 // FindPeersWithSubnet performs a network search for peers
 // subscribed to a particular subnet. Then we try to connect

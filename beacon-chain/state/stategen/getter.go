@@ -3,10 +3,12 @@ package stategen
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
@@ -159,12 +161,20 @@ func (s *State) loadStateByRoot(ctx context.Context, blockRoot [32]byte) (state.
 	ctx, span := trace.StartSpan(ctx, "stateGen.loadStateByRoot")
 	defer span.End()
 
+	defer func(start time.Time) {
+		duration := time.Since(start).Microseconds()
+		log.WithFields(logrus.Fields{
+			"μs":   duration,
+			"root": fmt.Sprintf("%#x", blockRoot),
+		}).Info("Load state by root: duration 0")
+	}(time.Now())
+
 	// First, it checks if the state exists in hot state cache.
 	cachedState := s.hotStateCache.get(blockRoot)
 	if cachedState != nil && !cachedState.IsNil() {
 		log.WithFields(logrus.Fields{
 			"0slot": cachedState.Slot(),
-			"6root": fmt.Sprintf("%#x", blockRoot),
+			"root":  fmt.Sprintf("%#x", blockRoot),
 		}).Info("Load state by root: from hot cache")
 		return cachedState, nil
 	}
@@ -174,7 +184,7 @@ func (s *State) loadStateByRoot(ctx context.Context, blockRoot [32]byte) (state.
 	if cachedState != nil && !cachedState.IsNil() {
 		log.WithFields(logrus.Fields{
 			"0slot": cachedState.Slot(),
-			"6root": fmt.Sprintf("%#x", blockRoot),
+			"root":  fmt.Sprintf("%#x", blockRoot),
 		}).Info("Load state by root: from sync cache")
 		return cachedState, nil
 	}
@@ -187,22 +197,85 @@ func (s *State) loadStateByRoot(ctx context.Context, blockRoot [32]byte) (state.
 	if ok {
 		log.WithFields(logrus.Fields{
 			"0slot": cachedInfo.state.Slot(),
-			"6root": fmt.Sprintf("%#x", blockRoot),
+			"root":  fmt.Sprintf("%#x", blockRoot),
 		}).Info("Load state by root: from epoch boundary cache")
 		return cachedInfo.state, nil
+	}
+
+	// check the state exists in replay cache
+	resState, err := s.loadStateCache.Get(ctx, blockRoot)
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"root": fmt.Sprintf("%#x", blockRoot),
+		}).Error("Load state by root: replay cache get failed")
+		return nil, err
+	}
+	if resState != nil {
+		log.WithFields(logrus.Fields{
+			"root": fmt.Sprintf("%#x", blockRoot),
+		}).Info("Load state by root: from replay cache get")
+		return resState, nil
 	}
 
 	// Short cut if the cachedState is already in the DB.
 	if s.beaconDB.HasState(ctx, blockRoot) {
 		log.WithFields(logrus.Fields{
-			"6root": fmt.Sprintf("%#x", blockRoot),
+			"root": fmt.Sprintf("%#x", blockRoot),
 		}).Info("Load state by root: from DB")
 		return s.beaconDB.State(ctx, blockRoot)
 	}
 
+	// if same request is already in progress - waite result
+	resState, err = s.loadStateCache.GetWhenReady(ctx, blockRoot)
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"root": fmt.Sprintf("%#x", blockRoot),
+		}).Error("Load state by root: replay cache wait failed")
+		return nil, err
+	}
+	if resState != nil {
+		log.WithFields(logrus.Fields{
+			"root": fmt.Sprintf("%#x", blockRoot),
+		}).Info("Load state by root: from replay wait cache")
+		return resState, nil
+	}
+	if err = s.loadStateCache.MarkInProgress(blockRoot); err != nil {
+		if errors.Is(err, cache.ErrAlreadyInProgress) {
+			resState, err = s.loadStateCache.GetWhenReady(ctx, blockRoot)
+			if err != nil {
+				log.WithError(err).WithFields(logrus.Fields{
+					"root": fmt.Sprintf("%#x", blockRoot),
+				}).Error("Load state by root: replay cache already progress")
+				return nil, err
+			}
+			if resState == nil || resState.IsNil() {
+				err = errors.New("replay cache was in progress and resolved nil")
+				log.WithError(err).WithFields(logrus.Fields{
+					"root": fmt.Sprintf("%#x", blockRoot),
+				}).Error("Load state by root: replay cache resolved nil")
+				return nil, err
+			}
+			log.WithFields(logrus.Fields{
+				"root": fmt.Sprintf("%#x", blockRoot),
+			}).Info("Load state by root: from replay cache 2")
+			return resState, nil
+		}
+		log.WithError(err).WithFields(logrus.Fields{
+			"root": fmt.Sprintf("%#x", blockRoot),
+		}).Error("Load state by root: replay cache start failed")
+		return nil, err
+	}
+	defer func() {
+		if err := s.loadStateCache.MarkNotInProgress(blockRoot); err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"root": fmt.Sprintf("%#x", blockRoot),
+			}).Error("Load state by root: replay cache failed to mark in progress")
+		}
+	}()
+
 	log.WithFields(logrus.Fields{
 		"root": fmt.Sprintf("%#x", blockRoot),
-	}).Info("Load state by root: replay blocks")
+	}).Info("Load state by root: replay blocks start")
 
 	summary, err := s.stateSummary(ctx, blockRoot)
 	if err != nil {
@@ -232,7 +305,17 @@ func (s *State) loadStateByRoot(ctx context.Context, blockRoot [32]byte) (state.
 
 	replayBlockCount.Observe(float64(len(blks)))
 
-	return s.ReplayBlocks(ctx, startState, blks, targetSlot)
+	resState, err = s.ReplayBlocks(ctx, startState, blks, targetSlot)
+	if err != nil {
+		return resState, err
+	}
+	// cache result of the ReplayBlocks method
+	if err = s.loadStateCache.Put(ctx, blockRoot, resState); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"root": fmt.Sprintf("%#x", blockRoot),
+		}).Error("Load state by root: replay cache put failed")
+	}
+	return resState, nil
 }
 
 // SyncStateByRoot retrieves the state using input block root.
@@ -254,12 +337,20 @@ func (s *State) loadSyncStateByRoot(ctx context.Context, blockRoot [32]byte) (st
 	ctx, span := trace.StartSpan(ctx, "stateGen.loadSyncStateByRoot")
 	defer span.End()
 
+	defer func(start time.Time) {
+		duration := time.Since(start).Microseconds()
+		log.WithFields(logrus.Fields{
+			"μs":   duration,
+			"root": fmt.Sprintf("%#x", blockRoot),
+		}).Info("Load state by root: duration 1")
+	}(time.Now())
+
 	//// check if the state exists in sync state cache.
 	//cachedState := s.hotStateCache.get(blockRoot)
 	//if cachedState != nil && !cachedState.IsNil() {
 	//	log.WithFields(logrus.Fields{
 	//		"0slot": cachedState.Slot(),
-	//		"6root": fmt.Sprintf("%#x", blockRoot),
+	//		"root": fmt.Sprintf("%#x", blockRoot),
 	//	}).Info("Load state by root: from hot cache")
 	//	return cachedState, nil
 	//}
@@ -269,7 +360,7 @@ func (s *State) loadSyncStateByRoot(ctx context.Context, blockRoot [32]byte) (st
 	if cachedState != nil && !cachedState.IsNil() {
 		log.WithFields(logrus.Fields{
 			"0slot": cachedState.Slot(),
-			"6root": fmt.Sprintf("%#x", blockRoot),
+			"root":  fmt.Sprintf("%#x", blockRoot),
 		}).Info("Load state by root: from sync cache")
 		return cachedState, nil
 	}
@@ -282,22 +373,85 @@ func (s *State) loadSyncStateByRoot(ctx context.Context, blockRoot [32]byte) (st
 	if ok {
 		log.WithFields(logrus.Fields{
 			"0slot": cachedInfo.state.Slot(),
-			"6root": fmt.Sprintf("%#x", blockRoot),
+			"root":  fmt.Sprintf("%#x", blockRoot),
 		}).Info("Load state by root: from epoch boundary cache")
 		return cachedInfo.state, nil
+	}
+
+	// check the state exists in replay cache
+	resState, err := s.loadStateCache.Get(ctx, blockRoot)
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"root": fmt.Sprintf("%#x", blockRoot),
+		}).Error("Load state by root: replay cache get failed")
+		return nil, err
+	}
+	if resState != nil {
+		log.WithFields(logrus.Fields{
+			"root": fmt.Sprintf("%#x", blockRoot),
+		}).Info("Load state by root: from replay cache get")
+		return resState, nil
 	}
 
 	// Short cut if the cachedState is already in the DB.
 	if s.beaconDB.HasState(ctx, blockRoot) {
 		log.WithFields(logrus.Fields{
-			"6root": fmt.Sprintf("%#x", blockRoot),
+			"root": fmt.Sprintf("%#x", blockRoot),
 		}).Info("Load state by root: from DB")
 		return s.beaconDB.State(ctx, blockRoot)
 	}
 
+	// if same request is already in progress - waite result
+	resState, err = s.loadStateCache.GetWhenReady(ctx, blockRoot)
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"root": fmt.Sprintf("%#x", blockRoot),
+		}).Error("Load state by root: replay cache wait failed")
+		return nil, err
+	}
+	if resState != nil {
+		log.WithFields(logrus.Fields{
+			"root": fmt.Sprintf("%#x", blockRoot),
+		}).Info("Load state by root: from replay wait cache")
+		return resState, nil
+	}
+	if err = s.loadStateCache.MarkInProgress(blockRoot); err != nil {
+		if errors.Is(err, cache.ErrAlreadyInProgress) {
+			resState, err = s.loadStateCache.GetWhenReady(ctx, blockRoot)
+			if err != nil {
+				log.WithError(err).WithFields(logrus.Fields{
+					"root": fmt.Sprintf("%#x", blockRoot),
+				}).Error("Load state by root: replay cache already progress")
+				return nil, err
+			}
+			if resState == nil || resState.IsNil() {
+				err = errors.New("replay cache was in progress and resolved nil")
+				log.WithError(err).WithFields(logrus.Fields{
+					"root": fmt.Sprintf("%#x", blockRoot),
+				}).Error("Load state by root: replay cache resolved nil")
+				return nil, err
+			}
+			log.WithFields(logrus.Fields{
+				"root": fmt.Sprintf("%#x", blockRoot),
+			}).Info("Load state by root: from replay cache 2")
+			return resState, nil
+		}
+		log.WithError(err).WithFields(logrus.Fields{
+			"root": fmt.Sprintf("%#x", blockRoot),
+		}).Error("Load state by root: replay cache start failed")
+		return nil, err
+	}
+	defer func() {
+		if err := s.loadStateCache.MarkNotInProgress(blockRoot); err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"root": fmt.Sprintf("%#x", blockRoot),
+			}).Error("Load state by root: replay cache failed to mark in progress")
+		}
+	}()
+
 	log.WithFields(logrus.Fields{
 		"root": fmt.Sprintf("%#x", blockRoot),
-	}).Info("Load state by root: replay blocks")
+	}).Info("Load state by root: replay blocks start")
 
 	summary, err := s.stateSummary(ctx, blockRoot)
 	if err != nil {
@@ -327,7 +481,17 @@ func (s *State) loadSyncStateByRoot(ctx context.Context, blockRoot [32]byte) (st
 
 	replayBlockCount.Observe(float64(len(blks)))
 
-	return s.ReplayBlocks(ctx, startState, blks, targetSlot)
+	resState, err = s.ReplayBlocks(ctx, startState, blks, targetSlot)
+	if err != nil {
+		return resState, err
+	}
+	// cache result of the ReplayBlocks method
+	if err = s.loadStateCache.Put(ctx, blockRoot, resState); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"root": fmt.Sprintf("%#x", blockRoot),
+		}).Error("Load state by root: replay cache put failed")
+	}
+	return resState, nil
 }
 
 // This returns the highest available ancestor state of the input block root.

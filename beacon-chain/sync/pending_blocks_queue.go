@@ -12,6 +12,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/trailofbits/go-mutexasserts"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/async"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	p2ptypes "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain"
@@ -53,16 +54,16 @@ func (s *Service) processPendingBlocks(ctx context.Context) error {
 	if err := s.validatePendingSlots(); err != nil {
 		return errors.Wrap(err, "could not validate pending slots")
 	}
-	slots := s.sortedPendingSlots()
+	pendingSlots := s.sortedPendingSlots()
 	var parentRoots [][32]byte
 
 	span.AddAttributes(
-		trace.Int64Attribute("numSlots", int64(len(slots))),
+		trace.Int64Attribute("numSlots", int64(len(pendingSlots))),
 		trace.Int64Attribute("numPeers", int64(len(pids))),
 	)
 
 	randGen := rand.NewGenerator()
-	for _, slot := range slots {
+	for _, slot := range pendingSlots {
 		// process the blocks during their respective slot.
 		// otherwise wait for the right slot to process the block.
 		if slot > s.cfg.chain.CurrentSlot() {
@@ -165,13 +166,16 @@ func (s *Service) processPendingBlocks(ctx context.Context) error {
 			}
 
 			if err := s.cfg.chain.ReceiveBlock(ctx, b, blkRoot); err != nil {
-				if !errors.Is(err, powchain.ErrHTTPTimeout) {
-					log.Debugf("Could not process block from slot %d: %v", b.Block().Slot(), err)
-					tracing.AnnotateError(span, err)
-					s.setBadBlock(ctx, blkRoot)
-				}
 				// In the next iteration of the queue, this block will be removed from
 				// the pending queue as it has been marked as a 'bad' block.
+				if errors.Is(err, blockchain.ErrBlockIsProcessing) ||
+					errors.Is(err, powchain.ErrHTTPTimeout) {
+					span.End()
+					continue
+				}
+				log.Debugf("Could not process block from slot %d: %v", b.Block().Slot(), err)
+				tracing.AnnotateError(span, err)
+				s.setBadBlock(ctx, blkRoot)
 				span.End()
 				continue
 			}
@@ -252,15 +256,15 @@ func (s *Service) sortedPendingSlots() []types.Slot {
 
 	items := s.slotToPendingBlocks.Items()
 
-	slots := make([]types.Slot, 0, len(items))
+	sortedSlots := make([]types.Slot, 0, len(items))
 	for k := range items {
 		slot := cacheKeyToSlot(k)
-		slots = append(slots, slot)
+		sortedSlots = append(sortedSlots, slot)
 	}
-	sort.Slice(slots, func(i, j int) bool {
-		return slots[i] < slots[j]
+	sort.Slice(sortedSlots, func(i, j int) bool {
+		return sortedSlots[i] < sortedSlots[j]
 	})
-	return slots
+	return sortedSlots
 }
 
 // validatePendingSlots validates the pending blocks

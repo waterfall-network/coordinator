@@ -10,6 +10,7 @@ import (
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
@@ -45,32 +46,8 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 		}, nil
 	}
 	eth1DataNotification = false
+	cpSpine := helpers.GetBaseSpine(beaconState)
 
-	cpRoot := beaconState.FinalizedCheckpoint().Root
-
-	if bytesutil.ToBytes32(cpRoot) == params.BeaconConfig().ZeroHash {
-		return &ethpb.Eth1Data{
-			BlockHash:    prevEth1Data.GetBlockHash(),
-			DepositCount: prevEth1Data.GetDepositCount(),
-			DepositRoot:  prevEth1Data.GetDepositRoot(),
-		}, nil
-	}
-
-	cpState, err := vs.StateGen.StateByRoot(ctx, bytesutil.ToBytes32(cpRoot))
-	if err != nil {
-		log.WithError(err).Error("eth1DataMajorityVote: could not retrieve checkpoint state")
-		return nil, err
-	}
-	cpFinSpines := gwatCommon.HashArrayFromBytes(cpState.SpineData().Finalization)
-	if len(cpFinSpines) == 0 {
-		log.Warn("eth1DataMajorityVote: no finalization in state")
-		return &ethpb.Eth1Data{
-			BlockHash:    prevEth1Data.GetBlockHash(),
-			DepositCount: prevEth1Data.GetDepositCount(),
-			DepositRoot:  prevEth1Data.GetDepositRoot(),
-		}, nil
-	}
-	cpSpine := cpFinSpines[len(cpFinSpines)-1]
 	cpSpineExists, cpSpineNum, err := vs.Eth1BlockFetcher.BlockExists(ctx, cpSpine)
 	if !cpSpineExists || err != nil {
 		log.WithError(err).Warn("eth1DataMajorityVote: could not retrieve checkpoint terminal spine")
@@ -80,11 +57,6 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 
 	if cpDepositCount >= vs.HeadFetcher.HeadETH1Data().DepositCount {
 		//if cpDepositCount > vs.HeadFetcher.HeadETH1Data().DepositCount {
-		lvtHash, err := vs.Eth1BlockFetcher.BlockHashByHeight(ctx, cpSpineNum)
-		if err != nil {
-			log.WithError(err).Warn("eth1DataMajorityVote: Could not get hash of last block by latest valid time")
-			return nil, errors.Wrap(err, "eth1DataMajorityVote: Could not get hash of last block by latest valid time")
-		}
 
 		log.WithFields(logrus.Fields{
 			"cpDepositRoot":               fmt.Sprintf("%#x", cpDepositRoot),
@@ -93,8 +65,16 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 			"condition":                   cpDepositCount >= vs.HeadFetcher.HeadETH1Data().DepositCount,
 		}).Info("eth1DataMajorityVote: update deposit eth1 data")
 
+		log.WithFields(logrus.Fields{
+			"0:stSlot":       beaconState.Slot(),
+			"1:newBlockHash": fmt.Sprintf("%#x", cpSpine),
+			"2:stBlockHash":  fmt.Sprintf("%#x", beaconState.Eth1Data().BlockHash),
+			"3:cpSpine":      fmt.Sprintf("%#x", cpSpine),
+			"4:cpSpineNum":   fmt.Sprintf("%d", cpSpineNum.Uint64()),
+		}).Info("eth1.BlockHash: eth1DataMajorityVote: 000")
+
 		return &ethpb.Eth1Data{
-			BlockHash:    lvtHash.Bytes(),
+			BlockHash:    cpSpine.Bytes(),
 			DepositCount: cpDepositCount,
 			DepositRoot:  cpDepositRoot[:],
 		}, nil

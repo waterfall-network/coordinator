@@ -48,6 +48,11 @@ type TestP2P struct {
 	LocalMetadata   metadata.Metadata
 }
 
+func (p *TestP2P) BroadcastPrevoting(ctx context.Context, subnet uint64, sMsg *ethpb.PreVote) error {
+	//TODO implement me
+	panic("implement me")
+}
+
 // NewTestP2P initializes a new p2p test service.
 func NewTestP2P(t *testing.T) *TestP2P {
 	ctx := context.Background()
