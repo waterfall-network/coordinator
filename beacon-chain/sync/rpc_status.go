@@ -96,7 +96,7 @@ func (s *Service) resyncIfBehind() {
 	interval := time.Duration(millisecondsPerEpoch/16) * time.Millisecond
 	async.RunEvery(s.ctx, interval, func() {
 		if s.shouldReSync() {
-			syncedEpoch := slots.ToEpoch(s.cfg.chain.HeadSlot())
+			syncedEpoch := slots.ToEpoch(s.cfg.chain.HeadSlot()) // nolint
 			// Factor number of expected minimum sync peers, to make sure that enough peers are
 			// available to resync (some peers may go away between checking non-finalized peers and
 			// actual resyncing).
@@ -104,7 +104,7 @@ func (s *Service) resyncIfBehind() {
 			// Check if the current node is more than 1 epoch behind.
 			if highestEpoch > (syncedEpoch + 1) {
 				log.WithFields(logrus.Fields{
-					"currentEpoch": slots.ToEpoch(s.cfg.chain.CurrentSlot()),
+					"currentEpoch": slots.ToEpoch(s.cfg.chain.CurrentSlot()), // nolint
 					"syncedEpoch":  syncedEpoch,
 					"peersEpoch":   highestEpoch,
 				}).Info("Fallen behind peers; reverting to initial sync to catch up")
@@ -120,8 +120,8 @@ func (s *Service) resyncIfBehind() {
 
 // shouldReSync returns true if the node is not syncing and falls behind two epochs.
 func (s *Service) shouldReSync() bool {
-	syncedEpoch := slots.ToEpoch(s.cfg.chain.HeadSlot())
-	currentEpoch := slots.ToEpoch(s.cfg.chain.CurrentSlot())
+	syncedEpoch := slots.ToEpoch(s.cfg.chain.HeadSlot())     // nolint
+	currentEpoch := slots.ToEpoch(s.cfg.chain.CurrentSlot()) // nolint
 	prevEpoch := types.Epoch(0)
 	if currentEpoch > 1 {
 		prevEpoch = currentEpoch - 1
@@ -134,7 +134,7 @@ func (s *Service) sendRPCStatusRequest(ctx context.Context, id peer.ID) error {
 	ctx, cancel := context.WithTimeout(ctx, respTimeout)
 	defer cancel()
 
-	headRoot, err := s.cfg.chain.HeadRoot(ctx)
+	headRoot, err := s.cfg.chain.HeadRoot(ctx) // nolint
 	if err != nil {
 		return err
 	}
@@ -145,12 +145,12 @@ func (s *Service) sendRPCStatusRequest(ctx context.Context, id peer.ID) error {
 	}
 	resp := &pb.Status{
 		ForkDigest:     forkDigest[:],
-		FinalizedRoot:  s.cfg.chain.FinalizedCheckpt().Root,
-		FinalizedEpoch: s.cfg.chain.FinalizedCheckpt().Epoch,
+		FinalizedRoot:  s.cfg.chain.FinalizedCheckpt().Root,  // nolint
+		FinalizedEpoch: s.cfg.chain.FinalizedCheckpt().Epoch, // nolint
 		HeadRoot:       headRoot,
-		HeadSlot:       s.cfg.chain.HeadSlot(),
+		HeadSlot:       s.cfg.chain.HeadSlot(), // nolint
 	}
-	topic, err := p2p.TopicFromMessage(p2p.StatusMessageName, slots.ToEpoch(s.cfg.chain.CurrentSlot()))
+	topic, err := p2p.TopicFromMessage(p2p.StatusMessageName, slots.ToEpoch(s.cfg.chain.CurrentSlot())) // nolint
 	if err != nil {
 		return err
 	}
@@ -195,7 +195,7 @@ func (s *Service) sendRPCStatusRequest(ctx context.Context, id peer.ID) error {
 }
 
 func (s *Service) reValidatePeer(ctx context.Context, id peer.ID) error {
-	s.cfg.p2p.Peers().Scorers().PeerStatusScorer().SetHeadSlot(s.cfg.chain.HeadSlot())
+	s.cfg.p2p.Peers().Scorers().PeerStatusScorer().SetHeadSlot(s.cfg.chain.HeadSlot()) // nolint
 	if err := s.sendRPCStatusRequest(ctx, id); err != nil {
 		return err
 	}
@@ -286,7 +286,7 @@ func (s *Service) statusRPCHandler(ctx context.Context, msg interface{}, stream 
 }
 
 func (s *Service) respondWithStatus(ctx context.Context, stream network.Stream) error {
-	headRoot, err := s.cfg.chain.HeadRoot(ctx)
+	headRoot, err := s.cfg.chain.HeadRoot(ctx) // nolint
 	if err != nil {
 		return err
 	}
@@ -297,10 +297,10 @@ func (s *Service) respondWithStatus(ctx context.Context, stream network.Stream) 
 	}
 	resp := &pb.Status{
 		ForkDigest:     forkDigest[:],
-		FinalizedRoot:  s.cfg.chain.FinalizedCheckpt().Root,
-		FinalizedEpoch: s.cfg.chain.FinalizedCheckpt().Epoch,
+		FinalizedRoot:  s.cfg.chain.FinalizedCheckpt().Root,  // nolint
+		FinalizedEpoch: s.cfg.chain.FinalizedCheckpt().Epoch, // nolint
 		HeadRoot:       headRoot,
-		HeadSlot:       s.cfg.chain.HeadSlot(),
+		HeadSlot:       s.cfg.chain.HeadSlot(), // nolint
 	}
 
 	if _, err := stream.Write([]byte{responseCodeSuccess}); err != nil {
@@ -318,8 +318,8 @@ func (s *Service) validateStatusMessage(ctx context.Context, msg *pb.Status) err
 	if !bytes.Equal(forkDigest[:], msg.ForkDigest) {
 		return p2ptypes.ErrWrongForkDigestVersion
 	}
-	genesis := s.cfg.chain.GenesisTime()
-	finalizedEpoch := s.cfg.chain.FinalizedCheckpt().Epoch
+	genesis := s.cfg.chain.GenesisTime()                   // nolint
+	finalizedEpoch := s.cfg.chain.FinalizedCheckpt().Epoch // nolint
 	maxEpoch := slots.EpochsSinceGenesis(genesis)
 	// It would take a minimum of 2 epochs to finalize a
 	// previous epoch

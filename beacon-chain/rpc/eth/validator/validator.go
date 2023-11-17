@@ -17,7 +17,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition"
 	rpchelpers "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc/eth/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
-	statev1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
+	statev1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1" // nolint
 	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"

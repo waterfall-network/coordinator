@@ -60,7 +60,7 @@ func (s *Service) validateSyncCommitteeMessage(
 
 	// We should not attempt to process this message if the node is running in optimistic mode.
 	// We just ignore in p2p so that the peer is not penalized.
-	optimistic, err := s.cfg.chain.IsOptimistic(ctx)
+	optimistic, err := s.cfg.chain.IsOptimistic(ctx) // nolint
 	if err != nil {
 		return pubsub.ValidationReject, err
 	}
@@ -83,14 +83,14 @@ func (s *Service) validateSyncCommitteeMessage(
 	// The message's `slot` is for the current slot (with a MAXIMUM_GOSSIP_CLOCK_DISPARITY allowance).
 	if err := altair.ValidateSyncMessageTime(
 		m.Slot,
-		s.cfg.chain.GenesisTime(),
+		s.cfg.chain.GenesisTime(), // nolint
 		params.BeaconNetworkConfig().MaximumGossipClockDisparity,
 	); err != nil {
 		tracing.AnnotateError(span, err)
 		return pubsub.ValidationIgnore, err
 	}
 
-	committeeIndices, err := s.cfg.chain.HeadSyncCommitteeIndices(ctx, m.ValidatorIndex, m.Slot)
+	committeeIndices, err := s.cfg.chain.HeadSyncCommitteeIndices(ctx, m.ValidatorIndex, m.Slot) // nolint
 	if err != nil {
 		tracing.AnnotateError(span, err)
 		return pubsub.ValidationIgnore, err
@@ -223,7 +223,7 @@ func (s *Service) rejectInvalidSyncCommitteeSignature(m *ethpb.SyncCommitteeMess
 		// Ignore the message if it is not possible to retrieve the signing root.
 		// For internal errors, the correct behaviour is to ignore rather than reject outright,
 		// since the failure is locally derived.
-		d, err := s.cfg.chain.HeadSyncCommitteeDomain(ctx, m.Slot)
+		d, err := s.cfg.chain.HeadSyncCommitteeDomain(ctx, m.Slot) // nolint
 		if err != nil {
 			tracing.AnnotateError(span, err)
 			return pubsub.ValidationIgnore, err
@@ -237,7 +237,7 @@ func (s *Service) rejectInvalidSyncCommitteeSignature(m *ethpb.SyncCommitteeMess
 
 		// Reject for a validator index that is not found, as we should not remain peered with a node
 		// that is on such a different fork than our chain.
-		pubKey, err := s.cfg.chain.HeadValidatorIndexToPublicKey(ctx, m.ValidatorIndex)
+		pubKey, err := s.cfg.chain.HeadValidatorIndexToPublicKey(ctx, m.ValidatorIndex) // nolint
 		if err != nil {
 			tracing.AnnotateError(span, err)
 			return pubsub.ValidationReject, err

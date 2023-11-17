@@ -44,7 +44,7 @@ func (s *Service) validateCommitteeIndexBeaconAttestation(ctx context.Context, p
 
 	// We should not attempt to process this message if the node is running in optimistic mode.
 	// We just ignore in p2p so that the peer is not penalized.
-	optimistic, err := s.cfg.chain.IsOptimistic(ctx)
+	optimistic, err := s.cfg.chain.IsOptimistic(ctx) // nolint
 	if err != nil {
 		return pubsub.ValidationReject, err
 	}
@@ -70,7 +70,7 @@ func (s *Service) validateCommitteeIndexBeaconAttestation(ctx context.Context, p
 		log.WithError(errWrongMessage).WithFields(logrus.Fields{
 			"pid":     fmt.Sprintf("%s", pid),
 			"topic":   fmt.Sprintf("%s", *msg.Topic),
-			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())), // nolint
 		}).Error("Atts: incoming: validate att: decode")
 
 		return pubsub.ValidationReject, errWrongMessage
@@ -94,13 +94,13 @@ func (s *Service) validateCommitteeIndexBeaconAttestation(ctx context.Context, p
 
 	// Attestation's slot is within ATTESTATION_PROPAGATION_SLOT_RANGE and early attestation
 	// processing tolerance.
-	if err := helpers.ValidateAttestationTime(att.Data.Slot, s.cfg.chain.GenesisTime(),
+	if err := helpers.ValidateAttestationTime(att.Data.Slot, s.cfg.chain.GenesisTime(), // nolint
 		earlyAttestationProcessingTolerance); err != nil {
 		tracing.AnnotateError(span, err)
 		log.WithError(err).WithFields(logrus.Fields{
 			"pid":     fmt.Sprintf("%s", pid),
 			"topic":   fmt.Sprintf("%s", *msg.Topic),
-			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())), // nolint
 		}).Error("Atts: incoming: validate att: time")
 		return pubsub.ValidationIgnore, err
 	}
@@ -108,7 +108,7 @@ func (s *Service) validateCommitteeIndexBeaconAttestation(ctx context.Context, p
 		log.WithError(err).WithFields(logrus.Fields{
 			"pid":     fmt.Sprintf("%s", pid),
 			"topic":   fmt.Sprintf("%s", *msg.Topic),
-			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())), // nolint
 		}).Error("Atts: incoming: validate att: target epoch")
 		return pubsub.ValidationReject, err
 	}
@@ -120,7 +120,7 @@ func (s *Service) validateCommitteeIndexBeaconAttestation(ctx context.Context, p
 			// Using a different context to prevent timeouts as this operation can be expensive
 			// and we want to avoid affecting the critical code path.
 			ctx := context.TODO()
-			preState, err := s.cfg.chain.AttestationTargetState(ctx, att.Data.Target)
+			preState, err := s.cfg.chain.AttestationTargetState(ctx, att.Data.Target) // nolint
 			if err != nil {
 				log.WithError(err).Error("Atts: incoming: Could not retrieve pre state")
 				tracing.AnnotateError(span, err)
@@ -147,7 +147,7 @@ func (s *Service) validateCommitteeIndexBeaconAttestation(ctx context.Context, p
 		log.WithError(err).WithFields(logrus.Fields{
 			"pid":           fmt.Sprintf("%s", pid),
 			"topic":         fmt.Sprintf("%s", *msg.Topic),
-			"curSlot":       slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+			"curSlot":       slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())), // nolint
 			"pv.AggrBits":   fmt.Sprintf("%#x", att.AggregationBits),
 			"pv.Data.Slot":  att.Data.Slot,
 			"pv.Data.Index": fmt.Sprintf("%#x", att.Data.BeaconBlockRoot),
@@ -162,7 +162,7 @@ func (s *Service) validateCommitteeIndexBeaconAttestation(ctx context.Context, p
 		log.WithError(errors.New("attestation data references bad block root")).WithFields(logrus.Fields{
 			"pid":     fmt.Sprintf("%s", pid),
 			"topic":   fmt.Sprintf("%s", *msg.Topic),
-			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())), // nolint
 		}).Error("Atts: incoming: validate att: check bad block")
 		return pubsub.ValidationReject, errors.New("attestation data references bad block root")
 	}
@@ -173,39 +173,39 @@ func (s *Service) validateCommitteeIndexBeaconAttestation(ctx context.Context, p
 		log.WithError(err).WithFields(logrus.Fields{
 			"pid":     fmt.Sprintf("%s", pid),
 			"topic":   fmt.Sprintf("%s", *msg.Topic),
-			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())), // nolint
 		}).Error("Atts: incoming: validate att: no block and state")
 		// A node doesn't have the block, it'll request from peer while saving the pending attestation to a queue.
 		s.savePendingAtt(&eth.SignedAggregateAttestationAndProof{Message: &eth.AggregateAttestationAndProof{Aggregate: att}})
 		return pubsub.ValidationIgnore, nil
 	}
 
-	if err := s.cfg.chain.VerifyFinalizedConsistency(ctx, att.Data.BeaconBlockRoot); err != nil {
+	if err := s.cfg.chain.VerifyFinalizedConsistency(ctx, att.Data.BeaconBlockRoot); err != nil { // nolint
 		tracing.AnnotateError(span, err)
 		log.WithError(err).WithFields(logrus.Fields{
 			"pid":     fmt.Sprintf("%s", pid),
 			"topic":   fmt.Sprintf("%s", *msg.Topic),
-			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())), // nolint
 		}).Error("Atts: incoming: validate att: finalized consistency")
 		return pubsub.ValidationIgnore, err
 	}
-	if err := s.cfg.chain.VerifyLmdFfgConsistency(ctx, att); err != nil {
+	if err := s.cfg.chain.VerifyLmdFfgConsistency(ctx, att); err != nil { // nolint
 		tracing.AnnotateError(span, err)
 		log.WithError(err).WithFields(logrus.Fields{
 			"pid":     fmt.Sprintf("%s", pid),
 			"topic":   fmt.Sprintf("%s", *msg.Topic),
-			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())), // nolint
 		}).Error("Atts: incoming: validate att: lmd consistency")
 		return pubsub.ValidationReject, err
 	}
 
-	preState, err := s.cfg.chain.AttestationTargetState(ctx, att.Data.Target)
+	preState, err := s.cfg.chain.AttestationTargetState(ctx, att.Data.Target) // nolint
 	if err != nil {
 		tracing.AnnotateError(span, err)
 		log.WithError(err).WithFields(logrus.Fields{
 			"pid":     fmt.Sprintf("%s", pid),
 			"topic":   fmt.Sprintf("%s", *msg.Topic),
-			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())), // nolint
 		}).Error("Atts: incoming: validate att: target state")
 		return pubsub.ValidationIgnore, err
 	}
@@ -215,7 +215,7 @@ func (s *Service) validateCommitteeIndexBeaconAttestation(ctx context.Context, p
 		log.WithError(err).WithFields(logrus.Fields{
 			"pid":     fmt.Sprintf("%s", pid),
 			"topic":   fmt.Sprintf("%s", *msg.Topic),
-			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())), // nolint
 		}).Error("Atts: incoming: validate att: topic")
 		return validationRes, err
 	}
@@ -225,7 +225,7 @@ func (s *Service) validateCommitteeIndexBeaconAttestation(ctx context.Context, p
 		log.WithError(err).WithFields(logrus.Fields{
 			"pid":     fmt.Sprintf("%s", pid),
 			"topic":   fmt.Sprintf("%s", *msg.Topic),
-			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())), // nolint
 		}).Error("Atts: incoming: validate att: state")
 		return validationRes, err
 	}
@@ -328,6 +328,6 @@ func (s *Service) setSeenCommitteeIndicesSlot(slot types.Slot, committeeID types
 func (s *Service) hasBlockAndState(ctx context.Context, blockRoot [32]byte) bool {
 	hasStateSummary := s.cfg.beaconDB.HasStateSummary(ctx, blockRoot)
 	hasState := hasStateSummary || s.cfg.beaconDB.HasState(ctx, blockRoot)
-	hasBlock := s.cfg.chain.HasInitSyncBlock(blockRoot) || s.cfg.beaconDB.HasBlock(ctx, blockRoot)
+	hasBlock := s.cfg.chain.HasInitSyncBlock(blockRoot) || s.cfg.beaconDB.HasBlock(ctx, blockRoot) // nolint
 	return hasState && hasBlock
 }

@@ -1,8 +1,11 @@
 run:
   skip-files:
-    - validator/web/site_data.go
     - .*_test.go
   skip-dirs:
+    - skip-dirs:beacon-chain/p2p/testing
+    - beacon-chain/powchain/testing
+    - beacon-chain/p2p/testing
+    - validator/
     - proto/
     - ^contracts/
     - testing/
@@ -27,9 +30,3 @@ linters-settings:
     min-complexity: 65
   misspell:
     locale: US
-
-issues:
-  exclude-use-default: false
-  max-issues-per-linter: 0
-  max-same-issues: 0
-

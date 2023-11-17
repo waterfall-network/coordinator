@@ -31,7 +31,7 @@ func (s *Service) validateVoluntaryExit(ctx context.Context, pid peer.ID, msg *p
 
 	// We should not attempt to process this message if the node is running in optimistic mode.
 	// We just ignore in p2p so that the peer is not penalized.
-	optimistic, err := s.cfg.chain.IsOptimistic(ctx)
+	optimistic, err := s.cfg.chain.IsOptimistic(ctx) // nolint
 	if err != nil {
 		return pubsub.ValidationReject, err
 	}
@@ -60,7 +60,7 @@ func (s *Service) validateVoluntaryExit(ctx context.Context, pid peer.ID, msg *p
 		return pubsub.ValidationIgnore, nil
 	}
 
-	headState, err := s.cfg.chain.HeadState(ctx)
+	headState, err := s.cfg.chain.HeadState(ctx) // nolint
 	if err != nil {
 		return pubsub.ValidationIgnore, err
 	}

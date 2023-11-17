@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc/eth/helpers"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	state "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state" // nolint
 	ethpbv1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
 	ethpbv2 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v2"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/migration"

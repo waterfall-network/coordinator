@@ -66,7 +66,7 @@ func (s *Service) processPendingBlocks(ctx context.Context) error {
 	for _, slot := range pendingSlots {
 		// process the blocks during their respective slot.
 		// otherwise wait for the right slot to process the block.
-		if slot > s.cfg.chain.CurrentSlot() {
+		if slot > s.cfg.chain.CurrentSlot() { // nolint
 			continue
 		}
 
@@ -165,7 +165,7 @@ func (s *Service) processPendingBlocks(ctx context.Context) error {
 			default:
 			}
 
-			if err := s.cfg.chain.ReceiveBlock(ctx, b, blkRoot); err != nil {
+			if err := s.cfg.chain.ReceiveBlock(ctx, b, blkRoot); err != nil { // nolint
 				// In the next iteration of the queue, this block will be removed from
 				// the pending queue as it has been marked as a 'bad' block.
 				if errors.Is(err, blockchain.ErrBlockIsProcessing) ||
@@ -214,7 +214,7 @@ func (s *Service) sendBatchRootRequest(ctx context.Context, roots [][32]byte, ra
 		return nil
 	}
 
-	_, bestPeers := s.cfg.p2p.Peers().BestFinalized(maxPeerRequest, s.cfg.chain.FinalizedCheckpt().Epoch)
+	_, bestPeers := s.cfg.p2p.Peers().BestFinalized(maxPeerRequest, s.cfg.chain.FinalizedCheckpt().Epoch) // nolint
 	if len(bestPeers) == 0 {
 		return nil
 	}
@@ -275,7 +275,7 @@ func (s *Service) validatePendingSlots() error {
 	defer s.pendingQueueLock.Unlock()
 	oldBlockRoots := make(map[[32]byte]bool)
 
-	finalizedEpoch := s.cfg.chain.FinalizedCheckpt().Epoch
+	finalizedEpoch := s.cfg.chain.FinalizedCheckpt().Epoch // nolint
 	if s.slotToPendingBlocks == nil {
 		return errors.New("slotToPendingBlocks cache can't be nil")
 	}

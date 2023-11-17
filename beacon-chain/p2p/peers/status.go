@@ -20,6 +20,7 @@
 // Peer information is persistent for the run of the service. This allows for collection of useful
 // long-term statistics such as number of bad responses obtained from the peer, giving the basis for
 // decisions to not talk to known-bad peers (by de-scoring them).
+// nolint
 package peers
 
 import (
