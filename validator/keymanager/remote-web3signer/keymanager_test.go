@@ -25,7 +25,7 @@ type MockClient struct {
 	isThrowingError bool
 }
 
-func (mc *MockClient) Sign(_ context.Context, _ string, _ internal.SignRequestJson) (bls.Signature, error) {
+func (mc *MockClient) Sign(_ context.Context, _ string, _ internal.SignRequestJSON) (bls.Signature, error) {
 	decoded, err := hexutil.Decode(mc.Signature)
 	if err != nil {
 		return nil, err

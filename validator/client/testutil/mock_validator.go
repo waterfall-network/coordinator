@@ -52,6 +52,16 @@ type FakeValidator struct {
 	Km                                keymanager.IKeymanager
 }
 
+func (fv *FakeValidator) SubmitPrevote(ctx context.Context, slot types.Slot, pubKey [48]byte) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (fv *FakeValidator) RolesAtNextEpoch(ctx context.Context, slot types.Slot) (map[[48]byte][]iface.ValidatorRole, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 type ctxKey string
 
 // AllValidatorsAreExitedCtxKey represents the metadata context key used for exits.

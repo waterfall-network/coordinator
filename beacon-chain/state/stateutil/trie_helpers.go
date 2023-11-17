@@ -107,10 +107,7 @@ func RecomputeFromLayer(changedLeaves [][32]byte, changedIdx []uint64, layer [][
 		if err != nil {
 			return [32]byte{}, nil, err
 		}
-		root, layer, err = recomputeRootFromLayer(ii, layer, leaves, hasher)
-		if err != nil {
-			return [32]byte{}, nil, err
-		}
+		root, layer = recomputeRootFromLayer(ii, layer, leaves, hasher)
 	}
 	return root, layer, nil
 }
@@ -128,10 +125,7 @@ func RecomputeFromLayerVariable(changedLeaves [][32]byte, changedIdx []uint64, l
 		if err != nil {
 			return [32]byte{}, nil, err
 		}
-		root, layer, err = recomputeRootFromLayerVariable(ii, changedLeaves[i], layer, hasher)
-		if err != nil {
-			return [32]byte{}, nil, err
-		}
+		root, layer = recomputeRootFromLayerVariable(ii, changedLeaves[i], layer, hasher)
 	}
 	return root, layer, nil
 }
@@ -139,7 +133,7 @@ func RecomputeFromLayerVariable(changedLeaves [][32]byte, changedIdx []uint64, l
 // this method assumes that the provided trie already has all its elements included
 // in the base depth.
 func recomputeRootFromLayer(idx int, layers [][]*[32]byte, chunks []*[32]byte,
-	hasher func([]byte) [32]byte) ([32]byte, [][]*[32]byte, error) {
+	hasher func([]byte) [32]byte) ([32]byte, [][]*[32]byte) {
 	root := *chunks[idx]
 	layers[0] = chunks
 	// The merkle tree structure looks as follows:
@@ -180,16 +174,16 @@ func recomputeRootFromLayer(idx int, layers [][]*[32]byte, chunks []*[32]byte,
 	}
 	// If there is only a single leaf, we return it (the identity element).
 	if len(layers[0]) == 1 {
-		return *layers[0][0], layers, nil
+		return *layers[0][0], layers
 	}
-	return root, layers, nil
+	return root, layers
 }
 
 // this method assumes that the base branch does not consist of all leaves of the
 // trie. Instead missing leaves are assumed to be zerohashes, following the structure
 // of a sparse merkle trie.
 func recomputeRootFromLayerVariable(idx int, item [32]byte, layers [][]*[32]byte,
-	hasher func([]byte) [32]byte) ([32]byte, [][]*[32]byte, error) {
+	hasher func([]byte) [32]byte) ([32]byte, [][]*[32]byte) {
 	for idx >= len(layers[0]) {
 		zerohash := trie.ZeroHashes[0]
 		layers[0] = append(layers[0], &zerohash)
@@ -232,7 +226,7 @@ func recomputeRootFromLayerVariable(idx int, item [32]byte, layers [][]*[32]byte
 		}
 		currentIndex = parentIdx
 	}
-	return root, layers, nil
+	return root, layers
 }
 
 // AddInMixin describes a method from which a length mixin is added to the

@@ -42,6 +42,7 @@ func (bld *builder) walk(n ast.Node) {
 }
 
 // Visit --
+// nolint
 func (bld *builder) Visit(n ast.Node) ast.Visitor {
 	switch n := n.(type) {
 	case *ast.FuncDecl:

@@ -11,9 +11,9 @@ import (
 )
 
 func TestListKeystores_JSONisEqual(t *testing.T) {
-	middlewareResponse := &listKeystoresResponseJson{
-		Keystores: []*keystoreJson{
-			&keystoreJson{
+	middlewareResponse := &listKeystoresResponseJSON{
+		Keystores: []*keystoreJSON{
+			&keystoreJSON{
 				ValidatingPubkey: "0x0",
 				DerivationPath:   "m/44'/60'/0'/0/0",
 			},
@@ -39,7 +39,7 @@ func TestListKeystores_JSONisEqual(t *testing.T) {
 }
 
 func TestImportKeystores_JSONisEqual(t *testing.T) {
-	importKeystoresRequest := &importKeystoresRequestJson{}
+	importKeystoresRequest := &importKeystoresRequestJSON{}
 
 	protoImportRequest := &service.ImportKeystoresRequest{
 		Keystores:          []string{""},
@@ -51,9 +51,9 @@ func TestImportKeystores_JSONisEqual(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, requestResp, true)
 
-	importKeystoresResponse := &importKeystoresResponseJson{
-		Statuses: []*statusJson{
-			&statusJson{
+	importKeystoresResponse := &importKeystoresResponseJSON{
+		Statuses: []*statusJSON{
+			&statusJSON{
 				Status:  "Error",
 				Message: "a",
 			},
@@ -79,7 +79,7 @@ func TestImportKeystores_JSONisEqual(t *testing.T) {
 }
 
 func TestDeleteKeystores_JSONisEqual(t *testing.T) {
-	deleteKeystoresRequest := &deleteKeystoresRequestJson{}
+	deleteKeystoresRequest := &deleteKeystoresRequestJSON{}
 
 	protoDeleteRequest := &service.DeleteKeystoresRequest{
 		Pubkeys: [][]byte{[]byte{}},
@@ -89,9 +89,9 @@ func TestDeleteKeystores_JSONisEqual(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, requestResp, true)
 
-	deleteKeystoresResponse := &deleteKeystoresResponseJson{
-		Statuses: []*statusJson{
-			&statusJson{
+	deleteKeystoresResponse := &deleteKeystoresResponseJSON{
+		Statuses: []*statusJSON{
+			&statusJSON{
 				Status:  "Error",
 				Message: "a",
 			},
@@ -119,11 +119,11 @@ func TestDeleteKeystores_JSONisEqual(t *testing.T) {
 }
 
 func TestListRemoteKeys_JSONisEqual(t *testing.T) {
-	middlewareResponse := &listRemoteKeysResponseJson{
-		Keystores: []*remoteKeysListJson{
-			&remoteKeysListJson{
+	middlewareResponse := &listRemoteKeysResponseJSON{
+		Keystores: []*remoteKeysListJSON{
+			{
 				Pubkey:   "0x0",
-				Url:      "http://localhost:8080",
+				URL:      "http://localhost:8080",
 				Readonly: true,
 			},
 		},
@@ -131,7 +131,7 @@ func TestListRemoteKeys_JSONisEqual(t *testing.T) {
 
 	protoResponse := &service.ListRemoteKeysResponse{
 		Data: []*service.ListRemoteKeysResponse_Keystore{
-			&service.ListRemoteKeysResponse_Keystore{
+			{
 				Pubkey:   make([]byte, fieldparams.BLSPubkeyLength),
 				Url:      "http://localhost:8080",
 				Readonly: true,
@@ -149,7 +149,7 @@ func TestListRemoteKeys_JSONisEqual(t *testing.T) {
 }
 
 func TestImportRemoteKeys_JSONisEqual(t *testing.T) {
-	importKeystoresRequest := &importRemoteKeysRequestJson{}
+	importKeystoresRequest := &importRemoteKeysRequestJSON{}
 
 	protoImportRequest := &service.ImportRemoteKeysRequest{
 		RemoteKeys: []*service.ImportRemoteKeysRequest_Keystore{
@@ -164,9 +164,9 @@ func TestImportRemoteKeys_JSONisEqual(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, requestResp, true)
 
-	importKeystoresResponse := &importRemoteKeysResponseJson{
-		Statuses: []*statusJson{
-			&statusJson{
+	importKeystoresResponse := &importRemoteKeysResponseJSON{
+		Statuses: []*statusJSON{
+			&statusJSON{
 				Status:  "Error",
 				Message: "a",
 			},
@@ -192,7 +192,7 @@ func TestImportRemoteKeys_JSONisEqual(t *testing.T) {
 }
 
 func TestDeleteRemoteKeys_JSONisEqual(t *testing.T) {
-	deleteKeystoresRequest := &deleteRemoteKeysRequestJson{}
+	deleteKeystoresRequest := &deleteRemoteKeysRequestJSON{}
 
 	protoDeleteRequest := &service.DeleteRemoteKeysRequest{
 		Pubkeys: [][]byte{[]byte{}},
@@ -202,9 +202,9 @@ func TestDeleteRemoteKeys_JSONisEqual(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, requestResp, true)
 
-	deleteKeystoresResponse := &deleteRemoteKeysResponseJson{
-		Statuses: []*statusJson{
-			&statusJson{
+	deleteKeystoresResponse := &deleteRemoteKeysResponseJSON{
+		Statuses: []*statusJSON{
+			&statusJSON{
 				Status:  "Error",
 				Message: "a",
 			},

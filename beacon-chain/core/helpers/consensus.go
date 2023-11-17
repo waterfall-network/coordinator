@@ -22,19 +22,19 @@ func ConsensusUpdateStateSpineFinalization(beaconState state.BeaconState, preJus
 	if bytes.Equal(justRoot, preJustRoot) {
 		return beaconState, nil
 	}
-	cp_finalized := beaconState.SpineData().GetCpFinalized()
+	cpFinalized := beaconState.SpineData().GetCpFinalized()
 	finalization := beaconState.SpineData().GetFinalization()
 	if bytes.Equal(finRoot, preFinRoot) {
-		cp_finalized = append(cp_finalized, finalization...)
+		cpFinalized = append(cpFinalized, finalization...)
 		finalization = []byte{}
 	} else {
-		cp_finalized = append(cp_finalized[len(cp_finalized)-32:], finalization...)
+		cpFinalized = append(cpFinalized[len(cpFinalized)-32:], finalization...)
 		finalization = []byte{}
 	}
 	//update state.SpineData
 	spineData := beaconState.SpineData()
 	spineData.Finalization = finalization
-	spineData.CpFinalized = cp_finalized
+	spineData.CpFinalized = cpFinalized
 	err := beaconState.SetSpineData(spineData)
 
 	return beaconState, err

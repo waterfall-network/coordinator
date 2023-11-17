@@ -1,7 +1,7 @@
 package validator_service_config
 
 import (
-	field_params "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	fieldParams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
@@ -22,7 +22,7 @@ type FeeRecipientFileOptions struct {
 // FeeRecipientConfig is a Prysm internal representation of the fee recipient config on the validator client.
 // FeeRecipientFileConfig maps to FeeRecipientConfig on import through the CLI.
 type FeeRecipientConfig struct {
-	ProposeConfig map[[field_params.BLSPubkeyLength]byte]*FeeRecipientOptions
+	ProposeConfig map[[fieldParams.BLSPubkeyLength]byte]*FeeRecipientOptions
 	DefaultConfig *FeeRecipientOptions
 }
 

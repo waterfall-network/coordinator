@@ -35,7 +35,7 @@ type PbHandlerRegistration func(context.Context, *gwruntime.ServeMux, *grpc.Clie
 
 // MuxHandler is a function that implements the mux handler functionality.
 type MuxHandler func(
-	apiMiddlewareHandler *apimiddleware.ApiProxyMiddleware,
+	apiMiddlewareHandler *apimiddleware.APIProxyMiddleware,
 	h http.HandlerFunc,
 	w http.ResponseWriter,
 	req *http.Request,
@@ -61,7 +61,7 @@ type Gateway struct {
 	conn         *grpc.ClientConn
 	server       *http.Server
 	cancel       context.CancelFunc
-	proxy        *apimiddleware.ApiProxyMiddleware
+	proxy        *apimiddleware.APIProxyMiddleware
 	ctx          context.Context
 	startFailure error
 }
@@ -111,7 +111,7 @@ func (g *Gateway) Start() {
 	corsMux := g.corsMiddleware(g.cfg.router)
 
 	if g.cfg.apiMiddlewareEndpointFactory != nil && !g.cfg.apiMiddlewareEndpointFactory.IsNil() {
-		g.registerApiMiddleware()
+		g.registerAPIMiddleware()
 	}
 
 	if g.cfg.muxHandler != nil {
@@ -121,8 +121,9 @@ func (g *Gateway) Start() {
 	}
 
 	g.server = &http.Server{
-		Addr:    g.cfg.gatewayAddr,
-		Handler: corsMux,
+		Addr:              g.cfg.gatewayAddr,
+		Handler:           corsMux,
+		ReadHeaderTimeout: time.Second,
 	}
 
 	go func() {
@@ -245,8 +246,8 @@ func (g *Gateway) dialUnix(ctx context.Context, addr string) (*grpc.ClientConn, 
 	return grpc.DialContext(ctx, addr, opts...)
 }
 
-func (g *Gateway) registerApiMiddleware() {
-	g.proxy = &apimiddleware.ApiProxyMiddleware{
+func (g *Gateway) registerAPIMiddleware() {
+	g.proxy = &apimiddleware.APIProxyMiddleware{
 		GatewayAddress:  g.cfg.gatewayAddr,
 		EndpointCreator: g.cfg.apiMiddlewareEndpointFactory,
 		Timeout:         g.cfg.timeout,

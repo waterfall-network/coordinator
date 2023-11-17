@@ -3,15 +3,16 @@
 // For example, one can specify a filter query for data by start epoch + end epoch + shard
 // for attestations, build a filter as follows, and respond to it accordingly:
 //
-//   f := filters.NewFilter().SetStartEpoch(3).SetEndEpoch(5)
-//   for k, v := range f.Filters() {
-//       switch k {
-//       case filters.StartEpoch:
-//          // Verify data matches filter criteria...
-//       case filters.EndEpoch:
-//          // Verify data matches filter criteria...
-//       }
-//   }
+// f := filters.NewFilter().SetStartEpoch(3).SetEndEpoch(5)
+//
+//	for k, v := range f.Filters() {
+//	    switch k {
+//	    case filters.StartEpoch:
+//	       // Verify data matches filter criteria...
+//	    case filters.EndEpoch:
+//	       // Verify data matches filter criteria...
+//	    }
+//	}
 package filters
 
 import types "github.com/prysmaticlabs/eth2-types"

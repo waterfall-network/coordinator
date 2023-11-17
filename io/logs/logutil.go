@@ -34,22 +34,22 @@ func ConfigurePersistentLogging(logFileName string) error {
 // MaskCredentialsLogging masks the url credentials before logging for security purpose
 // [scheme:][//[userinfo@]host][/]path[?query][#fragment] -->  [scheme:][//[***]host][/***][#***]
 // if the format is not matched nothing is done, string is returned as is.
-func MaskCredentialsLogging(currUrl string) string {
+func MaskCredentialsLogging(currURL string) string {
 	// error if the input is not a URL
-	MaskedUrl := currUrl
-	u, err := url.Parse(currUrl)
+	MaskedURL := currURL
+	u, err := url.Parse(currURL)
 	if err != nil {
-		return currUrl // Not a URL, nothing to do
+		return currURL // Not a URL, nothing to do
 	}
 	// Mask the userinfo and the URI (path?query or opaque?query ) and fragment, leave the scheme and host(host/port)  untouched
 	if u.User != nil {
-		MaskedUrl = strings.Replace(MaskedUrl, u.User.String(), "***", 1)
+		MaskedURL = strings.Replace(MaskedURL, u.User.String(), "***", 1)
 	}
 	if len(u.RequestURI()) > 1 { // Ignore the '/'
-		MaskedUrl = strings.Replace(MaskedUrl, u.RequestURI(), "/***", 1)
+		MaskedURL = strings.Replace(MaskedURL, u.RequestURI(), "/***", 1)
 	}
 	if len(u.Fragment) > 0 {
-		MaskedUrl = strings.Replace(MaskedUrl, u.RawFragment, "***", 1)
+		MaskedURL = strings.Replace(MaskedURL, u.RawFragment, "***", 1)
 	}
-	return MaskedUrl
+	return MaskedURL
 }

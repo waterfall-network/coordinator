@@ -7,7 +7,7 @@ import (
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
-// SyncCommitteeRoot computes the HashTreeRoot Merkleization of a commitee root.
+// SyncCommitteeRoot computes the HashTreeRoot Merkleization of a committee root.
 // a SyncCommitteeRoot struct according to the eth2
 // Simple Serialize specification.
 func SyncCommitteeRoot(committee *ethpb.SyncCommittee) ([32]byte, error) {

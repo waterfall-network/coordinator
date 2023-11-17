@@ -1,7 +1,6 @@
 package kv
 
 import (
-	"context"
 	"fmt"
 
 	types "github.com/prysmaticlabs/eth2-types"
@@ -64,10 +63,9 @@ func newDeprecatedAttestingHistory(target types.Epoch) deprecatedEncodedAttestin
 	arraySize := latestEpochWrittenSize + historyDataSize
 	en := make(deprecatedEncodedAttestingHistory, arraySize)
 	enc := en
-	ctx := context.Background()
 	var err error
 	for i := types.Epoch(0); i <= target%params.BeaconConfig().WeakSubjectivityPeriod; i++ {
-		enc, err = enc.setTargetData(ctx, i, emptyHistoryData())
+		enc, err = enc.setTargetData(i, emptyHistoryData())
 		if err != nil {
 			log.WithError(err).Error("Failed to set empty target data")
 		}
@@ -75,7 +73,7 @@ func newDeprecatedAttestingHistory(target types.Epoch) deprecatedEncodedAttestin
 	return enc
 }
 
-func (dh deprecatedEncodedAttestingHistory) getLatestEpochWritten(ctx context.Context) (types.Epoch, error) {
+func (dh deprecatedEncodedAttestingHistory) getLatestEpochWritten() (types.Epoch, error) {
 	if err := dh.assertSize(); err != nil {
 		return 0, err
 	}
@@ -83,7 +81,6 @@ func (dh deprecatedEncodedAttestingHistory) getLatestEpochWritten(ctx context.Co
 }
 
 func (dh deprecatedEncodedAttestingHistory) setLatestEpochWritten(
-	ctx context.Context,
 	latestEpochWritten types.Epoch,
 ) (deprecatedEncodedAttestingHistory, error) {
 	if err := dh.assertSize(); err != nil {
@@ -93,7 +90,7 @@ func (dh deprecatedEncodedAttestingHistory) setLatestEpochWritten(
 	return dh, nil
 }
 
-func (dh deprecatedEncodedAttestingHistory) getTargetData(ctx context.Context, target types.Epoch) (*deprecatedHistoryData, error) {
+func (dh deprecatedEncodedAttestingHistory) getTargetData(target types.Epoch) (*deprecatedHistoryData, error) {
 	if err := dh.assertSize(); err != nil {
 		return nil, err
 	}
@@ -112,7 +109,6 @@ func (dh deprecatedEncodedAttestingHistory) getTargetData(ctx context.Context, t
 }
 
 func (dh deprecatedEncodedAttestingHistory) setTargetData(
-	ctx context.Context,
 	target types.Epoch,
 	historyData *deprecatedHistoryData,
 ) (deprecatedEncodedAttestingHistory, error) {

@@ -45,22 +45,22 @@ func (r *BlockRoots) UnmarshalSSZ(buf []byte) error {
 
 // MarshalSSZTo marshals BlockRoots with the provided byte slice.
 func (r *BlockRoots) MarshalSSZTo(dst []byte) ([]byte, error) {
-	marshalled, err := r.MarshalSSZ()
+	marshaled, err := r.MarshalSSZ()
 	if err != nil {
 		return nil, err
 	}
-	return append(dst, marshalled...), nil
+	return append(dst, marshaled...), nil
 }
 
 // MarshalSSZ marshals BlockRoots into a serialized object.
 func (r *BlockRoots) MarshalSSZ() ([]byte, error) {
-	marshalled := make([]byte, fieldparams.BlockRootsLength*32)
+	marshaled := make([]byte, fieldparams.BlockRootsLength*32)
 	for i, r32 := range r {
 		for j, rr := range r32 {
-			marshalled[i*32+j] = rr
+			marshaled[i*32+j] = rr
 		}
 	}
-	return marshalled, nil
+	return marshaled, nil
 }
 
 // SizeSSZ returns the size of the serialized object.

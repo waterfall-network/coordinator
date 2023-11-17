@@ -83,6 +83,16 @@ type MockValidator struct {
 	Km keymanager.IKeymanager
 }
 
+func (_ MockValidator) SubmitPrevote(ctx context.Context, slot types.Slot, pubKey [48]byte) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (_ MockValidator) RolesAtNextEpoch(ctx context.Context, slot types.Slot) (map[[48]byte][]iface2.ValidatorRole, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (_ MockValidator) Done() {
 	panic("implement me")
 }

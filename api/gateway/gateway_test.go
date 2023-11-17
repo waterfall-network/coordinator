@@ -45,9 +45,9 @@ func TestGateway_Customized(t *testing.T) {
 		WithRemoteCert(cert),
 		WithAllowedOrigins(origins),
 		WithMaxCallRecvMsgSize(size),
-		WithApiMiddleware(endpointFactory),
+		WithAPIMiddleware(endpointFactory),
 		WithMuxHandler(func(
-			_ *apimiddleware.ApiProxyMiddleware,
+			_ *apimiddleware.APIProxyMiddleware,
 			_ http.HandlerFunc,
 			_ http.ResponseWriter,
 			_ *http.Request,
@@ -83,7 +83,7 @@ func TestGateway_StartStop(t *testing.T) {
 		WithGatewayAddr(gatewayAddress),
 		WithRemoteAddr(selfAddress),
 		WithMuxHandler(func(
-			_ *apimiddleware.ApiProxyMiddleware,
+			_ *apimiddleware.APIProxyMiddleware,
 			_ http.HandlerFunc,
 			_ http.ResponseWriter,
 			_ *http.Request,

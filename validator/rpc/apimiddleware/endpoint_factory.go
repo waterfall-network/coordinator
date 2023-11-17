@@ -26,17 +26,17 @@ func (*ValidatorEndpointFactory) Create(path string) (*apimiddleware.Endpoint, e
 	endpoint := apimiddleware.DefaultEndpoint()
 	switch path {
 	case "/eth/v1/keystores":
-		endpoint.GetResponse = &listKeystoresResponseJson{}
-		endpoint.PostRequest = &importKeystoresRequestJson{}
-		endpoint.PostResponse = &importKeystoresResponseJson{}
-		endpoint.DeleteRequest = &deleteKeystoresRequestJson{}
-		endpoint.DeleteResponse = &deleteKeystoresResponseJson{}
+		endpoint.GetResponse = &listKeystoresResponseJSON{}
+		endpoint.PostRequest = &importKeystoresRequestJSON{}
+		endpoint.PostResponse = &importKeystoresResponseJSON{}
+		endpoint.DeleteRequest = &deleteKeystoresRequestJSON{}
+		endpoint.DeleteResponse = &deleteKeystoresResponseJSON{}
 	case "/eth/v1/remotekeys":
-		endpoint.GetResponse = &listRemoteKeysResponseJson{}
-		endpoint.PostRequest = &importRemoteKeysRequestJson{}
-		endpoint.PostResponse = &importRemoteKeysResponseJson{}
-		endpoint.DeleteRequest = &deleteRemoteKeysRequestJson{}
-		endpoint.DeleteResponse = &deleteRemoteKeysResponseJson{}
+		endpoint.GetResponse = &listRemoteKeysResponseJSON{}
+		endpoint.PostRequest = &importRemoteKeysRequestJSON{}
+		endpoint.PostResponse = &importRemoteKeysResponseJSON{}
+		endpoint.DeleteRequest = &deleteRemoteKeysRequestJSON{}
+		endpoint.DeleteResponse = &deleteRemoteKeysResponseJSON{}
 	default:
 		return nil, errors.New("invalid path")
 	}

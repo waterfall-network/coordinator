@@ -62,6 +62,7 @@ func init() {
 	}
 }
 
+// nolint
 func run(pass *analysis.Pass) (interface{}, error) {
 	inspection, ok := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 	if !ok {
@@ -313,16 +314,16 @@ func namesForExcludeCheck(pass *analysis.Pass, call *ast.CallExpr) []string {
 //
 // For example, say we have:
 //
-//    type Inner interface {Method()}
-//    type Middle interface {Inner}
-//    type Outer interface {Middle}
-//    type T struct {Outer}
-//    type U struct {T}
-//    type V struct {U}
+// type Inner interface {Method()}
+// type Middle interface {Inner}
+// type Outer interface {Middle}
+// type T struct {Outer}
+// type U struct {T}
+// type V struct {U}
 //
 // And then the selector:
 //
-//    V.Method
+//	V.Method
 //
 // We'll return [Outer, Middle, Inner] by first walking through the embedded structs
 // until we reach the Outer interface, then descending through the embedded interfaces

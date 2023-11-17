@@ -81,7 +81,7 @@ func (s *Service) pollConnectionStatus(ctx context.Context) {
 			}).Info("sync slot info")
 			return
 		case <-s.ctx.Done():
-			log.Debug("Received cancelled context,closing existing powchain service")
+			log.Debug("Received canceled context,closing existing powchain service")
 			return
 		}
 	}

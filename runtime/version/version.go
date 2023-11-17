@@ -11,8 +11,8 @@ import (
 	"time"
 )
 
-//BuildId "🛠" build id
-//do not edit
+// BuildId "🛠" build id
+// do not edit
 const BuildId = "\u2692"
 
 // The value of these vars are set through linker options.

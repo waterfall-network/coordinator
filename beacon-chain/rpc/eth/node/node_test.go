@@ -66,7 +66,7 @@ func TestGetHealth(t *testing.T) {
 	require.NoError(t, err)
 	stream, ok := grpc.ServerTransportStreamFromContext(ctx).(*grpcruntime.ServerTransportStream)
 	require.Equal(t, true, ok, "type assertion failed")
-	assert.Equal(t, stream.Header()[strings.ToLower(grpcutil.HttpCodeMetadataKey)][0], strconv.Itoa(http.StatusPartialContent))
+	assert.Equal(t, stream.Header()[strings.ToLower(grpcutil.HTTPCodeMetadataKey)][0], strconv.Itoa(http.StatusPartialContent))
 	checker.IsSynced = true
 	_, err = s.GetHealth(ctx, &emptypb.Empty{})
 	require.NoError(t, err)

@@ -11,5 +11,4 @@ var errInvalidBestDescendantIndex = errors.New("best descendant index is invalid
 var errInvalidParentDelta = errors.New("parent delta is invalid")
 var errInvalidNodeDelta = errors.New("node delta is invalid")
 var errInvalidDeltaLength = errors.New("delta length is invalid")
-var errConsensusCalcHeadFailed = errors.New("consensus head calculation failed")
 var errParentNodFound = errors.New("parent not found")

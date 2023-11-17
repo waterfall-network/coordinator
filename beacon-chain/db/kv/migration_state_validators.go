@@ -18,6 +18,7 @@ const batchSize = 10
 
 var migrationStateValidatorsKey = []byte("migration_state_validator")
 
+// nolint
 func migrateStateValidators(ctx context.Context, db *bolt.DB) error {
 	migrateDB := false
 	if updateErr := db.View(func(tx *bolt.Tx) error {

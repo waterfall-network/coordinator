@@ -164,7 +164,6 @@ func TestLoadConfigFile_OverwriteCorrectly(t *testing.T) {
 }
 
 func Test_replaceHexStringWithYAMLFormat(t *testing.T) {
-
 	testLines := []struct {
 		line   string
 		wanted string

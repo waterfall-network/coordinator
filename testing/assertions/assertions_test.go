@@ -797,10 +797,9 @@ func Test_LogsContainDoNotContain(t *testing.T) {
 
 func TestAssert_NotEmpty(t *testing.T) {
 	type args struct {
-		tb     *assertions.TBMock
-		input  interface{}
-		actual interface{}
-		msgs   []interface{}
+		tb    *assertions.TBMock
+		input interface{}
+		msgs  []interface{}
 	}
 	tests := []struct {
 		name        string

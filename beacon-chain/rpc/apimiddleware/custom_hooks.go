@@ -23,7 +23,7 @@ func wrapFeeRecipientsArray(
 	endpoint *apimiddleware.Endpoint,
 	_ http.ResponseWriter,
 	req *http.Request,
-) (apimiddleware.RunDefault, apimiddleware.ErrorJson) {
+) (apimiddleware.RunDefault, apimiddleware.ErrorJSON) {
 	if _, ok := endpoint.PostRequest.(*feeRecipientsRequestJSON); !ok {
 		return true, nil
 	}
@@ -46,7 +46,7 @@ func wrapAttestationsArray(
 	endpoint *apimiddleware.Endpoint,
 	_ http.ResponseWriter,
 	req *http.Request,
-) (apimiddleware.RunDefault, apimiddleware.ErrorJson) {
+) (apimiddleware.RunDefault, apimiddleware.ErrorJSON) {
 	if _, ok := endpoint.PostRequest.(*submitAttestationRequestJson); ok {
 		atts := make([]*attestationJson, 0)
 		if err := json.NewDecoder(req.Body).Decode(&atts); err != nil {
@@ -68,7 +68,7 @@ func wrapValidatorIndicesArray(
 	endpoint *apimiddleware.Endpoint,
 	_ http.ResponseWriter,
 	req *http.Request,
-) (apimiddleware.RunDefault, apimiddleware.ErrorJson) {
+) (apimiddleware.RunDefault, apimiddleware.ErrorJSON) {
 	if _, ok := endpoint.PostRequest.(*dutiesRequestJson); ok {
 		indices := make([]string, 0)
 		if err := json.NewDecoder(req.Body).Decode(&indices); err != nil {
@@ -90,7 +90,7 @@ func wrapSignedAggregateAndProofArray(
 	endpoint *apimiddleware.Endpoint,
 	_ http.ResponseWriter,
 	req *http.Request,
-) (apimiddleware.RunDefault, apimiddleware.ErrorJson) {
+) (apimiddleware.RunDefault, apimiddleware.ErrorJSON) {
 	if _, ok := endpoint.PostRequest.(*submitAggregateAndProofsRequestJson); ok {
 		data := make([]*signedAggregateAttestationAndProofJson, 0)
 		if err := json.NewDecoder(req.Body).Decode(&data); err != nil {
@@ -112,7 +112,7 @@ func wrapBeaconCommitteeSubscriptionsArray(
 	endpoint *apimiddleware.Endpoint,
 	_ http.ResponseWriter,
 	req *http.Request,
-) (apimiddleware.RunDefault, apimiddleware.ErrorJson) {
+) (apimiddleware.RunDefault, apimiddleware.ErrorJSON) {
 	if _, ok := endpoint.PostRequest.(*submitBeaconCommitteeSubscriptionsRequestJson); ok {
 		data := make([]*beaconCommitteeSubscribeJson, 0)
 		if err := json.NewDecoder(req.Body).Decode(&data); err != nil {
@@ -134,7 +134,7 @@ func wrapSyncCommitteeSubscriptionsArray(
 	endpoint *apimiddleware.Endpoint,
 	_ http.ResponseWriter,
 	req *http.Request,
-) (apimiddleware.RunDefault, apimiddleware.ErrorJson) {
+) (apimiddleware.RunDefault, apimiddleware.ErrorJSON) {
 	if _, ok := endpoint.PostRequest.(*submitSyncCommitteeSubscriptionRequestJson); ok {
 		data := make([]*syncCommitteeSubscriptionJson, 0)
 		if err := json.NewDecoder(req.Body).Decode(&data); err != nil {
@@ -156,7 +156,7 @@ func wrapSyncCommitteeSignaturesArray(
 	endpoint *apimiddleware.Endpoint,
 	_ http.ResponseWriter,
 	req *http.Request,
-) (apimiddleware.RunDefault, apimiddleware.ErrorJson) {
+) (apimiddleware.RunDefault, apimiddleware.ErrorJSON) {
 	if _, ok := endpoint.PostRequest.(*submitSyncCommitteeSignaturesRequestJson); ok {
 		data := make([]*syncCommitteeMessageJson, 0)
 		if err := json.NewDecoder(req.Body).Decode(&data); err != nil {
@@ -178,7 +178,7 @@ func wrapSignedContributionAndProofsArray(
 	endpoint *apimiddleware.Endpoint,
 	_ http.ResponseWriter,
 	req *http.Request,
-) (apimiddleware.RunDefault, apimiddleware.ErrorJson) {
+) (apimiddleware.RunDefault, apimiddleware.ErrorJSON) {
 	if _, ok := endpoint.PostRequest.(*submitContributionAndProofsRequestJson); ok {
 		data := make([]*signedContributionAndProofJson, 0)
 		if err := json.NewDecoder(req.Body).Decode(&data); err != nil {
@@ -217,7 +217,7 @@ type bellatrixPublishBlockRequestJson struct {
 func setInitialPublishBlockPostRequest(endpoint *apimiddleware.Endpoint,
 	_ http.ResponseWriter,
 	req *http.Request,
-) (apimiddleware.RunDefault, apimiddleware.ErrorJson) {
+) (apimiddleware.RunDefault, apimiddleware.ErrorJSON) {
 	s := struct {
 		Message struct {
 			Slot string
@@ -251,7 +251,7 @@ func setInitialPublishBlockPostRequest(endpoint *apimiddleware.Endpoint,
 // gRPC expects an XXX_block field in the JSON object, but we have a message field at this point.
 // We do a simple conversion depending on the type of endpoint.PostRequest
 // (which was filled out previously in setInitialPublishBlockPostRequest).
-func preparePublishedBlock(endpoint *apimiddleware.Endpoint, _ http.ResponseWriter, _ *http.Request) apimiddleware.ErrorJson {
+func preparePublishedBlock(endpoint *apimiddleware.Endpoint, _ http.ResponseWriter, _ *http.Request) apimiddleware.ErrorJSON {
 	if block, ok := endpoint.PostRequest.(*signedBeaconBlockContainerJson); ok {
 		// Prepare post request that can be properly decoded on gRPC side.
 		actualPostReq := &phase0PublishBlockRequestJson{
@@ -297,7 +297,7 @@ type tempSyncSubcommitteeValidatorsJson struct {
 
 // https://ethereum.github.io/beacon-APIs/?urls.primaryName=v2.0.0#/Beacon/getEpochSyncCommittees returns validator_aggregates as a nested array.
 // grpc-gateway returns a struct with nested fields which we have to transform into a plain 2D array.
-func prepareValidatorAggregates(body []byte, responseContainer interface{}) (apimiddleware.RunDefault, apimiddleware.ErrorJson) {
+func prepareValidatorAggregates(body []byte, responseContainer interface{}) (apimiddleware.RunDefault, apimiddleware.ErrorJSON) {
 	tempContainer := &tempSyncCommitteesResponseJson{}
 	if err := json.Unmarshal(body, tempContainer); err != nil {
 		return false, apimiddleware.InternalServerErrorWithMessage(err, "could not unmarshal response into temp container")
@@ -334,7 +334,7 @@ type bellatrixBlockResponseJson struct {
 	Data    *signedBeaconBlockBellatrixContainerJson `json:"data"`
 }
 
-func serializeV2Block(response interface{}) (apimiddleware.RunDefault, []byte, apimiddleware.ErrorJson) {
+func serializeV2Block(response interface{}) (apimiddleware.RunDefault, []byte, apimiddleware.ErrorJSON) {
 	respContainer, ok := response.(*blockV2ResponseJson)
 	if !ok {
 		return false, nil, apimiddleware.InternalServerError(errors.New("container is not of the correct type"))
@@ -391,7 +391,7 @@ type bellatrixStateResponseJson struct {
 	Data    *beaconStateBellatrixJson `json:"data"`
 }
 
-func serializeV2State(response interface{}) (apimiddleware.RunDefault, []byte, apimiddleware.ErrorJson) {
+func serializeV2State(response interface{}) (apimiddleware.RunDefault, []byte, apimiddleware.ErrorJSON) {
 	respContainer, ok := response.(*beaconStateV2ResponseJson)
 	if !ok {
 		return false, nil, apimiddleware.InternalServerError(errors.New("container is not of the correct type"))
@@ -440,7 +440,7 @@ type bellatrixProduceBlockResponseJson struct {
 	Data    *beaconBlockBellatrixJson `json:"data"`
 }
 
-func serializeProducedV2Block(response interface{}) (apimiddleware.RunDefault, []byte, apimiddleware.ErrorJson) {
+func serializeProducedV2Block(response interface{}) (apimiddleware.RunDefault, []byte, apimiddleware.ErrorJSON) {
 	respContainer, ok := response.(*produceBlockResponseV2Json)
 	if !ok {
 		return false, nil, apimiddleware.InternalServerError(errors.New("container is not of the correct type"))

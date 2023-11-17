@@ -37,25 +37,25 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	}
 
 	inspection.Preorder(nodeFilter, func(node ast.Node) {
-		if ce, ok := node.(*ast.CallExpr); ok && isPkgDot(ce.Fun, "featureconfig", "Init") {
+		if ce, ok := node.(*ast.CallExpr); ok && isPkgDot(ce.Fun, "Init") {
 			reportForbiddenUsage(pass, ce.Pos())
 			return
 		}
 		switch stmt := node.(type) {
 		case *ast.ExprStmt:
-			if call, ok := stmt.X.(*ast.CallExpr); ok && isPkgDot(call.Fun, "featureconfig", "InitWithReset") {
+			if call, ok := stmt.X.(*ast.CallExpr); ok && isPkgDot(call.Fun, "InitWithReset") {
 				reportUnhandledReset(pass, call.Lparen)
 			}
 		case *ast.GoStmt:
-			if isPkgDot(stmt.Call, "featureconfig", "InitWithReset") {
+			if isPkgDot(stmt.Call, "InitWithReset") {
 				reportUnhandledReset(pass, stmt.Call.Lparen)
 			}
 		case *ast.DeferStmt:
-			if isPkgDot(stmt.Call, "featureconfig", "InitWithReset") {
+			if isPkgDot(stmt.Call, "InitWithReset") {
 				reportUnhandledReset(pass, stmt.Call.Lparen)
 			}
 		case *ast.AssignStmt:
-			if ce, ok := stmt.Rhs[0].(*ast.CallExpr); ok && isPkgDot(ce.Fun, "featureconfig", "InitWithReset") {
+			if ce, ok := stmt.Rhs[0].(*ast.CallExpr); ok && isPkgDot(ce.Fun, "InitWithReset") {
 				for i := 0; i < len(stmt.Lhs); i++ {
 					if id, ok := stmt.Lhs[i].(*ast.Ident); ok {
 						if id.Name == "_" {
@@ -82,9 +82,9 @@ func reportUnhandledReset(pass *analysis.Pass, pos token.Pos) {
 		"within this test method.")
 }
 
-func isPkgDot(expr ast.Expr, pkg, name string) bool {
+func isPkgDot(expr ast.Expr, name string) bool {
 	sel, ok := expr.(*ast.SelectorExpr)
-	return ok && isIdent(sel.X, pkg) && isIdent(sel.Sel, name)
+	return ok && isIdent(sel.X, "featureconfig") && isIdent(sel.Sel, name)
 }
 
 func isIdent(expr ast.Expr, ident string) bool {

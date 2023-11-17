@@ -772,7 +772,7 @@ func (p *Status) PeersToPrune() []peer.ID {
 		}
 	}
 
-	// Sort in ascending order to favour pruning peers with a
+	// Sort in ascending order to favor pruning peers with a
 	// lower score.
 	sort.Slice(peersToPrune, func(i, j int) bool {
 		return peersToPrune[i].score < peersToPrune[j].score
@@ -838,7 +838,7 @@ func (p *Status) deprecatedPeersToPrune() []peer.ID {
 		}
 	}
 
-	// Sort in descending order to favour pruning peers with a
+	// Sort in descending order to favor pruning peers with a
 	// higher bad response count.
 	sort.Slice(peersToPrune, func(i, j int) bool {
 		return peersToPrune[i].badResp > peersToPrune[j].badResp
@@ -906,10 +906,7 @@ func (p *Status) isfromBadIP(pid peer.ID) bool {
 		return false
 	}
 	_, err := manet.ToIP(peerData.Address)
-	if err != nil {
-		return true
-	}
-	return false
+	return err != nil
 }
 
 func (p *Status) addIpToTracker(pid peer.ID) {

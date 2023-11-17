@@ -35,6 +35,6 @@ func TestKeystoreContainsPath(t *testing.T) {
 	keystore := keymanager.Keystore{}
 	encoded, err := json.Marshal(keystore)
 
-	require.NoError(t, err, "Unexpected error marshalling keystore")
+	require.NoError(t, err, "Unexpected error marshaling keystore")
 	assert.Equal(t, true, strings.Contains(string(encoded), "path"))
 }

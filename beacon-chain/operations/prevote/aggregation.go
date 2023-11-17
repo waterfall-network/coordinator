@@ -114,10 +114,11 @@ func (c *PrevoteCache) GetPrevoteBySlot(ctx context.Context, slot types.Slot) []
 	}).Info("Prevote: GetPrevoteBySlot")
 
 	pv := c.prevoteCache[slot]
-	if pv == nil || len(pv) == 0 {
-		return []*ethpb.PreVote{}
+	if len(pv) > 0 {
+		return pv
 	}
-	return pv
+
+	return []*ethpb.PreVote{}
 }
 
 func (c *PrevoteCache) PurgeOutdatedPrevote(curSlot types.Slot) error {

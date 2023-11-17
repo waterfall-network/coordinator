@@ -104,7 +104,7 @@ func (km *Keymanager) Sign(ctx context.Context, request *validatorpb.SignRequest
 }
 
 // getSignRequestJson returns a json request based on the SignRequest type.
-func getSignRequestJson(ctx context.Context, validator *validator.Validate, request *validatorpb.SignRequest, genesisValidatorsRoot []byte) (internal.SignRequestJson, error) {
+func getSignRequestJson(ctx context.Context, validator *validator.Validate, request *validatorpb.SignRequest, genesisValidatorsRoot []byte) (internal.SignRequestJSON, error) {
 	if request == nil {
 		return nil, errors.New("nil sign request provided")
 	}

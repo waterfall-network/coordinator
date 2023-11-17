@@ -64,7 +64,6 @@ type chainer interface {
 }
 
 type stateReplayer struct {
-	s       state.BeaconState
 	target  types.Slot
 	method  retrievalMethod
 	chainer chainer

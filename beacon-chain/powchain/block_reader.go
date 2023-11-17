@@ -12,13 +12,6 @@ import (
 	"go.opencensus.io/trace"
 )
 
-// searchThreshold to apply for when searching for blocks of a particular time. If the buffer
-// is exceeded we recalibrate the search again.
-const searchThreshold = 5
-
-// amount of times we repeat a failed search till is satisfies the conditional.
-const repeatedSearches = 2 * searchThreshold
-
 // BlockExists returns true if the block exists, its height and any possible error encountered.
 func (s *Service) BlockExists(ctx context.Context, hash common.Hash) (bool, *big.Int, error) {
 	ctx, span := trace.StartSpan(ctx, "beacon-chain.web3service.BlockExists")
@@ -84,7 +77,7 @@ func (s *Service) BlockHashByHeight(ctx context.Context, height *big.Int) (commo
 	header, err := s.eth1DataFetcher.HeaderByNumber(ctx, height)
 	if err != nil {
 		if height == nil {
-			return [32]byte{}, errors.Wrap(err, fmt.Sprintf("could not query last finalized header"))
+			return [32]byte{}, errors.Wrap(err, "could not query last finalized header")
 		}
 		return [32]byte{}, errors.Wrap(err, fmt.Sprintf("could not query header with nr=%d", height.Uint64()))
 	}

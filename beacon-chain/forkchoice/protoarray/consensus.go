@@ -477,7 +477,7 @@ func (f *ForkChoice) GetNode(root [32]byte) *Node {
 	if !f.HasNode(root) {
 		return nil
 	}
-	i, _ := f.store.nodesIndices[root]
+	i := f.store.nodesIndices[root]
 	return f.store.nodes[i]
 }
 

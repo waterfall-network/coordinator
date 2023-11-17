@@ -38,11 +38,11 @@ func (e *Byte32) UnmarshalSSZ(buf []byte) error {
 
 // MarshalSSZTo marshals Byte32 with the provided byte slice.
 func (e *Byte32) MarshalSSZTo(dst []byte) ([]byte, error) {
-	marshalled, err := e.MarshalSSZ()
+	marshaled, err := e.MarshalSSZ()
 	if err != nil {
 		return nil, err
 	}
-	return append(dst, marshalled...), nil
+	return append(dst, marshaled...), nil
 }
 
 // MarshalSSZ marshals Byte32 into a serialized object.

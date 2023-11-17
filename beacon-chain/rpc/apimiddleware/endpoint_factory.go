@@ -123,7 +123,7 @@ func (_ *BeaconEndpointFactory) Create(path string) (*apimiddleware.Endpoint, er
 	case "/eth/v2/beacon/blocks/{block_id}":
 		endpoint.GetResponse = &blockV2ResponseJson{}
 		endpoint.Hooks = apimiddleware.HookCollection{
-			OnPreSerializeMiddlewareResponseIntoJson: serializeV2Block,
+			OnPreSerializeMiddlewareResponseIntoJSON: serializeV2Block,
 		}
 		endpoint.CustomHandlers = []apimiddleware.CustomHandler{handleGetBeaconBlockSSZV2}
 	case "/eth/v1/beacon/blocks/{block_id}/root":
@@ -177,7 +177,7 @@ func (_ *BeaconEndpointFactory) Create(path string) (*apimiddleware.Endpoint, er
 	case "/eth/v2/debug/beacon/states/{state_id}":
 		endpoint.GetResponse = &beaconStateV2ResponseJson{}
 		endpoint.Hooks = apimiddleware.HookCollection{
-			OnPreSerializeMiddlewareResponseIntoJson: serializeV2State,
+			OnPreSerializeMiddlewareResponseIntoJSON: serializeV2State,
 		}
 		endpoint.CustomHandlers = []apimiddleware.CustomHandler{handleGetBeaconStateSSZV2}
 	case "/eth/v1/debug/beacon/heads":
@@ -221,7 +221,7 @@ func (_ *BeaconEndpointFactory) Create(path string) (*apimiddleware.Endpoint, er
 		endpoint.RequestURLLiterals = []string{"slot"}
 		endpoint.RequestQueryParams = []apimiddleware.QueryParam{{Name: "randao_reveal", Hex: true}, {Name: "graffiti", Hex: true}}
 		endpoint.Hooks = apimiddleware.HookCollection{
-			OnPreSerializeMiddlewareResponseIntoJson: serializeProducedV2Block,
+			OnPreSerializeMiddlewareResponseIntoJSON: serializeProducedV2Block,
 		}
 	case "/eth/v1/validator/attestation_data":
 		endpoint.GetResponse = &produceAttestationDataResponseJson{}

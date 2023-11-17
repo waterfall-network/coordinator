@@ -47,7 +47,7 @@ func migrateArchivedIndex(ctx context.Context, db *bolt.DB) error {
 			if blk.Block.Slot > highest {
 				highest = blk.Block.Slot
 			}
-			// check if context is cancelled in between
+			// check if context is canceled in between
 			if ctx.Err() != nil {
 				return ctx.Err()
 			}

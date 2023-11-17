@@ -16,8 +16,8 @@ func TestHandleURLParameters(t *testing.T) {
 	t.Run("no_params", func(t *testing.T) {
 		request := httptest.NewRequest("GET", "http://foo.example/bar", &body)
 
-		errJson := HandleURLParameters("/not_param", request, []string{})
-		require.Equal(t, true, errJson == nil)
+		errJSON := HandleURLParameters("/not_param", request, []string{})
+		require.Equal(t, true, errJSON == nil)
 		assert.Equal(t, "/bar", request.URL.Path)
 	})
 
@@ -28,8 +28,8 @@ func TestHandleURLParameters(t *testing.T) {
 		request := httptest.NewRequest("GET", "http://foo.example/bar/baz/quux", &body)
 		request = mux.SetURLVars(request, muxVars)
 
-		errJson := HandleURLParameters("/{bar_param}/not_param/{quux_param}", request, []string{})
-		require.Equal(t, true, errJson == nil)
+		errJSON := HandleURLParameters("/{bar_param}/not_param/{quux_param}", request, []string{})
+		require.Equal(t, true, errJSON == nil)
 		assert.Equal(t, "/YmFy/baz/cXV1eA==", request.URL.Path)
 	})
 
@@ -39,8 +39,8 @@ func TestHandleURLParameters(t *testing.T) {
 		request := httptest.NewRequest("GET", "http://foo.example/bar/baz", &body)
 		request = mux.SetURLVars(request, muxVars)
 
-		errJson := HandleURLParameters("/{bar_param}/not_param/", request, []string{"bar_param"})
-		require.Equal(t, true, errJson == nil)
+		errJSON := HandleURLParameters("/{bar_param}/not_param/", request, []string{"bar_param"})
+		require.Equal(t, true, errJSON == nil)
 		assert.Equal(t, "/bar/baz", request.URL.Path)
 	})
 
@@ -50,8 +50,8 @@ func TestHandleURLParameters(t *testing.T) {
 		request := httptest.NewRequest("GET", "http://foo.example/0x626172/baz", &body)
 		request = mux.SetURLVars(request, muxVars)
 
-		errJson := HandleURLParameters("/{hex_param}/not_param/", request, []string{})
-		require.Equal(t, true, errJson == nil)
+		errJSON := HandleURLParameters("/{hex_param}/not_param/", request, []string{})
+		require.Equal(t, true, errJSON == nil)
 		assert.Equal(t, "/YmFy/baz", request.URL.Path)
 	})
 }
@@ -78,8 +78,8 @@ func TestHandleQueryParameters(t *testing.T) {
 	t.Run("hex_and_enum_params", func(t *testing.T) {
 		request := httptest.NewRequest("GET", "http://foo.example?hex=0x626172&baz=baz", &body)
 
-		errJson := HandleQueryParameters(request, []QueryParam{{Name: "hex", Hex: true}, {Name: "baz", Enum: true}})
-		require.Equal(t, true, errJson == nil)
+		errJSON := HandleQueryParameters(request, []QueryParam{{Name: "hex", Hex: true}, {Name: "baz", Enum: true}})
+		require.Equal(t, true, errJSON == nil)
 		query := request.URL.Query()
 		v, ok := query["hex"]
 		require.Equal(t, true, ok, "query param not found")

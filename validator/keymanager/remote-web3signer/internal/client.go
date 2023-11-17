@@ -27,22 +27,22 @@ const (
 	ethApiNamespace = "/api/v1/eth2/sign/"
 )
 
-type SignRequestJson []byte
+type SignRequestJSON []byte
 
 // HttpSignerClient defines the interface for interacting with a remote web3signer.
 type HttpSignerClient interface {
-	Sign(ctx context.Context, pubKey string, request SignRequestJson) (bls.Signature, error)
+	Sign(ctx context.Context, pubKey string, request SignRequestJSON) (bls.Signature, error)
 	GetPublicKeys(ctx context.Context, url string) ([][48]byte, error)
 }
 
-// ApiClient a wrapper object around web3signer APIs. Please refer to the docs from Consensys' web3signer project.
-type ApiClient struct {
+// APIClient a wrapper object around web3signer APIs. Please refer to the docs from Consensys' web3signer project.
+type APIClient struct {
 	BaseURL    *url.URL
 	RestClient *http.Client
 }
 
-// NewApiClient method instantiates a new ApiClient object.
-func NewApiClient(baseEndpoint string) (*ApiClient, error) {
+// NewApiClient method instantiates a new APIClient object.
+func NewApiClient(baseEndpoint string) (*APIClient, error) {
 	u, err := url.ParseRequestURI(baseEndpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "invalid format, unable to parse url")
@@ -50,14 +50,14 @@ func NewApiClient(baseEndpoint string) (*ApiClient, error) {
 	if u.Scheme == "" || u.Host == "" {
 		return nil, fmt.Errorf("web3signer url must be in the format of http(s)://host:port url used: %v", baseEndpoint)
 	}
-	return &ApiClient{
+	return &APIClient{
 		BaseURL:    u,
 		RestClient: &http.Client{},
 	}, nil
 }
 
 // Sign is a wrapper method around the web3signer sign api.
-func (client *ApiClient) Sign(ctx context.Context, pubKey string, request SignRequestJson) (bls.Signature, error) {
+func (client *APIClient) Sign(ctx context.Context, pubKey string, request SignRequestJSON) (bls.Signature, error) {
 	requestPath := ethApiNamespace + pubKey
 	resp, err := client.doRequest(ctx, http.MethodPost, client.BaseURL.String()+requestPath, bytes.NewBuffer(request))
 	if err != nil {
@@ -75,7 +75,7 @@ func (client *ApiClient) Sign(ctx context.Context, pubKey string, request SignRe
 }
 
 // GetPublicKeys is a wrapper method around the web3signer publickeys api (this may be removed in the future or moved to another location due to its usage).
-func (client *ApiClient) GetPublicKeys(ctx context.Context, url string) ([][fieldparams.BLSPubkeyLength]byte, error) {
+func (client *APIClient) GetPublicKeys(ctx context.Context, url string) ([][fieldparams.BLSPubkeyLength]byte, error) {
 	resp, err := client.doRequest(ctx, http.MethodGet, url, nil /* no body needed on get request */)
 	if err != nil {
 		return nil, err
@@ -101,7 +101,7 @@ func (client *ApiClient) GetPublicKeys(ctx context.Context, url string) ([][fiel
 }
 
 // ReloadSignerKeys is a wrapper method around the web3signer reload api.
-func (client *ApiClient) ReloadSignerKeys(ctx context.Context) error {
+func (client *APIClient) ReloadSignerKeys(ctx context.Context) error {
 	const requestPath = "/reload"
 	if _, err := client.doRequest(ctx, http.MethodPost, client.BaseURL.String()+requestPath, nil); err != nil {
 		return err
@@ -110,7 +110,7 @@ func (client *ApiClient) ReloadSignerKeys(ctx context.Context) error {
 }
 
 // GetServerStatus is a wrapper method around the web3signer upcheck api
-func (client *ApiClient) GetServerStatus(ctx context.Context) (string, error) {
+func (client *APIClient) GetServerStatus(ctx context.Context) (string, error) {
 	const requestPath = "/upcheck"
 	resp, err := client.doRequest(ctx, http.MethodGet, client.BaseURL.String()+requestPath, nil /* no body needed on get request */)
 	if err != nil {
@@ -124,7 +124,7 @@ func (client *ApiClient) GetServerStatus(ctx context.Context) (string, error) {
 }
 
 // doRequest is a utility method for requests.
-func (client *ApiClient) doRequest(ctx context.Context, httpMethod, fullPath string, body io.Reader) (*http.Response, error) {
+func (client *APIClient) doRequest(ctx context.Context, httpMethod, fullPath string, body io.Reader) (*http.Response, error) {
 	var requestDump []byte
 	ctx, span := trace.StartSpan(ctx, "remote_web3signer.Client.doRequest")
 	defer span.End()
@@ -147,9 +147,9 @@ func (client *ApiClient) doRequest(ctx context.Context, httpMethod, fullPath str
 		err = errors.Wrap(err, "failed to execute json request")
 		tracing.AnnotateError(span, err)
 		return resp, err
-	} else {
-		signRequestDurationSeconds.WithLabelValues(req.Method, strconv.Itoa(resp.StatusCode)).Observe(duration.Seconds())
 	}
+	signRequestDurationSeconds.WithLabelValues(req.Method, strconv.Itoa(resp.StatusCode)).Observe(duration.Seconds())
+
 	if resp.StatusCode != http.StatusOK {
 		requestDump, err = httputil.DumpRequestOut(req, true)
 		if err != nil {
