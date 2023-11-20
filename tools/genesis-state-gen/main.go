@@ -55,7 +55,7 @@ func main() {
 	gwatHash := common.HexToHash(*gwatGenesisHash)
 
 	if *genesisTime == 0 {
-		log.Print("No --genesis-time specified, defaulting to now + 2min")
+		log.Print("No --genesis-time specified, defaulting to now + 1min")
 	}
 	if *sszOutputFile == "" && *yamlOutputFile == "" && *jsonOutputFile == "" {
 		log.Println("Expected --output-ssz, --output-yaml, or --output-json to have been provided, received nil")
