@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"math/big"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -19,6 +20,10 @@ import (
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
 	"go.opencensus.io/trace"
+)
+
+const (
+	srtErrInvalidBaseSpine = "invalid base spine"
 )
 
 var (
@@ -72,7 +77,8 @@ func (s *Service) initGwatSync() {
 				if !errors.Is(err, errGwatSyncInProgress) {
 					s.ResetCachedGwatCoordinatedState()
 				}
-				if errors.Is(err, errors.New("invalid base spine")) {
+				if strings.Contains(err.Error(), srtErrInvalidBaseSpine) {
+					log.WithError(err).Warning("Gwat sync: reset sync state cache")
 					s.cfg.StateGen.PurgeSyncStateCache()
 				}
 				continue
@@ -120,7 +126,8 @@ func (s *Service) initParallelGwatSync(ctx context.Context) {
 		if !errors.Is(err, errGwatSyncInProgress) {
 			s.ResetCachedGwatCoordinatedState()
 		}
-		if errors.Is(err, errors.New("invalid base spine")) {
+		if strings.Contains(err.Error(), srtErrInvalidBaseSpine) {
+			log.WithError(err).Warning("Gwat sync: reset sync state cache")
 			s.cfg.StateGen.PurgeSyncStateCache()
 		}
 		return

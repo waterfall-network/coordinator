@@ -65,10 +65,6 @@ func (s *Service) ExecutionDagFinalize(ctx context.Context, params *gwatTypes.Fi
 		err = errors.New(*result.Error)
 	}
 
-	if result.Error != nil {
-		err = errors.New(*result.Error)
-	}
-
 	return result, handleDagRPCError(err)
 }
 
@@ -91,10 +87,6 @@ func (s *Service) ExecutionDagCoordinatedState(ctx context.Context) (*gwatTypes.
 
 	if err != nil {
 		log.WithError(err).Error("Dag Coordinated State")
-	}
-
-	if result.Error != nil {
-		err = errors.New(*result.Error)
 	}
 
 	if result.Error != nil {
