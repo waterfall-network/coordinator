@@ -86,6 +86,7 @@ type Service struct {
 	fnIsSync              func() bool
 	newHeadCh             chan *head
 	isGwatSyncing         *abool.AtomicBool
+	onBlockMu             sync.RWMutex
 }
 
 // config options for the service.
