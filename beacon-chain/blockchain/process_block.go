@@ -98,6 +98,22 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	ctx = context.WithValue(ctx, params.BeaconConfig().CtxBlockFetcherKey, db.BlockInfoFetcherFunc(s.cfg.BeaconDB))
 	defer span.End()
 
+	defer func(start time.Time, curSlot types.Slot) {
+		log.WithField(
+			"elapsed", time.Since(start),
+		).WithField(
+			"curSlot", curSlot,
+		).WithField(
+			"blSlot", signed.Block().Slot(),
+		).WithFields(logrus.Fields{
+			"parentRoot": fmt.Sprintf("%#x", signed.Block().ParentRoot()),
+			"root":       fmt.Sprintf("%#x", blockRoot),
+		}).Info("onBlock: end")
+	}(time.Now(), slots.CurrentSlot(uint64(s.genesisTime.Unix())))
+
+	s.onBlockMu.Lock()
+	defer s.onBlockMu.Unlock()
+
 	log.WithFields(logrus.Fields{
 		"slot":       signed.Block().Slot(),
 		"root":       fmt.Sprintf("%#x", blockRoot),

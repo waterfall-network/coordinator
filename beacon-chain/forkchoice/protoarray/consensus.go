@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"time"
 
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
@@ -51,6 +52,18 @@ func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines 
 	ctx, span := trace.StartSpan(ctx, "protoArrayForkChoice.GetParentByOptimisticSpines")
 	defer span.End()
 
+	var headRoot [32]byte
+	var err error
+
+	defer func(start time.Time) {
+		log.WithField(
+			"elapsed", time.Since(start),
+		).WithFields(logrus.Fields{
+			"optSpines": len(optSpines),
+			"headRoot":  fmt.Sprintf("%#x", headRoot),
+		}).Info("forkchoice: get parent end")
+	}(time.Now())
+
 	f.mu.Lock()
 	defer f.mu.Unlock()
 
@@ -97,7 +110,7 @@ func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines 
 		return [32]byte{}, nil
 	}
 
-	headRoot, err := f.calculateHeadRootByNodesIndexes(ctx, acceptableRootIndexMap)
+	headRoot, err = f.calculateHeadRootByNodesIndexes(ctx, acceptableRootIndexMap)
 	if err != nil {
 		return [32]byte{}, err
 	}

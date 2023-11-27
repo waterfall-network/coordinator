@@ -37,17 +37,17 @@ func GenerateGenesisState(ctx context.Context, genesisTime, numValidators uint64
 // GenerateGenesisStateFromDepositData creates a genesis state given a list of
 // deposit data items and their corresponding roots.
 func GenerateGenesisStateFromDepositData(ctx context.Context, gwtGenesisHash gwatCommon.Hash, genesisTime uint64, depositData []*ethpb.Deposit_Data, depositDataRoots [][]byte) (*ethpb.BeaconState, []*ethpb.Deposit, error) {
-	trie, err := trie.GenerateTrieFromItems(depositDataRoots, params.BeaconConfig().DepositContractTreeDepth)
+	itemsTrie, err := trie.GenerateTrieFromItems(depositDataRoots, params.BeaconConfig().DepositContractTreeDepth)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "could not generate Merkle trie for deposit proofs")
 	}
-	deposits, err := GenerateDepositsFromData(depositData, trie)
+	deposits, err := GenerateDepositsFromData(depositData, itemsTrie)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "could not generate deposits from the deposit data provided")
 	}
-	root := trie.HashTreeRoot()
+	root := itemsTrie.HashTreeRoot()
 	if genesisTime == 0 {
-		genesisTime = uint64(time.Now().Unix() + 120)
+		genesisTime = uint64(time.Now().Unix() + 60)
 	}
 	genesisCandidates := gwatCommon.HashArray{gwtGenesisHash}
 	beaconState, err := coreState.GenesisBeaconState(ctx, deposits, genesisTime, &ethpb.Eth1Data{
@@ -68,10 +68,10 @@ func GenerateGenesisStateFromDepositData(ctx context.Context, gwtGenesisHash gwa
 }
 
 // GenerateDepositsFromData a list of deposit items by creating proofs for each of them from a sparse Merkle trie.
-func GenerateDepositsFromData(depositDataItems []*ethpb.Deposit_Data, trie *trie.SparseMerkleTrie) ([]*ethpb.Deposit, error) {
+func GenerateDepositsFromData(depositDataItems []*ethpb.Deposit_Data, itemsTrie *trie.SparseMerkleTrie) ([]*ethpb.Deposit, error) {
 	deposits := make([]*ethpb.Deposit, len(depositDataItems))
 	results, err := async.Scatter(len(depositDataItems), func(offset int, entries int, _ *sync.RWMutex) (interface{}, error) {
-		return generateDepositsFromData(depositDataItems[offset:offset+entries], offset, trie)
+		return generateDepositsFromData(depositDataItems[offset:offset+entries], offset, itemsTrie)
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to generate deposits from data")
@@ -141,11 +141,11 @@ func depositDataFromKeys(privKeys []bls.SecretKey, pubKeys []bls.PublicKey) ([]*
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "could not create deposit data for key: %#x", privKeys[i].Marshal())
 		}
-		hash, err := data.HashTreeRoot()
+		h, err := data.HashTreeRoot()
 		if err != nil {
 			return nil, nil, errors.Wrap(err, "could not hash tree root deposit data item")
 		}
-		dataRoots[i] = hash[:]
+		dataRoots[i] = h[:]
 		depositDataItems[i] = data
 	}
 	return depositDataItems, dataRoots, nil

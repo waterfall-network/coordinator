@@ -99,7 +99,8 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 
 	if vs.SyncChecker.Syncing() {
 		log.WithError(fmt.Errorf("syncing to latest head, not ready to respond")).WithFields(logrus.Fields{
-			"Syncing": vs.SyncChecker.Syncing(),
+			"Syncing":  vs.SyncChecker.Syncing(),
+			"req.slot": req.Slot,
 		}).Warn("Proposing skipped (synchronizing)")
 		return nil, fmt.Errorf("syncing to latest head, not ready to respond")
 	}
@@ -126,14 +127,24 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 	parentRoot, err := vs.HeadFetcher.ForkChoicer().GetParentByOptimisticSpines(ctx, optSpines)
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
+			"req.slot":     req.Slot,
 			"extOptSpines": optSpines,
-		}).Error("Build block data: retrieving of gwat optimistic spines failed")
+		}).Error("Build block data: retrieving of parent root failed")
+		return nil, err
+	}
+	if parentRoot == ([32]byte{}) {
+		log.WithError(err).WithFields(logrus.Fields{
+			"req.slot":   req.Slot,
+			"parentRoot": fmt.Sprintf("%#x", parentRoot),
+		}).Error("Build block data: retrieving empty parent root")
+		return nil, fmt.Errorf("empty parent root %#x (slot=%d)", parentRoot, req.Slot)
 	}
 
 	log.WithFields(logrus.Fields{
+		"req.slot":       req.Slot,
 		"1.parentRoot":   fmt.Sprintf("%#x", parentRoot),
 		"2.extOptSpines": len(optSpines),
-	}).Info("Build block data: retrieving of gwat optimistic spines")
+	}).Info("Build block data: get parent root")
 
 	//head, err := vs.StateGen.SyncStateByRoot(ctx, parentRoot)
 	head, err := vs.StateGen.StateByRoot(ctx, parentRoot)
@@ -142,9 +153,11 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 	}
 
 	log.WithFields(logrus.Fields{
-		"0:stSlot":      head.Slot(),
-		"1:stBlockHash": fmt.Sprintf("%#x", head.Eth1Data().BlockHash),
-	}).Info("eth1.BlockHash: buildPhase0BlockData: 000")
+		"0:req.slot":    req.Slot,
+		"1:stSlot":      head.Slot(),
+		"2.parentRoot":  fmt.Sprintf("%#x", parentRoot),
+		"3:stBlockHash": fmt.Sprintf("%#x", head.Eth1Data().BlockHash),
+	}).Info("Build block data: get parent state")
 
 	head, err = transition.ProcessSlotsUsingNextSlotCache(ctx, head, parentRoot[:], req.Slot)
 	if err != nil {
