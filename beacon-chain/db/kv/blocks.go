@@ -9,7 +9,6 @@ import (
 	"github.com/golang/snappy"
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/filters"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/container/slice"
@@ -291,11 +290,6 @@ func (s *Store) SaveBlocks(ctx context.Context, blocks []block.SignedBeaconBlock
 		if err != nil {
 			return err
 		}
-
-		log.WithFields(logrus.Fields{
-			"size": len(enc),
-			"slot": blk.Block().Slot(),
-		}).Info("BLOCK SIZE")
 
 		blockRoots[i] = blockRoot[:]
 		encodedBlocks[i] = enc
