@@ -290,6 +290,7 @@ func (s *Store) SaveBlocks(ctx context.Context, blocks []block.SignedBeaconBlock
 		if err != nil {
 			return err
 		}
+
 		blockRoots[i] = blockRoot[:]
 		encodedBlocks[i] = enc
 		indicesByBucket := createBlockIndicesFromBlock(ctx, blk.Block())
