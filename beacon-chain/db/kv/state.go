@@ -207,19 +207,19 @@ func (s *Store) SaveStates(ctx context.Context, states []state.ReadOnlyBeaconSta
 	multipleEncs := make([][]byte, len(states))
 	for i, st := range states {
 		//store the spines data and replace it by keys
-		keySpines, err := s.WriteSpines(ctx, states[i].SpineData().Spines)
+		keySpines, err := s.WriteSpines(ctx, states[i].SpineData().Spines) //nolint: typecheck // Known issue, will be replaced when possible
 		if err != nil {
 			return err
 		}
-		keyPrefix, err := s.WriteSpines(ctx, states[i].SpineData().Prefix)
+		keyPrefix, err := s.WriteSpines(ctx, states[i].SpineData().Prefix) //nolint: typecheck // Known issue, will be replaced when possible
 		if err != nil {
 			return err
 		}
-		keyFinalization, err := s.WriteSpines(ctx, states[i].SpineData().Finalization)
+		keyFinalization, err := s.WriteSpines(ctx, states[i].SpineData().Finalization) //nolint: typecheck // Known issue, will be replaced when possible
 		if err != nil {
 			return err
 		}
-		keyCpFinalized, err := s.WriteSpines(ctx, states[i].SpineData().CpFinalized)
+		keyCpFinalized, err := s.WriteSpines(ctx, states[i].SpineData().CpFinalized) //nolint: typecheck // Known issue, will be replaced when possible
 		if err != nil {
 			return err
 		}

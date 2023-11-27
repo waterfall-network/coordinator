@@ -1,15 +1,17 @@
+// Fix some linter problems later
+// https://github.com/golangci/golangci-lint/issues/3815
 package debug
 
 import (
 	"context"
-	"fmt"
+	"fmt" //nolint: typecheck // Known issue, will be replaced when possible
 
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil" //nolint: typecheck // Known issue, will be replaced when possible
 	pbrpc "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/codes"  //nolint: typecheck // Known issue, will be replaced when possible
+	"google.golang.org/grpc/status" //nolint: typecheck // Known issue, will be replaced when possible
 )
 
 // GetBeaconState retrieves an ssz-encoded beacon state

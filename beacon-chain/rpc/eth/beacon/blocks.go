@@ -203,7 +203,7 @@ func (bs *Server) SubmitBlock(ctx context.Context, req *ethpbv2.SignedBeaconBloc
 
 	var wsb block.SignedBeaconBlock
 	var err error
-	var v1alpha1Blk interface{}
+	var v1alpha1Blk interface{} //nolint: typecheck // Known issue, will be replaced when possible
 
 	switch blk := req.Message.(type) {
 	case *ethpbv2.SignedBeaconBlockContainerV2_Phase0Block:

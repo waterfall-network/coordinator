@@ -27,7 +27,7 @@ stages:
     cp -r /tmp/version.go runtime/version/version.go
 
 lint:
-  image: golangci/golangci-lint:v1.55.2
+  image: golangci/golangci-lint:v1.52.2
   tags:
     - docker
   rules:

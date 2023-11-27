@@ -505,6 +505,7 @@ func sizeAndCountOfUin64List(list []uint64) (uint64, uint64) {
 	return size, count
 }
 
+// nolint: typecheck
 func sizeAndCountGeneric(genericItems interface{}, err error) (uint64, uint64) {
 	size := uint64(0)
 	count := uint64(0)

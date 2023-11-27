@@ -1,4 +1,3 @@
-// nolint
 package p2p
 
 import (

@@ -1,6 +1,6 @@
 package herumi
 
-import "github.com/herumi/bls-eth-go-binary/bls"
+import "github.com/herumi/bls-eth-go-binary/bls" //nolint: typecheck // Known issue, will be replaced when possible
 
 // HerumiInit allows the required curve orders and appropriate sub-groups to be initialized.
 func HerumiInit() {

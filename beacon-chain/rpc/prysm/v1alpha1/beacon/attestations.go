@@ -10,7 +10,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/operation"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/filters"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/filters" // nolint: typecheck
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"

@@ -83,8 +83,8 @@ func (s *Service) updateMetrics() {
 	if err != nil {
 		log.WithError(err).Debugf("Could not compute fork digest")
 	}
-	indices := s.aggregatorSubnetIndices(s.cfg.chain.CurrentSlot())                            //nolint
-	syncIndices := cache.SyncSubnetIDs.GetAllSubnets(slots.ToEpoch(s.cfg.chain.CurrentSlot())) // nolint
+	indices := s.aggregatorSubnetIndices(s.cfg.chain.CurrentSlot())                            //nolint: typecheck // Known issue, will be replaced when possible
+	syncIndices := cache.SyncSubnetIDs.GetAllSubnets(slots.ToEpoch(s.cfg.chain.CurrentSlot())) //nolint: typecheck // Known issue, will be replaced when possible
 	attTopic := p2p.GossipTypeMapping[reflect.TypeOf(&pb.Attestation{})]
 	syncTopic := p2p.GossipTypeMapping[reflect.TypeOf(&pb.SyncCommitteeMessage{})]
 	attTopic += s.cfg.p2p.Encoding().ProtocolSuffix()

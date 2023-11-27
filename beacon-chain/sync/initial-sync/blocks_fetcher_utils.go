@@ -157,7 +157,7 @@ func (f *blocksFetcher) findFork(ctx context.Context, slot types.Slot) (*forkDat
 
 	// The current slot's epoch must be after the finalization epoch,
 	// triggering backtracking on earlier epochs is unnecessary.
-	finalizedEpoch := f.chain.FinalizedCheckpt().Epoch // nolint
+	finalizedEpoch := f.chain.FinalizedCheckpt().Epoch //nolint: typecheck // Known issue, will be replaced when possible
 	epoch := slots.ToEpoch(slot)
 	if epoch <= finalizedEpoch {
 		return nil, errors.New("slot is not after the finalized epoch, no backtracking is necessary")
@@ -234,7 +234,7 @@ func (f *blocksFetcher) findForkWithPeer(ctx context.Context, pid peer.ID, slot 
 	// Traverse blocks, and if we've got one that doesn't have parent in DB, backtrack on it.
 	for i, block := range blocks {
 		parentRoot := bytesutil.ToBytes32(block.Block().ParentRoot())
-		if !f.db.HasBlock(ctx, parentRoot) && !f.chain.HasInitSyncBlock(parentRoot) { // nolint
+		if !f.db.HasBlock(ctx, parentRoot) && !f.chain.HasInitSyncBlock(parentRoot) { //nolint: typecheck // Known issue, will be replaced when possible
 			log.WithFields(logrus.Fields{
 				"peer": pid,
 				"slot": block.Block().Slot(),
@@ -261,7 +261,7 @@ func (f *blocksFetcher) findAncestor(ctx context.Context, pid peer.ID, b block.S
 	outBlocks := []block.SignedBeaconBlock{b}
 	for i := uint64(0); i < backtrackingMaxHops; i++ {
 		parentRoot := bytesutil.ToBytes32(outBlocks[len(outBlocks)-1].Block().ParentRoot())
-		if f.db.HasBlock(ctx, parentRoot) || f.chain.HasInitSyncBlock(parentRoot) { // nolint
+		if f.db.HasBlock(ctx, parentRoot) || f.chain.HasInitSyncBlock(parentRoot) { //nolint: typecheck // Known issue, will be replaced when possible
 			// Common ancestor found, forward blocks back to processor.
 			sort.Slice(outBlocks, func(i, j int) bool {
 				return outBlocks[i].Block().Slot() < outBlocks[j].Block().Slot()
@@ -288,13 +288,13 @@ func (f *blocksFetcher) findAncestor(ctx context.Context, pid peer.ID, b block.S
 // bestFinalizedSlot returns the highest finalized slot of the majority of connected peers.
 func (f *blocksFetcher) bestFinalizedSlot() types.Slot {
 	finalizedEpoch, _ := f.p2p.Peers().BestFinalized(
-		params.BeaconConfig().MaxPeersToSync, f.chain.FinalizedCheckpt().Epoch) // nolint
+		params.BeaconConfig().MaxPeersToSync, f.chain.FinalizedCheckpt().Epoch) //nolint: typecheck // Known issue, will be replaced when possible
 	return params.BeaconConfig().SlotsPerEpoch.Mul(uint64(finalizedEpoch))
 }
 
 // bestNonFinalizedSlot returns the highest non-finalized slot of enough number of connected peers.
 func (f *blocksFetcher) bestNonFinalizedSlot() types.Slot {
-	headEpoch := slots.ToEpoch(f.chain.HeadSlot()) // nolint
+	headEpoch := slots.ToEpoch(f.chain.HeadSlot()) //nolint: typecheck // Known issue, will be replaced when possible
 	targetEpoch, _ := f.p2p.Peers().BestNonFinalized(flags.Get().MinimumSyncPeers*2, headEpoch)
 	return params.BeaconConfig().SlotsPerEpoch.Mul(uint64(targetEpoch))
 }
@@ -303,10 +303,10 @@ func (f *blocksFetcher) bestNonFinalizedSlot() types.Slot {
 // epoch. For the latter peers supporting that target epoch are returned as well.
 func (f *blocksFetcher) calculateHeadAndTargetEpochs() (headEpoch, targetEpoch types.Epoch, peers []peer.ID) {
 	if f.mode == modeStopOnFinalizedEpoch {
-		headEpoch = f.chain.FinalizedCheckpt().Epoch // nolint
+		headEpoch = f.chain.FinalizedCheckpt().Epoch //nolint: typecheck // Known issue, will be replaced when possible
 		targetEpoch, peers = f.p2p.Peers().BestFinalized(params.BeaconConfig().MaxPeersToSync, headEpoch)
 	} else {
-		headEpoch = slots.ToEpoch(f.chain.HeadSlot()) // nolint
+		headEpoch = slots.ToEpoch(f.chain.HeadSlot()) //nolint: typecheck // Known issue, will be replaced when possible
 		targetEpoch, peers = f.p2p.Peers().BestNonFinalized(flags.Get().MinimumSyncPeers, headEpoch)
 	}
 	return headEpoch, targetEpoch, peers

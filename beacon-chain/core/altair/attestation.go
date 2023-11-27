@@ -11,7 +11,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
@@ -339,15 +338,15 @@ func RewardBeaconBlockRootProposer(
 			"attestors":              indices,
 		}).Error("Proposer reward error: retrieving block failed")
 		// if no block on local node
-		if errors.Is(err, db.ErrNotFound) {
-			log.WithFields(log.Fields{
-				"Slot":            beaconState.Slot(),
-				"attestationRoot": fmt.Sprintf("%#x", attRoot),
-				"reward":          reward,
-				"canonical":       false,
-			}).Debug("Reward proposer: skip reward of voting for root (not found)")
-			return nil
-		}
+		//if errors.Is(err, db.ErrNotFound) {
+		//	log.WithFields(log.Fields{
+		//		"Slot":            beaconState.Slot(),
+		//		"attestationRoot": fmt.Sprintf("%#x", attRoot),
+		//		"reward":          reward,
+		//		"canonical":       false,
+		//	}).Debug("Reward proposer: skip reward of voting for root (not found)")
+		//	return nil
+		//}
 		return err
 	}
 	slotRoot, err := helpers.BlockRootAtSlot(beaconState, proposedAtSlot)

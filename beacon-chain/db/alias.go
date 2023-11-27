@@ -1,4 +1,3 @@
-// nolint
 package db
 
 import "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/iface"

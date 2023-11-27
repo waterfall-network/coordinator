@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/kevinms/leakybucket-go"
-	"github.com/libp2p/go-libp2p"
+	libp2p "github.com/libp2p/go-libp2p"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
 	pubsubpb "github.com/libp2p/go-libp2p-pubsub/pb"
 	"github.com/libp2p/go-libp2p/core/host"
@@ -58,7 +58,6 @@ const pubsubQueueSize = 600
 var maxDialTimeout = params.BeaconNetworkConfig().RespTimeout
 
 // Service for managing peer to peer (p2p) networking.
-// nolint
 type Service struct {
 	started               bool
 	isPreGenesis          bool
@@ -126,7 +125,7 @@ func NewService(ctx context.Context, cfg *Config) (*Service, error) {
 	s.ipLimiter = leakybucket.NewCollector(ipLimit, ipBurst, true /* deleteEmptyBuckets */)
 
 	opts := s.buildOptions(ipAddr, s.privKey)
-	h, err := libp2p.New(opts...) //nolint
+	h, err := libp2p.New(opts...)
 	if err != nil {
 		log.WithError(err).Error("Failed to create p2p host")
 		return nil, err
@@ -356,7 +355,6 @@ func (s *Service) ENR() *enr.Record {
 }
 
 // DiscoveryAddresses represents our enr addresses as multiaddresses.
-// nolint
 func (s *Service) DiscoveryAddresses() ([]multiaddr.Multiaddr, error) {
 	if s.dv5Listener == nil {
 		return nil, nil
@@ -434,7 +432,7 @@ func (s *Service) awaitStateInitialized() {
 	}
 }
 
-func (s *Service) connectWithAllPeers(multiAddrs []multiaddr.Multiaddr) { // nolint
+func (s *Service) connectWithAllPeers(multiAddrs []multiaddr.Multiaddr) {
 	addrInfos, err := peer.AddrInfosFromP2pAddrs(multiAddrs...)
 	if err != nil {
 		log.Errorf("Could not convert to peer address info's from multiaddresses: %v", err)

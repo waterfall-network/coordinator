@@ -23,6 +23,8 @@ type filterIter struct {
 
 // Next looks up for the next valid node according to our
 // filter criteria.
+// https://github.com/golangci/golangci-lint/discussions/2287
+// nolint: typecheck
 func (f *filterIter) Next() bool {
 	seen := make(map[enode.ID]struct{})
 	for f.Iterator.Next() {
