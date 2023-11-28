@@ -597,7 +597,9 @@ func (p *Status) deprecatedPrune() {
 	}
 
 	notBadPeer := func(peerData *peerdata.PeerData) bool {
-		return peerData.BadResponses < p.scorers.BadResponsesScorer().Params().Threshold
+		//todo disable-peer-scorer check
+		return true
+		//return peerData.BadResponses < p.scorers.BadResponsesScorer().Params().Threshold
 	}
 	type peerResp struct {
 		pid     peer.ID

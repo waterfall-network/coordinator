@@ -133,12 +133,20 @@ func (s *Service) IsBadPeer(pid peer.ID) bool {
 
 // IsBadPeerNoLock is a lock-free version of IsBadPeer.
 func (s *Service) IsBadPeerNoLock(pid peer.ID) bool {
+	if !features.Get().EnablePeerScorer {
+		logrus.WithFields(logrus.Fields{
+			"func":  "IsBadPeerNoLock",
+			"peer":  pid,
+			"score": "EnablePeerScorer",
+		}).Info("Disconnect: scorer disabled")
+		return false
+	}
 	if s.scorers.badResponsesScorer.isBadPeer(pid) {
 		logrus.WithFields(logrus.Fields{
 			"func":  "IsBadPeerNoLock",
 			"peer":  pid,
 			"score": "badResponsesScorer",
-		}).Debug("Disconnect: peer is bad")
+		}).Info("Disconnect: peer is bad")
 		return true
 	}
 	if s.scorers.peerStatusScorer.isBadPeer(pid) {
@@ -146,7 +154,7 @@ func (s *Service) IsBadPeerNoLock(pid peer.ID) bool {
 			"func":  "IsBadPeerNoLock",
 			"peer":  pid,
 			"score": "peerStatusScorer",
-		}).Debug("Disconnect: peer is bad")
+		}).Info("Disconnect: peer is bad")
 		return true
 	}
 	if features.Get().EnablePeerScorer {
@@ -155,7 +163,7 @@ func (s *Service) IsBadPeerNoLock(pid peer.ID) bool {
 				"func":  "IsBadPeerNoLock",
 				"peer":  pid,
 				"score": "gossipScorer",
-			}).Debug("Disconnect: peer is bad")
+			}).Info("Disconnect: peer is bad")
 			return true
 		}
 	}

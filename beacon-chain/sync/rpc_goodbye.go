@@ -74,7 +74,7 @@ func (s *Service) disconnectBadPeer(ctx context.Context, id peer.ID) {
 	log.WithFields(logrus.Fields{
 		"func": "disconnectBadPeer",
 		"peer": id,
-	}).Debug("Disconnect: peer is bad")
+	}).Info("Disconnect: peer is bad")
 }
 
 // A custom goodbye method that is used by our connection handler, in the
@@ -102,6 +102,7 @@ func (s *Service) sendGoodByeAndDisconnect(ctx context.Context, code p2ptypes.RP
 	log.WithFields(logrus.Fields{
 		"func": "sendGoodByeAndDisconnect",
 		"peer": id,
+		"code": code,
 	}).Info("Disconnect: send goodbye message to peer")
 
 	return s.cfg.p2p.Disconnect(id)
