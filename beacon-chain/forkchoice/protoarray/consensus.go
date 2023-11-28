@@ -285,13 +285,14 @@ func collectTgTreeNodesByOptimisticSpines(fc *ForkChoice, optSpines []gwatCommon
 			// rm finalized spines from optSpines if contains
 			lastFinHash := node.spinesData.cpFinalized[len(node.spinesData.cpFinalized)-1]
 			lastFinIndex := indexOfOptimisticSpines(lastFinHash, optSpines)
+			forkOptSpines := optSpines
 			if lastFinIndex > -1 {
-				optSpines = optSpines[lastFinIndex+1:]
+				forkOptSpines = optSpines[lastFinIndex+1:]
 			}
 
 			// check finalization matches to optSpines
 			finalization := node.spinesData.Finalization()
-			ok := isSequenceMatchOptimisticSpines(finalization, optSpines)
+			ok := isSequenceMatchOptimisticSpines(finalization, forkOptSpines)
 
 			log.WithFields(logrus.Fields{
 				"ok":           ok,
@@ -300,7 +301,7 @@ func collectTgTreeNodesByOptimisticSpines(fc *ForkChoice, optSpines []gwatCommon
 				"node.slot":    node.slot,
 				"node.root":    fmt.Sprintf("%#x", node.root),
 				"finalization": len(finalization),
-				"optSpines":    len(optSpines),
+				"frkOptSpines": len(forkOptSpines),
 			}).Info("collectTgTreeNodesByOptimisticSpines: check finalization")
 
 			if !ok {
@@ -309,8 +310,8 @@ func collectTgTreeNodesByOptimisticSpines(fc *ForkChoice, optSpines []gwatCommon
 
 			// check prefix matches to optSpines
 			prefOptSpines := []gwatCommon.HashArray{}
-			if len(optSpines) > len(finalization) {
-				prefOptSpines = optSpines[len(finalization):]
+			if len(forkOptSpines) > len(finalization) {
+				prefOptSpines = forkOptSpines[len(finalization):]
 			}
 			prefix := node.spinesData.Prefix()
 			ok = isSequenceMatchOptimisticSpines(prefix, prefOptSpines)
@@ -371,11 +372,11 @@ func collectTgTreeNodesByOptimisticSpines(fc *ForkChoice, optSpines []gwatCommon
 				"continue":     !pubOptSpines[0].Has(published[0]),
 				"published":    published,
 				"pubOptSpines": pubOptSpines,
-				"optSpines[0]": optSpines[0],
 				"frkNr":        frkNr,
 				"node.index":   i,
 				"node.slot":    node.slot,
 				"node.root":    fmt.Sprintf("%#x", node.root),
+				//"forkOptSpines[0]": forkOptSpines[0],
 			}).Info("collectTgTreeNodesByOptimisticSpines: check the first published spine")
 
 			if !pubOptSpines[0].Has(published[0]) {
