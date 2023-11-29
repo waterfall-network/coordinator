@@ -133,6 +133,14 @@ func (s *Service) IsBadPeer(pid peer.ID) bool {
 
 // IsBadPeerNoLock is a lock-free version of IsBadPeer.
 func (s *Service) IsBadPeerNoLock(pid peer.ID) bool {
+	if !features.Get().EnablePeerScorer {
+		//logrus.WithFields(logrus.Fields{
+		//	"func":  "IsBadPeerNoLock",
+		//	"peer":  pid,
+		//	"score": "EnablePeerScorer",
+		//}).Info("Disconnect: scorer disabled")
+		return false
+	}
 	if s.scorers.badResponsesScorer.isBadPeer(pid) {
 		logrus.WithFields(logrus.Fields{
 			"func":  "IsBadPeerNoLock",

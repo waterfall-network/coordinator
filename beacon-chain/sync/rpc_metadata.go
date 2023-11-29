@@ -103,6 +103,7 @@ func (s *Service) sendMetaDataRequest(ctx context.Context, id peer.ID) (metadata
 		return nil, err
 	}
 	if code != 0 {
+		log.WithField("fn", "sendMetaDataRequest").WithField("peer", id.String()).WithField("code", code).WithError(err).Debug("Disconnect: incr BadResponses")
 		s.cfg.p2p.Peers().Scorers().BadResponsesScorer().Increment(stream.Conn().RemotePeer())
 		return nil, errors.New(errMsg)
 	}

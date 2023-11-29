@@ -90,7 +90,8 @@ func (s *Service) RefreshENR() {
 // listen for new nodes watches for new nodes in the network and adds them to the peerstore.
 func (s *Service) listenForNewNodes() {
 	iterator := s.dv5Listener.RandomNodes()
-	iterator = enode.Filter(iterator, s.filterPeer)
+	//iterator = enode.Filter(iterator, s.filterPeer)
+	iterator = enode.Filter(iterator, s.getFilterPeerFnWithDelay(100*time.Millisecond))
 	defer iterator.Close()
 	for {
 		// Exit if service's context is canceled
@@ -309,6 +310,69 @@ func (s *Service) filterPeer(node *enode.Node) bool {
 	// Add peer to peer handler.
 	s.peers.Add(nodeENR, peerData.ID, multiAddr, network.DirUnknown)
 	return true
+}
+
+func (s *Service) getFilterPeerFnWithDelay(delay time.Duration) (check func(*enode.Node) bool) {
+	var prevPeer peer.ID
+	return func(node *enode.Node) bool {
+		// Ignore nil node entries passed in.
+		if node == nil {
+			return false
+		}
+		// ignore nodes with no ip address stored.
+		if node.IP() == nil {
+			return false
+		}
+		// do not dial nodes with their tcp ports not set
+		if err := node.Record().Load(enr.WithEntry("tcp", new(enr.TCP))); err != nil {
+			if !enr.IsNotFound(err) {
+				log.WithError(err).Error("Could not retrieve tcp port")
+			}
+			return false
+		}
+		peerData, multiAddr, err := convertToAddrInfo(node)
+		if err != nil {
+			log.WithError(err).Error("Could not convert to peer data")
+			return false
+		}
+
+		//log.WithFields(logrus.Fields{
+		//	"cond":     peerData.ID == prevPeer,
+		//	"peer":     peerData.ID.String(),
+		//	"prevPeer": prevPeer,
+		//	"delay":    delay.Milliseconds(),
+		//}).Info("Discover: pause")
+
+		if peerData.ID == prevPeer {
+			time.Sleep(delay)
+		}
+		prevPeer = peerData.ID
+
+		if s.peers.IsBad(peerData.ID) {
+			return false
+		}
+		if s.peers.IsActive(peerData.ID) {
+			return false
+		}
+		if s.host.Network().Connectedness(peerData.ID) == network.Connected {
+			return false
+		}
+		if !s.peers.IsReadyToDial(peerData.ID) {
+			return false
+		}
+		nodeENR := node.Record()
+		// Decide whether or not to connect to peer that does not
+		// match the proper fork ENR data with our local node.
+		if s.genesisValidatorsRoot != nil {
+			if err := s.compareForkENR(nodeENR); err != nil {
+				log.WithError(err).Trace("Fork ENR mismatches between peer and local node")
+				return false
+			}
+		}
+		// Add peer to peer handler.
+		s.peers.Add(nodeENR, peerData.ID, multiAddr, network.DirUnknown)
+		return true
+	}
 }
 
 // This checks our set max peers in our config, and
