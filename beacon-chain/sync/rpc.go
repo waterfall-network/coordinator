@@ -145,7 +145,7 @@ func (s *Service) registerRPC(baseTopic string, handle rpcHandler) {
 			log.WithFields(logrus.Fields{
 				"func": "registerRPC",
 				"peer": stream.Conn().RemotePeer(),
-			}).Info("Disconnect: peer is bad")
+			}).Debug("Disconnect: peer is bad")
 			return
 		}
 		// Validate request according to peer limits.

@@ -189,13 +189,6 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		return err
 	}
 
-	log.WithFields(logrus.Fields{
-		"0:Slot":              signed.Block().Slot(),
-		"0:preStateSlot":      preState.Slot(),
-		"1:preStateBlockHash": fmt.Sprintf("%#x", preState.Eth1Data().BlockHash),
-		"2:blBlockHash":       fmt.Sprintf("%#x", signed.Block().Body().Eth1Data().BlockHash),
-	}).Info("eth1.BlockHash: onBlock:preState 000")
-
 	postState, err := transition.ExecuteStateTransition(ctx, preState, signed)
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
@@ -203,13 +196,6 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		}).Error("onBlock error")
 		return err
 	}
-
-	log.WithFields(logrus.Fields{
-		"0:Slot":        signed.Block().Slot(),
-		"0:stSlot":      postState.Slot(),
-		"1:stBlockHash": fmt.Sprintf("%#x", postState.Eth1Data().BlockHash),
-		"2:blBlockHash": fmt.Sprintf("%#x", signed.Block().Body().Eth1Data().BlockHash),
-	}).Info("eth1.BlockHash: onBlock:postState 111")
 
 	log.WithError(err).WithFields(logrus.Fields{
 		"block.slot": signed.Block().Slot(),
@@ -223,13 +209,6 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		}).Error("onBlock error")
 		return errors.Wrapf(err, "could not insert block %d to fork choice store", signed.Block().Slot())
 	}
-
-	log.WithFields(logrus.Fields{
-		"0:Slot":        signed.Block().Slot(),
-		"0:stSlot":      postState.Slot(),
-		"1:stBlockHash": fmt.Sprintf("%#x", postState.Eth1Data().BlockHash),
-		"2:blBlockHash": fmt.Sprintf("%#x", signed.Block().Body().Eth1Data().BlockHash),
-	}).Info("eth1.BlockHash: onBlock:insertBlockAndAttestationsToForkChoiceStore 222")
 
 	// We add a proposer score boost to fork choice for the block root if applicable, right after
 	// running a successful state transition for the block.
@@ -246,26 +225,12 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		return err
 	}
 
-	log.WithFields(logrus.Fields{
-		"0:Slot":        signed.Block().Slot(),
-		"0:stSlot":      postState.Slot(),
-		"1:stBlockHash": fmt.Sprintf("%#x", postState.Eth1Data().BlockHash),
-		"2:blBlockHash": fmt.Sprintf("%#x", signed.Block().Body().Eth1Data().BlockHash),
-	}).Info("eth1.BlockHash: onBlock:BoostProposerRoot 333")
-
 	if err := s.savePostStateInfo(ctx, blockRoot, signed, postState, false /* reg sync */); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"block.slot": signed.Block().Slot(),
 		}).Error("onBlock error")
 		return err
 	}
-
-	log.WithFields(logrus.Fields{
-		"0:Slot":        signed.Block().Slot(),
-		"0:stSlot":      postState.Slot(),
-		"1:stBlockHash": fmt.Sprintf("%#x", postState.Eth1Data().BlockHash),
-		"2:blBlockHash": fmt.Sprintf("%#x", signed.Block().Body().Eth1Data().BlockHash),
-	}).Info("eth1.BlockHash: onBlock:savePostStateInfo 444")
 
 	log.WithError(err).WithFields(logrus.Fields{
 		"block.slot": signed.Block().Slot(),
@@ -299,13 +264,6 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 			}
 		}()
 	}
-
-	log.WithFields(logrus.Fields{
-		"0:Slot":        signed.Block().Slot(),
-		"0:stSlot":      postState.Slot(),
-		"1:stBlockHash": fmt.Sprintf("%#x", postState.Eth1Data().BlockHash),
-		"2:blBlockHash": fmt.Sprintf("%#x", signed.Block().Body().Eth1Data().BlockHash),
-	}).Info("eth1.BlockHash: onBlock:BeaconCommitteeFromState 555")
 
 	// Update justified check point.
 	justified := s.store.JustifiedCheckpt()
@@ -378,15 +336,6 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	}
 
 	log.WithFields(logrus.Fields{
-		"0:h_Slot":        headBlock.Block().Slot(),
-		"0:h_stSlot":      headState.Slot(),
-		"1:h_stBlockHash": fmt.Sprintf("%#x", headState.Eth1Data().BlockHash),
-		"2:h_blBlockHash": fmt.Sprintf("%#x", headBlock.Block().Body().Eth1Data().BlockHash),
-		"3:blockRoot":     fmt.Sprintf("%#x", blockRoot),
-		"4:headRoot":      fmt.Sprintf("%#x", headRoot),
-	}).Info("eth1.BlockHash: onBlock:updateHead 666")
-
-	log.WithFields(logrus.Fields{
 		"block.slot":             signed.Block().Slot(),
 		"headRoot":               fmt.Sprintf("%#x", headRoot),
 		"headState.Finalization": gwatCommon.HashArrayFromBytes(headState.SpineData().Finalization),
@@ -398,15 +347,6 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		}).Error("onBlock error could not save head")
 		return errors.Wrap(err, "could not save head")
 	}
-
-	log.WithFields(logrus.Fields{
-		"0:h_Slot":        headBlock.Block().Slot(),
-		"0:h_stSlot":      headState.Slot(),
-		"1:h_stBlockHash": fmt.Sprintf("%#x", headState.Eth1Data().BlockHash),
-		"2:h_blBlockHash": fmt.Sprintf("%#x", headBlock.Block().Body().Eth1Data().BlockHash),
-		"3:blockRoot":     fmt.Sprintf("%#x", blockRoot),
-		"4:headRoot":      fmt.Sprintf("%#x", headRoot),
-	}).Info("eth1.BlockHash: onBlock:saveHead 777")
 
 	log.WithError(err).WithFields(logrus.Fields{
 		"block.slot": signed.Block().Slot(),
@@ -449,14 +389,6 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		if err := transition.UpdateNextSlotCache(slotCtx, blockRoot[:], postState); err != nil {
 			log.WithError(err).Debug("could not update next slot state cache")
 		}
-
-		log.WithFields(logrus.Fields{
-			"0:Slot":        signed.Block().Slot(),
-			"0:stSlot":      postState.Slot(),
-			"1:stBlockHash": fmt.Sprintf("%#x", postState.Eth1Data().BlockHash),
-			"2:blBlockHash": fmt.Sprintf("%#x", signed.Block().Body().Eth1Data().BlockHash),
-		}).Info("eth1.BlockHash: onBlock:UpdateNextSlotCache 888")
-
 	}()
 
 	// Save justified check point to db.
@@ -492,13 +424,6 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 			return errors.Wrap(err, "could not check if node is optimistically synced")
 		}
 
-		log.WithFields(logrus.Fields{
-			"0:Slot":        signed.Block().Slot(),
-			"0:stSlot":      postState.Slot(),
-			"1:stBlockHash": fmt.Sprintf("%#x", postState.Eth1Data().BlockHash),
-			"2:blBlockHash": fmt.Sprintf("%#x", signed.Block().Body().Eth1Data().BlockHash),
-		}).Info("eth1.BlockHash: onBlock:updateFinalized 990")
-
 		go func() {
 			// Send an event regarding the new finalized checkpoint over a common event feed.
 			s.cfg.StateNotifier.StateFeed().Send(&feed.Event{
@@ -519,14 +444,6 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 			if err := s.insertFinalizedDeposits(depCtx, fRoot); err != nil {
 				log.WithError(err).Error("Could not insert finalized deposits.")
 			}
-
-			log.WithFields(logrus.Fields{
-				"0:Slot":        signed.Block().Slot(),
-				"0:stSlot":      postState.Slot(),
-				"1:stBlockHash": fmt.Sprintf("%#x", postState.Eth1Data().BlockHash),
-				"2:blBlockHash": fmt.Sprintf("%#x", signed.Block().Body().Eth1Data().BlockHash),
-			}).Info("eth1.BlockHash: onBlock:insertFinalizedDeposits 999")
-
 		}()
 	}
 
@@ -763,11 +680,6 @@ func (s *Service) handleEpochBoundary(ctx context.Context, postState state.Beaco
 	ctx, span := trace.StartSpan(ctx, "blockChain.handleEpochBoundary")
 	defer span.End()
 
-	log.WithFields(logrus.Fields{
-		"0:stSlot":      postState.Slot(),
-		"1:stBlockHash": fmt.Sprintf("%#x", postState.Eth1Data().BlockHash),
-	}).Info("eth1.BlockHash: handleEpochBoundary 000")
-
 	if postState.Slot()+1 == s.nextEpochBoundarySlot {
 		// Update caches for the next epoch at epoch boundary slot - 1.
 		if err := helpers.UpdateCommitteeCache(postState, coreTime.NextEpoch(postState)); err != nil {
@@ -800,12 +712,6 @@ func (s *Service) handleEpochBoundary(ctx context.Context, postState state.Beaco
 			return err
 		}
 	}
-
-	log.WithFields(logrus.Fields{
-		"0:stSlot":      postState.Slot(),
-		"1:stBlockHash": fmt.Sprintf("%#x", postState.Eth1Data().BlockHash),
-	}).Info("eth1.BlockHash: handleEpochBoundary end 111")
-
 	return nil
 }
 

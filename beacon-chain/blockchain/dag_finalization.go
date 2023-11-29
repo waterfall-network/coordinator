@@ -382,12 +382,6 @@ func (s *Service) processDagFinalization(headState state.BeaconState, syncMode g
 	defer span.End()
 
 	var finalizedSeq gwatCommon.HashArray
-
-	log.WithFields(logrus.Fields{
-		"0:stSlot":      headState.Slot(),
-		"1:stBlockHash": fmt.Sprintf("%#x", headState.Eth1Data().BlockHash),
-	}).Info("eth1.BlockHash: processDagFinalization 000")
-
 	if s.IsSynced() || syncMode == gwatTypes.MainSync {
 		finParams, err := s.collectFinalizationParams(ctx, headState)
 		if err != nil {
