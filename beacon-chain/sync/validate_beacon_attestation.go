@@ -174,7 +174,7 @@ func (s *Service) validateCommitteeIndexBeaconAttestation(ctx context.Context, p
 			"pid":     fmt.Sprintf("%s", pid),
 			"topic":   fmt.Sprintf("%s", *msg.Topic),
 			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
-		}).Error("Atts: incoming: validate att: no block and state")
+		}).Warn("Atts: incoming: validate att: no block and state")
 		// A node doesn't have the block, it'll request from peer while saving the pending attestation to a queue.
 		s.savePendingAtt(&eth.SignedAggregateAttestationAndProof{Message: &eth.AggregateAttestationAndProof{Aggregate: att}})
 		return pubsub.ValidationIgnore, nil
