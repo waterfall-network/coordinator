@@ -66,6 +66,7 @@ func (s *Service) maintainPeerStatuses() {
 				if prysmTime.Now().After(lastUpdated.Add(interval)) {
 					if err := s.reValidatePeer(s.ctx, id); err != nil {
 						log.WithField("peer", id).WithError(err).Debug("Could not revalidate peer")
+						log.WithField("fn", "maintainPeerStatuses").WithField("peer", id.String()).WithError(err).Debug("Disconnect: incr BadResponses")
 						s.cfg.p2p.Peers().Scorers().BadResponsesScorer().Increment(id)
 					}
 				}
@@ -170,6 +171,7 @@ func (s *Service) sendRPCStatusRequest(ctx context.Context, id peer.ID) error {
 			"statusCode": code,
 			"func":       "sendRPCStatusRequest",
 		}).Warn("Disconnect: call IsBad: scorer incr by status code")
+		log.WithField("fn", "sendRPCStatusRequest").WithField("peer", id.String()).WithError(err).Debug("Disconnect: incr BadResponses")
 		s.cfg.p2p.Peers().Scorers().BadResponsesScorer().Increment(id)
 		return errors.New(errMsg)
 	}
@@ -254,6 +256,7 @@ func (s *Service) statusRPCHandler(ctx context.Context, msg interface{}, stream 
 		default:
 			respCode = responseCodeInvalidRequest
 			s.cfg.p2p.Peers().Scorers().BadResponsesScorer().Increment(remotePeer)
+			log.WithField("fn", "statusRPCHandler").WithField("peer", remotePeer.String()).WithError(err).Debug("Disconnect: incr BadResponses")
 		}
 
 		originalErr := err

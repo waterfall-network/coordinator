@@ -102,6 +102,7 @@ func (s *Service) sendGoodByeAndDisconnect(ctx context.Context, code p2ptypes.RP
 	log.WithFields(logrus.Fields{
 		"func": "sendGoodByeAndDisconnect",
 		"peer": id,
+		"code": code,
 	}).Info("Disconnect: send goodbye message to peer")
 
 	return s.cfg.p2p.Disconnect(id)

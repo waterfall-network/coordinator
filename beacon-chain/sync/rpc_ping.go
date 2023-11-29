@@ -31,6 +31,7 @@ func (s *Service) pingHandler(_ context.Context, msg interface{}, stream libp2pc
 	if err != nil {
 		// Descore peer for giving us a bad sequence number.
 		if errors.Is(err, p2ptypes.ErrInvalidSequenceNum) {
+			log.WithField("fn", "pingHandler").WithField("peer", stream.Conn().RemotePeer().String()).WithError(err).Debug("Disconnect: incr BadResponses")
 			s.cfg.p2p.Peers().Scorers().BadResponsesScorer().Increment(stream.Conn().RemotePeer())
 			s.writeErrorResponseToStream(responseCodeInvalidRequest, p2ptypes.ErrInvalidSequenceNum.Error(), stream)
 		}
@@ -97,6 +98,7 @@ func (s *Service) sendPingRequest(ctx context.Context, id peer.ID) error {
 	s.cfg.p2p.Host().Peerstore().RecordLatency(id, time.Now().Sub(currentTime))
 
 	if code != 0 {
+		log.WithField("fn", "sendPingRequest:ReadStatusCode").WithField("peer", id.String()).WithField("code", code).WithError(err).Debug("Disconnect: incr BadResponses")
 		s.cfg.p2p.Peers().Scorers().BadResponsesScorer().Increment(stream.Conn().RemotePeer())
 		return errors.New(errMsg)
 	}
@@ -108,6 +110,7 @@ func (s *Service) sendPingRequest(ctx context.Context, id peer.ID) error {
 	if err != nil {
 		// Descore peer for giving us a bad sequence number.
 		if errors.Is(err, p2ptypes.ErrInvalidSequenceNum) {
+			log.WithField("fn", "sendPingRequest:validateSequenceNum").WithField("peer", id.String()).WithError(err).Debug("Disconnect: incr BadResponses")
 			s.cfg.p2p.Peers().Scorers().BadResponsesScorer().Increment(stream.Conn().RemotePeer())
 		}
 		return err
