@@ -1,14 +1,14 @@
 run:
   skip-files:
     - .*_test.go
-    - validator/web/site_data.go
   skip-dirs:
-    - skip-dirs:beacon-chain/p2p/testing
+    - beacon-chain/p2p/testing
     - beacon-chain/powchain/testing
     - beacon-chain/p2p/testing
     - proto/
-    - ^contracts/
+    - contracts/
     - testing/
+    - validator/web
   timeout: 10m
   go: '1.20'
 
