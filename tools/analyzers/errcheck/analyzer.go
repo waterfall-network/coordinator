@@ -193,7 +193,6 @@ func selectorAndFunc(pass *analysis.Pass, call *ast.CallExpr) (*ast.SelectorExpr
 	}
 
 	return sel, fn, true
-
 }
 
 func ignoreCall(pass *analysis.Pass, call *ast.CallExpr) bool {
@@ -277,7 +276,7 @@ func namesForExcludeCheck(pass *analysis.Pass, call *ast.CallExpr) []string {
 	}
 
 	// This will be missing for functions without a receiver (like fmt.Printf),
-	// so just fall back to the the function's fullName in that case.
+	// so just fall back to the function's fullName in that case.
 	selection, ok := pass.TypesInfo.Selections[sel]
 	if !ok {
 		return []string{name}

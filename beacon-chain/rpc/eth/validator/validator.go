@@ -17,7 +17,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition"
 	rpchelpers "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc/eth/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
-	statev1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1" //nolint: typecheck // Known issue, will be replaced when possible
+	statev1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
 	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
@@ -158,14 +158,14 @@ func (vs *Server) GetProposerDuties(ctx context.Context, req *ethpbv1.ProposerDu
 	}
 
 	duties := make([]*ethpbv1.ProposerDuty, 0)
-	for index, slots := range proposals {
+	for index, sls := range proposals {
 		val, err := s.ValidatorAtIndexReadOnly(index)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "Could not get validator: %v", err)
 		}
 		pubkey48 := val.PublicKey()
 		pubkey := pubkey48[:]
-		for _, s := range slots {
+		for _, s := range sls {
 			duties = append(duties, &ethpbv1.ProposerDuty{
 				Pubkey:         pubkey,
 				ValidatorIndex: index,

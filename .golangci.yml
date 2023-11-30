@@ -15,13 +15,16 @@ run:
 linters:
   disable-all: true
   enable:
-    - gosimple
-    - goimports
-    - gocognit
-    - misspell
-    - errcheck
     - gofmt
+    - goimports
     - unused
+    - errcheck
+    - gosimple
+    - gocognit
+    - dupword
+    - nilerr
+    - whitespace
+    - misspell
 
 linters-settings:
   golint:

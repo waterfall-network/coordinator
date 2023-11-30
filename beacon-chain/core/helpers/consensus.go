@@ -41,7 +41,6 @@ func ConsensusUpdateStateSpineFinalization(beaconState state.BeaconState, preJus
 }
 
 // CalculateCandidates candidates sequence from optimistic spines for publication in block.
-// nolint: typecheck
 func CalculateCandidates(parentState state.BeaconState, optSpines []gwatCommon.HashArray) gwatCommon.HashArray {
 	//find terminal spine
 	var terminalSpine gwatCommon.Hash
@@ -55,10 +54,10 @@ func CalculateCandidates(parentState state.BeaconState, optSpines []gwatCommon.H
 	}
 	//calc candidates
 	candidates := make(gwatCommon.HashArray, 0, len(optSpines))
-	for i, spineList := range optSpines {
+	for _, spineList := range optSpines {
 		// reset candidates if reach terminal finalized spine
 		if spineList.Has(terminalSpine) {
-			candidates = make(gwatCommon.HashArray, 0, len(optSpines)-i)
+			candidates = make(gwatCommon.HashArray, 0, len(optSpines))
 			continue
 		}
 		if len(spineList) > 0 {
