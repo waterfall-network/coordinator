@@ -284,7 +284,6 @@ func (s *Store) SaveStates(ctx context.Context, states []state.ReadOnlyBeaconSta
 }
 
 // SaveStatesEfficient stores multiple states to the db (new schema) using the provided corresponding roots.
-// nolint
 func (s *Store) SaveStatesEfficient(ctx context.Context, states []state.ReadOnlyBeaconState, blockRoots [][32]byte) error {
 	ctx, span := trace.StartSpan(ctx, "BeaconDB.SaveStatesEfficient")
 	defer span.End()
@@ -297,18 +296,22 @@ func (s *Store) SaveStatesEfficient(ctx context.Context, states []state.ReadOnly
 		//store the spines data and replace it by keys
 		keySpines, err := s.WriteSpines(ctx, states[i].SpineData().Spines)
 		if err != nil {
+			log.WithField("key", fmt.Sprintf("%#x", keySpines)).Error("DB: save spines failed (keySpines)")
 			return err
 		}
 		keyPrefix, err := s.WriteSpines(ctx, states[i].SpineData().Prefix)
 		if err != nil {
+			log.WithField("key", fmt.Sprintf("%#x", keyPrefix)).Error("DB: save spines failed (keyPrefix)")
 			return err
 		}
 		keyFinalization, err := s.WriteSpines(ctx, states[i].SpineData().Finalization)
 		if err != nil {
+			log.WithField("key", fmt.Sprintf("%#x", keyFinalization)).Error("DB: save spines failed (keyFinalization)")
 			return err
 		}
 		keyCpFinalized, err := s.WriteSpines(ctx, states[i].SpineData().CpFinalized)
 		if err != nil {
+			log.WithField("key", fmt.Sprintf("%#x", keyCpFinalized)).Error("DB: save spines failed (keyCpFinalized)")
 			return err
 		}
 
@@ -359,6 +362,12 @@ func (s *Store) SaveStatesEfficient(ctx context.Context, states []state.ReadOnly
 	if err := s.db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(stateBucket)
 		valIdxBkt := tx.Bucket(blockRootValidatorHashesBucket)
+
+		var (
+			_ = bucket
+			_ = valIdxBkt
+		)
+
 		for i, rt := range blockRoots {
 			indicesByBucket := createStateIndicesFromStateSlot(ctx, states[i].Slot())
 			if err := updateValueForIndices(ctx, indicesByBucket, rt[:], tx); err != nil {

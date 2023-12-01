@@ -67,7 +67,7 @@ func NewService(ctx context.Context, cfg *Config) *Service {
 		genesisChan:  make(chan time.Time),
 	}
 
-	s.cfg.Chain.SetIsSyncFn(s.Syncing) // nolint
+	s.cfg.Chain.SetIsSyncFn(s.Syncing) //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
 
 	go s.waitForStateInitialization()
 	return s
@@ -100,7 +100,7 @@ func (s *Service) Start() {
 	s.chainStarted.Set()
 	log.Info("Starting initial chain sync...")
 	// Are we already in sync, or close to it?
-	if slots.ToEpoch(s.cfg.Chain.HeadSlot()) == slots.ToEpoch(currentSlot) { // nolint
+	if slots.ToEpoch(s.cfg.Chain.HeadSlot()) == slots.ToEpoch(currentSlot) { //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
 		log.Info("Already synced to the current chain head")
 		s.markSynced(genesis)
 		return
@@ -112,7 +112,7 @@ func (s *Service) Start() {
 		}
 		panic(err)
 	}
-	log.Infof("Synced up to slot %d", s.cfg.Chain.HeadSlot()) // nolint
+	log.Infof("Synced up to slot %d", s.cfg.Chain.HeadSlot()) //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
 	s.markSynced(genesis)
 }
 
@@ -148,7 +148,7 @@ func (s *Service) Synced() bool {
 // Resync allows a node to start syncing again if it has fallen
 // behind the current network head.
 func (s *Service) Resync() error {
-	headState, err := s.cfg.Chain.HeadState(s.ctx) // nolint
+	headState, err := s.cfg.Chain.HeadState(s.ctx) //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
 	if err != nil || headState == nil || headState.IsNil() {
 		return errors.Errorf("could not retrieve head state: %v", err)
 	}
@@ -162,7 +162,7 @@ func (s *Service) Resync() error {
 	if err = s.roundRobinSync(genesis); err != nil {
 		log = log.WithError(err)
 	}
-	log.WithField("slot", s.cfg.Chain.HeadSlot()).Info("Resync attempt complete") // nolint
+	log.WithField("slot", s.cfg.Chain.HeadSlot()).Info("Resync attempt complete") //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
 	return nil
 }
 
@@ -172,7 +172,7 @@ func (s *Service) waitForMinimumPeers() {
 		required = flags.Get().MinimumSyncPeers
 	}
 	for {
-		_, peers := s.cfg.P2P.Peers().BestNonFinalized(flags.Get().MinimumSyncPeers, s.cfg.Chain.FinalizedCheckpt().Epoch) // nolint
+		_, peers := s.cfg.P2P.Peers().BestNonFinalized(flags.Get().MinimumSyncPeers, s.cfg.Chain.FinalizedCheckpt().Epoch) //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
 		if len(peers) >= required {
 			break
 		}
