@@ -207,20 +207,24 @@ func (s *Store) SaveStates(ctx context.Context, states []state.ReadOnlyBeaconSta
 	multipleEncs := make([][]byte, len(states))
 	for i, st := range states {
 		//store the spines data and replace it by keys
-		keySpines, err := s.WriteSpines(ctx, states[i].SpineData().Spines) //nolint: typecheck // Known issue, will be replaced when possible
+		keySpines, err := s.WriteSpines(ctx, states[i].SpineData().Spines)
 		if err != nil {
+			log.WithField("key", fmt.Sprintf("%#x", keySpines)).Error("DB: save spines failed (keySpines)")
 			return err
 		}
-		keyPrefix, err := s.WriteSpines(ctx, states[i].SpineData().Prefix) //nolint: typecheck // Known issue, will be replaced when possible
+		keyPrefix, err := s.WriteSpines(ctx, states[i].SpineData().Prefix)
 		if err != nil {
+			log.WithField("key", fmt.Sprintf("%#x", keyPrefix)).Error("DB: save spines failed (keyPrefix)")
 			return err
 		}
-		keyFinalization, err := s.WriteSpines(ctx, states[i].SpineData().Finalization) //nolint: typecheck // Known issue, will be replaced when possible
+		keyFinalization, err := s.WriteSpines(ctx, states[i].SpineData().Finalization)
 		if err != nil {
+			log.WithField("key", fmt.Sprintf("%#x", keyFinalization)).Error("DB: save spines failed (keyFinalization)")
 			return err
 		}
-		keyCpFinalized, err := s.WriteSpines(ctx, states[i].SpineData().CpFinalized) //nolint: typecheck // Known issue, will be replaced when possible
+		keyCpFinalized, err := s.WriteSpines(ctx, states[i].SpineData().CpFinalized)
 		if err != nil {
+			log.WithField("key", fmt.Sprintf("%#x", keyCpFinalized)).Error("DB: save spines failed (keyCpFinalized)")
 			return err
 		}
 

@@ -532,6 +532,5 @@ func sizeAndCountGeneric(genericItems interface{}, err error) (uint64, uint64) {
 	default:
 		return 0, 0
 	}
-
 	return size, count
 }

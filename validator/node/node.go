@@ -51,7 +51,7 @@ import (
 	remote_web3signer "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager/remote-web3signer"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/rpc"
 	validatorMiddleware "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/rpc/apimiddleware"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/web"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/web" //nolint: typecheck
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 	"google.golang.org/protobuf/encoding/protojson"
