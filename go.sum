@@ -1473,6 +1473,8 @@ gitlab.waterfall.network/waterfall/protocol/gwat v0.8.4 h1:ZISFjsD2wYH4QYsWt8tSa
 gitlab.waterfall.network/waterfall/protocol/gwat v0.8.4/go.mod h1:1tJFZgVNvRHs+rvRThPUqojbw+Rh4ci+rxfOXwJPbzc=
 gitlab.waterfall.network/waterfall/protocol/gwat v0.8.5 h1:iNDgdddbllvoQizJUhfkHooBe3eHBszdYm+SGEaGXws=
 gitlab.waterfall.network/waterfall/protocol/gwat v0.8.5/go.mod h1:1tJFZgVNvRHs+rvRThPUqojbw+Rh4ci+rxfOXwJPbzc=
+gitlab.waterfall.network/waterfall/protocol/gwat v0.8.6 h1:KU4HyawshuMdIIwhvlCxe7lir3GvU4zkw60yj4+YmC8=
+gitlab.waterfall.network/waterfall/protocol/gwat v0.8.6/go.mod h1:9w2yNDuns0Mm9hmnyyE6wxpFBXoon9Pp8GdsSQLuTew=
 go.etcd.io/bbolt v1.3.2/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/bbolt v1.3.3/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/bbolt v1.3.5 h1:XAzx9gjCb0Rxj7EoqcClPD1d5ZBxZJk0jbuoPHenBt0=
