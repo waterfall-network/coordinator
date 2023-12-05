@@ -22,7 +22,7 @@ func (f *ForkChoice) CollectForkExcludedBlkRoots(leaf common.Hash) common.HashAr
 	panic("implement me")
 }
 
-func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines []common.HashArray) ([32]byte, error) {
+func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines []common.HashArray, jCpRoot [32]byte) ([32]byte, error) {
 	//TODO implement me
 	panic("implement me")
 }
