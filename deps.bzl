@@ -4467,8 +4467,8 @@ def prysm_deps():
         name = "org_golang_google_grpc",
         build_file_proto_mode = "disable",
         importpath = "google.golang.org/grpc",
-        sum = "h1:AGJ0Ih4mHjSeibYkFGh1dD9KJ/eOtZ93I6hoHhukQ5Q=",
-        version = "v1.40.0",
+        sum = "h1:8I4C0Yq1EjstUzUJzpcRVbuYA2mODtEmpWiQoN/b2nc=",
+        version = "v1.56.3",
     )
     go_repository(
         name = "org_golang_google_grpc_cmd_protoc_gen_go_grpc",

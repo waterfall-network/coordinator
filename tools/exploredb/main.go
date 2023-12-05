@@ -505,7 +505,6 @@ func sizeAndCountOfUin64List(list []uint64) (uint64, uint64) {
 	return size, count
 }
 
-// nolint: typecheck
 func sizeAndCountGeneric(genericItems interface{}, err error) (uint64, uint64) {
 	size := uint64(0)
 	count := uint64(0)
@@ -513,24 +512,32 @@ func sizeAndCountGeneric(genericItems interface{}, err error) (uint64, uint64) {
 		return size, count
 	}
 
-	switch items := genericItems.(type) {
-	case []*ethpb.Eth1Data:
+	if items, ok := genericItems.([]*ethpb.Eth1Data); ok {
 		for _, item := range items {
 			size += uint64(item.SizeSSZ())
 		}
 		count = uint64(len(items))
-	case []*ethpb.Validator:
-		for _, item := range items {
-			size += uint64(item.SizeSSZ())
-		}
-		count = uint64(len(items))
-	case []*ethpb.PendingAttestation:
-		for _, item := range items {
-			size += uint64(item.SizeSSZ())
-		}
-		count = uint64(len(items))
-	default:
-		return 0, 0
+
+		return size, count
 	}
+
+	if items, ok := genericItems.([]*ethpb.Validator); ok {
+		for _, item := range items {
+			size += uint64(item.SizeSSZ())
+		}
+		count = uint64(len(items))
+
+		return size, count
+	}
+
+	if items, ok := genericItems.([]*ethpb.PendingAttestation); ok {
+		for _, item := range items {
+			size += uint64(item.SizeSSZ())
+		}
+		count = uint64(len(items))
+
+		return size, count
+	}
+
 	return size, count
 }

@@ -8,7 +8,7 @@ import (
 
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil" //nolint: typecheck // Known issue, will be replaced when possible
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	pbrpc "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -20,6 +20,10 @@ func (ds *Server) GetBeaconState(
 	ctx context.Context,
 	req *pbrpc.BeaconStateRequest,
 ) (*pbrpc.SSZResponse, error) {
+	var _ = func(x []byte) [32]byte {
+		return bytesutil.ToBytes32(x)
+	}
+
 	switch q := req.QueryFilter.(type) {
 	case *pbrpc.BeaconStateRequest_Slot:
 		currentSlot := ds.GenesisTimeFetcher.CurrentSlot()

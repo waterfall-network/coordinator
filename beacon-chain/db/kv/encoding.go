@@ -50,28 +50,42 @@ func encode(ctx context.Context, msg proto.Message) ([]byte, error) {
 }
 
 // isSSZStorageFormat returns true if the object type should be saved in SSZ encoded format.
-// nolint: typecheck
 func isSSZStorageFormat(obj interface{}) bool {
-	switch obj.(type) {
-	case *ethpb.BeaconState:
+	if _, ok := obj.(*ethpb.BeaconState); ok {
 		return true
-	case *ethpb.SignedBeaconBlock:
-		return true
-	case *ethpb.SignedAggregateAttestationAndProof:
-		return true
-	case *ethpb.BeaconBlock:
-		return true
-	case *ethpb.Attestation:
-		return true
-	case *ethpb.Deposit:
-		return true
-	case *ethpb.AttesterSlashing:
-		return true
-	case *ethpb.ProposerSlashing:
-		return true
-	case *ethpb.VoluntaryExit:
-		return true
-	default:
-		return false
 	}
+
+	if _, ok := obj.(*ethpb.SignedBeaconBlock); ok {
+		return true
+	}
+
+	if _, ok := obj.(*ethpb.SignedAggregateAttestationAndProof); ok {
+		return true
+	}
+
+	if _, ok := obj.(*ethpb.BeaconBlock); ok {
+		return true
+	}
+
+	if _, ok := obj.(*ethpb.Attestation); ok {
+		return true
+	}
+
+	if _, ok := obj.(*ethpb.Deposit); ok {
+		return true
+	}
+
+	if _, ok := obj.(*ethpb.AttesterSlashing); ok {
+		return true
+	}
+
+	if _, ok := obj.(*ethpb.ProposerSlashing); ok {
+		return true
+	}
+
+	if _, ok := obj.(*ethpb.VoluntaryExit); ok {
+		return true
+	}
+
+	return false
 }

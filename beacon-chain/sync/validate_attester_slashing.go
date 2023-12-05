@@ -28,7 +28,7 @@ func (s *Service) validateAttesterSlashing(ctx context.Context, pid peer.ID, msg
 
 	// We should not attempt to process this message if the node is running in optimistic mode.
 	// We just ignore in p2p so that the peer is not penalized.
-	optimistic, err := s.cfg.chain.IsOptimistic(ctx) // nolint
+	optimistic, err := s.cfg.chain.IsOptimistic(ctx) //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
 	if err != nil {
 		return pubsub.ValidationReject, err
 	}
