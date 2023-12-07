@@ -10,7 +10,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
-	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/engine/v1"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
@@ -37,21 +36,12 @@ func TestSlotFromBlock(t *testing.T) {
 	sfba, err := slotFromBlock(bab)
 	require.NoError(t, err)
 	require.Equal(t, slot, sfba)
-
-	bm := testBlockBellatrix()
-	bm.Block.Slot = slot
-	bmb, err := ba.MarshalSSZ()
-	require.NoError(t, err)
-	sfbm, err := slotFromBlock(bmb)
-	require.NoError(t, err)
-	require.Equal(t, slot, sfbm)
 }
 
 func TestByState(t *testing.T) {
 	bc, cleanup := hackBellatrixMaxuint()
 	defer cleanup()
 	altairSlot, err := slots.EpochStart(bc.AltairForkEpoch)
-	bellaSlot, err := slots.EpochStart(bc.BellatrixForkEpoch)
 	require.NoError(t, err)
 	cases := []struct {
 		name        string
@@ -70,12 +60,6 @@ func TestByState(t *testing.T) {
 			version:     version.Altair,
 			slot:        altairSlot,
 			forkversion: bytesutil.ToBytes4(bc.AltairForkVersion),
-		},
-		{
-			name:        "bellatrix",
-			version:     version.Bellatrix,
-			slot:        bellaSlot,
-			forkversion: bytesutil.ToBytes4(bc.BellatrixForkVersion),
 		},
 	}
 	for _, c := range cases {
@@ -103,8 +87,6 @@ func stateForVersion(v int) (state.BeaconState, error) {
 		return util.NewBeaconState()
 	case version.Altair:
 		return util.NewBeaconStateAltair()
-	case version.Bellatrix:
-		return util.NewBeaconStateBellatrix()
 	default:
 		return nil, fmt.Errorf("unrecognoized version %d", v)
 	}
@@ -115,7 +97,6 @@ func TestUnmarshalState(t *testing.T) {
 	bc, cleanup := hackBellatrixMaxuint()
 	defer cleanup()
 	altairSlot, err := slots.EpochStart(bc.AltairForkEpoch)
-	bellaSlot, err := slots.EpochStart(bc.BellatrixForkEpoch)
 	require.NoError(t, err)
 	cases := []struct {
 		name        string
@@ -134,12 +115,6 @@ func TestUnmarshalState(t *testing.T) {
 			version:     version.Altair,
 			slot:        altairSlot,
 			forkversion: bytesutil.ToBytes4(bc.AltairForkVersion),
-		},
-		{
-			name:        "bellatrix",
-			version:     version.Bellatrix,
-			slot:        bellaSlot,
-			forkversion: bytesutil.ToBytes4(bc.BellatrixForkVersion),
 		},
 	}
 	for _, c := range cases {
@@ -193,7 +168,6 @@ func TestUnmarshalBlock(t *testing.T) {
 	require.Equal(t, types.Epoch(math.MaxUint32), params.KnownConfigs[params.Mainnet]().BellatrixForkEpoch)
 	genv := bytesutil.ToBytes4(bc.GenesisForkVersion)
 	altairv := bytesutil.ToBytes4(bc.AltairForkVersion)
-	bellav := bytesutil.ToBytes4(bc.BellatrixForkVersion)
 	altairS, err := slots.EpochStart(bc.AltairForkEpoch)
 	bellaS, err := slots.EpochStart(bc.BellatrixForkEpoch)
 	require.NoError(t, err)
@@ -226,19 +200,6 @@ func TestUnmarshalBlock(t *testing.T) {
 			b:       signedTestBlockAltair,
 			version: altairv,
 			slot:    bellaS - 1,
-		},
-		{
-			name:    "first slot of bellatrix",
-			b:       signedTestBlockBellatrix,
-			version: bellav,
-			slot:    bellaS,
-		},
-		{
-			name:    "bellatrix block in altair slot",
-			b:       signedTestBlockBellatrix,
-			version: bellav,
-			slot:    bellaS - 1,
-			err:     errBlockForkMismatch,
 		},
 		{
 			name:    "genesis block in altair slot",
@@ -302,6 +263,7 @@ func testBlockGenesis() *ethpb.SignedBeaconBlock {
 					DepositRoot:  make([]byte, 32),
 					DepositCount: 0,
 					Candidates:   make([]byte, 0),
+					BlockHash:    make([]byte, 32),
 				},
 			},
 		},
@@ -329,6 +291,7 @@ func testBlockAltair() *ethpb.SignedBeaconBlockAltair {
 					DepositRoot:  make([]byte, 32),
 					DepositCount: 0,
 					Candidates:   make([]byte, 0),
+					BlockHash:    make([]byte, 32),
 				},
 				Graffiti:          make([]byte, 32),
 				ProposerSlashings: []*ethpb.ProposerSlashing{},
@@ -341,59 +304,6 @@ func testBlockAltair() *ethpb.SignedBeaconBlockAltair {
 					SyncCommitteeSignature: make([]byte, 96),
 				},
 				Withdrawals: make([]*ethpb.Withdrawal, 0),
-			},
-		},
-		Signature: make([]byte, 96),
-	}
-}
-
-func signedTestBlockBellatrix(t *testing.T, slot types.Slot) block.SignedBeaconBlock {
-	b := testBlockBellatrix()
-	b.Block.Slot = slot
-	s, err := wrapper.WrappedSignedBeaconBlock(b)
-	require.NoError(t, err)
-	return s
-}
-
-func testBlockBellatrix() *ethpb.SignedBeaconBlockBellatrix {
-	return &ethpb.SignedBeaconBlockBellatrix{
-		Block: &ethpb.BeaconBlockBellatrix{
-			ProposerIndex: types.ValidatorIndex(0),
-			ParentRoot:    make([]byte, 32),
-			StateRoot:     make([]byte, 32),
-			Body: &ethpb.BeaconBlockBodyBellatrix{
-				RandaoReveal: make([]byte, 96),
-				Eth1Data: &ethpb.Eth1Data{
-					DepositRoot:  make([]byte, 32),
-					DepositCount: 0,
-					Candidates:   make([]byte, 0),
-				},
-				Graffiti:          make([]byte, 32),
-				ProposerSlashings: []*ethpb.ProposerSlashing{},
-				AttesterSlashings: []*ethpb.AttesterSlashing{},
-				Attestations:      []*ethpb.Attestation{},
-				Deposits:          []*ethpb.Deposit{},
-				VoluntaryExits:    []*ethpb.VoluntaryExit{},
-				SyncAggregate: &ethpb.SyncAggregate{
-					SyncCommitteeBits:      make([]byte, 64),
-					SyncCommitteeSignature: make([]byte, 96),
-				},
-				ExecutionPayload: &v1.ExecutionPayload{
-					ParentHash:    make([]byte, 32),
-					FeeRecipient:  make([]byte, 20),
-					StateRoot:     make([]byte, 32),
-					ReceiptsRoot:  make([]byte, 32),
-					LogsBloom:     make([]byte, 256),
-					BlockNumber:   0,
-					GasLimit:      0,
-					GasUsed:       0,
-					Timestamp:     0,
-					ExtraData:     make([]byte, 32),
-					BaseFeePerGas: make([]byte, 32),
-					BlockHash:     make([]byte, 32),
-					Transactions:  make([][]byte, 0),
-					PrevRandao:    make([]byte, 32),
-				},
 			},
 		},
 		Signature: make([]byte, 96),

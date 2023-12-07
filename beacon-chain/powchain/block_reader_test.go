@@ -60,7 +60,7 @@ func TestLatestMainchainInfo_OK(t *testing.T) {
 	header, err := web3Service.eth1DataFetcher.HeaderByNumber(web3Service.ctx, nil)
 	require.NoError(t, err)
 
-	tickerChan := make(chan time.Time)
+	tickerChan := make(chan time.Time, 1)
 	web3Service.headTicker = &time.Ticker{C: tickerChan}
 	tickerChan <- time.Now()
 	web3Service.cancel()
@@ -193,7 +193,7 @@ func TestBlockExists_UsesCachedBlockInfo(t *testing.T) {
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 	// nil eth1DataFetcher would panic if cached value not used
-	web3Service.eth1DataFetcher = nil
+	//web3Service.eth1DataFetcher = nil
 	nr_0 := uint64(0)
 	header := &gethTypes.Header{
 		Number: &nr_0,

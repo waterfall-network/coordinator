@@ -2,6 +2,7 @@ package util
 
 import (
 	"context"
+	"crypto/rand"
 	"sync"
 	"testing"
 
@@ -58,7 +59,8 @@ func DeterministicDepositsAndKeys(numDeposits uint64) ([]*ethpb.Deposit, []bls.S
 		// Create the new deposits and add them to the trie.
 		for i := uint64(0); i < numRequired; i++ {
 			balance := params.BeaconConfig().MaxEffectiveBalance
-			deposit, err := signedDeposit(secretKeys[i], publicKeys[i].Marshal(), publicKeys[i+1].Marshal(), balance)
+			initTxHash := RandomData(32)
+			deposit, err := signedDeposit(secretKeys[i], publicKeys[i].Marshal(), publicKeys[i+1].Marshal(), balance, initTxHash)
 			if err != nil {
 				return nil, nil, errors.Wrap(err, "could not create signed deposit")
 			}
@@ -130,7 +132,8 @@ func DepositsWithBalance(balances []uint64) ([]*ethpb.Deposit, *trie.SparseMerkl
 		if len(balances) == int(numDeposits) {
 			balance = balances[i]
 		}
-		deposit, err := signedDeposit(secretKeys[i], publicKeys[i].Marshal(), publicKeys[i+1].Marshal(), balance)
+		initTxHash := RandomData(32)
+		deposit, err := signedDeposit(secretKeys[i], publicKeys[i].Marshal(), publicKeys[i+1].Marshal(), balance, initTxHash)
 		if err != nil {
 			return nil, nil, errors.Wrap(err, "could not create signed deposit")
 		}
@@ -167,6 +170,7 @@ func signedDeposit(
 	publicKey,
 	withdrawalKey []byte,
 	balance uint64,
+	initTxHash []byte,
 ) (*ethpb.Deposit, error) {
 	withdrawalCreds := gwatCommon.BytesToAddress(withdrawalKey)
 	creatorAddr := gwatCommon.BytesToAddress(withdrawalKey)
@@ -195,6 +199,7 @@ func signedDeposit(
 		CreatorAddress:        creatorAddr[:],
 		WithdrawalCredentials: withdrawalCreds[:],
 		Signature:             secretKey.Sign(sigRoot[:]).Marshal(),
+		InitTxHash:            initTxHash,
 	}
 
 	deposit := &ethpb.Deposit{
@@ -407,4 +412,14 @@ func publicKeysFromSecrets(secretKeys []bls.SecretKey) []bls.PublicKey {
 		publicKeys[i] = secretKey.PublicKey()
 	}
 	return publicKeys
+}
+
+func RandomData(n int) []byte {
+	b := make([]byte, n)
+	_, err := rand.Read(b)
+	if err != nil {
+		return []byte{}
+	}
+
+	return b
 }

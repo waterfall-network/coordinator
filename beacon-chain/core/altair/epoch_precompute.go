@@ -11,7 +11,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/math"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
 	"go.opencensus.io/trace"
 )
 
@@ -321,15 +320,8 @@ func AttestationsDelta(beaconState state.BeaconState, bal *precompute.Balance, v
 		activeValidatorsForSlot = cfg.MaxCommitteesPerSlot * cfg.TargetCommitteeSize
 	}
 
-	// Modified in Altair and Bellatrix.
-	var inactivityDenominator uint64
 	bias := cfg.InactivityScoreBias
-	switch beaconState.Version() {
-	case version.Altair:
-		inactivityDenominator = bias * cfg.InactivityPenaltyQuotientAltair
-	default:
-		return nil, nil, errors.Errorf("invalid state type version: %T", beaconState.Version())
-	}
+	inactivityDenominator := bias * cfg.InactivityPenaltyQuotientAltair
 
 	for i, v := range vals {
 		rewards[i], penalties[i], err = attestationDelta(bal, v, inactivityDenominator, leak, numOfVals, activeValidatorsForSlot)

@@ -63,7 +63,7 @@ func TestSigningRoot_ComputeDomainAndSign(t *testing.T) {
 				return beaconState, privKeys
 			},
 			genBlock: func(t *testing.T, st state.BeaconState, keys []bls.SecretKey) *ethpb.SignedBeaconBlock {
-				block, err := util.GenerateFullBlock(st, keys, nil, 1)
+				block, err := util.GenerateFullBlock(st, keys, &util.BlockGenConfig{NumDeposits: 64}, 1)
 				require.NoError(t, err)
 				return block
 			},

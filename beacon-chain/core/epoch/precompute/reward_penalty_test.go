@@ -51,11 +51,11 @@ func TestProcessRewardsAndPenaltiesPrecompute(t *testing.T) {
 	require.Equal(t, true, processedState.Version() == version.Phase0)
 
 	// Indices that voted everything except for head, lost a bit money
-	wanted := uint64(31999810265)
+	wanted := uint64(3199998102635)
 	assert.Equal(t, wanted, beaconState.Balances()[4], "Unexpected balance")
 
 	// Indices that did not vote, lost more money
-	wanted = uint64(31999873505)
+	wanted = uint64(3199998735083)
 	assert.Equal(t, wanted, beaconState.Balances()[0], "Unexpected balance")
 }
 

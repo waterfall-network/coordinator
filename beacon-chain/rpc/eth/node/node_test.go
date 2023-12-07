@@ -10,9 +10,9 @@ import (
 	"testing"
 
 	grpcruntime "github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	libp2ptest "github.com/libp2p/go-libp2p-peerstore/test"
 	"github.com/libp2p/go-libp2p/core/network"
 	"github.com/libp2p/go-libp2p/core/peer"
+	libp2ptest "github.com/libp2p/go-libp2p/p2p/host/peerstore/test"
 	ma "github.com/multiformats/go-multiaddr"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/go-bitfield"

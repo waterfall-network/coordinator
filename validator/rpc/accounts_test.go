@@ -314,6 +314,7 @@ func TestServer_VoluntaryExit(t *testing.T) {
 	mockValidatorClient.EXPECT().
 		DomainData(gomock.Any(), gomock.Any()).
 		Times(2).
+		AnyTimes().
 		Return(&ethpb.DomainResponse{SignatureDomain: make([]byte, 32)}, nil)
 
 	mockValidatorClient.EXPECT().

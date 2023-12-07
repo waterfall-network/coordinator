@@ -1,19 +1,19 @@
 package trie_test
 
 import (
+	contracts "gitlab.waterfall.network/waterfall/protocol/coordinator/contracts/deposit/mock"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/abi/bind"
 	"strconv"
 	"testing"
 
 	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/container/trie"
-	contracts "gitlab.waterfall.network/waterfall/protocol/coordinator/contracts/deposit/mock"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
-	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/abi/bind"
 )
 
 func TestMarshalDepositWithProof(t *testing.T) {
@@ -42,6 +42,7 @@ func TestMarshalDepositWithProof(t *testing.T) {
 			WithdrawalCredentials: someRoot[:],
 			Amount:                32,
 			Signature:             someSig[:],
+			InitTxHash:            make([]byte, 32),
 		},
 	}
 	enc, err := dep.MarshalSSZ()

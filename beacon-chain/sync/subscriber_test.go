@@ -288,9 +288,9 @@ func TestRevalidateSubscription_CorrectlyFormatsTopic(t *testing.T) {
 	subscr_2, err := r.cfg.p2p.SubscribeToTopic(fullTopic)
 	require.NoError(t, err)
 
-	subscriptions := map[uint64][]*pubsub.Subscription{
-		1: {subscr_1},
-		2: {subscr_2},
+	subscriptions := map[uint64]*pubsub.Subscription{
+		1: subscr_1,
+		2: subscr_2,
 	}
 	r.reValidateSubscriptions(subscriptions, []uint64{2}, defaultTopic, digest)
 	require.LogsDoNotContain(t, hook, "Could not unregister topic validator")

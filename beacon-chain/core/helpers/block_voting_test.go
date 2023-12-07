@@ -330,8 +330,8 @@ func TestBlockVotingArrSort(t *testing.T) {
 		bv_2,
 	}
 	testWant := []*ethpb.BlockVoting{
-		bv_2,
 		bv_1,
+		bv_2,
 		bv_0,
 	}
 

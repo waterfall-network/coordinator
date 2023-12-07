@@ -234,7 +234,8 @@ func TestProcessAttestations_OK(t *testing.T) {
 	require.NoError(t, err)
 	wsb, err := wrapper.WrappedSignedBeaconBlock(block)
 	require.NoError(t, err)
-	_, err = altair.ProcessAttestationsNoVerifySignature(context.Background(), beaconState, wsb)
+	ctx := context.WithValue(context.Background(), params.BeaconConfig().CtxBlockFetcherKey, nil)
+	_, err = altair.ProcessAttestationsNoVerifySignature(ctx, beaconState, wsb)
 	require.NoError(t, err)
 }
 

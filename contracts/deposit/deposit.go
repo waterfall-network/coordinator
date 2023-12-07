@@ -56,6 +56,7 @@ func DepositInput(depositKey, withdrawalKey bls.SecretKey, amountInGwei uint64) 
 		WithdrawalCredentials: depositMessage.WithdrawalCredentials,
 		Amount:                depositMessage.Amount,
 		Signature:             depositKey.Sign(root[:]).Marshal(),
+		InitTxHash:            make([]byte, 32),
 	}
 
 	dr, err := di.HashTreeRoot()

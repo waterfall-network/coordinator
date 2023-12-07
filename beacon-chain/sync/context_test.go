@@ -2,6 +2,7 @@ package sync
 
 import (
 	"context"
+	"github.com/libp2p/go-libp2p/core/protocol"
 	"sync"
 	"testing"
 	"time"
@@ -71,6 +72,14 @@ func TestContextRead_NoReads(t *testing.T) {
 	}
 }
 
+type fakeStream struct {
+	protocol protocol.ID
+}
+
+func (fs *fakeStream) Protocol() protocol.ID {
+	return fs.protocol
+}
+
 func TestValidateVersion(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -103,8 +112,8 @@ func TestValidateVersion(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			stream := new(network.Stream)
-			err := validateVersion(tt.version, *stream)
+			stream := &fakeStream{protocol: protocol.ID(tt.protocol)}
+			err := validateVersion(tt.version, stream)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("validateVersion() error = %v, wantErr %v", err, tt.wantErr)
 			}
