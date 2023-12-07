@@ -73,10 +73,10 @@ func (f *blocksFetcher) waitForMinimumPeers(ctx context.Context) ([]peer.ID, err
 		}
 		var peers []peer.ID
 		if f.mode == modeStopOnFinalizedEpoch {
-			headEpoch := f.chain.FinalizedCheckpt().Epoch //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
+			headEpoch := f.chain.FinalizedCheckpt().Epoch
 			_, peers = f.p2p.Peers().BestFinalized(params.BeaconConfig().MaxPeersToSync, headEpoch)
 		} else {
-			headEpoch := slots.ToEpoch(f.chain.HeadSlot()) //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
+			headEpoch := slots.ToEpoch(f.chain.HeadSlot())
 			_, peers = f.p2p.Peers().BestNonFinalized(flags.Get().MinimumSyncPeers, headEpoch)
 		}
 		if len(peers) >= required {

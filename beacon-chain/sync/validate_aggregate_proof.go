@@ -43,7 +43,7 @@ func (s *Service) validateAggregateAndProof(ctx context.Context, pid peer.ID, ms
 
 	// We should not attempt to process this message if the node is running in optimistic mode.
 	// We just ignore in p2p so that the peer is not penalized.
-	optimistic, err := s.cfg.chain.IsOptimistic(ctx) //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
+	optimistic, err := s.cfg.chain.IsOptimistic(ctx)
 	if err != nil {
 		return pubsub.ValidationReject, err
 	}
@@ -86,7 +86,7 @@ func (s *Service) validateAggregateAndProof(ctx context.Context, pid peer.ID, ms
 
 	// Attestation's slot is within ATTESTATION_PROPAGATION_SLOT_RANGE and early attestation
 	// processing tolerance.
-	if err := helpers.ValidateAttestationTime(m.Message.Aggregate.Data.Slot, s.cfg.chain.GenesisTime(), // nolint
+	if err := helpers.ValidateAttestationTime(m.Message.Aggregate.Data.Slot, s.cfg.chain.GenesisTime(),
 		earlyAttestationProcessingTolerance); err != nil {
 		tracing.AnnotateError(span, err)
 		return pubsub.ValidationIgnore, err
@@ -136,18 +136,18 @@ func (s *Service) validateAggregatedAtt(ctx context.Context, signed *ethpb.Signe
 	// This verification is not in the spec, however we guard against it as it opens us up
 	// to weird edge cases during verification. The attestation technically could be used to add value to a block,
 	// but it's invalid in the spirit of the protocol. Here we choose safety over profit.
-	if err := s.cfg.chain.VerifyLmdFfgConsistency(ctx, signed.Message.Aggregate); err != nil { // nolint
+	if err := s.cfg.chain.VerifyLmdFfgConsistency(ctx, signed.Message.Aggregate); err != nil {
 		tracing.AnnotateError(span, err)
 		return pubsub.ValidationReject, err
 	}
 
 	// Verify current finalized checkpoint is an ancestor of the block defined by the attestation's beacon block root.
-	if err := s.cfg.chain.VerifyFinalizedConsistency(ctx, signed.Message.Aggregate.Data.BeaconBlockRoot); err != nil { // nolint
+	if err := s.cfg.chain.VerifyFinalizedConsistency(ctx, signed.Message.Aggregate.Data.BeaconBlockRoot); err != nil {
 		tracing.AnnotateError(span, err)
 		return pubsub.ValidationIgnore, err
 	}
 
-	bs, err := s.cfg.chain.AttestationTargetState(ctx, signed.Message.Aggregate.Data.Target) // nolint
+	bs, err := s.cfg.chain.AttestationTargetState(ctx, signed.Message.Aggregate.Data.Target)
 	if err != nil {
 		tracing.AnnotateError(span, err)
 		return pubsub.ValidationIgnore, err

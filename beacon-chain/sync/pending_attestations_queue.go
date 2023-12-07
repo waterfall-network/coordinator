@@ -45,7 +45,7 @@ func (s *Service) processPendingAtts(ctx context.Context) error {
 	// Before a node processes pending attestations queue, it verifies
 	// the attestations in the queue are still valid. Attestations will
 	// be deleted from the queue if invalid (ie. getting staled from falling too many slots behind).
-	s.validatePendingAtts(ctx, s.cfg.chain.CurrentSlot()) //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
+	s.validatePendingAtts(ctx, s.cfg.chain.CurrentSlot())
 
 	s.pendingAttsLock.RLock()
 	roots := make([][32]byte, 0, len(s.blkRootToPendingAtts))
@@ -90,15 +90,15 @@ func (s *Service) processPendingAtts(ctx context.Context) error {
 					// This is an important validation before retrieving attestation pre state to defend against
 					// attestation's target intentionally reference checkpoint that's long ago.
 					// Verify current finalized checkpoint is an ancestor of the block defined by the attestation's beacon block root.
-					if err := s.cfg.chain.VerifyFinalizedConsistency(ctx, att.Aggregate.Data.BeaconBlockRoot); err != nil { //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
+					if err := s.cfg.chain.VerifyFinalizedConsistency(ctx, att.Aggregate.Data.BeaconBlockRoot); err != nil {
 						log.WithError(err).Debug("Could not verify finalized consistency")
 						continue
 					}
-					if err := s.cfg.chain.VerifyLmdFfgConsistency(ctx, att.Aggregate); err != nil { //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
+					if err := s.cfg.chain.VerifyLmdFfgConsistency(ctx, att.Aggregate); err != nil {
 						log.WithError(err).Debug("Could not verify FFG consistency")
 						continue
 					}
-					preState, err := s.cfg.chain.AttestationTargetState(ctx, att.Aggregate.Data.Target) //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
+					preState, err := s.cfg.chain.AttestationTargetState(ctx, att.Aggregate.Data.Target)
 					if err != nil {
 						log.WithError(err).Debug("Could not retrieve attestation prestate")
 						continue
@@ -140,7 +140,7 @@ func (s *Service) processPendingAtts(ctx context.Context) error {
 		} else {
 			// Pending attestation's missing block has not arrived yet.
 			log.WithFields(logrus.Fields{
-				"currentSlot": s.cfg.chain.CurrentSlot(), //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
+				"currentSlot": s.cfg.chain.CurrentSlot(),
 				"attSlot":     attestations[0].Message.Aggregate.Data.Slot,
 				"attCount":    len(attestations),
 				"blockRoot":   hex.EncodeToString(bytesutil.Trunc(bRoot[:])),

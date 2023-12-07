@@ -20,6 +20,23 @@ var epochsSinceFinalitySaveHotStateDB = types.Epoch(100)
 
 var ErrBlockIsProcessing = errors.New("block is processing")
 
+type SyncBlockchainService interface {
+	BlockReceiver
+	HeadFetcher
+	FinalizationFetcher
+	ForkFetcher
+	AttestationReceiver
+	TimeFetcher
+	GenesisFetcher
+	CanonicalFetcher
+}
+
+type InitialSyncBlockchainService interface {
+	BlockReceiver
+	ChainInfoFetcher
+	SyncSrv
+}
+
 // BlockReceiver interface defines the methods of chain service receive and processing new blocks.
 type BlockReceiver interface {
 	ReceiveBlock(ctx context.Context, block block.SignedBeaconBlock, blockRoot [32]byte) error

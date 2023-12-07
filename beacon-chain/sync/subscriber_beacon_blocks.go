@@ -32,7 +32,7 @@ func (s *Service) beaconBlockSubscriber(ctx context.Context, msg proto.Message) 
 		return err
 	}
 
-	if err = s.cfg.chain.ReceiveBlock(ctx, signed, root); err != nil { //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
+	if err = s.cfg.chain.ReceiveBlock(ctx, signed, root); err != nil {
 		if errors.Is(err, blockchain.ErrBlockIsProcessing) ||
 			errors.Is(err, powchain.ErrHTTPTimeout) {
 			return err

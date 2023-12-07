@@ -362,11 +362,8 @@ func (s *Store) SaveStatesEfficient(ctx context.Context, states []state.ReadOnly
 	if err := s.db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(stateBucket)
 		valIdxBkt := tx.Bucket(blockRootValidatorHashesBucket)
-
-		var (
-			_ = bucket
-			_ = valIdxBkt
-		)
+		var _ = bucket
+		_ = valIdxBkt
 
 		for i, rt := range blockRoots {
 			indicesByBucket := createStateIndicesFromStateSlot(ctx, states[i].Slot())

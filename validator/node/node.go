@@ -51,7 +51,6 @@ import (
 	remote_web3signer "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager/remote-web3signer"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/rpc"
 	validatorMiddleware "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/rpc/apimiddleware"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/web" //nolint: typecheck
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -654,8 +653,9 @@ func (c *ValidatorClient) registerRPCGatewayService(cliCtx *cli.Context) error {
 			// Else, we handle with the Prysm API gateway without a middleware.
 			h(w, req)
 		} else {
+			log.Warn("TODO: op skipping: no web handler")
 			// Finally, we handle with the web server.
-			web.Handler(w, req)
+			//web.Handler(w, req)
 		}
 	}
 

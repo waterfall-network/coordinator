@@ -175,7 +175,7 @@ func (q *blocksQueue) loop() {
 	}
 
 	// Define initial state machines.
-	startSlot := q.chain.HeadSlot() //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
+	startSlot := q.chain.HeadSlot()
 	if startSlot > startBackSlots {
 		startSlot -= startBackSlots
 	}
@@ -188,7 +188,7 @@ func (q *blocksQueue) loop() {
 	defer ticker.Stop()
 	for {
 		// Check highest expected slot when we approach chain's head slot.
-		if q.chain.HeadSlot() >= q.highestExpectedSlot { //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
+		if q.chain.HeadSlot() >= q.highestExpectedSlot {
 			// By the time initial sync is complete, highest slot may increase, re-check.
 			if q.mode == modeStopOnFinalizedEpoch {
 				if q.highestExpectedSlot < q.blocksFetcher.bestFinalizedSlot() {
@@ -207,7 +207,7 @@ func (q *blocksQueue) loop() {
 
 		log.WithFields(logrus.Fields{
 			"highestExpectedSlot": q.highestExpectedSlot,
-			"headSlot":            q.chain.HeadSlot(), //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
+			"headSlot":            q.chain.HeadSlot(),
 			"state":               q.smm.String(),
 			"staleEpoch":          q.staleEpochs,
 		}).Trace("tick")
@@ -238,7 +238,7 @@ func (q *blocksQueue) loop() {
 					}
 				}
 				// Do garbage collection, and advance sliding window forward.
-				if q.chain.HeadSlot() >= fsm.start.Add(blocksPerRequest-1) { //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
+				if q.chain.HeadSlot() >= fsm.start.Add(blocksPerRequest-1) {
 					highestStartSlot, err := q.smm.highestStartSlot()
 					if err != nil {
 						log.WithError(err).Debug("Cannot obtain highest epoch state number")
@@ -408,17 +408,17 @@ func (q *blocksQueue) onProcessSkippedEvent(ctx context.Context) eventHandlerFn 
 		// Check if we have enough peers to progress, or sync needs to halt (due to no peers available).
 		bestFinalizedSlot := q.blocksFetcher.bestFinalizedSlot()
 		if q.mode == modeStopOnFinalizedEpoch {
-			if bestFinalizedSlot <= q.chain.HeadSlot() { //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
+			if bestFinalizedSlot <= q.chain.HeadSlot() {
 				return stateSkipped, errNoRequiredPeers
 			}
 		} else {
-			if q.blocksFetcher.bestNonFinalizedSlot() <= q.chain.HeadSlot() { //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
+			if q.blocksFetcher.bestNonFinalizedSlot() <= q.chain.HeadSlot() {
 				return stateSkipped, errNoRequiredPeers
 			}
 		}
 
 		// All machines are skipped, FSMs need reset.
-		startSlot := q.chain.HeadSlot() + 1 //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
+		startSlot := q.chain.HeadSlot() + 1
 		if q.mode == modeNonConstrained && startSlot > bestFinalizedSlot {
 			q.staleEpochs[slots.ToEpoch(startSlot)]++
 			// If FSMs have been reset enough times, try to explore alternative forks.
