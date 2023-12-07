@@ -8,7 +8,6 @@ run:
     - proto/
     - contracts/
     - testing/
-    - validator/web
   timeout: 10m
   go: '1.20'
 
