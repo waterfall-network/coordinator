@@ -20,7 +20,7 @@ func (s *Service) voluntaryExitSubscriber(ctx context.Context, msg proto.Message
 	}
 	s.setExitIndexSeen(ve.ValidatorIndex)
 
-	headState, err := s.cfg.chain.HeadState(ctx) // nolint
+	headState, err := s.cfg.chain.HeadState(ctx) //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
 	if err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func (s *Service) attesterSlashingSubscriber(ctx context.Context, msg proto.Mess
 	aSlashing1IsNil := aSlashing == nil || aSlashing.Attestation_1 == nil || aSlashing.Attestation_1.AttestingIndices == nil
 	aSlashing2IsNil := aSlashing == nil || aSlashing.Attestation_2 == nil || aSlashing.Attestation_2.AttestingIndices == nil
 	if !aSlashing1IsNil && !aSlashing2IsNil {
-		headState, err := s.cfg.chain.HeadState(ctx) // nolint
+		headState, err := s.cfg.chain.HeadState(ctx) //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
 		if err != nil {
 			return err
 		}
@@ -79,7 +79,7 @@ func (s *Service) proposerSlashingSubscriber(ctx context.Context, msg proto.Mess
 	header1IsNil := pSlashing == nil || pSlashing.Header_1 == nil || pSlashing.Header_1.Header == nil
 	header2IsNil := pSlashing == nil || pSlashing.Header_2 == nil || pSlashing.Header_2.Header == nil
 	if !header1IsNil && !header2IsNil {
-		headState, err := s.cfg.chain.HeadState(ctx) // nolint
+		headState, err := s.cfg.chain.HeadState(ctx) //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
 		if err != nil {
 			return err
 		}

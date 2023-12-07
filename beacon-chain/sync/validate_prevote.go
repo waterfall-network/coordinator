@@ -39,7 +39,7 @@ func (s *Service) validateCommitteeIndexPrevote(ctx context.Context, pid peer.ID
 
 	// We should not attempt to process this message if the node is running in optimistic mode.
 	// We just ignore in p2p so that the peer is not penalized.
-	optimistic, err := s.cfg.chain.IsOptimistic(ctx) // nolint
+	optimistic, err := s.cfg.chain.IsOptimistic(ctx) //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
 	if err != nil {
 		return pubsub.ValidationReject, err
 	}
@@ -79,7 +79,7 @@ func (s *Service) validateCommitteeIndexPrevote(ctx context.Context, pid peer.ID
 		return pubsub.ValidationIgnore, nil
 	}
 
-	bState, err := s.cfg.chain.HeadState(ctx) // nolint
+	bState, err := s.cfg.chain.HeadState(ctx) //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
 	if err != nil {
 		tracing.AnnotateError(span, err)
 		return pubsub.ValidationIgnore, err

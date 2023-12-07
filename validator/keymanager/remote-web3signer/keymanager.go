@@ -92,7 +92,7 @@ func (km *Keymanager) FetchValidatingPublicKeys(ctx context.Context) ([][fieldpa
 
 // Sign signs the message by using a remote web3signer server.
 func (km *Keymanager) Sign(ctx context.Context, request *validatorpb.SignRequest) (bls.Signature, error) {
-	signRequest, err := getSignRequestJson(ctx, km.validator, request, km.genesisValidatorsRoot)
+	signRequest, err := getSignRequestJSON(ctx, km.validator, request, km.genesisValidatorsRoot)
 	if err != nil {
 		erroredResponsesTotal.Inc()
 		return nil, err
@@ -103,8 +103,12 @@ func (km *Keymanager) Sign(ctx context.Context, request *validatorpb.SignRequest
 	return km.client.Sign(ctx, hexutil.Encode(request.PublicKey), signRequest)
 }
 
-// getSignRequestJson returns a json request based on the SignRequest type.
-func getSignRequestJson(ctx context.Context, validator *validator.Validate, request *validatorpb.SignRequest, genesisValidatorsRoot []byte) (internal.SignRequestJSON, error) {
+// getSignRequestJSON returns a json request based on the SignRequest type.
+func getSignRequestJSON(ctx context.Context, validator *validator.Validate, request *validatorpb.SignRequest, genesisValidatorsRoot []byte) (internal.SignRequestJSON, error) {
+	var _ = func(v interface{}) ([]byte, error) {
+		return json.Marshal(v)
+	}
+
 	if request == nil {
 		return nil, errors.New("nil sign request provided")
 	}

@@ -97,7 +97,7 @@ func (s *Service) resyncIfBehind() {
 	interval := time.Duration(millisecondsPerEpoch/16) * time.Millisecond
 	async.RunEvery(s.ctx, interval, func() {
 		if s.shouldReSync() {
-			syncedEpoch := slots.ToEpoch(s.cfg.chain.HeadSlot()) // nolint
+			syncedEpoch := slots.ToEpoch(s.cfg.chain.HeadSlot()) //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
 			// Factor number of expected minimum sync peers, to make sure that enough peers are
 			// available to resync (some peers may go away between checking non-finalized peers and
 			// actual resyncing).
@@ -105,7 +105,7 @@ func (s *Service) resyncIfBehind() {
 			// Check if the current node is more than 1 epoch behind.
 			if highestEpoch > (syncedEpoch + 1) {
 				log.WithFields(logrus.Fields{
-					"currentEpoch": slots.ToEpoch(s.cfg.chain.CurrentSlot()), // nolint
+					"currentEpoch": slots.ToEpoch(s.cfg.chain.CurrentSlot()), //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
 					"syncedEpoch":  syncedEpoch,
 					"peersEpoch":   highestEpoch,
 				}).Info("Fallen behind peers; reverting to initial sync to catch up")
@@ -121,8 +121,8 @@ func (s *Service) resyncIfBehind() {
 
 // shouldReSync returns true if the node is not syncing and falls behind two epochs.
 func (s *Service) shouldReSync() bool {
-	syncedEpoch := slots.ToEpoch(s.cfg.chain.HeadSlot())     // nolint
-	currentEpoch := slots.ToEpoch(s.cfg.chain.CurrentSlot()) // nolint
+	syncedEpoch := slots.ToEpoch(s.cfg.chain.HeadSlot())     //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
+	currentEpoch := slots.ToEpoch(s.cfg.chain.CurrentSlot()) //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
 	prevEpoch := types.Epoch(0)
 	if currentEpoch > 1 {
 		prevEpoch = currentEpoch - 1
@@ -135,7 +135,7 @@ func (s *Service) sendRPCStatusRequest(ctx context.Context, id peer.ID) error {
 	ctx, cancel := context.WithTimeout(ctx, respTimeout)
 	defer cancel()
 
-	headRoot, err := s.cfg.chain.HeadRoot(ctx) // nolint
+	headRoot, err := s.cfg.chain.HeadRoot(ctx) //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
 	if err != nil {
 		return err
 	}
@@ -146,12 +146,12 @@ func (s *Service) sendRPCStatusRequest(ctx context.Context, id peer.ID) error {
 	}
 	resp := &pb.Status{
 		ForkDigest:     forkDigest[:],
-		FinalizedRoot:  s.cfg.chain.FinalizedCheckpt().Root,  // nolint
-		FinalizedEpoch: s.cfg.chain.FinalizedCheckpt().Epoch, // nolint
+		FinalizedRoot:  s.cfg.chain.FinalizedCheckpt().Root,  //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
+		FinalizedEpoch: s.cfg.chain.FinalizedCheckpt().Epoch, //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
 		HeadRoot:       headRoot,
-		HeadSlot:       s.cfg.chain.HeadSlot(), // nolint
+		HeadSlot:       s.cfg.chain.HeadSlot(), //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
 	}
-	topic, err := p2p.TopicFromMessage(p2p.StatusMessageName, slots.ToEpoch(s.cfg.chain.CurrentSlot())) // nolint
+	topic, err := p2p.TopicFromMessage(p2p.StatusMessageName, slots.ToEpoch(s.cfg.chain.CurrentSlot())) //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
 	if err != nil {
 		return err
 	}
@@ -197,7 +197,7 @@ func (s *Service) sendRPCStatusRequest(ctx context.Context, id peer.ID) error {
 }
 
 func (s *Service) reValidatePeer(ctx context.Context, id peer.ID) error {
-	s.cfg.p2p.Peers().Scorers().PeerStatusScorer().SetHeadSlot(s.cfg.chain.HeadSlot()) // nolint
+	s.cfg.p2p.Peers().Scorers().PeerStatusScorer().SetHeadSlot(s.cfg.chain.HeadSlot()) //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
 	if err := s.sendRPCStatusRequest(ctx, id); err != nil {
 		return err
 	}
@@ -289,7 +289,7 @@ func (s *Service) statusRPCHandler(ctx context.Context, msg interface{}, stream 
 }
 
 func (s *Service) respondWithStatus(ctx context.Context, stream network.Stream) error {
-	headRoot, err := s.cfg.chain.HeadRoot(ctx) // nolint
+	headRoot, err := s.cfg.chain.HeadRoot(ctx) //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
 	if err != nil {
 		return err
 	}
@@ -300,10 +300,10 @@ func (s *Service) respondWithStatus(ctx context.Context, stream network.Stream) 
 	}
 	resp := &pb.Status{
 		ForkDigest:     forkDigest[:],
-		FinalizedRoot:  s.cfg.chain.FinalizedCheckpt().Root,  // nolint
-		FinalizedEpoch: s.cfg.chain.FinalizedCheckpt().Epoch, // nolint
+		FinalizedRoot:  s.cfg.chain.FinalizedCheckpt().Root,  //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
+		FinalizedEpoch: s.cfg.chain.FinalizedCheckpt().Epoch, //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
 		HeadRoot:       headRoot,
-		HeadSlot:       s.cfg.chain.HeadSlot(), // nolint
+		HeadSlot:       s.cfg.chain.HeadSlot(), //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
 	}
 
 	if _, err := stream.Write([]byte{responseCodeSuccess}); err != nil {
@@ -321,8 +321,8 @@ func (s *Service) validateStatusMessage(ctx context.Context, msg *pb.Status) err
 	if !bytes.Equal(forkDigest[:], msg.ForkDigest) {
 		return p2ptypes.ErrWrongForkDigestVersion
 	}
-	genesis := s.cfg.chain.GenesisTime()                   // nolint
-	finalizedEpoch := s.cfg.chain.FinalizedCheckpt().Epoch // nolint
+	genesis := s.cfg.chain.GenesisTime()                   //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
+	finalizedEpoch := s.cfg.chain.FinalizedCheckpt().Epoch //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
 	maxEpoch := slots.EpochsSinceGenesis(genesis)
 	// It would take a minimum of 2 epochs to finalize a
 	// previous epoch

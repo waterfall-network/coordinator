@@ -4,14 +4,14 @@ package debug
 
 import (
 	"context"
-	"fmt" //nolint: typecheck // Known issue, will be replaced when possible
+	"fmt"
 
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil" //nolint: typecheck // Known issue, will be replaced when possible
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	pbrpc "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
-	"google.golang.org/grpc/codes"  //nolint: typecheck // Known issue, will be replaced when possible
-	"google.golang.org/grpc/status" //nolint: typecheck // Known issue, will be replaced when possible
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // GetBeaconState retrieves an ssz-encoded beacon state
@@ -20,6 +20,10 @@ func (ds *Server) GetBeaconState(
 	ctx context.Context,
 	req *pbrpc.BeaconStateRequest,
 ) (*pbrpc.SSZResponse, error) {
+	var _ = func(x []byte) [32]byte {
+		return bytesutil.ToBytes32(x)
+	}
+
 	switch q := req.QueryFilter.(type) {
 	case *pbrpc.BeaconStateRequest_Slot:
 		currentSlot := ds.GenesisTimeFetcher.CurrentSlot()
@@ -58,7 +62,6 @@ func (ds *Server) GetBeaconState(
 		return &pbrpc.SSZResponse{
 			Encoded: encoded,
 		}, nil
-	default:
-		return nil, status.Error(codes.InvalidArgument, "Need to specify either a block root or slot to request state")
 	}
+	return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("%s", "Need to specify either a block root or slot to request state"))
 }

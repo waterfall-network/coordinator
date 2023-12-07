@@ -184,7 +184,7 @@ func (s *Service) validateRangeRequest(r *pb.BeaconBlocksByRangeRequest) error {
 	// Add a buffer for possible large range requests from nodes syncing close to the
 	// head of the chain.
 	buffer := rangeLimit * 2
-	highestExpectedSlot := s.cfg.chain.CurrentSlot().Add(uint64(buffer)) // nolint
+	highestExpectedSlot := s.cfg.chain.CurrentSlot().Add(uint64(buffer)) //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
 
 	// Ensure all request params are within appropriate bounds
 	if count == 0 || count > maxRequestBlocks {
@@ -216,7 +216,7 @@ func (s *Service) filterBlocks(ctx context.Context, blks []block.SignedBeaconBlo
 
 	newBlks := make([]block.SignedBeaconBlock, 0, len(blks))
 	for i, b := range blks {
-		isCanonical, err := s.cfg.chain.IsCanonical(ctx, roots[i]) // nolint
+		isCanonical, err := s.cfg.chain.IsCanonical(ctx, roots[i]) //nolint: typecheck // Linter does not determine nesting of interfaces (interface blockchainService)
 		if err != nil {
 			return nil, err
 		}

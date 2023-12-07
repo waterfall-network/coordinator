@@ -10,7 +10,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/operation"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/filters" // nolint: typecheck
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/filters"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
@@ -65,14 +65,17 @@ func (bs *Server) ListAttestations(
 	}
 	var blocks []block.SignedBeaconBlock
 	var err error
+	flt := filters.NewFilter()
+	flt.SetStartEpoch(0).SetEndEpoch(0)
 	switch q := req.QueryFilter.(type) {
 	case *ethpb.ListAttestationsRequest_GenesisEpoch:
-		blocks, _, err = bs.BeaconDB.Blocks(ctx, filters.NewFilter().SetStartEpoch(0).SetEndEpoch(0))
+		//blocks, _, err = bs.BeaconDB.Blocks(ctx, flt.SetStartEpoch(0).SetEndEpoch(0))
+		blocks, _, err = bs.BeaconDB.Blocks(ctx, flt)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "Could not fetch attestations: %v", err)
 		}
 	case *ethpb.ListAttestationsRequest_Epoch:
-		blocks, _, err = bs.BeaconDB.Blocks(ctx, filters.NewFilter().SetStartEpoch(q.Epoch).SetEndEpoch(q.Epoch))
+		blocks, _, err = bs.BeaconDB.Blocks(ctx, flt.SetStartEpoch(q.Epoch).SetEndEpoch(q.Epoch))
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "Could not fetch attestations: %v", err)
 		}
@@ -119,14 +122,16 @@ func (bs *Server) ListIndexedAttestations(
 ) (*ethpb.ListIndexedAttestationsResponse, error) {
 	var blocks []block.SignedBeaconBlock
 	var err error
+	flt := filters.NewFilter()
+	flt.SetStartEpoch(0).SetEndEpoch(0)
 	switch q := req.QueryFilter.(type) {
 	case *ethpb.ListIndexedAttestationsRequest_GenesisEpoch:
-		blocks, _, err = bs.BeaconDB.Blocks(ctx, filters.NewFilter().SetStartEpoch(0).SetEndEpoch(0))
+		blocks, _, err = bs.BeaconDB.Blocks(ctx, flt)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "Could not fetch attestations: %v", err)
 		}
 	case *ethpb.ListIndexedAttestationsRequest_Epoch:
-		blocks, _, err = bs.BeaconDB.Blocks(ctx, filters.NewFilter().SetStartEpoch(q.Epoch).SetEndEpoch(q.Epoch))
+		blocks, _, err = bs.BeaconDB.Blocks(ctx, flt.SetStartEpoch(q.Epoch).SetEndEpoch(q.Epoch))
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "Could not fetch attestations: %v", err)
 		}

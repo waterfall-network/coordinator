@@ -4,7 +4,7 @@
 
 package blst
 
-import blst "github.com/supranational/blst/bindings/go" //nolint: typecheck // Known issue, will be replaced when possible
+import blst "github.com/supranational/blst/bindings/go"
 
 // Internal types for blst.
 type blstPublicKey = blst.P1Affine
