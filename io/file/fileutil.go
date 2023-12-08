@@ -15,7 +15,6 @@ import (
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 )
 

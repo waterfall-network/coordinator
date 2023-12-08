@@ -1,5 +1,3 @@
-// Fix some linter problems later
-// https://github.com/golangci/golangci-lint/issues/3815
 package debug
 
 import (
@@ -14,16 +12,16 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+var toHash = func(x []byte) [32]byte {
+	return bytesutil.ToBytes32(x)
+}
+
 // GetBeaconState retrieves an ssz-encoded beacon state
 // from the beacon node by either a slot or block root.
 func (ds *Server) GetBeaconState(
 	ctx context.Context,
 	req *pbrpc.BeaconStateRequest,
 ) (*pbrpc.SSZResponse, error) {
-	var _ = func(x []byte) [32]byte {
-		return bytesutil.ToBytes32(x)
-	}
-
 	switch q := req.QueryFilter.(type) {
 	case *pbrpc.BeaconStateRequest_Slot:
 		currentSlot := ds.GenesisTimeFetcher.CurrentSlot()
@@ -51,7 +49,7 @@ func (ds *Server) GetBeaconState(
 			Encoded: encoded,
 		}, nil
 	case *pbrpc.BeaconStateRequest_BlockRoot:
-		st, err := ds.StateGen.StateByRoot(ctx, bytesutil.ToBytes32(q.BlockRoot))
+		st, err := ds.StateGen.StateByRoot(ctx, toHash(q.BlockRoot))
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "Could not compute state by block root: %v", err)
 		}

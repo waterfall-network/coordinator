@@ -69,7 +69,6 @@ func (bs *Server) ListAttestations(
 	flt.SetStartEpoch(0).SetEndEpoch(0)
 	switch q := req.QueryFilter.(type) {
 	case *ethpb.ListAttestationsRequest_GenesisEpoch:
-		//blocks, _, err = bs.BeaconDB.Blocks(ctx, flt.SetStartEpoch(0).SetEndEpoch(0))
 		blocks, _, err = bs.BeaconDB.Blocks(ctx, flt)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "Could not fetch attestations: %v", err)
