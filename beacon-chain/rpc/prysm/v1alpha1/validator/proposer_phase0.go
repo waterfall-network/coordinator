@@ -19,6 +19,8 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	"go.opencensus.io/trace"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // blockData required to create a beacon block.
@@ -41,8 +43,7 @@ func (vs *Server) getPhase0BeaconBlock(ctx context.Context, req *ethpb.BlockRequ
 	blkData, err := vs.buildPhase0BlockData(ctx, req)
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
-			"req":         req,
-			"withdrawals": len(blkData.Withdrawals),
+			"req.Slot": req.Slot,
 		}).Error("Build beacon block Phase0: could not build data")
 		return nil, fmt.Errorf("could not build block data: %v", err)
 	}
@@ -123,8 +124,22 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		log.Errorf("Empty list of optimistic spines was retrieved for slot: %v", req.Slot)
 	}
 
+	currHead, err := vs.HeadFetcher.HeadState(ctx)
+	if err != nil {
+		log.WithError(err).Error("Build block data:  Could not retrieve head state")
+		return nil, status.Errorf(codes.Internal, "Could not retrieve head state: %v", err)
+	}
+	jCpRoot := bytesutil.ToBytes32(currHead.CurrentJustifiedCheckpoint().Root)
+	if currHead.CurrentJustifiedCheckpoint().Epoch == 0 {
+		jCpRoot, err = vs.BeaconDB.GenesisBlockRoot(ctx)
+		if err != nil {
+			log.WithError(err).Error("Build block data:  retrieving of genesis root")
+			return nil, status.Errorf(codes.Internal, "Could not retrieve of genesis root: %v", err)
+		}
+	}
+
 	//calculate optimistic parent root
-	parentRoot, err := vs.HeadFetcher.ForkChoicer().GetParentByOptimisticSpines(ctx, optSpines)
+	parentRoot, err := vs.HeadFetcher.ForkChoicer().GetParentByOptimisticSpines(ctx, optSpines, jCpRoot)
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"req.slot":     req.Slot,
