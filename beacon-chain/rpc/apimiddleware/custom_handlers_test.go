@@ -18,6 +18,8 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
+const base64Val = "Zm9v"
+
 type testSSZResponseJson struct {
 	Version string `json:"version"`
 	Data    string `json:"data"`
@@ -61,7 +63,7 @@ func TestSSZRequested(t *testing.T) {
 }
 
 func TestPrepareSSZRequestForProxying(t *testing.T) {
-	middleware := &apimiddleware.ApiProxyMiddleware{
+	middleware := &apimiddleware.APIProxyMiddleware{
 		GatewayAddress: "http://apimiddleware.example",
 	}
 	endpoint := apimiddleware.Endpoint{
@@ -70,8 +72,8 @@ func TestPrepareSSZRequestForProxying(t *testing.T) {
 	var body bytes.Buffer
 	request := httptest.NewRequest("GET", "http://foo.example", &body)
 
-	errJson := prepareSSZRequestForProxying(middleware, endpoint, request, "/ssz")
-	require.Equal(t, true, errJson == nil)
+	errJSON := prepareSSZRequestForProxying(middleware, endpoint, request, "/ssz")
+	require.Equal(t, true, errJSON == nil)
 	assert.Equal(t, "/internal/ssz", request.URL.Path)
 }
 
@@ -108,15 +110,15 @@ func TestWriteSSZResponseHeaderAndBody(t *testing.T) {
 		response := &http.Response{
 			Header: http.Header{
 				"Foo": []string{"foo"},
-				"Grpc-Metadata-" + grpc.HttpCodeMetadataKey: []string{"204"},
+				"Grpc-Metadata-" + grpc.HTTPCodeMetadataKey: []string{"204"},
 			},
 		}
 
 		writer := httptest.NewRecorder()
 		writer.Body = &bytes.Buffer{}
 
-		errJson := writeSSZResponseHeaderAndBody(response, writer, responseSsz, version, fileName)
-		require.Equal(t, true, errJson == nil)
+		errJSON := writeSSZResponseHeaderAndBody(response, writer, responseSsz, version, fileName)
+		require.Equal(t, true, errJSON == nil)
 		v, ok := writer.Header()["Foo"]
 		require.Equal(t, true, ok, "header not found")
 		require.Equal(t, 1, len(v), "wrong number of header values")
@@ -157,7 +159,7 @@ func TestWriteSSZResponseHeaderAndBody(t *testing.T) {
 		response := &http.Response{
 			Header: http.Header{
 				"Foo": []string{"foo"},
-				"Grpc-Metadata-" + grpc.HttpCodeMetadataKey: []string{"invalid"},
+				"Grpc-Metadata-" + grpc.HTTPCodeMetadataKey: []string{"invalid"},
 			},
 		}
 		responseSsz := []byte("ssz")

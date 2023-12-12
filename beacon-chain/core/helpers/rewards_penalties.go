@@ -269,18 +269,18 @@ func initLogRewardsAndPenalties(st state.BeaconState) error {
 	optimalNumberOfCoordinators := params.BeaconConfig().OptValidatorsNum
 	stakeAmount := params.BeaconConfig().MaxEffectiveBalance / uint64(math.Pow(10, 9))
 	annualizedReturnRate := params.BeaconConfig().MaxAnnualizedReturnRate
-	slot_duration := params.BeaconConfig().SecondsPerSlot
+	slotDuration := params.BeaconConfig().SecondsPerSlot
 
 	// Write the metadata params
 	writer := bufio.NewWriter(file)
-	_, err = fmt.Fprintln(writer, fmt.Sprintf(
-		"%d %s %d %d %f %d %d %d %s %s",
+	_, err = fmt.Fprintf(writer, fmt.Sprintf(
+		"%d %s %d %d %f %d %d %d %s %s\n",
 		numberOfCoordinators,
 		MetaGlobalParams,
 		optimalNumberOfCoordinators,
 		stakeAmount,
 		annualizedReturnRate,
-		slot_duration,
+		slotDuration,
 		-1,
 		-1,
 		"NOOP",

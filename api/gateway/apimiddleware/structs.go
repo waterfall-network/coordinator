@@ -10,60 +10,60 @@ import (
 // Error handling.
 // ---------------
 
-// ErrorJson describes common functionality of all JSON error representations.
-type ErrorJson interface {
+// ErrorJSON describes common functionality of all JSON error representations.
+type ErrorJSON interface {
 	StatusCode() int
 	SetCode(code int)
 	Msg() string
 	SetMsg(msg string)
 }
 
-// DefaultErrorJson is a JSON representation of a simple error value, containing only a message and an error code.
-type DefaultErrorJson struct {
+// DefaultErrorJSON is a JSON representation of a simple error value, containing only a message and an error code.
+type DefaultErrorJSON struct {
 	Message string `json:"message"`
 	Code    int    `json:"code"`
 }
 
-// InternalServerErrorWithMessage returns a DefaultErrorJson with 500 code and a custom message.
-func InternalServerErrorWithMessage(err error, message string) *DefaultErrorJson {
+// InternalServerErrorWithMessage returns a DefaultErrorJSON with 500 code and a custom message.
+func InternalServerErrorWithMessage(err error, message string) *DefaultErrorJSON {
 	e := errors.Wrapf(err, message)
-	return &DefaultErrorJson{
+	return &DefaultErrorJSON{
 		Message: e.Error(),
 		Code:    http.StatusInternalServerError,
 	}
 }
 
-// InternalServerError returns a DefaultErrorJson with 500 code.
-func InternalServerError(err error) *DefaultErrorJson {
-	return &DefaultErrorJson{
+// InternalServerError returns a DefaultErrorJSON with 500 code.
+func InternalServerError(err error) *DefaultErrorJSON {
+	return &DefaultErrorJSON{
 		Message: err.Error(),
 		Code:    http.StatusInternalServerError,
 	}
 }
 
-func TimeoutError() *DefaultErrorJson {
-	return &DefaultErrorJson{
+func TimeoutError() *DefaultErrorJSON {
+	return &DefaultErrorJSON{
 		Message: "Request timeout",
 		Code:    http.StatusRequestTimeout,
 	}
 }
 
 // StatusCode returns the error's underlying error code.
-func (e *DefaultErrorJson) StatusCode() int {
+func (e *DefaultErrorJSON) StatusCode() int {
 	return e.Code
 }
 
 // Msg returns the error's underlying message.
-func (e *DefaultErrorJson) Msg() string {
+func (e *DefaultErrorJSON) Msg() string {
 	return e.Message
 }
 
 // SetCode sets the error's underlying error code.
-func (e *DefaultErrorJson) SetCode(code int) {
+func (e *DefaultErrorJSON) SetCode(code int) {
 	e.Code = code
 }
 
 // SetMsg sets the error's underlying message.
-func (e *DefaultErrorJson) SetMsg(msg string) {
+func (e *DefaultErrorJSON) SetMsg(msg string) {
 	e.Message = msg
 }

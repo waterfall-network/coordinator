@@ -904,7 +904,7 @@ func (b *BeaconNode) registerGRPCGateway() error {
 		apigateway.WithTimeout(uint64(timeout)),
 	}
 	if flags.EnableHTTPEthAPI(httpModules) {
-		opts = append(opts, apigateway.WithApiMiddleware(&apimiddleware.BeaconEndpointFactory{}))
+		opts = append(opts, apigateway.WithAPIMiddleware(&apimiddleware.BeaconEndpointFactory{}))
 	}
 	g, err := apigateway.New(b.ctx, opts...)
 	if err != nil {

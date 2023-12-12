@@ -43,12 +43,12 @@ func (ds *Server) GetBeaconStateSSZ(ctx context.Context, req *ethpbv1.StateReque
 	ctx, span := trace.StartSpan(ctx, "debug.GetBeaconStateSSZ")
 	defer span.End()
 
-	state, err := ds.StateFetcher.State(ctx, req.StateId)
+	bState, err := ds.StateFetcher.State(ctx, req.StateId)
 	if err != nil {
 		return nil, helpers.PrepareStateFetchGRPCError(err)
 	}
 
-	sszState, err := state.MarshalSSZ()
+	sszState, err := bState.MarshalSSZ()
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Could not marshal state into SSZ: %v", err)
 	}
@@ -61,11 +61,15 @@ func (ds *Server) GetBeaconStateV2(ctx context.Context, req *ethpbv2.StateReques
 	ctx, span := trace.StartSpan(ctx, "debug.GetBeaconStateV2")
 	defer span.End()
 
-	beaconSt, err := ds.StateFetcher.State(ctx, req.StateId)
+	var beaconSt state.BeaconState
+	var isOptimistic bool
+	var err error
+
+	beaconSt, err = ds.StateFetcher.State(ctx, req.StateId)
 	if err != nil {
 		return nil, helpers.PrepareStateFetchGRPCError(err)
 	}
-	isOptimistic, err := helpers.IsOptimistic(ctx, beaconSt, ds.HeadFetcher)
+	isOptimistic, err = helpers.IsOptimistic(ctx, beaconSt, ds.HeadFetcher)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Could not check if slot's block is optimistic: %v", err)
 	}
@@ -125,12 +129,12 @@ func (ds *Server) GetBeaconStateSSZV2(ctx context.Context, req *ethpbv2.StateReq
 	ctx, span := trace.StartSpan(ctx, "debug.GetBeaconStateSSZV2")
 	defer span.End()
 
-	state, err := ds.StateFetcher.State(ctx, req.StateId)
+	bState, err := ds.StateFetcher.State(ctx, req.StateId)
 	if err != nil {
 		return nil, helpers.PrepareStateFetchGRPCError(err)
 	}
 
-	sszState, err := state.MarshalSSZ()
+	sszState, err := bState.MarshalSSZ()
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Could not marshal state into SSZ: %v", err)
 	}

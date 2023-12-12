@@ -42,8 +42,8 @@ func (v *votes) Insert(blk block.BeaconBlock) {
 	if err != nil {
 		panic(err)
 	}
-	finId := crypto.Keccak256Hash(e1d.Candidates)
-	v.candidates[bytesutil.ToBytes32(finId.Bytes())]++
+	finID := crypto.Keccak256Hash(e1d.Candidates)
+	v.candidates[bytesutil.ToBytes32(finID.Bytes())]++
 	v.hashes[bytesutil.ToBytes32(e1d.BlockHash)]++
 	v.roots[bytesutil.ToBytes32(e1d.DepositRoot)]++
 	v.counts[e1d.DepositCount]++

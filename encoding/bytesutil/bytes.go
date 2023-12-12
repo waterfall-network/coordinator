@@ -9,7 +9,7 @@ import (
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
-	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	fieldParams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 )
 
 var hexRegex = regexp.MustCompile("^0x[0-9a-fA-F]+$")
@@ -417,12 +417,12 @@ func ReverseByteOrder(input []byte) []byte {
 
 // ZeroRoot returns whether or not a root is of proper length and non-zero hash.
 func ZeroRoot(root []byte) bool {
-	return string(make([]byte, fieldparams.RootLength)) == string(root)
+	return string(make([]byte, fieldParams.RootLength)) == string(root)
 }
 
 // IsRoot checks whether the byte array is a root.
 func IsRoot(root []byte) bool {
-	return len(root) == fieldparams.RootLength
+	return len(root) == fieldParams.RootLength
 }
 
 // IsValidRoot checks whether the byte array is a valid root.

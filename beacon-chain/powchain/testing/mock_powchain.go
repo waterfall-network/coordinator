@@ -224,7 +224,7 @@ type testETHRPC struct{}
 
 func (*testETHRPC) NoArgsRets() {}
 
-func (*testETHRPC) ChainId(_ context.Context) *hexutil.Big {
+func (*testETHRPC) ChainID(_ context.Context) *hexutil.Big {
 	return (*hexutil.Big)(big.NewInt(int64(params.BeaconConfig().DepositChainID)))
 }
 

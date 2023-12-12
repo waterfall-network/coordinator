@@ -75,8 +75,8 @@ func WithMaxCallRecvMsgSize(size uint64) Option {
 	}
 }
 
-// WithApiMiddleware allows adding an API middleware proxy to the gateway.
-func WithApiMiddleware(endpointFactory apimiddleware.EndpointFactory) Option {
+// WithAPIMiddleware allows adding an API middleware proxy to the gateway.
+func WithAPIMiddleware(endpointFactory apimiddleware.EndpointFactory) Option {
 	return func(g *Gateway) error {
 		g.cfg.apiMiddlewareEndpointFactory = endpointFactory
 		return nil

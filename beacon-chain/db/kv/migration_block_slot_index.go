@@ -32,7 +32,7 @@ func migrateBlockSlotIndex(ctx context.Context, db *bolt.DB) error {
 			if err = bkt.Put(bytesutil.Uint64ToBytesBigEndian(key), v); err != nil {
 				return err
 			}
-			// check if context is cancelled in between
+			// check if context is canceled in between
 			if ctx.Err() != nil {
 				return ctx.Err()
 			}

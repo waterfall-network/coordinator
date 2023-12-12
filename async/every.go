@@ -11,7 +11,7 @@ import (
 )
 
 // RunEvery runs the provided command periodically.
-// It runs in a goroutine, and can be cancelled by finishing the supplied context.
+// It runs in a goroutine, and can be canceled by finishing the supplied context.
 func RunEvery(ctx context.Context, period time.Duration, f func()) {
 	funcName := runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name()
 	ticker := time.NewTicker(period)

@@ -952,7 +952,7 @@ type eventChainReorgJson struct {
 
 // indexedVerificationFailureErrorJson is a JSON representation of the error returned when verifying an indexed object.
 type indexedVerificationFailureErrorJson struct {
-	apimiddleware.DefaultErrorJson
+	apimiddleware.DefaultErrorJSON
 	Failures []*singleIndexedVerificationFailureJson `json:"failures"`
 }
 
@@ -963,7 +963,7 @@ type singleIndexedVerificationFailureJson struct {
 }
 
 type nodeSyncDetailsErrorJson struct {
-	apimiddleware.DefaultErrorJson
+	apimiddleware.DefaultErrorJSON
 	SyncDetails syncDetails `json:"sync_details"`
 }
 

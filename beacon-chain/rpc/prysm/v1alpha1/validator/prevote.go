@@ -9,6 +9,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
@@ -75,8 +76,23 @@ func (vs *Server) GetPrevoteData(ctx context.Context, req *ethpb.PreVoteRequest)
 
 	candidates := gwatCommon.HashArray{}
 	if len(optSpines) > 0 {
+
+		currHead, err := vs.HeadFetcher.HeadState(ctx)
+		if err != nil {
+			log.WithError(err).Error("Collect prevote data:  Could not retrieve head state")
+			return nil, status.Errorf(codes.Internal, "Could not retrieve head state: %v", err)
+		}
+		jCpRoot := bytesutil.ToBytes32(currHead.CurrentJustifiedCheckpoint().Root)
+		if currHead.CurrentJustifiedCheckpoint().Epoch == 0 {
+			jCpRoot, err = vs.BeaconDB.GenesisBlockRoot(ctx)
+			if err != nil {
+				log.WithError(err).Error("Collect prevote data:  retrieving of genesis root")
+				return nil, status.Errorf(codes.Internal, "Could not retrieve of genesis root: %v", err)
+			}
+		}
+
 		//calculate optimistic parent root
-		parentRoot, err := vs.HeadFetcher.ForkChoicer().GetParentByOptimisticSpines(ctx, optSpines)
+		parentRoot, err := vs.HeadFetcher.ForkChoicer().GetParentByOptimisticSpines(ctx, optSpines, jCpRoot)
 		if err != nil {
 			log.WithError(err).WithFields(logrus.Fields{
 				"extOptSpines": optSpines,

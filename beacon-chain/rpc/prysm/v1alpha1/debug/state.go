@@ -12,6 +12,10 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+var toHash = func(x []byte) [32]byte {
+	return bytesutil.ToBytes32(x)
+}
+
 // GetBeaconState retrieves an ssz-encoded beacon state
 // from the beacon node by either a slot or block root.
 func (ds *Server) GetBeaconState(
@@ -45,7 +49,7 @@ func (ds *Server) GetBeaconState(
 			Encoded: encoded,
 		}, nil
 	case *pbrpc.BeaconStateRequest_BlockRoot:
-		st, err := ds.StateGen.StateByRoot(ctx, bytesutil.ToBytes32(q.BlockRoot))
+		st, err := ds.StateGen.StateByRoot(ctx, toHash(q.BlockRoot))
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "Could not compute state by block root: %v", err)
 		}
@@ -56,7 +60,6 @@ func (ds *Server) GetBeaconState(
 		return &pbrpc.SSZResponse{
 			Encoded: encoded,
 		}, nil
-	default:
-		return nil, status.Error(codes.InvalidArgument, "Need to specify either a block root or slot to request state")
 	}
+	return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("%s", "Need to specify either a block root or slot to request state"))
 }

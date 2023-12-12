@@ -1,17 +1,17 @@
 image: node:16
-before_script:
-  - apt-get update -y
-  - apt-get install cmake git libssl-dev libgmp-dev libtinfo5 libprotoc-dev wget -y
-  - npm install -g @bazel/bazelisk
-  - echo "machine $CI_SERVER_HOST login gitlab-ci-token password $CI_JOB_TOKEN" >> ~/.netrc
-  - export GOPRIVATE=${CI_SERVER_HOST}
-  - echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
 stages:
+  - test
   - build
   - release
 
 .job_build:
   script: &job_build |-
+    apt-get update -y
+    apt-get install cmake git libssl-dev libgmp-dev libtinfo5 libprotoc-dev wget -y
+    npm install -g @bazel/bazelisk
+    echo "machine $CI_SERVER_HOST login gitlab-ci-token password $CI_JOB_TOKEN" >> ~/.netrc
+    export GOPRIVATE=${CI_SERVER_HOST}
+    echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
     mkdir -p ./dist
     bazel version
     cp runtime/version/version.go /tmp/version.go
@@ -25,6 +25,18 @@ stages:
     bazel build //tools/genesis-state-gen --config=release
     cp ./bazel-bin/tools/genesis-state-gen/genesis-state-gen_/genesis-state-gen ./dist/coordinator-genesis
     cp -r /tmp/version.go runtime/version/version.go
+
+lint:
+  stage: test
+  image: golangci/golangci-lint:v1.52.2
+  tags:
+    - docker
+  rules:
+    - if: $CI_COMMIT_REF_NAME != "main" && $CI_COMMIT_TAG == null
+      when: on_success
+  script: 
+    - golangci-lint run -v --out-format=github-actions --config=.golangci.yml --out-format colored-line-number
+
 
 build branch:
   stage: build

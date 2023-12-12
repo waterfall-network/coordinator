@@ -23,13 +23,14 @@ type filterIter struct {
 
 // Next looks up for the next valid node according to our
 // filter criteria.
+// https://github.com/golangci/golangci-lint/discussions/2287
 func (f *filterIter) Next() bool {
 	seen := make(map[enode.ID]struct{})
 	for f.Iterator.Next() {
 		if f.Context.Err() != nil {
 			return false
 		}
-		pNode := f.Node()
+		pNode := f.Iterator.Node()
 		if _, ok := seen[pNode.ID()]; ok {
 			return false
 		}

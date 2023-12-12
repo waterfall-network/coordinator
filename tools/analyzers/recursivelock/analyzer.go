@@ -221,11 +221,11 @@ func (t lockTracker) String() string {
 
 func (t *lockTracker) deincFRU() {
 	if t.foundRLock > 0 {
-		t.foundRLock -= 1
+		t.foundRLock--
 	}
 }
 func (t *lockTracker) incFRU() {
-	t.foundRLock += 1
+	t.foundRLock++
 }
 
 func checkForRecLocks(node ast.Node, pass *analysis.Pass, inspect *inspector.Inspector, lockmode mode, call *callInfo,
@@ -450,27 +450,27 @@ func mapSelTypes(c *ast.CallExpr, pass *analysis.Pass) *selIdentList {
 }
 
 // recursively identifies the type of each identity node in a selector expression
-func (l *selIdentList) recurMapSelTypes(e ast.Expr, next *selIdentNode, t *types.Info) bool {
+func (s *selIdentList) recurMapSelTypes(e ast.Expr, next *selIdentNode, t *types.Info) bool {
 	expr := astutil.Unparen(e)
-	l.length++
-	s := &selIdentNode{next: next}
+	s.length++
+	selNode := &selIdentNode{next: next}
 	switch stmt := expr.(type) {
 	case *ast.Ident:
-		s.this = stmt
-		s.typObj = t.ObjectOf(stmt)
+		selNode.this = stmt
+		selNode.typObj = t.ObjectOf(stmt)
 	case *ast.SelectorExpr:
-		s.this = stmt.Sel
+		selNode.this = stmt.Sel
 		if sel, ok := t.Selections[stmt]; ok {
-			s.typObj = sel.Obj() // method or field
+			selNode.typObj = sel.Obj() // method or field
 		} else {
-			s.typObj = t.Uses[stmt.Sel] // qualified identifier?
+			selNode.typObj = t.Uses[stmt.Sel] // qualified identifier?
 		}
-		return l.recurMapSelTypes(stmt.X, s, t)
+		return s.recurMapSelTypes(stmt.X, selNode, t)
 	default:
 		return false
 	}
-	l.current = s
-	l.start = s
+	s.current = selNode
+	s.start = selNode
 	return true
 }
 
@@ -584,8 +584,8 @@ func findCallDeclarationNode(c *callInfo, inspect *inspector.Inspector, tInfo *t
 		if !ok {
 			return
 		}
-		compareId := tInfo.ObjectOf(funcDec.Name).String()
-		if c.id == compareId {
+		compareID := tInfo.ObjectOf(funcDec.Name).String()
+		if c.id == compareID {
 			retNode = funcDec
 		}
 	})

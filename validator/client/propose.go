@@ -31,7 +31,6 @@ type signingFunc func(context.Context, *validatorpb.SignRequest) (bls.Signature,
 
 const domainDataErr = "could not get domain data"
 const signingRootErr = "could not get signing root"
-const signExitErr = "could not sign voluntary exit proposal"
 
 // ProposeBlock proposes a new beacon block for a given slot. This method collects the
 // previous beacon block, any pending deposits, and ETH1 data from the beacon

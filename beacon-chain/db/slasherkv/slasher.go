@@ -158,7 +158,7 @@ func (s *Store) CheckAttesterDoubleVotes(
 						localDoubleVotes = append(localDoubleVotes, slashAtt)
 					}
 				}
-				// if any routine is cancelled, then cancel this routine too
+				// if any routine is canceled, then cancel this routine too
 				select {
 				case <-egctx.Done():
 					return egctx.Err()

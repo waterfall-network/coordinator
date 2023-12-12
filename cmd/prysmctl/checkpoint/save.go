@@ -59,13 +59,13 @@ func cliActionSave(_ *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("saved ssz-encoded block to to %s", blockPath)
+	log.Printf("saved ssz-encoded block to %s", blockPath)
 
 	statePath, err := od.SaveState(cwd)
 	if err != nil {
 		return err
 	}
-	log.Printf("saved ssz-encoded state to to %s", statePath)
+	log.Printf("saved ssz-encoded state to %s", statePath)
 
 	return nil
 }

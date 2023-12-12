@@ -680,7 +680,7 @@ func filledByteSlice2D(length, innerLen uint64) [][]byte {
 }
 
 // HydrateBeaconHeader hydrates a beacon block header with correct field length sizes
-// to comply with fssz marshalling and unmarshalling rules.
+// to comply with fssz marshaling and unmarshalling rules.
 func HydrateBeaconHeader(h *ethpb.BeaconBlockHeader) *ethpb.BeaconBlockHeader {
 	if h == nil {
 		h = &ethpb.BeaconBlockHeader{}

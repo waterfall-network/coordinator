@@ -174,55 +174,6 @@ func PayloadToHeader(payload *enginev1.ExecutionPayload) (*ethpb.ExecutionPayloa
 	}, nil
 }
 
-func isEmptyPayload(p *enginev1.ExecutionPayload) bool {
-	if p == nil {
-		return true
-	}
-	if !bytes.Equal(p.ParentHash, make([]byte, fieldparams.RootLength)) {
-		return false
-	}
-	if !bytes.Equal(p.FeeRecipient, make([]byte, fieldparams.FeeRecipientLength)) {
-		return false
-	}
-	if !bytes.Equal(p.StateRoot, make([]byte, fieldparams.RootLength)) {
-		return false
-	}
-	if !bytes.Equal(p.ReceiptsRoot, make([]byte, fieldparams.RootLength)) {
-		return false
-	}
-	if !bytes.Equal(p.LogsBloom, make([]byte, fieldparams.LogsBloomLength)) {
-		return false
-	}
-	if !bytes.Equal(p.PrevRandao, make([]byte, fieldparams.RootLength)) {
-		return false
-	}
-	if !bytes.Equal(p.BaseFeePerGas, make([]byte, fieldparams.RootLength)) {
-		return false
-	}
-	if !bytes.Equal(p.BlockHash, make([]byte, fieldparams.RootLength)) {
-		return false
-	}
-	if len(p.Transactions) != 0 {
-		return false
-	}
-	if len(p.ExtraData) != 0 {
-		return false
-	}
-	if p.BlockNumber != 0 {
-		return false
-	}
-	if p.GasLimit != 0 {
-		return false
-	}
-	if p.GasUsed != 0 {
-		return false
-	}
-	if p.Timestamp != 0 {
-		return false
-	}
-	return true
-}
-
 func isEmptyHeader(h *ethpb.ExecutionPayloadHeader) bool {
 	if !bytes.Equal(h.ParentHash, make([]byte, fieldparams.RootLength)) {
 		return false

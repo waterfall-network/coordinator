@@ -26,7 +26,7 @@ type Delta struct {
 }
 
 // unmarshalSSZ deserializes specs data into a simple aggregating container.
-func (d *Delta) unmarshalSSZ(buf []byte) error {
+func (d *Delta) unmarshalSSZ(buf []byte) {
 	offset1 := binary.LittleEndian.Uint32(buf[:4])
 	offset2 := binary.LittleEndian.Uint32(buf[4:8])
 
@@ -34,7 +34,6 @@ func (d *Delta) unmarshalSSZ(buf []byte) error {
 		d.Rewards = append(d.Rewards, binary.LittleEndian.Uint64(buf[offset1+i:offset1+i+8]))
 		d.Penalties = append(d.Penalties, binary.LittleEndian.Uint64(buf[offset2+i:offset2+i+8]))
 	}
-	return nil
 }
 
 // RunPrecomputeRewardsAndPenaltiesTests executes "rewards/{basic, leak, random}" tests.
@@ -97,7 +96,7 @@ func runPrecomputeRewardsAndPenaltiesTest(t *testing.T, testFolderPath string) {
 		sourceSSZ, err := snappy.Decode(nil /* dst */, sourceFile)
 		require.NoError(t, err, "Failed to decompress")
 		d := &Delta{}
-		require.NoError(t, d.unmarshalSSZ(sourceSSZ), "Failed to unmarshal")
+		d.unmarshalSSZ(sourceSSZ)
 		for i, reward := range d.Rewards {
 			totalSpecTestRewards[i] += reward
 		}

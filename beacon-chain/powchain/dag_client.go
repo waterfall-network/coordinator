@@ -3,7 +3,6 @@ package powchain
 import (
 	"context"
 	"fmt"
-	"go.opencensus.io/trace"
 	"math/big"
 	"time"
 
@@ -14,6 +13,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/rpc"
+	"go.opencensus.io/trace"
 )
 
 const (
@@ -33,7 +33,7 @@ const (
 	ExecutionDepositCountMethod = "wat_validator_DepositCount"
 )
 
-// ExecutionDagFinalize executing finalisation procedure
+// ExecutionDagFinalize executing finalization procedure
 // by calling dag_finalize via JSON-RPC.
 func (s *Service) ExecutionDagFinalize(ctx context.Context, params *gwatTypes.FinalizationParams) (*gwatTypes.FinalizationResult, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.ExecutionDagFinalize")

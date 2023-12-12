@@ -27,7 +27,7 @@ type mapCandidates map[gwatCommon.Hash]gwatCommon.HashArray
 // ProcessDagConsensus is an operation performed on each beacon block
 // to calculate state transition data related to dag consensus:
 // 1. calculate new prefix of spines
-// 2. collect attestations and calculate consensus of finalisation.
+// 2. collect attestations and calculate consensus of finalization.
 func ProcessDagConsensus(ctx context.Context, beaconState state.BeaconState, signed block.SignedBeaconBlock) (state.BeaconState, error) {
 	if beaconState == nil || beaconState.IsNil() {
 		return nil, errors.New("nil state")

@@ -70,7 +70,7 @@ type Getter interface {
 	JustifiedEpoch() types.Epoch
 	ForkChoiceNodes() []*pbrpc.ForkChoiceNode
 	NodeCount() int
-	GetParentByOptimisticSpines(ctx context.Context, optSpines []gwatCommon.HashArray) ([32]byte, error)
+	GetParentByOptimisticSpines(ctx context.Context, optSpines []gwatCommon.HashArray, jCpRoot [32]byte) ([32]byte, error)
 	CollectForkExcludedBlkRoots(leaf gwatCommon.Hash) gwatCommon.HashArray
 }
 

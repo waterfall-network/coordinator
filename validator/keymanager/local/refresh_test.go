@@ -15,12 +15,13 @@ import (
 	mock "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/accounts/testing"
 )
 
+const testPassword = "Passw03rdz293**%#2"
+
 func TestLocalKeymanager_reloadAccountsFromKeystore_MismatchedNumKeys(t *testing.T) {
-	password := "Passw03rdz293**%#2"
 	wallet := &mock.Wallet{
 		Files:            make(map[string]map[string][]byte),
 		AccountPasswords: make(map[string]string),
-		WalletPassword:   password,
+		WalletPassword:   testPassword,
 	}
 	dr := &Keymanager{
 		wallet: wallet,
@@ -47,11 +48,10 @@ func TestLocalKeymanager_reloadAccountsFromKeystore_MismatchedNumKeys(t *testing
 }
 
 func TestLocalKeymanager_reloadAccountsFromKeystore(t *testing.T) {
-	password := "Passw03rdz293**%#2"
 	wallet := &mock.Wallet{
 		Files:            make(map[string]map[string][]byte),
 		AccountPasswords: make(map[string]string),
-		WalletPassword:   password,
+		WalletPassword:   testPassword,
 	}
 	dr := &Keymanager{
 		wallet:              wallet,

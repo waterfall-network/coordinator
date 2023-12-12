@@ -196,7 +196,7 @@ func PrintBlockVoting(blockVoting *ethpb.BlockVoting) string {
 	str += fmt.Sprintf("root: \"%#x\",", blockVoting.Root)
 	str += fmt.Sprintf("candidates: %s,", candStr)
 	str += fmt.Sprintf("slot: %d,", blockVoting.GetSlot())
-	str += fmt.Sprintf("Votes: [")
+	str += "Votes: ["
 	for i, att := range blockVoting.Votes {
 		str += "{"
 		str += fmt.Sprintf("aggrBits: %b,", att.GetAggregationBits())
@@ -209,7 +209,6 @@ func PrintBlockVoting(blockVoting *ethpb.BlockVoting) string {
 			str += ","
 		}
 	}
-	str += fmt.Sprintf("]")
-	str += "}"
+	str += "]}"
 	return str
 }

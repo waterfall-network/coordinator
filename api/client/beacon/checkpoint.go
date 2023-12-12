@@ -31,7 +31,7 @@ type OriginData struct {
 
 // CheckpointString returns the standard string representation of a Checkpoint for the block root and epoch for the
 // SignedBeaconBlock value found by DownloadOriginData.
-// The format is a a hex-encoded block root, followed by the epoch of the block, separated by a colon. For example:
+// The format is a hex-encoded block root, followed by the epoch of the block, separated by a colon. For example:
 // "0x1c35540cac127315fabb6bf29181f2ae0de1a3fc909d2e76ba771e61312cc49a:74888"
 func (od *OriginData) CheckpointString() string {
 	return fmt.Sprintf("%#x:%d", od.wsd.BlockRoot, od.wsd.Epoch)

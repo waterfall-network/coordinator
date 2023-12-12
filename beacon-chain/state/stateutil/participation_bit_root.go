@@ -11,10 +11,7 @@ import (
 // ParticipationBitsRoot computes the HashTreeRoot merkleization of
 // participation roots.
 func ParticipationBitsRoot(bits []byte) ([32]byte, error) {
-	chunkedRoots, err := packParticipationBits(bits)
-	if err != nil {
-		return [32]byte{}, err
-	}
+	chunkedRoots := packParticipationBits(bits)
 
 	limit := (uint64(fieldparams.ValidatorRegistryLimit + 31)) / 32
 
@@ -30,7 +27,7 @@ func ParticipationBitsRoot(bits []byte) ([32]byte, error) {
 
 // packParticipationBits into chunks. It'll pad the last chunk with zero bytes if
 // it does not have length bytes per chunk.
-func packParticipationBits(bytes []byte) ([][32]byte, error) {
+func packParticipationBits(bytes []byte) [][32]byte {
 	numItems := len(bytes)
 	chunks := make([][32]byte, 0, numItems/32)
 	for i := 0; i < numItems; i += 32 {
@@ -48,8 +45,8 @@ func packParticipationBits(bytes []byte) ([][32]byte, error) {
 	}
 
 	if len(chunks) == 0 {
-		return chunks, nil
+		return chunks
 	}
 
-	return chunks, nil
+	return chunks
 }

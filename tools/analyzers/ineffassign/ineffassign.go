@@ -45,187 +45,40 @@ func (bld *builder) walk(n ast.Node) {
 func (bld *builder) Visit(n ast.Node) ast.Visitor {
 	switch n := n.(type) {
 	case *ast.FuncDecl:
-		if n.Body != nil {
-			bld.fun(n.Type, n.Body)
-		}
+		bld.processFuncDel(n)
 	case *ast.FuncLit:
-		bld.fun(n.Type, n.Body)
+		bld.processFuncLit(n)
 	case *ast.IfStmt:
-		bld.walk(n.Init)
-		bld.walk(n.Cond)
-		b0 := bld.block
-		bld.newBlock(b0)
-		bld.walk(n.Body)
-		b1 := bld.block
-		if n.Else != nil {
-			bld.newBlock(b0)
-			bld.walk(n.Else)
-			b0 = bld.block
-		}
-		bld.newBlock(b0, b1)
+		bld.processIfStmt(n)
 	case *ast.ForStmt:
-		lbl := bld.stmtLabel(n)
-		brek := bld.breaks.push(lbl)
-		continu := bld.continues.push(lbl)
-		bld.walk(n.Init)
-		start := bld.newBlock(bld.block)
-		bld.walk(n.Cond)
-		cond := bld.block
-		bld.newBlock(cond)
-		bld.walk(n.Body)
-		continu.setDestination(bld.newBlock(bld.block))
-		bld.walk(n.Post)
-		bld.block.addChild(start)
-		brek.setDestination(bld.newBlock(cond))
-		bld.breaks.pop()
-		bld.continues.pop()
+		bld.processForStmt(n)
 	case *ast.RangeStmt:
-		lbl := bld.stmtLabel(n)
-		brek := bld.breaks.push(lbl)
-		continu := bld.continues.push(lbl)
-		bld.walk(n.X)
-		pre := bld.newBlock(bld.block)
-		start := bld.newBlock(pre)
-		if n.Key != nil {
-			lhs := []ast.Expr{n.Key}
-			if n.Value != nil {
-				lhs = append(lhs, n.Value)
-			}
-			bld.walk(&ast.AssignStmt{Lhs: lhs, Tok: n.Tok, TokPos: n.TokPos, Rhs: []ast.Expr{&ast.Ident{NamePos: n.X.End()}}})
-		}
-		bld.walk(n.Body)
-		bld.block.addChild(start)
-		continu.setDestination(pre)
-		brek.setDestination(bld.newBlock(pre, bld.block))
-		bld.breaks.pop()
-		bld.continues.pop()
+		bld.processRangeStmt(n)
 	case *ast.SwitchStmt:
-		bld.walk(n.Init)
-		bld.walk(n.Tag)
-		bld.swtch(n, n.Body.List)
+		bld.processSwitchStmt(n)
 	case *ast.TypeSwitchStmt:
-		bld.walk(n.Init)
-		bld.walk(n.Assign)
-		bld.swtch(n, n.Body.List)
+		bld.processTypeSwitchStmt(n)
 	case *ast.SelectStmt:
-		brek := bld.breaks.push(bld.stmtLabel(n))
-		for _, c := range n.Body.List {
-			c := c.(*ast.CommClause).Comm
-			if s, ok := c.(*ast.AssignStmt); ok {
-				bld.walk(s.Rhs[0])
-			} else {
-				bld.walk(c)
-			}
-		}
-		b0 := bld.block
-		exits := make([]*block, len(n.Body.List))
-		dfault := false
-		for i, c := range n.Body.List {
-			c, ok := c.(*ast.CommClause)
-			if !ok {
-				continue
-			}
-			bld.newBlock(b0)
-			bld.walk(c)
-			exits[i] = bld.block
-			dfault = dfault || c.Comm == nil
-		}
-		if !dfault {
-			exits = append(exits, b0)
-		}
-		brek.setDestination(bld.newBlock(exits...))
-		bld.breaks.pop()
+		bld.processSelectStmt(n)
 	case *ast.LabeledStmt:
-		bld.gotos.get(n.Label).setDestination(bld.newBlock(bld.block))
-		bld.labelStmt = n
-		bld.walk(n.Stmt)
+		bld.processLabeledStmt(n)
 	case *ast.BranchStmt:
-		switch n.Tok {
-		case token.BREAK:
-			bld.breaks.get(n.Label).addSource(bld.block)
-			bld.newBlock()
-		case token.CONTINUE:
-			bld.continues.get(n.Label).addSource(bld.block)
-			bld.newBlock()
-		case token.GOTO:
-			bld.gotos.get(n.Label).addSource(bld.block)
-			bld.newBlock()
-		}
-
+		bld.processBranchStmt(n)
 	case *ast.AssignStmt:
-		if n.Tok == token.QUO_ASSIGN || n.Tok == token.REM_ASSIGN {
-			bld.maybePanic()
-		}
-
-		for _, x := range n.Rhs {
-			bld.walk(x)
-		}
-		for i, x := range n.Lhs {
-			if id, ok := ident(x); ok {
-				if n.Tok >= token.ADD_ASSIGN && n.Tok <= token.AND_NOT_ASSIGN {
-					bld.use(id)
-				}
-				// Don't treat explicit initialization to zero as assignment; it is often used as shorthand for a bare declaration.
-				if n.Tok == token.DEFINE && i < len(n.Rhs) && isZeroInitializer(n.Rhs[i]) {
-					bld.use(id)
-				} else {
-					bld.assign(id)
-				}
-			} else {
-				bld.walk(x)
-			}
-		}
+		bld.processAssignStmt(n)
 	case *ast.GenDecl:
-		if n.Tok == token.VAR {
-			for _, s := range n.Specs {
-				s, ok := s.(*ast.ValueSpec)
-				if !ok {
-					continue
-				}
-				for _, x := range s.Values {
-					bld.walk(x)
-				}
-				for _, id := range s.Names {
-					if len(s.Values) > 0 {
-						bld.assign(id)
-					} else {
-						bld.use(id)
-					}
-				}
-			}
-		}
+		bld.processGenDecl(n)
 	case *ast.IncDecStmt:
-		if id, ok := ident(n.X); ok {
-			bld.use(id)
-			bld.assign(id)
-		} else {
-			bld.walk(n.X)
-		}
+		bld.processIncDecStmt(n)
 	case *ast.Ident:
-		bld.use(n)
+		bld.processIdent(n)
 	case *ast.ReturnStmt:
-		for _, x := range n.Results {
-			bld.walk(x)
-		}
-		if res := bld.results[len(bld.results)-1]; res != nil {
-			for _, f := range res.List {
-				for _, id := range f.Names {
-					if n.Results != nil {
-						bld.assign(id)
-					}
-					bld.use(id)
-				}
-			}
-		}
-		bld.newBlock()
+		bld.processReturnStmt(n)
 	case *ast.SendStmt:
 		bld.maybePanic()
 		return bld
-
 	case *ast.BinaryExpr:
-		if n.Op == token.EQL || n.Op == token.QUO || n.Op == token.REM {
-			bld.maybePanic()
-		}
+		bld.processBinaryExpr(n)
 		return bld
 	case *ast.CallExpr:
 		bld.maybePanic()
@@ -234,36 +87,13 @@ func (bld *builder) Visit(n ast.Node) ast.Visitor {
 		bld.maybePanic()
 		return bld
 	case *ast.UnaryExpr:
-		id, ok := ident(n.X)
-		if ix, isIx := n.X.(*ast.IndexExpr); isIx {
-			// We don't care about indexing into slices, but without type information we can do no better.
-			id, ok = ident(ix.X)
-		}
-		if ok && n.Op == token.AND {
-			if v, ok := bld.vars[id.Obj]; ok {
-				v.escapes = true
-			}
-		}
+		bld.processUnaryExpr(n)
 		return bld
 	case *ast.SelectorExpr:
-		bld.maybePanic()
-		// A method call (possibly delayed via a method value) might implicitly take
-		// the address of its receiver, causing it to escape.
-		// We can't do any better here without knowing the variable's type.
-		if id, ok := ident(n.X); ok {
-			if v, ok := bld.vars[id.Obj]; ok {
-				v.escapes = true
-			}
-		}
+		bld.processSelectorExpr(n)
 		return bld
 	case *ast.SliceExpr:
-		bld.maybePanic()
-		// We don't care about slicing into slices, but without type information we can do no better.
-		if id, ok := ident(n.X); ok {
-			if v, ok := bld.vars[id.Obj]; ok {
-				v.escapes = true
-			}
-		}
+		bld.processSliceExpr(n)
 		return bld
 	case *ast.StarExpr:
 		bld.maybePanic()
@@ -276,6 +106,244 @@ func (bld *builder) Visit(n ast.Node) ast.Visitor {
 		return bld
 	}
 	return nil
+}
+
+func (bld *builder) processFuncDel(n *ast.FuncDecl) {
+	if n.Body != nil {
+		bld.fun(n.Type, n.Body)
+	}
+}
+
+func (bld *builder) processFuncLit(n *ast.FuncLit) {
+	bld.fun(n.Type, n.Body)
+}
+
+func (bld *builder) processIfStmt(n *ast.IfStmt) {
+	bld.walk(n.Init)
+	bld.walk(n.Cond)
+	b0 := bld.block
+	bld.newBlock(b0)
+	bld.walk(n.Body)
+	b1 := bld.block
+	if n.Else != nil {
+		bld.newBlock(b0)
+		bld.walk(n.Else)
+		b0 = bld.block
+	}
+	bld.newBlock(b0, b1)
+}
+
+func (bld *builder) processForStmt(n *ast.ForStmt) {
+	lbl := bld.stmtLabel(n)
+	brek := bld.breaks.push(lbl)
+	continu := bld.continues.push(lbl)
+	bld.walk(n.Init)
+	start := bld.newBlock(bld.block)
+	bld.walk(n.Cond)
+	cond := bld.block
+	bld.newBlock(cond)
+	bld.walk(n.Body)
+	continu.setDestination(bld.newBlock(bld.block))
+	bld.walk(n.Post)
+	bld.block.addChild(start)
+	brek.setDestination(bld.newBlock(cond))
+	bld.breaks.pop()
+	bld.continues.pop()
+}
+
+func (bld *builder) processRangeStmt(n *ast.RangeStmt) {
+	lbl := bld.stmtLabel(n)
+	brek := bld.breaks.push(lbl)
+	continu := bld.continues.push(lbl)
+	bld.walk(n.X)
+	pre := bld.newBlock(bld.block)
+	start := bld.newBlock(pre)
+	if n.Key != nil {
+		lhs := []ast.Expr{n.Key}
+		if n.Value != nil {
+			lhs = append(lhs, n.Value)
+		}
+		bld.walk(&ast.AssignStmt{Lhs: lhs, Tok: n.Tok, TokPos: n.TokPos, Rhs: []ast.Expr{&ast.Ident{NamePos: n.X.End()}}})
+	}
+	bld.walk(n.Body)
+	bld.block.addChild(start)
+	continu.setDestination(pre)
+	brek.setDestination(bld.newBlock(pre, bld.block))
+	bld.breaks.pop()
+	bld.continues.pop()
+}
+
+func (bld *builder) processSwitchStmt(n *ast.SwitchStmt) {
+	bld.walk(n.Init)
+	bld.walk(n.Tag)
+	bld.swtch(n, n.Body.List)
+}
+
+func (bld *builder) processTypeSwitchStmt(n *ast.TypeSwitchStmt) {
+	bld.walk(n.Init)
+	bld.walk(n.Assign)
+	bld.swtch(n, n.Body.List)
+}
+func (bld *builder) processSelectStmt(n *ast.SelectStmt) {
+	brek := bld.breaks.push(bld.stmtLabel(n))
+	for _, c := range n.Body.List {
+		c := c.(*ast.CommClause).Comm
+		if s, ok := c.(*ast.AssignStmt); ok {
+			bld.walk(s.Rhs[0])
+		} else {
+			bld.walk(c)
+		}
+	}
+	b0 := bld.block
+	exits := make([]*block, len(n.Body.List))
+	dfault := false
+	for i, c := range n.Body.List {
+		c, ok := c.(*ast.CommClause)
+		if !ok {
+			continue
+		}
+		bld.newBlock(b0)
+		bld.walk(c)
+		exits[i] = bld.block
+		dfault = dfault || c.Comm == nil
+	}
+	if !dfault {
+		exits = append(exits, b0)
+	}
+	brek.setDestination(bld.newBlock(exits...))
+	bld.breaks.pop()
+}
+func (bld *builder) processLabeledStmt(n *ast.LabeledStmt) {
+	bld.gotos.get(n.Label).setDestination(bld.newBlock(bld.block))
+	bld.labelStmt = n
+	bld.walk(n.Stmt)
+}
+func (bld *builder) processBranchStmt(n *ast.BranchStmt) {
+	switch n.Tok {
+	case token.BREAK:
+		bld.breaks.get(n.Label).addSource(bld.block)
+		bld.newBlock()
+	case token.CONTINUE:
+		bld.continues.get(n.Label).addSource(bld.block)
+		bld.newBlock()
+	case token.GOTO:
+		bld.gotos.get(n.Label).addSource(bld.block)
+		bld.newBlock()
+	}
+}
+func (bld *builder) processAssignStmt(n *ast.AssignStmt) {
+	if n.Tok == token.QUO_ASSIGN || n.Tok == token.REM_ASSIGN {
+		bld.maybePanic()
+	}
+
+	for _, x := range n.Rhs {
+		bld.walk(x)
+	}
+	for i, x := range n.Lhs {
+		if id, ok := ident(x); ok {
+			if n.Tok >= token.ADD_ASSIGN && n.Tok <= token.AND_NOT_ASSIGN {
+				bld.use(id)
+			}
+			// Don't treat explicit initialization to zero as assignment; it is often used as shorthand for a bare declaration.
+			if n.Tok == token.DEFINE && i < len(n.Rhs) && isZeroInitializer(n.Rhs[i]) {
+				bld.use(id)
+			} else {
+				bld.assign(id)
+			}
+		} else {
+			bld.walk(x)
+		}
+	}
+}
+func (bld *builder) processGenDecl(n *ast.GenDecl) {
+	if n.Tok == token.VAR {
+		for _, s := range n.Specs {
+			s, ok := s.(*ast.ValueSpec)
+			if !ok {
+				continue
+			}
+			for _, x := range s.Values {
+				bld.walk(x)
+			}
+			for _, id := range s.Names {
+				if len(s.Values) > 0 {
+					bld.assign(id)
+				} else {
+					bld.use(id)
+				}
+			}
+		}
+	}
+}
+func (bld *builder) processIncDecStmt(n *ast.IncDecStmt) {
+	if id, ok := ident(n.X); ok {
+		bld.use(id)
+		bld.assign(id)
+	} else {
+		bld.walk(n.X)
+	}
+}
+
+func (bld *builder) processIdent(n *ast.Ident) {
+	bld.use(n)
+}
+
+func (bld *builder) processReturnStmt(n *ast.ReturnStmt) {
+	for _, x := range n.Results {
+		bld.walk(x)
+	}
+	if res := bld.results[len(bld.results)-1]; res != nil {
+		for _, f := range res.List {
+			for _, id := range f.Names {
+				if n.Results != nil {
+					bld.assign(id)
+				}
+				bld.use(id)
+			}
+		}
+	}
+	bld.newBlock()
+}
+
+func (bld *builder) processBinaryExpr(n *ast.BinaryExpr) {
+	if n.Op == token.EQL || n.Op == token.QUO || n.Op == token.REM {
+		bld.maybePanic()
+	}
+}
+
+func (bld *builder) processUnaryExpr(n *ast.UnaryExpr) {
+	id, ok := ident(n.X)
+	if ix, isIx := n.X.(*ast.IndexExpr); isIx {
+		// We don't care about indexing into slices, but without type information we can do no better.
+		id, ok = ident(ix.X)
+	}
+	if ok && n.Op == token.AND {
+		if v, ok := bld.vars[id.Obj]; ok {
+			v.escapes = true
+		}
+	}
+}
+
+func (bld *builder) processSelectorExpr(n *ast.SelectorExpr) {
+	bld.maybePanic()
+	// A method call (possibly delayed via a method value) might implicitly take
+	// the address of its receiver, causing it to escape.
+	// We can't do any better here without knowing the variable's type.
+	if id, ok := ident(n.X); ok {
+		if v, ok := bld.vars[id.Obj]; ok {
+			v.escapes = true
+		}
+	}
+}
+
+func (bld *builder) processSliceExpr(n *ast.SliceExpr) {
+	bld.maybePanic()
+	// We don't care about slicing into slices, but without type information we can do no better.
+	if id, ok := ident(n.X); ok {
+		if v, ok := bld.vars[id.Obj]; ok {
+			v.escapes = true
+		}
+	}
 }
 
 func isZeroInitializer(x ast.Expr) bool {
