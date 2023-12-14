@@ -59,7 +59,7 @@ func DeterministicDepositsAndKeys(numDeposits uint64) ([]*ethpb.Deposit, []bls.S
 		// Create the new deposits and add them to the trie.
 		for i := uint64(0); i < numRequired; i++ {
 			balance := params.BeaconConfig().MaxEffectiveBalance
-			initTxHash := RandomData(32)
+			initTxHash := make([]byte, 32)
 			deposit, err := signedDeposit(secretKeys[i], publicKeys[i].Marshal(), publicKeys[i+1].Marshal(), balance, initTxHash)
 			if err != nil {
 				return nil, nil, errors.Wrap(err, "could not create signed deposit")
@@ -132,7 +132,7 @@ func DepositsWithBalance(balances []uint64) ([]*ethpb.Deposit, *trie.SparseMerkl
 		if len(balances) == int(numDeposits) {
 			balance = balances[i]
 		}
-		initTxHash := RandomData(32)
+		initTxHash := make([]byte, 32)
 		deposit, err := signedDeposit(secretKeys[i], publicKeys[i].Marshal(), publicKeys[i+1].Marshal(), balance, initTxHash)
 		if err != nil {
 			return nil, nil, errors.Wrap(err, "could not create signed deposit")
@@ -372,6 +372,7 @@ func DeterministicDepositsAndKeysSameValidator(numDeposits uint64) ([]*ethpb.Dep
 				CreatorAddress:        depositMessage.CreatorAddress,
 				WithdrawalCredentials: depositMessage.WithdrawalCredentials,
 				Signature:             secretKeys[1].Sign(sigRoot[:]).Marshal(),
+				InitTxHash:            make([]byte, 32),
 			}
 			deposit := &ethpb.Deposit{
 				Data: depositData,

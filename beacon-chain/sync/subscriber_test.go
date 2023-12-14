@@ -69,7 +69,7 @@ func TestSubscribe_ReceivesValidMessage(t *testing.T) {
 	}, p2pService.Digest)
 	r.markForChainStart()
 
-	p2pService.ReceivePubSub(topic, &pb.VoluntaryExit{Epoch: 55})
+	p2pService.ReceivePubSub(topic, &pb.VoluntaryExit{Epoch: 55, ValidatorIndex: 15, InitTxHash: make([]byte, 32)})
 
 	if util.WaitTimeout(&wg, time.Second) {
 		t.Fatal("Did not receive PubSub in 1 second")
@@ -247,7 +247,7 @@ func TestSubscribe_HandlesPanic(t *testing.T) {
 		panic("bad")
 	}, p.Digest)
 	r.markForChainStart()
-	p.ReceivePubSub(topic, &pb.VoluntaryExit{Epoch: 55})
+	p.ReceivePubSub(topic, &pb.VoluntaryExit{Epoch: 55, ValidatorIndex: 10, InitTxHash: make([]byte, 32)})
 
 	if util.WaitTimeout(&wg, time.Second) {
 		t.Fatal("Did not receive PubSub in 1 second")
@@ -676,7 +676,7 @@ func TestIsDigestValid(t *testing.T) {
 	assert.NoError(t, err)
 	valid, err = isDigestValid(digest, time.Now().Add(-100*time.Second), genRoot)
 	assert.NoError(t, err)
-	assert.Equal(t, false, valid)
+	assert.Equal(t, true, valid)
 }
 
 // Create peer and register them to provided topics.

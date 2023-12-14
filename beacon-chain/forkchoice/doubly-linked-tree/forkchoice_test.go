@@ -3,6 +3,8 @@ package doublylinkedtree
 import (
 	"context"
 	"encoding/binary"
+	"fmt"
+	types "github.com/prysmaticlabs/eth2-types"
 	"testing"
 
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
@@ -189,4 +191,90 @@ func indexToHash(i uint64) [32]byte {
 	var b [8]byte
 	binary.LittleEndian.PutUint64(b[:], i)
 	return hash.Hash(b[:])
+}
+
+func TestForkChoice_InsertOptimisticBlock(t *testing.T) {
+	const (
+		justifiedEpoch = 1
+		finalizedEpoch = 1
+	)
+
+	testCases := []struct {
+		slot       types.Slot
+		blockRoot  [32]byte
+		parentRoot [32]byte
+	}{
+		{
+			slot:       100,
+			blockRoot:  [32]byte{'a'},
+			parentRoot: params.BeaconConfig().ZeroHash,
+		},
+		{
+			slot:       101,
+			blockRoot:  [32]byte{'b'},
+			parentRoot: [32]byte{'a'},
+		},
+		{
+			slot:       102,
+			blockRoot:  [32]byte{'b'},
+			parentRoot: [32]byte{'c'},
+		},
+		{
+			slot:       103,
+			blockRoot:  [32]byte{'c'},
+			parentRoot: [32]byte{'d'},
+		},
+		{
+			slot:       104,
+			blockRoot:  [32]byte{'d'},
+			parentRoot: [32]byte{'e'},
+		},
+		{
+			slot:       105,
+			blockRoot:  [32]byte{'e'},
+			parentRoot: [32]byte{'f'},
+		},
+		{
+			slot:       106,
+			blockRoot:  [32]byte{'f'},
+			parentRoot: [32]byte{'g'},
+		},
+		{
+			slot:       107,
+			blockRoot:  [32]byte{'g'},
+			parentRoot: [32]byte{'h'},
+		},
+		{
+			slot:       108,
+			blockRoot:  [32]byte{'h'},
+			parentRoot: [32]byte{'i'},
+		},
+		{
+			slot:       109,
+			blockRoot:  [32]byte{'i'},
+			parentRoot: [32]byte{'j'},
+		},
+		{
+			slot:       102,
+			blockRoot:  [32]byte{'j'},
+			parentRoot: [32]byte{'k'},
+		},
+	}
+
+	f := setup(justifiedEpoch, finalizedEpoch)
+	ctx := context.Background()
+
+	for i, testCase := range testCases {
+		t.Run(fmt.Sprintf("testCase %d", i), func(t *testing.T) {
+			require.NoError(t, f.InsertOptimisticBlock(ctx,
+				testCase.slot,
+				testCase.blockRoot,
+				testCase.parentRoot,
+				justifiedEpoch,
+				finalizedEpoch,
+				params.BeaconConfig().ZeroHash[:],
+				params.BeaconConfig().ZeroHash[:],
+				nil))
+		})
+	}
 }

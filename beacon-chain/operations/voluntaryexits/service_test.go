@@ -44,7 +44,12 @@ func TestPool_InsertVoluntaryExit(t *testing.T) {
 			args: args{
 				exit: &ethpb.VoluntaryExit{},
 			},
-			want: []*ethpb.VoluntaryExit{},
+			want: []*ethpb.VoluntaryExit{
+				{
+					Epoch:          0,
+					ValidatorIndex: 0,
+				},
+			},
 		},
 		{
 			name: "Empty list",

@@ -10,7 +10,7 @@ func (b *BeaconState) SpineData() *ethpb.SpineData {
 		return nil
 	}
 	if b.state.SpineData == nil {
-		return nil
+		return &ethpb.SpineData{}
 	}
 
 	b.lock.RLock()

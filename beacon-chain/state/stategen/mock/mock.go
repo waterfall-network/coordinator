@@ -23,6 +23,11 @@ func NewMockService() *MockStateManager {
 	}
 }
 
+func (_ *MockStateManager) SyncStateByRoot(ctx context.Context, blockRoot [32]byte) (state.BeaconState, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 // StateByRootIfCachedNoCopy
 func (_ *MockStateManager) StateByRootIfCachedNoCopy(_ [32]byte) state.BeaconState {
 	panic("implement me")

@@ -3,6 +3,7 @@ package validator
 import (
 	"context"
 	"fmt"
+	"github.com/golang/mock/gomock"
 	"strconv"
 	"testing"
 	"time"
@@ -99,12 +100,12 @@ func TestGetAttesterDuties(t *testing.T) {
 		require.Equal(t, 1, len(resp.Data))
 		duty := resp.Data[0]
 		assert.Equal(t, types.CommitteeIndex(1), duty.CommitteeIndex)
-		assert.Equal(t, types.Slot(0), duty.Slot)
+		assert.Equal(t, types.Slot(29), duty.Slot)
 		assert.Equal(t, types.ValidatorIndex(0), duty.ValidatorIndex)
 		assert.DeepEqual(t, pubKeys[0], duty.Pubkey)
 		assert.Equal(t, uint64(171), duty.CommitteeLength)
 		assert.Equal(t, uint64(3), duty.CommitteesAtSlot)
-		assert.Equal(t, types.CommitteeIndex(80), duty.ValidatorCommitteeIndex)
+		assert.Equal(t, types.CommitteeIndex(124), duty.ValidatorCommitteeIndex)
 	})
 
 	t.Run("Multiple validators", func(t *testing.T) {
@@ -127,13 +128,13 @@ func TestGetAttesterDuties(t *testing.T) {
 		assert.DeepEqual(t, genesisRoot[:], resp.DependentRoot)
 		require.Equal(t, 1, len(resp.Data))
 		duty := resp.Data[0]
-		assert.Equal(t, types.CommitteeIndex(0), duty.CommitteeIndex)
-		assert.Equal(t, types.Slot(62), duty.Slot)
+		assert.Equal(t, types.CommitteeIndex(1), duty.CommitteeIndex)
+		assert.Equal(t, types.Slot(45), duty.Slot)
 		assert.Equal(t, types.ValidatorIndex(0), duty.ValidatorIndex)
 		assert.DeepEqual(t, pubKeys[0], duty.Pubkey)
 		assert.Equal(t, uint64(170), duty.CommitteeLength)
 		assert.Equal(t, uint64(3), duty.CommitteesAtSlot)
-		assert.Equal(t, types.CommitteeIndex(110), duty.ValidatorCommitteeIndex)
+		assert.Equal(t, types.CommitteeIndex(50), duty.ValidatorCommitteeIndex)
 	})
 
 	t.Run("Require slot processing", func(t *testing.T) {
@@ -176,12 +177,12 @@ func TestGetAttesterDuties(t *testing.T) {
 		require.Equal(t, 1, len(resp.Data))
 		duty := resp.Data[0]
 		assert.Equal(t, types.CommitteeIndex(1), duty.CommitteeIndex)
-		assert.Equal(t, types.Slot(86), duty.Slot)
+		assert.Equal(t, types.Slot(77), duty.Slot)
 		assert.Equal(t, types.ValidatorIndex(0), duty.ValidatorIndex)
 		assert.DeepEqual(t, pubKeys[0], duty.Pubkey)
 		assert.Equal(t, uint64(128), duty.CommitteeLength)
 		assert.Equal(t, uint64(4), duty.CommitteesAtSlot)
-		assert.Equal(t, types.CommitteeIndex(44), duty.ValidatorCommitteeIndex)
+		assert.Equal(t, types.CommitteeIndex(126), duty.ValidatorCommitteeIndex)
 	})
 
 	t.Run("Epoch out of bound", func(t *testing.T) {
@@ -658,6 +659,12 @@ func TestProduceBlock(t *testing.T) {
 	require.NoError(t, err, "Could not hash genesis state")
 
 	genesis := blocks.NewGenesisBlock(stateRoot[:])
+	genesisRoot, err := genesis.HashTreeRoot()
+	require.NoError(t, err)
+
+	err = db.SaveGenesisBlockRoot(ctx, genesisRoot)
+	require.NoError(t, err)
+
 	wsb, err := wrapper.WrappedSignedBeaconBlock(genesis)
 	require.NoError(t, err)
 	require.NoError(t, db.SaveBlock(ctx, wsb), "Could not save genesis block")
@@ -667,8 +674,16 @@ func TestProduceBlock(t *testing.T) {
 	require.NoError(t, db.SaveState(ctx, beaconState, parentRoot), "Could not save genesis state")
 	require.NoError(t, db.SaveHeadBlockRoot(ctx, parentRoot), "Could not save genesis state")
 
+	ctrl := gomock.NewController(t)
+	forkchoiceMock := mockChain.NewMockForkChoicer(ctrl)
+
+	forkchoiceMock.EXPECT().GetParentByOptimisticSpines(gomock.AssignableToTypeOf(context.WithValue(context.Background(), "key", "value")),
+		gomock.AssignableToTypeOf([]common.HashArray{}),
+		gomock.AssignableToTypeOf([32]byte{}),
+	).Return(parentRoot, nil)
+
 	v1Alpha1Server := &v1alpha1validator.Server{
-		HeadFetcher:       &mockChain.ChainService{State: beaconState, Root: parentRoot[:]},
+		HeadFetcher:       &mockChain.ChainService{State: beaconState, Root: parentRoot[:], ForkChoiceStore: forkchoiceMock},
 		SyncChecker:       &mockSync.Sync{IsSyncing: false},
 		BlockReceiver:     &mockChain.ChainService{},
 		ChainStartFetcher: &mockPOW.POWChain{},
@@ -680,6 +695,7 @@ func TestProduceBlock(t *testing.T) {
 		ExitPool:          voluntaryexits.NewPool(),
 		WithdrawalPool:    withdrawals.NewPool(),
 		StateGen:          stategen.New(db),
+		BeaconDB:          db,
 	}
 
 	proposerSlashings := make([]*ethpbalpha.ProposerSlashing, params.BeaconConfig().MaxProposerSlashings)

@@ -181,7 +181,7 @@ func TestService_removeInvalidBlockAndState(t *testing.T) {
 	require.NoError(t, err)
 	r1, err := blk1.Block().HashTreeRoot()
 	require.NoError(t, err)
-	st, _ := util.DeterministicGenesisStateBellatrix(t, 1)
+	st, _ := util.DeterministicGenesisStateAltair(t, 1)
 	require.NoError(t, service.cfg.BeaconDB.SaveBlock(ctx, blk1))
 	require.NoError(t, service.cfg.BeaconDB.SaveStateSummary(ctx, &ethpb.StateSummary{
 		Slot: 1,

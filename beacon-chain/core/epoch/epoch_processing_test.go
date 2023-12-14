@@ -195,9 +195,8 @@ func TestProcessSlashings_SlashedLess(t *testing.T) {
 				Balances:  []uint64{params.BeaconConfig().MaxEffectiveBalance, params.BeaconConfig().MaxEffectiveBalance},
 				Slashings: []uint64{0, 1e9},
 			},
-			// penalty    = validator balance / increment * (2*total_penalties) / total_balance * increment
-			// 1000000000 = (32 * 1e9)        / (1 * 1e9) * (1*1e9)             / (32*1e9)      * (1 * 1e9)
-			want: uint64(31000000000), // 32 * 1e9 - 1000000000
+
+			want: uint64(3200000000000),
 		},
 		{
 			state: &ethpb.BeaconState{
@@ -223,9 +222,8 @@ func TestProcessSlashings_SlashedLess(t *testing.T) {
 				Balances:  []uint64{params.BeaconConfig().MaxEffectiveBalance, params.BeaconConfig().MaxEffectiveBalance},
 				Slashings: []uint64{0, 1e9},
 			},
-			// penalty    = validator balance / increment * (2*total_penalties) / total_balance * increment
-			// 500000000 = (32 * 1e9)        / (1 * 1e9) * (1*1e9)             / (32*1e9)      * (1 * 1e9)
-			want: uint64(32000000000), // 32 * 1e9 - 500000000
+
+			want: uint64(3200000000000),
 		},
 		{
 			state: &ethpb.BeaconState{
@@ -251,9 +249,8 @@ func TestProcessSlashings_SlashedLess(t *testing.T) {
 				Balances:  []uint64{params.BeaconConfig().MaxEffectiveBalance, params.BeaconConfig().MaxEffectiveBalance},
 				Slashings: []uint64{0, 2 * 1e9},
 			},
-			// penalty    = validator balance / increment * (3*total_penalties) / total_balance * increment
-			// 1000000000 = (32 * 1e9)        / (1 * 1e9) * (1*2e9)             / (64*1e9)      * (1 * 1e9)
-			want: uint64(31000000000), // 32 * 1e9 - 1000000000
+
+			want: uint64(3200000000000),
 		},
 		{
 			state: &ethpb.BeaconState{
@@ -273,9 +270,8 @@ func TestProcessSlashings_SlashedLess(t *testing.T) {
 				Balances:  []uint64{params.BeaconConfig().MaxEffectiveBalance - params.BeaconConfig().EffectiveBalanceIncrement, params.BeaconConfig().MaxEffectiveBalance - params.BeaconConfig().EffectiveBalanceIncrement},
 				Slashings: []uint64{0, 1e9},
 			},
-			// penalty    = validator balance           / increment * (3*total_penalties) / total_balance        * increment
-			// 2000000000 = (32  * 1e9 - 1*1e9)         / (1 * 1e9) * (2*1e9)             / (31*1e9)             * (1 * 1e9)
-			want: uint64(30000000000), // 32 * 1e9 - 2000000000
+
+			want: uint64(3100000000000),
 		},
 	}
 
@@ -298,8 +294,8 @@ func TestProcessFinalUpdates_CanProcess(t *testing.T) {
 	ne := ce + 1
 	require.NoError(t, s.SetEth1DataVotes([]*ethpb.Eth1Data{}))
 	balances := s.Balances()
-	balances[0] = 31.75 * 1e9
-	balances[1] = 31.74 * 1e9
+	balances[0] = 3175 * 1e9
+	balances[1] = 3174 * 1e9
 	require.NoError(t, s.SetBalances(balances))
 
 	slashings := s.Slashings()
@@ -313,7 +309,7 @@ func TestProcessFinalUpdates_CanProcess(t *testing.T) {
 
 	// Verify effective balance is correctly updated.
 	assert.Equal(t, params.BeaconConfig().MaxEffectiveBalance, newS.Validators()[0].EffectiveBalance, "Effective balance incorrectly updated")
-	assert.Equal(t, uint64(31*1e9), newS.Validators()[1].EffectiveBalance, "Effective balance incorrectly updated")
+	assert.Equal(t, uint64(3100*1e9), newS.Validators()[1].EffectiveBalance, "Effective balance incorrectly updated")
 
 	// Verify slashed balances correctly updated.
 	assert.Equal(t, newS.Slashings()[ce], newS.Slashings()[ne], "Unexpected slashed balance")

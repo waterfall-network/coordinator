@@ -147,7 +147,7 @@ func TestGenerateFullBlock_ValidDeposits(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, beaconState.SetEth1Data(eth1Data))
 	conf := &BlockGenConfig{
-		NumDeposits: 1,
+		NumDeposits: 16,
 	}
 	block, err := GenerateFullBlock(beaconState, privs, conf, beaconState.Slot())
 	require.NoError(t, err)
@@ -184,7 +184,7 @@ func TestGenerateFullBlock_ValidVoluntaryExits(t *testing.T) {
 	beaconState, err = transition.ExecuteStateTransition(context.Background(), beaconState, wsb)
 	require.NoError(t, err)
 
-	exitedIndex := block.Block.Body.VoluntaryExits[0].Exit.ValidatorIndex
+	exitedIndex := block.Block.Body.VoluntaryExits[0].ValidatorIndex
 
 	val, err := beaconState.ValidatorAtIndexReadOnly(exitedIndex)
 	require.NoError(t, err)

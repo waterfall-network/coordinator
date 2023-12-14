@@ -14,6 +14,16 @@ type PoolMock struct {
 	Exits []*eth.VoluntaryExit
 }
 
+func (m *PoolMock) OnSlot(st state.ReadOnlyBeaconState) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *PoolMock) Verify(exit *eth.VoluntaryExit) error {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (m *PoolMock) InsertVoluntaryExitByGwat(ctx context.Context, exit *eth.VoluntaryExit) {
 	m.Exits = append(m.Exits, exit)
 }

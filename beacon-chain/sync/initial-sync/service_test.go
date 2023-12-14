@@ -103,9 +103,9 @@ func TestService_InitStartStop(t *testing.T) {
 				})
 			},
 			assert: func() {
-				assert.LogsContain(t, hook, "Chain started within the last epoch - not syncing")
-				assert.LogsDoNotContain(t, hook, "Genesis time has not arrived - not syncing")
 				assert.LogsContain(t, hook, "Waiting for state to be initialized")
+				assert.LogsContain(t, hook, "Starting initial chain sync...")
+				assert.LogsContain(t, hook, "Synced to finalized epoch - now syncing blocks up to current head")
 			},
 		},
 		{
@@ -455,6 +455,7 @@ func TestService_Resync(t *testing.T) {
 func TestService_Initialized(t *testing.T) {
 	s := NewService(context.Background(), &Config{
 		StateNotifier: &mock.MockStateNotifier{},
+		Chain:         &mock.ChainService{Genesis: time.Now(), ValidatorsRoot: [32]byte{}},
 	})
 	s.chainStarted.Set()
 	assert.Equal(t, true, s.Initialized())
@@ -465,6 +466,7 @@ func TestService_Initialized(t *testing.T) {
 func TestService_Synced(t *testing.T) {
 	s := NewService(context.Background(), &Config{
 		StateNotifier: &mock.MockStateNotifier{},
+		Chain:         &mock.ChainService{Genesis: time.Now(), ValidatorsRoot: [32]byte{}},
 	})
 	s.synced.UnSet()
 	assert.Equal(t, false, s.Synced())

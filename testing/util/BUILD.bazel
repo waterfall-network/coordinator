@@ -7,7 +7,6 @@ go_library(
         "altair.go",
         "attestation.go",
         "bazel.go",
-        "bellatrix.go",
         "bellatrix_state.go",
         "block.go",
         "deposits.go",

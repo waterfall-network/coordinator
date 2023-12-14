@@ -1407,7 +1407,6 @@ func TestOnBlock_CallNewPayloadAndForkchoiceUpdated(t *testing.T) {
 	params.SetupTestConfigCleanup(t)
 	config := params.BeaconConfig()
 	config.AltairForkEpoch = 1
-	config.BellatrixForkEpoch = 2
 	params.OverrideBeaconConfig(config)
 
 	ctx := context.Background()

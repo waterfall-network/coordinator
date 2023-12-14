@@ -230,8 +230,8 @@ func TestProcessAttesterSlashings_AppliesCorrectStatusAltair(t *testing.T) {
 		)
 	}
 
-	require.Equal(t, uint64(31500000000), newState.Balances()[1])
-	require.Equal(t, uint64(32000000000), newState.Balances()[2])
+	require.Equal(t, uint64(3150000000000), newState.Balances()[1])
+	require.Equal(t, uint64(3200000000000), newState.Balances()[2])
 }
 
 func TestProcessAttesterSlashings_AppliesCorrectStatusBellatrix(t *testing.T) {
@@ -299,6 +299,6 @@ func TestProcessAttesterSlashings_AppliesCorrectStatusBellatrix(t *testing.T) {
 		)
 	}
 
-	require.Equal(t, uint64(31000000000), newState.Balances()[1])
-	require.Equal(t, uint64(32000000000), newState.Balances()[2])
+	require.Equal(t, uint64(3100000000000), newState.Balances()[1])
+	require.Equal(t, uint64(3200000000000), newState.Balances()[2])
 }

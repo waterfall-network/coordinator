@@ -177,6 +177,7 @@ func GenerateFullBlock(
 		Slot:          slot,
 		ParentRoot:    parentRoot[:],
 		ProposerIndex: idx,
+		StateRoot:     prevStateRoot[:],
 		Body: &ethpb.BeaconBlockBody{
 			Eth1Data:          eth1Data,
 			RandaoReveal:      reveal,

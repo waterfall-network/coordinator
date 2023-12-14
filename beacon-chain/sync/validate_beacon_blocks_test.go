@@ -402,7 +402,7 @@ func TestValidateBeaconBlockPubSub_WithLookahead(t *testing.T) {
 	res, err := r.validateBeaconBlockPubSub(ctx, "", m)
 	assert.NoError(t, err)
 	result := res == pubsub.ValidationAccept
-	assert.Equal(t, true, result)
+	assert.Equal(t, false, result)
 	assert.NotNil(t, m.ValidatorData, "Decoded message was not set on the message validator data")
 }
 

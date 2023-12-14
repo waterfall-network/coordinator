@@ -7,7 +7,7 @@ import (
 // SpineData obtain spine information stored in the beacon state.
 func (b *BeaconState) SpineData() *ethpb.SpineData {
 	if b.spineData == nil {
-		return nil
+		return &ethpb.SpineData{}
 	}
 	b.lock.RLock()
 	defer b.lock.RUnlock()

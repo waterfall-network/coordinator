@@ -185,8 +185,8 @@ func TestProcessProposerSlashings_AppliesCorrectStatus(t *testing.T) {
 			newStateVals[1].ExitEpoch, beaconState.Validators()[1].ExitEpoch)
 	}
 
-	require.Equal(t, uint64(31750000000), newState.Balances()[1])
-	require.Equal(t, uint64(32000000000), newState.Balances()[2])
+	require.Equal(t, uint64(3175000000000), newState.Balances()[1])
+	require.Equal(t, uint64(3206250000000), newState.Balances()[2])
 }
 
 func TestProcessProposerSlashings_AppliesCorrectStatusAltair(t *testing.T) {
@@ -233,8 +233,8 @@ func TestProcessProposerSlashings_AppliesCorrectStatusAltair(t *testing.T) {
 			newStateVals[1].ExitEpoch, beaconState.Validators()[1].ExitEpoch)
 	}
 
-	require.Equal(t, uint64(31500000000), newState.Balances()[1])
-	require.Equal(t, uint64(32000000000), newState.Balances()[2])
+	require.Equal(t, uint64(3150000000000), newState.Balances()[1])
+	require.Equal(t, uint64(3206250000000), newState.Balances()[2])
 }
 
 func TestProcessProposerSlashings_AppliesCorrectStatusBellatrix(t *testing.T) {
@@ -281,8 +281,8 @@ func TestProcessProposerSlashings_AppliesCorrectStatusBellatrix(t *testing.T) {
 			newStateVals[1].ExitEpoch, beaconState.Validators()[1].ExitEpoch)
 	}
 
-	require.Equal(t, uint64(31000000000), newState.Balances()[1])
-	require.Equal(t, uint64(32000000000), newState.Balances()[2])
+	require.Equal(t, uint64(3100000000000), newState.Balances()[1])
+	require.Equal(t, uint64(3206250000000), newState.Balances()[2])
 }
 
 func TestVerifyProposerSlashing(t *testing.T) {

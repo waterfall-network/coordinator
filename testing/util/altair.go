@@ -177,6 +177,14 @@ func buildGenesisBeaconState(genesisTime uint64, preState state.BeaconStateAltai
 		Eth1DataVotes:    make([]*ethpb.Eth1Data, 0),
 		BlockVoting:      make([]*ethpb.BlockVoting, 0),
 		Eth1DepositIndex: preState.Eth1DepositIndex(),
+
+		SpineData: &ethpb.SpineData{
+			Spines:       make([]byte, 0),
+			Prefix:       make([]byte, 0),
+			Finalization: make([]byte, 0),
+			CpFinalized:  make([]byte, 0),
+			ParentSpines: make([]*ethpb.SpinesSeq, 0),
+		},
 	}
 
 	bodyRoot, err := (&ethpb.BeaconBlockBodyAltair{
