@@ -86,7 +86,7 @@ release tag:
       - dist/coordinator-bootnode
       - dist/coordinator-genesis
 
-cache:
-  key: bazel_cache
-  paths:
-    - .cache/
+# cache:
+#   key: bazel_cache
+#   paths:
+#     - .cache/
