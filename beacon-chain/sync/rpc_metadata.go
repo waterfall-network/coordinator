@@ -89,7 +89,7 @@ func (s *Service) sendMetaDataRequest(ctx context.Context, id peer.ID) (metadata
 	ctx, cancel := context.WithTimeout(ctx, respTimeout)
 	defer cancel()
 
-	topic, err := p2p.TopicFromMessage(p2p.MetadataMessageName, slots.ToEpoch(s.cfg.chain.CurrentSlot())) // nolint
+	topic, err := p2p.TopicFromMessage(p2p.MetadataMessageName, slots.ToEpoch(s.cfg.chain.CurrentSlot()))
 	if err != nil {
 		return nil, err
 	}
@@ -103,10 +103,11 @@ func (s *Service) sendMetaDataRequest(ctx context.Context, id peer.ID) (metadata
 		return nil, err
 	}
 	if code != 0 {
+		log.WithField("fn", "sendMetaDataRequest").WithField("peer", id.String()).WithField("code", code).WithError(err).Debug("Disconnect: incr BadResponses")
 		s.cfg.p2p.Peers().Scorers().BadResponsesScorer().Increment(stream.Conn().RemotePeer())
 		return nil, errors.New(errMsg)
 	}
-	valRoot := s.cfg.chain.GenesisValidatorsRoot() // nolint
+	valRoot := s.cfg.chain.GenesisValidatorsRoot()
 	rpcCtx, err := forks.ForkDigestFromEpoch(slots.ToEpoch(s.cfg.chain.CurrentSlot()), valRoot[:])
 	if err != nil {
 		return nil, err

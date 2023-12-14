@@ -21,14 +21,14 @@ func (s *Service) committeeIndexBeaconAttestationSubscriber(_ context.Context, m
 		logrus.WithError(
 			fmt.Errorf("message was not type *eth.Attestation, type=%T", msg),
 		).WithFields(logrus.Fields{
-			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())), // nolint
+			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
 		}).Error("Atts: incoming: handler: bad type")
 		return fmt.Errorf("message was not type *eth.Attestation, type=%T", msg)
 	}
 
 	if a.Data == nil {
 		logrus.WithError(errors.New("nil attestation")).WithFields(logrus.Fields{
-			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())), // nolint
+			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
 		}).Error("Atts: incoming: handler: nil data")
 		return errors.New("nil attestation")
 	}
@@ -37,7 +37,7 @@ func (s *Service) committeeIndexBeaconAttestationSubscriber(_ context.Context, m
 	exists, err := s.cfg.attPool.HasAggregatedAttestation(a)
 	if err != nil {
 		logrus.WithError(err).WithFields(logrus.Fields{
-			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())), // nolint
+			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
 		}).Error("Atts: incoming: handler: Could not determine if attestation pool has this atttestation")
 		return errors.Wrap(err, "Could not determine if attestation pool has this atttestation")
 	}
@@ -46,7 +46,7 @@ func (s *Service) committeeIndexBeaconAttestationSubscriber(_ context.Context, m
 	}
 
 	log.WithFields(logrus.Fields{
-		"curSlot":       slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())), // nolint
+		"curSlot":       slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
 		"pv.AggrBits":   fmt.Sprintf("%#x", a.AggregationBits),
 		"pv.Data.Slot":  a.Data.Slot,
 		"pv.Data.Index": fmt.Sprintf("%#x", a.Data.BeaconBlockRoot),

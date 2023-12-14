@@ -36,6 +36,7 @@ func (s *Service) beaconBlocksByRangeRPCHandler(ctx context.Context, msg interfa
 	}
 	if err := s.validateRangeRequest(m); err != nil {
 		s.writeErrorResponseToStream(responseCodeInvalidRequest, err.Error(), stream)
+		log.WithField("fn", "beaconBlocksByRangeRPCHandler").WithField("peer", stream.Conn().RemotePeer().String()).WithError(err).Debug("Disconnect: incr BadResponses")
 		s.cfg.p2p.Peers().Scorers().BadResponsesScorer().Increment(stream.Conn().RemotePeer())
 		tracing.AnnotateError(span, err)
 		return err
@@ -183,7 +184,7 @@ func (s *Service) validateRangeRequest(r *pb.BeaconBlocksByRangeRequest) error {
 	// Add a buffer for possible large range requests from nodes syncing close to the
 	// head of the chain.
 	buffer := rangeLimit * 2
-	highestExpectedSlot := s.cfg.chain.CurrentSlot().Add(uint64(buffer)) // nolint
+	highestExpectedSlot := s.cfg.chain.CurrentSlot().Add(uint64(buffer))
 
 	// Ensure all request params are within appropriate bounds
 	if count == 0 || count > maxRequestBlocks {
@@ -215,7 +216,7 @@ func (s *Service) filterBlocks(ctx context.Context, blks []block.SignedBeaconBlo
 
 	newBlks := make([]block.SignedBeaconBlock, 0, len(blks))
 	for i, b := range blks {
-		isCanonical, err := s.cfg.chain.IsCanonical(ctx, roots[i]) // nolint
+		isCanonical, err := s.cfg.chain.IsCanonical(ctx, roots[i])
 		if err != nil {
 			return nil, err
 		}

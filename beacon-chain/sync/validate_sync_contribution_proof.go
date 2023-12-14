@@ -55,7 +55,7 @@ func (s *Service) validateSyncContributionAndProof(ctx context.Context, pid peer
 
 	// We should not attempt to process this message if the node is running in optimistic mode.
 	// We just ignore in p2p so that the peer is not penalized.
-	optimistic, err := s.cfg.chain.IsOptimistic(ctx) // nolint
+	optimistic, err := s.cfg.chain.IsOptimistic(ctx)
 	if err != nil {
 		return pubsub.ValidationReject, err
 	}
@@ -70,7 +70,7 @@ func (s *Service) validateSyncContributionAndProof(ctx context.Context, pid peer
 	}
 
 	// The contribution's slot is for the current slot (with a `MAXIMUM_GOSSIP_CLOCK_DISPARITY` allowance).
-	if err := altair.ValidateSyncMessageTime(m.Message.Contribution.Slot, s.cfg.chain.GenesisTime(), params.BeaconNetworkConfig().MaximumGossipClockDisparity); err != nil { // nolint
+	if err := altair.ValidateSyncMessageTime(m.Message.Contribution.Slot, s.cfg.chain.GenesisTime(), params.BeaconNetworkConfig().MaximumGossipClockDisparity); err != nil {
 		tracing.AnnotateError(span, err)
 		return pubsub.ValidationIgnore, err
 	}
@@ -173,7 +173,7 @@ func (s *Service) rejectInvalidIndexInSubCommittee(m *ethpb.SignedContributionAn
 		_, span := trace.StartSpan(ctx, "sync.rejectInvalidIndexInSubCommittee")
 		defer span.End()
 		// The aggregator's validator index is in the declared subcommittee of the current sync committee.
-		committeeIndices, err := s.cfg.chain.HeadSyncCommitteeIndices(ctx, m.Message.AggregatorIndex, m.Message.Contribution.Slot) // nolint
+		committeeIndices, err := s.cfg.chain.HeadSyncCommitteeIndices(ctx, m.Message.AggregatorIndex, m.Message.Contribution.Slot)
 		if err != nil {
 			tracing.AnnotateError(span, err)
 			return pubsub.ValidationIgnore, err
@@ -215,12 +215,12 @@ func (s *Service) rejectInvalidContributionSignature(m *ethpb.SignedContribution
 		_, span := trace.StartSpan(ctx, "sync.rejectInvalidContributionSignature")
 		defer span.End()
 		// The aggregator signature, `signed_contribution_and_proof.signature`, is valid.
-		d, err := s.cfg.chain.HeadSyncContributionProofDomain(ctx, m.Message.Contribution.Slot) // nolint
+		d, err := s.cfg.chain.HeadSyncContributionProofDomain(ctx, m.Message.Contribution.Slot)
 		if err != nil {
 			tracing.AnnotateError(span, err)
 			return pubsub.ValidationIgnore, err
 		}
-		pubkey, err := s.cfg.chain.HeadValidatorIndexToPublicKey(ctx, m.Message.AggregatorIndex) // nolint
+		pubkey, err := s.cfg.chain.HeadValidatorIndexToPublicKey(ctx, m.Message.AggregatorIndex)
 		if err != nil {
 			return pubsub.ValidationIgnore, err
 		}
@@ -259,7 +259,7 @@ func (s *Service) rejectInvalidSyncAggregateSignature(m *ethpb.SignedContributio
 		// derived from the participation info in `aggregation_bits` for the subcommittee specified by the `contribution.subcommittee_index`.
 		var activePubkeys []bls.PublicKey
 		var activeRawPubkeys [][]byte
-		syncPubkeys, err := s.cfg.chain.HeadSyncCommitteePubKeys(ctx, m.Message.Contribution.Slot, types.CommitteeIndex(m.Message.Contribution.SubcommitteeIndex)) // nolint
+		syncPubkeys, err := s.cfg.chain.HeadSyncCommitteePubKeys(ctx, m.Message.Contribution.Slot, types.CommitteeIndex(m.Message.Contribution.SubcommitteeIndex))
 		if err != nil {
 			return pubsub.ValidationIgnore, err
 		}
@@ -280,7 +280,7 @@ func (s *Service) rejectInvalidSyncAggregateSignature(m *ethpb.SignedContributio
 				activeRawPubkeys = append(activeRawPubkeys, pk)
 			}
 		}
-		d, err := s.cfg.chain.HeadSyncCommitteeDomain(ctx, m.Message.Contribution.Slot) // nolint
+		d, err := s.cfg.chain.HeadSyncCommitteeDomain(ctx, m.Message.Contribution.Slot)
 		if err != nil {
 			tracing.AnnotateError(span, err)
 			return pubsub.ValidationIgnore, err
@@ -343,11 +343,11 @@ func (s *Service) setSyncContributionIndexSlotSeen(slot types.Slot, aggregatorIn
 // selection proof.
 func (s *Service) verifySyncSelectionData(ctx context.Context, m *ethpb.ContributionAndProof) error {
 	selectionData := &ethpb.SyncAggregatorSelectionData{Slot: m.Contribution.Slot, SubcommitteeIndex: m.Contribution.SubcommitteeIndex}
-	domain, err := s.cfg.chain.HeadSyncSelectionProofDomain(ctx, m.Contribution.Slot) // nolint
+	domain, err := s.cfg.chain.HeadSyncSelectionProofDomain(ctx, m.Contribution.Slot)
 	if err != nil {
 		return err
 	}
-	pubkey, err := s.cfg.chain.HeadValidatorIndexToPublicKey(ctx, m.AggregatorIndex) // nolint
+	pubkey, err := s.cfg.chain.HeadValidatorIndexToPublicKey(ctx, m.AggregatorIndex)
 	if err != nil {
 		return err
 	}

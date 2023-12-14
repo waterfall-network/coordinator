@@ -62,7 +62,6 @@ func init() {
 	}
 }
 
-// nolint
 func run(pass *analysis.Pass) (interface{}, error) {
 	inspection, ok := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 	if !ok {
@@ -80,76 +79,99 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	inspection.Preorder(nodeFilter, func(node ast.Node) {
 		switch stmt := node.(type) {
 		case *ast.ExprStmt:
-			if call, ok := stmt.X.(*ast.CallExpr); ok {
-				if !ignoreCall(pass, call) && callReturnsError(pass, call) {
-					reportUnhandledError(pass, call.Lparen, call)
-				}
-			}
+			handleExprStmt(stmt, pass)
 		case *ast.GoStmt:
-			if !ignoreCall(pass, stmt.Call) && callReturnsError(pass, stmt.Call) {
-				reportUnhandledError(pass, stmt.Call.Lparen, stmt.Call)
-			}
+			handleGoStmt(stmt, pass)
 		case *ast.DeferStmt:
-			if !ignoreCall(pass, stmt.Call) && callReturnsError(pass, stmt.Call) {
-				reportUnhandledError(pass, stmt.Call.Lparen, stmt.Call)
-			}
+			handleDeferStmt(stmt, pass)
 		case *ast.AssignStmt:
-			if len(stmt.Rhs) == 1 {
-				// single value on rhs; check against lhs identifiers
-				if call, ok := stmt.Rhs[0].(*ast.CallExpr); ok {
-					if ignoreCall(pass, call) {
-						break
-					}
-					isError := errorsByArg(pass, call)
-					for i := 0; i < len(stmt.Lhs); i++ {
-						if id, ok := stmt.Lhs[i].(*ast.Ident); ok {
-							// We shortcut calls to recover() because errorsByArg can't
-							// check its return types for errors since it returns interface{}.
-							if id.Name == "_" && (isRecover(pass, call) || isError[i]) {
-								reportUnhandledError(pass, id.NamePos, call)
-							}
-						}
-					}
-				} else if assert, ok := stmt.Rhs[0].(*ast.TypeAssertExpr); ok {
-					if assert.Type == nil {
-						// type switch
-						break
-					}
-					if len(stmt.Lhs) < 2 {
-						// assertion result not read
-						reportUnhandledTypeAssertion(pass, stmt.Rhs[0].Pos())
-					} else if id, ok := stmt.Lhs[1].(*ast.Ident); ok && id.Name == "_" {
-						// assertion result ignored
-						reportUnhandledTypeAssertion(pass, id.NamePos)
-					}
-				}
-			} else {
-				// multiple value on rhs; in this case a call can't return
-				// multiple values. Assume len(stmt.Lhs) == len(stmt.Rhs)
-				for i := 0; i < len(stmt.Lhs); i++ {
-					if id, ok := stmt.Lhs[i].(*ast.Ident); ok {
-						if call, ok := stmt.Rhs[i].(*ast.CallExpr); ok {
-							if ignoreCall(pass, call) {
-								continue
-							}
-							if id.Name == "_" && callReturnsError(pass, call) {
-								reportUnhandledError(pass, id.NamePos, call)
-							}
-						} else if assert, ok := stmt.Rhs[i].(*ast.TypeAssertExpr); ok {
-							if assert.Type == nil {
-								// Shouldn't happen anyway, no multi assignment in type switches
-								continue
-							}
-							reportUnhandledError(pass, id.NamePos, nil)
-						}
-					}
-				}
-			}
-		default:
+			handleAssignStmt(stmt, pass)
 		}
 	})
 
 	return nil, nil
+}
+
+func handleExprStmt(stmt *ast.ExprStmt, pass *analysis.Pass) {
+	if call, ok := stmt.X.(*ast.CallExpr); ok {
+		if !ignoreCall(pass, call) && callReturnsError(pass, call) {
+			reportUnhandledError(pass, call.Lparen, call)
+		}
+	}
+}
+
+func handleGoStmt(stmt *ast.GoStmt, pass *analysis.Pass) {
+	if !ignoreCall(pass, stmt.Call) && callReturnsError(pass, stmt.Call) {
+		reportUnhandledError(pass, stmt.Call.Lparen, stmt.Call)
+	}
+}
+
+func handleDeferStmt(stmt *ast.DeferStmt, pass *analysis.Pass) {
+	if !ignoreCall(pass, stmt.Call) && callReturnsError(pass, stmt.Call) {
+		reportUnhandledError(pass, stmt.Call.Lparen, stmt.Call)
+	}
+}
+
+func handleAssignStmt(stmt *ast.AssignStmt, pass *analysis.Pass) {
+	if len(stmt.Rhs) == 1 {
+		handleSingleValueAssignStmt(stmt, pass)
+	} else {
+		handleMultipleValueAssignStmt(stmt, pass)
+	}
+}
+
+func handleSingleValueAssignStmt(stmt *ast.AssignStmt, pass *analysis.Pass) {
+	// single value on rhs; check against lhs identifiers
+	if call, ok := stmt.Rhs[0].(*ast.CallExpr); ok {
+		if ignoreCall(pass, call) {
+			return
+		}
+		isError := errorsByArg(pass, call)
+		for i := 0; i < len(stmt.Lhs); i++ {
+			if id, ok := stmt.Lhs[i].(*ast.Ident); ok {
+				// We shortcut calls to recover() because errorsByArg can't
+				// check its return types for errors since it returns interface{}.
+				if id.Name == "_" && (isRecover(pass, call) || isError[i]) {
+					reportUnhandledError(pass, id.NamePos, call)
+				}
+			}
+		}
+	} else if assert, ok := stmt.Rhs[0].(*ast.TypeAssertExpr); ok {
+		if assert.Type == nil {
+			// type switch
+			return
+		}
+		if len(stmt.Lhs) < 2 {
+			// assertion result not read
+			reportUnhandledTypeAssertion(pass, stmt.Rhs[0].Pos())
+		} else if id, ok := stmt.Lhs[1].(*ast.Ident); ok && id.Name == "_" {
+			// assertion result ignored
+			reportUnhandledTypeAssertion(pass, id.NamePos)
+		}
+	}
+}
+
+func handleMultipleValueAssignStmt(stmt *ast.AssignStmt, pass *analysis.Pass) {
+	// multiple value on rhs; in this case a call can't return
+	// multiple values. Assume len(stmt.Lhs) == len(stmt.Rhs)
+	for i := 0; i < len(stmt.Lhs); i++ {
+		if id, ok := stmt.Lhs[i].(*ast.Ident); ok {
+			if call, ok := stmt.Rhs[i].(*ast.CallExpr); ok {
+				if ignoreCall(pass, call) {
+					continue
+				}
+				if id.Name == "_" && callReturnsError(pass, call) {
+					reportUnhandledError(pass, id.NamePos, call)
+				}
+			} else if assert, ok := stmt.Rhs[i].(*ast.TypeAssertExpr); ok {
+				if assert.Type == nil {
+					// Shouldn't happen anyway, no multi assignment in type switches
+					continue
+				}
+				reportUnhandledError(pass, id.NamePos, nil)
+			}
+		}
+	}
 }
 
 func reportUnhandledError(pass *analysis.Pass, pos token.Pos, call *ast.CallExpr) {
@@ -193,7 +215,6 @@ func selectorAndFunc(pass *analysis.Pass, call *ast.CallExpr) (*ast.SelectorExpr
 	}
 
 	return sel, fn, true
-
 }
 
 func ignoreCall(pass *analysis.Pass, call *ast.CallExpr) bool {
@@ -277,7 +298,7 @@ func namesForExcludeCheck(pass *analysis.Pass, call *ast.CallExpr) []string {
 	}
 
 	// This will be missing for functions without a receiver (like fmt.Printf),
-	// so just fall back to the the function's fullName in that case.
+	// so just fall back to the function's fullName in that case.
 	selection, ok := pass.TypesInfo.Selections[sel]
 	if !ok {
 		return []string{name}

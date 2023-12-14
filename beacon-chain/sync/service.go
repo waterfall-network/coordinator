@@ -91,16 +91,7 @@ type config struct {
 }
 
 // This defines the interface for interacting with block chain service
-type blockchainService interface {
-	blockchain.BlockReceiver
-	blockchain.HeadFetcher
-	blockchain.FinalizationFetcher
-	blockchain.ForkFetcher
-	blockchain.AttestationReceiver
-	blockchain.TimeFetcher
-	blockchain.GenesisFetcher
-	blockchain.CanonicalFetcher
-}
+type blockchainService = blockchain.SyncBlockchainService
 
 // Service is responsible for handling all run time p2p related operations as the
 // main entry point for network messages.
@@ -212,7 +203,7 @@ func (s *Service) Stop() error {
 func (s *Service) Status() error {
 	// If our head slot is on a previous epoch and our peers are reporting their head block are
 	// in the most recent epoch, then we might be out of sync.
-	if headEpoch := slots.ToEpoch(s.cfg.chain.HeadSlot()); headEpoch+1 < slots.ToEpoch(s.cfg.chain.CurrentSlot()) && // nolint
+	if headEpoch := slots.ToEpoch(s.cfg.chain.HeadSlot()); headEpoch+1 < slots.ToEpoch(s.cfg.chain.CurrentSlot()) &&
 		headEpoch+1 < s.cfg.p2p.Peers().HighestEpoch() {
 		return errors.New("out of sync")
 	}
@@ -274,7 +265,7 @@ func (s *Service) registerHandlers() {
 					log.WithError(err).Error("Could not retrieve current fork digest")
 					return
 				}
-				currentEpoch := slots.ToEpoch(slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix()))) // nolint
+				currentEpoch := slots.ToEpoch(slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())))
 				s.registerSubscribers(currentEpoch, digest)
 				go s.forkWatcher()
 				return

@@ -20,7 +20,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/validator/flags"
 	slashingprotectioncommands "gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/validator/slashing-protection"
 	walletcommands "gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/validator/wallet"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/validator/web"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/file"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/logs"
@@ -126,7 +125,6 @@ func main() {
 		accountcommands.Commands,
 		slashingprotectioncommands.Commands,
 		dbcommands.Commands,
-		web.Commands,
 	}
 
 	app.Flags = appFlags

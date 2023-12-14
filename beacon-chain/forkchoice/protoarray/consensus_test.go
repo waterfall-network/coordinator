@@ -329,7 +329,7 @@ func Test_collectTgTreeNodesByOptimisticSpines_prefix_extension(t *testing.T) {
 	}
 	wantLeafs := map[[32]byte]int{nrToHash(9): 10}
 
-	rootIndexMap, leafs := collectTgTreeNodesByOptimisticSpines(f, optSpines)
+	rootIndexMap, leafs := collectTgTreeNodesByOptimisticSpines(f, optSpines, nrToHash(0))
 	require.DeepEqual(t, wantRootIndexMap, rootIndexMap)
 	require.DeepEqual(t, wantLeafs, leafs)
 }
@@ -441,7 +441,7 @@ func Test_collectTgTreeNodesByOptimisticSpines_prefix_not_extension(t *testing.T
 	}
 	wantLeafs := map[[32]byte]int{nrToHash(8): 9}
 
-	rootIndexMap, leafs := collectTgTreeNodesByOptimisticSpines(f, optSpines)
+	rootIndexMap, leafs := collectTgTreeNodesByOptimisticSpines(f, optSpines, nrToHash(0))
 	require.DeepEqual(t, wantRootIndexMap, rootIndexMap)
 	require.DeepEqual(t, wantLeafs, leafs)
 }
@@ -560,7 +560,7 @@ func Test_collectTgTreeNodesByOptimisticSpines_3_forks(t *testing.T) {
 		nrToHash(3): 4,
 	}
 
-	rootIndexMap, leafs := collectTgTreeNodesByOptimisticSpines(f, optSpines)
+	rootIndexMap, leafs := collectTgTreeNodesByOptimisticSpines(f, optSpines, nrToHash(0))
 	require.DeepEqual(t, wantRootIndexMap, rootIndexMap)
 	require.DeepEqual(t, wantLeafs, leafs)
 }
@@ -674,7 +674,7 @@ func Test_collectTgTreeNodesByOptimisticSpines_1_forks(t *testing.T) {
 		nrToHash(3): 4,
 	}
 
-	rootIndexMap, leafs := collectTgTreeNodesByOptimisticSpines(f, optSpines)
+	rootIndexMap, leafs := collectTgTreeNodesByOptimisticSpines(f, optSpines, nrToHash(0))
 	require.DeepEqual(t, wantRootIndexMap, rootIndexMap)
 	require.DeepEqual(t, wantLeafs, leafs)
 }

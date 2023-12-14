@@ -2,12 +2,11 @@ run:
   skip-files:
     - .*_test.go
   skip-dirs:
-    - skip-dirs:beacon-chain/p2p/testing
+    - beacon-chain/p2p/testing
     - beacon-chain/powchain/testing
     - beacon-chain/p2p/testing
-    - validator/
     - proto/
-    - ^contracts/
+    - contracts/
     - testing/
   timeout: 10m
   go: '1.20'
@@ -15,13 +14,16 @@ run:
 linters:
   disable-all: true
   enable:
-    - gosimple
-    - goimports
-    - gocognit
-    - misspell
-    - errcheck
     - gofmt
+    - goimports
     - unused
+    - errcheck
+    - gosimple
+    - gocognit
+    - dupword
+    - nilerr
+    - whitespace
+    - misspell
 
 linters-settings:
   golint:

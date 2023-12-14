@@ -102,6 +102,7 @@ func (s *Service) sendGoodByeAndDisconnect(ctx context.Context, code p2ptypes.RP
 	log.WithFields(logrus.Fields{
 		"func": "sendGoodByeAndDisconnect",
 		"peer": id,
+		"code": code,
 	}).Info("Disconnect: send goodbye message to peer")
 
 	return s.cfg.p2p.Disconnect(id)
@@ -111,7 +112,7 @@ func (s *Service) sendGoodByeMessage(ctx context.Context, code p2ptypes.RPCGoodb
 	ctx, cancel := context.WithTimeout(ctx, respTimeout)
 	defer cancel()
 
-	topic, err := p2p.TopicFromMessage(p2p.GoodbyeMessageName, slots.ToEpoch(s.cfg.chain.CurrentSlot())) // nolint
+	topic, err := p2p.TopicFromMessage(p2p.GoodbyeMessageName, slots.ToEpoch(s.cfg.chain.CurrentSlot()))
 	if err != nil {
 		return err
 	}
