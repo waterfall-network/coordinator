@@ -152,11 +152,25 @@ func (e *epochBoundaryState) put(r [32]byte, s state.BeaconState) error {
 }
 
 // delete the state from the epoch boundary state cache.
-func (e *epochBoundaryState) delete(r [32]byte) error {
+func (e *epochBoundaryState) delete(blockRoot [32]byte) error {
 	e.lock.Lock()
 	defer e.lock.Unlock()
+	rInfo, ok, err := e.getByRootLockFree(blockRoot)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return nil
+	}
+	slotInfo := &slotRootInfo{
+		slot: rInfo.state.Slot(),
+		root: blockRoot,
+	}
+	if err = e.slotRootCache.Delete(slotInfo); err != nil {
+		return err
+	}
 	return e.rootStateCache.Delete(&rootStateInfo{
-		root: r,
+		root: blockRoot,
 	})
 }
 

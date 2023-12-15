@@ -22,9 +22,11 @@ import (
 	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/attestations"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/prevote"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/slashings"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/synccommittee"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/voluntaryexits"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/withdrawals"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc/eth/beacon"
@@ -92,7 +94,9 @@ type Config struct {
 	EnableDebugRPCEndpoints bool
 	MockEth1Votes           bool
 	AttestationsPool        attestations.Pool
+	PrevotePool             prevote.Pool
 	ExitPool                voluntaryexits.PoolManager
+	WithdrawalPool          withdrawals.PoolManager
 	SlashingsPool           slashings.PoolManager
 	SlashingChecker         slasherservice.SlashingChecker
 	SyncCommitteeObjectPool synccommittee.Pool
@@ -183,8 +187,11 @@ func (s *Service) Start() {
 	validatorServer := &validatorv1alpha1.Server{
 		Ctx:                    s.ctx,
 		AttestationCache:       cache.NewAttestationCache(),
+		PrevoteCache:           cache.NewPrevoteCache(),
 		AttPool:                s.cfg.AttestationsPool,
+		PrevotePool:            s.cfg.PrevotePool,
 		ExitPool:               s.cfg.ExitPool,
+		WithdrawalPool:         s.cfg.WithdrawalPool,
 		HeadFetcher:            s.cfg.HeadFetcher,
 		ForkFetcher:            s.cfg.ForkFetcher,
 		FinalizationFetcher:    s.cfg.FinalizationFetcher,
@@ -294,8 +301,10 @@ func (s *Service) Start() {
 			StateGenService:    s.cfg.StateGen,
 			ReplayerBuilder:    ch,
 		},
-		HeadFetcher:             s.cfg.HeadFetcher,
-		VoluntaryExitsPool:      s.cfg.ExitPool,
+		HeadFetcher:        s.cfg.HeadFetcher,
+		VoluntaryExitsPool: s.cfg.ExitPool,
+		WithdrawalPool:     s.cfg.WithdrawalPool,
+
 		V1Alpha1ValidatorServer: validatorServer,
 		SyncChecker:             s.cfg.SyncService,
 	}

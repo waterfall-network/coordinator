@@ -297,7 +297,7 @@ func testBlockGenesis() *ethpb.SignedBeaconBlock {
 				AttesterSlashings: []*ethpb.AttesterSlashing{},
 				Attestations:      []*ethpb.Attestation{},
 				Deposits:          []*ethpb.Deposit{},
-				VoluntaryExits:    []*ethpb.SignedVoluntaryExit{},
+				VoluntaryExits:    []*ethpb.VoluntaryExit{},
 				Eth1Data: &ethpb.Eth1Data{
 					DepositRoot:  make([]byte, 32),
 					DepositCount: 0,
@@ -335,11 +335,12 @@ func testBlockAltair() *ethpb.SignedBeaconBlockAltair {
 				AttesterSlashings: []*ethpb.AttesterSlashing{},
 				Attestations:      []*ethpb.Attestation{},
 				Deposits:          []*ethpb.Deposit{},
-				VoluntaryExits:    []*ethpb.SignedVoluntaryExit{},
+				VoluntaryExits:    []*ethpb.VoluntaryExit{},
 				SyncAggregate: &ethpb.SyncAggregate{
 					SyncCommitteeBits:      make([]byte, 64),
 					SyncCommitteeSignature: make([]byte, 96),
 				},
+				Withdrawals: make([]*ethpb.Withdrawal, 0),
 			},
 		},
 		Signature: make([]byte, 96),
@@ -372,7 +373,7 @@ func testBlockBellatrix() *ethpb.SignedBeaconBlockBellatrix {
 				AttesterSlashings: []*ethpb.AttesterSlashing{},
 				Attestations:      []*ethpb.Attestation{},
 				Deposits:          []*ethpb.Deposit{},
-				VoluntaryExits:    []*ethpb.SignedVoluntaryExit{},
+				VoluntaryExits:    []*ethpb.VoluntaryExit{},
 				SyncAggregate: &ethpb.SyncAggregate{
 					SyncCommitteeBits:      make([]byte, 64),
 					SyncCommitteeSignature: make([]byte, 96),

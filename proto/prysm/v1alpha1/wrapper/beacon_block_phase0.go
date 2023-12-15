@@ -273,8 +273,13 @@ func (w Phase0BeaconBlockBody) Deposits() []*eth.Deposit {
 }
 
 // VoluntaryExits returns the voluntary exits in the block.
-func (w Phase0BeaconBlockBody) VoluntaryExits() []*eth.SignedVoluntaryExit {
+func (w Phase0BeaconBlockBody) VoluntaryExits() []*eth.VoluntaryExit {
 	return w.b.VoluntaryExits
+}
+
+// Withdrawals returns the withdrawals in the block.
+func (w Phase0BeaconBlockBody) Withdrawals() []*eth.Withdrawal {
+	return w.b.Withdrawals
 }
 
 // SyncAggregate returns the sync aggregate in the block.

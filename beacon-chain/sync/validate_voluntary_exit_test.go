@@ -13,8 +13,6 @@ import (
 	mock "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain/testing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed"
 	opfeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/operation"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/signing"
-	coreTime "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
 	p2ptest "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/testing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
@@ -28,17 +26,18 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 )
 
-func setupValidExit(t *testing.T) (*ethpb.SignedVoluntaryExit, state.BeaconState) {
-	exit := &ethpb.SignedVoluntaryExit{
-		Exit: &ethpb.VoluntaryExit{
-			ValidatorIndex: 0,
-			Epoch:          1 + params.BeaconConfig().ShardCommitteePeriod,
-		},
+func setupValidExit(t *testing.T) (*ethpb.VoluntaryExit, state.BeaconState) {
+	exit := &ethpb.VoluntaryExit{
+		ValidatorIndex: 0,
+		Epoch:          1 + params.BeaconConfig().ShardCommitteePeriod,
 	}
 	registry := []*ethpb.Validator{
 		{
 			ExitEpoch:       params.BeaconConfig().FarFutureEpoch,
 			ActivationEpoch: 0,
+			ActivationHash:  make([]byte, 32),
+			ExitHash:        make([]byte, 32),
+			WithdrawalOps:   make([]*ethpb.WithdrawalOp, 0),
 		},
 	}
 	state, err := v1.InitializeFromProto(&ethpb.BeaconState{
@@ -54,8 +53,6 @@ func setupValidExit(t *testing.T) (*ethpb.SignedVoluntaryExit, state.BeaconState
 	require.NoError(t, err)
 
 	priv, err := bls.RandKey()
-	require.NoError(t, err)
-	exit.Signature, err = signing.ComputeDomainAndSign(state, coreTime.CurrentEpoch(state), exit.Exit, params.BeaconConfig().DomainVoluntaryExit, priv)
 	require.NoError(t, err)
 
 	val, err := state.ValidatorAtIndex(0)

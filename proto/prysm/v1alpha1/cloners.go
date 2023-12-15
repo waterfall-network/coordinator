@@ -2,7 +2,6 @@ package eth
 
 import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
-	enginev1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/engine/v1"
 )
 
 // CopyETH1Data copies the provided eth1data object.
@@ -15,7 +14,39 @@ func CopyETH1Data(data *Eth1Data) *Eth1Data {
 		DepositCount: data.DepositCount,
 		BlockHash:    bytesutil.SafeCopyBytes(data.BlockHash),
 		Candidates:   bytesutil.SafeCopyBytes(data.Candidates),
+	}
+}
+
+// CopySpineData copies the provided spine data object.
+func CopySpineData(data *SpineData) *SpineData {
+	if data == nil {
+		return nil
+	}
+	return &SpineData{
+		Spines:       bytesutil.SafeCopyBytes(data.Spines),
+		Prefix:       bytesutil.SafeCopyBytes(data.Prefix),
 		Finalization: bytesutil.SafeCopyBytes(data.Finalization),
+		CpFinalized:  bytesutil.SafeCopyBytes(data.CpFinalized),
+		ParentSpines: CopyParentSpines(data.ParentSpines),
+	}
+}
+
+func CopyParentSpines(data []*SpinesSeq) []*SpinesSeq {
+	if data == nil {
+		return nil
+	}
+	cpy := make([]*SpinesSeq, len(data))
+	for i, s := range data {
+		cpy[i] = CopySpinesSeq(s)
+	}
+	return cpy
+}
+func CopySpinesSeq(data *SpinesSeq) *SpinesSeq {
+	if data == nil {
+		return nil
+	}
+	return &SpinesSeq{
+		Spines: bytesutil.SafeCopyBytes(data.Spines),
 	}
 }
 
@@ -25,10 +56,10 @@ func CopyBlockVoting(data *BlockVoting) *BlockVoting {
 		return nil
 	}
 	return &BlockVoting{
-		Root:         bytesutil.SafeCopyBytes(data.Root),
-		Slot:         data.Slot,
-		Candidates:   bytesutil.SafeCopyBytes(data.Candidates),
-		Attestations: CopyAttestations(data.Attestations),
+		Root:       bytesutil.SafeCopyBytes(data.Root),
+		Slot:       data.Slot,
+		Candidates: bytesutil.SafeCopyBytes(data.Candidates),
+		Votes:      CopyCommitteeVotesArray(data.Votes),
 	}
 }
 
@@ -71,6 +102,17 @@ func CopyAttestation(att *Attestation) *Attestation {
 	}
 }
 
+func CopyPrevote(pv *PreVote) *PreVote {
+	if pv == nil {
+		return nil
+	}
+	return &PreVote{
+		AggregationBits: bytesutil.SafeCopyBytes(pv.AggregationBits),
+		Data:            CopyPrevoteData(pv.Data),
+		Signature:       bytesutil.SafeCopyBytes(pv.Signature),
+	}
+}
+
 // CopyAttestationData copies the provided AttestationData object.
 func CopyAttestationData(attData *AttestationData) *AttestationData {
 	if attData == nil {
@@ -82,6 +124,18 @@ func CopyAttestationData(attData *AttestationData) *AttestationData {
 		BeaconBlockRoot: bytesutil.SafeCopyBytes(attData.BeaconBlockRoot),
 		Source:          CopyCheckpoint(attData.Source),
 		Target:          CopyCheckpoint(attData.Target),
+	}
+}
+
+// CopyPrevoteData copies the provided PreVoteData object.
+func CopyPrevoteData(pvData *PreVoteData) *PreVoteData {
+	if pvData == nil {
+		return nil
+	}
+	return &PreVoteData{
+		Slot:       pvData.Slot,
+		Index:      pvData.Index,
+		Candidates: bytesutil.SafeCopyBytes(pvData.Candidates),
 	}
 }
 
@@ -134,7 +188,8 @@ func CopyBeaconBlockBody(body *BeaconBlockBody) *BeaconBlockBody {
 		AttesterSlashings: CopyAttesterSlashings(body.AttesterSlashings),
 		Attestations:      CopyAttestations(body.Attestations),
 		Deposits:          CopyDeposits(body.Deposits),
-		VoluntaryExits:    CopySignedVoluntaryExits(body.VoluntaryExits),
+		VoluntaryExits:    CopyVoluntaryExits(body.VoluntaryExits),
+		Withdrawals:       CopyWithdrawals(body.Withdrawals),
 	}
 }
 
@@ -176,7 +231,8 @@ func CopyBeaconBlockBodyAltair(body *BeaconBlockBodyAltair) *BeaconBlockBodyAlta
 		AttesterSlashings: CopyAttesterSlashings(body.AttesterSlashings),
 		Attestations:      CopyAttestations(body.Attestations),
 		Deposits:          CopyDeposits(body.Deposits),
-		VoluntaryExits:    CopySignedVoluntaryExits(body.VoluntaryExits),
+		VoluntaryExits:    CopyVoluntaryExits(body.VoluntaryExits),
+		Withdrawals:       CopyWithdrawals(body.Withdrawals),
 		SyncAggregate:     CopySyncAggregate(body.SyncAggregate),
 	}
 }
@@ -275,6 +331,30 @@ func CopyAttestations(attestations []*Attestation) []*Attestation {
 	return newAttestations
 }
 
+// CopyCommitteeVotesArray copies the provided CommitteeVote array.
+func CopyCommitteeVotesArray(votes []*CommitteeVote) []*CommitteeVote {
+	if votes == nil {
+		return nil
+	}
+	cpy := make([]*CommitteeVote, len(votes))
+	for i, att := range votes {
+		cpy[i] = CopyCommitteeVotes(att)
+	}
+	return cpy
+}
+
+// CopyCommitteeVotes copies the provided CommitteeVote object.
+func CopyCommitteeVotes(votes *CommitteeVote) *CommitteeVote {
+	if votes == nil {
+		return nil
+	}
+	return &CommitteeVote{
+		AggregationBits: bytesutil.SafeCopyBytes(votes.AggregationBits),
+		Slot:            votes.Slot,
+		Index:           votes.Index,
+	}
+}
+
 // CopyDeposits copies the provided deposit array.
 func CopyDeposits(deposits []*Deposit) []*Deposit {
 	if deposits == nil {
@@ -305,35 +385,61 @@ func CopyDepositData(depData *Deposit_Data) *Deposit_Data {
 	}
 	return &Deposit_Data{
 		PublicKey:             bytesutil.SafeCopyBytes(depData.PublicKey),
+		CreatorAddress:        bytesutil.SafeCopyBytes(depData.CreatorAddress),
 		WithdrawalCredentials: bytesutil.SafeCopyBytes(depData.WithdrawalCredentials),
 		Amount:                depData.Amount,
 		Signature:             bytesutil.SafeCopyBytes(depData.Signature),
+		InitTxHash:            bytesutil.SafeCopyBytes(depData.InitTxHash),
 	}
 }
 
-// CopySignedVoluntaryExits copies the provided SignedVoluntaryExits array.
-func CopySignedVoluntaryExits(exits []*SignedVoluntaryExit) []*SignedVoluntaryExit {
+// CopyVoluntaryExits copies the provided VoluntaryExits array.
+func CopyVoluntaryExits(exits []*VoluntaryExit) []*VoluntaryExit {
 	if exits == nil {
 		return nil
 	}
-	newExits := make([]*SignedVoluntaryExit, len(exits))
+	newExits := make([]*VoluntaryExit, len(exits))
 	for i, exit := range exits {
-		newExits[i] = CopySignedVoluntaryExit(exit)
+		newExits[i] = CopyVoluntaryExit(exit)
 	}
 	return newExits
 }
 
-// CopySignedVoluntaryExit copies the provided SignedVoluntaryExit.
-func CopySignedVoluntaryExit(exit *SignedVoluntaryExit) *SignedVoluntaryExit {
+// CopyVoluntaryExit copies the provided VoluntaryExit.
+func CopyVoluntaryExit(exit *VoluntaryExit) *VoluntaryExit {
 	if exit == nil {
 		return nil
 	}
-	return &SignedVoluntaryExit{
-		Exit: &VoluntaryExit{
-			Epoch:          exit.Exit.Epoch,
-			ValidatorIndex: exit.Exit.ValidatorIndex,
-		},
-		Signature: bytesutil.SafeCopyBytes(exit.Signature),
+	return &VoluntaryExit{
+		Epoch:          exit.Epoch,
+		ValidatorIndex: exit.ValidatorIndex,
+		InitTxHash:     bytesutil.SafeCopyBytes(exit.InitTxHash),
+	}
+}
+
+// CopyWithdrawals copies the provided Withdrawals array.
+func CopyWithdrawals(withdrawals []*Withdrawal) []*Withdrawal {
+	if withdrawals == nil {
+		return nil
+	}
+	newExits := make([]*Withdrawal, len(withdrawals))
+	for i, exit := range withdrawals {
+		newExits[i] = CopyWithdrawal(exit)
+	}
+	return newExits
+}
+
+// CopyWithdrawal copies the provided Withdrawal.
+func CopyWithdrawal(withdrawal *Withdrawal) *Withdrawal {
+	if withdrawal == nil {
+		return nil
+	}
+	return &Withdrawal{
+		Epoch:          withdrawal.Epoch,
+		ValidatorIndex: withdrawal.ValidatorIndex,
+		Amount:         withdrawal.Amount,
+		InitTxHash:     bytesutil.SafeCopyBytes(withdrawal.InitTxHash),
+		PublicKey:      bytesutil.SafeCopyBytes(withdrawal.PublicKey),
 	}
 }
 
@@ -341,10 +447,13 @@ func CopySignedVoluntaryExit(exit *SignedVoluntaryExit) *SignedVoluntaryExit {
 func CopyValidator(val *Validator) *Validator {
 	pubKey := make([]byte, len(val.PublicKey))
 	copy(pubKey, val.PublicKey)
+	creatorAddress := make([]byte, len(val.CreatorAddress))
+	copy(creatorAddress, val.CreatorAddress)
 	withdrawalCreds := make([]byte, len(val.WithdrawalCredentials))
 	copy(withdrawalCreds, val.WithdrawalCredentials)
 	return &Validator{
 		PublicKey:                  pubKey,
+		CreatorAddress:             creatorAddress,
 		WithdrawalCredentials:      withdrawalCreds,
 		EffectiveBalance:           val.EffectiveBalance,
 		Slashed:                    val.Slashed,
@@ -352,6 +461,30 @@ func CopyValidator(val *Validator) *Validator {
 		ActivationEpoch:            val.ActivationEpoch,
 		ExitEpoch:                  val.ExitEpoch,
 		WithdrawableEpoch:          val.WithdrawableEpoch,
+		ActivationHash:             bytesutil.SafeCopyBytes(val.ActivationHash),
+		ExitHash:                   bytesutil.SafeCopyBytes(val.ExitHash),
+		WithdrawalOps:              CopyWithdrawalOps(val.WithdrawalOps),
+	}
+}
+
+// CopyWithdrawalOps copies the provided WithdrawalOp array.
+func CopyWithdrawalOps(withdrawalOps []*WithdrawalOp) []*WithdrawalOp {
+	wops := make([]*WithdrawalOp, len(withdrawalOps))
+	for i, w := range withdrawalOps {
+		wops[i] = CopyWithdrawalOp(w)
+	}
+	return wops
+}
+
+// CopyWithdrawalOp copies the provided WithdrawalOp object.
+func CopyWithdrawalOp(withdrawalOp *WithdrawalOp) *WithdrawalOp {
+	if withdrawalOp == nil {
+		return nil
+	}
+	return &WithdrawalOp{
+		Amount: withdrawalOp.Amount,
+		Hash:   bytesutil.SafeCopyBytes(withdrawalOp.Hash),
+		Slot:   withdrawalOp.Slot,
 	}
 }
 
@@ -431,33 +564,9 @@ func CopyBeaconBlockBodyBellatrix(body *BeaconBlockBodyBellatrix) *BeaconBlockBo
 		AttesterSlashings: CopyAttesterSlashings(body.AttesterSlashings),
 		Attestations:      CopyAttestations(body.Attestations),
 		Deposits:          CopyDeposits(body.Deposits),
-		VoluntaryExits:    CopySignedVoluntaryExits(body.VoluntaryExits),
+		VoluntaryExits:    CopyVoluntaryExits(body.VoluntaryExits),
+		Withdrawals:       CopyWithdrawals(body.Withdrawals),
 		SyncAggregate:     CopySyncAggregate(body.SyncAggregate),
-		ExecutionPayload:  CopyExecutionPayload(body.ExecutionPayload),
-	}
-}
-
-// CopyExecutionPayload copies the provided ApplicationPayload.
-func CopyExecutionPayload(payload *enginev1.ExecutionPayload) *enginev1.ExecutionPayload {
-	if payload == nil {
-		return nil
-	}
-
-	return &enginev1.ExecutionPayload{
-		ParentHash:    bytesutil.SafeCopyBytes(payload.ParentHash),
-		FeeRecipient:  bytesutil.SafeCopyBytes(payload.FeeRecipient),
-		StateRoot:     bytesutil.SafeCopyBytes(payload.StateRoot),
-		ReceiptsRoot:  bytesutil.SafeCopyBytes(payload.ReceiptsRoot),
-		LogsBloom:     bytesutil.SafeCopyBytes(payload.LogsBloom),
-		PrevRandao:    bytesutil.SafeCopyBytes(payload.PrevRandao),
-		BlockNumber:   payload.BlockNumber,
-		GasLimit:      payload.GasLimit,
-		GasUsed:       payload.GasUsed,
-		Timestamp:     payload.Timestamp,
-		ExtraData:     bytesutil.SafeCopyBytes(payload.ExtraData),
-		BaseFeePerGas: bytesutil.SafeCopyBytes(payload.BaseFeePerGas),
-		BlockHash:     bytesutil.SafeCopyBytes(payload.BlockHash),
-		Transactions:  bytesutil.SafeCopy2dBytes(payload.Transactions),
 	}
 }
 
@@ -522,7 +631,7 @@ func CopyBlindedBeaconBlockBodyBellatrix(body *BlindedBeaconBlockBodyBellatrix) 
 		AttesterSlashings:      CopyAttesterSlashings(body.AttesterSlashings),
 		Attestations:           CopyAttestations(body.Attestations),
 		Deposits:               CopyDeposits(body.Deposits),
-		VoluntaryExits:         CopySignedVoluntaryExits(body.VoluntaryExits),
+		VoluntaryExits:         CopyVoluntaryExits(body.VoluntaryExits),
 		SyncAggregate:          CopySyncAggregate(body.SyncAggregate),
 		ExecutionPayloadHeader: CopyExecutionPayloadHeader(body.ExecutionPayloadHeader),
 	}

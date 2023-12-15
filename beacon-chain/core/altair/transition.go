@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	e "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/epoch"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/epoch/precompute"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
@@ -37,6 +38,10 @@ func ProcessEpoch(ctx context.Context, state state.BeaconState) (state.BeaconSta
 	if state == nil || state.IsNil() {
 		return nil, errors.New("nil state")
 	}
+
+	preFinRoot := state.FinalizedCheckpoint().GetRoot()
+	preJustRoot := state.CurrentJustifiedCheckpoint().GetRoot()
+
 	vp, bp, err := InitializePrecomputeValidators(ctx, state)
 	if err != nil {
 		return nil, err
@@ -99,6 +104,10 @@ func ProcessEpoch(ctx context.Context, state state.BeaconState) (state.BeaconSta
 	if err != nil {
 		return nil, err
 	}
+	state, err = e.ProcessWithdrawalOps(state)
+	if err != nil {
+		return nil, err
+	}
 	state, err = e.ProcessRandaoMixesReset(state)
 	if err != nil {
 		return nil, err
@@ -116,6 +125,11 @@ func ProcessEpoch(ctx context.Context, state state.BeaconState) (state.BeaconSta
 
 	// New in Altair.
 	state, err = ProcessSyncCommitteeUpdates(ctx, state)
+	if err != nil {
+		return nil, err
+	}
+
+	state, err = helpers.ConsensusUpdateStateSpineFinalization(state, preJustRoot, preFinRoot)
 	if err != nil {
 		return nil, err
 	}

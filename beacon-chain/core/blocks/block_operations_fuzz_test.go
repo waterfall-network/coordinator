@@ -5,11 +5,9 @@ import (
 	"testing"
 
 	fuzz "github.com/google/gofuzz"
-	types "github.com/prysmaticlabs/eth2-types"
 	v "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/validators"
 	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
 	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
@@ -374,14 +372,14 @@ func TestFuzzverifyDeposit_10000(t *testing.T) {
 func TestFuzzProcessVoluntaryExits_10000(t *testing.T) {
 	fuzzer := fuzz.NewWithSeed(0)
 	state := &ethpb.BeaconState{}
-	e := &ethpb.SignedVoluntaryExit{}
+	e := &ethpb.VoluntaryExit{}
 	ctx := context.Background()
 	for i := 0; i < 10000; i++ {
 		fuzzer.Fuzz(state)
 		fuzzer.Fuzz(e)
 		s, err := v1.InitializeFromProtoUnsafe(state)
 		require.NoError(t, err)
-		r, err := ProcessVoluntaryExits(ctx, s, []*ethpb.SignedVoluntaryExit{e})
+		r, err := ProcessVoluntaryExits(ctx, s, []*ethpb.VoluntaryExit{e})
 		if err != nil && r != nil {
 			t.Fatalf("return value should be nil on err. found: %v on error: %v for state: %v and exit: %v", r, err, state, e)
 		}
@@ -391,34 +389,15 @@ func TestFuzzProcessVoluntaryExits_10000(t *testing.T) {
 func TestFuzzProcessVoluntaryExitsNoVerify_10000(t *testing.T) {
 	fuzzer := fuzz.NewWithSeed(0)
 	state := &ethpb.BeaconState{}
-	e := &ethpb.SignedVoluntaryExit{}
+	e := &ethpb.VoluntaryExit{}
 	for i := 0; i < 10000; i++ {
 		fuzzer.Fuzz(state)
 		fuzzer.Fuzz(e)
 		s, err := v1.InitializeFromProtoUnsafe(state)
 		require.NoError(t, err)
-		r, err := ProcessVoluntaryExits(context.Background(), s, []*ethpb.SignedVoluntaryExit{e})
+		r, err := ProcessVoluntaryExits(context.Background(), s, []*ethpb.VoluntaryExit{e})
 		if err != nil && r != nil {
 			t.Fatalf("return value should be nil on err. found: %v on error: %v for state: %v and block: %v", r, err, state, e)
 		}
-	}
-}
-
-func TestFuzzVerifyExit_10000(_ *testing.T) {
-	fuzzer := fuzz.NewWithSeed(0)
-	ve := &ethpb.SignedVoluntaryExit{}
-	rawVal := &ethpb.Validator{}
-	fork := &ethpb.Fork{}
-	var slot types.Slot
-
-	for i := 0; i < 10000; i++ {
-		fuzzer.Fuzz(ve)
-		fuzzer.Fuzz(rawVal)
-		fuzzer.Fuzz(fork)
-		fuzzer.Fuzz(&slot)
-		val, err := v1.NewValidator(&ethpb.Validator{})
-		_ = err
-		err = VerifyExitAndSignature(val, slot, fork, ve, params.BeaconConfig().ZeroHash[:])
-		_ = err
 	}
 }

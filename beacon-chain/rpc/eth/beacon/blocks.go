@@ -204,7 +204,7 @@ func (bs *Server) SubmitBlock(ctx context.Context, req *ethpbv2.SignedBeaconBloc
 	var wsb block.SignedBeaconBlock
 	var err error
 	var v1alpha1Blk interface{}
-
+	_ = v1alpha1Blk
 	switch blk := req.Message.(type) {
 	case *ethpbv2.SignedBeaconBlockContainerV2_Phase0Block:
 		v1alpha1Blk, err = migration.V1ToV1Alpha1SignedBlock(&ethpbv1.SignedBeaconBlock{Block: blk.Phase0Block, Signature: req.Signature})

@@ -535,7 +535,6 @@ func TestIsRoot(t *testing.T) {
 }
 
 func TestIsValidRoot(t *testing.T) {
-
 	zeroRoot := make([]byte, fieldparams.RootLength)
 
 	validRoot := make([]byte, fieldparams.RootLength)

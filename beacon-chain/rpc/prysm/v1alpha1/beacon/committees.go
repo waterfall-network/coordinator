@@ -7,6 +7,7 @@ import (
 	types "github.com/prysmaticlabs/eth2-types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
@@ -74,6 +75,7 @@ func (bs *Server) retrieveCommitteesForEpoch(
 	if err != nil {
 		return nil, nil, err
 	}
+	ctx = context.WithValue(ctx, params.BeaconConfig().CtxBlockFetcherKey, db.BlockInfoFetcherFunc(bs.BeaconDB))
 	requestedState, err := bs.ReplayerBuilder.ReplayerForSlot(startSlot).ReplayBlocks(ctx)
 	if err != nil {
 		return nil, nil, status.Errorf(codes.Internal, "error replaying blocks for state at slot %d: %v", startSlot, err)

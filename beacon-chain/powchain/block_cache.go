@@ -21,8 +21,9 @@ var (
 
 	// maxCacheSize is 2x of the follow distance for additional cache padding.
 	// Requests should be only accessing blocks within recent blocks within the
-	// Eth1FollowDistance.
-	maxCacheSize = 2 * params.BeaconConfig().Eth1FollowDistance
+	// Eth1FollowDistance. (orig val: 2 * 2048)
+	//maxCacheSize = 2 * params.BeaconConfig().Eth1FollowDistance
+	maxCacheSize = (2 * params.BeaconConfig().Eth1FollowDistance) + uint64(params.BeaconConfig().EpochsPerEth1VotingPeriod)*uint64(params.BeaconConfig().SlotsPerEpoch)
 
 	// Metrics
 	headerCacheMiss = promauto.NewCounter(prometheus.CounterOpts{

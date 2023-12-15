@@ -17,9 +17,9 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (vs *Server) packDepositsAndAttestations(ctx context.Context, head state.BeaconState, eth1Data *ethpb.Eth1Data) ([]*ethpb.Deposit, []*ethpb.Attestation, error) {
+func (vs *Server) packDepositsAndAttestations(ctx context.Context, head state.BeaconState, eth1Data *ethpb.Eth1Data, parentRoot [32]byte) ([]*ethpb.Deposit, []*ethpb.Attestation, error) {
 	if features.Get().EnableGetBlockOptimizations {
-		deposits, atts, err := vs.optimizedPackDepositsAndAttestations(ctx, head, eth1Data)
+		deposits, atts, err := vs.optimizedPackDepositsAndAttestations(ctx, head, eth1Data, parentRoot)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -33,7 +33,7 @@ func (vs *Server) packDepositsAndAttestations(ctx context.Context, head state.Be
 	}
 
 	// Pack aggregated attestations which have not been included in the beacon chain.
-	atts, err := vs.packAttestations(ctx, head)
+	atts, err := vs.packAttestations(ctx, head, parentRoot)
 	if err != nil {
 		return nil, nil, status.Errorf(codes.Internal, "Could not get attestations to pack into block: %v", err)
 	}
@@ -41,7 +41,7 @@ func (vs *Server) packDepositsAndAttestations(ctx context.Context, head state.Be
 	return deposits, atts, nil
 }
 
-func (vs *Server) optimizedPackDepositsAndAttestations(ctx context.Context, head state.BeaconState, eth1Data *ethpb.Eth1Data) ([]*ethpb.Deposit, []*ethpb.Attestation, error) {
+func (vs *Server) optimizedPackDepositsAndAttestations(ctx context.Context, head state.BeaconState, eth1Data *ethpb.Eth1Data, parentRoot [32]byte) ([]*ethpb.Deposit, []*ethpb.Attestation, error) {
 	eg, egctx := errgroup.WithContext(ctx)
 	var deposits []*ethpb.Deposit
 	var atts []*ethpb.Attestation
@@ -64,7 +64,7 @@ func (vs *Server) optimizedPackDepositsAndAttestations(ctx context.Context, head
 
 	eg.Go(func() error {
 		// Pack aggregated attestations which have not been included in the beacon chain.
-		localAtts, err := vs.packAttestations(egctx, head)
+		localAtts, err := vs.packAttestations(egctx, head, parentRoot)
 		if err != nil {
 			return status.Errorf(codes.Internal, "Could not get attestations to pack into block: %v", err)
 		}

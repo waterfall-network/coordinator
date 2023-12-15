@@ -28,7 +28,7 @@ func MinimalSpecConfig() *BeaconChainConfig {
 
 	// Gwei values
 	minimalConfig.MinDepositAmount = 1e9
-	minimalConfig.MaxEffectiveBalance = 32e9
+	minimalConfig.MaxEffectiveBalance = 32_00 * 1e9
 	minimalConfig.EjectionBalance = 16e9
 	minimalConfig.EffectiveBalanceIncrement = 1e9
 
@@ -36,7 +36,7 @@ func MinimalSpecConfig() *BeaconChainConfig {
 	minimalConfig.BLSWithdrawalPrefixByte = byte(0)
 
 	// Time parameters
-	minimalConfig.SecondsPerSlot = 6
+	minimalConfig.SecondsPerSlot = 4 // align with mainnet config
 	minimalConfig.MinAttestationInclusionDelay = 1
 	minimalConfig.SlotsPerEpoch = 8
 	minimalConfig.SqrRootSlotsPerEpoch = 2
@@ -56,6 +56,7 @@ func MinimalSpecConfig() *BeaconChainConfig {
 	minimalConfig.EpochsPerSlashingsVector = 64
 	minimalConfig.HistoricalRootsLimit = 16777216
 	minimalConfig.ValidatorRegistryLimit = 1099511627776
+	minimalConfig.WithdrawalOpsLimit = 1024
 
 	// Reward and penalty quotients
 	minimalConfig.BaseRewardFactor = 64
@@ -64,6 +65,9 @@ func MinimalSpecConfig() *BeaconChainConfig {
 	minimalConfig.InactivityPenaltyQuotient = 33554432
 	minimalConfig.MinSlashingPenaltyQuotient = 64
 	minimalConfig.ProportionalSlashingMultiplier = 2
+	minimalConfig.BaseRewardMultiplier = 2.0
+	minimalConfig.MaxAnnualizedReturnRate = 0.2
+	minimalConfig.OptValidatorsNum = 300_000
 
 	// Max operations per block
 	minimalConfig.MaxProposerSlashings = 16
@@ -71,6 +75,7 @@ func MinimalSpecConfig() *BeaconChainConfig {
 	minimalConfig.MaxAttestations = 128
 	minimalConfig.MaxDeposits = 16
 	minimalConfig.MaxVoluntaryExits = 16
+	minimalConfig.MaxWithdrawals = 1024
 
 	// Signature domains
 	minimalConfig.DomainBeaconProposer = bytesutil.ToBytes4(bytesutil.Bytes4(0))

@@ -10,9 +10,11 @@ import (
 	"sync"
 	"time"
 
+	lru "github.com/hashicorp/golang-lru"
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/async/abool"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/async/event"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain/store"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache"
@@ -26,8 +28,10 @@ import (
 	doublylinkedtree "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/forkchoice/doubly-linked-tree"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/forkchoice/protoarray"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/attestations"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/prevote"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/slashings"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/voluntaryexits"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/withdrawals"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
@@ -40,21 +44,22 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
 	prysmTime "gitlab.waterfall.network/waterfall/protocol/coordinator/time"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
-	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	"go.opencensus.io/trace"
 )
 
 // SyncSrv interface to treat sync functionality.
 type SyncSrv interface {
-	SetHeadSyncFn(fn func(context.Context, bool) error)
 	SetIsSyncFn(fn func() bool)
-	AddFinalizedSpines(finSpines gwatCommon.HashArray)
-	ResetFinalizedSpines()
+	//AddFinalizedSpines(finSpines gwatCommon.HashArray)
+	//ResetFinalizedSpines()
 }
 
 // headSyncMinEpochsAfterCheckpoint defines how many epochs should elapse after known finalization
 // checkpoint for head sync to be triggered.
-const headSyncMinEpochsAfterCheckpoint = 128
+const (
+	headSyncMinEpochsAfterCheckpoint = 128
+	procBlockSize                    = 32
+)
 
 // Service represents a service that handles the internal
 // logic of managing the full PoS beacon chain.
@@ -64,7 +69,6 @@ type Service struct {
 	cancel      context.CancelFunc
 	genesisTime time.Time
 	spineData   spineData
-	creators    creatorsAssignment
 	head        *head
 	headLock    sync.RWMutex
 	// originBlockRoot is the genesis root, or weak subjectivity checkpoint root, depending on how the node is initialized
@@ -74,12 +78,15 @@ type Service struct {
 	checkpointStateCache  *cache.CheckpointStateCache
 	initSyncBlocks        map[[32]byte]block.SignedBeaconBlock
 	initSyncBlocksLock    sync.RWMutex
+	procBlockLock         sync.RWMutex
+	procBlockCache        *lru.Cache
 	justifiedBalances     *stateBalanceCache
 	wsVerifier            *WeakSubjectivityVerifier
 	store                 *store.Store
-	fnHeadSync            func(context.Context, bool) error
 	fnIsSync              func() bool
 	newHeadCh             chan *head
+	isGwatSyncing         *abool.AtomicBool
+	onBlockMu             sync.RWMutex
 }
 
 // config options for the service.
@@ -90,7 +97,9 @@ type config struct {
 	DepositCache            *depositcache.DepositCache
 	ProposerSlotIndexCache  *cache.ProposerPayloadIDsCache
 	AttPool                 attestations.Pool
+	PrevotePool             prevote.Pool
 	ExitPool                voluntaryexits.PoolManager
+	WithdrawalPool          withdrawals.PoolManager
 	SlashingPool            slashings.PoolManager
 	P2p                     p2p.Broadcaster
 	MaxRoutines             int
@@ -109,6 +118,11 @@ type config struct {
 // be registered into a running beacon node.
 func NewService(ctx context.Context, opts ...Option) (*Service, error) {
 	ctx, cancel := context.WithCancel(ctx)
+	var err error
+	procBlockCache, err := lru.New(procBlockSize)
+	if err != nil {
+		panic(fmt.Errorf("lru new failed: %w", err))
+	}
 	srv := &Service{
 		ctx:                  ctx,
 		cancel:               cancel,
@@ -119,13 +133,14 @@ func NewService(ctx context.Context, opts ...Option) (*Service, error) {
 		store:                &store.Store{},
 		spineData:            spineData{},
 		newHeadCh:            make(chan *head),
+		isGwatSyncing:        abool.New(),
+		procBlockCache:       procBlockCache,
 	}
 	for _, opt := range opts {
 		if err := opt(srv); err != nil {
 			return nil, err
 		}
 	}
-	var err error
 	if srv.justifiedBalances == nil {
 		srv.justifiedBalances, err = newStateBalanceCache(srv.cfg.StateGen)
 		if err != nil {
@@ -136,9 +151,6 @@ func NewService(ctx context.Context, opts ...Option) (*Service, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	srv.spawnProcessDagFinalize()
-
 	return srv, nil
 }
 
@@ -156,6 +168,7 @@ func (s *Service) Start() {
 		}
 	}
 	s.spawnProcessAttestationsRoutine(s.cfg.StateNotifier.StateFeed())
+	go s.initGwatSync()
 }
 
 // Stop the blockchain service's main event loop and associated goroutines.
@@ -182,6 +195,25 @@ func (s *Service) Status() error {
 		return fmt.Errorf("too many goroutines %d", runtime.NumGoroutine())
 	}
 	return nil
+}
+
+func (s *Service) SetIsSyncFn(fn func() bool) {
+	s.fnIsSync = fn
+}
+
+func (s *Service) isSynchronizing() bool {
+	if s.fnIsSync == nil {
+		return false
+	}
+	return s.fnIsSync()
+}
+
+func (s *Service) IsSynced() bool {
+	return !s.isSynchronizing()
+}
+
+func (s *Service) IsGwatSynchronizing() bool {
+	return s.isGwatSyncing.IsSet()
 }
 
 func (s *Service) StartFromSavedState(saved state.BeaconState) error {
@@ -215,7 +247,7 @@ func (s *Service) StartFromSavedState(saved state.BeaconState) error {
 	if features.Get().EnableForkChoiceDoublyLinkedTree {
 		fc = doublylinkedtree.New(justified.Epoch, finalized.Epoch)
 	} else {
-		fc = protoarray.New(justified.Epoch, finalized.Epoch, fRoot)
+		fc = protoarray.New(justified.Epoch, finalized.Epoch)
 	}
 	s.cfg.ForkChoiceStore = fc
 	fb, err := s.cfg.BeaconDB.Block(s.ctx, s.ensureRootNotZeros(fRoot))
@@ -225,13 +257,22 @@ func (s *Service) StartFromSavedState(saved state.BeaconState) error {
 	if fb == nil {
 		return errNilFinalizedInStore
 	}
-	payloadHash, err := getBlockPayloadHash(fb.Block())
+
+	calcRoot, err := fb.Block().HashTreeRoot()
 	if err != nil {
-		return errors.Wrap(err, "could not get execution payload hash")
+		return errors.Wrap(err, "could not get state for forkchoice")
 	}
+	st, err := s.cfg.StateGen.StateByRoot(s.ctx, calcRoot)
+	if err != nil {
+		return errors.Wrap(err, "could not get state for forkchoice")
+	}
+
 	fSlot := fb.Block().Slot()
 	if err := fc.InsertOptimisticBlock(s.ctx, fSlot, fRoot, params.BeaconConfig().ZeroHash,
-		payloadHash, justified.Epoch, finalized.Epoch); err != nil {
+		justified.Epoch, finalized.Epoch,
+		justified.Root, finalized.Root,
+		st.SpineData(),
+	); err != nil {
 		return errors.Wrap(err, "could not insert finalized block to forkchoice")
 	}
 
@@ -492,17 +533,16 @@ func (s *Service) saveGenesisData(ctx context.Context, genesisState state.Beacon
 	genesisCheckpoint := genesisState.FinalizedCheckpoint()
 	s.store = store.New(genesisCheckpoint, genesisCheckpoint)
 
-	payloadHash, err := getBlockPayloadHash(genesisBlk.Block())
-	if err != nil {
-		return err
-	}
 	if err := s.cfg.ForkChoiceStore.InsertOptimisticBlock(ctx,
 		genesisBlk.Block().Slot(),
 		genesisBlkRoot,
 		params.BeaconConfig().ZeroHash,
-		payloadHash,
 		genesisCheckpoint.Epoch,
-		genesisCheckpoint.Epoch); err != nil {
+		genesisCheckpoint.Epoch,
+		genesisCheckpoint.Root,
+		genesisCheckpoint.Root,
+		genesisState.SpineData(),
+	); err != nil {
 		log.Fatalf("Could not process genesis block for fork choice: %v", err)
 	}
 	if err := s.cfg.ForkChoiceStore.SetOptimisticToValid(ctx, genesisBlkRoot); err != nil {
@@ -523,31 +563,6 @@ func (s *Service) hasBlock(ctx context.Context, root [32]byte) bool {
 	}
 
 	return s.cfg.BeaconDB.HasBlock(ctx, root)
-}
-
-func (s *Service) SetHeadSyncFn(fn func(context.Context, bool) error) {
-	s.fnHeadSync = fn
-}
-
-func (s *Service) runHeadSync(ctx context.Context) {
-	if s.fnHeadSync == nil {
-		return
-	}
-	err := s.fnHeadSync(ctx, false)
-	if err != nil {
-		log.WithError(err).Error("Head sync error")
-	}
-}
-
-func (s *Service) SetIsSyncFn(fn func() bool) {
-	s.fnIsSync = fn
-}
-
-func (s *Service) isSync() bool {
-	if s.fnHeadSync == nil {
-		return false
-	}
-	return s.fnIsSync()
 }
 
 func spawnCountdownIfPreGenesis(ctx context.Context, genesisTime time.Time, db db.HeadAccessDatabase) {

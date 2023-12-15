@@ -16,10 +16,6 @@ var (
 	// errWrongBlockCount is returned when the wrong number of blocks or
 	// block roots is used
 	errWrongBlockCount = errors.New("wrong number of blocks or block roots")
-	// block is not a valid optimistic candidate block
-	errNotOptimisticCandidate = errors.New("block is not suitable for optimistic sync")
-	// errBadSpineCandidates block has an invalid spine candidates
-	errBadSpineCandidates = errors.New("block is not suitable for spyne candidates sync")
-	// errRetrievingSpine block has an invalid spine candidates
-	errSyncIsRunning = errors.New("sync is running")
+	// errNoCoordState gwat coordinated state is not initialized or broken
+	errNoCoordState = errors.New("no gwat coordinated state")
 )

@@ -63,7 +63,7 @@ type stateFinalityCheckpointResponse_StateFinalityCheckpointJson struct {
 	Finalized         *checkpointJson `json:"finalized"`
 }
 
-// stateValidatorResponseJson is used in /beacon/states/{state_id}/validators API endpoint.
+// stateValidatorsResponseJson is used in /beacon/states/{state_id}/validators API endpoint.
 type stateValidatorsResponseJson struct {
 	Data                []*validatorContainerJson `json:"data"`
 	ExecutionOptimistic bool                      `json:"execution_optimistic"`
@@ -91,6 +91,24 @@ type stateCommitteesResponseJson struct {
 type syncCommitteesResponseJson struct {
 	Data                *syncCommitteeValidatorsJson `json:"data"`
 	ExecutionOptimistic bool                         `json:"execution_optimistic"`
+}
+
+// stateSpineDataResponseJson is used in /beacon/states/{state_id}/spine_data API endpoint.
+type stateSpineDataResponseJson struct {
+	Data                *spineDataJson `json:"data"`
+	ExecutionOptimistic bool           `json:"execution_optimistic"`
+}
+
+// stateBlockVotingsResponseJson is used in /beacon/states/{state_id}/block_votings API endpoint.
+type stateBlockVotingsResponseJson struct {
+	Data                []*blockVotingJson `json:"data"`
+	ExecutionOptimistic bool               `json:"execution_optimistic"`
+}
+
+// syncCommitteesResponseJson is used in /beacon/states/{state_id}/sync_committees API endpoint.
+type stateEth1DataResponseJson struct {
+	Data                *eth1DataJson `json:"data"`
+	ExecutionOptimistic bool          `json:"execution_optimistic"`
 }
 
 // blockHeadersResponseJson is used in /beacon/headers API endpoint.
@@ -151,7 +169,7 @@ type proposerSlashingsPoolResponseJson struct {
 
 // voluntaryExitsPoolResponseJson is used in /beacon/pool/voluntary_exits API endpoint.
 type voluntaryExitsPoolResponseJson struct {
-	Data []*signedVoluntaryExitJson `json:"data"`
+	Data []*voluntaryExitJson `json:"data"`
 }
 
 // submitSyncCommitteeSignaturesRequestJson is used in /beacon/pool/sync_committees API endpoint.
@@ -348,14 +366,15 @@ type beaconBlockJson struct {
 }
 
 type beaconBlockBodyJson struct {
-	RandaoReveal      string                     `json:"randao_reveal" hex:"true"`
-	Eth1Data          *eth1DataJson              `json:"eth1_data"`
-	Graffiti          string                     `json:"graffiti" hex:"true"`
-	ProposerSlashings []*proposerSlashingJson    `json:"proposer_slashings"`
-	AttesterSlashings []*attesterSlashingJson    `json:"attester_slashings"`
-	Attestations      []*attestationJson         `json:"attestations"`
-	Deposits          []*depositJson             `json:"deposits"`
-	VoluntaryExits    []*signedVoluntaryExitJson `json:"voluntary_exits"`
+	RandaoReveal      string                  `json:"randao_reveal" hex:"true"`
+	Eth1Data          *eth1DataJson           `json:"eth1_data"`
+	Graffiti          string                  `json:"graffiti" hex:"true"`
+	ProposerSlashings []*proposerSlashingJson `json:"proposer_slashings"`
+	AttesterSlashings []*attesterSlashingJson `json:"attester_slashings"`
+	Attestations      []*attestationJson      `json:"attestations"`
+	Deposits          []*depositJson          `json:"deposits"`
+	VoluntaryExits    []*voluntaryExitJson    `json:"voluntary_exits"`
+	Withdrawals       []*withdrawalJson       `json:"withdrawals"`
 }
 
 type signedBeaconBlockContainerV2Json struct {
@@ -398,28 +417,30 @@ type beaconBlockBellatrixJson struct {
 }
 
 type beaconBlockBodyAltairJson struct {
-	RandaoReveal      string                     `json:"randao_reveal" hex:"true"`
-	Eth1Data          *eth1DataJson              `json:"eth1_data"`
-	Graffiti          string                     `json:"graffiti" hex:"true"`
-	ProposerSlashings []*proposerSlashingJson    `json:"proposer_slashings"`
-	AttesterSlashings []*attesterSlashingJson    `json:"attester_slashings"`
-	Attestations      []*attestationJson         `json:"attestations"`
-	Deposits          []*depositJson             `json:"deposits"`
-	VoluntaryExits    []*signedVoluntaryExitJson `json:"voluntary_exits"`
-	SyncAggregate     *syncAggregateJson         `json:"sync_aggregate"`
+	RandaoReveal      string                  `json:"randao_reveal" hex:"true"`
+	Eth1Data          *eth1DataJson           `json:"eth1_data"`
+	Graffiti          string                  `json:"graffiti" hex:"true"`
+	ProposerSlashings []*proposerSlashingJson `json:"proposer_slashings"`
+	AttesterSlashings []*attesterSlashingJson `json:"attester_slashings"`
+	Attestations      []*attestationJson      `json:"attestations"`
+	Deposits          []*depositJson          `json:"deposits"`
+	VoluntaryExits    []*voluntaryExitJson    `json:"voluntary_exits"`
+	SyncAggregate     *syncAggregateJson      `json:"sync_aggregate"`
+	Withdrawals       []*withdrawalJson       `json:"withdrawals"`
 }
 
 type beaconBlockBodyBellatrixJson struct {
-	RandaoReveal      string                     `json:"randao_reveal" hex:"true"`
-	Eth1Data          *eth1DataJson              `json:"eth1_data"`
-	Graffiti          string                     `json:"graffiti" hex:"true"`
-	ProposerSlashings []*proposerSlashingJson    `json:"proposer_slashings"`
-	AttesterSlashings []*attesterSlashingJson    `json:"attester_slashings"`
-	Attestations      []*attestationJson         `json:"attestations"`
-	Deposits          []*depositJson             `json:"deposits"`
-	VoluntaryExits    []*signedVoluntaryExitJson `json:"voluntary_exits"`
-	SyncAggregate     *syncAggregateJson         `json:"sync_aggregate"`
-	ExecutionPayload  *executionPayloadJson      `json:"execution_payload"`
+	RandaoReveal      string                  `json:"randao_reveal" hex:"true"`
+	Eth1Data          *eth1DataJson           `json:"eth1_data"`
+	Graffiti          string                  `json:"graffiti" hex:"true"`
+	ProposerSlashings []*proposerSlashingJson `json:"proposer_slashings"`
+	AttesterSlashings []*attesterSlashingJson `json:"attester_slashings"`
+	Attestations      []*attestationJson      `json:"attestations"`
+	Deposits          []*depositJson          `json:"deposits"`
+	VoluntaryExits    []*voluntaryExitJson    `json:"voluntary_exits"`
+	SyncAggregate     *syncAggregateJson      `json:"sync_aggregate"`
+	ExecutionPayload  *executionPayloadJson   `json:"execution_payload"`
+	Withdrawals       []*withdrawalJson       `json:"withdrawals"`
 }
 
 type executionPayloadJson struct {
@@ -490,7 +511,6 @@ type eth1DataJson struct {
 	DepositCount string `json:"deposit_count"`
 	BlockHash    string `json:"block_hash" hex:"true"`
 	Candidates   string `json:"candidates" hex:"true"`
-	Finalization string `json:"finalization" hex:"true"`
 }
 
 type proposerSlashingJson struct {
@@ -535,19 +555,24 @@ type depositJson struct {
 
 type deposit_DataJson struct {
 	PublicKey             string `json:"pubkey" hex:"true"`
+	CreatorAddress        string `json:"creator_address" hex:"true"`
 	WithdrawalCredentials string `json:"withdrawal_credentials" hex:"true"`
 	Amount                string `json:"amount"`
 	Signature             string `json:"signature" hex:"true"`
 }
 
-type signedVoluntaryExitJson struct {
-	Exit      *voluntaryExitJson `json:"message"`
-	Signature string             `json:"signature" hex:"true"`
-}
-
 type voluntaryExitJson struct {
 	Epoch          string `json:"epoch"`
 	ValidatorIndex string `json:"validator_index"`
+}
+
+// withdrawalJson a sub property of Withdrawal.
+type withdrawalJson struct {
+	Amount         string `json:"amount"`
+	ValidatorIndex string `json:"validator_index"`
+	PublicKey      string `json:"public_key" hex:"true"`
+	InitTxHash     string `json:"init_tx_hash" hex:"true"`
+	Epoch          string `json:"epoch"`
 }
 
 type syncCommitteeMessageJson struct {
@@ -681,14 +706,24 @@ type validatorContainerJson struct {
 }
 
 type validatorJson struct {
-	PublicKey                  string `json:"pubkey" hex:"true"`
-	WithdrawalCredentials      string `json:"withdrawal_credentials" hex:"true"`
-	EffectiveBalance           string `json:"effective_balance"`
-	Slashed                    bool   `json:"slashed"`
-	ActivationEligibilityEpoch string `json:"activation_eligibility_epoch"`
-	ActivationEpoch            string `json:"activation_epoch"`
-	ExitEpoch                  string `json:"exit_epoch"`
-	WithdrawableEpoch          string `json:"withdrawable_epoch"`
+	PublicKey                  string              `json:"pubkey" hex:"true"`
+	CreatorAddress             string              `json:"creator_address" hex:"true"`
+	WithdrawalCredentials      string              `json:"withdrawal_credentials" hex:"true"`
+	EffectiveBalance           string              `json:"effective_balance"`
+	Slashed                    bool                `json:"slashed"`
+	ActivationEligibilityEpoch string              `json:"activation_eligibility_epoch"`
+	ActivationEpoch            string              `json:"activation_epoch"`
+	ExitEpoch                  string              `json:"exit_epoch"`
+	WithdrawableEpoch          string              `json:"withdrawable_epoch"`
+	ActivationHash             string              `json:"activation_hash" hex:"true"`
+	ExitHash                   string              `json:"exit_hash" hex:"true"`
+	WithdrawalOps              []*withdrawalOpJson `json:"withdrawal_ops"`
+}
+
+type withdrawalOpJson struct {
+	Amount string `json:"amount"`
+	Hash   string `json:"hash" hex:"true"`
+	Slot   string `json:"slot"`
 }
 
 type validatorBalanceJson struct {
@@ -710,6 +745,18 @@ type syncCommitteeJson struct {
 type syncCommitteeValidatorsJson struct {
 	Validators          []string   `json:"validators"`
 	ValidatorAggregates [][]string `json:"validator_aggregates"`
+}
+
+type spineDataJson struct {
+	Spines       string           `json:"spines" hex:"true"`
+	Prefix       string           `json:"prefix" hex:"true"`
+	Finalization string           `json:"finalization" hex:"true"`
+	CpFinalized  string           `json:"cp_finalized" hex:"true"`
+	ParentSpines []*spinesSeqJson `json:"parent_spines"`
+}
+
+type spinesSeqJson struct {
+	Spines string `json:"spines" hex:"true"`
 }
 
 type pendingAttestationJson struct {
@@ -905,7 +952,7 @@ type eventChainReorgJson struct {
 
 // indexedVerificationFailureErrorJson is a JSON representation of the error returned when verifying an indexed object.
 type indexedVerificationFailureErrorJson struct {
-	apimiddleware.DefaultErrorJson
+	apimiddleware.DefaultErrorJSON
 	Failures []*singleIndexedVerificationFailureJson `json:"failures"`
 }
 
@@ -916,7 +963,7 @@ type singleIndexedVerificationFailureJson struct {
 }
 
 type nodeSyncDetailsErrorJson struct {
-	apimiddleware.DefaultErrorJson
+	apimiddleware.DefaultErrorJSON
 	SyncDetails syncDetails `json:"sync_details"`
 }
 
@@ -929,4 +976,17 @@ type syncDetails struct {
 	HeadSlot     string `json:"head_slot"`
 	SyncDistance string `json:"sync_distance"`
 	IsSyncing    bool   `json:"is_syncing"`
+}
+
+type blockVotingJson struct {
+	Root       string               `json:"root" hex:"true"`
+	Slot       string               `json:"slot"`
+	Candidates string               `json:"candidates" hex:"true"`
+	Votes      []*committeeVoteJson `json:"votes"`
+}
+
+type committeeVoteJson struct {
+	AggregationBits string `json:"aggregation_bits" hex:"true"`
+	Slot            string `json:"slot"`
+	Index           string `json:"index"`
 }

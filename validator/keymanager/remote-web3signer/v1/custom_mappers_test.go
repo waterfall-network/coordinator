@@ -316,19 +316,17 @@ func TestMapBeaconBlockAltair(t *testing.T) {
 								Proof: [][]byte{[]byte("A")},
 								Data: &ethpb.Deposit_Data{
 									PublicKey:             make([]byte, fieldparams.BLSPubkeyLength),
-									WithdrawalCredentials: make([]byte, 32),
+									CreatorAddress:        make([]byte, 20),
+									WithdrawalCredentials: make([]byte, 20),
 									Amount:                0,
 									Signature:             make([]byte, fieldparams.BLSSignatureLength),
 								},
 							},
 						},
-						VoluntaryExits: []*ethpb.SignedVoluntaryExit{
+						VoluntaryExits: []*ethpb.VoluntaryExit{
 							{
-								Exit: &ethpb.VoluntaryExit{
-									Epoch:          0,
-									ValidatorIndex: 0,
-								},
-								Signature: make([]byte, fieldparams.BLSSignatureLength),
+								Epoch:          0,
+								ValidatorIndex: 0,
 							},
 						},
 						SyncAggregate: &ethpb.SyncAggregate{
@@ -452,19 +450,17 @@ func TestMapBeaconBlockBody(t *testing.T) {
 							Proof: [][]byte{[]byte("A")},
 							Data: &ethpb.Deposit_Data{
 								PublicKey:             make([]byte, fieldparams.BLSPubkeyLength),
-								WithdrawalCredentials: make([]byte, 32),
+								CreatorAddress:        make([]byte, 20),
+								WithdrawalCredentials: make([]byte, 20),
 								Amount:                0,
 								Signature:             make([]byte, fieldparams.BLSSignatureLength),
 							},
 						},
 					},
-					VoluntaryExits: []*ethpb.SignedVoluntaryExit{
+					VoluntaryExits: []*ethpb.VoluntaryExit{
 						{
-							Exit: &ethpb.VoluntaryExit{
-								Epoch:          0,
-								ValidatorIndex: 0,
-							},
-							Signature: make([]byte, fieldparams.BLSSignatureLength),
+							Epoch:          0,
+							ValidatorIndex: 0,
 						},
 					},
 				},

@@ -6,20 +6,19 @@ import (
 
 	"github.com/pkg/errors"
 	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 // Eth1DataRootWithHasher returns the hash tree root of input `eth1Data`.
-func Eth1DataRootWithHasher(hasher ssz.HashFn, eth1Data *ethpb.Eth1Data) ([32]byte, error) {
+func Eth1DataRootWithHasher(eth1Data *ethpb.Eth1Data) ([32]byte, error) {
 	if eth1Data == nil {
 		return [32]byte{}, errors.New("nil eth1 data")
 	}
 	fixedFldsCount := 3
 
-	finLen := len(eth1Data.Candidates) + len(eth1Data.Finalization)
+	finLen := len(eth1Data.Candidates)
 	finChunks := finLen / 32
 	if finLen%32 > 0 {
 		finChunks++
@@ -43,7 +42,6 @@ func Eth1DataRootWithHasher(hasher ssz.HashFn, eth1Data *ethpb.Eth1Data) ([32]by
 
 	if finLen > 0 {
 		mergedData := append([]byte{}, eth1Data.Candidates...)
-		mergedData = append(mergedData, eth1Data.Finalization...)
 		for i := 0; i < finChunks; i++ {
 			from := i * 32
 			to := from + 32
@@ -57,7 +55,7 @@ func Eth1DataRootWithHasher(hasher ssz.HashFn, eth1Data *ethpb.Eth1Data) ([32]by
 		}
 	}
 
-	root, err := ssz.BitwiseMerkleize(hasher, fieldRoots, uint64(len(fieldRoots)), uint64(len(fieldRoots)))
+	root, err := ssz.BitwiseMerkleize(fieldRoots, uint64(len(fieldRoots)), uint64(len(fieldRoots)))
 	if err != nil {
 		return [32]byte{}, err
 	}
@@ -66,10 +64,9 @@ func Eth1DataRootWithHasher(hasher ssz.HashFn, eth1Data *ethpb.Eth1Data) ([32]by
 
 // Eth1DatasRoot returns the hash tree root of input `eth1Datas`.
 func Eth1DatasRoot(eth1Datas []*ethpb.Eth1Data) ([32]byte, error) {
-	hasher := hash.CustomSHA256Hasher()
 	eth1VotesRoots := make([][32]byte, 0, len(eth1Datas))
 	for i := 0; i < len(eth1Datas); i++ {
-		eth1, err := Eth1DataRootWithHasher(hasher, eth1Datas[i])
+		eth1, err := Eth1DataRootWithHasher(eth1Datas[i])
 		if err != nil {
 			return [32]byte{}, errors.Wrap(err, "could not compute eth1data merkleization")
 		}
@@ -77,7 +74,6 @@ func Eth1DatasRoot(eth1Datas []*ethpb.Eth1Data) ([32]byte, error) {
 	}
 
 	eth1VotesRootsRoot, err := ssz.BitwiseMerkleize(
-		hasher,
 		eth1VotesRoots,
 		uint64(len(eth1VotesRoots)),
 		fieldparams.Eth1DataVotesLength,

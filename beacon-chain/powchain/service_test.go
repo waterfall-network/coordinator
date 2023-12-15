@@ -267,8 +267,7 @@ func TestFollowBlock_OK(t *testing.T) {
 	web3Service.latestEth1Data.BlockHeight = testAcc.Backend.Blockchain().GetLastFinalizedBlock().Nr()
 	web3Service.latestEth1Data.BlockTime = testAcc.Backend.Blockchain().GetLastFinalizedBlock().Time()
 
-	h, err := web3Service.followBlockHeight(context.Background())
-	require.NoError(t, err)
+	h := web3Service.followBlockHeight(context.Background())
 	assert.Equal(t, baseHeight, h, "Unexpected block height")
 	numToForward := uint64(2)
 	expectedHeight := numToForward + baseHeight
@@ -280,8 +279,7 @@ func TestFollowBlock_OK(t *testing.T) {
 	web3Service.latestEth1Data.BlockHeight = testAcc.Backend.Blockchain().GetLastFinalizedBlock().Nr()
 	web3Service.latestEth1Data.BlockTime = testAcc.Backend.Blockchain().GetLastFinalizedBlock().Time()
 
-	h, err = web3Service.followBlockHeight(context.Background())
-	require.NoError(t, err)
+	h = web3Service.followBlockHeight(context.Background())
 	assert.Equal(t, expectedHeight, h, "Unexpected block height")
 }
 
@@ -324,11 +322,11 @@ func TestHandlePanic_OK(t *testing.T) {
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
 	)
-	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
+	require.NoError(t, err, "unable to setup web3 shard1 chain service")
 	// nil eth1DataFetcher would panic if cached value not used
 	web3Service.eth1DataFetcher = nil
 	web3Service.processBlockHeader(nil)
-	require.LogsContain(t, hook, "Panicked when handling data from ETH 1.0 Chain!")
+	require.LogsContain(t, hook, "Panicked when handling data from shard1 Chain!")
 }
 
 func TestLogTillGenesis_OK(t *testing.T) {
@@ -421,7 +419,8 @@ func TestInitDepositCacheWithFinalization_OK(t *testing.T) {
 			Deposit: &ethpb.Deposit{
 				Data: &ethpb.Deposit_Data{
 					PublicKey:             bytesutil.PadTo([]byte{0}, 48),
-					WithdrawalCredentials: make([]byte, 32),
+					CreatorAddress:        make([]byte, 20),
+					WithdrawalCredentials: make([]byte, 20),
 					Signature:             make([]byte, 96),
 				},
 			},
@@ -432,7 +431,8 @@ func TestInitDepositCacheWithFinalization_OK(t *testing.T) {
 			Deposit: &ethpb.Deposit{
 				Data: &ethpb.Deposit_Data{
 					PublicKey:             bytesutil.PadTo([]byte{1}, 48),
-					WithdrawalCredentials: make([]byte, 32),
+					CreatorAddress:        make([]byte, 20),
+					WithdrawalCredentials: make([]byte, 20),
 					Signature:             make([]byte, 96),
 				},
 			},
@@ -443,7 +443,8 @@ func TestInitDepositCacheWithFinalization_OK(t *testing.T) {
 			Deposit: &ethpb.Deposit{
 				Data: &ethpb.Deposit_Data{
 					PublicKey:             bytesutil.PadTo([]byte{2}, 48),
-					WithdrawalCredentials: make([]byte, 32),
+					CreatorAddress:        make([]byte, 20),
+					WithdrawalCredentials: make([]byte, 20),
 					Signature:             make([]byte, 96),
 				},
 			},
@@ -511,12 +512,6 @@ func TestNewService_EarliestVotingBlock(t *testing.T) {
 	conf.Eth1FollowDistance = 50
 	params.OverrideBeaconConfig(conf)
 
-	// Genesis not set
-	followBlock := uint64(2000)
-	blk, err := web3Service.determineEarliestVotingBlock(context.Background(), followBlock)
-	require.NoError(t, err)
-	assert.Equal(t, followBlock-conf.Eth1FollowDistance, blk, "unexpected earliest voting block")
-
 	// Genesis is set.
 
 	numToForward := 1500
@@ -534,12 +529,6 @@ func TestNewService_EarliestVotingBlock(t *testing.T) {
 	web3Service.latestEth1Data.BlockHeight = testAcc.Backend.Blockchain().GetLastFinalizedHeader().Nr()
 	web3Service.latestEth1Data.BlockTime = testAcc.Backend.Blockchain().GetLastFinalizedHeader().Time
 	web3Service.chainStartData.GenesisTime = currTime
-
-	// With a current slot of zero, only request follow_blocks behind.
-	blk, err = web3Service.determineEarliestVotingBlock(context.Background(), followBlock)
-	require.NoError(t, err)
-	assert.Equal(t, followBlock-conf.Eth1FollowDistance, blk, "unexpected earliest voting block")
-
 }
 
 func TestNewService_Eth1HeaderRequLimit(t *testing.T) {
@@ -807,7 +796,7 @@ func TestTimestampIsChecked(t *testing.T) {
 	timestamp := uint64(time.Now().Unix())
 	assert.Equal(t, false, eth1HeadIsBehind(timestamp))
 
-	// Give an older timestmap beyond threshold.
+	// Give an older timestamp beyond threshold.
 	timestamp = uint64(time.Now().Add(-eth1Threshold).Add(-1 * time.Minute).Unix())
 	assert.Equal(t, true, eth1HeadIsBehind(timestamp))
 }

@@ -14,6 +14,7 @@ import (
 	coreTime "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/validators"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
@@ -65,6 +66,7 @@ func (bs *Server) ListValidatorBalances(
 	if err != nil {
 		return nil, err
 	}
+	ctx = context.WithValue(ctx, params.BeaconConfig().CtxBlockFetcherKey, db.BlockInfoFetcherFunc(bs.BeaconDB))
 	requestedState, err := bs.ReplayerBuilder.ReplayerForSlot(startSlot).ReplayBlocks(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("error replaying blocks for state at slot %d: %v", startSlot, err))
@@ -220,6 +222,7 @@ func (bs *Server) ListValidators(
 		if err != nil {
 			return nil, err
 		}
+		ctx = context.WithValue(ctx, params.BeaconConfig().CtxBlockFetcherKey, db.BlockInfoFetcherFunc(bs.BeaconDB))
 		reqState, err = bs.ReplayerBuilder.ReplayerForSlot(s).ReplayBlocks(ctx)
 		if err != nil {
 			return nil, status.Error(codes.Internal, fmt.Sprintf("error replaying blocks for state at slot %d: %v", s, err))
@@ -415,6 +418,7 @@ func (bs *Server) GetValidatorActiveSetChanges(
 	if err != nil {
 		return nil, err
 	}
+	ctx = context.WithValue(ctx, params.BeaconConfig().CtxBlockFetcherKey, db.BlockInfoFetcherFunc(bs.BeaconDB))
 	requestedState, err := bs.ReplayerBuilder.ReplayerForSlot(s).ReplayBlocks(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("error replaying blocks for state at slot %d: %v", s, err))
@@ -512,6 +516,7 @@ func (bs *Server) GetValidatorParticipation(
 	}
 
 	// ReplayerBuilder ensures that a canonical chain is followed to the slot
+	ctx = context.WithValue(ctx, params.BeaconConfig().CtxBlockFetcherKey, db.BlockInfoFetcherFunc(bs.BeaconDB))
 	beaconState, err := bs.ReplayerBuilder.ReplayerForSlot(startSlot).ReplayBlocks(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("error replaying blocks for state at slot %d: %v", startSlot, err))
@@ -689,7 +694,7 @@ func (bs *Server) GetValidatorPerformance(
 			return nil, err
 		}
 
-		log.WithField("headState.slot", headState.Slot()).Info("*** process rewards and penalties *** Phase0")
+		log.WithField("headState.slot", headState.Slot()).Info("Process rewards and penalties Phase0")
 
 		headState, err = precompute.ProcessRewardsAndPenaltiesPrecompute(headState, bp, vp, precompute.AttestationsDelta, precompute.ProposersDelta)
 		if err != nil {
@@ -710,7 +715,7 @@ func (bs *Server) GetValidatorPerformance(
 			return nil, err
 		}
 
-		log.WithField("headState.slot", headState.Slot()).Info("*** process rewards and penalties *** Altair")
+		log.WithField("headState.slot", headState.Slot()).Info("Process rewards and penalties Altair")
 
 		headState, err = altair.ProcessRewardsAndPenaltiesPrecompute(headState, bp, vp)
 		if err != nil {
@@ -837,6 +842,7 @@ func (bs *Server) GetIndividualVotes(
 	if err != nil {
 		return nil, err
 	}
+	ctx = context.WithValue(ctx, params.BeaconConfig().CtxBlockFetcherKey, db.BlockInfoFetcherFunc(bs.BeaconDB))
 	st, err := bs.ReplayerBuilder.ReplayerForSlot(s).ReplayBlocks(ctx)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to replay blocks for state at epoch %d: %v", req.Epoch, err)

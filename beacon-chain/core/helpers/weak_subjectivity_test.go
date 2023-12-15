@@ -269,9 +269,13 @@ func genState(t *testing.T, valCount, avgBalance uint64) state.BeaconState {
 	for i := uint64(0); i < valCount; i++ {
 		validators[i] = &ethpb.Validator{
 			PublicKey:             make([]byte, params.BeaconConfig().BLSPubkeyLength),
-			WithdrawalCredentials: make([]byte, 32),
+			CreatorAddress:        make([]byte, 20),
+			WithdrawalCredentials: make([]byte, 20),
 			EffectiveBalance:      avgBalance * 1e9,
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
+			ActivationHash:        make([]byte, 32),
+			ExitHash:              make([]byte, 32),
+			WithdrawalOps:         make([]*ethpb.WithdrawalOp, 0),
 		}
 		balances[i] = validators[i].EffectiveBalance
 	}

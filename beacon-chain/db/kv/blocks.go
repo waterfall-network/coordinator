@@ -290,6 +290,7 @@ func (s *Store) SaveBlocks(ctx context.Context, blocks []block.SignedBeaconBlock
 		if err != nil {
 			return err
 		}
+
 		blockRoots[i] = blockRoot[:]
 		encodedBlocks[i] = enc
 		indicesByBucket := createBlockIndicesFromBlock(ctx, blk.Block())
@@ -698,11 +699,6 @@ func unmarshalBlock(_ context.Context, enc []byte) (block.SignedBeaconBlock, err
 		// Marshal block bytes to altair beacon block.
 		rawBlock = &ethpb.SignedBeaconBlockAltair{}
 		if err := rawBlock.UnmarshalSSZ(enc[len(altairKey):]); err != nil {
-			return nil, err
-		}
-	case hasBellatrixKey(enc):
-		rawBlock = &ethpb.SignedBeaconBlockBellatrix{}
-		if err := rawBlock.UnmarshalSSZ(enc[len(bellatrixKey):]); err != nil {
 			return nil, err
 		}
 	default:

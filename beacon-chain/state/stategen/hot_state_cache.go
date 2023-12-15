@@ -93,3 +93,10 @@ func (c *hotStateCache) delete(root [32]byte) bool {
 	defer c.lock.Unlock()
 	return c.cache.Remove(root)
 }
+
+// Purge completely clear the cache.
+func (c *hotStateCache) purge() {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	c.cache.Purge()
+}

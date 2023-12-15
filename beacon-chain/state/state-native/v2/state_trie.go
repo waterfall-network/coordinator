@@ -15,7 +15,6 @@ import (
 	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/container/slice"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
@@ -67,6 +66,7 @@ func InitializeFromProtoUnsafe(st *ethpb.BeaconStateAltair) (*BeaconState, error
 		eth1DepositIndex:            st.Eth1DepositIndex,
 		blockVoting:                 st.BlockVoting,
 		validators:                  st.Validators,
+		spineData:                   st.SpineData,
 		balances:                    st.Balances,
 		randaoMixes:                 &mixes,
 		slashings:                   st.Slashings,
@@ -151,6 +151,7 @@ func (b *BeaconState) Copy() state.BeaconState {
 		fork:                        b.forkVal(),
 		latestBlockHeader:           b.latestBlockHeaderVal(),
 		eth1Data:                    b.eth1DataVal(),
+		spineData:                   b.spineDataVal(),
 		previousJustifiedCheckpoint: b.previousJustifiedCheckpointVal(),
 		currentJustifiedCheckpoint:  b.currentJustifiedCheckpointVal(),
 		finalizedCheckpoint:         b.finalizedCheckpointVal(),
@@ -315,7 +316,6 @@ func (b *BeaconState) rootSelector(ctx context.Context, field types.FieldIndex) 
 	defer span.End()
 	span.AddAttributes(trace.StringAttribute("field", field.String(b.Version())))
 
-	hasher := hash.CustomSHA256Hasher()
 	switch field {
 	case genesisTime:
 		return ssz.Uint64Root(b.genesisTime), nil
@@ -356,7 +356,9 @@ func (b *BeaconState) rootSelector(ctx context.Context, field types.FieldIndex) 
 		}
 		return ssz.ByteArrayRootWithLimit(hRoots, fieldparams.HistoricalRootsLength)
 	case eth1Data:
-		return stateutil.Eth1Root(hasher, b.eth1Data)
+		return stateutil.Eth1Root(b.eth1Data)
+	case spineData:
+		return stateutil.SpineDataRoot(b.spineData)
 	case eth1DataVotes:
 		if b.rebuildTrie[field] {
 			err := b.resetFieldTrie(
@@ -382,7 +384,7 @@ func (b *BeaconState) rootSelector(ctx context.Context, field types.FieldIndex) 
 				return [32]byte{}, err
 			}
 			delete(b.rebuildTrie, field)
-			return b.stateFieldLeaves[field].TrieRoot()
+			//return b.stateFieldLeaves[field].TrieRoot()
 		}
 		return b.recomputeFieldTrie(field, b.blockVoting)
 	case validators:
@@ -430,11 +432,11 @@ func (b *BeaconState) rootSelector(ctx context.Context, field types.FieldIndex) 
 	case justificationBits:
 		return bytesutil.ToBytes32(b.justificationBits), nil
 	case previousJustifiedCheckpoint:
-		return ssz.CheckpointRoot(hasher, b.previousJustifiedCheckpoint)
+		return ssz.CheckpointRoot(b.previousJustifiedCheckpoint)
 	case currentJustifiedCheckpoint:
-		return ssz.CheckpointRoot(hasher, b.currentJustifiedCheckpoint)
+		return ssz.CheckpointRoot(b.currentJustifiedCheckpoint)
 	case finalizedCheckpoint:
-		return ssz.CheckpointRoot(hasher, b.finalizedCheckpoint)
+		return ssz.CheckpointRoot(b.finalizedCheckpoint)
 	case inactivityScores:
 		return stateutil.Uint64ListRootWithRegistryLimit(b.inactivityScores)
 	case currentSyncCommittee:

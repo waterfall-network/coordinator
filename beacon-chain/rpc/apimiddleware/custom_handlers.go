@@ -23,7 +23,7 @@ type sszConfig struct {
 	responseJson sszResponseJson
 }
 
-func handleGetBeaconStateSSZ(m *apimiddleware.ApiProxyMiddleware, endpoint apimiddleware.Endpoint, w http.ResponseWriter, req *http.Request) (handled bool) {
+func handleGetBeaconStateSSZ(m *apimiddleware.APIProxyMiddleware, endpoint apimiddleware.Endpoint, w http.ResponseWriter, req *http.Request) (handled bool) {
 	config := sszConfig{
 		sszPath:      "/eth/v1/debug/beacon/states/{state_id}/ssz",
 		fileName:     "beacon_state.ssz",
@@ -32,7 +32,7 @@ func handleGetBeaconStateSSZ(m *apimiddleware.ApiProxyMiddleware, endpoint apimi
 	return handleGetSSZ(m, endpoint, w, req, config)
 }
 
-func handleGetBeaconBlockSSZ(m *apimiddleware.ApiProxyMiddleware, endpoint apimiddleware.Endpoint, w http.ResponseWriter, req *http.Request) (handled bool) {
+func handleGetBeaconBlockSSZ(m *apimiddleware.APIProxyMiddleware, endpoint apimiddleware.Endpoint, w http.ResponseWriter, req *http.Request) (handled bool) {
 	config := sszConfig{
 		sszPath:      "/eth/v1/beacon/blocks/{block_id}/ssz",
 		fileName:     "beacon_block.ssz",
@@ -41,7 +41,7 @@ func handleGetBeaconBlockSSZ(m *apimiddleware.ApiProxyMiddleware, endpoint apimi
 	return handleGetSSZ(m, endpoint, w, req, config)
 }
 
-func handleGetBeaconStateSSZV2(m *apimiddleware.ApiProxyMiddleware, endpoint apimiddleware.Endpoint, w http.ResponseWriter, req *http.Request) (handled bool) {
+func handleGetBeaconStateSSZV2(m *apimiddleware.APIProxyMiddleware, endpoint apimiddleware.Endpoint, w http.ResponseWriter, req *http.Request) (handled bool) {
 	config := sszConfig{
 		sszPath:      "/eth/v2/debug/beacon/states/{state_id}/ssz",
 		fileName:     "beacon_state.ssz",
@@ -50,7 +50,7 @@ func handleGetBeaconStateSSZV2(m *apimiddleware.ApiProxyMiddleware, endpoint api
 	return handleGetSSZ(m, endpoint, w, req, config)
 }
 
-func handleGetBeaconBlockSSZV2(m *apimiddleware.ApiProxyMiddleware, endpoint apimiddleware.Endpoint, w http.ResponseWriter, req *http.Request) (handled bool) {
+func handleGetBeaconBlockSSZV2(m *apimiddleware.APIProxyMiddleware, endpoint apimiddleware.Endpoint, w http.ResponseWriter, req *http.Request) (handled bool) {
 	config := sszConfig{
 		sszPath:      "/eth/v2/beacon/blocks/{block_id}/ssz",
 		fileName:     "beacon_block.ssz",
@@ -60,7 +60,7 @@ func handleGetBeaconBlockSSZV2(m *apimiddleware.ApiProxyMiddleware, endpoint api
 }
 
 func handleGetSSZ(
-	m *apimiddleware.ApiProxyMiddleware,
+	m *apimiddleware.APIProxyMiddleware,
 	endpoint apimiddleware.Endpoint,
 	w http.ResponseWriter,
 	req *http.Request,
@@ -127,10 +127,10 @@ func sszRequested(req *http.Request) bool {
 }
 
 func prepareSSZRequestForProxying(
-	m *apimiddleware.ApiProxyMiddleware,
+	m *apimiddleware.APIProxyMiddleware,
 	endpoint apimiddleware.Endpoint,
 	req *http.Request, sszPath string,
-) apimiddleware.ErrorJson {
+) apimiddleware.ErrorJSON {
 	req.URL.Scheme = "http"
 	req.URL.Host = m.GatewayAddress
 	req.RequestURI = ""
@@ -143,7 +143,7 @@ func prepareSSZRequestForProxying(
 	return nil
 }
 
-func serializeMiddlewareResponseIntoSSZ(respJson sszResponseJson) (version string, ssz []byte, errJson apimiddleware.ErrorJson) {
+func serializeMiddlewareResponseIntoSSZ(respJson sszResponseJson) (version string, ssz []byte, errJson apimiddleware.ErrorJSON) {
 	// Serialize the SSZ part of the deserialized value.
 	data, err := base64.StdEncoding.DecodeString(respJson.SSZData())
 	if err != nil {
@@ -152,12 +152,12 @@ func serializeMiddlewareResponseIntoSSZ(respJson sszResponseJson) (version strin
 	return strings.ToLower(respJson.SSZVersion()), data, nil
 }
 
-func writeSSZResponseHeaderAndBody(grpcResp *http.Response, w http.ResponseWriter, respSsz []byte, respVersion, fileName string) apimiddleware.ErrorJson {
+func writeSSZResponseHeaderAndBody(grpcResp *http.Response, w http.ResponseWriter, respSsz []byte, respVersion, fileName string) apimiddleware.ErrorJSON {
 	var statusCodeHeader string
 	for h, vs := range grpcResp.Header {
 		// We don't want to expose any gRPC metadata in the HTTP response, so we skip forwarding metadata headers.
 		if strings.HasPrefix(h, "Grpc-Metadata") {
-			if h == "Grpc-Metadata-"+grpc.HttpCodeMetadataKey {
+			if h == "Grpc-Metadata-"+grpc.HTTPCodeMetadataKey {
 				statusCodeHeader = vs[0]
 			}
 		} else {
@@ -185,7 +185,7 @@ func writeSSZResponseHeaderAndBody(grpcResp *http.Response, w http.ResponseWrite
 	return nil
 }
 
-func handleEvents(m *apimiddleware.ApiProxyMiddleware, _ apimiddleware.Endpoint, w http.ResponseWriter, req *http.Request) (handled bool) {
+func handleEvents(m *apimiddleware.APIProxyMiddleware, _ apimiddleware.Endpoint, w http.ResponseWriter, req *http.Request) (handled bool) {
 	sseClient := sse.NewClient("http://" + m.GatewayAddress + "/internal" + req.URL.RequestURI())
 	eventChan := make(chan *sse.Event)
 
@@ -207,7 +207,7 @@ func handleEvents(m *apimiddleware.ApiProxyMiddleware, _ apimiddleware.Endpoint,
 	return true
 }
 
-func receiveEvents(eventChan <-chan *sse.Event, w http.ResponseWriter, req *http.Request) apimiddleware.ErrorJson {
+func receiveEvents(eventChan <-chan *sse.Event, w http.ResponseWriter, req *http.Request) apimiddleware.ErrorJSON {
 	for {
 		select {
 		case msg := <-eventChan:
@@ -238,7 +238,7 @@ func receiveEvents(eventChan <-chan *sse.Event, w http.ResponseWriter, req *http
 				}
 				msg.Data = attData
 			case events.VoluntaryExitTopic:
-				data = &signedVoluntaryExitJson{}
+				data = &voluntaryExitJson{}
 			case events.FinalizedCheckpointTopic:
 				data = &eventFinalizedCheckpointJson{}
 			case events.ChainReorgTopic:
@@ -248,7 +248,7 @@ func receiveEvents(eventChan <-chan *sse.Event, w http.ResponseWriter, req *http
 			case "error":
 				data = &eventErrorJson{}
 			default:
-				return &apimiddleware.DefaultErrorJson{
+				return &apimiddleware.DefaultErrorJSON{
 					Message: fmt.Sprintf("Event type '%s' not supported", string(msg.Event)),
 					Code:    http.StatusInternalServerError,
 				}
@@ -266,14 +266,14 @@ func receiveEvents(eventChan <-chan *sse.Event, w http.ResponseWriter, req *http
 	}
 }
 
-func writeEvent(msg *sse.Event, w http.ResponseWriter, data interface{}) apimiddleware.ErrorJson {
+func writeEvent(msg *sse.Event, w http.ResponseWriter, data interface{}) apimiddleware.ErrorJSON {
 	if err := json.Unmarshal(msg.Data, data); err != nil {
 		return apimiddleware.InternalServerError(err)
 	}
 	if errJson := apimiddleware.ProcessMiddlewareResponseFields(data); errJson != nil {
 		return errJson
 	}
-	dataJson, errJson := apimiddleware.SerializeMiddlewareResponseIntoJson(data)
+	dataJson, errJson := apimiddleware.SerializeMiddlewareResponseIntoJSON(data)
 	if errJson != nil {
 		return errJson
 	}
@@ -299,10 +299,10 @@ func writeEvent(msg *sse.Event, w http.ResponseWriter, data interface{}) apimidd
 	return nil
 }
 
-func flushEvent(w http.ResponseWriter) apimiddleware.ErrorJson {
+func flushEvent(w http.ResponseWriter) apimiddleware.ErrorJSON {
 	flusher, ok := w.(http.Flusher)
 	if !ok {
-		return &apimiddleware.DefaultErrorJson{Message: fmt.Sprintf("Flush not supported in %T", w), Code: http.StatusInternalServerError}
+		return &apimiddleware.DefaultErrorJSON{Message: fmt.Sprintf("Flush not supported in %T", w), Code: http.StatusInternalServerError}
 	}
 	flusher.Flush()
 	return nil

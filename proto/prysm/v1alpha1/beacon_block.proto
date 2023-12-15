@@ -140,7 +140,9 @@ message BeaconBlockBody {
     repeated Deposit deposits = 7 [(ethereum.eth.ext.ssz_max) = "16"];
 
     // At most MAX_VOLUNTARY_EXITS.
-    repeated SignedVoluntaryExit voluntary_exits = 8 [(ethereum.eth.ext.ssz_max) = "16"];
+    repeated VoluntaryExit voluntary_exits = 8 [(ethereum.eth.ext.ssz_max) = "16"];
+
+    repeated Withdrawal withdrawals  = 9 [(ethereum.eth.ext.ssz_max) = "1024"];
 }
 
 
@@ -173,10 +175,12 @@ message BeaconBlockBodyAltair {
     repeated Deposit deposits = 7 [(ethereum.eth.ext.ssz_max) = "16"];
 
     // At most MAX_VOLUNTARY_EXITS.
-    repeated SignedVoluntaryExit voluntary_exits = 8 [(ethereum.eth.ext.ssz_max) = "16"];
+    repeated VoluntaryExit voluntary_exits = 8 [(ethereum.eth.ext.ssz_max) = "16"];
 
     // Sync aggregate object to track sync committee votes for light client support. [New in ]
     SyncAggregate sync_aggregate = 9;
+
+    repeated Withdrawal withdrawals  = 10 [(ethereum.eth.ext.ssz_max) = "1024"];
 }
 
 // Proposer slashings are proofs that a slashable offense has been committed by
@@ -206,14 +210,20 @@ message Deposit {
         // 48 byte BLS public key of the validator.
         bytes public_key = 1 [(ethereum.eth.ext.ssz_size) = "48", (ethereum.eth.ext.spec_name) = "pubkey"];
 
-        // A 32 byte hash of the withdrawal address public key.
-        bytes withdrawal_credentials = 2 [(ethereum.eth.ext.ssz_size) = "32"];
+        // A 20 byte of the creator address public key.
+        bytes creator_address = 2 [(ethereum.eth.ext.ssz_size) = "20"];
+
+        // A 20 byte of the withdrawal address public key.
+        bytes withdrawal_credentials = 3 [(ethereum.eth.ext.ssz_size) = "20"];
 
         // Deposit amount in gwei.
-        uint64 amount = 3;
+        uint64 amount = 4;
 
         // 96 byte signature from the validators public key.
-        bytes signature = 4 [(ethereum.eth.ext.ssz_size) = "96"];
+        bytes signature = 5 [(ethereum.eth.ext.ssz_size) = "96"];
+
+        // hash of transaction initiator of operation
+        bytes init_tx_hash = 6 [(ethereum.eth.ext.ssz_size) = "32"];
     }
     // 32 byte roots in the deposit tree branch.
     repeated bytes proof = 1 [(ethereum.eth.ext.ssz_size) = "33,32"];
@@ -230,15 +240,30 @@ message VoluntaryExit {
 
     // Index of the exiting validator.
     uint64 validator_index = 2 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.ValidatorIndex"];
+
+    // hash of transaction initiator of operation
+    bytes init_tx_hash = 3 [(ethereum.eth.ext.ssz_size) = "32"];
 }
 
-// The signed version of voluntary exit.
-message SignedVoluntaryExit {
-    // The unsigned voluntary exit itself.
-    VoluntaryExit exit = 1;
+// A message that represents a validator signaling that they want to withdrawals:
+// - reward only if validator is active
+// - whole balance if validator is not active
+// The message does not contain a validator signature.
+message Withdrawal {
+    // 48 byte validator public key.
+    bytes public_key = 1 [(ethereum.eth.ext.ssz_size) = "48"];
 
-    // Validator's 96 byte signature
-    bytes signature = 2 [(ethereum.eth.ext.ssz_size) = "96"];
+    // Index of the validator.
+    uint64 validator_index = 2 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.ValidatorIndex"];
+
+    // Withdrawal amount in gwei.
+    uint64 amount = 3;
+
+    // hash of transaction initiator of operation
+    bytes init_tx_hash = 4 [(ethereum.eth.ext.ssz_size) = "32"];
+
+    // The epoch on when withdrawals request becomes valid.
+    uint64 epoch = 5 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Epoch"];
 }
 
 // Eth1Data represents references to the Ethereum 1.x deposit contract.
@@ -256,12 +281,8 @@ message Eth1Data {
     bytes block_hash = 3 [(ethereum.eth.ext.ssz_size) = "32"];
 
     // The 32 byte array of hashes presented sequence of the GWAT spines candidates.
-    // ssz_max = 32 * 128
-    bytes candidates = 4 [(ethereum.eth.ext.ssz_max) = "4096"];
-
-    //The 32 byte array of hashes presented sequence of the GWAT spines to finalization.
-    // ssz_max = 32 * 128
-    bytes finalization = 5 [(ethereum.eth.ext.ssz_max) = "4096"];
+    // ssz_max = 32 * 1024
+    bytes candidates = 4 [(ethereum.eth.ext.ssz_max) = "32768"];
 }
 
 // A beacon block header is essentially a beacon block with only a reference to
@@ -364,13 +385,15 @@ message BeaconBlockBodyBellatrix {
     repeated Deposit deposits = 7 [(ethereum.eth.ext.ssz_max) = "16"];
 
     // At most MAX_VOLUNTARY_EXITS.
-    repeated SignedVoluntaryExit voluntary_exits = 8 [(ethereum.eth.ext.ssz_max) = "16"];
+    repeated VoluntaryExit voluntary_exits = 8 [(ethereum.eth.ext.ssz_max) = "16"];
 
     // Sync aggregate object for the beacon chain to track sync committee votes. New in Altair network upgrade.
     SyncAggregate sync_aggregate = 9;
 
     // Execution payload from the execution chain. New in Bellatrix network upgrade.
     ethereum.engine.v1.ExecutionPayload execution_payload = 10;
+
+    repeated Withdrawal withdrawals  = 11 [(ethereum.eth.ext.ssz_max) = "1024"];
 }
 
 message SignedBlindedBeaconBlockBellatrix {
@@ -422,13 +445,15 @@ message BlindedBeaconBlockBodyBellatrix {
     repeated Deposit deposits = 7 [(ethereum.eth.ext.ssz_max) = "16"];
 
     // At most MAX_VOLUNTARY_EXITS.
-    repeated SignedVoluntaryExit voluntary_exits = 8 [(ethereum.eth.ext.ssz_max) = "16"];
+    repeated VoluntaryExit voluntary_exits = 8 [(ethereum.eth.ext.ssz_max) = "16"];
 
     // Sync aggregate object for the beacon chain to track sync committee votes. New in Altair network upgrade.
     SyncAggregate sync_aggregate = 9;
 
     // Execution payload header from the execution chain. New in Bellatrix network upgrade to accommodate MEV interaction.
     ExecutionPayloadHeader execution_payload_header = 10;
+
+    repeated Withdrawal withdrawals  = 11 [(ethereum.eth.ext.ssz_max) = "1024"];
 }
 
 message ExecutionPayloadHeader {

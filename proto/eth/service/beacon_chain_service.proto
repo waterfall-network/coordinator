@@ -108,6 +108,27 @@ service BeaconChain {
     };
   }
 
+  // GetSpineData returns spine data specified by state.
+  rpc GetSpineData(v1.StateSpineDataRequest) returns (v1.StateSpineDataResponse) {
+    option (google.api.http) = {
+      get: "/internal/eth/v1/beacon/states/{state_id}/spine_data"
+    };
+  }
+
+  // ListBlockVotings retrieves the block votings for the given state at the given epoch.
+  rpc ListBlockVotings(v1.StateBlockVotingsRequest) returns (v1.StateBlockVotingsResponse) {
+    option (google.api.http) = {
+      get: "/internal/eth/v1/beacon/states/{state_id}/block_votings"
+    };
+  }
+
+  // GetEth1Data retrieves the eth1Data for the given state at the given epoch.
+  rpc GetEth1Data(v1.StateEth1DataRequest) returns (v1.StateEth1DataResponse) {
+    option (google.api.http) = {
+      get: "/internal/eth/v1/beacon/states/{state_id}/eth1_data"
+    };
+  }
+
   // Beacon blocks API related endpoints.
 
   // ListBlockHeaders retrieves block headers matching given query. By default it will fetch current head slot blocks.
@@ -236,15 +257,6 @@ service BeaconChain {
   rpc ListPoolVoluntaryExits(google.protobuf.Empty) returns (v1.VoluntaryExitsPoolResponse) {
     option (google.api.http) = {
       get: "/internal/eth/v1/beacon/pool/voluntary_exits"
-    };
-  }
-
-  // SubmitVoluntaryExit submits SignedVoluntaryExit object to node's pool
-  // and if passes validation node MUST broadcast it to network.
-  rpc SubmitVoluntaryExit(v1.SignedVoluntaryExit) returns (google.protobuf.Empty) {
-    option (google.api.http) = {
-      post: "/internal/eth/v1/beacon/pool/voluntary_exits"
-      body: "*"
     };
   }
 

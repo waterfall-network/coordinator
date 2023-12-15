@@ -31,9 +31,13 @@ func TestProcessBlockHeader_ImproperBlockSlot(t *testing.T) {
 	for i := 0; i < len(validators); i++ {
 		validators[i] = &ethpb.Validator{
 			PublicKey:             make([]byte, 32),
-			WithdrawalCredentials: make([]byte, 32),
+			CreatorAddress:        make([]byte, 20),
+			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			Slashed:               true,
+			ActivationHash:        (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:              (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:         []*ethpb.WithdrawalOp{},
 		}
 	}
 
@@ -108,9 +112,13 @@ func TestProcessBlockHeader_DifferentSlots(t *testing.T) {
 	for i := 0; i < len(validators); i++ {
 		validators[i] = &ethpb.Validator{
 			PublicKey:             make([]byte, 32),
-			WithdrawalCredentials: make([]byte, 32),
+			CreatorAddress:        make([]byte, 20),
+			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			Slashed:               true,
+			ActivationHash:        (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:              (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:         []*ethpb.WithdrawalOp{},
 		}
 	}
 
@@ -152,9 +160,13 @@ func TestProcessBlockHeader_PreviousBlockRootNotSignedRoot(t *testing.T) {
 	for i := 0; i < len(validators); i++ {
 		validators[i] = &ethpb.Validator{
 			PublicKey:             make([]byte, 48),
-			WithdrawalCredentials: make([]byte, 32),
+			CreatorAddress:        make([]byte, 20),
+			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			Slashed:               true,
+			ActivationHash:        (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:              (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:         []*ethpb.WithdrawalOp{},
 		}
 	}
 
@@ -193,9 +205,13 @@ func TestProcessBlockHeader_SlashedProposer(t *testing.T) {
 	for i := 0; i < len(validators); i++ {
 		validators[i] = &ethpb.Validator{
 			PublicKey:             make([]byte, 48),
-			WithdrawalCredentials: make([]byte, 32),
+			CreatorAddress:        make([]byte, 20),
+			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			Slashed:               true,
+			ActivationHash:        (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:              (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:         []*ethpb.WithdrawalOp{},
 		}
 	}
 
@@ -237,9 +253,13 @@ func TestProcessBlockHeader_OK(t *testing.T) {
 	for i := 0; i < len(validators); i++ {
 		validators[i] = &ethpb.Validator{
 			PublicKey:             make([]byte, 32),
-			WithdrawalCredentials: make([]byte, 32),
+			CreatorAddress:        make([]byte, 20),
+			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			Slashed:               true,
+			ActivationHash:        (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:              (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:         []*ethpb.WithdrawalOp{},
 		}
 	}
 
@@ -297,9 +317,13 @@ func TestBlockSignatureSet_OK(t *testing.T) {
 	for i := 0; i < len(validators); i++ {
 		validators[i] = &ethpb.Validator{
 			PublicKey:             make([]byte, 32),
-			WithdrawalCredentials: make([]byte, 32),
+			CreatorAddress:        make([]byte, 20),
+			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
 			Slashed:               true,
+			ActivationHash:        (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:              (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:         []*ethpb.WithdrawalOp{},
 		}
 	}
 

@@ -31,8 +31,12 @@ func TestComputeCommittee_WithoutCache(t *testing.T) {
 		copy(k, strconv.Itoa(i))
 		validators[i] = &ethpb.Validator{
 			PublicKey:             k,
-			WithdrawalCredentials: make([]byte, 32),
+			CreatorAddress:        make([]byte, 20),
+			WithdrawalCredentials: make([]byte, 20),
 			ExitEpoch:             params.BeaconConfig().FarFutureEpoch,
+			ActivationHash:        make([]byte, 32),
+			ExitHash:              make([]byte, 32),
+			WithdrawalOps:         make([]*ethpb.WithdrawalOp, 0),
 		}
 	}
 
@@ -110,6 +114,9 @@ func TestCommitteeAssignments_NoProposerForSlot0(t *testing.T) {
 		validators[i] = &ethpb.Validator{
 			ActivationEpoch: activationEpoch,
 			ExitEpoch:       params.BeaconConfig().FarFutureEpoch,
+			ActivationHash:  make([]byte, 32),
+			ExitHash:        make([]byte, 32),
+			WithdrawalOps:   make([]*ethpb.WithdrawalOp, 0),
 		}
 	}
 	state, err := v1.InitializeFromProto(&ethpb.BeaconState{
@@ -140,6 +147,9 @@ func TestCommitteeAssignments_CanRetrieve(t *testing.T) {
 		validators[i] = &ethpb.Validator{
 			ActivationEpoch: activationEpoch,
 			ExitEpoch:       params.BeaconConfig().FarFutureEpoch,
+			ActivationHash:  make([]byte, 32),
+			ExitHash:        make([]byte, 32),
+			WithdrawalOps:   make([]*ethpb.WithdrawalOp, 0),
 		}
 	}
 
@@ -217,6 +227,9 @@ func TestCommitteeAssignments_CannotRetrieveFuture(t *testing.T) {
 		validators[i] = &ethpb.Validator{
 			ActivationEpoch: activationEpoch,
 			ExitEpoch:       params.BeaconConfig().FarFutureEpoch,
+			ActivationHash:  make([]byte, 32),
+			ExitHash:        make([]byte, 32),
+			WithdrawalOps:   make([]*ethpb.WithdrawalOp, 0),
 		}
 	}
 
@@ -242,6 +255,9 @@ func TestCommitteeAssignments_EverySlotHasMin1Proposer(t *testing.T) {
 		validators[i] = &ethpb.Validator{
 			ActivationEpoch: 0,
 			ExitEpoch:       params.BeaconConfig().FarFutureEpoch,
+			ActivationHash:  make([]byte, 32),
+			ExitHash:        make([]byte, 32),
+			WithdrawalOps:   make([]*ethpb.WithdrawalOp, 0),
 		}
 	}
 	state, err := v1.InitializeFromProto(&ethpb.BeaconState{
@@ -277,7 +293,10 @@ func TestVerifyAttestationBitfieldLengths_OK(t *testing.T) {
 	activeRoots := make([][]byte, params.BeaconConfig().EpochsPerHistoricalVector)
 	for i := 0; i < len(validators); i++ {
 		validators[i] = &ethpb.Validator{
-			ExitEpoch: params.BeaconConfig().FarFutureEpoch,
+			ExitEpoch:      params.BeaconConfig().FarFutureEpoch,
+			ActivationHash: make([]byte, 32),
+			ExitHash:       make([]byte, 32),
+			WithdrawalOps:  make([]*ethpb.WithdrawalOp, 0),
 		}
 	}
 
@@ -378,6 +397,9 @@ func TestUpdateCommitteeCache_CanUpdate(t *testing.T) {
 		validators[i] = &ethpb.Validator{
 			ExitEpoch:        params.BeaconConfig().FarFutureEpoch,
 			EffectiveBalance: 1,
+			ActivationHash:   make([]byte, 32),
+			ExitHash:         make([]byte, 32),
+			WithdrawalOps:    make([]*ethpb.WithdrawalOp, 0),
 		}
 		indices[i] = i
 	}
@@ -402,7 +424,10 @@ func BenchmarkComputeCommittee300000_WithPreCache(b *testing.B) {
 	validators := make([]*ethpb.Validator, 300000)
 	for i := 0; i < len(validators); i++ {
 		validators[i] = &ethpb.Validator{
-			ExitEpoch: params.BeaconConfig().FarFutureEpoch,
+			ExitEpoch:      params.BeaconConfig().FarFutureEpoch,
+			ActivationHash: make([]byte, 32),
+			ExitHash:       make([]byte, 32),
+			WithdrawalOps:  make([]*ethpb.WithdrawalOp, 0),
 		}
 	}
 	state, err := v1.InitializeFromProto(&ethpb.BeaconState{
@@ -436,7 +461,10 @@ func BenchmarkComputeCommittee3000000_WithPreCache(b *testing.B) {
 	validators := make([]*ethpb.Validator, 3000000)
 	for i := 0; i < len(validators); i++ {
 		validators[i] = &ethpb.Validator{
-			ExitEpoch: params.BeaconConfig().FarFutureEpoch,
+			ExitEpoch:      params.BeaconConfig().FarFutureEpoch,
+			ActivationHash: make([]byte, 32),
+			ExitHash:       make([]byte, 32),
+			WithdrawalOps:  make([]*ethpb.WithdrawalOp, 0),
 		}
 	}
 	state, err := v1.InitializeFromProto(&ethpb.BeaconState{
@@ -470,7 +498,10 @@ func BenchmarkComputeCommittee128000_WithOutPreCache(b *testing.B) {
 	validators := make([]*ethpb.Validator, 128000)
 	for i := 0; i < len(validators); i++ {
 		validators[i] = &ethpb.Validator{
-			ExitEpoch: params.BeaconConfig().FarFutureEpoch,
+			ExitEpoch:      params.BeaconConfig().FarFutureEpoch,
+			ActivationHash: make([]byte, 32),
+			ExitHash:       make([]byte, 32),
+			WithdrawalOps:  make([]*ethpb.WithdrawalOp, 0),
 		}
 	}
 	state, err := v1.InitializeFromProto(&ethpb.BeaconState{
@@ -505,7 +536,10 @@ func BenchmarkComputeCommittee1000000_WithOutCache(b *testing.B) {
 	validators := make([]*ethpb.Validator, 1000000)
 	for i := 0; i < len(validators); i++ {
 		validators[i] = &ethpb.Validator{
-			ExitEpoch: params.BeaconConfig().FarFutureEpoch,
+			ExitEpoch:      params.BeaconConfig().FarFutureEpoch,
+			ActivationHash: make([]byte, 32),
+			ExitHash:       make([]byte, 32),
+			WithdrawalOps:  make([]*ethpb.WithdrawalOp, 0),
 		}
 	}
 	state, err := v1.InitializeFromProto(&ethpb.BeaconState{
@@ -540,7 +574,10 @@ func BenchmarkComputeCommittee4000000_WithOutCache(b *testing.B) {
 	validators := make([]*ethpb.Validator, 4000000)
 	for i := 0; i < len(validators); i++ {
 		validators[i] = &ethpb.Validator{
-			ExitEpoch: params.BeaconConfig().FarFutureEpoch,
+			ExitEpoch:      params.BeaconConfig().FarFutureEpoch,
+			ActivationHash: make([]byte, 32),
+			ExitHash:       make([]byte, 32),
+			WithdrawalOps:  make([]*ethpb.WithdrawalOp, 0),
 		}
 	}
 	state, err := v1.InitializeFromProto(&ethpb.BeaconState{
@@ -576,7 +613,10 @@ func TestBeaconCommitteeFromState_UpdateCacheForPreviousEpoch(t *testing.T) {
 	validators := make([]*ethpb.Validator, params.BeaconConfig().SlotsPerEpoch.Mul(committeeSize))
 	for i := 0; i < len(validators); i++ {
 		validators[i] = &ethpb.Validator{
-			ExitEpoch: params.BeaconConfig().FarFutureEpoch,
+			ExitEpoch:      params.BeaconConfig().FarFutureEpoch,
+			ActivationHash: make([]byte, 32),
+			ExitHash:       make([]byte, 32),
+			WithdrawalOps:  make([]*ethpb.WithdrawalOp, 0),
 		}
 	}
 
@@ -601,7 +641,10 @@ func TestPrecomputeProposerIndices_Ok(t *testing.T) {
 	validators := make([]*ethpb.Validator, params.BeaconConfig().MinGenesisActiveValidatorCount)
 	for i := 0; i < len(validators); i++ {
 		validators[i] = &ethpb.Validator{
-			ExitEpoch: params.BeaconConfig().FarFutureEpoch,
+			ExitEpoch:      params.BeaconConfig().FarFutureEpoch,
+			ActivationHash: make([]byte, 32),
+			ExitHash:       make([]byte, 32),
+			WithdrawalOps:  make([]*ethpb.WithdrawalOp, 0),
 		}
 	}
 

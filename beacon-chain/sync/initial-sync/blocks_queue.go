@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/libp2p/go-libp2p-core/peer"
+	"github.com/libp2p/go-libp2p/core/peer"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
@@ -320,6 +320,7 @@ func (q *blocksQueue) onDataReceivedEvent(ctx context.Context) eventHandlerFn {
 			case beaconsync.ErrInvalidFetchedData:
 				// Peer returned invalid data, penalize.
 				q.blocksFetcher.p2p.Peers().Scorers().BadResponsesScorer().Increment(m.pid)
+				log.WithField("fn", "onDataReceivedEvent").WithField("peer", response.pid).WithError(response.err).Debug("Disconnect: incr BadResponses")
 				log.WithField("pid", response.pid).Debug("Peer is penalized for invalid blocks")
 			}
 			return m.state, response.err

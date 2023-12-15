@@ -40,6 +40,7 @@ type BeaconState struct {
 	previousJustifiedCheckpoint *ethpb.Checkpoint           `ssz-gen:"true"`
 	currentJustifiedCheckpoint  *ethpb.Checkpoint           `ssz-gen:"true"`
 	finalizedCheckpoint         *ethpb.Checkpoint           `ssz-gen:"true"`
+	spineData                   *ethpb.SpineData            `ssz-gen:"true"`
 	inactivityScores            []uint64                    `ssz-gen:"true" ssz-max:"1099511627776"`
 	currentSyncCommittee        *ethpb.SyncCommittee        `ssz-gen:"true"`
 	nextSyncCommittee           *ethpb.SyncCommittee        `ssz-gen:"true"`
@@ -52,9 +53,4 @@ type BeaconState struct {
 	valMapHandler         *stateutil.ValidatorMapHandler
 	merkleLayers          [][][]byte
 	sharedFieldReferences map[types.FieldIndex]*stateutil.Reference
-}
-
-func (b *BeaconState) SetBlockVoting(val []*ethpb.BlockVoting) error {
-	//TODO implement me
-	panic("implement me")
 }

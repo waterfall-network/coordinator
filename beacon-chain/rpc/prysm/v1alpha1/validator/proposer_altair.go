@@ -7,6 +7,7 @@ import (
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition/interop"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
@@ -23,16 +24,16 @@ func (vs *Server) buildAltairBeaconBlock(ctx context.Context, req *ethpb.BlockRe
 	blkData, err := vs.buildPhase0BlockData(ctx, req)
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
-			"req": req,
-		}).Error("#### build-Altair-BeaconBlock: could not build block data ###")
+			"req.Slot": req.Slot,
+		}).Error("Build beacon block Altair: could not build block data")
 		return nil, fmt.Errorf("could not build block data: %v", err)
 	}
 
 	log.WithError(err).WithFields(logrus.Fields{
-		"req.slot":             req.Slot,
-		"blkData.Finalization": gwatCommon.HashArrayFromBytes(blkData.Eth1Data.Finalization),
-		"blkData.Candidates":   gwatCommon.HashArrayFromBytes(blkData.Eth1Data.Candidates),
-	}).Info("#### build-Altair-BeaconBlock ###")
+		"req.slot":           req.Slot,
+		"blkData.Candidates": gwatCommon.HashArrayFromBytes(blkData.Eth1Data.Candidates),
+		"withdrawals":        len(blkData.Withdrawals),
+	}).Info("Build beacon block Altair: start")
 
 	// Use zero hash as stub for state root to compute later.
 	stateRoot := params.BeaconConfig().ZeroHash[:]
@@ -59,6 +60,7 @@ func (vs *Server) buildAltairBeaconBlock(ctx context.Context, req *ethpb.BlockRe
 			VoluntaryExits:    blkData.VoluntaryExits,
 			Graffiti:          blkData.Graffiti[:],
 			SyncAggregate:     syncAggregate,
+			Withdrawals:       blkData.Withdrawals,
 		},
 	}, nil
 }
@@ -77,6 +79,7 @@ func (vs *Server) getAltairBeaconBlock(ctx context.Context, req *ethpb.BlockRequ
 	if err != nil {
 		return nil, err
 	}
+	ctx = context.WithValue(ctx, params.BeaconConfig().CtxBlockFetcherKey, db.BlockInfoFetcherFunc(vs.BeaconDB))
 	stateRoot, err := vs.computeStateRoot(ctx, wsb)
 
 	log.WithError(err).WithFields(logrus.Fields{

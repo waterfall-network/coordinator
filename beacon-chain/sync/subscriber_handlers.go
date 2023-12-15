@@ -10,15 +10,15 @@ import (
 )
 
 func (s *Service) voluntaryExitSubscriber(ctx context.Context, msg proto.Message) error {
-	ve, ok := msg.(*ethpb.SignedVoluntaryExit)
+	ve, ok := msg.(*ethpb.VoluntaryExit)
 	if !ok {
-		return fmt.Errorf("wrong type, expected: *ethpb.SignedVoluntaryExit got: %T", msg)
+		return fmt.Errorf("wrong type, expected: *ethpb.VoluntaryExit got: %T", msg)
 	}
 
-	if ve.Exit == nil {
+	if ve == nil {
 		return errors.New("exit can't be nil")
 	}
-	s.setExitIndexSeen(ve.Exit.ValidatorIndex)
+	s.setExitIndexSeen(ve.ValidatorIndex)
 
 	headState, err := s.cfg.chain.HeadState(ctx)
 	if err != nil {
@@ -26,6 +26,27 @@ func (s *Service) voluntaryExitSubscriber(ctx context.Context, msg proto.Message
 	}
 	s.cfg.exitPool.InsertVoluntaryExit(ctx, headState, ve)
 	return nil
+}
+
+func (s *Service) committeeIndexBeaconPrevoteSubscriber(_ context.Context, msg proto.Message) error {
+	prevote, ok := msg.(*ethpb.PreVote)
+	if !ok {
+		return fmt.Errorf("wrong type, expected: *ethpb.PreVote got: %T", msg)
+	}
+
+	if prevote.Data == nil {
+		return errors.New("prevote data is nil")
+	}
+
+	exists, err := s.cfg.prevotePool.HasPrevote(prevote)
+	if err != nil {
+		return errors.Wrap(err, "Could not determine if prevote pool has this prevote")
+	}
+	if exists {
+		return nil
+	}
+
+	return s.cfg.prevotePool.SavePrevote(prevote)
 }
 
 func (s *Service) attesterSlashingSubscriber(ctx context.Context, msg proto.Message) error {

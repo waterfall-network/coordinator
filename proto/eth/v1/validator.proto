@@ -40,36 +40,59 @@ message Validator {
     // 48 byte BLS public key used for the validator's activities.
     bytes pubkey = 1 [(ethereum.eth.ext.ssz_size) = "48", (ethereum.eth.ext.spec_name) = "pubkey"];
 
-    // 32 byte hash of the withdrawal destination public key.
-    bytes withdrawal_credentials = 2 [(ethereum.eth.ext.ssz_size) = "32"];
+    // A 20 byte of the creator address public key.
+    bytes creator_address = 2 [(ethereum.eth.ext.ssz_size) = "20"];
+
+    // 20 byte of the withdrawal destination public key.
+    bytes withdrawal_credentials = 3 [(ethereum.eth.ext.ssz_size) = "20"];
 
     // The validators current effective balance in gwei.
-    uint64 effective_balance = 3;
+    uint64 effective_balance = 4;
 
     // Whether or not the validator has been slashed.
-    bool slashed = 4;
+    bool slashed = 5;
 
     // Epoch when the validator became eligible for activation. This field may
     // be zero if the validator was present in the Ethereum proof of stake genesis. This
     // field is FAR_FUTURE_EPOCH if the validator has not been activated.
-    uint64 activation_eligibility_epoch = 5 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Epoch"];
+    uint64 activation_eligibility_epoch = 6 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Epoch"];
 
     // Epoch when the validator was activated. This field may be zero if the
     // validator was present in the Ethereum proof of stake genesis. This field is
     // FAR_FUTURE_EPOCH if the validator has not been activated.
-    uint64 activation_epoch = 6 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Epoch"];
+    uint64 activation_epoch = 7 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Epoch"];
 
     // Epoch when the validator was exited. This field is FAR_FUTURE_EPOCH if
     // the validator has not exited.
     // FAR_FUTURE_EPOCH is a constant defined by the official Ethereum Beacon Chain specification:
     // https://github.com/ethereum/consensus-specs/blob/v0.9.2/specs/core/0_beacon-chain.md#constants
-    uint64 exit_epoch = 7 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Epoch"];
+    uint64 exit_epoch = 8 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Epoch"];
 
     // Epoch when the validator is eligible to withdraw their funds. This field
     // is FAR_FUTURE_EPOCH if the validator has not exited.
     // FAR_FUTURE_EPOCH is a constant defined by the official Ethereum Beacon Chain specification:
     // https://github.com/ethereum/consensus-specs/blob/v0.9.2/specs/core/0_beacon-chain.md#constants
-    uint64 withdrawable_epoch = 8 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Epoch"];
+    uint64 withdrawable_epoch = 9 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Epoch"];
+
+    // hash of activation tx
+    bytes activation_hash = 10 [(ethereum.eth.ext.ssz_size) = "32"];
+
+    // hash of exit tx
+    bytes exit_hash = 11 [(ethereum.eth.ext.ssz_size) = "32"];
+
+    // array of withdrawals operations from finalized checkpoint
+    // 1024 * 48(data len) = 49152
+    repeated WithdrawalOp withdrawal_ops = 12  [(ethereum.eth.ext.ssz_max) = "49152"];
+}
+
+// represents validator withdrawal operation
+message WithdrawalOp {
+    // Withdrawal amount in gwei.
+    uint64 amount = 1;
+    // hash of transaction initiator of withdrawal
+    bytes hash = 2 [(ethereum.eth.ext.ssz_size) = "32"];
+    // The slot of apply.
+    uint64 slot = 3 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Slot"];
 }
 
 enum ValidatorStatus {

@@ -304,9 +304,7 @@ func TestAltairBeaconBlockBody_Deposits(t *testing.T) {
 }
 
 func TestAltairBeaconBlockBody_VoluntaryExits(t *testing.T) {
-	exits := []*ethpb.SignedVoluntaryExit{
-		{Exit: &ethpb.VoluntaryExit{Epoch: 54}},
-	}
+	exits := []*ethpb.VoluntaryExit{{Epoch: 54}}
 	body := &ethpb.BeaconBlockBodyAltair{VoluntaryExits: exits}
 	wbb, err := wrapper.WrappedAltairBeaconBlockBody(body)
 	require.NoError(t, err)
@@ -378,8 +376,6 @@ func TestAltairBeaconBlock_ExecutionPayloadHeader(t *testing.T) {
 	sb := &ethpb.SignedBeaconBlockAltair{
 		Block: &ethpb.BeaconBlockAltair{Slot: 66},
 	}
-	wsb, err := wrapper.WrappedSignedBeaconBlock(sb)
+	_, err := wrapper.WrappedSignedBeaconBlock(sb)
 	require.NoError(t, err)
-	_, err = wsb.Block().Body().ExecutionPayloadHeader()
-	require.ErrorContains(t, "unsupported field for block type", err)
 }

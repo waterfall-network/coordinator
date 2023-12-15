@@ -12,7 +12,7 @@ import (
 )
 
 // HandleURLParameters processes URL parameters, allowing parameterized URLs to be safely and correctly proxied to grpc-gateway.
-func HandleURLParameters(url string, req *http.Request, literals []string) ErrorJson {
+func HandleURLParameters(url string, req *http.Request, literals []string) ErrorJSON {
 	segments := strings.Split(url, "/")
 
 segmentsLoop:
@@ -49,7 +49,7 @@ segmentsLoop:
 }
 
 // HandleQueryParameters processes query parameters, allowing them to be safely and correctly proxied to grpc-gateway.
-func HandleQueryParameters(req *http.Request, params []QueryParam) ErrorJson {
+func HandleQueryParameters(req *http.Request, params []QueryParam) ErrorJSON {
 	queryParams := req.URL.Query()
 
 	normalizeQueryValues(queryParams)

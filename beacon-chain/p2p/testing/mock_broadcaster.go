@@ -14,6 +14,11 @@ type MockBroadcaster struct {
 	BroadcastAttestations []*ethpb.Attestation
 }
 
+func (m *MockBroadcaster) BroadcastPrevoting(ctx context.Context, subnet uint64, sMsg *ethpb.PreVote) error {
+	//TODO implement me
+	panic("implement me")
+}
+
 // Broadcast records a broadcast occurred.
 func (m *MockBroadcaster) Broadcast(_ context.Context, msg proto.Message) error {
 	m.BroadcastCalled = true

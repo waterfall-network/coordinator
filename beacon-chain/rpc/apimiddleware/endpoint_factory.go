@@ -25,6 +25,9 @@ func (_ *BeaconEndpointFactory) Paths() []string {
 		"/eth/v1/beacon/states/{state_id}/validator_balances",
 		"/eth/v1/beacon/states/{state_id}/committees",
 		"/eth/v1/beacon/states/{state_id}/sync_committees",
+		"/eth/v1/beacon/states/{state_id}/spine_data",
+		"/eth/v1/beacon/states/{state_id}/block_votings",
+		"/eth/v1/beacon/states/{state_id}/eth1_data",
 		"/eth/v1/beacon/headers",
 		"/eth/v1/beacon/headers/{block_id}",
 		"/eth/v1/beacon/blocks",
@@ -98,6 +101,12 @@ func (_ *BeaconEndpointFactory) Create(path string) (*apimiddleware.Endpoint, er
 		endpoint.Hooks = apimiddleware.HookCollection{
 			OnPreDeserializeGrpcResponseBodyIntoContainer: prepareValidatorAggregates,
 		}
+	case "/eth/v1/beacon/states/{state_id}/spine_data":
+		endpoint.GetResponse = &stateSpineDataResponseJson{}
+	case "/eth/v1/beacon/states/{state_id}/block_votings":
+		endpoint.GetResponse = &stateBlockVotingsResponseJson{}
+	case "/eth/v1/beacon/states/{state_id}/eth1_data":
+		endpoint.GetResponse = &stateEth1DataResponseJson{}
 	case "/eth/v1/beacon/headers":
 		endpoint.RequestQueryParams = []apimiddleware.QueryParam{{Name: "slot"}, {Name: "parent_root", Hex: true}}
 		endpoint.GetResponse = &blockHeadersResponseJson{}
@@ -114,7 +123,7 @@ func (_ *BeaconEndpointFactory) Create(path string) (*apimiddleware.Endpoint, er
 	case "/eth/v2/beacon/blocks/{block_id}":
 		endpoint.GetResponse = &blockV2ResponseJson{}
 		endpoint.Hooks = apimiddleware.HookCollection{
-			OnPreSerializeMiddlewareResponseIntoJson: serializeV2Block,
+			OnPreSerializeMiddlewareResponseIntoJSON: serializeV2Block,
 		}
 		endpoint.CustomHandlers = []apimiddleware.CustomHandler{handleGetBeaconBlockSSZV2}
 	case "/eth/v1/beacon/blocks/{block_id}/root":
@@ -136,7 +145,7 @@ func (_ *BeaconEndpointFactory) Create(path string) (*apimiddleware.Endpoint, er
 		endpoint.PostRequest = &proposerSlashingJson{}
 		endpoint.GetResponse = &proposerSlashingsPoolResponseJson{}
 	case "/eth/v1/beacon/pool/voluntary_exits":
-		endpoint.PostRequest = &signedVoluntaryExitJson{}
+		//endpoint.PostRequest = &voluntaryExitJson{}
 		endpoint.GetResponse = &voluntaryExitsPoolResponseJson{}
 	case "/eth/v1/beacon/pool/sync_committees":
 		endpoint.PostRequest = &submitSyncCommitteeSignaturesRequestJson{}
@@ -168,7 +177,7 @@ func (_ *BeaconEndpointFactory) Create(path string) (*apimiddleware.Endpoint, er
 	case "/eth/v2/debug/beacon/states/{state_id}":
 		endpoint.GetResponse = &beaconStateV2ResponseJson{}
 		endpoint.Hooks = apimiddleware.HookCollection{
-			OnPreSerializeMiddlewareResponseIntoJson: serializeV2State,
+			OnPreSerializeMiddlewareResponseIntoJSON: serializeV2State,
 		}
 		endpoint.CustomHandlers = []apimiddleware.CustomHandler{handleGetBeaconStateSSZV2}
 	case "/eth/v1/debug/beacon/heads":
@@ -212,7 +221,7 @@ func (_ *BeaconEndpointFactory) Create(path string) (*apimiddleware.Endpoint, er
 		endpoint.RequestURLLiterals = []string{"slot"}
 		endpoint.RequestQueryParams = []apimiddleware.QueryParam{{Name: "randao_reveal", Hex: true}, {Name: "graffiti", Hex: true}}
 		endpoint.Hooks = apimiddleware.HookCollection{
-			OnPreSerializeMiddlewareResponseIntoJson: serializeProducedV2Block,
+			OnPreSerializeMiddlewareResponseIntoJSON: serializeProducedV2Block,
 		}
 	case "/eth/v1/validator/attestation_data":
 		endpoint.GetResponse = &produceAttestationDataResponseJson{}

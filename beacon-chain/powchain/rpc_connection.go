@@ -9,7 +9,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
-	contracts "gitlab.waterfall.network/waterfall/protocol/coordinator/contracts/deposit"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/logs"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/network"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/network/authorization"
@@ -28,13 +27,6 @@ func (s *Service) setupExecutionClientConnections(ctx context.Context, currEndpo
 	s.rpcClient = client
 	s.httpLogger = fetcher
 	s.eth1DataFetcher = fetcher
-
-	depositContractCaller, err := contracts.NewDepositContractCaller(s.cfg.depositContractAddr, fetcher)
-	if err != nil {
-		client.Close()
-		return errors.Wrap(err, "could not initialize deposit contract caller")
-	}
-	s.depositContractCaller = depositContractCaller
 
 	// Ensure we have the correct chain and deposit IDs.
 	if err := ensureCorrectExecutionChain(ctx, fetcher); err != nil {
@@ -89,7 +81,7 @@ func (s *Service) pollConnectionStatus(ctx context.Context) {
 			}).Info("sync slot info")
 			return
 		case <-s.ctx.Done():
-			log.Debug("Received cancelled context,closing existing powchain service")
+			log.Debug("Received canceled context,closing existing powchain service")
 			return
 		}
 	}

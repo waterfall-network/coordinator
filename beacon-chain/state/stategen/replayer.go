@@ -64,7 +64,6 @@ type chainer interface {
 }
 
 type stateReplayer struct {
-	s       state.BeaconState
 	target  types.Slot
 	method  retrievalMethod
 	chainer chainer
@@ -99,7 +98,7 @@ func (rs *stateReplayer) ReplayBlocks(ctx context.Context) (state.BeaconState, e
 		"startSlot": s.Slot(),
 		"endSlot":   rs.target,
 		"diff":      diff,
-	}).Debug("Replaying canonical blocks from most recent state")
+	}).Info("Replaying canonical blocks from most recent state")
 
 	for _, b := range descendants {
 		if ctx.Err() != nil {

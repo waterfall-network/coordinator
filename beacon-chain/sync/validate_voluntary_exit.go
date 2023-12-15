@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/libp2p/go-libp2p-core/peer"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
+	"github.com/libp2p/go-libp2p/core/peer"
 	types "github.com/prysmaticlabs/eth2-types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed"
@@ -48,15 +48,15 @@ func (s *Service) validateVoluntaryExit(ctx context.Context, pid peer.ID, msg *p
 		return pubsub.ValidationReject, err
 	}
 
-	exit, ok := m.(*ethpb.SignedVoluntaryExit)
+	exit, ok := m.(*ethpb.VoluntaryExit)
 	if !ok {
 		return pubsub.ValidationReject, errWrongMessage
 	}
 
-	if exit.Exit == nil {
+	if exit == nil {
 		return pubsub.ValidationReject, errNilMessage
 	}
-	if s.hasSeenExitIndex(exit.Exit.ValidatorIndex) {
+	if s.hasSeenExitIndex(exit.ValidatorIndex) {
 		return pubsub.ValidationIgnore, nil
 	}
 
@@ -65,14 +65,14 @@ func (s *Service) validateVoluntaryExit(ctx context.Context, pid peer.ID, msg *p
 		return pubsub.ValidationIgnore, err
 	}
 
-	if uint64(exit.Exit.ValidatorIndex) >= uint64(headState.NumValidators()) {
+	if uint64(exit.ValidatorIndex) >= uint64(headState.NumValidators()) {
 		return pubsub.ValidationReject, errors.New("validator index is invalid")
 	}
-	val, err := headState.ValidatorAtIndexReadOnly(exit.Exit.ValidatorIndex)
+	val, err := headState.ValidatorAtIndexReadOnly(exit.ValidatorIndex)
 	if err != nil {
 		return pubsub.ValidationIgnore, err
 	}
-	if err := blocks.VerifyExitAndSignature(val, headState.Slot(), headState.Fork(), exit, headState.GenesisValidatorsRoot()); err != nil {
+	if err := blocks.VerifyExitData(val, headState.Slot(), exit); err != nil {
 		return pubsub.ValidationReject, err
 	}
 

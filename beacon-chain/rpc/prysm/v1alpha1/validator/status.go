@@ -8,6 +8,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/signing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
@@ -147,6 +148,7 @@ func (vs *Server) CheckDoppelGanger(ctx context.Context, req *ethpb.DoppelGanger
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Could not get previous epoch's end")
 	}
+	ctx = context.WithValue(ctx, params.BeaconConfig().CtxBlockFetcherKey, db.BlockInfoFetcherFunc(vs.BeaconDB))
 	prevState, err := vs.ReplayerBuilder.ReplayerForSlot(prevEpochEnd).ReplayBlocks(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Could not get previous state")
@@ -370,6 +372,7 @@ func (vs *Server) retrieveAfterEpochTransition(ctx context.Context, epoch types.
 		return nil, err
 	}
 	// replay to first slot of following epoch
+	ctx = context.WithValue(ctx, params.BeaconConfig().CtxBlockFetcherKey, db.BlockInfoFetcherFunc(vs.BeaconDB))
 	return vs.ReplayerBuilder.ReplayerForSlot(endSlot).ReplayToSlot(ctx, endSlot+1)
 }
 

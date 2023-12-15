@@ -247,7 +247,8 @@ func TestProcessDeposit_IncompleteDeposit(t *testing.T) {
 	deposit := &ethpb.Deposit{
 		Data: &ethpb.Deposit_Data{
 			Amount:                params.BeaconConfig().EffectiveBalanceIncrement, // incomplete deposit
-			WithdrawalCredentials: bytesutil.PadTo([]byte("testing"), 32),
+			CreatorAddress:        bytesutil.PadTo([]byte("testing"), 20),
+			WithdrawalCredentials: bytesutil.PadTo([]byte("testing"), 20),
 			Signature:             bytesutil.PadTo([]byte("test"), fieldparams.BLSSignatureLength),
 		},
 	}

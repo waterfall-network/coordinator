@@ -8,8 +8,10 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/forkchoice"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/attestations"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/prevote"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/slashings"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/voluntaryexits"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/withdrawals"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
@@ -87,6 +89,22 @@ func WithAttestationPool(p attestations.Pool) Option {
 func WithExitPool(p voluntaryexits.PoolManager) Option {
 	return func(s *Service) error {
 		s.cfg.ExitPool = p
+		return nil
+	}
+}
+
+// WithWithdrawalPool for withdrawals operations.
+func WithWithdrawalPool(withdrawalPool withdrawals.PoolManager) Option {
+	return func(s *Service) error {
+		s.cfg.WithdrawalPool = withdrawalPool
+		return nil
+	}
+}
+
+// WithPrevotePool for prevote operations.
+func WithPrevotePool(prevotePool prevote.Pool) Option {
+	return func(s *Service) error {
+		s.cfg.PrevotePool = prevotePool
 		return nil
 	}
 }

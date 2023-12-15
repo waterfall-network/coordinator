@@ -3,11 +3,11 @@ package p2p
 import (
 	"context"
 
-	"github.com/libp2p/go-libp2p-core/connmgr"
-	"github.com/libp2p/go-libp2p-core/host"
-	"github.com/libp2p/go-libp2p-core/network"
-	"github.com/libp2p/go-libp2p-core/peer"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
+	"github.com/libp2p/go-libp2p/core/connmgr"
+	"github.com/libp2p/go-libp2p/core/host"
+	"github.com/libp2p/go-libp2p/core/network"
+	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/multiformats/go-multiaddr"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/encoder"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers"
@@ -36,6 +36,7 @@ type Broadcaster interface {
 	Broadcast(context.Context, proto.Message) error
 	BroadcastAttestation(ctx context.Context, subnet uint64, att *ethpb.Attestation) error
 	BroadcastSyncCommitteeMessage(ctx context.Context, subnet uint64, sMsg *ethpb.SyncCommitteeMessage) error
+	BroadcastPrevoting(ctx context.Context, subnet uint64, sMsg *ethpb.PreVote) error
 }
 
 // SetStreamHandler configures p2p to handle streams of a certain topic ID.

@@ -37,8 +37,8 @@ func ProcessPreGenesisDeposits(
 
 // ActivateValidatorWithEffectiveBalance updates validator's effective balance, and if it's above MaxEffectiveBalance, validator becomes active in genesis.
 func ActivateValidatorWithEffectiveBalance(beaconState state.BeaconState, deposits []*ethpb.Deposit) (state.BeaconState, error) {
-	for _, deposit := range deposits {
-		pubkey := deposit.Data.PublicKey
+	for _, dps := range deposits {
+		pubkey := dps.Data.PublicKey
 		index, ok := beaconState.ValidatorIndexByPubkey(bytesutil.ToBytes48(pubkey))
 		// In the event of the pubkey not existing, we continue processing the other
 		// deposits.
@@ -86,13 +86,13 @@ func ProcessDeposits(
 		return nil, err
 	}
 
-	for _, deposit := range deposits {
-		if deposit == nil || deposit.Data == nil {
+	for _, dps := range deposits {
+		if dps == nil || dps.Data == nil {
 			return nil, errors.New("got a nil deposit in block")
 		}
-		beaconState, _, err = ProcessDeposit(beaconState, deposit, batchVerified)
+		beaconState, _, err = ProcessDeposit(beaconState, dps, batchVerified)
 		if err != nil {
-			return nil, errors.Wrapf(err, "could not process deposit from %#x", bytesutil.Trunc(deposit.Data.PublicKey))
+			return nil, errors.Wrapf(err, "could not process deposit from %#x", bytesutil.Trunc(dps.Data.PublicKey))
 		}
 	}
 	return beaconState, nil
@@ -189,12 +189,16 @@ func ProcessDeposit(beaconState state.BeaconState, deposit *ethpb.Deposit, verif
 		}
 		if err := beaconState.AppendValidator(&ethpb.Validator{
 			PublicKey:                  pubKey,
+			CreatorAddress:             deposit.Data.CreatorAddress,
 			WithdrawalCredentials:      deposit.Data.WithdrawalCredentials,
 			ActivationEligibilityEpoch: params.BeaconConfig().FarFutureEpoch,
 			ActivationEpoch:            params.BeaconConfig().FarFutureEpoch,
 			ExitEpoch:                  params.BeaconConfig().FarFutureEpoch,
 			WithdrawableEpoch:          params.BeaconConfig().FarFutureEpoch,
 			EffectiveBalance:           effectiveBalance,
+			ActivationHash:             deposit.Data.InitTxHash,
+			ExitHash:                   (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:              []*ethpb.WithdrawalOp{},
 		}); err != nil {
 			return nil, newValidator, err
 		}
@@ -266,8 +270,8 @@ func verifyDepositDataWithDomain(ctx context.Context, deps []*ethpb.Deposit, dom
 		sigs[i] = dep.Data.Signature
 		depositMessage := &ethpb.DepositMessage{
 			PublicKey:             dep.Data.PublicKey,
+			CreatorAddress:        dep.Data.CreatorAddress,
 			WithdrawalCredentials: dep.Data.WithdrawalCredentials,
-			Amount:                dep.Data.Amount,
 		}
 		sr, err := signing.ComputeSigningRoot(depositMessage, domain)
 		if err != nil {

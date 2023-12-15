@@ -60,12 +60,13 @@ func setupGenesisState(tb testing.TB, count uint64) *ethpb.BeaconState {
 	genesisState, _, err := interop.GenerateGenesisState(context.Background(), 0, count)
 	require.NoError(tb, err, "Could not generate genesis beacon state")
 	for i := uint64(1); i < count; i++ {
-		someRoot := [32]byte{}
+		someRoot := [20]byte{}
 		someKey := [fieldparams.BLSPubkeyLength]byte{}
 		copy(someRoot[:], strconv.Itoa(int(i)))
 		copy(someKey[:], strconv.Itoa(int(i)))
 		genesisState.Validators = append(genesisState.Validators, &ethpb.Validator{
 			PublicKey:                  someKey[:],
+			CreatorAddress:             someRoot[:],
 			WithdrawalCredentials:      someRoot[:],
 			EffectiveBalance:           params.BeaconConfig().MaxEffectiveBalance,
 			Slashed:                    false,
@@ -73,6 +74,9 @@ func setupGenesisState(tb testing.TB, count uint64) *ethpb.BeaconState {
 			ActivationEpoch:            1,
 			ExitEpoch:                  1,
 			WithdrawableEpoch:          1,
+			ActivationHash:             (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:                   (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:              []*ethpb.WithdrawalOp{},
 		})
 		genesisState.Balances = append(genesisState.Balances, params.BeaconConfig().MaxEffectiveBalance)
 	}
@@ -83,10 +87,11 @@ func BenchmarkCloneValidators_Proto(b *testing.B) {
 	b.StopTimer()
 	validators := make([]*ethpb.Validator, 16384)
 	somePubKey := [fieldparams.BLSPubkeyLength]byte{1, 2, 3}
-	someRoot := [32]byte{3, 4, 5}
+	someRoot := [20]byte{3, 4, 5}
 	for i := 0; i < len(validators); i++ {
 		validators[i] = &ethpb.Validator{
 			PublicKey:                  somePubKey[:],
+			CreatorAddress:             someRoot[:],
 			WithdrawalCredentials:      someRoot[:],
 			EffectiveBalance:           params.BeaconConfig().MaxEffectiveBalance,
 			Slashed:                    false,
@@ -106,10 +111,11 @@ func BenchmarkCloneValidators_Manual(b *testing.B) {
 	b.StopTimer()
 	validators := make([]*ethpb.Validator, 16384)
 	somePubKey := [fieldparams.BLSPubkeyLength]byte{1, 2, 3}
-	someRoot := [32]byte{3, 4, 5}
+	someRoot := [20]byte{3, 4, 5}
 	for i := 0; i < len(validators); i++ {
 		validators[i] = &ethpb.Validator{
 			PublicKey:                  somePubKey[:],
+			CreatorAddress:             someRoot[:],
 			WithdrawalCredentials:      someRoot[:],
 			EffectiveBalance:           params.BeaconConfig().MaxEffectiveBalance,
 			Slashed:                    false,
@@ -168,6 +174,7 @@ func cloneValidatorsManually(vals []*ethpb.Validator) []*ethpb.Validator {
 		val := vals[i]
 		res[i] = &ethpb.Validator{
 			PublicKey:                  val.PublicKey,
+			CreatorAddress:             val.CreatorAddress,
 			WithdrawalCredentials:      val.WithdrawalCredentials,
 			EffectiveBalance:           val.EffectiveBalance,
 			Slashed:                    val.Slashed,

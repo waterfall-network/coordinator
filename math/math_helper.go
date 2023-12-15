@@ -153,9 +153,7 @@ func AddInt(i ...int) (int, error) {
 		} else if ii < 0 && sum < stdmath.MinInt-ii {
 			return 0, ErrOverflow
 		}
-
 		sum += ii
-
 	}
 	return sum, nil
 }

@@ -26,6 +26,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 var ErrNilState = errors.New("nil state")
@@ -62,6 +63,16 @@ type ChainService struct {
 	Genesis                     time.Time
 	ForkChoiceStore             forkchoice.ForkChoicer
 	ReceiveBlockMockErr         error
+}
+
+func (s *ChainService) GetOptimisticSpines(ctx context.Context, baseSpine common.Hash) ([]common.HashArray, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *ChainService) IsGwatSynchronizing() bool {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (s *ChainService) GetValidatedBlockInfo() ([]byte, types.Slot) {

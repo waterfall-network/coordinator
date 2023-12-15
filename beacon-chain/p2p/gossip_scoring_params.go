@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/libp2p/go-libp2p-core/peer"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
+	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
@@ -116,6 +116,8 @@ func (s *Service) topicScoreParams(topic string) (*pubsub.TopicScoreParams, erro
 		return defaultProposerSlashingTopicParams(), nil
 	case strings.Contains(topic, GossipAttesterSlashingMessage):
 		return defaultAttesterSlashingTopicParams(), nil
+	case strings.Contains(topic, GossipPrevoteMessage):
+		return defaultAggregateSubnetTopicParams(activeValidators), nil
 	default:
 		return nil, errors.Errorf("unrecognized topic provided for parameter registration: %s", topic)
 	}

@@ -20,7 +20,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/validator/flags"
 	slashingprotectioncommands "gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/validator/slashing-protection"
 	walletcommands "gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/validator/wallet"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/validator/web"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/file"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/logs"
@@ -118,7 +117,7 @@ func init() {
 func main() {
 	app := cli.App{}
 	app.Name = "validator"
-	app.Usage = `launches an Ethereum validator client that interacts with a beacon chain, starts proposer and attester services, p2p connections, and more`
+	app.Usage = `launches an Waterfall coordinator client that interacts with a beacon chain, starts proposer and attester services, p2p connections, and more`
 	app.Version = version.Version()
 	app.Action = startNode
 	app.Commands = []*cli.Command{
@@ -126,7 +125,6 @@ func main() {
 		accountcommands.Commands,
 		slashingprotectioncommands.Commands,
 		dbcommands.Commands,
-		web.Commands,
 	}
 
 	app.Flags = appFlags

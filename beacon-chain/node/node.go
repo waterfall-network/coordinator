@@ -35,9 +35,11 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/monitor"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/node/registration"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/attestations"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/prevote"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/slashings"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/synccommittee"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/voluntaryexits"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/withdrawals"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc"
@@ -91,7 +93,9 @@ type BeaconNode struct {
 	db                      db.Database
 	slasherDB               db.SlasherDatabase
 	attestationPool         attestations.Pool
+	prevotePool             prevote.Pool
 	exitPool                voluntaryexits.PoolManager
+	withdrawalPool          withdrawals.PoolManager
 	slashingsPool           slashings.PoolManager
 	syncCommitteePool       synccommittee.Pool
 	depositCache            *depositcache.DepositCache
@@ -129,6 +133,8 @@ func New(cliCtx *cli.Context, opts ...Option) (*BeaconNode, error) {
 	configureEth1Config(cliCtx)
 	configureNetwork(cliCtx)
 	configureInteropConfig(cliCtx)
+	configureDataConfig(cliCtx)
+	configureRewardLogConfig(cliCtx)
 	if err := configureExecutionSetting(cliCtx); err != nil {
 		return nil, err
 	}
@@ -149,7 +155,9 @@ func New(cliCtx *cli.Context, opts ...Option) (*BeaconNode, error) {
 		blockFeed:               new(event.Feed),
 		opFeed:                  new(event.Feed),
 		attestationPool:         attestations.NewPool(),
+		prevotePool:             prevote.NewPool(),
 		exitPool:                voluntaryexits.NewPool(),
+		withdrawalPool:          withdrawals.NewPool(),
 		slashingsPool:           slashings.NewPool(),
 		syncCommitteePool:       synccommittee.NewPool(),
 		slasherBlockHeadersFeed: new(event.Feed),
@@ -333,7 +341,7 @@ func (b *BeaconNode) startForkChoice() {
 	if features.Get().EnableForkChoiceDoublyLinkedTree {
 		b.forkChoiceStore = doublylinkedtree.New(0, 0)
 	} else {
-		b.forkChoiceStore = protoarray.New(0, 0, params.BeaconConfig().ZeroHash)
+		b.forkChoiceStore = protoarray.New(0, 0)
 	}
 }
 
@@ -519,25 +527,26 @@ func (b *BeaconNode) registerP2P(cliCtx *cli.Context) error {
 	}
 
 	svc, err := p2p.NewService(b.ctx, &p2p.Config{
-		NoDiscovery:       cliCtx.Bool(cmd.NoDiscovery.Name),
-		StaticPeers:       slice.SplitCommaSeparated(cliCtx.StringSlice(cmd.StaticPeers.Name)),
-		BootstrapNodeAddr: bootstrapNodeAddrs,
-		RelayNodeAddr:     cliCtx.String(cmd.RelayNode.Name),
-		DataDir:           dataDir,
-		LocalIP:           cliCtx.String(cmd.P2PIP.Name),
-		HostAddress:       cliCtx.String(cmd.P2PHost.Name),
-		HostDNS:           cliCtx.String(cmd.P2PHostDNS.Name),
-		PrivateKey:        cliCtx.String(cmd.P2PPrivKey.Name),
-		MetaDataDir:       cliCtx.String(cmd.P2PMetadata.Name),
-		TCPPort:           cliCtx.Uint(cmd.P2PTCPPort.Name),
-		UDPPort:           cliCtx.Uint(cmd.P2PUDPPort.Name),
-		MaxPeers:          cliCtx.Uint(cmd.P2PMaxPeers.Name),
-		AllowListCIDR:     cliCtx.String(cmd.P2PAllowList.Name),
-		DenyListCIDR:      slice.SplitCommaSeparated(cliCtx.StringSlice(cmd.P2PDenyList.Name)),
-		EnableUPnP:        cliCtx.Bool(cmd.EnableUPnPFlag.Name),
-		DisableDiscv5:     cliCtx.Bool(flags.DisableDiscv5.Name),
-		StateNotifier:     b,
-		DB:                b.db,
+		NoDiscovery:        cliCtx.Bool(cmd.NoDiscovery.Name),
+		StaticPeers:        slice.SplitCommaSeparated(cliCtx.StringSlice(cmd.StaticPeers.Name)),
+		BootstrapNodeAddr:  bootstrapNodeAddrs,
+		RelayNodeAddr:      cliCtx.String(cmd.RelayNode.Name),
+		DataDir:            dataDir,
+		LocalIP:            cliCtx.String(cmd.P2PIP.Name),
+		HostAddress:        cliCtx.String(cmd.P2PHost.Name),
+		HostDNS:            cliCtx.String(cmd.P2PHostDNS.Name),
+		PrivateKey:         cliCtx.String(cmd.P2PPrivKey.Name),
+		MetaDataDir:        cliCtx.String(cmd.P2PMetadata.Name),
+		TCPPort:            cliCtx.Uint(cmd.P2PTCPPort.Name),
+		UDPPort:            cliCtx.Uint(cmd.P2PUDPPort.Name),
+		MaxPeers:           cliCtx.Uint(cmd.P2PMaxPeers.Name),
+		AllowListCIDR:      cliCtx.String(cmd.P2PAllowList.Name),
+		FindNodesBucketLen: cliCtx.Uint(cmd.FindNodesBucketLength.Name),
+		DenyListCIDR:       slice.SplitCommaSeparated(cliCtx.StringSlice(cmd.P2PDenyList.Name)),
+		EnableUPnP:         cliCtx.Bool(cmd.EnableUPnPFlag.Name),
+		DisableDiscv5:      cliCtx.Bool(flags.DisableDiscv5.Name),
+		StateNotifier:      b,
+		DB:                 b.db,
 	})
 	if err != nil {
 		return err
@@ -583,6 +592,7 @@ func (b *BeaconNode) registerBlockchainService() error {
 		blockchain.WithExecutionEngineCaller(web3Service),
 		blockchain.WithAttestationPool(b.attestationPool),
 		blockchain.WithExitPool(b.exitPool),
+		blockchain.WithWithdrawalPool(b.withdrawalPool),
 		blockchain.WithSlashingPool(b.slashingsPool),
 		blockchain.WithP2PBroadcaster(b.fetchP2P()),
 		blockchain.WithStateNotifier(b),
@@ -592,6 +602,7 @@ func (b *BeaconNode) registerBlockchainService() error {
 		blockchain.WithSlasherAttestationsFeed(b.slasherAttestationsFeed),
 		blockchain.WithFinalizedStateAtStartUp(b.finalizedStateAtStartUp),
 		blockchain.WithProposerIdsCache(b.proposerIdsCache),
+		blockchain.WithPrevotePool(b.prevotePool),
 	)
 	blockchainService, err := blockchain.NewService(b.ctx, opts...)
 	if err != nil {
@@ -623,6 +634,8 @@ func (b *BeaconNode) registerPOWChainService() error {
 		powchain.WithStateGen(b.stateGen),
 		powchain.WithBeaconNodeStatsUpdater(bs),
 		powchain.WithFinalizedStateAtStartup(b.finalizedStateAtStartUp),
+		powchain.WithExitPool(b.exitPool),
+		powchain.WithWithdrawalPool(b.withdrawalPool),
 	)
 	web3Service, err := powchain.NewService(b.ctx, opts...)
 	if err != nil {
@@ -659,7 +672,9 @@ func (b *BeaconNode) registerSyncService() error {
 		regularsync.WithAttestationNotifier(b),
 		regularsync.WithOperationNotifier(b),
 		regularsync.WithAttestationPool(b.attestationPool),
+		regularsync.WithPrevotePool(b.prevotePool),
 		regularsync.WithExitPool(b.exitPool),
+		regularsync.WithWithdrawalPool(b.withdrawalPool),
 		regularsync.WithSlashingPool(b.slashingsPool),
 		regularsync.WithSyncCommsPool(b.syncCommitteePool),
 		regularsync.WithStateGen(b.stateGen),
@@ -674,19 +689,13 @@ func (b *BeaconNode) registerInitialSyncService() error {
 	if err := b.services.FetchService(&chainService); err != nil {
 		return err
 	}
-	var web3Service *powchain.Service
-	if err := b.services.FetchService(&web3Service); err != nil {
-		return err
-	}
 
 	is := initialsync.NewService(b.ctx, &initialsync.Config{
-		DB:                    b.db,
-		Chain:                 chainService,
-		P2P:                   b.fetchP2P(),
-		StateNotifier:         b,
-		BlockNotifier:         b,
-		ExecutionEngineCaller: web3Service,
-		StateGen:              b.stateGen,
+		DB:            b.db,
+		Chain:         chainService,
+		P2P:           b.fetchP2P(),
+		StateNotifier: b,
+		BlockNotifier: b,
 	})
 	return b.services.RegisterService(is)
 }
@@ -797,7 +806,9 @@ func (b *BeaconNode) registerRPCService() error {
 		GenesisTimeFetcher:      chainService,
 		GenesisFetcher:          chainService,
 		AttestationsPool:        b.attestationPool,
+		PrevotePool:             b.prevotePool,
 		ExitPool:                b.exitPool,
+		WithdrawalPool:          b.withdrawalPool,
 		SlashingsPool:           b.slashingsPool,
 		SlashingChecker:         slasherService,
 		SyncCommitteeObjectPool: b.syncCommitteePool,
@@ -893,7 +904,7 @@ func (b *BeaconNode) registerGRPCGateway() error {
 		apigateway.WithTimeout(uint64(timeout)),
 	}
 	if flags.EnableHTTPEthAPI(httpModules) {
-		opts = append(opts, apigateway.WithApiMiddleware(&apimiddleware.BeaconEndpointFactory{}))
+		opts = append(opts, apigateway.WithAPIMiddleware(&apimiddleware.BeaconEndpointFactory{}))
 	}
 	g, err := apigateway.New(b.ctx, opts...)
 	if err != nil {

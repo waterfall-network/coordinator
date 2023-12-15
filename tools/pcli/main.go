@@ -36,7 +36,7 @@ func main() {
 	log.SetFormatter(customFormatter)
 	app := cli.App{}
 	app.Name = "pcli"
-	app.Usage = "A command line utility to run Ethereum consensus specific commands"
+	app.Usage = "A command line utility to run Waterfall consensus specific commands"
 	app.Version = version.Version()
 	app.Commands = []*cli.Command{
 		{
@@ -86,8 +86,6 @@ func main() {
 					data = &ethpb.ProposerSlashing{}
 				case "signed_block_header":
 					data = &ethpb.SignedBeaconBlockHeader{}
-				case "signed_voluntary_exit":
-					data = &ethpb.SignedVoluntaryExit{}
 				case "voluntary_exit":
 					data = &ethpb.VoluntaryExit{}
 				case "state":

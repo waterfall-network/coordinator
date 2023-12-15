@@ -1,12 +1,23 @@
 package helpers
 
 import (
+	"bufio"
 	"errors"
+	"fmt"
+	"math"
+	"os"
+	"path"
+	"strconv"
+	"strings"
+	"time"
 
+	lru "github.com/hashicorp/golang-lru"
 	types "github.com/prysmaticlabs/eth2-types"
+	log "github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
 	mathutil "gitlab.waterfall.network/waterfall/protocol/coordinator/math"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 )
@@ -95,6 +106,16 @@ func TotalActiveBalance(s state.ReadOnlyBeaconState) (uint64, error) {
 //	  """
 //	  state.balances[index] += delta
 func IncreaseBalance(state state.BeaconState, idx types.ValidatorIndex, delta uint64) error {
+	isLocked, err := IsWithdrawBalanceLocked(state, idx)
+	if err != nil || isLocked {
+		return err
+	}
+	log.WithFields(log.Fields{
+		"Slot":      state.Slot(),
+		"Validator": idx,
+		"Delta":     delta,
+	}).Debug("Reward: IncreaseBalance")
+
 	balAtIdx, err := state.BalanceAtIndex(idx)
 	if err != nil {
 		return err
@@ -131,11 +152,32 @@ func IncreaseBalanceWithVal(currBalance, delta uint64) (uint64, error) {
 //	  """
 //	  state.balances[index] = 0 if delta > state.balances[index] else state.balances[index] - delta
 func DecreaseBalance(state state.BeaconState, idx types.ValidatorIndex, delta uint64) error {
+	isLocked, err := IsWithdrawBalanceLocked(state, idx)
+	if err != nil || isLocked {
+		return err
+	}
+	log.WithFields(log.Fields{
+		"Slot":      state.Slot(),
+		"Validator": idx,
+		"Delta":     delta,
+	}).Debug("Reward: DecreaseBalance")
 	balAtIdx, err := state.BalanceAtIndex(idx)
 	if err != nil {
 		return err
 	}
 	return state.UpdateBalancesAtIndex(idx, DecreaseBalanceWithVal(balAtIdx, delta))
+}
+
+// IsWithdrawBalanceLocked define period to block all rewards and penalties operations
+// of balance while procedure of exit.
+func IsWithdrawBalanceLocked(state state.BeaconState, idx types.ValidatorIndex) (bool, error) {
+	val, err := state.ValidatorAtIndexReadOnly(idx)
+	if err != nil {
+		return false, err
+	}
+	stateEpoche := slots.ToEpoch(state.Slot())
+	lockEpoch := val.WithdrawableEpoch() - params.BeaconConfig().WithdrawalBalanceLockPeriod
+	return stateEpoche >= lockEpoch && stateEpoche < val.WithdrawableEpoch(), nil
 }
 
 // DecreaseBalanceWithVal decreases validator with the given 'index' balance by 'delta' in Gwei.
@@ -174,4 +216,200 @@ func IsInInactivityLeak(prevEpoch, finalizedEpoch types.Epoch) bool {
 //	return get_previous_epoch(state) - state.finalized_checkpoint.epoch
 func FinalityDelay(prevEpoch, finalizedEpoch types.Epoch) types.Epoch {
 	return prevEpoch - finalizedEpoch
+}
+
+/* functionality of Reward and Penalty logging */
+const (
+	BalanceIncrease   = "+"
+	BalanceDecrease   = "-"
+	OpAttestation     = "attesting"
+	OpProposing       = "blk-props"
+	OpBlockAttested   = "blk-attsd"
+	OpSyncCommittee   = "sync-comm"
+	OpSyncAggregation = "sync-aggr"
+	OpWithdrawal      = "withdrawal"
+	MetaGlobalParams  = "META"
+)
+
+var (
+	rpLogCache *lru.Cache
+	rpLogFile  string
+)
+
+func initLogRewardsAndPenalties(st state.BeaconState) error {
+	if !params.BeaconConfig().WriteRewardLogFlag {
+		return nil
+	}
+	if rpLogCache != nil {
+		return nil
+	}
+	vCount := st.NumValidators()
+	cacheLen := int(params.BeaconConfig().SlotsPerEpoch) * vCount
+	var err error
+	rpLogCache, err = lru.New(cacheLen)
+	if err != nil {
+		panic(fmt.Errorf("lru new rpLogCache failed: %w", err))
+	}
+
+	now := time.Now()
+	rpLogFileName := fmt.Sprintf("rewards-%s.log", now.Format("060102t150405"))
+	rpLogFile = path.Join(params.BeaconConfig().DataDir, rpLogFileName)
+	file, err := os.OpenFile(rpLogFile, os.O_CREATE|os.O_WRONLY, params.BeaconIoConfig().ReadWritePermissions) // #nosec G304
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err := file.Close(); err != nil {
+			panic(err)
+		}
+	}()
+
+	// collect metadata params
+	numberOfCoordinators := vCount
+	optimalNumberOfCoordinators := params.BeaconConfig().OptValidatorsNum
+	stakeAmount := params.BeaconConfig().MaxEffectiveBalance / uint64(math.Pow(10, 9))
+	annualizedReturnRate := params.BeaconConfig().MaxAnnualizedReturnRate
+	slotDuration := params.BeaconConfig().SecondsPerSlot
+
+	// Write the metadata params
+	writer := bufio.NewWriter(file)
+	_, err = fmt.Fprintf(writer, fmt.Sprintf(
+		"%d %s %d %d %f %d %d %d %s %s\n",
+		numberOfCoordinators,
+		MetaGlobalParams,
+		optimalNumberOfCoordinators,
+		stakeAmount,
+		annualizedReturnRate,
+		slotDuration,
+		-1,
+		-1,
+		"NOOP",
+		"-",
+	))
+	if err != nil {
+		return err
+	}
+
+	// Flush the writer to ensure the line is written to the file
+	err = writer.Flush()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func LogBeforeRewardsAndPenalties(
+	st state.BeaconState,
+	validator types.ValidatorIndex,
+	amount uint64,
+	votesIncluded []uint64,
+	operation,
+	role string,
+) error {
+	if !params.BeaconConfig().WriteRewardLogFlag {
+		return nil
+	}
+	if err := initLogRewardsAndPenalties(st); err != nil {
+		return err
+	}
+	// skip zero values
+	if amount == 0 {
+		return nil
+	}
+	before, err := st.BalanceAtIndex(validator)
+	if err != nil {
+		return err
+	}
+	after := uint64(0)
+	switch operation {
+	case BalanceIncrease:
+		after = before + amount
+	case BalanceDecrease:
+		after = before - amount
+	default:
+		return fmt.Errorf("bad operation %s", operation)
+	}
+	return LogBalanceChanges(validator, before, amount, after, st.Slot(), votesIncluded, operation, role)
+}
+
+func LogBalanceChanges(
+	index types.ValidatorIndex,
+	before, delta, after uint64,
+	slot types.Slot,
+	votesIncluded []uint64,
+	operation, role string,
+) error {
+	if !params.BeaconConfig().WriteRewardLogFlag {
+		return nil
+	}
+	//start write after 3-d epoch
+	if slots.ToEpoch(slot) < 3 {
+		return nil
+	}
+	if rpLogCache == nil {
+		return fmt.Errorf("Reward and penalty logging is not initialized")
+	}
+
+	votesIncludedNum := uint64(0)
+	votesList := ""
+	if votesIncluded != nil {
+		votesIncludedNum = uint64(len(votesIncluded))
+
+		strNumbers := make([]string, len(votesIncluded))
+		for i, num := range votesIncluded {
+			strNumbers[i] = strconv.FormatUint(num, 10)
+		}
+		votesList = strings.Join(strNumbers, ",")
+		if votesIncludedNum == 0 {
+			votesList = "-"
+		}
+	} else {
+		votesList = "-"
+	}
+
+	line := fmt.Sprintf(
+		"%d %s %d %d %d %d %d %d %s %s",
+		index,
+		role,
+		votesIncludedNum,
+		before,
+		delta,
+		after,
+		slot,
+		slots.ToEpoch(slot),
+		operation,
+		votesList,
+	)
+	key := hash.FastSum64([]byte(line))
+	if _, ok := rpLogCache.Get(key); ok {
+		return nil
+	}
+	rpLogCache.Add(key, true)
+
+	// Open the file in append mode
+	file, err := os.OpenFile(rpLogFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, params.BeaconIoConfig().ReadWritePermissions) // #nosec G304
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err := file.Close(); err != nil {
+			panic(err)
+		}
+	}()
+	// Create a new writer for the file
+	writer := bufio.NewWriter(file)
+	// Write the new line to the file
+	_, err = fmt.Fprintln(writer, line)
+	if err != nil {
+		return err
+	}
+
+	// Flush the writer to ensure the line is written to the file
+	err = writer.Flush()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -242,6 +242,13 @@ func emptyGenesisState() (state.BeaconStateAltair, error) {
 		Eth1DataVotes:    make([]*ethpb.Eth1Data, 0),
 		BlockVoting:      make([]*ethpb.BlockVoting, 0),
 		Eth1DepositIndex: 0,
+		SpineData: &ethpb.SpineData{
+			Spines:       nil,
+			Prefix:       nil,
+			Finalization: nil,
+			CpFinalized:  nil,
+			ParentSpines: nil,
+		},
 	}
 	return stateAltair.InitializeFromProto(st)
 }
@@ -264,7 +271,7 @@ func NewBeaconBlockAltair() *ethpb.SignedBeaconBlockAltair {
 				AttesterSlashings: []*ethpb.AttesterSlashing{},
 				Deposits:          []*ethpb.Deposit{},
 				ProposerSlashings: []*ethpb.ProposerSlashing{},
-				VoluntaryExits:    []*ethpb.SignedVoluntaryExit{},
+				VoluntaryExits:    []*ethpb.VoluntaryExit{},
 				SyncAggregate: &ethpb.SyncAggregate{
 					SyncCommitteeBits:      make([]byte, len(bitfield.NewBitvector512())),
 					SyncCommitteeSignature: make([]byte, 96),
@@ -373,7 +380,7 @@ func GenerateFullBlockAltair(
 	}
 
 	numToGen = conf.NumVoluntaryExits
-	var exits []*ethpb.SignedVoluntaryExit
+	var exits []*ethpb.VoluntaryExit
 	if numToGen > 0 {
 		exits, err = generateVoluntaryExits(bState, privs, numToGen)
 		if err != nil {

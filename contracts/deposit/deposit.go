@@ -96,8 +96,8 @@ func VerifyDepositSignature(dd *ethpb.Deposit_Data, domain []byte) error {
 	}
 	di := &ethpb.DepositMessage{
 		PublicKey:             ddCopy.PublicKey,
+		CreatorAddress:        ddCopy.CreatorAddress,
 		WithdrawalCredentials: ddCopy.WithdrawalCredentials,
-		Amount:                ddCopy.Amount,
 	}
 	root, err := di.HashTreeRoot()
 	if err != nil {

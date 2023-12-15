@@ -312,9 +312,7 @@ func TestBellatrixBlindedBeaconBlockBody_Deposits(t *testing.T) {
 }
 
 func TestBellatrixBlindedBeaconBlockBody_VoluntaryExits(t *testing.T) {
-	exits := []*ethpb.SignedVoluntaryExit{
-		{Exit: &ethpb.VoluntaryExit{Epoch: 54}},
-	}
+	exits := []*ethpb.VoluntaryExit{{Epoch: 54}}
 	body := &ethpb.BlindedBeaconBlockBodyBellatrix{VoluntaryExits: exits}
 	wbb, err := wrapper.WrappedBellatrixBlindedBeaconBlockBody(body)
 	require.NoError(t, err)
@@ -347,18 +345,6 @@ func TestBellatrixBlindedBeaconBlockBody_Proto(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, body, wbb.Proto())
-}
-
-func TestBellatrixBlindedBeaconBlockBody_ExecutionPayloadHeader(t *testing.T) {
-	payloads := &ethpb.ExecutionPayloadHeader{
-		BlockNumber: 100,
-	}
-	body := &ethpb.BlindedBeaconBlockBodyBellatrix{ExecutionPayloadHeader: payloads}
-	wbb, err := wrapper.WrappedBellatrixBlindedBeaconBlockBody(body)
-	require.NoError(t, err)
-
-	_, err = wbb.ExecutionPayload()
-	require.ErrorContains(t, wrapper.ErrUnsupportedField.Error(), err)
 }
 
 func TestBellatrixBlindedBeaconBlock_PbGenericBlock(t *testing.T) {

@@ -6,56 +6,35 @@ import (
 
 	"github.com/pkg/errors"
 	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
 // BlockVotingDataRootWithHasher returns the hash tree root of input `BlockVoting`.
-func BlockVotingDataRootWithHasher(hasher ssz.HashFn, blockVoting *ethpb.BlockVoting) ([32]byte, error) {
+func BlockVotingDataRootWithHasher(blockVoting *ethpb.BlockVoting) ([32]byte, error) {
 	if blockVoting == nil {
 		return [32]byte{}, errors.New("nil blockVoting data")
 	}
-	fixedFldsCount := 2
-
-	attBytes := append([]byte{}, blockVoting.GetCandidates()...)
-	for _, att := range blockVoting.GetAttestations() {
-		attBytes = []byte(att.String())
-	}
-	finLen := len(attBytes)
-	finChunks := finLen / 32
-	if finLen%32 > 0 {
-		finChunks++
-	}
-	fieldRoots := make([][32]byte, fixedFldsCount+finChunks)
-
-	for i := 0; i < len(fieldRoots); i++ {
-		fieldRoots[i] = [32]byte{}
-	}
-
+	var (
+		rootRoot, slotRoot, candRoot, votesRoot [32]byte
+		err                                     error
+	)
 	if len(blockVoting.Root) > 0 {
-		fieldRoots[0] = bytesutil.ToBytes32(blockVoting.Root)
+		rootRoot = bytesutil.ToBytes32(blockVoting.Root)
 	}
-	slotBuf := make([]byte, 8)
-	binary.LittleEndian.PutUint64(slotBuf, uint64(blockVoting.Slot))
-	fieldRoots[1] = bytesutil.ToBytes32(slotBuf)
-
-	if finLen > 0 {
-		for i := 0; i < finChunks; i++ {
-			from := i * 32
-			to := from + 32
-			if to > finLen {
-				to = finLen
-			}
-			val := attBytes[from:to]
-			if len(val) > 0 {
-				fieldRoots[i+fixedFldsCount] = bytesutil.ToBytes32(val)
-			}
-		}
+	binary.LittleEndian.PutUint64(slotRoot[:8], uint64(blockVoting.Slot))
+	candRoot, err = BytesRoot(blockVoting.Candidates)
+	if err != nil {
+		return [32]byte{}, errors.Wrap(err, "block voting candidates")
+	}
+	votesRoot, err = CommitteeVotesListRoot(blockVoting.Votes)
+	if err != nil {
+		return [32]byte{}, errors.Wrap(err, "block voting votes")
 	}
 
-	root, err := ssz.BitwiseMerkleize(hasher, fieldRoots, uint64(len(fieldRoots)), uint64(len(fieldRoots)))
+	fieldRoots := [][32]byte{rootRoot, slotRoot, candRoot, votesRoot}
+	root, err := ssz.BitwiseMerkleize(fieldRoots, uint64(len(fieldRoots)), uint64(len(fieldRoots)))
 	if err != nil {
 		return [32]byte{}, err
 	}
@@ -64,18 +43,16 @@ func BlockVotingDataRootWithHasher(hasher ssz.HashFn, blockVoting *ethpb.BlockVo
 
 // BlockVotingsRoot returns the hash tree root of input `blockVoting`.
 func BlockVotingsRoot(blockVotings []*ethpb.BlockVoting) ([32]byte, error) {
-	hasher := hash.CustomSHA256Hasher()
-	BlockVotingRoots := make([][32]byte, 0, len(blockVotings))
+	BlockVotingRoots := make([][32]byte, len(blockVotings))
 	for i := 0; i < len(blockVotings); i++ {
-		root, err := BlockVotingDataRootWithHasher(hasher, blockVotings[i])
+		root, err := BlockVotingDataRootWithHasher(blockVotings[i])
 		if err != nil {
 			return [32]byte{}, errors.Wrap(err, "could not compute blockVoting merkleization")
 		}
-		BlockVotingRoots = append(BlockVotingRoots, root)
+		BlockVotingRoots[i] = root
 	}
 
 	blockVotingRootsRoot, err := ssz.BitwiseMerkleize(
-		hasher,
 		BlockVotingRoots,
 		uint64(len(BlockVotingRoots)),
 		fieldparams.BlockVotingLength,
@@ -92,5 +69,47 @@ func BlockVotingsRoot(blockVotings []*ethpb.BlockVoting) ([32]byte, error) {
 	copy(blockVotingRootBufRoot, blockVotingRootBuf.Bytes())
 	root := ssz.MixInLength(blockVotingRootsRoot, blockVotingRootBufRoot)
 
+	return root, nil
+}
+
+// CommitteeVotesListRoot returns the hash tree root of input `CommitteeVote`.
+func CommitteeVotesListRoot(committeeVotes []*ethpb.CommitteeVote) ([32]byte, error) {
+	bvsRoots := make([][32]byte, len(committeeVotes))
+	for i := 0; i < len(committeeVotes); i++ {
+		root, err := CommitteeVoteRoot(committeeVotes[i])
+		if err != nil {
+			return [32]byte{}, err
+		}
+		bvsRoots[i] = root
+	}
+
+	blockVotingRootsRoot, err := ssz.BitwiseMerkleize(bvsRoots, uint64(len(bvsRoots)), uint64(len(bvsRoots)))
+	if err != nil {
+		return [32]byte{}, errors.Wrap(err, "could not compute committee votes merkleization")
+	}
+	dataLenRoot := make([]byte, 32)
+	binary.LittleEndian.PutUint64(dataLenRoot, uint64(len(bvsRoots)))
+	root := ssz.MixInLength(blockVotingRootsRoot, dataLenRoot)
+	return root, nil
+}
+
+// CommitteeVoteRoot returns the hash tree root of input `CommitteeVote`.
+func CommitteeVoteRoot(committeeVote *ethpb.CommitteeVote) ([32]byte, error) {
+	if committeeVote == nil {
+		return [32]byte{}, nil
+	}
+	var slotBuf, indexBuf [32]byte
+	binary.LittleEndian.PutUint64(slotBuf[:8], uint64(committeeVote.Slot))
+	binary.LittleEndian.PutUint64(indexBuf[:8], uint64(committeeVote.Index))
+	agrBuf, err := BytesRoot(committeeVote.AggregationBits.Bytes())
+	if err != nil {
+		return [32]byte{}, errors.Wrap(err, "could not compute committee vote aggr bits")
+	}
+	votingRoots := [][32]byte{slotBuf, indexBuf, agrBuf}
+
+	root, err := ssz.BitwiseMerkleize(votingRoots, uint64(len(votingRoots)), uint64(len(votingRoots)))
+	if err != nil {
+		return [32]byte{}, errors.Wrap(err, "could not compute committee vote merkleization")
+	}
 	return root, nil
 }

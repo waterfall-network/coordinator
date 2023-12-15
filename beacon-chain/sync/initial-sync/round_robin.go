@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/libp2p/go-libp2p-core/peer"
+	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/paulbellamy/ratecounter"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"

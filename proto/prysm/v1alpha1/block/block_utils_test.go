@@ -38,7 +38,7 @@ func TestBeaconBlockHeaderFromBlock(t *testing.T) {
 			AttesterSlashings: []*eth.AttesterSlashing{},
 			Attestations:      []*eth.Attestation{},
 			Deposits:          []*eth.Deposit{},
-			VoluntaryExits:    []*eth.SignedVoluntaryExit{},
+			VoluntaryExits:    []*eth.VoluntaryExit{},
 		},
 	}
 	bodyRoot, err := blk.Body.HashTreeRoot()
@@ -81,7 +81,7 @@ func TestBeaconBlockHeaderFromBlockInterface(t *testing.T) {
 			AttesterSlashings: []*eth.AttesterSlashing{},
 			Attestations:      []*eth.Attestation{},
 			Deposits:          []*eth.Deposit{},
-			VoluntaryExits:    []*eth.SignedVoluntaryExit{},
+			VoluntaryExits:    []*eth.VoluntaryExit{},
 		},
 	}
 	bodyRoot, err := blk.Body.HashTreeRoot()
@@ -136,7 +136,7 @@ func TestSignedBeaconBlockHeaderFromBlock(t *testing.T) {
 			AttesterSlashings: []*eth.AttesterSlashing{},
 			Attestations:      []*eth.Attestation{},
 			Deposits:          []*eth.Deposit{},
-			VoluntaryExits:    []*eth.SignedVoluntaryExit{},
+			VoluntaryExits:    []*eth.VoluntaryExit{},
 		},
 	},
 		Signature: bytesutil.PadTo([]byte("signature"), fieldparams.BLSSignatureLength),
@@ -183,7 +183,7 @@ func TestSignedBeaconBlockHeaderFromBlockInterface(t *testing.T) {
 			AttesterSlashings: []*eth.AttesterSlashing{},
 			Attestations:      []*eth.Attestation{},
 			Deposits:          []*eth.Deposit{},
-			VoluntaryExits:    []*eth.SignedVoluntaryExit{},
+			VoluntaryExits:    []*eth.VoluntaryExit{},
 		},
 	},
 		Signature: bytesutil.PadTo([]byte("signature"), fieldparams.BLSSignatureLength),

@@ -9,6 +9,7 @@ import (
 
 	ssz "github.com/ferranbt/fastssz"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/altair"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
@@ -70,6 +71,33 @@ func (s *Service) BroadcastAttestation(ctx context.Context, subnet uint64, att *
 	return nil
 }
 
+// BroadcastPrevoting broadcasts a prevote message to the p2p network, the message is assumed to be
+// broadcasted to the current fork.
+func (s *Service) BroadcastPrevoting(ctx context.Context, subnet uint64, prevote *ethpb.PreVote) error {
+	ctx, span := trace.StartSpan(ctx, "p2p.BroadcastPrevoting")
+	defer span.End()
+
+	log.WithFields(logrus.Fields{
+		"subnet":             subnet,
+		"curSlot":            slots.CurrentSlot(uint64(s.genesisTime.Unix())),
+		"pv.AggregationBits": fmt.Sprintf("%b", prevote.AggregationBits),
+		"pv.Data.Slot":       prevote.Data.Slot,
+		"pv.Data.Index":      prevote.Data.Index,
+	}).Debug("Prevote: BroadcastPrevoting")
+
+	forkDigest, err := s.currentForkDigest()
+	if err != nil {
+		err := errors.Wrap(err, "could not retrieve fork digest")
+		tracing.AnnotateError(span, err)
+		return err
+	}
+
+	// Non-blocking broadcast, with attempts to discover a subnet peer if none available.
+	go s.broadcastPrevoting(ctx, subnet, prevote, forkDigest)
+
+	return nil
+}
+
 // BroadcastSyncCommitteeMessage broadcasts a sync committee message to the p2p network, the message is assumed to be
 // broadcasted to the current fork.
 func (s *Service) BroadcastSyncCommitteeMessage(ctx context.Context, subnet uint64, sMsg *ethpb.SyncCommitteeMessage) error {
@@ -93,6 +121,14 @@ func (s *Service) broadcastAttestation(ctx context.Context, subnet uint64, att *
 	defer span.End()
 	ctx = trace.NewContext(context.Background(), span) // clear parent context / deadline.
 
+	log.WithFields(logrus.Fields{
+		"subnet":       subnet,
+		"att.AggrBits": fmt.Sprintf("%#x", att.AggregationBits),
+		"att.Slot":     att.Data.Slot,
+		"att.root":     fmt.Sprintf("%#x", att.Data.BeaconBlockRoot),
+		"curSlot":      slots.CurrentSlot(uint64(s.genesisTime.Unix())),
+	}).Debug("Atts: broadcastAttestation")
+
 	oneEpoch := time.Duration(1*params.BeaconConfig().SlotsPerEpoch.Mul(params.BeaconConfig().SecondsPerSlot)) * time.Second
 	ctx, cancel := context.WithTimeout(ctx, oneEpoch)
 	defer cancel()
@@ -108,12 +144,35 @@ func (s *Service) broadcastAttestation(ctx context.Context, subnet uint64, att *
 		trace.Int64Attribute("subnet", int64(subnet)),      // lint:ignore uintcast -- It's safe to do this for tracing.
 	)
 
+	log.WithFields(logrus.Fields{
+		"subnet":        subnet,
+		"att.AggrBits":  fmt.Sprintf("%#x", att.AggregationBits),
+		"curSlot":       slots.CurrentSlot(uint64(s.genesisTime.Unix())),
+		"pv.Data.Slot":  att.Data.Slot,
+		"pv.Data.Index": att.Data.CommitteeIndex,
+		"hasPeer":       hasPeer,
+		//"pv.Candidates":      fmt.Sprintf("%#x", prevote.Data.Candidates),
+	}).Debug("Atts: broadcastAttestation")
+
 	if !hasPeer {
 		attestationBroadcastAttempts.Inc()
 		if err := func() error {
 			s.subnetLocker(subnet).Lock()
 			defer s.subnetLocker(subnet).Unlock()
 			ok, err := s.FindPeersWithSubnet(ctx, attestationToTopic(subnet, forkDigest), subnet, 1)
+
+			log.WithError(err).WithFields(logrus.Fields{
+				"topic":        attestationToTopic(subnet, forkDigest),
+				"ok":           ok,
+				"subnet":       subnet,
+				"curSlot":      slots.CurrentSlot(uint64(s.genesisTime.Unix())),
+				"att.AggrBits": fmt.Sprintf("%#x", att.AggregationBits),
+				"pv.Data.Slot": att.Data.Slot,
+				//"pv.Data.Index":      prevote.Data.Index,
+				//"hasPeer":            hasPeer,
+				//"pv.Candidates":      fmt.Sprintf("%#x", prevote.Data.Candidates),
+			}).Debug("Atts: broadcastAttestation: FindPeersWithSubnet")
+
 			if err != nil {
 				return err
 			}
@@ -136,9 +195,18 @@ func (s *Service) broadcastAttestation(ctx context.Context, subnet uint64, att *
 	}
 
 	if err := s.broadcastObject(ctx, att, attestationToTopic(subnet, forkDigest)); err != nil {
-		log.WithError(err).Error("Failed to broadcast attestation")
+		log.WithError(err).Error("Atts: Failed to broadcast attestation")
 		tracing.AnnotateError(span, err)
 	}
+
+	log.WithFields(logrus.Fields{
+		"topic":        attestationToTopic(subnet, forkDigest),
+		"subnet":       subnet,
+		"att.AggrBits": fmt.Sprintf("%#x", att.AggregationBits),
+		"att.Slot":     att.Data.Slot,
+		"att.root":     fmt.Sprintf("%#x", att.Data.BeaconBlockRoot),
+		"curSlot":      slots.CurrentSlot(uint64(s.genesisTime.Unix())),
+	}).Debug("Atts: broadcastAttestation: broadcastObject 999")
 }
 
 func (s *Service) broadcastSyncCommittee(ctx context.Context, subnet uint64, sMsg *ethpb.SyncCommitteeMessage, forkDigest [4]byte) {
@@ -196,6 +264,87 @@ func (s *Service) broadcastSyncCommittee(ctx context.Context, subnet uint64, sMs
 	}
 }
 
+func (s *Service) broadcastPrevoting(ctx context.Context, subnet uint64, prevote *ethpb.PreVote, forkDigest [4]byte) {
+	ctx, span := trace.StartSpan(ctx, "p2p.broadcastPrevoting")
+	defer span.End()
+	ctx = trace.NewContext(context.Background(), span) // clear parent context / deadline.
+
+	oneSlot := time.Duration(1*params.BeaconConfig().SecondsPerSlot) * time.Second
+	ctx, cancel := context.WithTimeout(ctx, oneSlot)
+	defer cancel()
+
+	// Ensure we have peers with this subnet.
+	// This adds in a special value to the subnet
+	// to ensure that we can re-use the same subnet locker.
+	s.subnetLocker(subnet).RLock()
+	ptt := prevoteToTopic(subnet, forkDigest)
+	hasPeer := s.hasPeerWithSubnet(ptt)
+	s.subnetLocker(subnet).RUnlock()
+
+	span.AddAttributes(
+		trace.BoolAttribute("hasPeer", hasPeer),
+		trace.Int64Attribute("slot", int64(prevote.Data.Slot)), // lint:ignore uintcast -- It's safe to do this for tracing.
+		trace.Int64Attribute("subnet", int64(subnet)),          // lint:ignore uintcast -- It's safe to do this for tracing.
+	)
+
+	log.WithFields(logrus.Fields{
+		"0:subnet":           subnet,
+		"1:hasPeer":          hasPeer,
+		"curSlot":            slots.CurrentSlot(uint64(s.genesisTime.Unix())),
+		"pv.AggregationBits": fmt.Sprintf("%b", prevote.AggregationBits),
+		"pv.Data.Slot":       prevote.Data.Slot,
+		"pv.Data.Index":      prevote.Data.Index,
+	}).Debug("Prevote: BroadcastPrevoting: broadcastPrevoting 1")
+
+	if !hasPeer {
+		prevoteBroadcastAttempts.Inc()
+		if err := func() error {
+			s.subnetLocker(subnet).Lock()
+			defer s.subnetLocker(subnet).Unlock()
+			ok, err := s.FindPeersWithSubnet(ctx, ptt, subnet, 1)
+			if err != nil {
+				return err
+			}
+			if ok {
+				savedPrevoteBroadcasts.Inc()
+				return nil
+			}
+			return errors.New("failed to find peers for subnet")
+		}(); err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"subnet":             subnet,
+				"hasPeer":            hasPeer,
+				"curSlot":            slots.CurrentSlot(uint64(s.genesisTime.Unix())),
+				"pv.AggregationBits": fmt.Sprintf("%b", prevote.AggregationBits),
+				"pv.Data.Slot":       prevote.Data.Slot,
+				"pv.Data.Index":      prevote.Data.Index,
+			}).Error("Prevote: BroadcastPrevoting: broadcastPrevoting failed")
+			tracing.AnnotateError(span, err)
+		}
+	}
+	// In the event our prevote is outdated and beyond the
+	// acceptable threshold, we exit early and do not broadcast it.
+	currSlot := slots.CurrentSlot(uint64(s.genesisTime.Unix()))
+
+	if prevote.Data.Slot <= currSlot {
+		log.Warnf("Prevote is too old to broadcast, discarding it. Current Slot: %d , Prevote Slot: %d", currSlot, prevote.Data.Slot)
+		return
+	}
+
+	log.WithFields(logrus.Fields{
+		"subnet":             subnet,
+		"curSlot":            slots.CurrentSlot(uint64(s.genesisTime.Unix())),
+		"pv.AggregationBits": fmt.Sprintf("%#x", prevote.AggregationBits),
+		"pv.Data.Slot":       prevote.Data.Slot,
+		"pv.Data.Index":      prevote.Data.Index,
+	}).Debug("Prevote: BroadcastPrevoting: broadcastPrevoting 2")
+
+	if err := s.broadcastObject(ctx, prevote, ptt); err != nil {
+		log.WithError(err).Error("Failed to broadcast prevote")
+		tracing.AnnotateError(span, err)
+	}
+}
+
 // method to broadcast messages to other peers in our gossip mesh.
 func (s *Service) broadcastObject(ctx context.Context, obj ssz.Marshaler, topic string) error {
 	_, span := trace.StartSpan(ctx, "p2p.broadcastObject")
@@ -231,4 +380,8 @@ func attestationToTopic(subnet uint64, forkDigest [4]byte) string {
 
 func syncCommitteeToTopic(subnet uint64, forkDigest [4]byte) string {
 	return fmt.Sprintf(SyncCommitteeSubnetTopicFormat, forkDigest, subnet)
+}
+
+func prevoteToTopic(subnet uint64, forkDigest [4]byte) string {
+	return fmt.Sprintf(PrevoteSubnetTopicFormat, forkDigest, subnet)
 }

@@ -479,10 +479,6 @@ type testFeed2 struct {
 	c []byte
 }
 
-func (testFeed2) method1() {
-
-}
-
 type testFeed3 struct {
 	a    uint64
 	b    string
@@ -494,10 +490,6 @@ func (testFeed3) method1() {
 }
 
 func (testFeed3) method2() {
-
-}
-
-func (testFeed3) method3() {
 
 }
 

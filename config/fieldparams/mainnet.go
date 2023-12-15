@@ -17,6 +17,7 @@ const (
 	SlashingsLength                 = 8192                                         // EPOCHS_PER_SLASHINGS_VECTOR
 	SyncCommitteeLength             = 512                                          // SYNC_COMMITTEE_SIZE
 	RootLength                      = 32                                           // RootLength defines the byte length of a Merkle root.
+	AddressLength                   = 20                                           // AddressLength defines the byte length of a eth1 address.
 	BLSSignatureLength              = 96                                           // BLSSignatureLength defines the byte length of a BLSSignature.
 	BLSPubkeyLength                 = 48                                           // BLSPubkeyLength defines the byte length of a BLSSignature.
 	MaxTxsPerPayloadLength          = 1048576                                      // MaxTxsPerPayloadLength defines the maximum number of transactions that can be included in a payload.

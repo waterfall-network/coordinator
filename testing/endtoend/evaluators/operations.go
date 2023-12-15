@@ -9,7 +9,6 @@ import (
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	corehelpers "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/signing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
@@ -19,7 +18,6 @@ import (
 	e2e "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/policies"
 	e2etypes "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/types"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
 	"golang.org/x/exp/rand"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -125,7 +123,7 @@ func processesDepositsInBlocks(conns ...*grpc.ClientConn) error {
 			return errors.New("block neither phase0 nor altair")
 		}
 		fmt.Printf(
-			"Slot: %d with %d deposits, Eth1 block %#x with %d deposits\n",
+			"Slot: %d with %d deposits, shard1 block %#x with %d deposits\n",
 			slot,
 			len(deposits),
 			eth1Data.BlockHash, eth1Data.DepositCount,
@@ -273,7 +271,7 @@ func depositedValidatorsAreActive(conns ...*grpc.ClientConn) error {
 	}
 	if belowBalanceCount > 0 {
 		return fmt.Errorf(
-			"%d validators did not have a proper balance, expected %d validators to have 32 ETH",
+			"%d validators did not have a proper balance, expected %d validators to have 3200 WATER",
 			belowBalanceCount,
 			params.BeaconConfig().MinGenesisActiveValidatorCount,
 		)
@@ -292,11 +290,6 @@ func proposeVoluntaryExit(conns ...*grpc.ClientConn) error {
 		return errors.Wrap(err, "could not get chain head")
 	}
 
-	_, privKeys, err := util.DeterministicDepositsAndKeys(params.BeaconConfig().MinGenesisActiveValidatorCount)
-	if err != nil {
-		return err
-	}
-
 	exitedIndex = types.ValidatorIndex(rand.Uint64() % params.BeaconConfig().MinGenesisActiveValidatorCount)
 	valExited = true
 
@@ -304,25 +297,8 @@ func proposeVoluntaryExit(conns ...*grpc.ClientConn) error {
 		Epoch:          chainHead.HeadEpoch,
 		ValidatorIndex: exitedIndex,
 	}
-	req := &ethpb.DomainRequest{
-		Epoch:  chainHead.HeadEpoch,
-		Domain: params.BeaconConfig().DomainVoluntaryExit[:],
-	}
-	domain, err := valClient.DomainData(ctx, req)
-	if err != nil {
-		return err
-	}
-	signingData, err := signing.ComputeSigningRoot(voluntaryExit, domain.SignatureDomain)
-	if err != nil {
-		return err
-	}
-	signature := privKeys[exitedIndex].Sign(signingData[:])
-	signedExit := &ethpb.SignedVoluntaryExit{
-		Exit:      voluntaryExit,
-		Signature: signature.Marshal(),
-	}
 
-	if _, err = valClient.ProposeExit(ctx, signedExit); err != nil {
+	if _, err = valClient.ProposeExit(ctx, voluntaryExit); err != nil {
 		return errors.Wrap(err, "could not propose exit")
 	}
 	return nil
@@ -400,7 +376,7 @@ func validatorsVoteWithTheMajority(conns ...*grpc.ClientConn) error {
 		}
 
 		if !bytes.Equal(vote, expectedEth1DataVote) {
-			return fmt.Errorf("incorrect eth1data vote for slot %d; expected: %#x vs voted: %#x",
+			return fmt.Errorf("incorrect shard1data vote for slot %d; expected: %#x vs voted: %#x",
 				slot, expectedEth1DataVote, vote)
 		}
 	}

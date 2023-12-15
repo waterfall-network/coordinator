@@ -10,9 +10,9 @@ import (
 	"testing"
 
 	grpcruntime "github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"github.com/libp2p/go-libp2p-core/network"
-	"github.com/libp2p/go-libp2p-core/peer"
 	libp2ptest "github.com/libp2p/go-libp2p-peerstore/test"
+	"github.com/libp2p/go-libp2p/core/network"
+	"github.com/libp2p/go-libp2p/core/peer"
 	ma "github.com/multiformats/go-multiaddr"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/go-bitfield"
@@ -66,7 +66,7 @@ func TestGetHealth(t *testing.T) {
 	require.NoError(t, err)
 	stream, ok := grpc.ServerTransportStreamFromContext(ctx).(*grpcruntime.ServerTransportStream)
 	require.Equal(t, true, ok, "type assertion failed")
-	assert.Equal(t, stream.Header()[strings.ToLower(grpcutil.HttpCodeMetadataKey)][0], strconv.Itoa(http.StatusPartialContent))
+	assert.Equal(t, stream.Header()[strings.ToLower(grpcutil.HTTPCodeMetadataKey)][0], strconv.Itoa(http.StatusPartialContent))
 	checker.IsSynced = true
 	_, err = s.GetHealth(ctx, &emptypb.Empty{})
 	require.NoError(t, err)

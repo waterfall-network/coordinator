@@ -61,7 +61,16 @@ func NewBeaconBlock() *ethpb.SignedBeaconBlock {
 				AttesterSlashings: []*ethpb.AttesterSlashing{},
 				Deposits:          []*ethpb.Deposit{},
 				ProposerSlashings: []*ethpb.ProposerSlashing{},
-				VoluntaryExits:    []*ethpb.SignedVoluntaryExit{},
+				VoluntaryExits:    []*ethpb.VoluntaryExit{},
+				Withdrawals: []*ethpb.Withdrawal{
+					{
+						PublicKey:      bytesutil.PadTo([]byte{0x77}, 48),
+						ValidatorIndex: 0,
+						Amount:         123456789,
+						InitTxHash:     bytesutil.PadTo([]byte{0x77}, 32),
+						Epoch:          5,
+					},
+				},
 			},
 		},
 		Signature: make([]byte, fieldparams.BLSSignatureLength),
@@ -126,7 +135,7 @@ func GenerateFullBlock(
 	}
 
 	numToGen = conf.NumVoluntaryExits
-	var exits []*ethpb.SignedVoluntaryExit
+	var exits []*ethpb.VoluntaryExit
 	if numToGen > 0 {
 		exits, err = generateVoluntaryExits(bState, privs, numToGen)
 		if err != nil {
@@ -356,24 +365,16 @@ func generateVoluntaryExits(
 	bState state.BeaconState,
 	privs []bls.SecretKey,
 	numExits uint64,
-) ([]*ethpb.SignedVoluntaryExit, error) {
-	currentEpoch := time.CurrentEpoch(bState)
-
-	voluntaryExits := make([]*ethpb.SignedVoluntaryExit, numExits)
+) ([]*ethpb.VoluntaryExit, error) {
+	voluntaryExits := make([]*ethpb.VoluntaryExit, numExits)
 	for i := 0; i < len(voluntaryExits); i++ {
 		valIndex, err := randValIndex(bState)
 		if err != nil {
 			return nil, err
 		}
-		exit := &ethpb.SignedVoluntaryExit{
-			Exit: &ethpb.VoluntaryExit{
-				Epoch:          time.PrevEpoch(bState),
-				ValidatorIndex: valIndex,
-			},
-		}
-		exit.Signature, err = signing.ComputeDomainAndSign(bState, currentEpoch, exit.Exit, params.BeaconConfig().DomainVoluntaryExit, privs[valIndex])
-		if err != nil {
-			return nil, err
+		exit := &ethpb.VoluntaryExit{
+			Epoch:          time.PrevEpoch(bState),
+			ValidatorIndex: valIndex,
 		}
 		voluntaryExits[i] = exit
 	}

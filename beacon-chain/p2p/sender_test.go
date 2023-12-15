@@ -9,7 +9,7 @@ import (
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
 
-	"github.com/libp2p/go-libp2p-core/network"
+	"github.com/libp2p/go-libp2p/core/network"
 	testp2p "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/testing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"

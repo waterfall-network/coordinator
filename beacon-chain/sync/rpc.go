@@ -7,9 +7,10 @@ import (
 	"strings"
 
 	ssz "github.com/ferranbt/fastssz"
-	libp2pcore "github.com/libp2p/go-libp2p-core"
-	"github.com/libp2p/go-libp2p-core/network"
-	"github.com/libp2p/go-libp2p-core/protocol"
+	libp2pcore "github.com/libp2p/go-libp2p/core"
+	"github.com/libp2p/go-libp2p/core/network"
+	"github.com/libp2p/go-libp2p/core/protocol"
+	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
 	p2ptypes "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
@@ -139,19 +140,23 @@ func (s *Service) registerRPC(baseTopic string, handle rpcHandler) {
 		// Check before hand that peer is valid.
 		if s.cfg.p2p.Peers().IsBad(stream.Conn().RemotePeer()) {
 			if err := s.sendGoodByeAndDisconnect(ctx, p2ptypes.GoodbyeCodeBanned, stream.Conn().RemotePeer()); err != nil {
-				log.Debugf("Could not disconnect from peer: %v", err)
+				log.Errorf("Could not disconnect from peer: %v", err)
 			}
+			log.WithFields(logrus.Fields{
+				"func": "registerRPC",
+				"peer": stream.Conn().RemotePeer(),
+			}).Debug("Disconnect: peer is bad")
 			return
 		}
 		// Validate request according to peer limits.
 		if err := s.rateLimiter.validateRawRpcRequest(stream); err != nil {
-			log.Debugf("Could not validate rpc request from peer: %v", err)
+			log.Errorf("Could not validate rpc request from peer: %v", err)
 			return
 		}
 		s.rateLimiter.addRawStream(stream)
 
 		if err := stream.SetReadDeadline(time.Now().Add(ttfbTimeout)); err != nil {
-			log.WithError(err).Debug("Could not set stream read deadline")
+			log.WithError(err).Error("Could not set stream read deadline")
 			return
 		}
 
@@ -173,7 +178,7 @@ func (s *Service) registerRPC(baseTopic string, handle rpcHandler) {
 			if err := handle(ctx, base, stream); err != nil {
 				messageFailedProcessingCounter.WithLabelValues(topic).Inc()
 				if err != p2ptypes.ErrWrongForkDigestVersion {
-					log.WithError(err).Debug("Could not handle p2p RPC")
+					log.WithError(err).Error("Could not handle p2p RPC")
 				}
 				tracing.AnnotateError(span, err)
 			}

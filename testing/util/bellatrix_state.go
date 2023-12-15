@@ -83,6 +83,15 @@ func emptyGenesisStateBellatrix() (state.BeaconState, error) {
 		Eth1DepositIndex: 0,
 
 		LatestExecutionPayloadHeader: &ethpb.ExecutionPayloadHeader{},
+
+		// Spine data.
+		SpineData: &ethpb.SpineData{
+			Spines:       []byte{},
+			Prefix:       []byte{},
+			Finalization: []byte{},
+			CpFinalized:  []byte{},
+			ParentSpines: []*ethpb.SpinesSeq{},
+		},
 	}
 	return v3.InitializeFromProto(st)
 }

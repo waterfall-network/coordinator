@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	libp2pcore "github.com/libp2p/go-libp2p-core"
-	"github.com/libp2p/go-libp2p-core/network"
-	"github.com/libp2p/go-libp2p-core/peer"
+	libp2pcore "github.com/libp2p/go-libp2p/core"
+	"github.com/libp2p/go-libp2p/core/network"
+	"github.com/libp2p/go-libp2p/core/peer"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/async"
@@ -46,7 +46,12 @@ func (s *Service) goodbyeRPCHandler(_ context.Context, msg interface{}, stream l
 	}
 	s.rateLimiter.add(stream, 1)
 	log := log.WithField("Reason", goodbyeMessage(*m))
-	log.WithField("peer", stream.Conn().RemotePeer()).Debug("Peer has sent a goodbye message")
+	log.WithField("func", "goodbyeRPCHandler")
+	log.WithField(
+		"SetNextValidTime", goodByeBackoff(*m).Second(),
+	).WithField(
+		"peer", stream.Conn().RemotePeer(),
+	).Info("Disconnect: peer has sent a goodbye message")
 	s.cfg.p2p.Peers().SetNextValidTime(stream.Conn().RemotePeer(), goodByeBackoff(*m))
 	// closes all streams with the peer
 	return s.cfg.p2p.Disconnect(stream.Conn().RemotePeer())
@@ -64,8 +69,12 @@ func (s *Service) disconnectBadPeer(ctx context.Context, id peer.ID) {
 		goodbyeCode = p2ptypes.GoodbyeCodeBanned
 	}
 	if err := s.sendGoodByeAndDisconnect(ctx, goodbyeCode, id); err != nil {
-		log.Debugf("Error when disconnecting with bad peer: %v", err)
+		log.Errorf("Error when disconnecting with bad peer: %v", err)
 	}
+	log.WithFields(logrus.Fields{
+		"func": "disconnectBadPeer",
+		"peer": id,
+	}).Debug("Disconnect: peer is bad")
 }
 
 // A custom goodbye method that is used by our connection handler, in the
@@ -87,8 +96,15 @@ func (s *Service) sendGoodByeAndDisconnect(ctx context.Context, code p2ptypes.RP
 		log.WithFields(logrus.Fields{
 			"error": err,
 			"peer":  id,
-		}).Debug("Could not send goodbye message to peer")
+		}).Error("Disconnect: could not send goodbye message to peer")
 	}
+
+	log.WithFields(logrus.Fields{
+		"func": "sendGoodByeAndDisconnect",
+		"peer": id,
+		"code": code,
+	}).Info("Disconnect: send goodbye message to peer")
+
 	return s.cfg.p2p.Disconnect(id)
 }
 

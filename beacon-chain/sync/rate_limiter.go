@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/kevinms/leakybucket-go"
-	"github.com/libp2p/go-libp2p-core/network"
+	"github.com/libp2p/go-libp2p/core/network"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/trailofbits/go-mutexasserts"
@@ -92,6 +92,7 @@ func (l *limiter) validateRequest(stream network.Stream, amt uint64) error {
 		amt = 1
 	}
 	if amt > uint64(remaining) {
+		log.WithField("fn", "validateRequest").WithField("peer", stream.Conn().RemotePeer().String()).WithField("amt", amt).WithField("remaining", remaining).WithError(err).Debug("Disconnect: incr BadResponses")
 		l.p2p.Peers().Scorers().BadResponsesScorer().Increment(stream.Conn().RemotePeer())
 		writeErrorResponseToStream(responseCodeInvalidRequest, p2ptypes.ErrRateLimited.Error(), stream, l.p2p)
 		return p2ptypes.ErrRateLimited
@@ -115,6 +116,7 @@ func (l *limiter) validateRawRpcRequest(stream network.Stream) error {
 	// Treat each request as a minimum of 1.
 	amt := int64(1)
 	if amt > remaining {
+		log.WithField("fn", "validateRawRpcRequest").WithField("peer", stream.Conn().RemotePeer().String()).WithField("amt", amt).WithField("remaining", remaining).WithError(err).Debug("Disconnect: incr BadResponses")
 		l.p2p.Peers().Scorers().BadResponsesScorer().Increment(stream.Conn().RemotePeer())
 		writeErrorResponseToStream(responseCodeInvalidRequest, p2ptypes.ErrRateLimited.Error(), stream, l.p2p)
 		return p2ptypes.ErrRateLimited

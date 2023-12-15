@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/dgraph-io/ristretto"
+	lru "github.com/hashicorp/golang-lru"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -80,6 +81,7 @@ type Store struct {
 	db                  *bolt.DB
 	databasePath        string
 	blockCache          *ristretto.Cache
+	spinesCache         *lru.Cache
 	validatorEntryCache *ristretto.Cache
 	stateSummaryCache   *stateSummaryCache
 	ctx                 context.Context
@@ -140,6 +142,13 @@ func NewKVStore(ctx context.Context, dirPath string, config *Config) (*Store, er
 	}
 	log.WithField("elapsed", time.Since(start)).Info("Created block cache")
 
+	spinesCache, err := lru.New(1024)
+	if err != nil {
+		log.WithField("elapsed", time.Since(start)).Error("Failed to create spine cache")
+		return nil, err
+	}
+	log.WithField("elapsed", time.Since(start)).Info("Created spine cache")
+
 	start = time.Now()
 	log.Infof("Creating validator cache...")
 	validatorCache, err := ristretto.NewCache(&ristretto.Config{
@@ -157,6 +166,7 @@ func NewKVStore(ctx context.Context, dirPath string, config *Config) (*Store, er
 		db:                  boltDB,
 		databasePath:        dirPath,
 		blockCache:          blockCache,
+		spinesCache:         spinesCache,
 		validatorEntryCache: validatorCache,
 		stateSummaryCache:   newStateSummaryCache(),
 		ctx:                 ctx,
@@ -195,6 +205,8 @@ func NewKVStore(ctx context.Context, dirPath string, config *Config) (*Store, er
 			migrationsBucket,
 
 			feeRecipientBucket,
+			// spines lists bucket
+			spinesBucket,
 		)
 	}); err != nil {
 		log.WithField("elapsed", time.Since(start)).Error("Failed to update db and create buckets")

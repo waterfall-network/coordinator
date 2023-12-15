@@ -34,9 +34,8 @@ func ParseGraffitiFile(f string) (*Graffiti, error) {
 	if err := yaml.UnmarshalStrict(yamlFile, g); err != nil {
 		if _, ok := err.(*yaml.TypeError); !ok {
 			return nil, err
-		} else {
-			log.WithError(err).Error("There were some issues parsing graffiti from a yaml file.")
 		}
+		log.WithError(err).Error("There were some issues parsing graffiti from a yaml file.")
 	}
 
 	for i, o := range g.Specific {

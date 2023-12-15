@@ -23,7 +23,7 @@ var previousFinalizedCheckpointKey = []byte("previous-finalized-checkpoint")
 var containerFinalizedButNotCanonical = []byte("recent block needs reindexing to determine canonical")
 
 // The finalized block roots index tracks beacon blocks which are finalized in the canonical chain.
-// The finalized checkpoint contains the the epoch which was finalized and the highest beacon block
+// The finalized checkpoint contains the epoch which was finalized and the highest beacon block
 // root where block.slot <= start_slot(epoch). As a result, we cannot index the finalized canonical
 // beacon block chain using the finalized root alone as this would exclude all other blocks in the
 // finalized epoch from being indexed as "final and canonical".

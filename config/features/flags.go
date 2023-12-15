@@ -21,7 +21,7 @@ var (
 	Mainnet = &cli.BoolFlag{
 		Value: true,
 		Name:  "mainnet",
-		Usage: "Run on Ethereum Beacon Chain Main Net. This is the default and can be omitted.",
+		Usage: "Run on Waterfall Beacon Chain Main Net. This is the default and can be omitted.",
 	}
 	devModeFlag = &cli.BoolFlag{
 		Name:  "dev",
@@ -44,6 +44,10 @@ var (
 		Name:  "enable-peer-scorer",
 		Usage: "Enable experimental P2P peer scorer",
 	}
+	enablePassSlotInfoToGwat = &cli.BoolFlag{
+		Name:  "enable-pass-slot-info-to-gwat",
+		Usage: "Enables passing slot info to GWAT during sync process",
+	}
 	checkPtInfoCache = &cli.BoolFlag{
 		Name:  "use-check-point-cache",
 		Usage: "Enables check point info caching",
@@ -51,6 +55,10 @@ var (
 	enableLargerGossipHistory = &cli.BoolFlag{
 		Name:  "enable-larger-gossip-history",
 		Usage: "Enables the node to store a larger amount of gossip messages in its cache.",
+	}
+	disablePeerScorer = &cli.BoolFlag{
+		Name:  "disable-peer-scorer",
+		Usage: "(Danger): Disables P2P peer scorer. Do NOT use this in production!",
 	}
 	writeWalletPasswordOnWebOnboarding = &cli.BoolFlag{
 		Name: "write-wallet-password-on-web-onboarding",
@@ -134,10 +142,6 @@ var (
 		Name:  "enable-native-state",
 		Usage: "Enables representing the beacon state as a pure Go struct.",
 	}
-	enableVecHTR = &cli.BoolFlag{
-		Name:  "enable-vectorized-htr",
-		Usage: "Enables new go sha256 library which utilizes optimized routines for merkle trees",
-	}
 	enableForkChoiceDoublyLinkedTree = &cli.BoolFlag{
 		Name:  "enable-forkchoice-doubly-linked-tree",
 		Usage: "Enables new forkchoice store structure that uses doubly linked trees",
@@ -147,7 +151,6 @@ var (
 // devModeFlags holds list of flags that are set when development mode is on.
 var devModeFlags = []cli.Flag{
 	enablePeerScorer,
-	enableVecHTR,
 	enableForkChoiceDoublyLinkedTree,
 }
 
@@ -178,6 +181,7 @@ var BeaconChainFlags = append(deprecatedFlags, []cli.Flag{
 	PyrmontTestnet,
 	PraterTestnet,
 	Mainnet,
+	disablePeerScorer,
 	enablePeerScorer,
 	enableLargerGossipHistory,
 	checkPtInfoCache,
@@ -193,8 +197,8 @@ var BeaconChainFlags = append(deprecatedFlags, []cli.Flag{
 	disableBatchGossipVerification,
 	disableBalanceTrieComputation,
 	enableNativeState,
-	enableVecHTR,
 	enableForkChoiceDoublyLinkedTree,
+	enablePassSlotInfoToGwat,
 }...)
 
 // E2EBeaconChainFlags contains a list of the beacon chain feature flags to be tested in E2E.

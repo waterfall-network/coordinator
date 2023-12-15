@@ -58,7 +58,6 @@ func TestExecuteStateTransition_FullProcess(t *testing.T) {
 		DepositRoot:  bytesutil.PadTo([]byte{2}, 32),
 		BlockHash:    make([]byte, 32),
 		Candidates:   make([]byte, 0),
-		Finalization: make([]byte, 0),
 	}
 	require.NoError(t, beaconState.SetSlot(params.BeaconConfig().SlotsPerEpoch-1))
 	e := beaconState.Eth1Data()
@@ -161,9 +160,9 @@ func TestProcessBlock_IncorrectProcessExits(t *testing.T) {
 		AggregationBits: bitfield.Bitlist{0xC0, 0xC0, 0xC0, 0xC0, 0x01},
 	})
 	attestations := []*ethpb.Attestation{blockAtt}
-	var exits []*ethpb.SignedVoluntaryExit
+	var exits []*ethpb.VoluntaryExit
 	for i := uint64(0); i < params.BeaconConfig().MaxVoluntaryExits+1; i++ {
-		exits = append(exits, &ethpb.SignedVoluntaryExit{})
+		exits = append(exits, &ethpb.VoluntaryExit{})
 	}
 	genesisBlock := blocks.NewGenesisBlock([]byte{})
 	bodyRoot, err := genesisBlock.Block.HashTreeRoot()
@@ -199,7 +198,7 @@ func TestProcessBlock_IncorrectProcessExits(t *testing.T) {
 }
 
 func createFullBlockWithOperations(t *testing.T) (state.BeaconState,
-	*ethpb.SignedBeaconBlock, []*ethpb.Attestation, []*ethpb.ProposerSlashing, []*ethpb.SignedVoluntaryExit) {
+	*ethpb.SignedBeaconBlock, []*ethpb.Attestation, []*ethpb.ProposerSlashing, []*ethpb.VoluntaryExit) {
 	beaconState, privKeys := util.DeterministicGenesisState(t, 32)
 	genesisBlock := blocks.NewGenesisBlock([]byte{})
 	bodyRoot, err := genesisBlock.Block.HashTreeRoot()
@@ -325,14 +324,10 @@ func createFullBlockWithOperations(t *testing.T) (state.BeaconState,
 	}
 	blockAtt.Signature = bls.AggregateSignatures(sigs).Marshal()
 
-	exit := &ethpb.SignedVoluntaryExit{
-		Exit: &ethpb.VoluntaryExit{
-			ValidatorIndex: 10,
-			Epoch:          0,
-		},
+	exit := &ethpb.VoluntaryExit{
+		ValidatorIndex: 10,
+		Epoch:          0,
 	}
-	exit.Signature, err = signing.ComputeDomainAndSign(beaconState, currentEpoch, exit.Exit, params.BeaconConfig().DomainVoluntaryExit, privKeys[exit.Exit.ValidatorIndex])
-	require.NoError(t, err)
 
 	header := beaconState.LatestBlockHeader()
 	prevStateRoot, err := beaconState.HashTreeRoot(context.Background())
@@ -357,7 +352,7 @@ func createFullBlockWithOperations(t *testing.T) (state.BeaconState,
 				ProposerSlashings: proposerSlashings,
 				AttesterSlashings: attesterSlashings,
 				Attestations:      []*ethpb.Attestation{blockAtt},
-				VoluntaryExits:    []*ethpb.SignedVoluntaryExit{exit},
+				VoluntaryExits:    []*ethpb.VoluntaryExit{exit},
 			},
 		},
 	})
@@ -367,7 +362,7 @@ func createFullBlockWithOperations(t *testing.T) (state.BeaconState,
 	block.Signature = sig.Marshal()
 
 	require.NoError(t, beaconState.SetSlot(block.Block.Slot))
-	return beaconState, block, []*ethpb.Attestation{blockAtt}, proposerSlashings, []*ethpb.SignedVoluntaryExit{exit}
+	return beaconState, block, []*ethpb.Attestation{blockAtt}, proposerSlashings, []*ethpb.VoluntaryExit{exit}
 }
 
 func TestProcessEpochPrecompute_CanProcess(t *testing.T) {
@@ -454,7 +449,7 @@ func TestProcessBlock_OverMaxVoluntaryExits(t *testing.T) {
 	b := &ethpb.SignedBeaconBlock{
 		Block: &ethpb.BeaconBlock{
 			Body: &ethpb.BeaconBlockBody{
-				VoluntaryExits: make([]*ethpb.SignedVoluntaryExit, maxExits+1),
+				VoluntaryExits: make([]*ethpb.VoluntaryExit, maxExits+1),
 			},
 		},
 	}

@@ -7,7 +7,7 @@ import (
 	"net"
 	"testing"
 
-	"github.com/libp2p/go-libp2p-core/crypto"
+	"github.com/libp2p/go-libp2p/core/crypto"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
@@ -35,7 +35,8 @@ func TestPrivateKeyLoading(t *testing.T) {
 	}
 	pKey, err := privKey(cfg)
 	require.NoError(t, err, "Could not apply option")
-	newPkey := convertToInterfacePrivkey(pKey)
+	newPkey, err := convertToInterfacePrivkey(pKey)
+	require.NoError(t, err)
 	rawBytes, err := key.Raw()
 	require.NoError(t, err)
 	newRaw, err := newPkey.Raw()

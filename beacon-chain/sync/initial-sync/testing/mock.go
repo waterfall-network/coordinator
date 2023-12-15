@@ -9,11 +9,6 @@ type Sync struct {
 	IsSynced      bool
 }
 
-func (s *Sync) IsInitSync() bool {
-	//TODO implement me
-	panic("implement me")
-}
-
 // Syncing --
 func (s *Sync) Syncing() bool {
 	return s.IsSyncing
@@ -25,12 +20,12 @@ func (s *Sync) Initialized() bool {
 }
 
 // Status --
-func (_ *Sync) Status() error {
+func (s *Sync) Status() error {
 	return nil
 }
 
 // Resync --
-func (_ *Sync) Resync() error {
+func (s *Sync) Resync() error {
 	return nil
 }
 

@@ -31,83 +31,83 @@ func TestPruneInvalid(t *testing.T) {
 			[32]byte{'j'},
 			[32]byte{'B'},
 			12,
-			[][32]byte{[32]byte{'j'}},
+			[][32]byte{{'j'}},
 		},
 		{
 			[32]byte{'c'},
 			[32]byte{'B'},
 			4,
-			[][32]byte{[32]byte{'f'}, [32]byte{'e'}, [32]byte{'i'}, [32]byte{'h'}, [32]byte{'l'},
-				[32]byte{'k'}, [32]byte{'g'}, [32]byte{'d'}, [32]byte{'c'}},
+			[][32]byte{{'f'}, {'e'}, {'i'}, {'h'}, {'l'},
+				{'k'}, {'g'}, {'d'}, {'c'}},
 		},
 		{
 			[32]byte{'i'},
 			[32]byte{'H'},
 			12,
-			[][32]byte{[32]byte{'i'}},
+			[][32]byte{{'i'}},
 		},
 		{
 			[32]byte{'h'},
 			[32]byte{'G'},
 			11,
-			[][32]byte{[32]byte{'i'}, [32]byte{'h'}},
+			[][32]byte{{'i'}, {'h'}},
 		},
 		{
 			[32]byte{'g'},
 			[32]byte{'D'},
 			8,
-			[][32]byte{[32]byte{'i'}, [32]byte{'h'}, [32]byte{'l'}, [32]byte{'k'}, [32]byte{'g'}},
+			[][32]byte{{'i'}, {'h'}, {'l'}, {'k'}, {'g'}},
 		},
 		{
 			[32]byte{'i'},
 			[32]byte{'D'},
 			8,
-			[][32]byte{[32]byte{'i'}, [32]byte{'h'}, [32]byte{'l'}, [32]byte{'k'}, [32]byte{'g'}},
+			[][32]byte{{'i'}, {'h'}, {'l'}, {'k'}, {'g'}},
 		},
 		{
 			[32]byte{'f'},
 			[32]byte{'D'},
 			11,
-			[][32]byte{[32]byte{'f'}, [32]byte{'e'}},
+			[][32]byte{{'f'}, {'e'}},
 		},
 		{
 			[32]byte{'h'},
 			[32]byte{'C'},
 			5,
 			[][32]byte{
-				[32]byte{'f'},
-				[32]byte{'e'},
-				[32]byte{'i'},
-				[32]byte{'h'},
-				[32]byte{'l'},
-				[32]byte{'k'},
-				[32]byte{'g'},
-				[32]byte{'d'},
+				{'f'},
+				{'e'},
+				{'i'},
+				{'h'},
+				{'l'},
+				{'k'},
+				{'g'},
+				{'d'},
 			},
 		},
 		{
 			[32]byte{'g'},
 			[32]byte{'E'},
 			8,
-			[][32]byte{[32]byte{'i'}, [32]byte{'h'}, [32]byte{'l'}, [32]byte{'k'}, [32]byte{'g'}},
+			[][32]byte{{'i'}, {'h'}, {'l'}, {'k'}, {'g'}},
 		},
 	}
 	for _, tc := range tests {
 		ctx := context.Background()
 		f := setup(1, 1)
 
-		require.NoError(t, f.InsertOptimisticBlock(ctx, 100, [32]byte{'a'}, params.BeaconConfig().ZeroHash, [32]byte{'A'}, 1, 1))
-		require.NoError(t, f.InsertOptimisticBlock(ctx, 101, [32]byte{'b'}, [32]byte{'a'}, [32]byte{'B'}, 1, 1))
-		require.NoError(t, f.InsertOptimisticBlock(ctx, 102, [32]byte{'c'}, [32]byte{'b'}, [32]byte{'C'}, 1, 1))
-		require.NoError(t, f.InsertOptimisticBlock(ctx, 102, [32]byte{'j'}, [32]byte{'b'}, [32]byte{'J'}, 1, 1))
-		require.NoError(t, f.InsertOptimisticBlock(ctx, 103, [32]byte{'d'}, [32]byte{'c'}, [32]byte{'D'}, 1, 1))
-		require.NoError(t, f.InsertOptimisticBlock(ctx, 104, [32]byte{'e'}, [32]byte{'d'}, [32]byte{'E'}, 1, 1))
-		require.NoError(t, f.InsertOptimisticBlock(ctx, 104, [32]byte{'g'}, [32]byte{'d'}, [32]byte{'G'}, 1, 1))
-		require.NoError(t, f.InsertOptimisticBlock(ctx, 105, [32]byte{'f'}, [32]byte{'e'}, [32]byte{'F'}, 1, 1))
-		require.NoError(t, f.InsertOptimisticBlock(ctx, 105, [32]byte{'h'}, [32]byte{'g'}, [32]byte{'H'}, 1, 1))
-		require.NoError(t, f.InsertOptimisticBlock(ctx, 105, [32]byte{'k'}, [32]byte{'g'}, [32]byte{'K'}, 1, 1))
-		require.NoError(t, f.InsertOptimisticBlock(ctx, 106, [32]byte{'i'}, [32]byte{'h'}, [32]byte{'I'}, 1, 1))
-		require.NoError(t, f.InsertOptimisticBlock(ctx, 106, [32]byte{'l'}, [32]byte{'k'}, [32]byte{'L'}, 1, 1))
+		require.NoError(t, f.InsertOptimisticBlock(ctx, 100, [32]byte{'a'}, params.BeaconConfig().ZeroHash, 1, 1, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil))
+		require.NoError(t, f.InsertOptimisticBlock(ctx, 101, [32]byte{'b'}, [32]byte{'a'}, 1, 1, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil))
+		require.NoError(t, f.InsertOptimisticBlock(ctx, 102, [32]byte{'c'}, [32]byte{'b'}, 1, 1, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil))
+		require.NoError(t, f.InsertOptimisticBlock(ctx, 102, [32]byte{'j'}, [32]byte{'b'}, 1, 1, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil))
+		require.NoError(t, f.InsertOptimisticBlock(ctx, 103, [32]byte{'d'}, [32]byte{'c'}, 1, 1, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil))
+		require.NoError(t, f.InsertOptimisticBlock(ctx, 104, [32]byte{'e'}, [32]byte{'d'}, 1, 1, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil))
+		require.NoError(t, f.InsertOptimisticBlock(ctx, 104, [32]byte{'g'}, [32]byte{'d'}, 1, 1, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil))
+		require.NoError(t, f.InsertOptimisticBlock(ctx, 105, [32]byte{'f'}, [32]byte{'e'}, 1, 1, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil))
+		require.NoError(t, f.InsertOptimisticBlock(ctx, 105, [32]byte{'h'}, [32]byte{'g'}, 1, 1, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil))
+		require.NoError(t, f.InsertOptimisticBlock(ctx, 105, [32]byte{'k'}, [32]byte{'g'}, 1, 1, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil))
+		require.NoError(t, f.InsertOptimisticBlock(ctx, 106, [32]byte{'i'}, [32]byte{'h'}, 1, 1, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil))
+		require.NoError(t, f.InsertOptimisticBlock(ctx, 106, [32]byte{'l'}, [32]byte{'k'}, 1, 1, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil))
 
 		roots, err := f.store.setOptimisticToInvalid(context.Background(), tc.root, tc.payload)
 		require.NoError(t, err)
@@ -121,9 +121,9 @@ func TestSetOptimisticToInvalid_ProposerBoost(t *testing.T) {
 	ctx := context.Background()
 	f := setup(1, 1)
 
-	require.NoError(t, f.InsertOptimisticBlock(ctx, 100, [32]byte{'a'}, params.BeaconConfig().ZeroHash, [32]byte{'A'}, 1, 1))
-	require.NoError(t, f.InsertOptimisticBlock(ctx, 101, [32]byte{'b'}, [32]byte{'a'}, [32]byte{'B'}, 1, 1))
-	require.NoError(t, f.InsertOptimisticBlock(ctx, 101, [32]byte{'c'}, [32]byte{'b'}, [32]byte{'C'}, 1, 1))
+	require.NoError(t, f.InsertOptimisticBlock(ctx, 100, [32]byte{'a'}, params.BeaconConfig().ZeroHash, 1, 1, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil))
+	require.NoError(t, f.InsertOptimisticBlock(ctx, 101, [32]byte{'b'}, [32]byte{'a'}, 1, 1, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil))
+	require.NoError(t, f.InsertOptimisticBlock(ctx, 101, [32]byte{'c'}, [32]byte{'b'}, 1, 1, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil))
 	f.store.proposerBoostLock.Lock()
 	f.store.proposerBoostRoot = [32]byte{'c'}
 	f.store.previousProposerBoostScore = 10

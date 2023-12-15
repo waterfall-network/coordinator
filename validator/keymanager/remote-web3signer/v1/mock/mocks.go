@@ -190,19 +190,17 @@ func GetMockSignRequest(t string) *validatorpb.SignRequest {
 								Proof: [][]byte{[]byte("A")},
 								Data: &eth.Deposit_Data{
 									PublicKey:             make([]byte, fieldparams.BLSPubkeyLength),
-									WithdrawalCredentials: make([]byte, 32),
+									CreatorAddress:        make([]byte, 20),
+									WithdrawalCredentials: make([]byte, 20),
 									Amount:                0,
 									Signature:             make([]byte, fieldparams.BLSSignatureLength),
 								},
 							},
 						},
-						VoluntaryExits: []*eth.SignedVoluntaryExit{
+						VoluntaryExits: []*eth.VoluntaryExit{
 							{
-								Exit: &eth.VoluntaryExit{
-									Epoch:          0,
-									ValidatorIndex: 0,
-								},
-								Signature: make([]byte, fieldparams.BLSSignatureLength),
+								Epoch:          0,
+								ValidatorIndex: 0,
 							},
 						},
 					},
@@ -304,19 +302,17 @@ func GetMockSignRequest(t string) *validatorpb.SignRequest {
 								Proof: [][]byte{[]byte("A")},
 								Data: &eth.Deposit_Data{
 									PublicKey:             make([]byte, fieldparams.BLSPubkeyLength),
-									WithdrawalCredentials: make([]byte, 32),
+									CreatorAddress:        make([]byte, 20),
+									WithdrawalCredentials: make([]byte, 20),
 									Amount:                0,
 									Signature:             make([]byte, fieldparams.BLSSignatureLength),
 								},
 							},
 						},
-						VoluntaryExits: []*eth.SignedVoluntaryExit{
+						VoluntaryExits: []*eth.VoluntaryExit{
 							{
-								Exit: &eth.VoluntaryExit{
-									Epoch:          0,
-									ValidatorIndex: 0,
-								},
-								Signature: make([]byte, fieldparams.BLSSignatureLength),
+								Epoch:          0,
+								ValidatorIndex: 0,
 							},
 						},
 						SyncAggregate: &eth.SyncAggregate{
@@ -635,19 +631,17 @@ func MockBeaconBlockAltair() *v1.BeaconBlockAltair {
 					Proof: []string{"0x41"},
 					Data: &v1.DepositData{
 						PublicKey:             hexutil.Encode(make([]byte, fieldparams.BLSPubkeyLength)),
-						WithdrawalCredentials: hexutil.Encode(make([]byte, 32)),
+						CreatorAddress:        hexutil.Encode(make([]byte, 20)),
+						WithdrawalCredentials: hexutil.Encode(make([]byte, 20)),
 						Amount:                "0",
 						Signature:             hexutil.Encode(make([]byte, fieldparams.BLSSignatureLength)),
 					},
 				},
 			},
-			VoluntaryExits: []*v1.SignedVoluntaryExit{
+			VoluntaryExits: []*v1.VoluntaryExit{
 				{
-					Message: &v1.VoluntaryExit{
-						Epoch:          "0",
-						ValidatorIndex: "0",
-					},
-					Signature: hexutil.Encode(make([]byte, fieldparams.BLSSignatureLength)),
+					Epoch:          "0",
+					ValidatorIndex: "0",
 				},
 			},
 			SyncAggregate: &v1.SyncAggregate{
@@ -706,19 +700,17 @@ func MockBeaconBlockBody() *v1.BeaconBlockBody {
 				Proof: []string{"0x41"},
 				Data: &v1.DepositData{
 					PublicKey:             hexutil.Encode(make([]byte, fieldparams.BLSPubkeyLength)),
-					WithdrawalCredentials: hexutil.Encode(make([]byte, 32)),
+					CreatorAddress:        hexutil.Encode(make([]byte, 20)),
+					WithdrawalCredentials: hexutil.Encode(make([]byte, 20)),
 					Amount:                "0",
 					Signature:             hexutil.Encode(make([]byte, fieldparams.BLSSignatureLength)),
 				},
 			},
 		},
-		VoluntaryExits: []*v1.SignedVoluntaryExit{
+		VoluntaryExits: []*v1.VoluntaryExit{
 			{
-				Message: &v1.VoluntaryExit{
-					Epoch:          "0",
-					ValidatorIndex: "0",
-				},
-				Signature: hexutil.Encode(make([]byte, fieldparams.BLSSignatureLength)),
+				Epoch:          "0",
+				ValidatorIndex: "0",
 			},
 		},
 	}

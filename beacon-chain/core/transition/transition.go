@@ -95,7 +95,7 @@ func ExecuteStateTransition(
 			valid, err := aSet.Verify()
 			log.WithError(err).WithFields(logrus.Fields{
 				"valid":                valid,
-				"len(bSet.Signatures)": len(aSet.Signatures),
+				"len(aSet.Signatures)": len(aSet.Signatures),
 			}).Warn("*** ExecuteStateTransition: signature invalid ATTESTATION ***")
 		} else {
 			log.Warn("*** ExecuteStateTransition: signature==nil ATTESTATION ***")
@@ -167,7 +167,8 @@ func ProcessSlotsUsingNextSlotCache(
 	ctx context.Context,
 	parentState state.BeaconState,
 	parentRoot []byte,
-	slot types.Slot) (state.BeaconState, error) {
+	slot types.Slot,
+) (state.BeaconState, error) {
 	ctx, span := trace.StartSpan(ctx, "core.state.ProcessSlotsUsingNextSlotCache")
 	defer span.End()
 
@@ -367,6 +368,15 @@ func VerifyOperationLengths(_ context.Context, state state.BeaconState, b block.
 			params.BeaconConfig().MaxVoluntaryExits,
 		)
 	}
+
+	if uint64(len(body.Withdrawals())) > params.BeaconConfig().MaxWithdrawals {
+		return nil, fmt.Errorf(
+			"number of withdrawals requests (%d) in block body exceeds allowed threshold of %d",
+			len(body.VoluntaryExits()),
+			params.BeaconConfig().MaxWithdrawals,
+		)
+	}
+
 	eth1Data := state.Eth1Data()
 	if eth1Data == nil {
 		return nil, errors.New("nil eth1data in state")
@@ -394,6 +404,10 @@ func ProcessEpochPrecompute(ctx context.Context, state state.BeaconState) (state
 	if state == nil || state.IsNil() {
 		return nil, errors.New("nil state")
 	}
+
+	preFinRoot := state.FinalizedCheckpoint().GetRoot()
+	preJustRoot := state.CurrentJustifiedCheckpoint().GetRoot()
+
 	vp, bp, err := precompute.New(ctx, state)
 	if err != nil {
 		return nil, err
@@ -408,11 +422,11 @@ func ProcessEpochPrecompute(ctx context.Context, state state.BeaconState) (state
 		return nil, errors.Wrap(err, "could not process justification")
 	}
 
-	log.WithField("state.slot", state.Slot()).Info("*** process rewards and penalties *** 0")
+	log.WithField("state.slot", state.Slot()).Info("process rewards and penalties phase0")
 
 	state, err = precompute.ProcessRewardsAndPenaltiesPrecompute(state, bp, vp, precompute.AttestationsDelta, precompute.ProposersDelta)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not process rewards and penalties")
+		return nil, errors.Wrap(err, "could not process rewards and penalties phase0")
 	}
 
 	state, err = e.ProcessRegistryUpdates(ctx, state)
@@ -429,5 +443,11 @@ func ProcessEpochPrecompute(ctx context.Context, state state.BeaconState) (state
 	if err != nil {
 		return nil, errors.Wrap(err, "could not process final updates")
 	}
+
+	state, err = helpers.ConsensusUpdateStateSpineFinalization(state, preJustRoot, preFinRoot)
+	if err != nil {
+		return nil, err
+	}
+
 	return state, nil
 }

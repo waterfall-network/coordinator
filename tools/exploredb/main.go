@@ -116,11 +116,10 @@ func main() {
 }
 
 func printBucketStats(dbNameWithPath string) {
-	ctx := context.Background()
 	groupSize := uint64(128)
 	doneC := make(chan bool)
 	statsC := make(chan *bucketStat, groupSize)
-	go readBucketStat(ctx, dbNameWithPath, statsC)
+	go readBucketStat(dbNameWithPath, statsC)
 	go printBucketStat(statsC, doneC)
 	<-doneC
 }
@@ -163,7 +162,7 @@ func printBucketContents(dbNameWithPath string, rowLimit uint64, bucketName stri
 	<-doneC
 }
 
-func readBucketStat(ctx context.Context, dbNameWithPath string, statsC chan<- *bucketStat) {
+func readBucketStat(dbNameWithPath string, statsC chan<- *bucketStat) {
 	// open the raw database file. If the file is busy, then exit.
 	db, openErr := bolt.Open(dbNameWithPath, 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if openErr != nil {
@@ -513,24 +512,31 @@ func sizeAndCountGeneric(genericItems interface{}, err error) (uint64, uint64) {
 		return size, count
 	}
 
-	switch items := genericItems.(type) {
-	case []*ethpb.Eth1Data:
+	if items, ok := genericItems.([]*ethpb.Eth1Data); ok {
 		for _, item := range items {
 			size += uint64(item.SizeSSZ())
 		}
 		count = uint64(len(items))
-	case []*ethpb.Validator:
+
+		return size, count
+	}
+
+	if items, ok := genericItems.([]*ethpb.Validator); ok {
 		for _, item := range items {
 			size += uint64(item.SizeSSZ())
 		}
 		count = uint64(len(items))
-	case []*ethpb.PendingAttestation:
+
+		return size, count
+	}
+
+	if items, ok := genericItems.([]*ethpb.PendingAttestation); ok {
 		for _, item := range items {
 			size += uint64(item.SizeSSZ())
 		}
 		count = uint64(len(items))
-	default:
-		return 0, 0
+
+		return size, count
 	}
 
 	return size, count

@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/libp2p/go-libp2p-core/peer"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
+	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"

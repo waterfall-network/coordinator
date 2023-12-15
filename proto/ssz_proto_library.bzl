@@ -11,7 +11,7 @@ mainnet = {
     "block_roots.size": "8192,32",  # SLOTS_PER_HISTORICAL_ROOT, [32]byte
     "state_roots.size": "8192,32",  # SLOTS_PER_HISTORICAL_ROOT, [32]byte
     "eth1_data_votes.size": "2048", # SLOTS_PER_ETH1_VOTING_PERIOD
-    "block_voting.size": "2048",    # 64(epochs) ×32(slots per epoch)
+    "block_voting.size": "65536",    #
     "randao_mixes.size": "65536,32",  # EPOCHS_PER_HISTORICAL_VECTOR, [32]byte
     "previous_epoch_attestations.max": "4096",  # MAX_ATTESTATIONS * SLOTS_PER_EPOCH
     "current_epoch_attestations.max": "4096",  # MAX_ATTESTATIONS * SLOTS_PER_EPOCH
@@ -26,7 +26,8 @@ mainnet = {
 minimal = {
     "block_roots.size": "64,32",
     "state_roots.size": "64,32",
-    "eth1_data_votes.size": "32",
+    "eth1_data_votes.size": "2048",
+    "block_voting.size": "65536",
     "randao_mixes.size": "64,32",
     "previous_epoch_attestations.max": "1024",
     "current_epoch_attestations.max": "1024",

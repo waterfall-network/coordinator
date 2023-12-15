@@ -2,6 +2,7 @@
 package params
 
 import (
+	"context"
 	"time"
 
 	types "github.com/prysmaticlabs/eth2-types"
@@ -24,7 +25,6 @@ type BeaconChainConfig struct {
 	// Misc constants.
 	PresetBase                     string `yaml:"PRESET_BASE" spec:"true"`                        // PresetBase represents the underlying spec preset this config is based on.
 	ConfigName                     string `yaml:"CONFIG_NAME" spec:"true"`                        // ConfigName for allowing an easy human-readable way of knowing what chain is being used.
-	MaxCreatorsPerSlot             uint64 `yaml:"CREATORS_PER_SLOT" spec:"true"`                  // MaxCreatorsPerSlot is the number of creators in a slot.
 	TargetCommitteeSize            uint64 `yaml:"TARGET_COMMITTEE_SIZE" spec:"true"`              // TargetCommitteeSize is the number of validators in a committee when the chain is healthy.
 	MaxValidatorsPerCommittee      uint64 `yaml:"MAX_VALIDATORS_PER_COMMITTEE" spec:"true"`       // MaxValidatorsPerCommittee defines the upper bound of the size of a committee.
 	MaxCommitteesPerSlot           uint64 `yaml:"MAX_COMMITTEES_PER_SLOT" spec:"true"`            // MaxCommitteesPerSlot defines the max amount of committee in a single slot.
@@ -58,6 +58,7 @@ type BeaconChainConfig struct {
 	MaxSeedLookahead                 types.Epoch `yaml:"MAX_SEED_LOOKAHEAD" spec:"true"`                  // MaxSeedLookahead is the duration a validator has to wait for entry and exit in epoch.
 	EpochsPerEth1VotingPeriod        types.Epoch `yaml:"EPOCHS_PER_ETH1_VOTING_PERIOD" spec:"true"`       // EpochsPerEth1VotingPeriod defines how often the merkle root of deposit receipts get updated in beacon node on per epoch basis.
 	SlotsPerHistoricalRoot           types.Slot  `yaml:"SLOTS_PER_HISTORICAL_ROOT" spec:"true"`           // SlotsPerHistoricalRoot defines how often the historical root is saved.
+	WithdrawalBalanceLockPeriod      types.Epoch `yaml:"WITHDRAWAL_BALANCE_LOCK_PERIOD" spec:"true"`      // WithdrawalBalanceLockPeriod is the period to lock balance to sync with gwat before reset.
 	MinValidatorWithdrawabilityDelay types.Epoch `yaml:"MIN_VALIDATOR_WITHDRAWABILITY_DELAY" spec:"true"` // MinValidatorWithdrawabilityDelay is the shortest amount of time a validator has to wait to withdraw.
 	ShardCommitteePeriod             types.Epoch `yaml:"SHARD_COMMITTEE_PERIOD" spec:"true"`              // ShardCommitteePeriod is the minimum amount of epochs a validator must participate before exiting.
 	MinEpochsToInactivityPenalty     types.Epoch `yaml:"MIN_EPOCHS_TO_INACTIVITY_PENALTY" spec:"true"`    // MinEpochsToInactivityPenalty defines the minimum amount of epochs since finality to begin penalizing inactivity.
@@ -65,7 +66,7 @@ type BeaconChainConfig struct {
 	SafeSlotsToUpdateJustified       types.Slot  `yaml:"SAFE_SLOTS_TO_UPDATE_JUSTIFIED" spec:"true"`      // SafeSlotsToUpdateJustified is the minimal slots needed to update justified check point.
 	SafeSlotsToImportOptimistically  types.Slot  `yaml:"SAFE_SLOTS_TO_IMPORT_OPTIMISTICALLY" spec:"true"` // SafeSlotsToImportOptimistically is the minimal number of slots to wait before importing optimistically a pre-merge block
 	SecondsPerETH1Block              uint64      `yaml:"SECONDS_PER_ETH1_BLOCK" spec:"true"`              // SecondsPerETH1Block is the approximate time for a single eth1 block to be produced.
-	HeadSyncReadyIntervalMs          uint64      `yaml:"HEAD_SYNC_READY_INTERVAL" spec:"true"`            // HeadSyncReadyInterval is the interval (ms) of head-sync-ready check.
+	GwatSyncIntervalMs               uint64      `yaml:"GWAT_SYNC_INTERVAL" spec:"true"`                  // GwatSyncIntervalMs is the interval (ms) of attempts to start gwat sync process.
 	VotingRequiredSlots              int         `yaml:"VOTING_REQUIRED_SLOTS" spec:"true"`               // VotingRequiredSlots defines the slots number required to accept spines sequence.
 
 	// Fork choice algorithm constants.
@@ -86,14 +87,18 @@ type BeaconChainConfig struct {
 	EpochsPerSlashingsVector  types.Epoch `yaml:"EPOCHS_PER_SLASHINGS_VECTOR" spec:"true"`  // EpochsPerSlashingsVector defines max length in epoch to store old stats to recompute slashing witness.
 	HistoricalRootsLimit      uint64      `yaml:"HISTORICAL_ROOTS_LIMIT" spec:"true"`       // HistoricalRootsLimit defines max historical roots that can be saved in state before roll over.
 	ValidatorRegistryLimit    uint64      `yaml:"VALIDATOR_REGISTRY_LIMIT" spec:"true"`     // ValidatorRegistryLimit defines the upper bound of validators can participate in eth2.
+	WithdrawalOpsLimit        uint64      `yaml:"WITHDRAWAL_OPS_LIMIT" spec:"true"`         // WithdrawalOpsLimit defines the max length of list of latest withdrawals op of validator.
 
 	// Reward and penalty quotients constants.
-	BaseRewardFactor               uint64 `yaml:"BASE_REWARD_FACTOR" spec:"true"`               // BaseRewardFactor is used to calculate validator per-slot interest rate.
-	WhistleBlowerRewardQuotient    uint64 `yaml:"WHISTLEBLOWER_REWARD_QUOTIENT" spec:"true"`    // WhistleBlowerRewardQuotient is used to calculate whistle blower reward.
-	ProposerRewardQuotient         uint64 `yaml:"PROPOSER_REWARD_QUOTIENT" spec:"true"`         // ProposerRewardQuotient is used to calculate the reward for proposers.
-	InactivityPenaltyQuotient      uint64 `yaml:"INACTIVITY_PENALTY_QUOTIENT" spec:"true"`      // InactivityPenaltyQuotient is used to calculate the penalty for a validator that is offline.
-	MinSlashingPenaltyQuotient     uint64 `yaml:"MIN_SLASHING_PENALTY_QUOTIENT" spec:"true"`    // MinSlashingPenaltyQuotient is used to calculate the minimum penalty to prevent DoS attacks.
-	ProportionalSlashingMultiplier uint64 `yaml:"PROPORTIONAL_SLASHING_MULTIPLIER" spec:"true"` // ProportionalSlashingMultiplier is used as a multiplier on slashed penalties.
+	BaseRewardFactor               uint64  `yaml:"BASE_REWARD_FACTOR" spec:"true"`               // BaseRewardFactor is used to calculate validator per-slot interest rate.
+	WhistleBlowerRewardQuotient    uint64  `yaml:"WHISTLEBLOWER_REWARD_QUOTIENT" spec:"true"`    // WhistleBlowerRewardQuotient is used to calculate whistle blower reward.
+	ProposerRewardQuotient         uint64  `yaml:"PROPOSER_REWARD_QUOTIENT" spec:"true"`         // ProposerRewardQuotient is used to calculate the reward for proposers.
+	InactivityPenaltyQuotient      uint64  `yaml:"INACTIVITY_PENALTY_QUOTIENT" spec:"true"`      // InactivityPenaltyQuotient is used to calculate the penalty for a validator that is offline.
+	MinSlashingPenaltyQuotient     uint64  `yaml:"MIN_SLASHING_PENALTY_QUOTIENT" spec:"true"`    // MinSlashingPenaltyQuotient is used to calculate the minimum penalty to prevent DoS attacks.
+	ProportionalSlashingMultiplier uint64  `yaml:"PROPORTIONAL_SLASHING_MULTIPLIER" spec:"true"` // ProportionalSlashingMultiplier is used as a multiplier on slashed penalties.
+	BaseRewardMultiplier           float64 `yaml:"BASE_REWARD_MULTIPLIER" spec:"true"`           // BaseRewardMultiplier is used as a multiplier on base reward.
+	MaxAnnualizedReturnRate        float64 `yaml:"MAX_ANNUALIZED_RETURN_RATE" spec:"true"`       // MaxAnnualizedReturnRate is used to calculate annual minted amount. It is the maximum annualized return rate with Nopt validators.
+	OptValidatorsNum               uint64  `yaml:"OPT_VALIDATORS_NUM" spec:"true"`               // OptValidatorsNum is used to calculate annual minted amount(Nopt). It is the optimal number of the validators.
 
 	// Max operations per block constants.
 	MaxProposerSlashings uint64 `yaml:"MAX_PROPOSER_SLASHINGS" spec:"true"` // MaxProposerSlashings defines the maximum number of slashings of proposers possible in a block.
@@ -101,6 +106,7 @@ type BeaconChainConfig struct {
 	MaxAttestations      uint64 `yaml:"MAX_ATTESTATIONS" spec:"true"`       // MaxAttestations defines the maximum allowed attestations in a beacon block.
 	MaxDeposits          uint64 `yaml:"MAX_DEPOSITS" spec:"true"`           // MaxDeposits defines the maximum number of validator deposits in a block.
 	MaxVoluntaryExits    uint64 `yaml:"MAX_VOLUNTARY_EXITS" spec:"true"`    // MaxVoluntaryExits defines the maximum number of validator exits in a block.
+	MaxWithdrawals       uint64 `yaml:"MAX_WITHDRAWALS" spec:"true"`        // MaxWithdrawals defines the maximum number of withdrawals requests in a block.
 
 	// BLS domain values.
 	DomainBeaconProposer              [4]byte `yaml:"DOMAIN_BEACON_PROPOSER" spec:"true"`                // DomainBeaconProposer defines the BLS signature domain for beacon proposal verification.
@@ -131,6 +137,10 @@ type BeaconChainConfig struct {
 	BeaconStateAltairFieldCount    int           // BeaconStateAltairFieldCount defines how many fields are in beacon state hard fork 1.
 	BeaconStateBellatrixFieldCount int           // BeaconStateBellatrixFieldCount defines how many fields are in beacon state post upgrade to the Bellatrix.
 	BlockVotingMinSupportPrc       int           // BlockVotingMinSupportPrc defines minimum percentage of votes for accept of consensus for block.
+	SpinePublicationsPefixSupport  int           // SpinePublicationsPefixSupport defines number of publications of spine to accept it as prefix.
+	CtxBlockFetcherKey             CtxFnKey      // CtxBlockFetcherKey defines the key of block fetcher for context of state transition.
+	DataDir                        string
+	WriteRewardLogFlag             bool
 
 	// Slasher constants.
 	WeakSubjectivityPeriod    types.Epoch // WeakSubjectivityPeriod defines the time period expressed in number of epochs were proof of stake network should validate block headers and attestations for slashable events.
@@ -158,6 +168,9 @@ type BeaconChainConfig struct {
 	TimelyTargetFlagIndex uint8 `yaml:"TIMELY_TARGET_FLAG_INDEX" spec:"true"` // TimelyTargetFlagIndex is the target flag position of the participation bits.
 	TimelyHeadFlagIndex   uint8 `yaml:"TIMELY_HEAD_FLAG_INDEX" spec:"true"`   // TimelyHeadFlagIndex is the head flag position of the participation bits.
 
+	// DAG participation flag indices
+	DAGTimelyVotingFlagIndex uint8 `yaml:"DAG_TIMELY_VOTING_FLAG_INDEX" spec:"true"` // DAGTimelyVotingFlagIndex is the voting flag position of the participation bits.
+
 	// Incentivization weights.
 	TimelySourceWeight uint64 `yaml:"TIMELY_SOURCE_WEIGHT" spec:"true"` // TimelySourceWeight is the factor of how much source rewards receives.
 	TimelyTargetWeight uint64 `yaml:"TIMELY_TARGET_WEIGHT" spec:"true"` // TimelyTargetWeight is the factor of how much target rewards receives.
@@ -165,6 +178,12 @@ type BeaconChainConfig struct {
 	SyncRewardWeight   uint64 `yaml:"SYNC_REWARD_WEIGHT" spec:"true"`   // SyncRewardWeight is the factor of how much sync committee rewards receives.
 	WeightDenominator  uint64 `yaml:"WEIGHT_DENOMINATOR" spec:"true"`   // WeightDenominator accounts for total rewards denomination.
 	ProposerWeight     uint64 `yaml:"PROPOSER_WEIGHT" spec:"true"`      // ProposerWeight is the factor of how much proposer rewards receives.
+
+	// DAG Incentivization weights
+	DAGTimelySourceWeight float64 `yaml:"DAG_TIMELY_SOURCE_WEIGHT" spec:"true"` // DAGTimelySourceWeight is the factor of how much source rewards receives.
+	DAGTimelyTargetWeight float64 `yaml:"DAG_TIMELY_TARGET_WEIGHT" spec:"true"` // DAGTimelyTargetWeight is the factor of how much target rewards receives.
+	DAGTimelyHeadWeight   float64 `yaml:"DAG_TIMELY_HEAD_WEIGHT" spec:"true"`   // DAGTimelyHeadWeight is the factor of how much head rewards receives.
+	DAGTimelyVotingWeight float64 `yaml:"DAG_TIMELY_VOTING_WEIGHT" spec:"true"` // DAGTimelyVotingWeight is the factor of how much timely voting rewards receives.
 
 	// Validator related.
 	TargetAggregatorsPerSyncSubcommittee uint64 `yaml:"TARGET_AGGREGATORS_PER_SYNC_SUBCOMMITTEE" spec:"true"` // TargetAggregatorsPerSyncSubcommittee for aggregating in sync committee.
@@ -183,7 +202,6 @@ type BeaconChainConfig struct {
 	ProportionalSlashingMultiplierAltair    uint64 `yaml:"PROPORTIONAL_SLASHING_MULTIPLIER_ALTAIR" spec:"true"`    // ProportionalSlashingMultiplierAltair for slashing penalties' multiplier post Alair hard fork.
 	MinSlashingPenaltyQuotientBellatrix     uint64 `yaml:"MIN_SLASHING_PENALTY_QUOTIENT_BELLATRIX" spec:"true"`    // MinSlashingPenaltyQuotientBellatrix for slashing penalties post Bellatrix hard fork.
 	ProportionalSlashingMultiplierBellatrix uint64 `yaml:"PROPORTIONAL_SLASHING_MULTIPLIER_BELLATRIX" spec:"true"` // ProportionalSlashingMultiplierBellatrix for slashing penalties' multiplier post Bellatrix hard fork.
-	InactivityPenaltyQuotientBellatrix      uint64 `yaml:"INACTIVITY_PENALTY_QUOTIENT_BELLATRIX" spec:"true"`      // InactivityPenaltyQuotientBellatrix for penalties during inactivity post Bellatrix hard fork.
 
 	// Light client
 	MinSyncCommitteeParticipants uint64 `yaml:"MIN_SYNC_COMMITTEE_PARTICIPANTS" spec:"true"` // MinSyncCommitteeParticipants defines the minimum amount of sync committee participants for which the light client acknowledges the signature.
@@ -194,6 +212,9 @@ type BeaconChainConfig struct {
 	TerminalTotalDifficulty          string         `yaml:"TERMINAL_TOTAL_DIFFICULTY" spec:"true"`            // TerminalTotalDifficulty is part of the experimental Bellatrix spec. This value is type is currently TBD.
 	DefaultFeeRecipient              common.Address // DefaultFeeRecipient where the transaction fee goes to.
 }
+
+type CtxFnKey string
+type CtxBlockFetcher func(context.Context, [32]byte) (types.ValidatorIndex, types.Slot, uint64, error)
 
 // InitializeForkSchedule initializes the schedules forks baked into the config.
 func (b *BeaconChainConfig) InitializeForkSchedule() {

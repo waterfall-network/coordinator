@@ -175,7 +175,11 @@ func (BeaconBlockBody) Deposits() []*eth.Deposit {
 	panic("implement me")
 }
 
-func (BeaconBlockBody) VoluntaryExits() []*eth.SignedVoluntaryExit {
+func (BeaconBlockBody) VoluntaryExits() []*eth.VoluntaryExit {
+	panic("implement me")
+}
+
+func (BeaconBlockBody) Withdrawals() []*eth.Withdrawal {
 	panic("implement me")
 }
 

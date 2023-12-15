@@ -42,60 +42,60 @@ func defaultResponseContainer() *testResponseContainer {
 	}
 }
 
-type testErrorJson struct {
+type testErrorJSON struct {
 	Message     string
 	Code        int
 	CustomField string
 }
 
 // StatusCode returns the error's underlying error code.
-func (e *testErrorJson) StatusCode() int {
+func (e *testErrorJSON) StatusCode() int {
 	return e.Code
 }
 
 // Msg returns the error's underlying message.
-func (e *testErrorJson) Msg() string {
+func (e *testErrorJSON) Msg() string {
 	return e.Message
 }
 
 // SetCode sets the error's underlying error code.
-func (e *testErrorJson) SetCode(code int) {
+func (e *testErrorJSON) SetCode(code int) {
 	e.Code = code
 }
 
 // SetMsg sets the error's underlying message.
-func (e *testErrorJson) SetMsg(msg string) {
+func (e *testErrorJSON) SetMsg(msg string) {
 	e.Message = msg
 }
 
 func TestDeserializeRequestBodyIntoContainer(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
-		var bodyJson bytes.Buffer
-		err := json.NewEncoder(&bodyJson).Encode(defaultRequestContainer())
+		var bodyJSON bytes.Buffer
+		err := json.NewEncoder(&bodyJSON).Encode(defaultRequestContainer())
 		require.NoError(t, err)
 
 		container := &testRequestContainer{}
-		errJson := DeserializeRequestBodyIntoContainer(&bodyJson, container)
+		errJson := DeserializeRequestBodyIntoContainer(&bodyJSON, container)
 		require.Equal(t, true, errJson == nil)
 		assert.Equal(t, "test string", container.TestString)
 	})
 
 	t.Run("error", func(t *testing.T) {
-		var bodyJson bytes.Buffer
-		bodyJson.Write([]byte("foo"))
-		errJson := DeserializeRequestBodyIntoContainer(&bodyJson, &testRequestContainer{})
+		var bodyJSON bytes.Buffer
+		bodyJSON.Write([]byte("foo"))
+		errJson := DeserializeRequestBodyIntoContainer(&bodyJSON, &testRequestContainer{})
 		require.NotNil(t, errJson)
 		assert.Equal(t, true, strings.Contains(errJson.Msg(), "could not decode request body"))
 		assert.Equal(t, http.StatusInternalServerError, errJson.StatusCode())
 	})
 
 	t.Run("unknown field", func(t *testing.T) {
-		var bodyJson bytes.Buffer
-		bodyJson.Write([]byte("{\"foo\":\"foo\"}"))
-		errJson := DeserializeRequestBodyIntoContainer(&bodyJson, &testRequestContainer{})
-		require.NotNil(t, errJson)
-		assert.Equal(t, true, strings.Contains(errJson.Msg(), "could not decode request body"))
-		assert.Equal(t, http.StatusBadRequest, errJson.StatusCode())
+		var bodyJSON bytes.Buffer
+		bodyJSON.Write([]byte("{\"foo\":\"foo\"}"))
+		errJSON := DeserializeRequestBodyIntoContainer(&bodyJSON, &testRequestContainer{})
+		require.NotNil(t, errJSON)
+		assert.Equal(t, true, strings.Contains(errJSON.Msg(), "could not decode request body"))
+		assert.Equal(t, http.StatusBadRequest, errJSON.StatusCode())
 	})
 }
 
@@ -103,16 +103,16 @@ func TestProcessRequestContainerFields(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		container := defaultRequestContainer()
 
-		errJson := ProcessRequestContainerFields(container)
-		require.Equal(t, true, errJson == nil)
+		errJSON := ProcessRequestContainerFields(container)
+		require.Equal(t, true, errJSON == nil)
 		assert.Equal(t, "Zm9v", container.TestHexString)
 	})
 
 	t.Run("error", func(t *testing.T) {
-		errJson := ProcessRequestContainerFields("foo")
-		require.NotNil(t, errJson)
-		assert.Equal(t, true, strings.Contains(errJson.Msg(), "could not process request data"))
-		assert.Equal(t, http.StatusInternalServerError, errJson.StatusCode())
+		errJSON := ProcessRequestContainerFields("foo")
+		require.NotNil(t, errJSON)
+		assert.Equal(t, true, strings.Contains(errJSON.Msg(), "could not process request data"))
+		assert.Equal(t, http.StatusInternalServerError, errJSON.StatusCode())
 	})
 }
 
@@ -120,8 +120,8 @@ func TestSetRequestBodyToRequestContainer(t *testing.T) {
 	var body bytes.Buffer
 	request := httptest.NewRequest("GET", "http://foo.example", &body)
 
-	errJson := SetRequestBodyToRequestContainer(defaultRequestContainer(), request)
-	require.Equal(t, true, errJson == nil)
+	errJSON := SetRequestBodyToRequestContainer(defaultRequestContainer(), request)
+	require.Equal(t, true, errJSON == nil)
 	container := &testRequestContainer{}
 	require.NoError(t, json.NewDecoder(request.Body).Decode(container))
 	assert.Equal(t, "test string", container.TestString)
@@ -133,7 +133,7 @@ func TestSetRequestBodyToRequestContainer(t *testing.T) {
 }
 
 func TestPrepareRequestForProxying(t *testing.T) {
-	middleware := &ApiProxyMiddleware{
+	middleware := &APIProxyMiddleware{
 		GatewayAddress: "http://gateway.example",
 	}
 	// We will set some params to make the request more interesting.
@@ -145,8 +145,8 @@ func TestPrepareRequestForProxying(t *testing.T) {
 	var body bytes.Buffer
 	request := httptest.NewRequest("GET", "http://foo.example?query_param=bar", &body)
 
-	errJson := middleware.PrepareRequestForProxying(endpoint, request)
-	require.Equal(t, true, errJson == nil)
+	errJSON := middleware.PrepareRequestForProxying(endpoint, request)
+	require.Equal(t, true, errJSON == nil)
 	assert.Equal(t, "http", request.URL.Scheme)
 	assert.Equal(t, middleware.GatewayAddress, request.URL.Host)
 	assert.Equal(t, "", request.RequestURI)
@@ -156,8 +156,8 @@ func TestReadGrpcResponseBody(t *testing.T) {
 	var b bytes.Buffer
 	b.Write([]byte("foo"))
 
-	body, jsonErr := ReadGrpcResponseBody(&b)
-	require.Equal(t, true, jsonErr == nil)
+	body, jsonERR := ReadGrpcResponseBody(&b)
+	require.Equal(t, true, jsonERR == nil)
 	assert.Equal(t, "foo", string(body))
 }
 
@@ -170,14 +170,14 @@ func TestHandleGrpcResponseError(t *testing.T) {
 		},
 	}
 	writer := httptest.NewRecorder()
-	errJson := &testErrorJson{
+	errJSON := &testErrorJSON{
 		Message: "foo",
 		Code:    400,
 	}
-	b, err := json.Marshal(errJson)
+	b, err := json.Marshal(errJSON)
 	require.NoError(t, err)
 
-	hasError, e := HandleGrpcResponseError(errJson, response, b, writer)
+	hasError, e := HandleGrpcResponseError(errJSON, response, b, writer)
 	require.Equal(t, true, e == nil)
 	assert.Equal(t, true, hasError)
 	v, ok := writer.Header()["Foo"]
@@ -188,7 +188,7 @@ func TestHandleGrpcResponseError(t *testing.T) {
 	require.Equal(t, true, ok, "header not found")
 	require.Equal(t, 1, len(v), "wrong number of header values")
 	assert.Equal(t, "bar", v[0])
-	assert.Equal(t, 400, errJson.StatusCode())
+	assert.Equal(t, 400, errJSON.StatusCode())
 }
 
 func TestGrpcResponseIsEmpty(t *testing.T) {
@@ -212,15 +212,15 @@ func TestDeserializeGrpcResponseBodyIntoContainer(t *testing.T) {
 		require.NoError(t, err)
 
 		container := &testRequestContainer{}
-		errJson := DeserializeGrpcResponseBodyIntoContainer(body, container)
-		require.Equal(t, true, errJson == nil)
+		errJSON := DeserializeGrpcResponseBodyIntoContainer(body, container)
+		require.Equal(t, true, errJSON == nil)
 		assert.Equal(t, "test string", container.TestString)
 	})
 
 	t.Run("error", func(t *testing.T) {
-		var bodyJson bytes.Buffer
-		bodyJson.Write([]byte("foo"))
-		errJson := DeserializeGrpcResponseBodyIntoContainer(bodyJson.Bytes(), &testRequestContainer{})
+		var bodyJSON bytes.Buffer
+		bodyJSON.Write([]byte("foo"))
+		errJson := DeserializeGrpcResponseBodyIntoContainer(bodyJSON.Bytes(), &testRequestContainer{})
 		require.NotNil(t, errJson)
 		assert.Equal(t, true, strings.Contains(errJson.Msg(), "could not unmarshal response"))
 		assert.Equal(t, http.StatusInternalServerError, errJson.StatusCode())
@@ -231,25 +231,25 @@ func TestProcessMiddlewareResponseFields(t *testing.T) {
 	t.Run("Ok", func(t *testing.T) {
 		container := defaultResponseContainer()
 
-		errJson := ProcessMiddlewareResponseFields(container)
-		require.Equal(t, true, errJson == nil)
+		errJSON := ProcessMiddlewareResponseFields(container)
+		require.Equal(t, true, errJSON == nil)
 		assert.Equal(t, "0x666f6f", container.TestHex)
 		assert.Equal(t, "test enum", container.TestEnum)
 		assert.Equal(t, "1136214245", container.TestTime)
 	})
 
 	t.Run("error", func(t *testing.T) {
-		errJson := ProcessMiddlewareResponseFields("foo")
-		require.NotNil(t, errJson)
-		assert.Equal(t, true, strings.Contains(errJson.Msg(), "could not process response data"))
-		assert.Equal(t, http.StatusInternalServerError, errJson.StatusCode())
+		errJSON := ProcessMiddlewareResponseFields("foo")
+		require.NotNil(t, errJSON)
+		assert.Equal(t, true, strings.Contains(errJSON.Msg(), "could not process response data"))
+		assert.Equal(t, http.StatusInternalServerError, errJSON.StatusCode())
 	})
 }
 
 func TestSerializeMiddlewareResponseIntoJson(t *testing.T) {
 	container := defaultResponseContainer()
-	j, errJson := SerializeMiddlewareResponseIntoJson(container)
-	assert.Equal(t, true, errJson == nil)
+	j, errJSON := SerializeMiddlewareResponseIntoJSON(container)
+	assert.Equal(t, true, errJSON == nil)
 	cToDeserialize := &testResponseContainer{}
 	require.NoError(t, json.Unmarshal(j, cToDeserialize))
 	assert.Equal(t, "test string", cToDeserialize.TestString)
@@ -260,17 +260,17 @@ func TestWriteMiddlewareResponseHeadersAndBody(t *testing.T) {
 		response := &http.Response{
 			Header: http.Header{
 				"Foo": []string{"foo"},
-				"Grpc-Metadata-" + grpc.HttpCodeMetadataKey: []string{"204"},
+				"Grpc-Metadata-" + grpc.HTTPCodeMetadataKey: []string{"204"},
 			},
 		}
 		container := defaultResponseContainer()
-		responseJson, err := json.Marshal(container)
+		responseJSON, err := json.Marshal(container)
 		require.NoError(t, err)
 		writer := httptest.NewRecorder()
 		writer.Body = &bytes.Buffer{}
 
-		errJson := WriteMiddlewareResponseHeadersAndBody(response, responseJson, writer)
-		require.Equal(t, true, errJson == nil)
+		errJSON := WriteMiddlewareResponseHeadersAndBody(response, responseJSON, writer)
+		require.Equal(t, true, errJSON == nil)
 		v, ok := writer.Header()["Foo"]
 		require.Equal(t, true, ok, "header not found")
 		require.Equal(t, 1, len(v), "wrong number of header values")
@@ -280,7 +280,7 @@ func TestWriteMiddlewareResponseHeadersAndBody(t *testing.T) {
 		require.Equal(t, 1, len(v), "wrong number of header values")
 		assert.Equal(t, "102", v[0])
 		assert.Equal(t, 204, writer.Code)
-		assert.DeepEqual(t, responseJson, writer.Body.Bytes())
+		assert.DeepEqual(t, responseJSON, writer.Body.Bytes())
 	})
 
 	t.Run("GET_no_grpc_status_code_header", func(t *testing.T) {
@@ -289,12 +289,12 @@ func TestWriteMiddlewareResponseHeadersAndBody(t *testing.T) {
 			StatusCode: 204,
 		}
 		container := defaultResponseContainer()
-		responseJson, err := json.Marshal(container)
+		responseJSON, err := json.Marshal(container)
 		require.NoError(t, err)
 		writer := httptest.NewRecorder()
 
-		errJson := WriteMiddlewareResponseHeadersAndBody(response, responseJson, writer)
-		require.Equal(t, true, errJson == nil)
+		errJSON := WriteMiddlewareResponseHeadersAndBody(response, responseJSON, writer)
+		require.Equal(t, true, errJSON == nil)
 		assert.Equal(t, 204, writer.Code)
 	})
 
@@ -304,17 +304,17 @@ func TestWriteMiddlewareResponseHeadersAndBody(t *testing.T) {
 		}
 
 		// Set invalid status code.
-		response.Header["Grpc-Metadata-"+grpc.HttpCodeMetadataKey] = []string{"invalid"}
+		response.Header["Grpc-Metadata-"+grpc.HTTPCodeMetadataKey] = []string{"invalid"}
 
 		container := defaultResponseContainer()
-		responseJson, err := json.Marshal(container)
+		responseJSON, err := json.Marshal(container)
 		require.NoError(t, err)
 		writer := httptest.NewRecorder()
 
-		errJson := WriteMiddlewareResponseHeadersAndBody(response, responseJson, writer)
-		require.Equal(t, false, errJson == nil)
-		assert.Equal(t, true, strings.Contains(errJson.Msg(), "could not parse status code"))
-		assert.Equal(t, http.StatusInternalServerError, errJson.StatusCode())
+		errJSON := WriteMiddlewareResponseHeadersAndBody(response, responseJSON, writer)
+		require.Equal(t, false, errJSON == nil)
+		assert.Equal(t, true, strings.Contains(errJSON.Msg(), "could not parse status code"))
+		assert.Equal(t, http.StatusInternalServerError, errJSON.StatusCode())
 	})
 
 	t.Run("POST", func(t *testing.T) {
@@ -323,12 +323,12 @@ func TestWriteMiddlewareResponseHeadersAndBody(t *testing.T) {
 			StatusCode: 204,
 		}
 		container := defaultResponseContainer()
-		responseJson, err := json.Marshal(container)
+		responseJSON, err := json.Marshal(container)
 		require.NoError(t, err)
 		writer := httptest.NewRecorder()
 
-		errJson := WriteMiddlewareResponseHeadersAndBody(response, responseJson, writer)
-		require.Equal(t, true, errJson == nil)
+		errJSON := WriteMiddlewareResponseHeadersAndBody(response, responseJSON, writer)
+		require.Equal(t, true, errJSON == nil)
 		assert.Equal(t, 204, writer.Code)
 	})
 
@@ -338,15 +338,15 @@ func TestWriteMiddlewareResponseHeadersAndBody(t *testing.T) {
 			StatusCode: 204,
 		}
 		container := defaultResponseContainer()
-		responseJson, err := json.Marshal(container)
+		responseJSON, err := json.Marshal(container)
 		require.NoError(t, err)
 		writer := httptest.NewRecorder()
 		writer.Body = &bytes.Buffer{}
 
-		errJson := WriteMiddlewareResponseHeadersAndBody(response, responseJson, writer)
-		require.Equal(t, true, errJson == nil)
+		errJSON := WriteMiddlewareResponseHeadersAndBody(response, responseJSON, writer)
+		require.Equal(t, true, errJSON == nil)
 		assert.Equal(t, 204, writer.Code)
-		assert.DeepEqual(t, responseJson, writer.Body.Bytes())
+		assert.DeepEqual(t, responseJSON, writer.Body.Bytes())
 	})
 
 	t.Run("POST_with_empty_json_body", func(t *testing.T) {
@@ -354,13 +354,13 @@ func TestWriteMiddlewareResponseHeadersAndBody(t *testing.T) {
 			Header:     http.Header{},
 			StatusCode: 204,
 		}
-		responseJson, err := json.Marshal(struct{}{})
+		responseJSON, err := json.Marshal(struct{}{})
 		require.NoError(t, err)
 		writer := httptest.NewRecorder()
 		writer.Body = &bytes.Buffer{}
 
-		errJson := WriteMiddlewareResponseHeadersAndBody(response, responseJson, writer)
-		require.Equal(t, true, errJson == nil)
+		errJSON := WriteMiddlewareResponseHeadersAndBody(response, responseJSON, writer)
+		require.Equal(t, true, errJSON == nil)
 		assert.Equal(t, 204, writer.Code)
 		assert.DeepEqual(t, []byte(nil), writer.Body.Bytes())
 		assert.Equal(t, "0", writer.Header()["Content-Length"][0])
@@ -372,14 +372,14 @@ func TestWriteError(t *testing.T) {
 		responseHeader := http.Header{
 			"Grpc-Metadata-" + grpc.CustomErrorMetadataKey: []string{"{\"CustomField\":\"bar\"}"},
 		}
-		errJson := &testErrorJson{
+		errJSON := &testErrorJSON{
 			Message: "foo",
 			Code:    500,
 		}
 		writer := httptest.NewRecorder()
 		writer.Body = &bytes.Buffer{}
 
-		WriteError(writer, errJson, responseHeader)
+		WriteError(writer, errJSON, responseHeader)
 		v, ok := writer.Header()["Content-Length"]
 		require.Equal(t, true, ok, "header not found")
 		require.Equal(t, 1, len(v), "wrong number of header values")
@@ -389,7 +389,7 @@ func TestWriteError(t *testing.T) {
 		require.Equal(t, 1, len(v), "wrong number of header values")
 		assert.Equal(t, "application/json", v[0])
 		assert.Equal(t, 500, writer.Code)
-		eDeserialize := &testErrorJson{}
+		eDeserialize := &testErrorJSON{}
 		require.NoError(t, json.Unmarshal(writer.Body.Bytes(), eDeserialize))
 		assert.Equal(t, "foo", eDeserialize.Message)
 		assert.Equal(t, 500, eDeserialize.Code)
@@ -403,7 +403,7 @@ func TestWriteError(t *testing.T) {
 			"Grpc-Metadata-" + grpc.CustomErrorMetadataKey: []string{"invalid"},
 		}
 
-		WriteError(httptest.NewRecorder(), &testErrorJson{}, responseHeader)
+		WriteError(httptest.NewRecorder(), &testErrorJSON{}, responseHeader)
 		assert.LogsContain(t, logHook, "Could not unmarshal custom error message")
 	})
 }

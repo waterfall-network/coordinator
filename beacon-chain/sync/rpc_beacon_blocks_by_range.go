@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	libp2pcore "github.com/libp2p/go-libp2p-core"
+	libp2pcore "github.com/libp2p/go-libp2p/core"
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/filters"
@@ -36,6 +36,7 @@ func (s *Service) beaconBlocksByRangeRPCHandler(ctx context.Context, msg interfa
 	}
 	if err := s.validateRangeRequest(m); err != nil {
 		s.writeErrorResponseToStream(responseCodeInvalidRequest, err.Error(), stream)
+		log.WithField("fn", "beaconBlocksByRangeRPCHandler").WithField("peer", stream.Conn().RemotePeer().String()).WithError(err).Debug("Disconnect: incr BadResponses")
 		s.cfg.p2p.Peers().Scorers().BadResponsesScorer().Increment(stream.Conn().RemotePeer())
 		tracing.AnnotateError(span, err)
 		return err

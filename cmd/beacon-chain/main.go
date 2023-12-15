@@ -84,6 +84,7 @@ var appFlags = []cli.Flag{
 	cmd.P2PHost,
 	cmd.P2PHostDNS,
 	cmd.P2PMaxPeers,
+	cmd.FindNodesBucketLength,
 	cmd.P2PPrivKey,
 	cmd.P2PMetadata,
 	cmd.P2PAllowList,
@@ -110,6 +111,7 @@ var appFlags = []cli.Flag{
 	debug.BlockProfileRateFlag,
 	debug.MutexProfileFractionFlag,
 	cmd.LogFileName,
+	cmd.WriteRewardLogFlag,
 	cmd.EnableUPnPFlag,
 	cmd.ConfigFileFlag,
 	cmd.ChainConfigFileFlag,
@@ -134,7 +136,7 @@ func init() {
 func main() {
 	app := cli.App{}
 	app.Name = "beacon-chain"
-	app.Usage = "this is a beacon chain implementation for Ethereum"
+	app.Usage = "this is a beacon chain implementation for Waterfall"
 	app.Action = startNode
 	app.Version = version.Version()
 	app.Commands = []*cli.Command{

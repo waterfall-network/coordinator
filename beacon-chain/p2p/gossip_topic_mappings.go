@@ -14,12 +14,13 @@ import (
 var gossipTopicMappings = map[string]proto.Message{
 	BlockSubnetTopicFormat:                    &ethpb.SignedBeaconBlock{},
 	AttestationSubnetTopicFormat:              &ethpb.Attestation{},
-	ExitSubnetTopicFormat:                     &ethpb.SignedVoluntaryExit{},
+	ExitSubnetTopicFormat:                     &ethpb.VoluntaryExit{},
 	ProposerSlashingSubnetTopicFormat:         &ethpb.ProposerSlashing{},
 	AttesterSlashingSubnetTopicFormat:         &ethpb.AttesterSlashing{},
 	AggregateAndProofSubnetTopicFormat:        &ethpb.SignedAggregateAttestationAndProof{},
 	SyncContributionAndProofSubnetTopicFormat: &ethpb.SignedContributionAndProof{},
 	SyncCommitteeSubnetTopicFormat:            &ethpb.SyncCommitteeMessage{},
+	PrevoteSubnetTopicFormat:                  &ethpb.PreVote{},
 }
 
 // GossipTopicMappings is a function to return the assigned data type

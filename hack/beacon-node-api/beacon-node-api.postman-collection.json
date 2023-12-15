@@ -372,6 +372,114 @@
 			"response": []
 		},
 		{
+			"name": "/beacon/states/{state_id}/spine_data",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3500/eth/v1/beacon/states/{state_id}/spine_data",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3500",
+					"path": [
+						"eth",
+						"v1",
+						"beacon",
+						"states",
+						"{state_id}",
+						"spine_data"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/beacon/states/{state_id}/block_votings",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3500/eth/v1/beacon/states/{state_id}/block_votings",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3500",
+					"path": [
+						"eth",
+						"v1",
+						"beacon",
+						"states",
+						"{state_id}",
+						"block_votings"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/beacon/states/{state_id}/eth1_data",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3500/eth/v1/beacon/states/{state_id}/eth1_data",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3500",
+					"path": [
+						"eth",
+						"v1",
+						"beacon",
+						"states",
+						"{state_id}",
+						"eth1_data"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "/beacon/headers",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
@@ -878,38 +986,6 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"url": {
-					"raw": "http://localhost:3500/eth/v1/beacon/pool/voluntary_exits",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3500",
-					"path": [
-						"eth",
-						"v1",
-						"beacon",
-						"pool",
-						"voluntary_exits"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/beacon/pool/voluntary_exits",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"message\": {\n        \"epoch\": \"1\",\n        \"validator_index\": \"1\"\n    },\n    \"signature\": \"0x1b66ac1fb663c9bc59509846d6ec05345bd908eda73e670af888da41af171505cc411d61252fb6cb3fa0017b679f8bb2305b26a285fa2737f175668d0dff91cc1b66ac1fb663c9bc59509846d6ec05345bd908eda73e670af888da41af171505\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
 				"url": {
 					"raw": "http://localhost:3500/eth/v1/beacon/pool/voluntary_exits",
 					"protocol": "http",

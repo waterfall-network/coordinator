@@ -9,14 +9,13 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/iface"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
 )
 
 func TestStore_SaveGenesisData(t *testing.T) {
 	ctx := context.Background()
 	db := setupDB(t)
 
-	gs, err := util.NewBeaconState()
+	gs, err := NewBeaconState()
 	assert.NoError(t, err)
 
 	assert.NoError(t, db.SaveGenesisData(ctx, gs))

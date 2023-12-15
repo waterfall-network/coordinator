@@ -53,6 +53,7 @@ type Flags struct {
 	EnableGetBlockOptimizations         bool // EnableGetBlockOptimizations optimizes some elements of the GetBlock() function.
 	EnableBatchVerification             bool // EnableBatchVerification enables batch signature verification on gossip messages.
 	EnableBalanceTrieComputation        bool // EnableBalanceTrieComputation enables our beacon state to use balance tries for hash tree root operations.
+	EnablePassSlotInfoToGwat            bool // EnablePassSlotInfoToGwat enables passing slot info to GWAT during sync process
 	// Logging related toggles.
 	DisableGRPCConnectionLogs bool // Disables logging when a new grpc client has connected.
 
@@ -75,7 +76,6 @@ type Flags struct {
 	CorrectlyPruneCanonicalAtts bool
 
 	EnableNativeState                bool // EnableNativeState defines whether the beacon state will be represented as a pure Go struct or a Go struct that wraps a proto struct.
-	EnableVectorizedHTR              bool // EnableVectorizedHTR specifies whether the beacon state will use the optimized sha256 routines.
 	EnableForkChoiceDoublyLinkedTree bool // EnableForkChoiceDoublyLinkedTree specifies whether fork choice store will use a doubly linked tree.
 
 	// KeystoreImportDebounceInterval specifies the time duration the validator waits to reload new keys if they have
@@ -132,7 +132,7 @@ func configureTestnet(ctx *cli.Context, cfg *Flags) {
 		params.UsePraterConfig()
 		params.UsePraterNetworkConfig()
 	} else {
-		log.Warn("Running on Ethereum Consensus Mainnet")
+		log.Warn("Running on Waterfall Consensus Testnet")
 		params.UseMainnetConfig()
 	}
 }
@@ -156,9 +156,10 @@ func ConfigureBeaconChain(ctx *cli.Context) {
 		logDisabled(disableGRPCConnectionLogging)
 		cfg.DisableGRPCConnectionLogs = true
 	}
-	if ctx.Bool(enablePeerScorer.Name) {
-		logEnabled(enablePeerScorer)
-		cfg.EnablePeerScorer = true
+	cfg.EnablePeerScorer = true
+	if ctx.Bool(disablePeerScorer.Name) {
+		logDisabled(disablePeerScorer)
+		cfg.EnablePeerScorer = false
 	}
 	if ctx.Bool(checkPtInfoCache.Name) {
 		log.Warn("Advance check point info cache is no longer supported and will soon be deleted")
@@ -219,14 +220,15 @@ func ConfigureBeaconChain(ctx *cli.Context) {
 		logDisabled(disableBalanceTrieComputation)
 		cfg.EnableBalanceTrieComputation = false
 	}
+	cfg.EnablePassSlotInfoToGwat = false
+	if ctx.Bool(enablePassSlotInfoToGwat.Name) {
+		logEnabled(enablePassSlotInfoToGwat)
+		cfg.EnablePassSlotInfoToGwat = true
+	}
 	cfg.EnableNativeState = false
 	if ctx.Bool(enableNativeState.Name) {
 		logEnabled(enableNativeState)
 		cfg.EnableNativeState = true
-	}
-	if ctx.Bool(enableVecHTR.Name) {
-		logEnabled(enableVecHTR)
-		cfg.EnableVectorizedHTR = true
 	}
 	if ctx.Bool(enableForkChoiceDoublyLinkedTree.Name) {
 		logEnabled(enableForkChoiceDoublyLinkedTree)

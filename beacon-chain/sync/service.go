@@ -10,9 +10,9 @@ import (
 	"time"
 
 	lru "github.com/hashicorp/golang-lru"
-	"github.com/libp2p/go-libp2p-core/peer"
-	"github.com/libp2p/go-libp2p-core/protocol"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
+	"github.com/libp2p/go-libp2p/core/peer"
+	"github.com/libp2p/go-libp2p/core/protocol"
 	gcache "github.com/patrickmn/go-cache"
 	"github.com/pkg/errors"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/async"
@@ -25,9 +25,11 @@ import (
 	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/attestations"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/prevote"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/slashings"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/synccommittee"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/voluntaryexits"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/withdrawals"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen"
 	lruwrpr "gitlab.waterfall.network/waterfall/protocol/coordinator/cache/lru"
@@ -45,6 +47,7 @@ const rangeLimit = 1024
 const seenBlockSize = 1000
 const seenUnaggregatedAttSize = 20000
 const seenAggregatedAttSize = 1024
+const seenPrevotingSize = 2048
 const seenSyncMsgSize = 1000         // Maximum of 512 sync committee members, 1000 is a safe amount.
 const seenSyncContributionSize = 512 // Maximum of SYNC_COMMITTEE_SIZE as specified by the spec.
 const seenExitSize = 100
@@ -72,7 +75,9 @@ type config struct {
 	p2p                     p2p.P2P
 	beaconDB                db.NoHeadAccessDatabase
 	attPool                 attestations.Pool
+	prevotePool             prevote.Pool
 	exitPool                voluntaryexits.PoolManager
+	withdrawalPool          withdrawals.PoolManager
 	slashingPool            slashings.PoolManager
 	syncCommsPool           synccommittee.Pool
 	chain                   blockchainService
@@ -86,16 +91,7 @@ type config struct {
 }
 
 // This defines the interface for interacting with block chain service
-type blockchainService interface {
-	blockchain.BlockReceiver
-	blockchain.HeadFetcher
-	blockchain.FinalizationFetcher
-	blockchain.ForkFetcher
-	blockchain.AttestationReceiver
-	blockchain.TimeFetcher
-	blockchain.GenesisFetcher
-	blockchain.CanonicalFetcher
-}
+type blockchainService = blockchain.SyncBlockchainService
 
 // Service is responsible for handling all run time p2p related operations as the
 // main entry point for network messages.
@@ -118,6 +114,8 @@ type Service struct {
 	seenAggregatedAttestationCache   *lru.Cache
 	seenUnAggregatedAttestationLock  sync.RWMutex
 	seenUnAggregatedAttestationCache *lru.Cache
+	seenPrevotingLock                sync.RWMutex
+	seenPrevotingCache               *lru.Cache
 	seenExitLock                     sync.RWMutex
 	seenExitCache                    *lru.Cache
 	seenProposerSlashingLock         sync.RWMutex
@@ -218,6 +216,7 @@ func (s *Service) initCaches() {
 	s.seenBlockCache = lruwrpr.New(seenBlockSize)
 	s.seenAggregatedAttestationCache = lruwrpr.New(seenAggregatedAttSize)
 	s.seenUnAggregatedAttestationCache = lruwrpr.New(seenUnaggregatedAttSize)
+	s.seenPrevotingCache = lruwrpr.New(seenPrevotingSize)
 	s.seenSyncMessageCache = lruwrpr.New(seenSyncMsgSize)
 	s.seenSyncContributionCache = lruwrpr.New(seenSyncContributionSize)
 	s.seenExitCache = lruwrpr.New(seenExitSize)
@@ -294,5 +293,4 @@ type Checker interface {
 	Synced() bool
 	Status() error
 	Resync() error
-	IsInitSync() bool
 }

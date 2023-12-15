@@ -25,12 +25,13 @@ func TestValidatorMap_DistinctCopy(t *testing.T) {
 	count := uint64(100)
 	vals := make([]*ethpb.Validator, 0, count)
 	for i := uint64(1); i < count; i++ {
-		someRoot := [fieldparams.RootLength]byte{}
+		someRoot := [fieldparams.AddressLength]byte{}
 		someKey := [fieldparams.BLSPubkeyLength]byte{}
 		copy(someRoot[:], strconv.Itoa(int(i)))
 		copy(someKey[:], strconv.Itoa(int(i)))
 		vals = append(vals, &ethpb.Validator{
 			PublicKey:                  someKey[:],
+			CreatorAddress:             someRoot[:],
 			WithdrawalCredentials:      someRoot[:],
 			EffectiveBalance:           params.BeaconConfig().MaxEffectiveBalance,
 			Slashed:                    false,
@@ -38,6 +39,9 @@ func TestValidatorMap_DistinctCopy(t *testing.T) {
 			ActivationEpoch:            1,
 			ExitEpoch:                  1,
 			WithdrawableEpoch:          1,
+			ActivationHash:             (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:                   (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:              []*ethpb.WithdrawalOp{},
 		})
 	}
 	handler := stateutil.NewValMapHandler(vals)
@@ -89,12 +93,13 @@ func TestBeaconState_NoDeadlock(t *testing.T) {
 	count := uint64(100)
 	vals := make([]*ethpb.Validator, 0, count)
 	for i := uint64(1); i < count; i++ {
-		someRoot := [fieldparams.RootLength]byte{}
+		someRoot := [fieldparams.AddressLength]byte{}
 		someKey := [fieldparams.BLSPubkeyLength]byte{}
 		copy(someRoot[:], strconv.Itoa(int(i)))
 		copy(someKey[:], strconv.Itoa(int(i)))
 		vals = append(vals, &ethpb.Validator{
 			PublicKey:                  someKey[:],
+			CreatorAddress:             someRoot[:],
 			WithdrawalCredentials:      someRoot[:],
 			EffectiveBalance:           params.BeaconConfig().MaxEffectiveBalance,
 			Slashed:                    false,
@@ -102,6 +107,9 @@ func TestBeaconState_NoDeadlock(t *testing.T) {
 			ActivationEpoch:            1,
 			ExitEpoch:                  1,
 			WithdrawableEpoch:          1,
+			ActivationHash:             (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:                   (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:              []*ethpb.WithdrawalOp{},
 		})
 	}
 	st, err := InitializeFromProtoUnsafe(&ethpb.BeaconStateBellatrix{

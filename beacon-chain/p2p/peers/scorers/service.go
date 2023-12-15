@@ -5,7 +5,8 @@ import (
 	"math"
 	"time"
 
-	"github.com/libp2p/go-libp2p-core/peer"
+	"github.com/libp2p/go-libp2p/core/peer"
+	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers/peerdata"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 )
@@ -132,14 +133,37 @@ func (s *Service) IsBadPeer(pid peer.ID) bool {
 
 // IsBadPeerNoLock is a lock-free version of IsBadPeer.
 func (s *Service) IsBadPeerNoLock(pid peer.ID) bool {
+	if !features.Get().EnablePeerScorer {
+		//logrus.WithFields(logrus.Fields{
+		//	"func":  "IsBadPeerNoLock",
+		//	"peer":  pid,
+		//	"score": "EnablePeerScorer",
+		//}).Info("Disconnect: scorer disabled")
+		return false
+	}
 	if s.scorers.badResponsesScorer.isBadPeer(pid) {
+		logrus.WithFields(logrus.Fields{
+			"func":  "IsBadPeerNoLock",
+			"peer":  pid,
+			"score": "badResponsesScorer",
+		}).Debug("Disconnect: peer is bad")
 		return true
 	}
 	if s.scorers.peerStatusScorer.isBadPeer(pid) {
+		logrus.WithFields(logrus.Fields{
+			"func":  "IsBadPeerNoLock",
+			"peer":  pid,
+			"score": "peerStatusScorer",
+		}).Debug("Disconnect: peer is bad")
 		return true
 	}
 	if features.Get().EnablePeerScorer {
 		if s.scorers.gossipScorer.isBadPeer(pid) {
+			logrus.WithFields(logrus.Fields{
+				"func":  "IsBadPeerNoLock",
+				"peer":  pid,
+				"score": "gossipScorer",
+			}).Debug("Disconnect: peer is bad")
 			return true
 		}
 	}

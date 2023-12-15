@@ -1017,7 +1017,7 @@ def process_deposit(state: BeaconState, deposit: Deposit) -> None:
         increase_balance(state, index, amount)
 ```
 ```python
-def process_voluntary_exit(state: BeaconState, signed_voluntary_exit: SignedVoluntaryExit) -> None:
+def process_voluntary_exit(state: BeaconState, signed_voluntary_exit: VoluntaryExit) -> None:
     voluntary_exit = signed_voluntary_exit.message
     validator = state.validators[voluntary_exit.validator_index]
     # Verify the validator is active

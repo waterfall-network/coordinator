@@ -33,6 +33,8 @@ message BeaconState {
   uint64 eth1_deposit_index = 3003;
   repeated BlockVoting block_voting = 3004 [(ethereum.eth.ext.ssz_max) = "block_voting.size"];
 
+  SpineData spine_data = 3005;
+
   // Registry [4001-5000]
   repeated Validator validators = 4001 [(ethereum.eth.ext.ssz_max) = "1099511627776"];
   repeated uint64 balances = 4002 [(ethereum.eth.ext.ssz_max) = "1099511627776"];
@@ -76,6 +78,7 @@ message BeaconStateAltair {
   uint64 eth1_deposit_index = 3003;
   repeated BlockVoting block_voting = 3004 [(ethereum.eth.ext.ssz_max) = "block_voting.size"];
 
+  SpineData spine_data = 3005;
 
   // Registry [4001-5000]
   repeated Validator validators = 4001 [(ethereum.eth.ext.ssz_max) = "1099511627776"];
@@ -169,11 +172,14 @@ message DepositMessage {
   // 48 byte BLS public key of the validator.
   bytes public_key = 1 [(ethereum.eth.ext.ssz_size) = "48", (ethereum.eth.ext.spec_name) = "pubkey"];
 
-  // A 32 byte hash of the withdrawal address public key.
-  bytes withdrawal_credentials = 2 [(ethereum.eth.ext.ssz_size) = "32"];
+  // A 20 byte of the creator address public key.
+  bytes creator_address = 2 [(ethereum.eth.ext.ssz_size) = "20"];
+
+  // A 20 byte of the withdrawal address public key.
+  bytes withdrawal_credentials = 3 [(ethereum.eth.ext.ssz_size) = "20"];
 
   // Deposit amount in gwei.
-  uint64 amount = 3;
+  uint64 amount = 4;
 }
 
 // SyncCommittee serves as committees to facilitate light client syncing to beacon chain.
@@ -209,6 +215,7 @@ message BeaconStateBellatrix {
   uint64 eth1_deposit_index = 3003;
   repeated BlockVoting block_voting = 3004 [(ethereum.eth.ext.ssz_max) = "block_voting.size"];
 
+  SpineData spine_data = 3005;
 
   // Registry [4001-5000]
   repeated Validator validators = 4001 [(ethereum.eth.ext.ssz_max) = "1099511627776"];
@@ -241,17 +248,60 @@ message BeaconStateBellatrix {
 }
 
 
+message SpineData {
+
+  // The 32 byte array of hashes presented sequence of the GWAT spines candidates.
+  // ssz_max = 32 * 1024
+  bytes spines = 1 [(ethereum.eth.ext.ssz_max) = "32768"];
+
+  // The 32 byte array of hashes presented sequence of the GWAT spines candidates.
+  // ssz_max = 32 * 1024
+  bytes prefix = 2 [(ethereum.eth.ext.ssz_max) = "32768"];
+
+  //The 32 byte array of hashes presented sequence of the GWAT spines to finalization.
+  // ssz_max = 32 * 1024
+  bytes finalization = 3 [(ethereum.eth.ext.ssz_max) = "32768"];
+
+  //The 32 byte array of hashes presented sequence of the GWAT spines
+  // finalized from finalized to justified checkpoint.
+  // ssz_max = 32 * 1024
+  bytes cp_finalized = 4 [(ethereum.eth.ext.ssz_max) = "32768"];
+
+  // The array of 32 byte arrays of hashes.
+  // Presents the sequences of the GWAT spines of ancestors.
+  // The hashes of finalization and prefix excluded.
+  // ssz_max = 524288
+  repeated SpinesSeq parent_spines = 5 [(ethereum.eth.ext.ssz_max) = "524288"];
+}
+
+message SpinesSeq {
+  bytes spines = 1 [(ethereum.eth.ext.ssz_max) = "524288"];
+}
+
 message BlockVoting {
   // 32 byte merkle tree root of the ssz encoded block.
   bytes root = 1 [(ethereum.eth.ext.ssz_size) = "32"];
   // slot
   uint64 slot = 2 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Slot"];
   // The 32 byte array of hashes presented sequence of the GWAT spines candidates.
-  // ssz_max = 32 * 128
-  bytes candidates = 3 [(ethereum.eth.ext.ssz_max) = "4096"];
-  // block attestations
-  repeated Attestation attestations = 4 [(ethereum.eth.ext.ssz_max) = "128"];
+  // ssz_max = 32 * 1024
+  bytes candidates = 3 [(ethereum.eth.ext.ssz_max) = "32768"];
+  // CommitteeVote array
+  repeated CommitteeVote votes = 4 [(ethereum.eth.ext.ssz_max) = "32768"];
 }
+
+message CommitteeVote {
+  // A bitfield representation of validator indices that have voted exactly
+  // the same vote and have been aggregated into this attestation.
+  bytes aggregation_bits = 1 [(ethereum.eth.ext.ssz_max) = "2048", (ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/go-bitfield.Bitlist"];
+
+  // Slot of the committee attesting for.
+  uint64 slot = 2 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Slot"];
+
+  // The committee index that submitted this attestation.
+  uint64 index = 3 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.CommitteeIndex"];
+}
+
 
 
 // PowBlock is a definition from Bellatrix fork choice spec to represent a block with total difficulty in the PoW chain.

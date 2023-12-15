@@ -11,6 +11,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/attestations"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/slashings"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/voluntaryexits"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/withdrawals"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
 	v1alpha1validator "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc/prysm/v1alpha1/validator"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/rpc/statefetcher"
@@ -31,6 +32,7 @@ type Server struct {
 	AttestationsPool        attestations.Pool
 	SlashingsPool           slashings.PoolManager
 	VoluntaryExitsPool      voluntaryexits.PoolManager
+	WithdrawalPool          withdrawals.PoolManager
 	StateGenService         stategen.StateManager
 	StateFetcher            statefetcher.Fetcher
 	HeadFetcher             blockchain.HeadFetcher

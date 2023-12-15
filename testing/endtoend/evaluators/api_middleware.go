@@ -23,15 +23,24 @@ import (
 )
 
 type validatorJson struct {
-	PublicKey                  string `json:"pubkey"`
-	WithdrawalCredentials      string `json:"withdrawal_credentials"`
-	EffectiveBalance           string `json:"effective_balance"`
-	Slashed                    bool   `json:"slashed"`
-	ActivationEligibilityEpoch string `json:"activation_eligibility_epoch"`
-	ActivationEpoch            string `json:"activation_epoch"`
-	ExitEpoch                  string `json:"exit_epoch"`
-	WithdrawableEpoch          string `json:"withdrawable_epoch"`
+	PublicKey                  string              `json:"pubkey"`
+	CreatorAddress             string              `json:"creator_address"`
+	WithdrawalCredentials      string              `json:"withdrawal_credentials"`
+	EffectiveBalance           string              `json:"effective_balance"`
+	Slashed                    bool                `json:"slashed"`
+	ActivationEligibilityEpoch string              `json:"activation_eligibility_epoch"`
+	ActivationEpoch            string              `json:"activation_epoch"`
+	ExitEpoch                  string              `json:"exit_epoch"`
+	WithdrawableEpoch          string              `json:"withdrawable_epoch"`
+	WithdrawalOps              []*withdrawalOpJson `json:"withdrawal_ops"`
 }
+
+type withdrawalOpJson struct {
+	Amount string `json:"amount"`
+	Hash   string `json:"hash" hex:"true"`
+	Slot   string `json:"slot"`
+}
+
 type validatorContainerJson struct {
 	Index     string         `json:"index"`
 	Balance   string         `json:"balance"`

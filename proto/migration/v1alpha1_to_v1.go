@@ -206,31 +206,25 @@ func V1Alpha1ProposerSlashingToV1(v1alpha1Slashing *ethpbalpha.ProposerSlashing)
 	}
 }
 
-// V1Alpha1ExitToV1 converts a v1alpha1 SignedVoluntaryExit to v1.
-func V1Alpha1ExitToV1(v1alpha1Exit *ethpbalpha.SignedVoluntaryExit) *ethpbv1.SignedVoluntaryExit {
-	if v1alpha1Exit == nil || v1alpha1Exit.Exit == nil {
-		return &ethpbv1.SignedVoluntaryExit{}
+// V1Alpha1ExitToV1 converts a v1alpha1 VoluntaryExit to v1.
+func V1Alpha1ExitToV1(v1alpha1Exit *ethpbalpha.VoluntaryExit) *ethpbv1.VoluntaryExit {
+	if v1alpha1Exit == nil {
+		return &ethpbv1.VoluntaryExit{}
 	}
-	return &ethpbv1.SignedVoluntaryExit{
-		Message: &ethpbv1.VoluntaryExit{
-			Epoch:          v1alpha1Exit.Exit.Epoch,
-			ValidatorIndex: v1alpha1Exit.Exit.ValidatorIndex,
-		},
-		Signature: v1alpha1Exit.Signature,
+	return &ethpbv1.VoluntaryExit{
+		Epoch:          v1alpha1Exit.Epoch,
+		ValidatorIndex: v1alpha1Exit.ValidatorIndex,
 	}
 }
 
-// V1ExitToV1Alpha1 converts a v1 SignedVoluntaryExit to v1alpha1.
-func V1ExitToV1Alpha1(v1Exit *ethpbv1.SignedVoluntaryExit) *ethpbalpha.SignedVoluntaryExit {
-	if v1Exit == nil || v1Exit.Message == nil {
-		return &ethpbalpha.SignedVoluntaryExit{}
+// V1ExitToV1Alpha1 converts a v1 VoluntaryExit to v1alpha1.
+func V1ExitToV1Alpha1(v1Exit *ethpbv1.VoluntaryExit) *ethpbalpha.VoluntaryExit {
+	if v1Exit == nil {
+		return &ethpbalpha.VoluntaryExit{}
 	}
-	return &ethpbalpha.SignedVoluntaryExit{
-		Exit: &ethpbalpha.VoluntaryExit{
-			Epoch:          v1Exit.Message.Epoch,
-			ValidatorIndex: v1Exit.Message.ValidatorIndex,
-		},
-		Signature: v1Exit.Signature,
+	return &ethpbalpha.VoluntaryExit{
+		Epoch:          v1Exit.Epoch,
+		ValidatorIndex: v1Exit.ValidatorIndex,
 	}
 }
 
@@ -305,8 +299,19 @@ func V1Alpha1ValidatorToV1(v1Alpha1Validator *ethpbalpha.Validator) *ethpbv1.Val
 	if v1Alpha1Validator == nil {
 		return &ethpbv1.Validator{}
 	}
+
+	wops := make([]*ethpbv1.WithdrawalOp, len(v1Alpha1Validator.WithdrawalOps))
+	for i, op := range v1Alpha1Validator.WithdrawalOps {
+		wops[i] = &ethpbv1.WithdrawalOp{
+			Amount: op.Amount,
+			Hash:   op.Hash,
+			Slot:   op.Slot,
+		}
+	}
+
 	return &ethpbv1.Validator{
 		Pubkey:                     v1Alpha1Validator.PublicKey,
+		CreatorAddress:             v1Alpha1Validator.CreatorAddress,
 		WithdrawalCredentials:      v1Alpha1Validator.WithdrawalCredentials,
 		EffectiveBalance:           v1Alpha1Validator.EffectiveBalance,
 		Slashed:                    v1Alpha1Validator.Slashed,
@@ -314,6 +319,9 @@ func V1Alpha1ValidatorToV1(v1Alpha1Validator *ethpbalpha.Validator) *ethpbv1.Val
 		ActivationEpoch:            v1Alpha1Validator.ActivationEpoch,
 		ExitEpoch:                  v1Alpha1Validator.ExitEpoch,
 		WithdrawableEpoch:          v1Alpha1Validator.WithdrawableEpoch,
+		ActivationHash:             v1Alpha1Validator.ActivationHash,
+		ExitHash:                   v1Alpha1Validator.ExitHash,
+		WithdrawalOps:              wops,
 	}
 }
 
@@ -322,8 +330,19 @@ func V1ValidatorToV1Alpha1(v1Validator *ethpbv1.Validator) *ethpbalpha.Validator
 	if v1Validator == nil {
 		return &ethpbalpha.Validator{}
 	}
+
+	wops := make([]*ethpbalpha.WithdrawalOp, len(v1Validator.WithdrawalOps))
+	for i, op := range v1Validator.WithdrawalOps {
+		wops[i] = &ethpbalpha.WithdrawalOp{
+			Amount: op.Amount,
+			Hash:   op.Hash,
+			Slot:   op.Slot,
+		}
+	}
+
 	return &ethpbalpha.Validator{
 		PublicKey:                  v1Validator.Pubkey,
+		CreatorAddress:             v1Validator.CreatorAddress,
 		WithdrawalCredentials:      v1Validator.WithdrawalCredentials,
 		EffectiveBalance:           v1Validator.EffectiveBalance,
 		Slashed:                    v1Validator.Slashed,
@@ -331,6 +350,9 @@ func V1ValidatorToV1Alpha1(v1Validator *ethpbv1.Validator) *ethpbalpha.Validator
 		ActivationEpoch:            v1Validator.ActivationEpoch,
 		ExitEpoch:                  v1Validator.ExitEpoch,
 		WithdrawableEpoch:          v1Validator.WithdrawableEpoch,
+		ActivationHash:             v1Validator.ActivationHash,
+		ExitHash:                   v1Validator.ExitHash,
+		WithdrawalOps:              wops,
 	}
 }
 
@@ -382,8 +404,18 @@ func BeaconStateToProto(state state.BeaconState) (*ethpbv1.BeaconState, error) {
 	}
 	resultValidators := make([]*ethpbv1.Validator, len(sourceValidators))
 	for i, validator := range sourceValidators {
+		wops := make([]*ethpbv1.WithdrawalOp, len(validator.WithdrawalOps))
+		for j, op := range validator.WithdrawalOps {
+			wops[j] = &ethpbv1.WithdrawalOp{
+				Amount: op.Amount,
+				Hash:   op.Hash,
+				Slot:   op.Slot,
+			}
+		}
+
 		resultValidators[i] = &ethpbv1.Validator{
 			Pubkey:                     bytesutil.SafeCopyBytes(validator.PublicKey),
+			CreatorAddress:             bytesutil.SafeCopyBytes(validator.CreatorAddress),
 			WithdrawalCredentials:      bytesutil.SafeCopyBytes(validator.WithdrawalCredentials),
 			EffectiveBalance:           validator.EffectiveBalance,
 			Slashed:                    validator.Slashed,
@@ -391,6 +423,9 @@ func BeaconStateToProto(state state.BeaconState) (*ethpbv1.BeaconState, error) {
 			ActivationEpoch:            validator.ActivationEpoch,
 			ExitEpoch:                  validator.ExitEpoch,
 			WithdrawableEpoch:          validator.WithdrawableEpoch,
+			ActivationHash:             validator.ActivationHash,
+			ExitHash:                   validator.ExitHash,
+			WithdrawalOps:              wops,
 		}
 	}
 	resultPrevEpochAtts := make([]*ethpbv1.PendingAttestation, len(sourcePrevEpochAtts))

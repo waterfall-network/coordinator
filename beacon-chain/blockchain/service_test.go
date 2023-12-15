@@ -57,6 +57,11 @@ type mockBroadcaster struct {
 	broadcastCalled bool
 }
 
+func (mb *mockBroadcaster) BroadcastPrevoting(ctx context.Context, subnet uint64, sMsg *ethpb.PreVote) error {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (mb *mockBroadcaster) Broadcast(_ context.Context, _ proto.Message) error {
 	mb.broadcastCalled = true
 	return nil
@@ -128,7 +133,7 @@ func setupBeaconChain(t *testing.T, beaconDB db.Database) *Service {
 		WithAttestationPool(attestations.NewPool()),
 		WithP2PBroadcaster(&mockBroadcaster{}),
 		WithStateNotifier(&mockBeaconNode{}),
-		WithForkChoiceStore(protoarray.New(0, 0, params.BeaconConfig().ZeroHash)),
+		WithForkChoiceStore(protoarray.New(0, 0)),
 		WithAttestationService(attService),
 		WithStateGen(stateGen),
 	}
@@ -499,7 +504,7 @@ func TestHasBlock_ForkChoiceAndDB_ProtoArray(t *testing.T) {
 	ctx := context.Background()
 	beaconDB := testDB.SetupDB(t)
 	s := &Service{
-		cfg:   &config{ForkChoiceStore: protoarray.New(0, 0, [32]byte{}), BeaconDB: beaconDB},
+		cfg:   &config{ForkChoiceStore: protoarray.New(0, 0), BeaconDB: beaconDB},
 		store: &store.Store{},
 	}
 	s.store.SetFinalizedCheckpt(&ethpb.Checkpoint{Epoch: 0, Root: params.BeaconConfig().ZeroHash[:]})
@@ -593,7 +598,7 @@ func BenchmarkHasBlockForkChoiceStore_ProtoArray(b *testing.B) {
 	ctx := context.Background()
 	beaconDB := testDB.SetupDB(b)
 	s := &Service{
-		cfg:   &config{ForkChoiceStore: protoarray.New(0, 0, [32]byte{}), BeaconDB: beaconDB},
+		cfg:   &config{ForkChoiceStore: protoarray.New(0, 0), BeaconDB: beaconDB},
 		store: &store.Store{},
 	}
 	s.store.SetFinalizedCheckpt(&ethpb.Checkpoint{Epoch: 0, Root: params.BeaconConfig().ZeroHash[:]})

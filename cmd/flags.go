@@ -155,6 +155,13 @@ var (
 		Usage: "The max number of p2p peers to maintain.",
 		Value: 45,
 	}
+	// FindNodesBucketLength defines length of known nodes bucket to search until the bucket is full.
+	FindNodesBucketLength = &cli.IntFlag{
+		Name: "find-nodes-bucket-length",
+		Usage: "Length of known nodes bucket to search until the bucket is full. " +
+			"May be fine-tuned to avoid infinite nodes search within small networks.",
+		Value: 16,
+	}
 	// P2PAllowList defines a CIDR subnet to exclusively allow connections.
 	P2PAllowList = &cli.StringFlag{
 		Name: "p2p-allowlist",
@@ -166,7 +173,7 @@ var (
 	// P2PDenyList defines a list of CIDR subnets to disallow connections from them.
 	P2PDenyList = &cli.StringSliceFlag{
 		Name: "p2p-denylist",
-		Usage: "The CIDR subnets for denying certainy peer connections. " +
+		Usage: "The CIDR subnets for denying certainty peer connections. " +
 			"Using \"private\" would deny all private subnets. Example: " +
 			"192.168.0.0/16 would deny connections from peers on your local network only. The " +
 			"default is to accept all connections.",
@@ -186,6 +193,11 @@ var (
 		Name:  "log-format",
 		Usage: "Specify log formatting. Supports: text, json, fluentd, journald.",
 		Value: "text",
+	}
+	// WriteRewardLogFlag Write log of rewards and penalties.
+	WriteRewardLogFlag = &cli.BoolFlag{
+		Name:  "write-reward-log",
+		Usage: "Enable write log file of rewards and penalties.",
 	}
 	// MaxGoroutines specifies the maximum amount of goroutines tolerated, before a status check fails.
 	MaxGoroutines = &cli.IntFlag{
@@ -216,7 +228,7 @@ var (
 	// GrpcMaxCallRecvMsgSizeFlag defines the max call message size for GRPC
 	GrpcMaxCallRecvMsgSizeFlag = &cli.IntFlag{
 		Name:  "grpc-max-msg-size",
-		Usage: "Integer to define max recieve message call size",
+		Usage: "Integer to define max receive message call size",
 		//Value: 1 << 22,
 		Value: 15900000,
 	}

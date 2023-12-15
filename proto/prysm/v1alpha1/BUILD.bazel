@@ -30,6 +30,7 @@ proto_library(
         "slasher.proto",
         "validator.proto",
         "p2p_messages.proto",
+        "prevoting.proto",
         ":ssz_proto_files",
         #        ":generated_swagger_proto",
     ],
@@ -107,6 +108,7 @@ ssz_gen_marshal(
         "SignedBlindedBeaconBlockBellatrix",
         "BlindedBeaconBlockBellatrix",
         "BlindedBeaconBlockBodyBellatrix",
+        "PreVote",
     ],
 )
 
@@ -213,5 +215,6 @@ go_test(
     embed = [":go_default_library"],
     deps = [
         "//testing/assert:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//common:go_default_library",
     ],
 )

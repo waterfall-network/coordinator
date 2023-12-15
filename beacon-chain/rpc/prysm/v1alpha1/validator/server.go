@@ -5,9 +5,11 @@ package validator
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache/depositcache"
@@ -18,9 +20,11 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/signing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/attestations"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/prevote"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/slashings"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/synccommittee"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/voluntaryexits"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/withdrawals"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen"
@@ -29,6 +33,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/network/forks"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -41,6 +46,7 @@ import (
 type Server struct {
 	Ctx                    context.Context
 	AttestationCache       *cache.AttestationCache
+	PrevoteCache           *cache.PrevoteCache
 	ProposerSlotIndexCache *cache.ProposerPayloadIDsCache
 	HeadFetcher            blockchain.HeadFetcher
 	ForkFetcher            blockchain.ForkFetcher
@@ -55,8 +61,10 @@ type Server struct {
 	BlockNotifier          blockfeed.Notifier
 	P2P                    p2p.Broadcaster
 	AttPool                attestations.Pool
+	PrevotePool            prevote.Pool
 	SlashingsPool          slashings.PoolManager
 	ExitPool               voluntaryexits.PoolManager
+	WithdrawalPool         withdrawals.PoolManager
 	SyncCommitteePool      synccommittee.Pool
 	BlockReceiver          blockchain.BlockReceiver
 	MockEth1Votes          bool
@@ -200,4 +208,59 @@ func (vs *Server) WaitForChainStart(_ *emptypb.Empty, stream ethpb.BeaconNodeVal
 			return status.Error(codes.Canceled, "Context canceled")
 		}
 	}
+}
+
+// getOptimisticSpine retrieves optimistic spines from gwat or cached
+// and extend by finalized chain to use with forkchoice
+// to calculate the parent block by optimistic spine.
+func (vs *Server) getOptimisticSpine(ctx context.Context) ([]gwatCommon.HashArray, error) {
+	currHead, err := vs.HeadFetcher.HeadState(ctx)
+	if err != nil {
+		log.WithError(err).Error("Get optimistic spines failed: could not retrieve head state")
+		return nil, status.Errorf(codes.Internal, "Could not retrieve head state: %v", err)
+	}
+
+	if currHead == nil || currHead.SpineData() == nil {
+		err = status.Errorf(codes.Internal, "no spine data of head state")
+		log.WithError(err).Error("Get optimistic spines failed: bad had state")
+		return nil, status.Errorf(codes.Internal, "Could not retrieve head state: %v", err)
+	}
+
+	//request optimistic spine
+	cpFinalized := currHead.SpineData().CpFinalized
+	baseSpine := gwatCommon.BytesToHash(cpFinalized[len(cpFinalized)-32:])
+
+	optSpines, err := vs.HeadFetcher.GetOptimisticSpines(ctx, baseSpine)
+	if err != nil {
+		errWrap := fmt.Errorf("could not get gwat optimistic spines: %v", err)
+		log.WithError(errWrap).WithFields(logrus.Fields{
+			"head.Slot": currHead.Slot(),
+			"baseSpine": fmt.Sprintf("%#x", baseSpine),
+			"jcp.Epoch": currHead.CurrentJustifiedCheckpoint().Epoch,
+			"jcp.Root":  fmt.Sprintf("%#x", currHead.CurrentJustifiedCheckpoint().Root),
+		}).Error("Get optimistic spines failed: Could not retrieve of gwat optimistic spines")
+		return nil, errWrap
+	}
+
+	log.WithFields(logrus.Fields{
+		"head.Slot": currHead.Slot(),
+		"baseSpine": fmt.Sprintf("%#x", baseSpine),
+		"jcp.Epoch": currHead.CurrentJustifiedCheckpoint().Epoch,
+		"jcp.Root":  fmt.Sprintf("%#x", currHead.CurrentJustifiedCheckpoint().Root),
+		//"optSpines":        optSpines,
+	}).Info("Get optimistic spines: data retrieved")
+
+	//prepend current optimistic finalization to optimistic spine to calc parent
+	cpf := gwatCommon.HashArrayFromBytes(currHead.SpineData().CpFinalized)
+	extOptSpines := make([]gwatCommon.HashArray, len(cpf)+len(optSpines))
+	ofs := 0
+	for i, offset, a := 0, ofs, cpf; i < len(a); i++ {
+		ofs++
+		extOptSpines[offset+i] = gwatCommon.HashArray{a[i]}
+	}
+	for i, offset, a := 0, ofs, optSpines; i < len(a); i++ {
+		ofs++
+		extOptSpines[offset+i] = a[i].Copy()
+	}
+	return extOptSpines, nil
 }

@@ -12,8 +12,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz"
 	enginev1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/engine/v1"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 )
@@ -37,70 +35,6 @@ func IsMergeTransitionComplete(st state.BeaconState) (bool, error) {
 		return false, err
 	}
 	return !isEmptyHeader(h), nil
-}
-
-// IsMergeTransitionBlockUsingPreStatePayloadHeader returns true if the input block is the terminal merge block.
-// Terminal merge block must be associated with an empty payload header.
-// This assumes the header `h` is referenced as the parent state for block body `body.
-func IsMergeTransitionBlockUsingPreStatePayloadHeader(h *ethpb.ExecutionPayloadHeader, body block.BeaconBlockBody) (bool, error) {
-	if h == nil || body == nil {
-		return false, errors.New("nil header or block body")
-	}
-	if !isEmptyHeader(h) {
-		return false, nil
-	}
-	return IsExecutionBlock(body)
-}
-
-// IsExecutionBlock returns whether the block has a non-empty ExecutionPayload.
-//
-// Spec code:
-// def is_execution_block(block: BeaconBlock) -> bool:
-//
-//	return block.body.execution_payload != ExecutionPayload()
-func IsExecutionBlock(body block.BeaconBlockBody) (bool, error) {
-	if body == nil {
-		return false, errors.New("nil block body")
-	}
-	payload, err := body.ExecutionPayload()
-	switch {
-	case errors.Is(err, wrapper.ErrUnsupportedField):
-		return false, nil
-	case err != nil:
-		return false, err
-	default:
-	}
-	return !isEmptyPayload(payload), nil
-}
-
-// IsExecutionEnabled returns true if the beacon chain can begin executing.
-// Meaning the payload header is beacon state is non-empty or the payload in block body is non-empty.
-//
-// Spec code:
-// def is_execution_enabled(state: BeaconState, body: BeaconBlockBody) -> bool:
-//
-//	return is_merge_block(state, body) or is_merge_complete(state)
-func IsExecutionEnabled(st state.BeaconState, body block.BeaconBlockBody) (bool, error) {
-	if st == nil || body == nil {
-		return false, errors.New("nil state or block body")
-	}
-	if IsPreBellatrixVersion(st.Version()) {
-		return false, nil
-	}
-	header, err := st.LatestExecutionPayloadHeader()
-	if err != nil {
-		return false, err
-	}
-	return IsExecutionEnabledUsingHeader(header, body)
-}
-
-// IsExecutionEnabledUsingHeader returns true if the execution is enabled using post processed payload header and block body.
-// This is an optimized version of IsExecutionEnabled where beacon state is not required as an argument.
-func IsExecutionEnabledUsingHeader(header *ethpb.ExecutionPayloadHeader, body block.BeaconBlockBody) (bool, error) {
-	if !isEmptyHeader(header) {
-		return true, nil
-	}
-	return IsExecutionBlock(body)
 }
 
 // IsPreBellatrixVersion returns true if input version is before bellatrix fork.
@@ -238,55 +172,6 @@ func PayloadToHeader(payload *enginev1.ExecutionPayload) (*ethpb.ExecutionPayloa
 		BlockHash:        bytesutil.SafeCopyBytes(payload.BlockHash),
 		TransactionsRoot: txRoot[:],
 	}, nil
-}
-
-func isEmptyPayload(p *enginev1.ExecutionPayload) bool {
-	if p == nil {
-		return true
-	}
-	if !bytes.Equal(p.ParentHash, make([]byte, fieldparams.RootLength)) {
-		return false
-	}
-	if !bytes.Equal(p.FeeRecipient, make([]byte, fieldparams.FeeRecipientLength)) {
-		return false
-	}
-	if !bytes.Equal(p.StateRoot, make([]byte, fieldparams.RootLength)) {
-		return false
-	}
-	if !bytes.Equal(p.ReceiptsRoot, make([]byte, fieldparams.RootLength)) {
-		return false
-	}
-	if !bytes.Equal(p.LogsBloom, make([]byte, fieldparams.LogsBloomLength)) {
-		return false
-	}
-	if !bytes.Equal(p.PrevRandao, make([]byte, fieldparams.RootLength)) {
-		return false
-	}
-	if !bytes.Equal(p.BaseFeePerGas, make([]byte, fieldparams.RootLength)) {
-		return false
-	}
-	if !bytes.Equal(p.BlockHash, make([]byte, fieldparams.RootLength)) {
-		return false
-	}
-	if len(p.Transactions) != 0 {
-		return false
-	}
-	if len(p.ExtraData) != 0 {
-		return false
-	}
-	if p.BlockNumber != 0 {
-		return false
-	}
-	if p.GasLimit != 0 {
-		return false
-	}
-	if p.GasUsed != 0 {
-		return false
-	}
-	if p.Timestamp != 0 {
-		return false
-	}
-	return true
 }
 
 func isEmptyHeader(h *ethpb.ExecutionPayloadHeader) bool {

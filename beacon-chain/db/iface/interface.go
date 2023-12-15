@@ -14,6 +14,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/backup"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
@@ -88,6 +89,10 @@ type NoHeadAccessDatabase interface {
 	SaveFeeRecipientsByValidatorIDs(ctx context.Context, ids []types.ValidatorIndex, addrs []common.Address) error
 
 	CleanUpDirtyStates(ctx context.Context, slotsPerArchivedPoint types.Slot) error
+
+	ReadSpines(ctx context.Context, key [32]byte) (wrapper.Spines, error)
+	WriteSpines(ctx context.Context, spines wrapper.Spines) ([32]byte, error)
+	DeleteSpines(ctx context.Context, key [32]byte) error
 }
 
 // HeadAccessDatabase defines a struct with access to reading chain head data.

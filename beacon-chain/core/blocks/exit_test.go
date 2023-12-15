@@ -7,8 +7,6 @@ import (
 	types "github.com/prysmaticlabs/eth2-types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/signing"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
 	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
@@ -19,17 +17,13 @@ import (
 )
 
 func TestProcessVoluntaryExits_NotActiveLongEnoughToExit(t *testing.T) {
-	exits := []*ethpb.SignedVoluntaryExit{
-		{
-			Exit: &ethpb.VoluntaryExit{
-				ValidatorIndex: 0,
-				Epoch:          0,
-			},
-		},
-	}
+	exits := []*ethpb.VoluntaryExit{{ValidatorIndex: 0, Epoch: 0}}
 	registry := []*ethpb.Validator{
 		{
-			ExitEpoch: params.BeaconConfig().FarFutureEpoch,
+			ExitEpoch:      params.BeaconConfig().FarFutureEpoch,
+			ActivationHash: make([]byte, 32),
+			ExitHash:       make([]byte, 32),
+			WithdrawalOps:  make([]*ethpb.WithdrawalOp, 0),
 		},
 	}
 	state, err := v1.InitializeFromProto(&ethpb.BeaconState{
@@ -50,16 +44,13 @@ func TestProcessVoluntaryExits_NotActiveLongEnoughToExit(t *testing.T) {
 }
 
 func TestProcessVoluntaryExits_ExitAlreadySubmitted(t *testing.T) {
-	exits := []*ethpb.SignedVoluntaryExit{
-		{
-			Exit: &ethpb.VoluntaryExit{
-				Epoch: 10,
-			},
-		},
-	}
+	exits := []*ethpb.VoluntaryExit{{Epoch: 10}}
 	registry := []*ethpb.Validator{
 		{
-			ExitEpoch: 10,
+			ExitEpoch:      10,
+			ActivationHash: (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:       (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:  []*ethpb.WithdrawalOp{},
 		},
 	}
 	state, err := v1.InitializeFromProto(&ethpb.BeaconState{
@@ -80,18 +71,18 @@ func TestProcessVoluntaryExits_ExitAlreadySubmitted(t *testing.T) {
 }
 
 func TestProcessVoluntaryExits_AppliesCorrectStatus(t *testing.T) {
-	exits := []*ethpb.SignedVoluntaryExit{
-		{
-			Exit: &ethpb.VoluntaryExit{
-				ValidatorIndex: 0,
-				Epoch:          0,
-			},
-		},
+	exits := []*ethpb.VoluntaryExit{{
+		ValidatorIndex: 0,
+		Epoch:          0,
+	},
 	}
 	registry := []*ethpb.Validator{
 		{
 			ExitEpoch:       params.BeaconConfig().FarFutureEpoch,
 			ActivationEpoch: 0,
+			ActivationHash:  (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:        (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:   []*ethpb.WithdrawalOp{},
 		},
 	}
 	state, err := v1.InitializeFromProto(&ethpb.BeaconState{
@@ -113,8 +104,6 @@ func TestProcessVoluntaryExits_AppliesCorrectStatus(t *testing.T) {
 	require.NoError(t, err)
 	val.PublicKey = priv.PublicKey().Marshal()
 	require.NoError(t, state.UpdateValidatorAtIndex(0, val))
-	exits[0].Signature, err = signing.ComputeDomainAndSign(state, time.CurrentEpoch(state), exits[0].Exit, params.BeaconConfig().DomainVoluntaryExit, priv)
-	require.NoError(t, err)
 
 	b := util.NewBeaconBlock()
 	b.Block = &ethpb.BeaconBlock{

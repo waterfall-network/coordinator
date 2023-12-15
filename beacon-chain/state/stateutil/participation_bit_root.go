@@ -5,22 +5,17 @@ import (
 
 	"github.com/pkg/errors"
 	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz"
 )
 
 // ParticipationBitsRoot computes the HashTreeRoot merkleization of
 // participation roots.
 func ParticipationBitsRoot(bits []byte) ([32]byte, error) {
-	hasher := hash.CustomSHA256Hasher()
-	chunkedRoots, err := packParticipationBits(bits)
-	if err != nil {
-		return [32]byte{}, err
-	}
+	chunkedRoots := packParticipationBits(bits)
 
 	limit := (uint64(fieldparams.ValidatorRegistryLimit + 31)) / 32
 
-	bytesRoot, err := ssz.BitwiseMerkleize(hasher, chunkedRoots, uint64(len(chunkedRoots)), limit)
+	bytesRoot, err := ssz.BitwiseMerkleize(chunkedRoots, uint64(len(chunkedRoots)), limit)
 	if err != nil {
 		return [32]byte{}, errors.Wrap(err, "could not compute merkleization")
 	}
@@ -32,7 +27,7 @@ func ParticipationBitsRoot(bits []byte) ([32]byte, error) {
 
 // packParticipationBits into chunks. It'll pad the last chunk with zero bytes if
 // it does not have length bytes per chunk.
-func packParticipationBits(bytes []byte) ([][32]byte, error) {
+func packParticipationBits(bytes []byte) [][32]byte {
 	numItems := len(bytes)
 	chunks := make([][32]byte, 0, numItems/32)
 	for i := 0; i < numItems; i += 32 {
@@ -50,8 +45,8 @@ func packParticipationBits(bytes []byte) ([][32]byte, error) {
 	}
 
 	if len(chunks) == 0 {
-		return chunks, nil
+		return chunks
 	}
 
-	return chunks, nil
+	return chunks
 }

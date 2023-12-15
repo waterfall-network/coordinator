@@ -56,6 +56,45 @@ func (v readOnlyValidator) WithdrawableEpoch() types.Epoch {
 	return v.validator.WithdrawableEpoch
 }
 
+// WithdrawalOps returns the array of withdrawal operation from finalized checkpoint of the
+// read only validator.
+func (v readOnlyValidator) WithdrawalOps() []*ethpb.WithdrawalOp {
+	srcVal := v.validator.WithdrawalOps
+	cpy := make([]*ethpb.WithdrawalOp, len(srcVal))
+
+	for i, sv := range srcVal {
+		if sv == nil {
+			continue
+		}
+		h := make([]byte, len(sv.Hash))
+		copy(h, sv.Hash)
+		cpy[i] = &ethpb.WithdrawalOp{
+			Amount: sv.Amount,
+			Hash:   h,
+			Slot:   sv.Slot,
+		}
+	}
+	return cpy
+}
+
+// ActivationHash returns the tx hash of activation of
+// read only validator.
+func (v readOnlyValidator) ActivationHash() []byte {
+	srcVal := v.validator.ActivationHash
+	cpy := make([]byte, len(srcVal))
+	copy(cpy, srcVal)
+	return cpy
+}
+
+// ExitHash returns the tx hash of deactivation of
+// read only validator.
+func (v readOnlyValidator) ExitHash() []byte {
+	srcVal := v.validator.ExitHash
+	cpy := make([]byte, len(srcVal))
+	copy(cpy, srcVal)
+	return cpy
+}
+
 // ExitEpoch returns the exit epoch of the
 // read only validator.
 func (v readOnlyValidator) ExitEpoch() types.Epoch {
@@ -68,6 +107,14 @@ func (v readOnlyValidator) PublicKey() [fieldparams.BLSPubkeyLength]byte {
 	var pubkey [fieldparams.BLSPubkeyLength]byte
 	copy(pubkey[:], v.validator.PublicKey)
 	return pubkey
+}
+
+// CreatorAddress returns the Creator Address of the
+// read only validator.
+func (v readOnlyValidator) CreatorAddress() []byte {
+	bytes := make([]byte, len(v.validator.CreatorAddress))
+	copy(bytes, v.validator.CreatorAddress)
+	return bytes
 }
 
 // WithdrawalCredentials returns the withdrawal credentials of the

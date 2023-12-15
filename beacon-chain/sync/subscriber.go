@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/libp2p/go-libp2p-core/host"
-	"github.com/libp2p/go-libp2p-core/peer"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
+	"github.com/libp2p/go-libp2p/core/host"
+	"github.com/libp2p/go-libp2p/core/peer"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache"
@@ -40,7 +40,7 @@ type subHandler func(context.Context, proto.Message) error
 func (s *Service) noopValidator(_ context.Context, _ peer.ID, msg *pubsub.Message) (pubsub.ValidationResult, error) {
 	m, err := s.decodePubsubMessage(msg)
 	if err != nil {
-		log.WithError(err).Debug("Could not decode message")
+		log.WithError(err).Error("Validator subscription: Could not decode message")
 		return pubsub.ValidationReject, nil
 	}
 	msg.ValidatorData = m
@@ -86,11 +86,23 @@ func (s *Service) registerSubscribers(epoch types.Epoch, digest [4]byte) {
 			s.committeeIndexBeaconAttestationSubscriber, /* message handler */
 			digest,
 		)
+		s.subscribeStaticWithSubnets(
+			p2p.PrevoteSubnetTopicFormat,
+			s.validateCommitteeIndexPrevote,
+			s.committeeIndexBeaconPrevoteSubscriber,
+			digest,
+		)
 	} else {
 		s.subscribeDynamicWithSubnets(
 			p2p.AttestationSubnetTopicFormat,
 			s.validateCommitteeIndexBeaconAttestation,   /* validator */
 			s.committeeIndexBeaconAttestationSubscriber, /* message handler */
+			digest,
+		)
+		s.subscribeDynamicWithSubnets(
+			p2p.PrevoteSubnetTopicFormat,
+			s.validateCommitteeIndexPrevote,         /* validator */
+			s.committeeIndexBeaconPrevoteSubscriber, /* message handler */
 			digest,
 		)
 	}
@@ -144,12 +156,12 @@ func (s *Service) subscribeWithBase(topic string, validator wrappedVal, handle s
 	// Do not resubscribe already seen subscriptions.
 	ok := s.subHandler.topicExists(topic)
 	if ok {
-		log.Debugf("Provided topic already has an active subscription running: %s", topic)
+		log.Debugf("Validator subscription: subscribeWithBase: Provided topic already has an active subscription running: %s", topic)
 		return nil
 	}
 
 	if err := s.cfg.p2p.PubSub().RegisterTopicValidator(s.wrapAndReportValidation(topic, validator)); err != nil {
-		log.WithError(err).Error("Could not register validator for topic")
+		log.WithError(err).Error("Validator subscription: subscribeWithBase: Could not register validator for topic")
 		return nil
 	}
 
@@ -158,7 +170,7 @@ func (s *Service) subscribeWithBase(topic string, validator wrappedVal, handle s
 		// Any error subscribing to a PubSub topic would be the result of a misconfiguration of
 		// libp2p PubSub library or a subscription request to a topic that fails to match the topic
 		// subscription filter.
-		log.WithError(err).Error("Could not subscribe topic")
+		log.WithError(err).Error("Validator subscription: subscribeWithBase: Could not subscribe topic")
 		return nil
 	}
 	s.subHandler.addTopic(sub.Topic(), sub)
@@ -174,7 +186,7 @@ func (s *Service) subscribeWithBase(topic string, validator wrappedVal, handle s
 		defer func() {
 			if r := recover(); r != nil {
 				tracing.AnnotateError(span, fmt.Errorf("panic occurred: %v", r))
-				log.WithField("error", r).Error("Panic occurred")
+				log.WithField("error", r).Error("Validator subscription: Panic occurred")
 				debug.PrintStack()
 			}
 		}()
@@ -182,14 +194,14 @@ func (s *Service) subscribeWithBase(topic string, validator wrappedVal, handle s
 		span.AddAttributes(trace.StringAttribute("topic", topic))
 
 		if msg.ValidatorData == nil {
-			log.Error("Received nil message on pubsub")
+			log.Error("Validator subscription: Received nil message on pubsub")
 			messageFailedProcessingCounter.WithLabelValues(topic).Inc()
 			return
 		}
 
 		if err := handle(ctx, msg.ValidatorData.(proto.Message)); err != nil {
 			tracing.AnnotateError(span, err)
-			log.WithError(err).Error("Could not handle p2p pubsub")
+			log.WithError(err).Error("Validator subscription: Could not handle p2p pubsub")
 			messageFailedProcessingCounter.WithLabelValues(topic).Inc()
 			return
 		}
@@ -202,7 +214,7 @@ func (s *Service) subscribeWithBase(topic string, validator wrappedVal, handle s
 			if err != nil {
 				// This should only happen when the context is cancelled or subscription is cancelled.
 				if err != pubsub.ErrSubscriptionCancelled { // Only log a warning on unexpected errors.
-					log.WithError(err).Warn("Subscription next failed")
+					log.WithError(err).Warn("Validator subscription: Subscription next failed")
 				}
 				// Cancel subscription in the event of an error, as we are
 				// now exiting topic event loop.
@@ -210,7 +222,8 @@ func (s *Service) subscribeWithBase(topic string, validator wrappedVal, handle s
 				return
 			}
 
-			if msg.ReceivedFrom == s.cfg.p2p.PeerID() {
+			// TODO remove second condition in if when saving prevote by node to itselfs pool logic is added
+			if msg.ReceivedFrom == s.cfg.p2p.PeerID() && !strings.Contains(*msg.Topic, p2p.GossipPrevoteMessage) {
 				continue
 			}
 
@@ -219,7 +232,7 @@ func (s *Service) subscribeWithBase(topic string, validator wrappedVal, handle s
 	}
 
 	go messageLoop()
-	log.WithField("topic", topic).Info("Subscribed to topic")
+	log.WithField("topic", topic).Info("Validator subscription: Validator subscription: Subscribed to topic")
 	return sub
 }
 
@@ -243,16 +256,16 @@ func (s *Service) wrapAndReportValidation(topic string, v wrappedVal) (string, p
 		}
 		retDigest, err := p2p.ExtractGossipDigest(topic)
 		if err != nil {
-			log.WithField("topic", topic).Errorf("Invalid topic format of pubsub topic: %v", err)
+			log.WithField("topic", topic).Errorf("Validator subscription: Invalid topic format of pubsub topic: %v", err)
 			return pubsub.ValidationIgnore
 		}
 		currDigest, err := s.currentForkDigest()
 		if err != nil {
-			log.WithField("topic", topic).Errorf("Unable to retrieve fork data: %v", err)
+			log.WithField("topic", topic).Errorf("Validator subscription: Unable to retrieve fork data: %v", err)
 			return pubsub.ValidationIgnore
 		}
 		if currDigest != retDigest {
-			log.WithField("topic", topic).Debugf("Received message from outdated fork digest %#x", retDigest)
+			log.WithField("topic", topic).Warnf("Validator subscription: Received message from outdated fork digest %#x", retDigest)
 			return pubsub.ValidationIgnore
 		}
 		b, err := v(ctx, pid, msg)
@@ -263,7 +276,7 @@ func (s *Service) wrapAndReportValidation(topic string, v wrappedVal) (string, p
 				"peer id":      pid.String(),
 				"agent":        agentString(pid, s.cfg.p2p.Host()),
 				"gossip score": s.cfg.p2p.Peers().Scorers().GossipScorer().Score(pid),
-			}).Debugf("Gossip message was rejected")
+			}).Warn("Validator subscription: Gossip message was rejected")
 			messageFailedValidationCounter.WithLabelValues(topic).Inc()
 		}
 		if b == pubsub.ValidationIgnore {
@@ -274,7 +287,7 @@ func (s *Service) wrapAndReportValidation(topic string, v wrappedVal) (string, p
 					"peer id":      pid.String(),
 					"agent":        agentString(pid, s.cfg.p2p.Host()),
 					"gossip score": s.cfg.p2p.Peers().Scorers().GossipScorer().Score(pid),
-				}).Debugf("Gossip message was ignored")
+				}).Error("Validator subscription: Gossip message was ignored")
 			}
 			messageIgnoredValidationCounter.WithLabelValues(topic).Inc()
 		}
@@ -314,11 +327,25 @@ func (s *Service) subscribeStaticWithSubnets(topic string, validator wrappedVal,
 				}
 				valid, err := isDigestValid(digest, genesis, genRoot)
 				if err != nil {
-					log.Error(err)
+					log.WithError(err).WithFields(logrus.Fields{
+						"digest":        fmt.Sprintf("%#x", digest),
+						"isDigestValid": valid,
+						"topic":         topic,
+						"s.curSlot":     s.cfg.chain.CurrentSlot(),
+						"curSlot":       slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+					}).Debug("Validator subscription: subscribeStaticWithSubnets: error 0")
 					continue
 				}
 				if !valid {
-					log.Warnf("Attestation subnets with digest %#x are no longer valid, unsubscribing from all of them.", digest)
+					log.WithError(err).WithFields(logrus.Fields{
+						"digest":        fmt.Sprintf("%#x", digest),
+						"isDigestValid": valid,
+						"topic":         topic,
+						"s.curSlot":     s.cfg.chain.CurrentSlot(),
+						"curSlot":       slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+					}).Warn("Validator subscription: subscribeStaticWithSubnets: invalid digest")
+
+					log.Warnf("Validator subscription: Attestation subnets with digest %#x are no longer valid, unsubscribing from all of them.", digest)
 					// Unsubscribes from all our current subnets.
 					for i := uint64(0); i < params.BeaconNetworkConfig().AttestationSubnetCount; i++ {
 						fullTopic := fmt.Sprintf(topic, digest, i) + s.cfg.p2p.Encoding().ProtocolSuffix()
@@ -327,11 +354,22 @@ func (s *Service) subscribeStaticWithSubnets(topic string, validator wrappedVal,
 					ticker.Done()
 					return
 				}
+
+				log.WithError(err).WithFields(logrus.Fields{
+					"digest":                 fmt.Sprintf("%#x", digest),
+					"isDigestValid":          valid,
+					"topic":                  topic,
+					"s.curSlot":              s.cfg.chain.CurrentSlot(),
+					"curSlot":                slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+					"AttestationSubnetCount": params.BeaconNetworkConfig().AttestationSubnetCount,
+				}).Debug("Validator subscription: subscribeStaticWithSubnets: 1")
+
 				// Check every slot that there are enough peers
 				for i := uint64(0); i < params.BeaconNetworkConfig().AttestationSubnetCount; i++ {
 					if !s.validPeersExist(s.addDigestAndIndexToTopic(topic, digest, i)) {
-						log.Debugf("No peers found subscribed to attestation gossip subnet with "+
+						log.Debugf("Validator subscription: No peers found subscribed to attestation gossip subnet with "+
 							"committee index %d. Searching network for peers subscribed to the subnet.", i)
+
 						_, err := s.cfg.p2p.FindPeersWithSubnet(
 							s.ctx,
 							s.addDigestAndIndexToTopic(topic, digest, i),
@@ -339,7 +377,7 @@ func (s *Service) subscribeStaticWithSubnets(topic string, validator wrappedVal,
 							flags.Get().MinimumPeersPerSubnet,
 						)
 						if err != nil {
-							log.WithError(err).Debug("Could not search for peers")
+							log.WithError(err).Info("Could not search for peers")
 							return
 						}
 					}
@@ -358,6 +396,14 @@ func (s *Service) subscribeDynamicWithSubnets(
 	handle subHandler,
 	digest [4]byte,
 ) {
+
+	log.WithFields(logrus.Fields{
+		"1:topicFormat": topicFormat,
+		"2:digest":      fmt.Sprintf("%#x", digest),
+		"3:s.curSlot":   s.cfg.chain.CurrentSlot(),
+		"4:calcSlot":    slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+	}).Debug("Validator subscription: subscribeDynamicWithSubnets: START")
+
 	genRoot := s.cfg.chain.GenesisValidatorsRoot()
 	_, e, err := forks.RetrieveForkDataFromDigest(digest, genRoot[:])
 	if err != nil {
@@ -371,6 +417,7 @@ func (s *Service) subscribeDynamicWithSubnets(
 	subscriptions := make(map[uint64]*pubsub.Subscription, params.BeaconConfig().MaxCommitteesPerSlot)
 	genesis := s.cfg.chain.GenesisTime()
 	ticker := slots.NewSlotTicker(genesis, params.BeaconConfig().SecondsPerSlot)
+	attestationSubnetCount := params.BeaconNetworkConfig().AttestationSubnetCount
 
 	go func() {
 		for {
@@ -379,16 +426,42 @@ func (s *Service) subscribeDynamicWithSubnets(
 				ticker.Done()
 				return
 			case currentSlot := <-ticker.C():
+
+				log.WithFields(logrus.Fields{
+					"0:currentSlot": currentSlot,
+					"1:topicFormat": topicFormat,
+					"2:digest":      fmt.Sprintf("%#x", digest),
+					"3:s.curSlot":   s.cfg.chain.CurrentSlot(),
+					"4:calcSlot":    slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+				}).Debug("Validator subscription: subscribeDynamicWithSubnets: slot ticker 0")
+
 				if s.chainStarted.IsSet() && s.cfg.initialSync.Syncing() {
 					continue
 				}
 				valid, err := isDigestValid(digest, genesis, genRoot)
 				if err != nil {
+					log.WithError(err).WithFields(logrus.Fields{
+						"0:isDigestValid": valid,
+						"0:currentSlot":   currentSlot,
+						"1:topicFormat":   topicFormat,
+						"2:digest":        fmt.Sprintf("%#x", digest),
+						"3:s.curSlot":     s.cfg.chain.CurrentSlot(),
+						"4:calcSlot":      slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+					}).Error("Validator subscription: subscribeDynamicWithSubnets: invalid digest")
 					log.Error(err)
 					continue
 				}
 				if !valid {
-					log.Warnf("Attestation subnets with digest %#x are no longer valid, unsubscribing from all of them.", digest)
+					log.WithFields(logrus.Fields{
+						"isDigestValid": valid,
+						"0:currentSlot": currentSlot,
+						"1:topicFormat": topicFormat,
+						"2:digest":      fmt.Sprintf("%#x", digest),
+						"3:s.curSlot":   s.cfg.chain.CurrentSlot(),
+						"4:calcSlot":    slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+					}).Warn("Validator subscription: subscribeDynamicWithSubnets: invalid digest")
+
+					log.Warnf("Validator subscription: Attestation subnets with digest %#x are no longer valid, unsubscribing from all of them.", digest)
 					// Unsubscribes from all our current subnets.
 					s.reValidateSubscriptions(subscriptions, []uint64{}, topicFormat, digest)
 					ticker.Done()
@@ -398,14 +471,63 @@ func (s *Service) subscribeDynamicWithSubnets(
 				// Resize as appropriate.
 				s.reValidateSubscriptions(subscriptions, wantedSubs, topicFormat, digest)
 
-				// subscribe desired aggregator subnets.
-				for _, idx := range wantedSubs {
-					s.subscribeAggregatorSubnet(subscriptions, idx, digest, validate, handle)
-				}
-				// find desired subs for attesters
-				attesterSubs := s.attesterSubnetIndices(currentSlot)
-				for _, idx := range attesterSubs {
-					s.lookupAttesterSubnets(digest, idx)
+				log.WithError(err).WithFields(logrus.Fields{
+					"wantedSubs":    wantedSubs,
+					"0:currentSlot": currentSlot,
+					"1:topicFormat": topicFormat,
+					"2:digest":      fmt.Sprintf("%#x", digest),
+					"3:s.curSlot":   s.cfg.chain.CurrentSlot(),
+					"4:calcSlot":    slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+				}).Debug("Validator subscription: subscribeDynamicWithSubnets: start subscribe aggregator subnet 2")
+
+				switch topicFormat {
+				case p2p.AttestationSubnetTopicFormat:
+					// subscribe desired subnets.
+					for _, idx := range wantedSubs {
+						// exclude prevoting subnets
+						if idx < attestationSubnetCount {
+							s.subscribeAggregatorSubnet(subscriptions, idx, digest, validate, handle, topicFormat)
+						}
+					}
+					// find desired subs for attesters
+					attesterSubs := s.attesterSubnetIndices(currentSlot)
+
+					log.WithError(err).WithFields(logrus.Fields{
+						"attesterSubs":  attesterSubs,
+						"0:currentSlot": currentSlot,
+						"1:topicFormat": topicFormat,
+						"2:digest":      fmt.Sprintf("%#x", digest),
+						"3:s.curSlot":   s.cfg.chain.CurrentSlot(),
+						"4:calcSlot":    slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+					}).Debug("Validator subscription: subscribeDynamicWithSubnets: start lookup Attester Subnets 3")
+
+					for _, idx := range attesterSubs {
+						s.lookupAttesterSubnets(digest, idx)
+					}
+
+				case p2p.PrevoteSubnetTopicFormat:
+					// subscribe desired subnets.
+					for _, idx := range wantedSubs {
+						// exclude attestations subnets
+						if idx >= attestationSubnetCount && idx < 2*attestationSubnetCount {
+							s.subscribeAggregatorSubnet(subscriptions, idx, digest, validate, handle, topicFormat)
+						}
+					}
+					prevoteSubs := slice.SetUint64(s.prevotingSubnetIndices(currentSlot))
+					for _, idx := range prevoteSubs {
+						s.lookupPrevotingSubnets(digest, idx)
+					}
+
+					log.WithError(err).WithFields(logrus.Fields{
+						"prevoteSubs": prevoteSubs,
+						//"prevoteAttrSubs": prevoteAttrSubs,
+						//"prevotePropSubs": prevotePropSubs,
+						"0:currentSlot": currentSlot,
+						"1:topicFormat": topicFormat,
+						"2:digest":      fmt.Sprintf("%#x", digest),
+						"3:s.curSlot":   s.cfg.chain.CurrentSlot(),
+						"4:calcSlot":    slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+					}).Debug("Validator subscription: subscribeDynamicWithSubnets: success 4")
 				}
 			}
 		}
@@ -413,8 +535,12 @@ func (s *Service) subscribeDynamicWithSubnets(
 }
 
 // revalidate that our currently connected subnets are valid.
-func (s *Service) reValidateSubscriptions(subscriptions map[uint64]*pubsub.Subscription,
-	wantedSubs []uint64, topicFormat string, digest [4]byte) {
+func (s *Service) reValidateSubscriptions(
+	subscriptions map[uint64]*pubsub.Subscription,
+	wantedSubs []uint64,
+	topicFormat string,
+	digest [4]byte,
+) {
 	for k, v := range subscriptions {
 		var wanted bool
 		for _, idx := range wantedSubs {
@@ -439,21 +565,36 @@ func (s *Service) subscribeAggregatorSubnet(
 	digest [4]byte,
 	validate wrappedVal,
 	handle subHandler,
+	topicFormat string,
 ) {
 	// do not subscribe if we have no peers in the same
 	// subnet
-	topic := p2p.GossipTypeMapping[reflect.TypeOf(&ethpb.Attestation{})]
+	var topic string
+	if strings.Contains(topicFormat, p2p.GossipPrevoteMessage) {
+		topic = p2p.GossipTypeMapping[reflect.TypeOf(&ethpb.PreVote{})]
+	} else {
+		topic = p2p.GossipTypeMapping[reflect.TypeOf(&ethpb.Attestation{})]
+	}
+
 	subnetTopic := fmt.Sprintf(topic, digest, idx)
+
+	log.WithFields(logrus.Fields{
+		"topic":     fmt.Sprintf("%s", subnetTopic),
+		"digest":    fmt.Sprintf("%#x", digest),
+		"s.curSlot": s.cfg.chain.CurrentSlot(),
+		"curSlot":   slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+	}).Debug("Validator subscription: subscribeAggregatorSubnet: start")
+
 	// check if subscription exists and if not subscribe the relevant subnet.
 	if _, exists := subscriptions[idx]; !exists {
 		subscriptions[idx] = s.subscribeWithBase(subnetTopic, validate, handle)
 	}
 	if !s.validPeersExist(subnetTopic) {
-		log.Debugf("No peers found subscribed to attestation gossip subnet with "+
+		log.Debugf("Validator subscription: No peers found subscribed to attestation gossip subnet with "+
 			"committee index %d. Searching network for peers subscribed to the subnet.", idx)
 		_, err := s.cfg.p2p.FindPeersWithSubnet(s.ctx, subnetTopic, idx, flags.Get().MinimumPeersPerSubnet)
 		if err != nil {
-			log.WithError(err).Debug("Could not search for peers")
+			log.WithError(err).Error("Validator subscription: Could not search for peers")
 		}
 	}
 }
@@ -475,11 +616,11 @@ func (s *Service) subscribeSyncSubnet(
 		subscriptions[idx] = s.subscribeWithBase(subnetTopic, validate, handle)
 	}
 	if !s.validPeersExist(subnetTopic) {
-		log.Debugf("No peers found subscribed to sync gossip subnet with "+
+		log.Debugf("Validator subscription: No peers found subscribed to sync gossip subnet with "+
 			"committee index %d. Searching network for peers subscribed to the subnet.", idx)
 		_, err := s.cfg.p2p.FindPeersWithSubnet(s.ctx, subnetTopic, idx, flags.Get().MinimumPeersPerSubnet)
 		if err != nil {
-			log.WithError(err).Debug("Could not search for peers")
+			log.WithError(err).Error("Validator subscription: Could not search for peers")
 		}
 	}
 }
@@ -530,7 +671,7 @@ func (s *Service) subscribeStaticWithSyncSubnets(topic string, validator wrapped
 				// Check every slot that there are enough peers
 				for i := uint64(0); i < params.BeaconConfig().SyncCommitteeSubnetCount; i++ {
 					if !s.validPeersExist(s.addDigestAndIndexToTopic(topic, digest, i)) {
-						log.Debugf("No peers found subscribed to sync gossip subnet with "+
+						log.Debugf("Validator subscription: No peers found subscribed to sync gossip subnet with "+
 							"committee index %d. Searching network for peers subscribed to the subnet.", i)
 						_, err := s.cfg.p2p.FindPeersWithSubnet(
 							s.ctx,
@@ -539,7 +680,7 @@ func (s *Service) subscribeStaticWithSyncSubnets(topic string, validator wrapped
 							flags.Get().MinimumPeersPerSubnet,
 						)
 						if err != nil {
-							log.WithError(err).Debug("Could not search for peers")
+							log.WithError(err).Error("Validator subscription: Validator subscription: Could not search for peers")
 							return
 						}
 					}
@@ -587,7 +728,7 @@ func (s *Service) subscribeDynamicWithSyncSubnets(
 					continue
 				}
 				if !valid {
-					log.Warnf("Sync subnets with digest %#x are no longer valid, unsubscribing from all of them.", digest)
+					log.Warnf("Validator subscription: Sync subnets with digest %#x are no longer valid, unsubscribing from all of them.", digest)
 					// Unsubscribes from all our current subnets.
 					s.reValidateSubscriptions(subscriptions, []uint64{}, topicFormat, digest)
 					ticker.Done()
@@ -612,20 +753,71 @@ func (s *Service) lookupAttesterSubnets(digest [4]byte, idx uint64) {
 	topic := p2p.GossipTypeMapping[reflect.TypeOf(&ethpb.Attestation{})]
 	subnetTopic := fmt.Sprintf(topic, digest, idx)
 	if !s.validPeersExist(subnetTopic) {
-		log.Debugf("No peers found subscribed to attestation gossip subnet with "+
-			"committee index %d. Searching network for peers subscribed to the subnet.", idx)
+		log.WithFields(logrus.Fields{
+			"idx":         idx,
+			"topic":       fmt.Sprintf("%s", topic),
+			"subnetTopic": subnetTopic,
+			"digest":      fmt.Sprintf("%#x", digest),
+			"curSlot":     s.cfg.chain.CurrentSlot(),
+		}).Debug("Validator subscription: lookupAttesterSubnets: searching peers for subnet")
 		// perform a search for peers with the desired committee index.
 		_, err := s.cfg.p2p.FindPeersWithSubnet(s.ctx, subnetTopic, idx, flags.Get().MinimumPeersPerSubnet)
 		if err != nil {
-			log.WithError(err).Debug("Could not search for peers")
+			log.WithError(err).WithFields(logrus.Fields{
+				"idx":         idx,
+				"topic":       fmt.Sprintf("%s", topic),
+				"subnetTopic": subnetTopic,
+				"digest":      fmt.Sprintf("%#x", digest),
+				"curSlot":     s.cfg.chain.CurrentSlot(),
+			}).Error("Validator subscription: lookupAttesterSubnets: searching peers failed")
 		}
+	} else {
+		log.WithFields(logrus.Fields{
+			"idx":         idx,
+			"topic":       fmt.Sprintf("%s", topic),
+			"subnetTopic": subnetTopic,
+			"digest":      fmt.Sprintf("%#x", digest),
+			"curSlot":     s.cfg.chain.CurrentSlot(),
+		}).Debug("Validator subscription: lookupAttesterSubnets: have peers for subnet")
+	}
+}
+
+// lookup peers for prevoting specific subnets.
+func (s *Service) lookupPrevotingSubnets(digest [4]byte, idx uint64) {
+	topic := p2p.GossipTypeMapping[reflect.TypeOf(&ethpb.PreVote{})]
+	subnetTopic := fmt.Sprintf(topic, digest, idx)
+	if !s.validPeersExist(subnetTopic) {
+		log.WithFields(logrus.Fields{
+			"idx":         idx,
+			"subnetTopic": subnetTopic,
+			"digest":      fmt.Sprintf("%#x", digest),
+			"curSlot":     s.cfg.chain.CurrentSlot(),
+		}).Debug("Validator subscription: lookupPrevotingSubnets: searching peers for subnet")
+		// perform a search for peers with the desired committee index.
+		_, err := s.cfg.p2p.FindPeersWithSubnet(s.ctx, subnetTopic, idx, flags.Get().MinimumPeersPerSubnet)
+		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"idx":         idx,
+				"subnetTopic": subnetTopic,
+				"digest":      fmt.Sprintf("%#x", digest),
+				"curSlot":     s.cfg.chain.CurrentSlot(),
+			}).Error("Validator subscription: lookupPrevotingSubnets: searching peers failed")
+		}
+	} else {
+		log.WithFields(logrus.Fields{
+			"idx":         idx,
+			"topic":       fmt.Sprintf("%s", topic),
+			"subnetTopic": subnetTopic,
+			"digest":      fmt.Sprintf("%#x", digest),
+			"curSlot":     s.cfg.chain.CurrentSlot(),
+		}).Debug("Validator subscription: lookupPrevotingSubnets: have peers for subnet")
 	}
 }
 
 func (s *Service) unSubscribeFromTopic(topic string) {
-	log.WithField("topic", topic).Debug("Unsubscribing from topic")
+	log.WithField("topic", topic).Debug("Validator subscription: Unsubscribing from topic")
 	if err := s.cfg.p2p.PubSub().UnregisterTopicValidator(topic); err != nil {
-		log.WithError(err).Error("Could not unregister topic validator")
+		log.WithError(err).Error("Validator subscription: Could not unregister topic validator")
 	}
 	sub := s.subHandler.subForTopic(topic)
 	if sub != nil {
@@ -647,10 +839,16 @@ func (s *Service) retrievePersistentSubs(currSlot types.Slot) []uint64 {
 	// Persistent subscriptions from validators
 	persistentSubs := s.persistentSubnetIndices()
 	// Update desired topic indices for aggregator
-	wantedSubs := s.aggregatorSubnetIndices(currSlot)
-
+	aggrSubs := s.aggregatorSubnetIndices(currSlot)
+	// Update desired topic indices for prevoting
+	prevotingSubs := s.prevotingSubnetIndices(currSlot)
 	// Combine subscriptions to get all requested subscriptions
-	return slice.SetUint64(append(persistentSubs, wantedSubs...))
+	wantedSubs := make([]uint64, 0, len(persistentSubs)+len(aggrSubs)+len(prevotingSubs))
+	wantedSubs = append(wantedSubs, persistentSubs...)
+	wantedSubs = append(wantedSubs, aggrSubs...)
+	wantedSubs = append(wantedSubs, prevotingSubs...)
+	//uniq
+	return slice.SetUint64(wantedSubs)
 }
 
 func (_ *Service) retrieveActiveSyncSubnets(currEpoch types.Epoch) []uint64 {
@@ -673,27 +871,39 @@ func (s *Service) filterNeededPeers(pids []peer.ID) []peer.ID {
 	currSlot := s.cfg.chain.CurrentSlot()
 	wantedSubs := s.retrievePersistentSubs(currSlot)
 	wantedSubs = slice.SetUint64(append(wantedSubs, s.attesterSubnetIndices(currSlot)...))
-	topic := p2p.GossipTypeMapping[reflect.TypeOf(&ethpb.Attestation{})]
+	topicAtt := p2p.GossipTypeMapping[reflect.TypeOf(&ethpb.Attestation{})]
+	topicPrv := p2p.GossipTypeMapping[reflect.TypeOf(&ethpb.PreVote{})]
 
 	// Map of peers in subnets
 	peerMap := make(map[peer.ID]bool)
 
 	for _, sub := range wantedSubs {
-		subnetTopic := fmt.Sprintf(topic, digest, sub) + s.cfg.p2p.Encoding().ProtocolSuffix()
-		peers := s.cfg.p2p.PubSub().ListPeers(subnetTopic)
-		if len(peers) > flags.Get().MinimumPeersPerSubnet {
+		subnetTopicAtt := fmt.Sprintf(topicAtt, digest, sub) + s.cfg.p2p.Encoding().ProtocolSuffix()
+		subPeersAtt := s.cfg.p2p.PubSub().ListPeers(subnetTopicAtt)
+		if len(subPeersAtt) > flags.Get().MinimumPeersPerSubnet {
 			// In the event we have more than the minimum, we can
 			// mark the remaining as viable for pruning.
-			peers = peers[:flags.Get().MinimumPeersPerSubnet]
+			subPeersAtt = subPeersAtt[:flags.Get().MinimumPeersPerSubnet]
 		}
 		// Add peer to peer map.
-		for _, p := range peers {
+		for _, p := range subPeersAtt {
 			// Even if the peer id has
 			// already been seen we still set
 			// it, as the outcome is the same.
 			peerMap[p] = true
 		}
+		// prevoting
+		subnetTopicPrv := fmt.Sprintf(topicPrv, digest, sub) + s.cfg.p2p.Encoding().ProtocolSuffix()
+		subPeersPrv := s.cfg.p2p.PubSub().ListPeers(subnetTopicPrv)
+		for _, p := range subPeersPrv {
+			peerMap[p] = true
+		}
 	}
+
+	log.WithFields(logrus.Fields{
+		"pids":    pids,
+		"curSlot": s.cfg.chain.CurrentSlot(),
+	}).Info("Validator subscription: filterNeededPeers")
 
 	// Clear out necessary peers from the peers to prune.
 	newPeers := make([]peer.ID, 0, len(pids))
@@ -728,7 +938,7 @@ func (s *Service) currentForkDigest() ([4]byte, error) {
 	return forks.CreateForkDigest(s.cfg.chain.GenesisTime(), genRoot[:])
 }
 
-// Checks if the provided digest matches up with the current supposed digest.
+// isDigestValid Checks if the provided digest matches up with the current supposed digest.
 func isDigestValid(digest [4]byte, genesis time.Time, genValRoot [32]byte) (bool, error) {
 	retDigest, err := forks.CreateForkDigest(genesis, genValRoot[:])
 	if err != nil {

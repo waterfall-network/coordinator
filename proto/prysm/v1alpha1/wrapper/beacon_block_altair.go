@@ -285,8 +285,13 @@ func (w altairBeaconBlockBody) Deposits() []*eth.Deposit {
 }
 
 // VoluntaryExits returns the voluntary exits in the block.
-func (w altairBeaconBlockBody) VoluntaryExits() []*eth.SignedVoluntaryExit {
+func (w altairBeaconBlockBody) VoluntaryExits() []*eth.VoluntaryExit {
 	return w.b.VoluntaryExits
+}
+
+// Withdrawals returns the withdrawals in the block.
+func (w altairBeaconBlockBody) Withdrawals() []*eth.Withdrawal {
+	return w.b.Withdrawals
 }
 
 // SyncAggregate returns the sync aggregate in the block.

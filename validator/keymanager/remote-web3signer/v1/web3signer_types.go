@@ -155,14 +155,15 @@ type BeaconBlock struct {
 
 // BeaconBlockBody a sub property of BeaconBlock.
 type BeaconBlockBody struct {
-	RandaoReveal      string                 `json:"randao_reveal"`
-	Eth1Data          *Eth1Data              `json:"eth1_data"`
-	Graffiti          string                 `json:"graffiti"` // 32 bytes
-	ProposerSlashings []*ProposerSlashing    `json:"proposer_slashings"`
-	AttesterSlashings []*AttesterSlashing    `json:"attester_slashings"`
-	Attestations      []*Attestation         `json:"attestations"`
-	Deposits          []*Deposit             `json:"deposits"`
-	VoluntaryExits    []*SignedVoluntaryExit `json:"voluntary_exits"`
+	RandaoReveal      string              `json:"randao_reveal"`
+	Eth1Data          *Eth1Data           `json:"eth1_data"`
+	Graffiti          string              `json:"graffiti"` // 32 bytes
+	ProposerSlashings []*ProposerSlashing `json:"proposer_slashings"`
+	AttesterSlashings []*AttesterSlashing `json:"attester_slashings"`
+	Attestations      []*Attestation      `json:"attestations"`
+	Deposits          []*Deposit          `json:"deposits"`
+	VoluntaryExits    []*VoluntaryExit    `json:"voluntary_exits"`
+	Withdrawals       []*Withdrawal       `json:"withdrawals"`
 }
 
 // Eth1Data a sub property of BeaconBlockBody.
@@ -171,7 +172,6 @@ type Eth1Data struct {
 	DepositCount string `json:"deposit_count"` /* uint64 */
 	BlockHash    string `json:"block_hash"`
 	Candidates   string `json:"candidates"`
-	Finalization string `json:"finalization"`
 }
 
 // ProposerSlashing a sub property of BeaconBlockBody.
@@ -220,22 +220,23 @@ type Deposit struct {
 // DepositData Prysm uses Deposit_data instead of DepositData which is inconsistent naming
 type DepositData struct {
 	PublicKey             string `json:"pubkey"`
+	CreatorAddress        string `json:"creator_address"`
 	WithdrawalCredentials string `json:"withdrawal_credentials"`
 	Amount                string `json:"amount"` /* uint64 */
 	Signature             string `json:"signature"`
 }
 
-// SignedVoluntaryExit is a sub property of BeaconBlockBody.
-type SignedVoluntaryExit struct {
-	// Prysm uses Exit instead of Message
-	Message   *VoluntaryExit `json:"message"`
-	Signature string         `json:"signature"`
-}
-
-// VoluntaryExit a sub property of SignedVoluntaryExit.
+// VoluntaryExit a sub property of VoluntaryExit.
 type VoluntaryExit struct {
 	Epoch          string `json:"epoch"`           /* uint64 */
 	ValidatorIndex string `json:"validator_index"` /* uint64 */
+}
+
+// Withdrawal a sub property of Withdrawal.
+type Withdrawal struct {
+	Epoch          string `json:"epoch"`           /* uint64 */
+	ValidatorIndex string `json:"validator_index"` /* uint64 */
+	Amount         string `json:"amount"`          /* uint64 */
 }
 
 // BeaconBlockAltairBlockV2 a sub property of BlockV2AltairSignRequest.
@@ -255,15 +256,16 @@ type BeaconBlockAltair struct {
 
 // BeaconBlockBodyAltair a sub property of BeaconBlockAltair.
 type BeaconBlockBodyAltair struct {
-	RandaoReveal      string                 `json:"randao_reveal"`
-	Eth1Data          *Eth1Data              `json:"eth1_data"`
-	Graffiti          string                 `json:"graffiti"` /* Hash32 */
-	ProposerSlashings []*ProposerSlashing    `json:"proposer_slashings"`
-	AttesterSlashings []*AttesterSlashing    `json:"attester_slashings"`
-	Attestations      []*Attestation         `json:"attestations"`
-	Deposits          []*Deposit             `json:"deposits"`
-	VoluntaryExits    []*SignedVoluntaryExit `json:"voluntary_exits"`
-	SyncAggregate     *SyncAggregate         `json:"sync_aggregate"`
+	RandaoReveal      string              `json:"randao_reveal"`
+	Eth1Data          *Eth1Data           `json:"eth1_data"`
+	Graffiti          string              `json:"graffiti"` /* Hash32 */
+	ProposerSlashings []*ProposerSlashing `json:"proposer_slashings"`
+	AttesterSlashings []*AttesterSlashing `json:"attester_slashings"`
+	Attestations      []*Attestation      `json:"attestations"`
+	Deposits          []*Deposit          `json:"deposits"`
+	VoluntaryExits    []*VoluntaryExit    `json:"voluntary_exits"`
+	SyncAggregate     *SyncAggregate      `json:"sync_aggregate"`
+	Withdrawals       []*Withdrawal       `json:"withdrawals"`
 }
 
 // SyncAggregate is a sub property of BeaconBlockBodyAltair.

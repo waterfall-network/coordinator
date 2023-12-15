@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	libp2pcore "github.com/libp2p/go-libp2p-core"
-	"github.com/libp2p/go-libp2p-core/network"
+	libp2pcore "github.com/libp2p/go-libp2p/core"
+	"github.com/libp2p/go-libp2p/core/network"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition"
 	prysmP2P "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/encoder"

@@ -9,7 +9,7 @@ import (
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
-	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
+	fieldParams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 )
 
 var hexRegex = regexp.MustCompile("^0x[0-9a-fA-F]+$")
@@ -104,6 +104,15 @@ func ToBytes4(x []byte) [4]byte {
 // than 32 bytes.
 func ToBytes32(x []byte) [32]byte {
 	var y [32]byte
+	copy(y[:], x)
+	return y
+}
+
+// ToBytes20 is a convenience method for converting a byte slice to a fix
+// sized 20 byte array. This method will truncate the input if it is larger
+// than 20 bytes.
+func ToBytes20(x []byte) [20]byte {
+	var y [20]byte
 	copy(y[:], x)
 	return y
 }
@@ -408,12 +417,12 @@ func ReverseByteOrder(input []byte) []byte {
 
 // ZeroRoot returns whether or not a root is of proper length and non-zero hash.
 func ZeroRoot(root []byte) bool {
-	return string(make([]byte, fieldparams.RootLength)) == string(root)
+	return string(make([]byte, fieldParams.RootLength)) == string(root)
 }
 
 // IsRoot checks whether the byte array is a root.
 func IsRoot(root []byte) bool {
-	return len(root) == fieldparams.RootLength
+	return len(root) == fieldParams.RootLength
 }
 
 // IsValidRoot checks whether the byte array is a valid root.

@@ -13,7 +13,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-const baseUrl = "https://raw.githubusercontent.com/ethereum/consensus-specs/dev"
+const baseURL = "https://raw.githubusercontent.com/ethereum/consensus-specs/dev"
 
 // Regex to find Python's code snippets in markdown.
 var reg2 = regexp.MustCompile(`(?msU)^\x60\x60\x60python\n+def\s(.*)^\x60\x60\x60`)
@@ -27,9 +27,9 @@ func download(cliCtx *cli.Context) error {
 		}
 		for _, fileName := range fileNames {
 			outFilePath := path.Join(baseDir, dirName, fileName)
-			specDocUrl := fmt.Sprintf("%s/%s", baseUrl, fmt.Sprintf("%s/%s", dirName, fileName))
-			fmt.Printf("- %s\n", specDocUrl)
-			if err := getAndSaveFile(specDocUrl, outFilePath); err != nil {
+			specDocURL := fmt.Sprintf("%s/%s", baseURL, fmt.Sprintf("%s/%s", dirName, fileName))
+			fmt.Printf("- %s\n", specDocURL)
+			if err := getAndSaveFile(specDocURL, outFilePath); err != nil {
 				return err
 			}
 		}
@@ -38,7 +38,7 @@ func download(cliCtx *cli.Context) error {
 	return nil
 }
 
-func getAndSaveFile(specDocUrl, outFilePath string) error {
+func getAndSaveFile(specDocURL, outFilePath string) error {
 	// Create output file.
 	f, err := os.Create(filepath.Clean(outFilePath))
 	if err != nil {
@@ -51,7 +51,7 @@ func getAndSaveFile(specDocUrl, outFilePath string) error {
 	}()
 
 	// Download spec doc.
-	resp, err := http.Get(specDocUrl) // #nosec G107 -- False positive
+	resp, err := http.Get(specDocURL) // #nosec G107 -- False positive
 	if err != nil {
 		return err
 	}

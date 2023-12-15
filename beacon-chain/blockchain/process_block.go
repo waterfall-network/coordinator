@@ -6,13 +6,14 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed"
 	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	coreTime "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	forkchoicetypes "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/forkchoice/types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
@@ -93,13 +94,84 @@ var initialSyncBlockCacheSize = uint64(2 * params.BeaconConfig().SlotsPerEpoch)
 //	             store.justified_checkpoint = state.current_justified_checkpoint
 func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, blockRoot [32]byte) error {
 	ctx, span := trace.StartSpan(ctx, "blockChain.onBlock")
+	//required to support rewards and penalties state operations
+	ctx = context.WithValue(ctx, params.BeaconConfig().CtxBlockFetcherKey, db.BlockInfoFetcherFunc(s.cfg.BeaconDB))
 	defer span.End()
 
+	defer func(start time.Time, curSlot types.Slot) {
+		log.WithField(
+			"elapsed", time.Since(start),
+		).WithField(
+			"curSlot", curSlot,
+		).WithField(
+			"blSlot", signed.Block().Slot(),
+		).WithFields(logrus.Fields{
+			"parentRoot": fmt.Sprintf("%#x", signed.Block().ParentRoot()),
+			"root":       fmt.Sprintf("%#x", blockRoot),
+		}).Info("onBlock: end")
+	}(time.Now(), slots.CurrentSlot(uint64(s.genesisTime.Unix())))
+
+	s.onBlockMu.Lock()
+	defer s.onBlockMu.Unlock()
+
 	log.WithFields(logrus.Fields{
-		"block.slot": signed.Block().Slot(),
-		"ParentRoot": fmt.Sprintf("%#x", signed.Block().ParentRoot()),
+		"slot":       signed.Block().Slot(),
+		"root":       fmt.Sprintf("%#x", blockRoot),
+		"parentRoot": fmt.Sprintf("%#x", signed.Block().ParentRoot()),
 		"\u2692":     version.BuildId,
-	}).Info("<<< onBlock:START >>> ")
+	}).Info("onBlock: start")
+
+	if len(signed.Block().Body().Withdrawals()) > 0 {
+		for i, itm := range signed.Block().Body().Withdrawals() {
+			log.WithFields(logrus.Fields{
+				"i":              i,
+				"slot":           signed.Block().Slot(),
+				"Amount":         fmt.Sprintf("%d", itm.Amount),
+				"Epoch":          fmt.Sprintf("%d", itm.Epoch),
+				"InitTxHash":     fmt.Sprintf("%#x", itm.InitTxHash),
+				"PublicKey":      fmt.Sprintf("%#x", itm.PublicKey),
+				"ValidatorIndex": fmt.Sprintf("%d", itm.ValidatorIndex),
+			}).Info("onBlock: withdrawal")
+
+			////todo req. fork change handling
+			//if err := s.cfg.WithdrawalPool.Verify(itm); err != nil {
+			//	log.WithError(err).WithFields(logrus.Fields{
+			//		"i":              i,
+			//		"slot":           signed.Block().Slot(),
+			//		"Amount":         fmt.Sprintf("%d", itm.Amount),
+			//		"Epoch":          fmt.Sprintf("%d", itm.Epoch),
+			//		"InitTxHash":     fmt.Sprintf("%#x", itm.InitTxHash),
+			//		"PublicKey":      fmt.Sprintf("%#x", itm.PublicKey),
+			//		"ValidatorIndex": fmt.Sprintf("%d", itm.ValidatorIndex),
+			//	}).Error("onBlock:: withdrawal")
+			//	return err
+			//}
+		}
+	}
+
+	if len(signed.Block().Body().VoluntaryExits()) > 0 {
+		for i, itm := range signed.Block().Body().VoluntaryExits() {
+			log.WithFields(logrus.Fields{
+				"i":              i,
+				"slot":           signed.Block().Slot(),
+				"Epoch":          fmt.Sprintf("%d", itm.Epoch),
+				"InitTxHash":     fmt.Sprintf("%#x", itm.InitTxHash),
+				"ValidatorIndex": fmt.Sprintf("%d", itm.ValidatorIndex),
+			}).Info("onBlock: exit")
+
+			////todo req. fork change handling
+			//if err := s.cfg.ExitPool.Verify(itm); err != nil {
+			//	log.WithError(err).WithFields(logrus.Fields{
+			//		"i":              i,
+			//		"slot":           signed.Block().Slot(),
+			//		"Epoch":          fmt.Sprintf("%d", itm.Epoch),
+			//		"InitTxHash":     fmt.Sprintf("%#x", itm.InitTxHash),
+			//		"ValidatorIndex": fmt.Sprintf("%d", itm.ValidatorIndex),
+			//	}).Error("onBlock:: exit")
+			//	return err
+			//}
+		}
+	}
 
 	if err := helpers.BeaconBlockIsNil(signed); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
@@ -116,6 +188,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		}).Error("onBlock error")
 		return err
 	}
+
 	postState, err := transition.ExecuteStateTransition(ctx, preState, signed)
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
@@ -162,7 +235,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	log.WithError(err).WithFields(logrus.Fields{
 		"block.slot": signed.Block().Slot(),
 		//"postBlockVoting": helpers.PrintBlockVotingArr(postState.BlockVoting()),
-		"postState.Finalization": gwatCommon.HashArrayFromBytes(postState.Eth1Data().Finalization),
+		"postState.Finalization": gwatCommon.HashArrayFromBytes(postState.SpineData().Finalization),
 	}).Info("onBlock: save post state")
 
 	// If slasher is configured, forward the attestations in the block via
@@ -238,8 +311,9 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 
 	log.WithError(err).WithFields(logrus.Fields{
 		"block.slot": signed.Block().Slot(),
+		"headRoot":   fmt.Sprintf("%#x", headRoot),
 		//"postBlockVoting": helpers.PrintBlockVotingArr(postState.BlockVoting()),
-		"headState.Finalization": gwatCommon.HashArrayFromBytes(s.head.state.Eth1Data().Finalization),
+		"headState.Finalization": gwatCommon.HashArrayFromBytes(s.head.state.SpineData().Finalization),
 	}).Info("onBlock: update head")
 
 	if err != nil {
@@ -254,12 +328,6 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	}
 	headState, err := s.cfg.StateGen.StateByRoot(ctx, headRoot)
 
-	log.WithError(err).WithFields(logrus.Fields{
-		"block.slot":             signed.Block().Slot(),
-		"headRoot":               fmt.Sprintf("%#x", headRoot),
-		"headState.Finalization": gwatCommon.HashArrayFromBytes(headState.Eth1Data().Finalization),
-	}).Info("onBlock: get state by root")
-
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"block.slot": signed.Block().Slot(),
@@ -267,10 +335,11 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		return err
 	}
 
-	//// todo test no-belatrix
-	//if _, err := s.notifyForkchoiceUpdate(ctx, headState, headBlock.Block(), headRoot, bytesutil.ToBytes32(finalized.Root)); err != nil {
-	//	return err
-	//}
+	log.WithFields(logrus.Fields{
+		"block.slot":             signed.Block().Slot(),
+		"headRoot":               fmt.Sprintf("%#x", headRoot),
+		"headState.Finalization": gwatCommon.HashArrayFromBytes(headState.SpineData().Finalization),
+	}).Info("onBlock: get state by root")
 
 	if err := s.saveHead(ctx, headRoot, headBlock, headState); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
@@ -282,12 +351,11 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	log.WithError(err).WithFields(logrus.Fields{
 		"block.slot": signed.Block().Slot(),
 		//"postBlockVoting": helpers.PrintBlockVotingArr(postState.BlockVoting()),
-		"headState.Finalization": gwatCommon.HashArrayFromBytes(s.head.state.Eth1Data().Finalization),
+		"headState.Finalization": gwatCommon.HashArrayFromBytes(s.head.state.SpineData().Finalization),
 	}).Info("onBlock: save head")
 
 	log.WithFields(logrus.Fields{
-		"condition":                s.CurrentSlot() == signed.Block().Slot() && !s.isSync(),
-		"isSync":                   s.isSync(),
+		"IsSynced":                 s.IsSynced(),
 		"CurrentSlot == BlockSlot": s.CurrentSlot() == signed.Block().Slot(),
 		"CurrentSlot":              s.CurrentSlot(),
 		"BlockSlot":                signed.Block().Slot(),
@@ -355,6 +423,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 			}).Error("onBlock error could not check if node is optimistically synced")
 			return errors.Wrap(err, "could not check if node is optimistically synced")
 		}
+
 		go func() {
 			// Send an event regarding the new finalized checkpoint over a common event feed.
 			s.cfg.StateNotifier.StateFeed().Send(&feed.Event{
@@ -376,55 +445,47 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 				log.WithError(err).Error("Could not insert finalized deposits.")
 			}
 		}()
-
 	}
+
+	// Deprecated
+	////create gwat synchronization params
+	//if currEpoch := slots.ToEpoch(postState.Slot()); currEpoch > s.store.LastEpoch() {
+	//	if err = s.saveGwatSyncState(ctx, blockRoot); err != nil {
+	//		return err
+	//	}
+	//	s.store.SetLastEpoch(currEpoch)
+	//}
 
 	defer reportAttestationInclusion(b)
 
 	return s.handleEpochBoundary(ctx, postState)
 }
 
-func getStateVersionAndPayload(st state.BeaconState) (int, *ethpb.ExecutionPayloadHeader, error) {
-	if st == nil {
-		return 0, nil, errors.New("nil state")
-	}
-	var preStateHeader *ethpb.ExecutionPayloadHeader
-	var err error
-	preStateVersion := st.Version()
-	switch preStateVersion {
-	case version.Phase0, version.Altair:
-	default:
-		preStateHeader, err = st.LatestExecutionPayloadHeader()
-		if err != nil {
-			return 0, nil, err
-		}
-	}
-	return preStateVersion, preStateHeader, nil
-}
-
 func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlock, blockRoots [][32]byte) ([]*ethpb.Checkpoint, []*ethpb.Checkpoint, error) {
 	ctx, span := trace.StartSpan(ctx, "blockChain.onBlockBatch")
+	//required to support rewards and penalties state operations
+	ctx = context.WithValue(ctx, params.BeaconConfig().CtxBlockFetcherKey, BatchHandlerBlockInfoFetcherFunc(s.cfg.BeaconDB, blks, blockRoots))
 	defer span.End()
 
 	if len(blks) == 0 || len(blockRoots) == 0 {
 		log.WithFields(logrus.Fields{
 			"len(blks) == 0":       len(blks) == 0,
 			"len(blockRoots) == 0": len(blockRoots) == 0,
-		}).Error(">>>>> onBlockBatch error")
+		}).Error("Block batch handling error")
 		return nil, nil, errors.New("no blocks provided")
 	}
 
 	if len(blks) != len(blockRoots) {
 		log.WithError(errWrongBlockCount).WithFields(logrus.Fields{
 			"len(blks) != len(blockRoots)": len(blks) != len(blockRoots),
-		}).Error(">>>>> onBlockBatch error")
+		}).Error("Block batch handling error")
 		return nil, nil, errWrongBlockCount
 	}
 
 	if err := helpers.BeaconBlockIsNil(blks[0]); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"blks[0]": blks[0],
-		}).Error(">>>>> onBlockBatch error")
+		}).Error("Block batch handling error")
 		return nil, nil, err
 	}
 	b := blks[0].Block()
@@ -433,23 +494,24 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 	if err := s.verifyBlkPreState(ctx, b); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"verifyBlkPreState()": "fail",
-		}).Error(">>>>> onBlockBatch error")
+		}).Error("Block batch handling error")
 		return nil, nil, err
 	}
 	preState, err := s.cfg.StateGen.StateByRootInitialSync(ctx, bytesutil.ToBytes32(b.ParentRoot()))
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"StateByRootInitialSync": "fail",
-		}).Error(">>>>> onBlockBatch error")
+		}).Error("Block batch handling error")
 		return nil, nil, err
 	}
 	if preState == nil || preState.IsNil() {
 		log.WithError(fmt.Errorf("nil pre state for slot %d", b.Slot())).WithFields(logrus.Fields{
 			"preState == nil || preState.IsNil()": preState == nil || preState.IsNil(),
-		}).Error(">>>>> onBlockBatch error")
+		}).Error("Block batch handling error")
 		return nil, nil, fmt.Errorf("nil pre state for slot %d", b.Slot())
 	}
 
+	stSpineData := make([]*ethpb.SpineData, len(blks))
 	jCheckpoints := make([]*ethpb.Checkpoint, len(blks))
 	fCheckpoints := make([]*ethpb.Checkpoint, len(blks))
 	sigSet := &bls.SignatureBatch{
@@ -465,9 +527,10 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 		if err != nil {
 			log.WithError(err).WithFields(logrus.Fields{
 				"ExecuteStateTransitionNoVerifyAnySig": "fail",
-			}).Error(">>>>> onBlockBatch error")
+			}).Error("Block batch handling error")
 			return nil, nil, err
 		}
+		stSpineData[i] = preState.SpineData()
 		// Save potential boundary states.
 		if slots.IsEpochStart(preState.Slot()) {
 			boundaries[blockRoots[i]] = preState.Copy()
@@ -482,14 +545,14 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 		log.WithError(err).WithFields(logrus.Fields{
 			"Verify()": "fail",
 			"verify":   verify,
-		}).Error(">>>>> onBlockBatch error")
+		}).Error("Block batch handling error")
 		return nil, nil, err
 	}
 	if !verify {
 		log.WithError(errors.New("batch block signature verification failed")).WithFields(logrus.Fields{
 			"Verify()": "fail",
 			"verify":   verify,
-		}).Error(">>>>> onBlockBatch error")
+		}).Error("Block batch handling error")
 		return nil, nil, errors.New("batch block signature verification failed")
 	}
 
@@ -497,11 +560,7 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 	for i, b := range blks {
 		s.saveInitSyncBlock(blockRoots[i], b)
 
-		if err := s.insertBlockToForkChoiceStore(ctx, b.Block(), blockRoots[i], fCheckpoints[i], jCheckpoints[i]); err != nil {
-			return nil, nil, err
-		}
-
-		if _, err := s.notifyForkchoiceUpdate(ctx, preState, b.Block(), blockRoots[i], bytesutil.ToBytes32(fCheckpoints[i].Root)); err != nil {
+		if err = s.insertBlockToForkChoiceStore(ctx, b.Block(), blockRoots[i], fCheckpoints[i], jCheckpoints[i], stSpineData[i]); err != nil {
 			return nil, nil, err
 		}
 	}
@@ -510,7 +569,7 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 		if err := s.cfg.StateGen.SaveState(ctx, r, st); err != nil {
 			log.WithError(err).WithFields(logrus.Fields{
 				"s.cfg.StateGen.SaveState:boundaries": "fail",
-			}).Error(">>>>> onBlockBatch error")
+			}).Error("Block batch handling error")
 			return nil, nil, err
 		}
 	}
@@ -520,16 +579,47 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 	if err := s.cfg.StateGen.SaveState(ctx, lastBR, preState); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"StateByRootInitialSync:lastBR": "fail",
-		}).Error(">>>>> onBlockBatch error")
+		}).Error("Block batch handling error")
 		return nil, nil, err
 	}
 	if err := s.saveHeadNoDB(ctx, lastB, lastBR, preState); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"saveHeadNoDB": "fail",
-		}).Error(">>>>> onBlockBatch error")
+		}).Error("Block batch handling error")
 		return nil, nil, err
 	}
 	return fCheckpoints, jCheckpoints, nil
+}
+
+func BatchHandlerBlockInfoFetcherFunc(dbRo db.ReadOnlyDatabase, blks []block.SignedBeaconBlock, blockRoots [][32]byte) params.CtxBlockFetcher {
+	return func(ctx context.Context, blockRoot [32]byte) (types.ValidatorIndex, types.Slot, uint64, error) {
+		var blk block.SignedBeaconBlock
+		var err error
+
+		for i, root := range blockRoots {
+			if blockRoot == root {
+				blk = blks[i]
+				break
+			}
+		}
+		// if not found in batch
+		if blk == nil {
+			blk, err = dbRo.Block(ctx, blockRoot)
+			if err != nil {
+				return 0, 0, 0, err
+			}
+		}
+		if blk == nil {
+			return 0, 0, 0, db.ErrNotFound
+		}
+
+		votesIncluded := uint64(0)
+		for _, att := range blk.Block().Body().Attestations() {
+			votesIncluded += att.AggregationBits.Count()
+		}
+
+		return blk.Block().ProposerIndex(), blk.Block().Slot(), votesIncluded, nil
+	}
 }
 
 // handles a block after the block's batch has been verified, where we can save blocks
@@ -574,6 +664,14 @@ func (s *Service) handleBlockAfterBatchVerify(ctx context.Context, signed block.
 		s.store.SetPrevFinalizedCheckpt(finalized)
 		s.store.SetFinalizedCheckpt(fCheckpoint)
 	}
+	// Deprecated
+	////create gwat synchronization params
+	//if currEpoch := slots.ToEpoch(signed.Block().Slot()); currEpoch > s.store.LastEpoch() {
+	//	if err := s.saveGwatSyncState(ctx, blockRoot); err != nil {
+	//		return err
+	//	}
+	//	s.store.SetLastEpoch(currEpoch)
+	//}
 	return nil
 }
 
@@ -614,20 +712,23 @@ func (s *Service) handleEpochBoundary(ctx context.Context, postState state.Beaco
 			return err
 		}
 	}
-
 	return nil
 }
 
 // This feeds in the block and block's attestations to fork choice store. It's allows fork choice store
 // to gain information on the most current chain.
-func (s *Service) insertBlockAndAttestationsToForkChoiceStore(ctx context.Context, blk block.BeaconBlock, root [32]byte,
-	st state.BeaconState) error {
+func (s *Service) insertBlockAndAttestationsToForkChoiceStore(
+	ctx context.Context,
+	blk block.BeaconBlock,
+	root [32]byte,
+	st state.BeaconState,
+) error {
 	ctx, span := trace.StartSpan(ctx, "blockChain.insertBlockAndAttestationsToForkChoiceStore")
 	defer span.End()
 
 	fCheckpoint := st.FinalizedCheckpoint()
 	jCheckpoint := st.CurrentJustifiedCheckpoint()
-	if err := s.insertBlockToForkChoiceStore(ctx, blk, root, fCheckpoint, jCheckpoint); err != nil {
+	if err := s.insertBlockToForkChoiceStore(ctx, blk, root, fCheckpoint, jCheckpoint, st.SpineData()); err != nil {
 		return err
 	}
 	// Feed in block's attestations to fork choice store.
@@ -645,33 +746,26 @@ func (s *Service) insertBlockAndAttestationsToForkChoiceStore(ctx context.Contex
 	return nil
 }
 
-func (s *Service) insertBlockToForkChoiceStore(ctx context.Context, blk block.BeaconBlock,
-	root [32]byte, fCheckpoint, jCheckpoint *ethpb.Checkpoint) error {
+func (s *Service) insertBlockToForkChoiceStore(
+	ctx context.Context,
+	blk block.BeaconBlock,
+	root [32]byte,
+	fCheckpoint, jCheckpoint *ethpb.Checkpoint,
+	spineData *ethpb.SpineData,
+) error {
 	if err := s.fillInForkChoiceMissingBlocks(ctx, blk, fCheckpoint, jCheckpoint); err != nil {
 		return err
 	}
+
 	// Feed in block to fork choice store.
-
-	payloadHash, err := getBlockPayloadHash(blk)
-	if err != nil {
-		return err
-	}
 	return s.cfg.ForkChoiceStore.InsertOptimisticBlock(ctx,
-		blk.Slot(), root, bytesutil.ToBytes32(blk.ParentRoot()), payloadHash,
+		blk.Slot(), root, bytesutil.ToBytes32(blk.ParentRoot()),
 		jCheckpoint.Epoch,
-		fCheckpoint.Epoch)
-}
-
-func getBlockPayloadHash(blk block.BeaconBlock) ([32]byte, error) {
-	payloadHash := [32]byte{}
-	if blocks.IsPreBellatrixVersion(blk.Version()) {
-		return payloadHash, nil
-	}
-	payload, err := blk.Body().ExecutionPayload()
-	if err != nil {
-		return payloadHash, err
-	}
-	return bytesutil.ToBytes32(payload.BlockHash), nil
+		fCheckpoint.Epoch,
+		jCheckpoint.Root,
+		fCheckpoint.Root,
+		spineData,
+	)
 }
 
 // This saves post state info to DB or cache. This also saves post state info to fork choice store.

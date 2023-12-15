@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	types "github.com/prysmaticlabs/eth2-types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/sync/backfill"
@@ -32,6 +33,7 @@ type StateManager interface {
 	HasState(ctx context.Context, blockRoot [32]byte) (bool, error)
 	HasStateInCache(ctx context.Context, blockRoot [32]byte) (bool, error)
 	StateByRoot(ctx context.Context, blockRoot [32]byte) (state.BeaconState, error)
+	SyncStateByRoot(ctx context.Context, blockRoot [32]byte) (state.BeaconState, error)
 	StateByRootIfCachedNoCopy(blockRoot [32]byte) state.BeaconState
 	StateByRootInitialSync(ctx context.Context, blockRoot [32]byte) (state.BeaconState, error)
 	RecoverStateSummary(ctx context.Context, blockRoot [32]byte) (*ethpb.StateSummary, error)
@@ -46,7 +48,9 @@ type StateManager interface {
 type State struct {
 	beaconDB                db.NoHeadAccessDatabase
 	slotsPerArchivedPoint   types.Slot
+	loadStateCache          *cache.LoadStateCache
 	hotStateCache           *hotStateCache
+	syncStateCache          *hotStateCache
 	finalizedInfo           *finalizedInfo
 	epochBoundaryStateCache *epochBoundaryState
 	saveHotStateDB          *saveHotStateDbConfig
@@ -85,7 +89,9 @@ func WithBackfillStatus(bfs *backfill.Status) StateGenOption {
 func New(beaconDB db.NoHeadAccessDatabase, opts ...StateGenOption) *State {
 	s := &State{
 		beaconDB:                beaconDB,
+		loadStateCache:          cache.NewLoadStateCache(),
 		hotStateCache:           newHotStateCache(),
+		syncStateCache:          newHotStateCache(),
 		finalizedInfo:           &finalizedInfo{slot: 0, root: params.BeaconConfig().ZeroHash},
 		slotsPerArchivedPoint:   params.BeaconConfig().SlotsPerArchivedPoint,
 		epochBoundaryStateCache: newBoundaryStateCache(),

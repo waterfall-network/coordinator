@@ -10,7 +10,7 @@ import (
 )
 
 func Test_headerToHeaderInfo(t *testing.T) {
-	nr_0 := uint64(500)
+	nr0 := uint64(500)
 	type args struct {
 		hdr *gethTypes.Header
 	}
@@ -23,7 +23,7 @@ func Test_headerToHeaderInfo(t *testing.T) {
 		{
 			name: "OK",
 			args: args{hdr: &gethTypes.Header{
-				Number: &nr_0,
+				Number: &nr0,
 				Time:   2345,
 			}},
 			want: &HeaderInfo{

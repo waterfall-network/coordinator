@@ -17,6 +17,7 @@ go_library(
         "sync_committee.go",
         "validator.go",
         "wait_for_activation.go",
+        "prevoting.go",
     ],
     importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/client",
     visibility = ["//validator:__subpackages__"],

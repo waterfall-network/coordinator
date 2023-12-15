@@ -15,236 +15,193 @@ import (
 
 func TestPool_InsertVoluntaryExit(t *testing.T) {
 	type fields struct {
-		pending []*ethpb.SignedVoluntaryExit
+		pending []*ethpb.VoluntaryExit
 	}
 	type args struct {
-		exit *ethpb.SignedVoluntaryExit
+		exit *ethpb.VoluntaryExit
 	}
 	tests := []struct {
 		name   string
 		fields fields
 		args   args
-		want   []*ethpb.SignedVoluntaryExit
+		want   []*ethpb.VoluntaryExit
 	}{
 		{
 			name: "Prevent inserting nil exit",
 			fields: fields{
-				pending: make([]*ethpb.SignedVoluntaryExit, 0),
+				pending: make([]*ethpb.VoluntaryExit, 0),
 			},
 			args: args{
 				exit: nil,
 			},
-			want: []*ethpb.SignedVoluntaryExit{},
+			want: []*ethpb.VoluntaryExit{},
 		},
 		{
 			name: "Prevent inserting malformed exit",
 			fields: fields{
-				pending: make([]*ethpb.SignedVoluntaryExit, 0),
+				pending: make([]*ethpb.VoluntaryExit, 0),
 			},
 			args: args{
-				exit: &ethpb.SignedVoluntaryExit{
-					Exit: nil,
-				},
+				exit: &ethpb.VoluntaryExit{},
 			},
-			want: []*ethpb.SignedVoluntaryExit{},
+			want: []*ethpb.VoluntaryExit{},
 		},
 		{
 			name: "Empty list",
 			fields: fields{
-				pending: make([]*ethpb.SignedVoluntaryExit, 0),
+				pending: make([]*ethpb.VoluntaryExit, 0),
 			},
 			args: args{
-				exit: &ethpb.SignedVoluntaryExit{
-					Exit: &ethpb.VoluntaryExit{
-						Epoch:          12,
-						ValidatorIndex: 1,
-					},
+				exit: &ethpb.VoluntaryExit{
+					Epoch:          12,
+					ValidatorIndex: 1,
 				},
 			},
-			want: []*ethpb.SignedVoluntaryExit{
+			want: []*ethpb.VoluntaryExit{
 				{
-					Exit: &ethpb.VoluntaryExit{
-						Epoch:          12,
-						ValidatorIndex: 1,
-					},
+					Epoch:          12,
+					ValidatorIndex: 1,
 				},
 			},
 		},
 		{
 			name: "Duplicate identical exit",
 			fields: fields{
-				pending: []*ethpb.SignedVoluntaryExit{
+				pending: []*ethpb.VoluntaryExit{
 					{
-						Exit: &ethpb.VoluntaryExit{
-							Epoch:          12,
-							ValidatorIndex: 1,
-						},
+
+						Epoch:          12,
+						ValidatorIndex: 1,
 					},
 				},
 			},
 			args: args{
-				exit: &ethpb.SignedVoluntaryExit{
-					Exit: &ethpb.VoluntaryExit{
-						Epoch:          12,
-						ValidatorIndex: 1,
-					},
+				exit: &ethpb.VoluntaryExit{
+					Epoch:          12,
+					ValidatorIndex: 1,
 				},
 			},
-			want: []*ethpb.SignedVoluntaryExit{
+			want: []*ethpb.VoluntaryExit{
 				{
-					Exit: &ethpb.VoluntaryExit{
-						Epoch:          12,
-						ValidatorIndex: 1,
-					},
+					Epoch:          12,
+					ValidatorIndex: 1,
 				},
 			},
 		},
 		{
 			name: "Duplicate exit in pending list",
 			fields: fields{
-				pending: []*ethpb.SignedVoluntaryExit{
+				pending: []*ethpb.VoluntaryExit{
 					{
-						Exit: &ethpb.VoluntaryExit{
-							Epoch:          12,
-							ValidatorIndex: 1,
-						},
+						Epoch:          12,
+						ValidatorIndex: 1,
 					},
 				},
 			},
 			args: args{
-				exit: &ethpb.SignedVoluntaryExit{
-					Exit: &ethpb.VoluntaryExit{
-						Epoch:          12,
-						ValidatorIndex: 1,
-					},
+				exit: &ethpb.VoluntaryExit{
+					Epoch:          12,
+					ValidatorIndex: 1,
 				},
 			},
-			want: []*ethpb.SignedVoluntaryExit{
+			want: []*ethpb.VoluntaryExit{
 				{
-					Exit: &ethpb.VoluntaryExit{
-						Epoch:          12,
-						ValidatorIndex: 1,
-					},
+					Epoch:          12,
+					ValidatorIndex: 1,
 				},
 			},
 		},
 		{
 			name: "Duplicate validator index",
 			fields: fields{
-				pending: []*ethpb.SignedVoluntaryExit{
+				pending: []*ethpb.VoluntaryExit{
 					{
-						Exit: &ethpb.VoluntaryExit{
-							Epoch:          12,
-							ValidatorIndex: 1,
-						},
+						Epoch:          12,
+						ValidatorIndex: 1,
 					},
 				},
 			},
 			args: args{
-				exit: &ethpb.SignedVoluntaryExit{
-					Exit: &ethpb.VoluntaryExit{
-						Epoch:          20,
-						ValidatorIndex: 1,
-					},
+				exit: &ethpb.VoluntaryExit{
+					Epoch:          20,
+					ValidatorIndex: 1,
 				},
 			},
-			want: []*ethpb.SignedVoluntaryExit{
+			want: []*ethpb.VoluntaryExit{
 				{
-					Exit: &ethpb.VoluntaryExit{
-						Epoch:          12,
-						ValidatorIndex: 1,
-					},
+					Epoch:          12,
+					ValidatorIndex: 1,
 				},
 			},
 		},
 		{
 			name: "Duplicate received with more favorable exit epoch",
 			fields: fields{
-				pending: []*ethpb.SignedVoluntaryExit{
+				pending: []*ethpb.VoluntaryExit{
 					{
-						Exit: &ethpb.VoluntaryExit{
-							Epoch:          12,
-							ValidatorIndex: 1,
-						},
+						Epoch:          12,
+						ValidatorIndex: 1,
 					},
 				},
 			},
 			args: args{
-				exit: &ethpb.SignedVoluntaryExit{
-					Exit: &ethpb.VoluntaryExit{
-						Epoch:          4,
-						ValidatorIndex: 1,
-					},
+				exit: &ethpb.VoluntaryExit{
+					Epoch:          4,
+					ValidatorIndex: 1,
 				},
 			},
-			want: []*ethpb.SignedVoluntaryExit{
+			want: []*ethpb.VoluntaryExit{
 				{
-					Exit: &ethpb.VoluntaryExit{
-						Epoch:          4,
-						ValidatorIndex: 1,
-					},
+					Epoch:          4,
+					ValidatorIndex: 1,
 				},
 			},
 		},
 		{
 			name: "Exit for already exited validator",
 			fields: fields{
-				pending: []*ethpb.SignedVoluntaryExit{},
+				pending: []*ethpb.VoluntaryExit{},
 			},
 			args: args{
-				exit: &ethpb.SignedVoluntaryExit{
-					Exit: &ethpb.VoluntaryExit{
-						Epoch:          12,
-						ValidatorIndex: 2,
-					},
+				exit: &ethpb.VoluntaryExit{
+					Epoch:          12,
+					ValidatorIndex: 2,
 				},
 			},
-			want: []*ethpb.SignedVoluntaryExit{},
+			want: []*ethpb.VoluntaryExit{},
 		},
 		{
 			name: "Maintains sorted order",
 			fields: fields{
-				pending: []*ethpb.SignedVoluntaryExit{
+				pending: []*ethpb.VoluntaryExit{
 					{
-						Exit: &ethpb.VoluntaryExit{
-							Epoch:          12,
-							ValidatorIndex: 0,
-						},
+						Epoch:          12,
+						ValidatorIndex: 0,
 					},
 					{
-						Exit: &ethpb.VoluntaryExit{
-							Epoch:          12,
-							ValidatorIndex: 2,
-						},
+						Epoch:          12,
+						ValidatorIndex: 2,
 					},
 				},
 			},
 			args: args{
-				exit: &ethpb.SignedVoluntaryExit{
-					Exit: &ethpb.VoluntaryExit{
-						Epoch:          10,
-						ValidatorIndex: 1,
-					},
+				exit: &ethpb.VoluntaryExit{
+					Epoch:          10,
+					ValidatorIndex: 1,
 				},
 			},
-			want: []*ethpb.SignedVoluntaryExit{
+			want: []*ethpb.VoluntaryExit{
 				{
-					Exit: &ethpb.VoluntaryExit{
-						Epoch:          12,
-						ValidatorIndex: 0,
-					},
+					Epoch:          12,
+					ValidatorIndex: 0,
 				},
 				{
-					Exit: &ethpb.VoluntaryExit{
-						Epoch:          10,
-						ValidatorIndex: 1,
-					},
+					Epoch:          10,
+					ValidatorIndex: 1,
 				},
 				{
-					Exit: &ethpb.VoluntaryExit{
-						Epoch:          12,
-						ValidatorIndex: 2,
-					},
+					Epoch:          12,
+					ValidatorIndex: 2,
 				},
 			},
 		},
@@ -252,16 +209,28 @@ func TestPool_InsertVoluntaryExit(t *testing.T) {
 	ctx := context.Background()
 	validators := []*ethpb.Validator{
 		{ // 0
-			ExitEpoch: params.BeaconConfig().FarFutureEpoch,
+			ExitEpoch:      params.BeaconConfig().FarFutureEpoch,
+			ActivationHash: (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:       (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:  []*ethpb.WithdrawalOp{},
 		},
 		{ // 1
-			ExitEpoch: params.BeaconConfig().FarFutureEpoch,
+			ExitEpoch:      params.BeaconConfig().FarFutureEpoch,
+			ActivationHash: (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:       (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:  []*ethpb.WithdrawalOp{},
 		},
 		{ // 2 - Already exited.
-			ExitEpoch: 15,
+			ExitEpoch:      15,
+			ActivationHash: (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:       (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:  []*ethpb.WithdrawalOp{},
 		},
 		{ // 3
-			ExitEpoch: params.BeaconConfig().FarFutureEpoch,
+			ExitEpoch:      params.BeaconConfig().FarFutureEpoch,
+			ActivationHash: (params.BeaconConfig().ZeroHash)[:],
+			ExitHash:       (params.BeaconConfig().ZeroHash)[:],
+			WithdrawalOps:  []*ethpb.WithdrawalOp{},
 		},
 	}
 	for _, tt := range tests {
@@ -286,10 +255,10 @@ func TestPool_InsertVoluntaryExit(t *testing.T) {
 
 func TestPool_MarkIncluded(t *testing.T) {
 	type fields struct {
-		pending []*ethpb.SignedVoluntaryExit
+		pending []*ethpb.VoluntaryExit
 	}
 	type args struct {
-		exit *ethpb.SignedVoluntaryExit
+		exit *ethpb.VoluntaryExit
 	}
 	tests := []struct {
 		name   string
@@ -300,32 +269,17 @@ func TestPool_MarkIncluded(t *testing.T) {
 		{
 			name: "Removes from pending list",
 			fields: fields{
-				pending: []*ethpb.SignedVoluntaryExit{
-					{
-						Exit: &ethpb.VoluntaryExit{ValidatorIndex: 1},
-					},
-					{
-						Exit: &ethpb.VoluntaryExit{ValidatorIndex: 2},
-					},
-					{
-						Exit: &ethpb.VoluntaryExit{ValidatorIndex: 3},
-					},
+				pending: []*ethpb.VoluntaryExit{
+					{ValidatorIndex: 1},
+					{ValidatorIndex: 2},
+					{ValidatorIndex: 3},
 				},
 			},
 			args: args{
-				exit: &ethpb.SignedVoluntaryExit{
-					Exit: &ethpb.VoluntaryExit{ValidatorIndex: 2},
-				},
+				exit: &ethpb.VoluntaryExit{ValidatorIndex: 2},
 			},
 			want: fields{
-				pending: []*ethpb.SignedVoluntaryExit{
-					{
-						Exit: &ethpb.VoluntaryExit{ValidatorIndex: 1},
-					},
-					{
-						Exit: &ethpb.VoluntaryExit{ValidatorIndex: 3},
-					},
-				},
+				pending: []*ethpb.VoluntaryExit{{ValidatorIndex: 1}, {ValidatorIndex: 3}},
 			},
 		},
 	}
@@ -349,7 +303,7 @@ func TestPool_MarkIncluded(t *testing.T) {
 
 func TestPool_PendingExits(t *testing.T) {
 	type fields struct {
-		pending []*ethpb.SignedVoluntaryExit
+		pending []*ethpb.VoluntaryExit
 		noLimit bool
 	}
 	type args struct {
@@ -359,159 +313,159 @@ func TestPool_PendingExits(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   []*ethpb.SignedVoluntaryExit
+		want   []*ethpb.VoluntaryExit
 	}{
 		{
 			name: "Empty list",
 			fields: fields{
-				pending: []*ethpb.SignedVoluntaryExit{},
+				pending: []*ethpb.VoluntaryExit{},
 			},
 			args: args{
 				slot: 100000,
 			},
-			want: []*ethpb.SignedVoluntaryExit{},
+			want: []*ethpb.VoluntaryExit{},
 		},
 		{
 			name: "All eligible",
 			fields: fields{
-				pending: []*ethpb.SignedVoluntaryExit{
-					{Exit: &ethpb.VoluntaryExit{Epoch: 0}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 1}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 2}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 3}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 4}},
+				pending: []*ethpb.VoluntaryExit{
+					{Epoch: 0},
+					{Epoch: 1},
+					{Epoch: 2},
+					{Epoch: 3},
+					{Epoch: 4},
 				},
 			},
 			args: args{
 				slot: 1000000,
 			},
-			want: []*ethpb.SignedVoluntaryExit{
-				{Exit: &ethpb.VoluntaryExit{Epoch: 0}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 1}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 2}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 3}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 4}},
+			want: []*ethpb.VoluntaryExit{
+				{Epoch: 0},
+				{Epoch: 1},
+				{Epoch: 2},
+				{Epoch: 3},
+				{Epoch: 4},
 			},
 		},
 		{
 			name: "All eligible, above max",
 			fields: fields{
 				noLimit: true,
-				pending: []*ethpb.SignedVoluntaryExit{
-					{Exit: &ethpb.VoluntaryExit{Epoch: 0}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 1}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 2}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 3}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 4}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 5}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 6}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 7}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 8}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 9}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 10}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 11}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 12}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 13}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 14}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 15}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 16}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 17}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 18}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 19}},
+				pending: []*ethpb.VoluntaryExit{
+					{Epoch: 0},
+					{Epoch: 1},
+					{Epoch: 2},
+					{Epoch: 3},
+					{Epoch: 4},
+					{Epoch: 5},
+					{Epoch: 6},
+					{Epoch: 7},
+					{Epoch: 8},
+					{Epoch: 9},
+					{Epoch: 10},
+					{Epoch: 11},
+					{Epoch: 12},
+					{Epoch: 13},
+					{Epoch: 14},
+					{Epoch: 15},
+					{Epoch: 16},
+					{Epoch: 17},
+					{Epoch: 18},
+					{Epoch: 19},
 				},
 			},
 			args: args{
 				slot: 1000000,
 			},
-			want: []*ethpb.SignedVoluntaryExit{
-				{Exit: &ethpb.VoluntaryExit{Epoch: 0}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 1}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 2}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 3}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 4}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 5}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 6}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 7}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 8}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 9}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 10}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 11}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 12}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 13}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 14}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 15}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 16}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 17}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 18}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 19}},
+			want: []*ethpb.VoluntaryExit{
+				{Epoch: 0},
+				{Epoch: 1},
+				{Epoch: 2},
+				{Epoch: 3},
+				{Epoch: 4},
+				{Epoch: 5},
+				{Epoch: 6},
+				{Epoch: 7},
+				{Epoch: 8},
+				{Epoch: 9},
+				{Epoch: 10},
+				{Epoch: 11},
+				{Epoch: 12},
+				{Epoch: 13},
+				{Epoch: 14},
+				{Epoch: 15},
+				{Epoch: 16},
+				{Epoch: 17},
+				{Epoch: 18},
+				{Epoch: 19},
 			},
 		},
 		{
 			name: "All eligible, block max",
 			fields: fields{
-				pending: []*ethpb.SignedVoluntaryExit{
-					{Exit: &ethpb.VoluntaryExit{Epoch: 0}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 1}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 2}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 3}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 4}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 5}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 6}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 7}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 8}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 9}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 10}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 11}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 12}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 13}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 14}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 15}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 16}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 17}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 18}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 19}},
+				pending: []*ethpb.VoluntaryExit{
+					{Epoch: 0},
+					{Epoch: 1},
+					{Epoch: 2},
+					{Epoch: 3},
+					{Epoch: 4},
+					{Epoch: 5},
+					{Epoch: 6},
+					{Epoch: 7},
+					{Epoch: 8},
+					{Epoch: 9},
+					{Epoch: 10},
+					{Epoch: 11},
+					{Epoch: 12},
+					{Epoch: 13},
+					{Epoch: 14},
+					{Epoch: 15},
+					{Epoch: 16},
+					{Epoch: 17},
+					{Epoch: 18},
+					{Epoch: 19},
 				},
 			},
 			args: args{
 				slot: 1000000,
 			},
-			want: []*ethpb.SignedVoluntaryExit{
-				{Exit: &ethpb.VoluntaryExit{Epoch: 0}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 1}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 2}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 3}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 4}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 5}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 6}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 7}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 8}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 9}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 10}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 11}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 12}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 13}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 14}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 15}},
+			want: []*ethpb.VoluntaryExit{
+				{Epoch: 0},
+				{Epoch: 1},
+				{Epoch: 2},
+				{Epoch: 3},
+				{Epoch: 4},
+				{Epoch: 5},
+				{Epoch: 6},
+				{Epoch: 7},
+				{Epoch: 8},
+				{Epoch: 9},
+				{Epoch: 10},
+				{Epoch: 11},
+				{Epoch: 12},
+				{Epoch: 13},
+				{Epoch: 14},
+				{Epoch: 15},
 			},
 		},
 		{
 			name: "Some eligible",
 			fields: fields{
-				pending: []*ethpb.SignedVoluntaryExit{
-					{Exit: &ethpb.VoluntaryExit{Epoch: 0}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 3}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 4}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 2}},
-					{Exit: &ethpb.VoluntaryExit{Epoch: 1}},
+				pending: []*ethpb.VoluntaryExit{
+					{Epoch: 0},
+					{Epoch: 3},
+					{Epoch: 4},
+					{Epoch: 2},
+					{Epoch: 1},
 				},
 			},
 			args: args{
 				slot: 2 * params.BeaconConfig().SlotsPerEpoch,
 			},
-			want: []*ethpb.SignedVoluntaryExit{
-				{Exit: &ethpb.VoluntaryExit{Epoch: 0}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 2}},
-				{Exit: &ethpb.VoluntaryExit{Epoch: 1}},
+			want: []*ethpb.VoluntaryExit{
+				{Epoch: 0},
+				{Epoch: 2},
+				{Epoch: 1},
 			},
 		},
 	}

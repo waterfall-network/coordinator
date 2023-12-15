@@ -13,6 +13,8 @@ import (
 )
 
 type subnetIDs struct {
+	prevoting         *lru.Cache
+	prevotingLock     sync.RWMutex
 	attester          *lru.Cache
 	attesterLock      sync.RWMutex
 	aggregator        *lru.Cache
@@ -29,11 +31,45 @@ func newSubnetIDs() *subnetIDs {
 	// Max size is set to 2 epoch length.
 	cacheSize := int(params.BeaconConfig().SlotsPerEpoch.Mul(params.BeaconConfig().MaxCommitteesPerSlot * 2)) // lint:ignore uintcast -- constant values that would panic on startup if negative.
 	attesterCache := lruwrpr.New(cacheSize)
+	prevotingCache := lruwrpr.New(cacheSize)
 	aggregatorCache := lruwrpr.New(cacheSize)
 	epochDuration := time.Duration(params.BeaconConfig().SlotsPerEpoch.Mul(params.BeaconConfig().SecondsPerSlot))
 	subLength := epochDuration * time.Duration(params.BeaconConfig().EpochsPerRandomSubnetSubscription)
 	persistentCache := cache.New(subLength*time.Second, epochDuration*time.Second)
-	return &subnetIDs{attester: attesterCache, aggregator: aggregatorCache, persistentSubnets: persistentCache}
+	return &subnetIDs{
+		attester:          attesterCache,
+		aggregator:        aggregatorCache,
+		persistentSubnets: persistentCache,
+		prevoting:         prevotingCache,
+	}
+}
+
+// AddPrevotingSubnetID adds the subnet index for subscribing subnet for the prevoting of a given slot.
+func (s *subnetIDs) AddPrevotingSubnetID(slot types.Slot, subnetID uint64) {
+	s.prevotingLock.Lock()
+	defer s.prevotingLock.Unlock()
+
+	ids := []uint64{subnetID}
+	val, exists := s.prevoting.Get(slot)
+	if exists {
+		ids = slice.UnionUint64(append(val.([]uint64), ids...))
+	}
+	s.prevoting.Add(slot, ids)
+}
+
+// GetPrevotingSubnetIDs gets the subnet IDs for subscribed subnets for prevoting of the slot.
+func (s *subnetIDs) GetPrevotingSubnetIDs(slot types.Slot) []uint64 {
+	s.prevotingLock.RLock()
+	defer s.prevotingLock.RUnlock()
+
+	val, exists := s.prevoting.Get(slot)
+	if !exists {
+		return nil
+	}
+	if v, ok := val.([]uint64); ok {
+		return v
+	}
+	return nil
 }
 
 // AddAttesterSubnetID adds the subnet index for subscribing subnet for the attester of a given slot.
@@ -146,4 +182,8 @@ func (s *subnetIDs) EmptyAllCaches() {
 	s.subnetsLock.Lock()
 	s.persistentSubnets.Flush()
 	s.subnetsLock.Unlock()
+
+	s.prevotingLock.Lock()
+	s.prevoting.Purge()
+	s.prevotingLock.Unlock()
 }

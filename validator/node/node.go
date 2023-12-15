@@ -51,7 +51,6 @@ import (
 	remote_web3signer "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager/remote-web3signer"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/rpc"
 	validatorMiddleware "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/rpc/apimiddleware"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/web"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -641,7 +640,7 @@ func (c *ValidatorClient) registerRPCGatewayService(cliCtx *cli.Context) error {
 			"text/event-stream", &gwruntime.EventSourceJSONPb{},
 		),
 	)
-	muxHandler := func(apiMware *apimiddleware.ApiProxyMiddleware, h http.HandlerFunc, w http.ResponseWriter, req *http.Request) {
+	muxHandler := func(apiMware *apimiddleware.APIProxyMiddleware, h http.HandlerFunc, w http.ResponseWriter, req *http.Request) {
 		// The validator gateway handler requires this special logic as it serves two kinds of APIs, namely
 		// the standard validator keymanager API under the /eth namespace, and the Prysm internal
 		// validator API under the /api namespace. Finally, it also serves requests to host the validator web UI.
@@ -654,8 +653,9 @@ func (c *ValidatorClient) registerRPCGatewayService(cliCtx *cli.Context) error {
 			// Else, we handle with the Prysm API gateway without a middleware.
 			h(w, req)
 		} else {
+			log.Warn("TODO: op skipping: no web handler")
 			// Finally, we handle with the web server.
-			web.Handler(w, req)
+			//web.Handler(w, req)
 		}
 	}
 
@@ -670,7 +670,7 @@ func (c *ValidatorClient) registerRPCGatewayService(cliCtx *cli.Context) error {
 		gateway.WithMaxCallRecvMsgSize(maxCallSize),
 		gateway.WithPbHandlers([]*gateway.PbMux{pbHandler}),
 		gateway.WithAllowedOrigins(allowedOrigins),
-		gateway.WithApiMiddleware(&validatorMiddleware.ValidatorEndpointFactory{}),
+		gateway.WithAPIMiddleware(&validatorMiddleware.ValidatorEndpointFactory{}),
 		gateway.WithMuxHandler(muxHandler),
 		gateway.WithTimeout(uint64(timeout)),
 	}

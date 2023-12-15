@@ -79,7 +79,6 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	GenesisDelay:             300, // 5 min.
 
 	// Misc constant.
-	MaxCreatorsPerSlot:             4,
 	TargetCommitteeSize:            128,
 	MaxValidatorsPerCommittee:      2048,
 	MaxCommitteesPerSlot:           64,
@@ -94,10 +93,10 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	HysteresisUpwardMultiplier:     5,
 
 	// Gwei value constants.
-	MinDepositAmount:          1000 * 1e9,
-	MaxEffectiveBalance:       32000 * 1e9,
-	EjectionBalance:           16000 * 1e9,
-	EffectiveBalanceIncrement: 1000 * 1e9,
+	MinDepositAmount:          100 * 1e9,
+	MaxEffectiveBalance:       3200 * 1e9,
+	EjectionBalance:           1600 * 1e9,
+	EffectiveBalanceIncrement: 100 * 1e9,
 
 	// Initial value constants.
 	BLSWithdrawalPrefixByte: byte(0),
@@ -114,15 +113,19 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	//EpochsPerEth1VotingPeriod:        64,
 	EpochsPerEth1VotingPeriod:        4,
 	SlotsPerHistoricalRoot:           8192,
-	MinValidatorWithdrawabilityDelay: 256,
-	ShardCommitteePeriod:             256,
+	WithdrawalBalanceLockPeriod:      4,
+	MinValidatorWithdrawabilityDelay: 4, // orig val: 256
+	ShardCommitteePeriod:             4, // orig val: 256:epochs a validator must participate before exiting.
 	MinEpochsToInactivityPenalty:     4,
 	//Eth1FollowDistance:               2048,
-	Eth1FollowDistance:         16,
+	Eth1FollowDistance: 16,
+	//Eth1FollowDistance:         64,
 	SafeSlotsToUpdateJustified: 8,
 
-	//BlockVoting slots
-	VotingRequiredSlots: 3,
+	//Optimistic consensus constants.
+	VotingRequiredSlots:           3,
+	BlockVotingMinSupportPrc:      50,
+	SpinePublicationsPefixSupport: 2,
 
 	// Fork choice algorithm constants.
 	ProposerScoreBoost: 70,
@@ -146,13 +149,14 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	//SecondsPerETH1Block: 14,
 	SecondsPerETH1Block: 4,
 
-	HeadSyncReadyIntervalMs: 1000,
+	GwatSyncIntervalMs: 1000,
 
 	// State list length constants.
 	EpochsPerHistoricalVector: 65536,
 	EpochsPerSlashingsVector:  8192,
 	HistoricalRootsLimit:      16777216,
 	ValidatorRegistryLimit:    1099511627776,
+	WithdrawalOpsLimit:        1024,
 
 	// Reward and penalty quotients constants.
 	BaseRewardFactor:               64,
@@ -161,6 +165,9 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	InactivityPenaltyQuotient:      67108864,
 	MinSlashingPenaltyQuotient:     128,
 	ProportionalSlashingMultiplier: 1,
+	BaseRewardMultiplier:           2.0,
+	MaxAnnualizedReturnRate:        0.2,
+	OptValidatorsNum:               3_000_000,
 
 	// Max operations per block constants.
 	MaxProposerSlashings: 16,
@@ -168,6 +175,7 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	MaxAttestations:      128,
 	MaxDeposits:          16,
 	MaxVoluntaryExits:    16,
+	MaxWithdrawals:       1024,
 
 	// BLS domain values.
 	DomainBeaconProposer:              bytesutil.ToBytes4(bytesutil.Bytes4(0)),
@@ -196,10 +204,10 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	GenesisCountdownInterval:       time.Minute,
 	ConfigName:                     ConfigNames[Mainnet],
 	PresetBase:                     "mainnet",
-	BeaconStateFieldCount:          21 + 1,
-	BeaconStateAltairFieldCount:    24 + 1,
-	BeaconStateBellatrixFieldCount: 25 + 1,
-	BlockVotingMinSupportPrc:       66,
+	BeaconStateFieldCount:          21 + 2,
+	BeaconStateAltairFieldCount:    24 + 2,
+	BeaconStateBellatrixFieldCount: 25 + 2,
+	CtxBlockFetcherKey:             CtxFnKey("CtxBlockFetcher"),
 
 	// Slasher related values.
 	WeakSubjectivityPeriod:          54000,
@@ -225,6 +233,9 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	TimelyTargetFlagIndex: 1,
 	TimelyHeadFlagIndex:   2,
 
+	// DAG Participation flag indices.
+	DAGTimelyVotingFlagIndex: 3,
+
 	// Incentivization weight values.
 	TimelySourceWeight: 14,
 	TimelyTargetWeight: 26,
@@ -232,6 +243,12 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	SyncRewardWeight:   2,
 	ProposerWeight:     8,
 	WeightDenominator:  64,
+
+	// DAG Incentivization weight values.
+	DAGTimelySourceWeight: 0.25,
+	DAGTimelyTargetWeight: 0.25,
+	DAGTimelyHeadWeight:   0.25,
+	DAGTimelyVotingWeight: 0.25,
 
 	// Validator related values.
 	TargetAggregatorsPerSyncSubcommittee: 16,
@@ -249,7 +266,6 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	ProportionalSlashingMultiplierAltair:    2,
 	MinSlashingPenaltyQuotientBellatrix:     32,
 	ProportionalSlashingMultiplierBellatrix: 3,
-	InactivityPenaltyQuotientBellatrix:      1 << 24,
 
 	// Light client
 	MinSyncCommitteeParticipants: 1,

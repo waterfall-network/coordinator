@@ -7,19 +7,10 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain/types"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/tracing"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	"go.opencensus.io/trace"
 )
-
-// searchThreshold to apply for when searching for blocks of a particular time. If the buffer
-// is exceeded we recalibrate the search again.
-const searchThreshold = 5
-
-// amount of times we repeat a failed search till is satisfies the conditional.
-const repeatedSearches = 2 * searchThreshold
 
 // BlockExists returns true if the block exists, its height and any possible error encountered.
 func (s *Service) BlockExists(ctx context.Context, hash common.Hash) (bool, *big.Int, error) {
@@ -30,8 +21,10 @@ func (s *Service) BlockExists(ctx context.Context, hash common.Hash) (bool, *big
 		if err != nil {
 			return false, nil, err
 		}
-		span.AddAttributes(trace.BoolAttribute("blockCacheHit", true))
-		return true, hdrInfo.Number, nil
+		if hdrInfo.Number.Uint64() > 0 {
+			span.AddAttributes(trace.BoolAttribute("blockCacheHit", true))
+			return true, hdrInfo.Number, nil
+		}
 	}
 	span.AddAttributes(trace.BoolAttribute("blockCacheHit", false))
 	header, err := s.eth1DataFetcher.HeaderByHash(ctx, hash)
@@ -84,7 +77,7 @@ func (s *Service) BlockHashByHeight(ctx context.Context, height *big.Int) (commo
 	header, err := s.eth1DataFetcher.HeaderByNumber(ctx, height)
 	if err != nil {
 		if height == nil {
-			return [32]byte{}, errors.Wrap(err, fmt.Sprintf("could not query last finalized header"))
+			return [32]byte{}, errors.Wrap(err, "could not query last finalized header")
 		}
 		return [32]byte{}, errors.Wrap(err, fmt.Sprintf("could not query header with nr=%d", height.Uint64()))
 	}
@@ -97,7 +90,7 @@ func (s *Service) BlockHashByHeight(ctx context.Context, height *big.Int) (commo
 			"header.Nr":     header.Nr(),
 			"header.Height": header.Height,
 			"blockHash":     fmt.Sprintf("%#x", s.latestEth1Data.BlockHash),
-		}).Error("Latest eth1 block is not finalized")
+		}).Error("Latest shard1 block is not finalized")
 		return [32]byte{}, errors.Wrap(err, fmt.Sprintf("could not query header with height %d", height.Uint64()))
 	}
 	if err := s.headerCache.AddHeader(header); err != nil {
@@ -121,144 +114,4 @@ func (s *Service) BlockTimeByHeight(ctx context.Context, height *big.Int) (uint6
 		return 0, errors.Wrap(err, fmt.Sprintf("could not query block with height %d", height.Uint64()))
 	}
 	return header.Time, nil
-}
-
-// BlockByTimestamp returns the most recent block number up to a given timestamp.
-// This is an optimized version with the worst case being O(2*repeatedSearches) number of calls
-// while in best case search for the block is performed in O(1).
-func (s *Service) BlockByTimestamp(ctx context.Context, time uint64) (*types.HeaderInfo, error) {
-	ctx, span := trace.StartSpan(ctx, "beacon-chain.web3service.BlockByTimestamp")
-	defer span.End()
-
-	latestBlkHeight := s.latestEth1Data.BlockHeight
-	latestBlkTime := s.latestEth1Data.BlockTime
-
-	if latestBlkHeight == 0 {
-		hi := &types.HeaderInfo{
-			Number: new(big.Int).SetInt64(0),
-			Hash:   common.BytesToHash(s.latestEth1Data.BlockHash),
-			Time:   latestBlkTime,
-		}
-		return hi, nil
-	}
-
-	if time > latestBlkTime {
-		return nil, errors.New("provided time is later than the current eth1 head")
-	}
-	// Initialize a pointer to eth1 chain's history to start our search
-	// from.
-	cursorNum := big.NewInt(0).SetUint64(latestBlkHeight)
-	cursorTime := latestBlkTime
-
-	numOfBlocks := uint64(0)
-	estimatedBlk := cursorNum.Uint64()
-	maxTimeBuffer := searchThreshold * params.BeaconConfig().SecondsPerETH1Block
-	// Terminate if we cant find an acceptable block after
-	// repeated searches.
-	for i := 0; i < repeatedSearches; i++ {
-		if ctx.Err() != nil {
-			return nil, ctx.Err()
-		}
-		if time > cursorTime+maxTimeBuffer {
-			numOfBlocks = (time - cursorTime) / params.BeaconConfig().SecondsPerETH1Block
-			// In the event we have an infeasible estimated block, this is a defensive
-			// check to ensure it does not exceed rational bounds.
-			if cursorNum.Uint64()+numOfBlocks > latestBlkHeight {
-				break
-			}
-			estimatedBlk = cursorNum.Uint64() + numOfBlocks
-		} else if time+maxTimeBuffer < cursorTime {
-			numOfBlocks = (cursorTime - time) / params.BeaconConfig().SecondsPerETH1Block
-			// In the event we have an infeasible number of blocks
-			// we exit early.
-			if numOfBlocks >= cursorNum.Uint64() {
-				break
-			}
-			estimatedBlk = cursorNum.Uint64() - numOfBlocks
-		} else {
-			// Exit if we are in the range of
-			// time - buffer <= head.time <= time + buffer
-			break
-		}
-		hinfo, err := s.retrieveHeaderInfo(ctx, estimatedBlk)
-		if err != nil {
-			return nil, err
-		}
-		cursorNum = hinfo.Number
-		cursorTime = hinfo.Time
-	}
-
-	// Exit early if we get the desired block.
-	if cursorTime == time {
-		return s.retrieveHeaderInfo(ctx, cursorNum.Uint64())
-	}
-	if cursorTime > time {
-		return s.findLessTargetEth1Block(ctx, big.NewInt(0).SetUint64(estimatedBlk), time)
-	}
-	return s.findMoreTargetEth1Block(ctx, big.NewInt(0).SetUint64(estimatedBlk), time)
-}
-
-// Performs a search to find a target eth1 block which is earlier than or equal to the
-// target time. This method is used when head.time > targetTime
-func (s *Service) findLessTargetEth1Block(ctx context.Context, startBlk *big.Int, targetTime uint64) (*types.HeaderInfo, error) {
-	for bn := startBlk; ; bn = big.NewInt(0).Sub(bn, big.NewInt(1)) {
-		if ctx.Err() != nil {
-			return nil, ctx.Err()
-		}
-		info, err := s.retrieveHeaderInfo(ctx, bn.Uint64())
-		if err != nil {
-			return nil, err
-		}
-		if info.Time <= targetTime {
-			return info, nil
-		}
-	}
-}
-
-// Performs a search to find a target eth1 block which is just earlier than or equal to the
-// target time. This method is used when head.time < targetTime
-func (s *Service) findMoreTargetEth1Block(ctx context.Context, startBlk *big.Int, targetTime uint64) (*types.HeaderInfo, error) {
-	for bn := startBlk; ; bn = big.NewInt(0).Add(bn, big.NewInt(1)) {
-		if ctx.Err() != nil {
-			return nil, ctx.Err()
-		}
-		info, err := s.retrieveHeaderInfo(ctx, bn.Uint64())
-		if err != nil {
-			return nil, err
-		}
-		// Return the last block before we hit the threshold
-		// time.
-		if info.Time > targetTime {
-			return s.retrieveHeaderInfo(ctx, info.Number.Uint64()-1)
-		}
-		// If time is equal, this is our target block.
-		if info.Time == targetTime {
-			return info, nil
-		}
-	}
-}
-
-func (s *Service) retrieveHeaderInfo(ctx context.Context, bNum uint64) (*types.HeaderInfo, error) {
-	bn := big.NewInt(0).SetUint64(bNum)
-	exists, info, err := s.headerCache.HeaderInfoByHeight(bn)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		blk, err := s.eth1DataFetcher.HeaderByNumber(ctx, bn)
-		if err != nil {
-			return nil, err
-		}
-		if blk == nil {
-			return nil, errors.New("header with the provided number does not exist")
-		}
-		if err := s.headerCache.AddHeader(blk); err != nil {
-			return nil, err
-		}
-		info, err = types.HeaderToHeaderInfo(blk)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return info, nil
 }

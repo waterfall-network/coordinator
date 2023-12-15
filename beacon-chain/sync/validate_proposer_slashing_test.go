@@ -37,6 +37,9 @@ func setupValidProposerSlashing(t *testing.T) (*ethpb.ProposerSlashing, state.Be
 			ExitEpoch:         params.BeaconConfig().FarFutureEpoch,
 			WithdrawableEpoch: params.BeaconConfig().FarFutureEpoch,
 			ActivationEpoch:   0,
+			ActivationHash:    make([]byte, 32),
+			ExitHash:          make([]byte, 32),
+			WithdrawalOps:     make([]*ethpb.WithdrawalOp, 0),
 		}
 	}
 	validatorBalances := make([]uint64, len(validators))

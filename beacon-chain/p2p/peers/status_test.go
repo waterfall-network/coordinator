@@ -3,12 +3,11 @@ package peers_test
 import (
 	"context"
 	"crypto/rand"
-	"strconv"
 	"testing"
 	"time"
 
-	"github.com/libp2p/go-libp2p-core/network"
-	"github.com/libp2p/go-libp2p-core/peer"
+	"github.com/libp2p/go-libp2p/core/network"
+	"github.com/libp2p/go-libp2p/core/peer"
 	ma "github.com/multiformats/go-multiaddr"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/go-bitfield"
@@ -546,49 +545,6 @@ func TestPrune(t *testing.T) {
 	// Last peer has been removed.
 	_, err = scorer.Count(thirdPID)
 	assert.ErrorContains(t, "peer unknown", err)
-}
-
-func TestPeerIPTracker(t *testing.T) {
-	resetCfg := features.InitWithReset(&features.Flags{
-		EnablePeerScorer: false,
-	})
-	defer resetCfg()
-	maxBadResponses := 2
-	p := peers.NewStatus(context.Background(), &peers.StatusConfig{
-		PeerLimit: 30,
-		ScorerParams: &scorers.Config{
-			BadResponsesScorerConfig: &scorers.BadResponsesScorerConfig{
-				Threshold: maxBadResponses,
-			},
-		},
-	})
-
-	badIP := "211.227.218.116"
-	var badPeers []peer.ID
-	for i := 0; i < peers.ColocationLimit+10; i++ {
-		port := strconv.Itoa(3000 + i)
-		addr, err := ma.NewMultiaddr("/ip4/" + badIP + "/tcp/" + port)
-		if err != nil {
-			t.Fatal(err)
-		}
-		badPeers = append(badPeers, createPeer(t, p, addr, network.DirUnknown, peerdata.PeerConnectionState(ethpb.ConnectionState_DISCONNECTED)))
-	}
-	for _, pr := range badPeers {
-		assert.Equal(t, true, p.IsBad(pr), "peer with bad ip is not bad")
-	}
-
-	// Add in bad peers, so that our records are trimmed out
-	// from the peer store.
-	for i := 0; i < p.MaxPeerLimit()+100; i++ {
-		// Peer added to peer handler.
-		pid := addPeer(t, p, peers.PeerDisconnected)
-		p.Scorers().BadResponsesScorer().Increment(pid)
-	}
-	p.Prune()
-
-	for _, pr := range badPeers {
-		assert.Equal(t, false, p.IsBad(pr), "peer with good ip is regarded as bad")
-	}
 }
 
 func TestTrimmedOrderedPeers(t *testing.T) {

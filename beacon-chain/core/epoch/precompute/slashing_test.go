@@ -51,10 +51,18 @@ func TestProcessSlashingsPrecompute_SlashedLess(t *testing.T) {
 		{
 			state: &ethpb.BeaconState{
 				Validators: []*ethpb.Validator{
-					{Slashed: true,
+					{
+						ActivationHash:    make([]byte, 32),
+						ExitHash:          make([]byte, 32),
+						WithdrawalOps:     make([]*ethpb.WithdrawalOp, 0),
+						Slashed:           true,
 						WithdrawableEpoch: params.BeaconConfig().EpochsPerSlashingsVector / 2,
 						EffectiveBalance:  params.BeaconConfig().MaxEffectiveBalance},
-					{ExitEpoch: params.BeaconConfig().FarFutureEpoch, EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance}},
+					{
+						ActivationHash: make([]byte, 32),
+						ExitHash:       make([]byte, 32),
+						WithdrawalOps:  make([]*ethpb.WithdrawalOp, 0),
+						ExitEpoch:      params.BeaconConfig().FarFutureEpoch, EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance}},
 				Balances:  []uint64{params.BeaconConfig().MaxEffectiveBalance, params.BeaconConfig().MaxEffectiveBalance},
 				Slashings: []uint64{0, 1e9},
 			},
@@ -65,11 +73,23 @@ func TestProcessSlashingsPrecompute_SlashedLess(t *testing.T) {
 		{
 			state: &ethpb.BeaconState{
 				Validators: []*ethpb.Validator{
-					{Slashed: true,
+					{
+						ActivationHash:    make([]byte, 32),
+						ExitHash:          make([]byte, 32),
+						WithdrawalOps:     make([]*ethpb.WithdrawalOp, 0),
+						Slashed:           true,
 						WithdrawableEpoch: params.BeaconConfig().EpochsPerSlashingsVector / 2,
 						EffectiveBalance:  params.BeaconConfig().MaxEffectiveBalance},
-					{ExitEpoch: params.BeaconConfig().FarFutureEpoch, EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance},
-					{ExitEpoch: params.BeaconConfig().FarFutureEpoch, EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance},
+					{
+						ActivationHash: make([]byte, 32),
+						ExitHash:       make([]byte, 32),
+						WithdrawalOps:  make([]*ethpb.WithdrawalOp, 0),
+						ExitEpoch:      params.BeaconConfig().FarFutureEpoch, EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance},
+					{
+						ActivationHash: make([]byte, 32),
+						ExitHash:       make([]byte, 32),
+						WithdrawalOps:  make([]*ethpb.WithdrawalOp, 0),
+						ExitEpoch:      params.BeaconConfig().FarFutureEpoch, EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance},
 				},
 				Balances:  []uint64{params.BeaconConfig().MaxEffectiveBalance, params.BeaconConfig().MaxEffectiveBalance, params.BeaconConfig().MaxEffectiveBalance},
 				Slashings: []uint64{0, 1e9},
@@ -81,11 +101,23 @@ func TestProcessSlashingsPrecompute_SlashedLess(t *testing.T) {
 		{
 			state: &ethpb.BeaconState{
 				Validators: []*ethpb.Validator{
-					{Slashed: true,
+					{
+						ActivationHash:    make([]byte, 32),
+						ExitHash:          make([]byte, 32),
+						WithdrawalOps:     make([]*ethpb.WithdrawalOp, 0),
+						Slashed:           true,
 						WithdrawableEpoch: params.BeaconConfig().EpochsPerSlashingsVector / 2,
 						EffectiveBalance:  params.BeaconConfig().MaxEffectiveBalance},
-					{ExitEpoch: params.BeaconConfig().FarFutureEpoch, EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance},
-					{ExitEpoch: params.BeaconConfig().FarFutureEpoch, EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance},
+					{
+						ActivationHash: make([]byte, 32),
+						ExitHash:       make([]byte, 32),
+						WithdrawalOps:  make([]*ethpb.WithdrawalOp, 0),
+						ExitEpoch:      params.BeaconConfig().FarFutureEpoch, EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance},
+					{
+						ActivationHash: make([]byte, 32),
+						ExitHash:       make([]byte, 32),
+						WithdrawalOps:  make([]*ethpb.WithdrawalOp, 0),
+						ExitEpoch:      params.BeaconConfig().FarFutureEpoch, EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance},
 				},
 				Balances:  []uint64{params.BeaconConfig().MaxEffectiveBalance, params.BeaconConfig().MaxEffectiveBalance, params.BeaconConfig().MaxEffectiveBalance},
 				Slashings: []uint64{0, 2 * 1e9},
@@ -97,10 +129,18 @@ func TestProcessSlashingsPrecompute_SlashedLess(t *testing.T) {
 		{
 			state: &ethpb.BeaconState{
 				Validators: []*ethpb.Validator{
-					{Slashed: true,
+					{
+						ActivationHash:    make([]byte, 32),
+						ExitHash:          make([]byte, 32),
+						WithdrawalOps:     make([]*ethpb.WithdrawalOp, 0),
+						Slashed:           true,
 						WithdrawableEpoch: params.BeaconConfig().EpochsPerSlashingsVector / 2,
 						EffectiveBalance:  params.BeaconConfig().MaxEffectiveBalance - params.BeaconConfig().EffectiveBalanceIncrement},
-					{ExitEpoch: params.BeaconConfig().FarFutureEpoch, EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance - params.BeaconConfig().EffectiveBalanceIncrement}},
+					{
+						ActivationHash: make([]byte, 32),
+						ExitHash:       make([]byte, 32),
+						WithdrawalOps:  make([]*ethpb.WithdrawalOp, 0),
+						ExitEpoch:      params.BeaconConfig().FarFutureEpoch, EffectiveBalance: params.BeaconConfig().MaxEffectiveBalance - params.BeaconConfig().EffectiveBalanceIncrement}},
 				Balances:  []uint64{params.BeaconConfig().MaxEffectiveBalance - params.BeaconConfig().EffectiveBalanceIncrement, params.BeaconConfig().MaxEffectiveBalance - params.BeaconConfig().EffectiveBalanceIncrement},
 				Slashings: []uint64{0, 1e9},
 			},

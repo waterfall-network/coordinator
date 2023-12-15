@@ -8,8 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/libp2p/go-libp2p-core/crypto"
+	"github.com/libp2p/go-libp2p/core/crypto"
 	"github.com/sirupsen/logrus"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/network"
 	_ "gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/maxprocs"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
@@ -67,7 +68,8 @@ func TestPrivateKey_ParsesCorrectly(t *testing.T) {
 
 	extractedKey := extractPrivateKey()
 
-	rawKey := (*ecdsa.PrivateKey)(privKey.(*crypto.Secp256k1PrivateKey))
+	rawKey, err := p2p.ConvertFromInterfacePrivKey(privKey)
+	require.NoError(t, err)
 
 	r, s, err := ecdsa.Sign(rand.Reader, extractedKey, []byte{'t', 'e', 's', 't'})
 	require.NoError(t, err)
