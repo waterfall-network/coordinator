@@ -50,21 +50,14 @@ func Setup() (*TestAccount, error) {
 	copy(pubKey, publicKeyBytes)
 
 	addr := crypto.PubkeyToAddress(privKey.PublicKey)
-	txOpts, err := bind.NewKeyedTransactorWithChainID(privKey, big.NewInt(1337))
-	if err != nil {
-		return nil, err
-	}
+
 	startingBalance, _ := new(big.Int).SetString("100000000000000000000000000000000000000", 10)
 	genesis[addr] = core.GenesisAccount{Balance: startingBalance}
 	backend := backends.NewSimulatedBackend(genesis, 105000000)
 
-	contractAddr, _, contract, err := DeployDepositContract(txOpts, backend)
-	if err != nil {
-		return nil, err
-	}
 	backend.Commit()
 
-	return &TestAccount{addr, contractAddr, contract, backend, txOpts}, nil
+	return &TestAccount{addr, common.Address{}, nil, backend, nil}, nil
 }
 
 // Amount3200Wat returns 32Wat(in wei) in terms of the big.Int type.

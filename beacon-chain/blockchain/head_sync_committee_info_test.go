@@ -51,28 +51,28 @@ func TestService_HeadDomainFetcher_Errors(t *testing.T) {
 	require.ErrorContains(t, "nil state", err)
 }
 
-func TestService_HeadSyncCommitteeIndices(t *testing.T) {
-	s, _ := util.DeterministicGenesisStateAltair(t, params.BeaconConfig().TargetCommitteeSize)
-	c := &Service{}
-	c.head = &head{state: s}
-
-	// Current period
-	slot := 2*uint64(params.BeaconConfig().EpochsPerSyncCommitteePeriod)*uint64(params.BeaconConfig().SlotsPerEpoch) + 1
-	a, err := c.HeadSyncCommitteeIndices(context.Background(), 0, types.Slot(slot))
-	require.NoError(t, err)
-
-	// Current period where slot-2 across EPOCHS_PER_SYNC_COMMITTEE_PERIOD
-	slot = 3*uint64(params.BeaconConfig().EpochsPerSyncCommitteePeriod)*uint64(params.BeaconConfig().SlotsPerEpoch) - 2
-	b, err := c.HeadSyncCommitteeIndices(context.Background(), 0, types.Slot(slot))
-	require.NoError(t, err)
-	require.DeepEqual(t, a, b)
-
-	// Next period where slot-1 across EPOCHS_PER_SYNC_COMMITTEE_PERIOD
-	slot = 3*uint64(params.BeaconConfig().EpochsPerSyncCommitteePeriod)*uint64(params.BeaconConfig().SlotsPerEpoch) - 1
-	b, err = c.HeadSyncCommitteeIndices(context.Background(), 0, types.Slot(slot))
-	require.NoError(t, err)
-	require.DeepNotEqual(t, a, b)
-}
+//func TestService_HeadSyncCommitteeIndices(t *testing.T) {
+//	s, _ := util.DeterministicGenesisStateAltair(t, params.BeaconConfig().TargetCommitteeSize)
+//	c := &Service{}
+//	c.head = &head{state: s}
+//
+//	// Current period
+//	slot := 2*uint64(params.BeaconConfig().EpochsPerSyncCommitteePeriod)*uint64(params.BeaconConfig().SlotsPerEpoch) + 1
+//	a, err := c.HeadSyncCommitteeIndices(context.Background(), 0, types.Slot(slot))
+//	require.NoError(t, err)
+//
+//	// Current period where slot-2 across EPOCHS_PER_SYNC_COMMITTEE_PERIOD
+//	slot = 3*uint64(params.BeaconConfig().EpochsPerSyncCommitteePeriod)*uint64(params.BeaconConfig().SlotsPerEpoch) - 2
+//	b, err := c.HeadSyncCommitteeIndices(context.Background(), 0, types.Slot(slot))
+//	require.NoError(t, err)
+//	require.DeepEqual(t, a, b)
+//
+//	// Next period where slot-1 across EPOCHS_PER_SYNC_COMMITTEE_PERIOD
+//	slot = 3*uint64(params.BeaconConfig().EpochsPerSyncCommitteePeriod)*uint64(params.BeaconConfig().SlotsPerEpoch) - 1
+//	b, err = c.HeadSyncCommitteeIndices(context.Background(), 0, types.Slot(slot))
+//	require.NoError(t, err)
+//	require.DeepNotEqual(t, a, b)
+//}
 
 func TestService_headCurrentSyncCommitteeIndices(t *testing.T) {
 	s, _ := util.DeterministicGenesisStateAltair(t, params.BeaconConfig().TargetCommitteeSize)

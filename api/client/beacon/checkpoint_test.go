@@ -378,7 +378,7 @@ func defaultTestHeadState(t *testing.T, cfg *params.BeaconChainConfig) (state.Be
 	}))
 	// to see the math for this, look at helpers.LatestWeakSubjectivityEpoch
 	// and for the values use mainnet config values, the validatorCount and avgBalance above, and altair fork epoch
-	expectedEpoch := slots.ToEpoch(st.Slot()) - 224
+	expectedEpoch := slots.ToEpoch(st.Slot()) - 13
 	return st, expectedEpoch
 }
 

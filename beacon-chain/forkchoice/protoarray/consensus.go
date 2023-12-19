@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"sync"
 	"time"
 
 	types "github.com/prysmaticlabs/eth2-types"
@@ -36,6 +37,15 @@ func (f *ForkChoice) setNodeVotes(validator uint64, vote Vote) {
 		}
 	}
 	lastNode := f.store.nodes[index]
+	if lastNode.attsData == nil {
+		lastNode.attsData = &AttestationsData{
+			justifiedRoot: [32]byte{},
+			finalizedRoot: [32]byte{},
+			votes:         make(map[uint64]Vote),
+			mu:            sync.Mutex{},
+		}
+	}
+
 	lastNode.attsData.votes[validator] = vote
 }
 

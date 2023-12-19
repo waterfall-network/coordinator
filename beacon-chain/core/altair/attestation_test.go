@@ -428,6 +428,23 @@ func TestFuzzProcessAttestationsNoVerify_10000(t *testing.T) {
 		if b.Block == nil {
 			b.Block = &ethpb.BeaconBlockAltair{}
 		}
+		for j := 0; j < len(b.Block.Body.Attestations); j++ {
+			if b.Block.Body.Attestations[j] == nil {
+				b.Block.Body.Attestations = append(b.Block.Body.Attestations[:j], b.Block.Body.Attestations[j+1:]...)
+				j = 0
+				continue
+			}
+			if b.Block.Body.Attestations[j].Data == nil {
+				b.Block.Body.Attestations[j].Data = &ethpb.AttestationData{
+					Slot:            0,
+					CommitteeIndex:  0,
+					BeaconBlockRoot: make([]byte, 32),
+					Source:          &ethpb.Checkpoint{},
+					Target:          &ethpb.Checkpoint{},
+				}
+			}
+		}
+
 		s, err := stateAltair.InitializeFromProtoUnsafe(bState)
 		require.NoError(t, err)
 		wsb, err := wrapper.WrappedSignedBeaconBlock(b)

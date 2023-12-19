@@ -59,6 +59,7 @@ func TestClearDB(t *testing.T) {
 	set := flag.NewFlagSet("test", 0)
 	set.String("datadir", tmp, "node data directory")
 	set.Bool(cmd.ForceClearDB.Name, true, "force clear db")
+	set.String("genesis-state", "beacon-chain/node/test_data/genesis.ssz", "")
 
 	context := cli.NewContext(&app, set, nil)
 	_, err = New(context, WithPowchainFlagOptions([]powchain.Option{

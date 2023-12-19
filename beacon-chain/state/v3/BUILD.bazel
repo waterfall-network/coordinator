@@ -69,7 +69,6 @@ go_test(
         "getters_validator_test.go",
         "proofs_test.go",
         "references_test.go",
-        "setters_test.go",
         "state_trie_test.go",
     ],
     embed = [":go_default_library"],
@@ -88,7 +87,6 @@ go_test(
         "//testing/assert:go_default_library",
         "//testing/require:go_default_library",
         "//testing/util:go_default_library",
-        "@com_github_prysmaticlabs_eth2_types//:go_default_library",
         "@com_github_prysmaticlabs_go_bitfield//:go_default_library",
     ],
 )

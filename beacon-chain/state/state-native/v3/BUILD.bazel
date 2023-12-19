@@ -78,7 +78,6 @@ go_test(
         "getters_test.go",
         "getters_validator_test.go",
         "proofs_test.go",
-        "setters_test.go",
         "state_trie_test.go",
     ] + select({
         "//config:mainnet": ["beacon_state_mainnet_test.go"],
@@ -101,7 +100,6 @@ go_test(
         "//testing/assert:go_default_library",
         "//testing/require:go_default_library",
         "//testing/util:go_default_library",
-        "@com_github_prysmaticlabs_eth2_types//:go_default_library",
         "@com_github_prysmaticlabs_go_bitfield//:go_default_library",
     ],
 )

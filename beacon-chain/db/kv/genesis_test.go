@@ -47,7 +47,7 @@ func testGenesisDataSaved(t *testing.T, db iface.Database) {
 }
 
 func TestLoadGenesisFromFile(t *testing.T) {
-	fp := "testdata/genesis.ssz"
+	fp := "testdata/mainnet.genesis.ssz"
 	rfp, err := bazel.Runfile(fp)
 	if err == nil {
 		fp = rfp

@@ -43,6 +43,7 @@ func TestAppendBeyondIndicesLimit(t *testing.T) {
 		BlockRoots:                 mockblockRoots,
 		StateRoots:                 mockstateRoots,
 		RandaoMixes:                mockrandaoMixes,
+		SpineData:                  &ethpb.SpineData{},
 	})
 	require.NoError(t, err)
 	_, err = st.HashTreeRoot(context.Background())
@@ -148,6 +149,7 @@ func TestBeaconState_AppendBalanceWithTrie(t *testing.T) {
 			Pubkeys:         pubKeys,
 			AggregatePubkey: make([]byte, 48),
 		},
+		SpineData: &ethpb.SpineData{},
 	})
 	assert.NoError(t, err)
 	_, err = st.HashTreeRoot(context.Background())
@@ -232,5 +234,6 @@ func createState(count uint64) *ethpb.BeaconStateAltair {
 		PreviousEpochParticipation: make([]byte, count),
 		Validators:                 vals,
 		Balances:                   bals,
+		SpineData:                  &ethpb.SpineData{},
 	}
 }
