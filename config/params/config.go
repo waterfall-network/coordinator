@@ -150,14 +150,17 @@ type BeaconChainConfig struct {
 	SlashingProtectionPruningEpochs types.Epoch // SlashingProtectionPruningEpochs defines a period after which all prior epochs are pruned in the validator database.
 
 	// Fork-related values.
-	GenesisForkVersion   []byte                                          `yaml:"GENESIS_FORK_VERSION" spec:"true"`   // GenesisForkVersion is used to track fork version between state transitions.
-	AltairForkVersion    []byte                                          `yaml:"ALTAIR_FORK_VERSION" spec:"true"`    // AltairForkVersion is used to represent the fork version for altair.
-	AltairForkEpoch      types.Epoch                                     `yaml:"ALTAIR_FORK_EPOCH" spec:"true"`      // AltairForkEpoch is used to represent the assigned fork epoch for altair.
-	BellatrixForkVersion []byte                                          `yaml:"BELLATRIX_FORK_VERSION" spec:"true"` // BellatrixForkVersion is used to represent the fork version for bellatrix.
-	BellatrixForkEpoch   types.Epoch                                     `yaml:"BELLATRIX_FORK_EPOCH" spec:"true"`   // BellatrixForkEpoch is used to represent the assigned fork epoch for bellatrix.
-	ShardingForkVersion  []byte                                          `yaml:"SHARDING_FORK_VERSION" spec:"true"`  // ShardingForkVersion is used to represent the fork version for sharding.
-	ShardingForkEpoch    types.Epoch                                     `yaml:"SHARDING_FORK_EPOCH" spec:"true"`    // ShardingForkEpoch is used to represent the assigned fork epoch for sharding.
-	ForkVersionSchedule  map[[fieldparams.VersionLength]byte]types.Epoch // Schedule of fork epochs by version.
+	GenesisForkVersion []byte      `yaml:"GENESIS_FORK_VERSION" spec:"true"` // GenesisForkVersion is used to track fork version between state transitions.
+	AltairForkVersion  []byte      `yaml:"ALTAIR_FORK_VERSION" spec:"true"`  // AltairForkVersion is used to represent the fork version for altair.
+	AltairForkEpoch    types.Epoch `yaml:"ALTAIR_FORK_EPOCH" spec:"true"`    // AltairForkEpoch is used to represent the assigned fork epoch for altair.
+	DelegateForkEpoch  types.Epoch `yaml:"DELEGATE_FORK_EPOCH" spec:"true"`  // DelegateForkEpoch defines the epoch to start support of Delegate Stake functionalities.
+	// Deprecated
+	BellatrixForkVersion []byte `yaml:"BELLATRIX_FORK_VERSION" spec:"true"` // BellatrixForkVersion is used to represent the fork version for bellatrix.
+	// Deprecated
+	BellatrixForkEpoch  types.Epoch                                     `yaml:"BELLATRIX_FORK_EPOCH" spec:"true"`  // BellatrixForkEpoch is used to represent the assigned fork epoch for bellatrix.
+	ShardingForkVersion []byte                                          `yaml:"SHARDING_FORK_VERSION" spec:"true"` // ShardingForkVersion is used to represent the fork version for sharding.
+	ShardingForkEpoch   types.Epoch                                     `yaml:"SHARDING_FORK_EPOCH" spec:"true"`   // ShardingForkEpoch is used to represent the assigned fork epoch for sharding.
+	ForkVersionSchedule map[[fieldparams.VersionLength]byte]types.Epoch // Schedule of fork epochs by version.
 
 	// Weak subjectivity values.
 	SafetyDecay uint64 // SafetyDecay is defined as the loss in the 1/3 consensus safety margin of the casper FFG mechanism.
