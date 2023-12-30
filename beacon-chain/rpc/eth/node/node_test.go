@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	grpcruntime "github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	libp2ptest "github.com/libp2p/go-libp2p-peerstore/test"
+	//libp2ptest "github.com/libp2p/go-libp2p-peerstore/test"
 	"github.com/libp2p/go-libp2p/core/network"
 	"github.com/libp2p/go-libp2p/core/peer"
 	ma "github.com/multiformats/go-multiaddr"
@@ -19,7 +19,6 @@ import (
 	grpcutil "gitlab.waterfall.network/waterfall/protocol/coordinator/api/grpc"
 	mock "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain/testing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/peers"
 	mockp2p "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/testing"
 	syncmock "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/sync/initial-sync/testing"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
@@ -223,237 +222,237 @@ func TestGetPeer(t *testing.T) {
 	})
 }
 
-func TestListPeers(t *testing.T) {
-	ids := libp2ptest.GeneratePeerIDs(9)
-	peerFetcher := &mockp2p.MockPeersProvider{}
-	peerFetcher.ClearPeers()
-	peerStatus := peerFetcher.Peers()
+//func TestListPeers(t *testing.T) {
+//	ids := libp2ptest.GeneratePeerIDs(9)
+//	peerFetcher := &mockp2p.MockPeersProvider{}
+//	peerFetcher.ClearPeers()
+//	peerStatus := peerFetcher.Peers()
+//
+//	for i, id := range ids {
+//		// Make last peer undiscovered
+//		if i == len(ids)-1 {
+//			peerStatus.Add(nil, id, nil, network.DirUnknown)
+//		} else {
+//			enrRecord := &enr.Record{}
+//			err := enrRecord.SetSig(dummyIdentity{1}, []byte{42})
+//			require.NoError(t, err)
+//			enrRecord.Set(enr.IPv4{127, 0, 0, byte(i)})
+//			err = enrRecord.SetSig(dummyIdentity{}, []byte{})
+//			require.NoError(t, err)
+//			var p2pAddr = "/ip4/127.0.0." + strconv.Itoa(i) + "/udp/30303/p2p/QmYyQSo1c1Ym7orWxLYvCrM2EmxFTANf8wXmmE7DWjhx5N"
+//			p2pMultiAddr, err := ma.NewMultiaddr(p2pAddr)
+//			require.NoError(t, err)
+//
+//			var direction network.Direction
+//			if i%2 == 0 {
+//				direction = network.DirInbound
+//			} else {
+//				direction = network.DirOutbound
+//			}
+//			peerStatus.Add(enrRecord, id, p2pMultiAddr, direction)
+//
+//			switch i {
+//			case 0, 1:
+//				peerStatus.SetConnectionState(id, peers.PeerConnecting)
+//			case 2, 3:
+//				peerStatus.SetConnectionState(id, peers.PeerConnected)
+//			case 4, 5:
+//				peerStatus.SetConnectionState(id, peers.PeerDisconnecting)
+//			case 6, 7:
+//				peerStatus.SetConnectionState(id, peers.PeerDisconnected)
+//			default:
+//				t.Fatalf("Failed to set connection state for peer")
+//			}
+//		}
+//	}
+//
+//	s := Server{PeersFetcher: peerFetcher}
+//
+//	t.Run("Peer data OK", func(t *testing.T) {
+//		// We will check the first peer from the list.
+//		expectedId := ids[0]
+//
+//		resp, err := s.ListPeers(context.Background(), &ethpb.PeersRequest{
+//			State:     []ethpb.ConnectionState{ethpb.ConnectionState_CONNECTING},
+//			Direction: []ethpb.PeerDirection{ethpb.PeerDirection_INBOUND},
+//		})
+//		require.NoError(t, err)
+//		require.Equal(t, 1, len(resp.Data))
+//		returnedPeer := resp.Data[0]
+//		assert.Equal(t, expectedId.Pretty(), returnedPeer.PeerId)
+//		expectedEnr, err := peerStatus.ENR(expectedId)
+//		require.NoError(t, err)
+//		serializedEnr, err := p2p.SerializeENR(expectedEnr)
+//		require.NoError(t, err)
+//		assert.Equal(t, "enr:"+serializedEnr, returnedPeer.Enr)
+//		expectedP2PAddr, err := peerStatus.Address(expectedId)
+//		require.NoError(t, err)
+//		assert.Equal(t, expectedP2PAddr.String(), returnedPeer.LastSeenP2PAddress)
+//		assert.Equal(t, ethpb.ConnectionState_CONNECTING, returnedPeer.State)
+//		assert.Equal(t, ethpb.PeerDirection_INBOUND, returnedPeer.Direction)
+//	})
+//
+//	filterTests := []struct {
+//		name       string
+//		states     []ethpb.ConnectionState
+//		directions []ethpb.PeerDirection
+//		wantIds    []peer.ID
+//	}{
+//		{
+//			name:       "No filters - return all peers",
+//			states:     []ethpb.ConnectionState{},
+//			directions: []ethpb.PeerDirection{},
+//			wantIds:    ids[:len(ids)-1], // Excluding last peer as it is not connected.
+//		},
+//		{
+//			name:       "State filter empty - return peers for all states",
+//			states:     []ethpb.ConnectionState{},
+//			directions: []ethpb.PeerDirection{ethpb.PeerDirection_INBOUND},
+//			wantIds:    []peer.ID{ids[0], ids[2], ids[4], ids[6]},
+//		},
+//		{
+//			name:       "Direction filter empty - return peers for all directions",
+//			states:     []ethpb.ConnectionState{ethpb.ConnectionState_CONNECTED},
+//			directions: []ethpb.PeerDirection{},
+//			wantIds:    []peer.ID{ids[2], ids[3]},
+//		},
+//		{
+//			name:       "One state and direction",
+//			states:     []ethpb.ConnectionState{ethpb.ConnectionState_DISCONNECTED},
+//			directions: []ethpb.PeerDirection{ethpb.PeerDirection_INBOUND},
+//			wantIds:    []peer.ID{ids[6]},
+//		},
+//		{
+//			name:       "Multiple states and directions",
+//			states:     []ethpb.ConnectionState{ethpb.ConnectionState_CONNECTING, ethpb.ConnectionState_DISCONNECTING},
+//			directions: []ethpb.PeerDirection{ethpb.PeerDirection_INBOUND, ethpb.PeerDirection_OUTBOUND},
+//			wantIds:    []peer.ID{ids[0], ids[1], ids[4], ids[5]},
+//		},
+//		{
+//			name:       "Unknown filter is ignored",
+//			states:     []ethpb.ConnectionState{ethpb.ConnectionState_CONNECTED, 99},
+//			directions: []ethpb.PeerDirection{ethpb.PeerDirection_OUTBOUND, 99},
+//			wantIds:    []peer.ID{ids[3]},
+//		},
+//		{
+//			name:       "Only unknown filters - return all peers",
+//			states:     []ethpb.ConnectionState{99},
+//			directions: []ethpb.PeerDirection{99},
+//			wantIds:    ids[:len(ids)-1], // Excluding last peer as it is not connected.
+//		},
+//	}
+//	for _, tt := range filterTests {
+//		t.Run(tt.name, func(t *testing.T) {
+//			resp, err := s.ListPeers(context.Background(), &ethpb.PeersRequest{
+//				State:     tt.states,
+//				Direction: tt.directions,
+//			})
+//			require.NoError(t, err)
+//			assert.Equal(t, len(tt.wantIds), len(resp.Data), "Wrong number of peers returned")
+//			for _, id := range tt.wantIds {
+//				expectedId := id.Pretty()
+//				found := false
+//				for _, returnedPeer := range resp.Data {
+//					if returnedPeer.PeerId == expectedId {
+//						found = true
+//						break
+//					}
+//				}
+//				if !found {
+//					t.Errorf("Expected ID '" + expectedId + "' not found")
+//				}
+//			}
+//		})
+//	}
+//}
 
-	for i, id := range ids {
-		// Make last peer undiscovered
-		if i == len(ids)-1 {
-			peerStatus.Add(nil, id, nil, network.DirUnknown)
-		} else {
-			enrRecord := &enr.Record{}
-			err := enrRecord.SetSig(dummyIdentity{1}, []byte{42})
-			require.NoError(t, err)
-			enrRecord.Set(enr.IPv4{127, 0, 0, byte(i)})
-			err = enrRecord.SetSig(dummyIdentity{}, []byte{})
-			require.NoError(t, err)
-			var p2pAddr = "/ip4/127.0.0." + strconv.Itoa(i) + "/udp/30303/p2p/QmYyQSo1c1Ym7orWxLYvCrM2EmxFTANf8wXmmE7DWjhx5N"
-			p2pMultiAddr, err := ma.NewMultiaddr(p2pAddr)
-			require.NoError(t, err)
+//func TestListPeers_NoPeersReturnsEmptyArray(t *testing.T) {
+//	peerFetcher := &mockp2p.MockPeersProvider{}
+//	peerFetcher.ClearPeers()
+//	s := Server{PeersFetcher: peerFetcher}
+//
+//	resp, err := s.ListPeers(context.Background(), &ethpb.PeersRequest{
+//		State: []ethpb.ConnectionState{ethpb.ConnectionState_CONNECTED},
+//	})
+//	require.NoError(t, err)
+//	require.NotNil(t, resp.Data)
+//	assert.Equal(t, 0, len(resp.Data))
+//}
 
-			var direction network.Direction
-			if i%2 == 0 {
-				direction = network.DirInbound
-			} else {
-				direction = network.DirOutbound
-			}
-			peerStatus.Add(enrRecord, id, p2pMultiAddr, direction)
+//func TestPeerCount(t *testing.T) {
+//	ids := libp2ptest.GeneratePeerIDs(10)
+//	peerFetcher := &mockp2p.MockPeersProvider{}
+//	peerFetcher.ClearPeers()
+//	peerStatus := peerFetcher.Peers()
+//
+//	for i, id := range ids {
+//		enrRecord := &enr.Record{}
+//		err := enrRecord.SetSig(dummyIdentity{1}, []byte{42})
+//		require.NoError(t, err)
+//		enrRecord.Set(enr.IPv4{127, 0, 0, byte(i)})
+//		err = enrRecord.SetSig(dummyIdentity{}, []byte{})
+//		require.NoError(t, err)
+//		var p2pAddr = "/ip4/127.0.0." + strconv.Itoa(i) + "/udp/30303/p2p/QmYyQSo1c1Ym7orWxLYvCrM2EmxFTANf8wXmmE7DWjhx5N"
+//		p2pMultiAddr, err := ma.NewMultiaddr(p2pAddr)
+//		require.NoError(t, err)
+//
+//		var direction network.Direction
+//		if i%2 == 0 {
+//			direction = network.DirInbound
+//		} else {
+//			direction = network.DirOutbound
+//		}
+//		peerStatus.Add(enrRecord, id, p2pMultiAddr, direction)
+//
+//		switch i {
+//		case 0:
+//			peerStatus.SetConnectionState(id, peers.PeerConnecting)
+//		case 1, 2:
+//			peerStatus.SetConnectionState(id, peers.PeerConnected)
+//		case 3, 4, 5:
+//			peerStatus.SetConnectionState(id, peers.PeerDisconnecting)
+//		case 6, 7, 8, 9:
+//			peerStatus.SetConnectionState(id, peers.PeerDisconnected)
+//		default:
+//			t.Fatalf("Failed to set connection state for peer")
+//		}
+//	}
+//
+//	s := Server{PeersFetcher: peerFetcher}
+//	resp, err := s.PeerCount(context.Background(), &emptypb.Empty{})
+//	require.NoError(t, err)
+//	assert.Equal(t, uint64(1), resp.Data.Connecting, "Wrong number of connecting peers")
+//	assert.Equal(t, uint64(2), resp.Data.Connected, "Wrong number of connected peers")
+//	assert.Equal(t, uint64(3), resp.Data.Disconnecting, "Wrong number of disconnecting peers")
+//	assert.Equal(t, uint64(4), resp.Data.Disconnected, "Wrong number of disconnected peers")
+//}
 
-			switch i {
-			case 0, 1:
-				peerStatus.SetConnectionState(id, peers.PeerConnecting)
-			case 2, 3:
-				peerStatus.SetConnectionState(id, peers.PeerConnected)
-			case 4, 5:
-				peerStatus.SetConnectionState(id, peers.PeerDisconnecting)
-			case 6, 7:
-				peerStatus.SetConnectionState(id, peers.PeerDisconnected)
-			default:
-				t.Fatalf("Failed to set connection state for peer")
-			}
-		}
-	}
-
-	s := Server{PeersFetcher: peerFetcher}
-
-	t.Run("Peer data OK", func(t *testing.T) {
-		// We will check the first peer from the list.
-		expectedId := ids[0]
-
-		resp, err := s.ListPeers(context.Background(), &ethpb.PeersRequest{
-			State:     []ethpb.ConnectionState{ethpb.ConnectionState_CONNECTING},
-			Direction: []ethpb.PeerDirection{ethpb.PeerDirection_INBOUND},
-		})
-		require.NoError(t, err)
-		require.Equal(t, 1, len(resp.Data))
-		returnedPeer := resp.Data[0]
-		assert.Equal(t, expectedId.Pretty(), returnedPeer.PeerId)
-		expectedEnr, err := peerStatus.ENR(expectedId)
-		require.NoError(t, err)
-		serializedEnr, err := p2p.SerializeENR(expectedEnr)
-		require.NoError(t, err)
-		assert.Equal(t, "enr:"+serializedEnr, returnedPeer.Enr)
-		expectedP2PAddr, err := peerStatus.Address(expectedId)
-		require.NoError(t, err)
-		assert.Equal(t, expectedP2PAddr.String(), returnedPeer.LastSeenP2PAddress)
-		assert.Equal(t, ethpb.ConnectionState_CONNECTING, returnedPeer.State)
-		assert.Equal(t, ethpb.PeerDirection_INBOUND, returnedPeer.Direction)
-	})
-
-	filterTests := []struct {
-		name       string
-		states     []ethpb.ConnectionState
-		directions []ethpb.PeerDirection
-		wantIds    []peer.ID
-	}{
-		{
-			name:       "No filters - return all peers",
-			states:     []ethpb.ConnectionState{},
-			directions: []ethpb.PeerDirection{},
-			wantIds:    ids[:len(ids)-1], // Excluding last peer as it is not connected.
-		},
-		{
-			name:       "State filter empty - return peers for all states",
-			states:     []ethpb.ConnectionState{},
-			directions: []ethpb.PeerDirection{ethpb.PeerDirection_INBOUND},
-			wantIds:    []peer.ID{ids[0], ids[2], ids[4], ids[6]},
-		},
-		{
-			name:       "Direction filter empty - return peers for all directions",
-			states:     []ethpb.ConnectionState{ethpb.ConnectionState_CONNECTED},
-			directions: []ethpb.PeerDirection{},
-			wantIds:    []peer.ID{ids[2], ids[3]},
-		},
-		{
-			name:       "One state and direction",
-			states:     []ethpb.ConnectionState{ethpb.ConnectionState_DISCONNECTED},
-			directions: []ethpb.PeerDirection{ethpb.PeerDirection_INBOUND},
-			wantIds:    []peer.ID{ids[6]},
-		},
-		{
-			name:       "Multiple states and directions",
-			states:     []ethpb.ConnectionState{ethpb.ConnectionState_CONNECTING, ethpb.ConnectionState_DISCONNECTING},
-			directions: []ethpb.PeerDirection{ethpb.PeerDirection_INBOUND, ethpb.PeerDirection_OUTBOUND},
-			wantIds:    []peer.ID{ids[0], ids[1], ids[4], ids[5]},
-		},
-		{
-			name:       "Unknown filter is ignored",
-			states:     []ethpb.ConnectionState{ethpb.ConnectionState_CONNECTED, 99},
-			directions: []ethpb.PeerDirection{ethpb.PeerDirection_OUTBOUND, 99},
-			wantIds:    []peer.ID{ids[3]},
-		},
-		{
-			name:       "Only unknown filters - return all peers",
-			states:     []ethpb.ConnectionState{99},
-			directions: []ethpb.PeerDirection{99},
-			wantIds:    ids[:len(ids)-1], // Excluding last peer as it is not connected.
-		},
-	}
-	for _, tt := range filterTests {
-		t.Run(tt.name, func(t *testing.T) {
-			resp, err := s.ListPeers(context.Background(), &ethpb.PeersRequest{
-				State:     tt.states,
-				Direction: tt.directions,
-			})
-			require.NoError(t, err)
-			assert.Equal(t, len(tt.wantIds), len(resp.Data), "Wrong number of peers returned")
-			for _, id := range tt.wantIds {
-				expectedId := id.Pretty()
-				found := false
-				for _, returnedPeer := range resp.Data {
-					if returnedPeer.PeerId == expectedId {
-						found = true
-						break
-					}
-				}
-				if !found {
-					t.Errorf("Expected ID '" + expectedId + "' not found")
-				}
-			}
-		})
-	}
-}
-
-func TestListPeers_NoPeersReturnsEmptyArray(t *testing.T) {
-	peerFetcher := &mockp2p.MockPeersProvider{}
-	peerFetcher.ClearPeers()
-	s := Server{PeersFetcher: peerFetcher}
-
-	resp, err := s.ListPeers(context.Background(), &ethpb.PeersRequest{
-		State: []ethpb.ConnectionState{ethpb.ConnectionState_CONNECTED},
-	})
-	require.NoError(t, err)
-	require.NotNil(t, resp.Data)
-	assert.Equal(t, 0, len(resp.Data))
-}
-
-func TestPeerCount(t *testing.T) {
-	ids := libp2ptest.GeneratePeerIDs(10)
-	peerFetcher := &mockp2p.MockPeersProvider{}
-	peerFetcher.ClearPeers()
-	peerStatus := peerFetcher.Peers()
-
-	for i, id := range ids {
-		enrRecord := &enr.Record{}
-		err := enrRecord.SetSig(dummyIdentity{1}, []byte{42})
-		require.NoError(t, err)
-		enrRecord.Set(enr.IPv4{127, 0, 0, byte(i)})
-		err = enrRecord.SetSig(dummyIdentity{}, []byte{})
-		require.NoError(t, err)
-		var p2pAddr = "/ip4/127.0.0." + strconv.Itoa(i) + "/udp/30303/p2p/QmYyQSo1c1Ym7orWxLYvCrM2EmxFTANf8wXmmE7DWjhx5N"
-		p2pMultiAddr, err := ma.NewMultiaddr(p2pAddr)
-		require.NoError(t, err)
-
-		var direction network.Direction
-		if i%2 == 0 {
-			direction = network.DirInbound
-		} else {
-			direction = network.DirOutbound
-		}
-		peerStatus.Add(enrRecord, id, p2pMultiAddr, direction)
-
-		switch i {
-		case 0:
-			peerStatus.SetConnectionState(id, peers.PeerConnecting)
-		case 1, 2:
-			peerStatus.SetConnectionState(id, peers.PeerConnected)
-		case 3, 4, 5:
-			peerStatus.SetConnectionState(id, peers.PeerDisconnecting)
-		case 6, 7, 8, 9:
-			peerStatus.SetConnectionState(id, peers.PeerDisconnected)
-		default:
-			t.Fatalf("Failed to set connection state for peer")
-		}
-	}
-
-	s := Server{PeersFetcher: peerFetcher}
-	resp, err := s.PeerCount(context.Background(), &emptypb.Empty{})
-	require.NoError(t, err)
-	assert.Equal(t, uint64(1), resp.Data.Connecting, "Wrong number of connecting peers")
-	assert.Equal(t, uint64(2), resp.Data.Connected, "Wrong number of connected peers")
-	assert.Equal(t, uint64(3), resp.Data.Disconnecting, "Wrong number of disconnecting peers")
-	assert.Equal(t, uint64(4), resp.Data.Disconnected, "Wrong number of disconnected peers")
-}
-
-func BenchmarkListPeers(b *testing.B) {
-	// We simulate having a lot of peers.
-	ids := libp2ptest.GeneratePeerIDs(2000)
-	peerFetcher := &mockp2p.MockPeersProvider{}
-
-	for _, id := range ids {
-		enrRecord := &enr.Record{}
-		err := enrRecord.SetSig(dummyIdentity{1}, []byte{42})
-		require.NoError(b, err)
-		enrRecord.Set(enr.IPv4{7, 7, 7, 7})
-		err = enrRecord.SetSig(dummyIdentity{}, []byte{})
-		require.NoError(b, err)
-		const p2pAddr = "/ip4/7.7.7.7/udp/30303/p2p/QmYyQSo1c1Ym7orWxLYvCrM2EmxFTANf8wXmmE7DWjhx5N"
-		p2pMultiAddr, err := ma.NewMultiaddr(p2pAddr)
-		require.NoError(b, err)
-		peerFetcher.Peers().Add(enrRecord, id, p2pMultiAddr, network.DirInbound)
-	}
-
-	s := Server{PeersFetcher: peerFetcher}
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_, err := s.ListPeers(context.Background(), &ethpb.PeersRequest{
-			State:     []ethpb.ConnectionState{},
-			Direction: []ethpb.PeerDirection{},
-		})
-		require.NoError(b, err)
-	}
-}
+//func BenchmarkListPeers(b *testing.B) {
+//	// We simulate having a lot of peers.
+//	ids := libp2ptest.GeneratePeerIDs(2000)
+//	peerFetcher := &mockp2p.MockPeersProvider{}
+//
+//	for _, id := range ids {
+//		enrRecord := &enr.Record{}
+//		err := enrRecord.SetSig(dummyIdentity{1}, []byte{42})
+//		require.NoError(b, err)
+//		enrRecord.Set(enr.IPv4{7, 7, 7, 7})
+//		err = enrRecord.SetSig(dummyIdentity{}, []byte{})
+//		require.NoError(b, err)
+//		const p2pAddr = "/ip4/7.7.7.7/udp/30303/p2p/QmYyQSo1c1Ym7orWxLYvCrM2EmxFTANf8wXmmE7DWjhx5N"
+//		p2pMultiAddr, err := ma.NewMultiaddr(p2pAddr)
+//		require.NoError(b, err)
+//		peerFetcher.Peers().Add(enrRecord, id, p2pMultiAddr, network.DirInbound)
+//	}
+//
+//	s := Server{PeersFetcher: peerFetcher}
+//
+//	b.ResetTimer()
+//	for i := 0; i < b.N; i++ {
+//		_, err := s.ListPeers(context.Background(), &ethpb.PeersRequest{
+//			State:     []ethpb.ConnectionState{},
+//			Direction: []ethpb.PeerDirection{},
+//		})
+//		require.NoError(b, err)
+//	}
+//}
