@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"bytes"
+	"math/big"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -163,4 +164,8 @@ func ConsensusCopyUnpublishedChains(unpublishedChains []gwatCommon.HashArray) []
 		cpy[i] = chain.Copy()
 	}
 	return cpy
+}
+
+func GweiToBig(gwei uint64) *big.Int {
+	return new(big.Int).Mul(new(big.Int).SetUint64(gwei), new(big.Int).SetUint64(1000000000))
 }

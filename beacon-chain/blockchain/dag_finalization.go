@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"math/big"
 	"strings"
 	"time"
 
@@ -621,8 +620,13 @@ func (s *Service) collectValidatorSyncData(ctx context.Context, st state.BeaconS
 			if wop.Slot < minSlot {
 				continue
 			}
+			balance, err := st.BalanceAtIndex(types.ValidatorIndex(idx))
+			if err != nil {
+				return nil, err
+			}
 			//gwei to wei
-			amt := new(big.Int).Mul(new(big.Int).SetUint64(wop.Amount), new(big.Int).SetUint64(1000000000))
+			amt := helpers.GweiToBig(wop.Amount)
+			blc := helpers.GweiToBig(balance)
 			vsd := &gwatTypes.ValidatorSync{
 				OpType:     gwatTypes.UpdateBalance,
 				ProcEpoch:  uint64(currentEpoch) + 1,
@@ -630,6 +634,7 @@ func (s *Service) collectValidatorSyncData(ctx context.Context, st state.BeaconS
 				Creator:    gwatCommon.BytesToAddress(validator.CreatorAddress),
 				Amount:     amt,
 				InitTxHash: gwatCommon.BytesToHash(wop.Hash),
+				Balance:    blc,
 			}
 			validatorSyncData = append(validatorSyncData, vsd)
 			log.WithFields(logrus.Fields{
