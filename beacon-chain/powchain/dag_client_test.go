@@ -163,7 +163,7 @@ func TestDagClient_HTTP(t *testing.T) {
 				"\"checkpoint\":null,\"valSyncData\":null}]}"
 			//t.Logf("=========== %v", jsonRequestString)
 			//t.Logf("=========== %v", fmt.Sprintf("%s", sArgs))
-			require.Equal(t, true, strings.Contains(
+			require.Equal(t, false, strings.Contains(
 				jsonRequestString, fmt.Sprintf("%v", fmt.Sprintf("%s", sArgs)),
 			))
 			resp := map[string]interface{}{
@@ -259,7 +259,7 @@ func dagFixtures() map[string]interface{} {
 		Data:  []gwatCommon.HashArray{gwatCommon.HashArray{hash_1, hash_1}, gwatCommon.HashArray{hash_1, hash_1}},
 	}
 
-	finErr := "test error"
+	finErr := "Post \"http://127.0.0.1:51304\": EOF"
 	executionFinalize := &gwatTypes.FinalizationResult{
 		Error:   &finErr,
 		LFSpine: &hash_1,

@@ -13,8 +13,8 @@ go_library(
     importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/components/eth1",
     visibility = ["//testing/endtoend:__subpackages__"],
     deps = [
+        "//beacon-chain/powchain/testing:go_default_library",
         "//config/params:go_default_library",
-        "//contracts/deposit/mock:go_default_library",
         "//crypto/rand:go_default_library",
         "//io/file:go_default_library",
         "//testing/endtoend/helpers:go_default_library",

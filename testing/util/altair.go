@@ -179,10 +179,10 @@ func buildGenesisBeaconState(genesisTime uint64, preState state.BeaconStateAltai
 		Eth1DepositIndex: preState.Eth1DepositIndex(),
 
 		SpineData: &ethpb.SpineData{
-			Spines:       make([]byte, 0),
-			Prefix:       make([]byte, 0),
-			Finalization: make([]byte, 0),
-			CpFinalized:  make([]byte, 0),
+			Spines:       make([]byte, 32),
+			Prefix:       make([]byte, 32),
+			Finalization: make([]byte, 32),
+			CpFinalized:  make([]byte, 32),
 			ParentSpines: make([]*ethpb.SpinesSeq, 0),
 		},
 	}
@@ -301,7 +301,20 @@ func BlockSignatureAltair(
 	if err != nil {
 		return nil, err
 	}
-	s, err := transition.CalculateStateRoot(context.Background(), bState, wsb)
+
+	ctx := context.WithValue(context.Background(),
+		params.BeaconConfig().CtxBlockFetcherKey,
+		func(ctx context.Context, blockRoot [32]byte) (types.ValidatorIndex, types.Slot, uint64, error) {
+			block := wsb
+			votesIncluded := uint64(0)
+			for _, att := range block.Block().Body().Attestations() {
+				votesIncluded += att.AggregationBits.Count()
+			}
+
+			return block.Block().ProposerIndex(), block.Block().Slot(), votesIncluded, nil
+		})
+
+	s, err := transition.CalculateStateRoot(ctx, bState, wsb)
 	if err != nil {
 		return nil, err
 	}
@@ -317,10 +330,11 @@ func BlockSignatureAltair(
 	// Temporarily increasing the beacon state slot here since BeaconProposerIndex is a
 	// function deterministic on beacon state slot.
 	currentSlot := bState.Slot()
+
 	if err := bState.SetSlot(block.Slot); err != nil {
 		return nil, err
 	}
-	proposerIdx, err := helpers.BeaconProposerIndex(context.Background(), bState)
+	proposerIdx, err := helpers.BeaconProposerIndex(ctx, bState)
 	if err != nil {
 		return nil, err
 	}
@@ -431,8 +445,14 @@ func GenerateFullBlockAltair(
 		return nil, err
 	}
 
+	stateRoot, err := bState.HashTreeRoot(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	block := &ethpb.BeaconBlockAltair{
 		Slot:          slot,
+		StateRoot:     stateRoot[:],
 		ParentRoot:    parentRoot[:],
 		ProposerIndex: idx,
 		Body: &ethpb.BeaconBlockBodyAltair{

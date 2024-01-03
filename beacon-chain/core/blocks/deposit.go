@@ -8,9 +8,9 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/signing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/utils"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/container/trie"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/contracts/deposit"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/math"
@@ -245,7 +245,7 @@ func verifyDeposit(beaconState state.ReadOnlyBeaconState, deposit *ethpb.Deposit
 }
 
 func verifyDepositDataSigningRoot(obj *ethpb.Deposit_Data, domain []byte) error {
-	return deposit.VerifyDepositSignature(obj, domain)
+	return utils.VerifyDepositSignature(obj, domain)
 }
 
 func verifyDepositDataWithDomain(ctx context.Context, deps []*ethpb.Deposit, domain []byte) error {

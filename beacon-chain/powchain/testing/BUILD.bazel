@@ -7,6 +7,7 @@ go_library(
         "mock_engine_client.go",
         "mock_faulty_powchain.go",
         "mock_powchain.go",
+        "mock_test_account.go",
     ],
     importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain/testing",
     visibility = [
@@ -23,10 +24,14 @@ go_library(
         "@com_github_holiman_uint256//:go_default_library",
         "@com_github_pkg_errors//:go_default_library",
         "@com_github_prysmaticlabs_eth2_types//:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//accounts/abi:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//accounts/abi/bind:go_default_library",
         "@network_waterfall_gitlab_waterfall_protocol_gwat//accounts/abi/bind/backends:go_default_library",
         "@network_waterfall_gitlab_waterfall_protocol_gwat//common:go_default_library",
         "@network_waterfall_gitlab_waterfall_protocol_gwat//common/hexutil:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//core:go_default_library",
         "@network_waterfall_gitlab_waterfall_protocol_gwat//core/types:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//crypto:go_default_library",
         "@network_waterfall_gitlab_waterfall_protocol_gwat//rpc:go_default_library",
     ],
 )

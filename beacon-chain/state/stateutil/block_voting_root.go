@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 
 	"github.com/pkg/errors"
-	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
@@ -55,7 +54,7 @@ func BlockVotingsRoot(blockVotings []*ethpb.BlockVoting) ([32]byte, error) {
 	blockVotingRootsRoot, err := ssz.BitwiseMerkleize(
 		BlockVotingRoots,
 		uint64(len(BlockVotingRoots)),
-		fieldparams.BlockVotingLength,
+		2048,
 	)
 	if err != nil {
 		return [32]byte{}, errors.Wrap(err, "could not compute blockVoting votes merkleization")

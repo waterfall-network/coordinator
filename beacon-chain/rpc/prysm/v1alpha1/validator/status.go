@@ -10,9 +10,9 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/utils"
 	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/contracts/deposit"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/tracing"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
@@ -320,7 +320,7 @@ func (vs *Server) validatorStatus(
 			log.Warn("Could not compute domain")
 			return resp, nonExistentIndex
 		}
-		if err := deposit.VerifyDepositSignature(dep.Data, domain); err != nil {
+		if err := utils.VerifyDepositSignature(dep.Data, domain); err != nil {
 			resp.Status = ethpb.ValidatorStatus_INVALID
 			log.WithError(err).Warn("Invalid Eth1 deposit")
 			return resp, nonExistentIndex

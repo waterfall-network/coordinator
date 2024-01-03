@@ -86,7 +86,13 @@ func Test_UpdateLastValidatedCheckpoint(t *testing.T) {
 	require.NoError(t, err)
 	assert.NoError(t, beaconDB.SaveGenesisBlockRoot(ctx, genesisRoot))
 	require.NoError(t, fcs.InsertOptimisticBlock(ctx, 0, genesisRoot, params.BeaconConfig().ZeroHash,
-		0, 0, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil))
+		0, 0, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], &ethpb.SpineData{
+			Spines:       make([]byte, 0),
+			Prefix:       make([]byte, 0),
+			Finalization: make([]byte, 0),
+			CpFinalized:  make([]byte, 0),
+			ParentSpines: make([]*ethpb.SpinesSeq, 0),
+		}))
 	genesisSummary := &ethpb.StateSummary{
 		Root: genesisStateRoot[:],
 		Slot: 0,

@@ -44,8 +44,8 @@ zig_toolchains()
 # Register zig sdk toolchains with support for Ubuntu 20.04 (Focal Fossa) which has an EOL date of April, 2025.
 # For ubuntu glibc support, see https://launchpad.net/ubuntu/+source/glibc
 register_toolchains(
-        "@zig_sdk//toolchain:linux_amd64_gnu.2.31",
-        "@zig_sdk//toolchain:linux_arm64_gnu.2.31",
+    #        "@zig_sdk//toolchain:linux_amd64_gnu.2.31",
+    #        "@zig_sdk//toolchain:linux_arm64_gnu.2.31",
     # Hermetic cc toolchain is not yet supported on darwin. Sysroot needs to be provided.
     # See https://github.com/uber/hermetic_cc_toolchain#osx-sysroot
     #    "@zig_sdk//toolchain:darwin_amd64",

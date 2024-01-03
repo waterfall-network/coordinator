@@ -47,8 +47,8 @@ func setupService(t *testing.T) *Service {
 	trackedVals := map[types.ValidatorIndex]bool{
 		1:  true,
 		2:  true,
+		7:  true,
 		12: true,
-		15: true,
 	}
 	latestPerformance := map[types.ValidatorIndex]ValidatorLatestPerformance{
 		1: {
@@ -57,10 +57,10 @@ func setupService(t *testing.T) *Service {
 		2: {
 			balance: 32000000000,
 		},
-		12: {
+		7: {
 			balance: 31900000000,
 		},
-		15: {
+		12: {
 			balance: 31900000000,
 		},
 	}
@@ -79,8 +79,8 @@ func setupService(t *testing.T) *Service {
 			totalSyncComitteeAggregations:  0,
 		},
 		2:  {},
+		7:  {},
 		12: {},
-		15: {},
 	}
 	trackedSyncCommitteeIndices := map[types.ValidatorIndex][]types.CommitteeIndex{
 		1:  {0, 1, 2, 3},
@@ -121,10 +121,7 @@ func TestUpdateSyncCommitteeTrackedVals(t *testing.T) {
 
 	s.updateSyncCommitteeTrackedVals(state)
 	require.LogsDoNotContain(t, hook, "Sync committee assignments will not be reported")
-	newTrackedSyncIndices := map[types.ValidatorIndex][]types.CommitteeIndex{
-		1: {1, 3, 4},
-		2: {2},
-	}
+	newTrackedSyncIndices := map[types.ValidatorIndex][]types.CommitteeIndex{}
 	require.DeepEqual(t, s.trackedSyncCommitteeIndices, newTrackedSyncIndices)
 }
 
@@ -171,7 +168,7 @@ func TestStart(t *testing.T) {
 	// wait for Logrus
 	time.Sleep(1000 * time.Millisecond)
 	require.LogsContain(t, hook, "Synced to head epoch, starting reporting performance")
-	require.LogsContain(t, hook, "\"Starting service\" ValidatorIndices=\"[1 2 12 15]\"")
+	require.LogsContain(t, hook, "\"Starting service\" ValidatorIndices=\"[1 2 7 12]\"")
 	require.Equal(t, s.isLogging, true, "monitor is not running")
 }
 
@@ -186,30 +183,30 @@ func TestInitializePerformanceStructures(t *testing.T) {
 	require.LogsDoNotContain(t, hook, "Could not fetch starting balance")
 	latestPerformance := map[types.ValidatorIndex]ValidatorLatestPerformance{
 		1: {
-			balance: 32000000000,
+			balance: 3200000000000,
 		},
 		2: {
-			balance: 32000000000,
+			balance: 3200000000000,
+		},
+		7: {
+			balance: 3200000000000,
 		},
 		12: {
-			balance: 32000000000,
-		},
-		15: {
-			balance: 32000000000,
+			balance: 3200000000000,
 		},
 	}
 	aggregatedPerformance := map[types.ValidatorIndex]ValidatorAggregatedPerformance{
 		1: {
-			startBalance: 32000000000,
+			startBalance: 3200000000000,
 		},
 		2: {
-			startBalance: 32000000000,
+			startBalance: 3200000000000,
+		},
+		7: {
+			startBalance: 3200000000000,
 		},
 		12: {
-			startBalance: 32000000000,
-		},
-		15: {
-			startBalance: 32000000000,
+			startBalance: 3200000000000,
 		},
 	}
 

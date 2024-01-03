@@ -1,8 +1,6 @@
 package trie_test
 
 import (
-	contracts "gitlab.waterfall.network/waterfall/protocol/coordinator/contracts/deposit/mock"
-	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/abi/bind"
 	"strconv"
 	"testing"
 
@@ -71,17 +69,6 @@ func TestMerkleTrie_MerkleProofOutOfRange(t *testing.T) {
 	if _, err := m.MerkleProof(6); err == nil {
 		t.Error("Expected out of range failure, received nil", err)
 	}
-}
-
-func TestMerkleTrieRoot_EmptyTrie(t *testing.T) {
-	trie, err := trie.NewTrie(params.BeaconConfig().DepositContractTreeDepth)
-	require.NoError(t, err)
-	testAccount, err := contracts.Setup()
-	require.NoError(t, err)
-
-	depRoot, err := testAccount.Contract.GetDepositRoot(&bind.CallOpts{})
-	require.NoError(t, err)
-	require.DeepEqual(t, depRoot, trie.HashTreeRoot())
 }
 
 func TestGenerateTrieFromItems_NoItemsProvided(t *testing.T) {

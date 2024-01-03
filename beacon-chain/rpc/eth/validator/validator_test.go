@@ -3,7 +3,7 @@ package validator
 import (
 	"context"
 	"fmt"
-	"github.com/golang/mock/gomock"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/forkchoice/protoarray"
 	"strconv"
 	"testing"
 	"time"
@@ -308,8 +308,8 @@ func TestGetProposerDuties(t *testing.T) {
 			}
 		}
 		require.NotNil(t, expectedDuty, "Expected duty for slot 11 not found")
-		assert.Equal(t, types.ValidatorIndex(9982), expectedDuty.ValidatorIndex)
-		assert.DeepEqual(t, pubKeys[9982], expectedDuty.Pubkey)
+		assert.Equal(t, types.ValidatorIndex(6103), expectedDuty.ValidatorIndex)
+		assert.DeepEqual(t, pubKeys[6103], expectedDuty.Pubkey)
 	})
 
 	t.Run("Require slot processing", func(t *testing.T) {
@@ -357,8 +357,8 @@ func TestGetProposerDuties(t *testing.T) {
 			}
 		}
 		require.NotNil(t, expectedDuty, "Expected duty for slot 74 not found")
-		assert.Equal(t, types.ValidatorIndex(11741), expectedDuty.ValidatorIndex)
-		assert.DeepEqual(t, pubKeys[11741], expectedDuty.Pubkey)
+		assert.Equal(t, types.ValidatorIndex(6912), expectedDuty.ValidatorIndex)
+		assert.DeepEqual(t, pubKeys[6912], expectedDuty.Pubkey)
 	})
 
 	t.Run("Epoch out of bound", func(t *testing.T) {
@@ -420,16 +420,25 @@ func TestGetSyncCommitteeDuties(t *testing.T) {
 	require.NoError(t, st.SetGenesisTime(uint64(genesisTime.Unix())))
 	vals := st.Validators()
 	currCommittee := &ethpbalpha.SyncCommittee{}
+	aggregatedPubKEy := make([]byte, 0)
 	for i := 0; i < 5; i++ {
 		currCommittee.Pubkeys = append(currCommittee.Pubkeys, vals[i].PublicKey)
+		aggregatedPubKEy = append(aggregatedPubKEy, vals[i].PublicKey...)
 	}
+
+	currCommittee.AggregatePubkey = aggregatedPubKEy
+	aggregatedPubKEy = make([]byte, 0)
 	// add one public key twice - this is needed for one of the test cases
 	currCommittee.Pubkeys = append(currCommittee.Pubkeys, vals[0].PublicKey)
 	require.NoError(t, st.SetCurrentSyncCommittee(currCommittee))
 	nextCommittee := &ethpbalpha.SyncCommittee{}
 	for i := 5; i < 10; i++ {
 		nextCommittee.Pubkeys = append(nextCommittee.Pubkeys, vals[i].PublicKey)
+		aggregatedPubKEy = append(aggregatedPubKEy, vals[i].PublicKey...)
 	}
+
+	nextCommittee.AggregatePubkey = aggregatedPubKEy
+
 	require.NoError(t, st.SetNextSyncCommittee(nextCommittee))
 	db := dbutil.SetupDB(t)
 
@@ -549,19 +558,25 @@ func TestGetSyncCommitteeDuties(t *testing.T) {
 		// in this test we swap validators in the current and next sync committee inside the new state
 
 		newSyncPeriodStartSlot := types.Slot(uint64(params.BeaconConfig().EpochsPerSyncCommitteePeriod) * uint64(params.BeaconConfig().SlotsPerEpoch))
-		newSyncPeriodSt, _ := util.DeterministicGenesisStateAltair(t, numVals)
+		newSyncPeriodSt, _ := util.DeterministicGenesisStateAltair(t, 16)
 		require.NoError(t, newSyncPeriodSt.SetSlot(newSyncPeriodStartSlot))
 		require.NoError(t, newSyncPeriodSt.SetGenesisTime(uint64(genesisTime.Unix())))
 		vals := newSyncPeriodSt.Validators()
 		currCommittee := &ethpbalpha.SyncCommittee{}
-		for i := 5; i < 10; i++ {
+		for i := 0; i < 10; i++ {
 			currCommittee.Pubkeys = append(currCommittee.Pubkeys, vals[i].PublicKey)
+			aggregatedPubKEy = append(aggregatedPubKEy, vals[i].PublicKey...)
 		}
+
 		require.NoError(t, newSyncPeriodSt.SetCurrentSyncCommittee(currCommittee))
 		nextCommittee := &ethpbalpha.SyncCommittee{}
-		for i := 0; i < 5; i++ {
+		for i := 10; i < 16; i++ {
 			nextCommittee.Pubkeys = append(nextCommittee.Pubkeys, vals[i].PublicKey)
+			aggregatedPubKEy = append(aggregatedPubKEy, vals[i].PublicKey...)
 		}
+
+		currCommittee.AggregatePubkey = aggregatedPubKEy
+		nextCommittee.AggregatePubkey = aggregatedPubKEy
 		require.NoError(t, newSyncPeriodSt.SetNextSyncCommittee(nextCommittee))
 
 		stateFetchFn := func(slot types.Slot) beaconState.BeaconState {
@@ -581,7 +596,7 @@ func TestGetSyncCommitteeDuties(t *testing.T) {
 
 		req := &ethpbv2.SyncCommitteeDutiesRequest{
 			Epoch: params.BeaconConfig().EpochsPerSyncCommitteePeriod,
-			Index: []types.ValidatorIndex{8},
+			Index: []types.ValidatorIndex{2},
 		}
 		resp, err := vs.GetSyncCommitteeDuties(ctx, req)
 		require.NoError(t, err)
@@ -589,10 +604,10 @@ func TestGetSyncCommitteeDuties(t *testing.T) {
 		require.NotNil(t, resp.Data)
 		require.Equal(t, 1, len(resp.Data))
 		duty := resp.Data[0]
-		assert.DeepEqual(t, vals[8].PublicKey, duty.Pubkey)
-		assert.Equal(t, types.ValidatorIndex(8), duty.ValidatorIndex)
+		assert.DeepEqual(t, vals[2].PublicKey, duty.Pubkey)
+		assert.Equal(t, types.ValidatorIndex(2), duty.ValidatorIndex)
 		require.Equal(t, 1, len(duty.ValidatorSyncCommitteeIndices))
-		assert.Equal(t, uint64(3), duty.ValidatorSyncCommitteeIndices[0])
+		assert.Equal(t, uint64(2), duty.ValidatorSyncCommitteeIndices[0])
 	})
 
 	t.Run("execution optimistic", func(t *testing.T) {
@@ -674,16 +689,12 @@ func TestProduceBlock(t *testing.T) {
 	require.NoError(t, db.SaveState(ctx, beaconState, parentRoot), "Could not save genesis state")
 	require.NoError(t, db.SaveHeadBlockRoot(ctx, parentRoot), "Could not save genesis state")
 
-	ctrl := gomock.NewController(t)
-	forkchoiceMock := mockChain.NewMockForkChoicer(ctrl)
-
-	forkchoiceMock.EXPECT().GetParentByOptimisticSpines(gomock.AssignableToTypeOf(context.WithValue(context.Background(), "key", "value")),
-		gomock.AssignableToTypeOf([]common.HashArray{}),
-		gomock.AssignableToTypeOf([32]byte{}),
-	).Return(parentRoot, nil)
-
+	store := protoarray.New(0, 0)
 	v1Alpha1Server := &v1alpha1validator.Server{
-		HeadFetcher:       &mockChain.ChainService{State: beaconState, Root: parentRoot[:], ForkChoiceStore: forkchoiceMock},
+		HeadFetcher: &mockChain.ChainService{
+			State:           beaconState,
+			Root:            parentRoot[:],
+			ForkChoiceStore: store},
 		SyncChecker:       &mockSync.Sync{IsSyncing: false},
 		BlockReceiver:     &mockChain.ChainService{},
 		ChainStartFetcher: &mockPOW.POWChain{},
@@ -697,6 +708,15 @@ func TestProduceBlock(t *testing.T) {
 		StateGen:          stategen.New(db),
 		BeaconDB:          db,
 	}
+
+	require.NoError(t, v1Alpha1Server.HeadFetcher.ForkChoicer().InsertOptimisticBlock(ctx, 0, genesisRoot, params.BeaconConfig().ZeroHash,
+		0, 0, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], &ethpbalpha.SpineData{
+			Spines:       params.BeaconConfig().ZeroHash[:],
+			Prefix:       params.BeaconConfig().ZeroHash[:],
+			Finalization: params.BeaconConfig().ZeroHash[:],
+			CpFinalized:  params.BeaconConfig().ZeroHash[:],
+			ParentSpines: make([]*ethpbalpha.SpinesSeq, 0),
+		}))
 
 	proposerSlashings := make([]*ethpbalpha.ProposerSlashing, params.BeaconConfig().MaxProposerSlashings)
 	for i := types.ValidatorIndex(0); uint64(i) < params.BeaconConfig().MaxProposerSlashings; i++ {

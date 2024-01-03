@@ -62,7 +62,6 @@ go_test(
     name = "go_default_test",
     srcs = [
         "attestation_test.go",
-        "bellatrix_state_test.go",
         "block_test.go",
         "deposits_test.go",
         "helpers_test.go",

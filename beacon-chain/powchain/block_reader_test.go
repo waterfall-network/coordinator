@@ -8,8 +8,7 @@ import (
 
 	dbutil "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/testing"
 	mockPOW "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain/testing"
-	contracts "gitlab.waterfall.network/waterfall/protocol/coordinator/contracts/deposit"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/contracts/deposit/mock"
+	eth "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
@@ -26,7 +25,7 @@ func setDefaultMocks(service *Service) *Service {
 }
 
 func TestLatestMainchainInfo_OK(t *testing.T) {
-	testAcc, err := mock.Setup()
+	testAcc, err := mockPOW.Setup()
 	require.NoError(t, err, "Unable to set up simulated backend")
 
 	beaconDB := dbutil.SetupDB(t)
@@ -37,7 +36,6 @@ func TestLatestMainchainInfo_OK(t *testing.T) {
 	})
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
-		WithDepositContractAddress(testAcc.ContractAddr),
 		WithDatabase(beaconDB),
 	)
 	require.NoError(t, err, "Unable to setup web3 ETH1.0 chain service")
@@ -46,8 +44,15 @@ func TestLatestMainchainInfo_OK(t *testing.T) {
 	web3Service.rpcClient = &mockPOW.RPCClient{Backend: testAcc.Backend}
 	web3Service.eth1DataFetcher = &goodFetcher{backend: testAcc.Backend}
 
-	web3Service.depositContractCaller, err = contracts.NewDepositContractCaller(testAcc.ContractAddr, testAcc.Backend)
-	require.NoError(t, err)
+	web3Service.latestEth1Data = &eth.LatestETH1Data{
+		BlockHeight:        2,
+		BlockTime:          20,
+		BlockHash:          []byte{204, 181, 12, 155, 100, 227, 119, 27, 88, 40, 96, 88, 30, 186, 145, 22, 110, 245, 223, 234, 55, 208, 42, 74, 90, 60, 26, 12, 137, 240, 64, 118},
+		LastRequestedBlock: 0,
+		CpHash:             nil,
+		CpNr:               0,
+	}
+
 	testAcc.Backend.Commit()
 
 	exitRoutine := make(chan bool)
@@ -194,7 +199,7 @@ func TestBlockExists_UsesCachedBlockInfo(t *testing.T) {
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 	// nil eth1DataFetcher would panic if cached value not used
 	//web3Service.eth1DataFetcher = nil
-	nr_0 := uint64(0)
+	nr_0 := uint64(1)
 	header := &gethTypes.Header{
 		Number: &nr_0,
 	}

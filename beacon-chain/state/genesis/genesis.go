@@ -21,7 +21,7 @@ func State(netName, genesisPath string) (state.BeaconState, error) {
 	case params.ConfigNames[params.Mainnet]:
 		if genesisPath == "" {
 			// todo activate load mainnetRawSSZCompressed after implemented
-			if false {
+			if true {
 				return load(mainnetRawSSZCompressed)
 			}
 			return nil, fmt.Errorf("mainnet raw genesis is not installed. Use cmd param `--genesis-state` to define path to genesis.ssz")
