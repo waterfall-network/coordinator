@@ -259,7 +259,7 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		validExits = append(validExits, exit)
 	}
 
-	withdrawals := vs.WithdrawalPool.PendingWithdrawals(req.Slot, false)
+	withdrawals := vs.WithdrawalPool.PendingWithdrawals(req.Slot, head, false)
 
 	if len(withdrawals) > 0 {
 		log.WithFields(logrus.Fields{
