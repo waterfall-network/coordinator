@@ -65,6 +65,31 @@ func (p *Pool) PendingWithdrawals(slot types.Slot, st state.ReadOnlyBeaconState,
 		if itm.Epoch > slots.ToEpoch(slot) {
 			continue
 		}
+		// check in withdrawal already in state
+		roVal, err := st.ValidatorAtIndexReadOnly(itm.ValidatorIndex)
+		if err != nil {
+			log.WithError(err).WithFields(log.Fields{
+				"VIndex":     fmt.Sprintf("%d", itm.ValidatorIndex),
+				"PublicKey":  fmt.Sprintf("%#x", itm.PublicKey),
+				"Epoch":      fmt.Sprintf("%d", itm.Epoch),
+				"Amount":     fmt.Sprintf("%d", itm.Amount),
+				"InitTxHash": fmt.Sprintf("%#x", itm.InitTxHash),
+			}).Error("WithdrawalPool pool: get pending: get validator err")
+			continue
+		}
+		for _, wop := range roVal.WithdrawalOps() {
+			if bytes.Equal(wop.Hash, itm.InitTxHash) {
+				log.WithFields(log.Fields{
+					"VIndex":       fmt.Sprintf("%d", itm.ValidatorIndex),
+					"PublicKey":    fmt.Sprintf("%#x", itm.PublicKey),
+					"Epoch":        fmt.Sprintf("%d", itm.Epoch),
+					"Amount":       fmt.Sprintf("%d", itm.Amount),
+					"availBalance": fmt.Sprintf("%d", availBalMap[itm.ValidatorIndex]),
+					"InitTxHash":   fmt.Sprintf("%#x", itm.InitTxHash),
+				}).Error("WithdrawalPool pool: get pending: skip already handled item item")
+				continue
+			}
+		}
 		// check available balance
 		if _, ok := availBalMap[itm.ValidatorIndex]; !ok {
 			bal, err := helpers.AvailableWithdrawalAmount(itm.ValidatorIndex, st)
@@ -92,32 +117,6 @@ func (p *Pool) PendingWithdrawals(slot types.Slot, st state.ReadOnlyBeaconState,
 			continue
 		}
 		availBalMap[itm.ValidatorIndex] -= itm.Amount
-
-		// check in withdrawal already in state
-		roVal, err := st.ValidatorAtIndexReadOnly(itm.ValidatorIndex)
-		if err != nil {
-			log.WithError(err).WithFields(log.Fields{
-				"VIndex":     fmt.Sprintf("%d", itm.ValidatorIndex),
-				"PublicKey":  fmt.Sprintf("%#x", itm.PublicKey),
-				"Epoch":      fmt.Sprintf("%d", itm.Epoch),
-				"Amount":     fmt.Sprintf("%d", itm.Amount),
-				"InitTxHash": fmt.Sprintf("%#x", itm.InitTxHash),
-			}).Error("WithdrawalPool pool: get pending: get validator err")
-			continue
-		}
-		for _, wop := range roVal.WithdrawalOps() {
-			if bytes.Equal(wop.Hash, itm.InitTxHash) {
-				log.WithFields(log.Fields{
-					"VIndex":       fmt.Sprintf("%d", itm.ValidatorIndex),
-					"PublicKey":    fmt.Sprintf("%#x", itm.PublicKey),
-					"Epoch":        fmt.Sprintf("%d", itm.Epoch),
-					"Amount":       fmt.Sprintf("%d", itm.Amount),
-					"availBalance": fmt.Sprintf("%d", availBalMap[itm.ValidatorIndex]),
-					"InitTxHash":   fmt.Sprintf("%#x", itm.InitTxHash),
-				}).Error("WithdrawalPool pool: get pending: skip already handled item item")
-				continue
-			}
-		}
 
 		pending = append(pending, itm)
 		if uint64(len(pending)) == maxWithdrawals {
