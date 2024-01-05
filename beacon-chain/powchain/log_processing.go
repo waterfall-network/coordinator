@@ -390,6 +390,8 @@ func (s *Service) processPastLogs(ctx context.Context) error {
 			},
 			FromBlock: big.NewInt(0).SetUint64(start),
 			ToBlock:   big.NewInt(0).SetUint64(end),
+			////handle deposit only
+			//Topics: [][]gwatCommon.Hash{{gwatVal.EvtDepositLogSignature}},
 		}
 		remainingLogs := logCount - uint64(s.lastReceivedMerkleIndex+1)
 		// only change the end block if the remaining logs are below the required log limit.
