@@ -166,6 +166,6 @@ func ConsensusCopyUnpublishedChains(unpublishedChains []gwatCommon.HashArray) []
 	return cpy
 }
 
-func GweiToBig(gwei uint64) *big.Int {
+func GweiToWei(gwei uint64) *big.Int {
 	return new(big.Int).Mul(new(big.Int).SetUint64(gwei), new(big.Int).SetUint64(1000000000))
 }
