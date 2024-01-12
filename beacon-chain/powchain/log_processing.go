@@ -22,7 +22,7 @@ import (
 	gwat "gitlab.waterfall.network/waterfall/protocol/gwat"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
-	gwatVal "gitlab.waterfall.network/waterfall/protocol/gwat/validator"
+	gwatValLog "gitlab.waterfall.network/waterfall/protocol/gwat/validator/txlog"
 )
 
 const eth1DataSavingInterval = 1000
@@ -79,7 +79,7 @@ func (s *Service) ProcessLog(ctx context.Context, depositLog gwatTypes.Log) erro
 	s.processingLock.RLock()
 	defer s.processingLock.RUnlock()
 	// Process logs according to their event signature.
-	if depositLog.Topics[0] == gwatVal.EvtDepositLogSignature {
+	if depositLog.Topics[0] == gwatValLog.EvtDepositLogSignature {
 		if err := s.ProcessDepositLog(ctx, depositLog); err != nil {
 			return errors.Wrap(err, "Could not process deposit log")
 		}
@@ -88,13 +88,13 @@ func (s *Service) ProcessLog(ctx context.Context, depositLog gwatTypes.Log) erro
 		}
 		return nil
 	}
-	if depositLog.Topics[0] == gwatVal.EvtExitReqLogSignature {
+	if depositLog.Topics[0] == gwatValLog.EvtExitReqLogSignature {
 		if err := s.ProcessExitLog(ctx, depositLog); err != nil {
 			return errors.Wrap(err, "Could not process exit log")
 		}
 		return nil
 	}
-	if depositLog.Topics[0] == gwatVal.EvtWithdrawalLogSignature {
+	if depositLog.Topics[0] == gwatValLog.EvtWithdrawalLogSignature {
 		if err := s.ProcessWithdrawalLog(ctx, depositLog); err != nil {
 			return errors.Wrap(err, "Could not process withdrawal log")
 		}
@@ -105,7 +105,7 @@ func (s *Service) ProcessLog(ctx context.Context, depositLog gwatTypes.Log) erro
 }
 
 func (s *Service) ProcessWithdrawalLog(ctx context.Context, wtdLog gwatTypes.Log) error {
-	pubkey, creatorAddr, valIndex, amtGwei, err := gwatVal.UnpackWithdrawalLogData(wtdLog.Data)
+	pubkey, creatorAddr, valIndex, amtGwei, err := gwatValLog.UnpackWithdrawalLogData(wtdLog.Data)
 
 	curSlot := slots.CurrentSlot(s.cfg.finalizedStateAtStartup.GenesisTime())
 	curEpoch := slots.ToEpoch(curSlot)
@@ -136,7 +136,7 @@ func (s *Service) ProcessWithdrawalLog(ctx context.Context, wtdLog gwatTypes.Log
 }
 
 func (s *Service) ProcessExitLog(ctx context.Context, exitLog gwatTypes.Log) error {
-	pubkey, creatorAddr, valIndex, exitEpoch, err := gwatVal.UnpackExitRequestLogData(exitLog.Data)
+	pubkey, creatorAddr, valIndex, exitEpoch, err := gwatValLog.UnpackExitRequestLogData(exitLog.Data)
 
 	log.WithError(err).WithFields(logrus.Fields{
 		"valIndex":    valIndex,
@@ -176,7 +176,7 @@ func (s *Service) ProcessExitLog(ctx context.Context, exitLog gwatTypes.Log) err
 // the ETH1.0 chain by trying to ascertain which participant deposited
 // in the contract.
 func (s *Service) ProcessDepositLog(ctx context.Context, depositLog gwatTypes.Log) error {
-	pubkey, creatorAddr, withdrawalCredentials, amount, signature, depositIndex, err := gwatVal.UnpackDepositLogData(depositLog.Data)
+	pubkey, creatorAddr, withdrawalCredentials, amount, signature, depositIndex, err := gwatValLog.UnpackDepositLogData(depositLog.Data)
 
 	log.WithError(err).WithFields(logrus.Fields{
 		"amount":          amount,
@@ -391,7 +391,7 @@ func (s *Service) processPastLogs(ctx context.Context) error {
 			FromBlock: big.NewInt(0).SetUint64(start),
 			ToBlock:   big.NewInt(0).SetUint64(end),
 			////handle deposit only
-			//Topics: [][]gwatCommon.Hash{{gwatVal.EvtDepositLogSignature}},
+			//Topics: [][]gwatCommon.Hash{{gwatValLog.EvtDepositLogSignature}},
 		}
 		remainingLogs := logCount - uint64(s.lastReceivedMerkleIndex+1)
 		// only change the end block if the remaining logs are below the required log limit.

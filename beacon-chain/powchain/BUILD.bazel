@@ -63,7 +63,7 @@ go_library(
         "@network_waterfall_gitlab_waterfall_protocol_gwat//core/types:go_default_library",
         "@network_waterfall_gitlab_waterfall_protocol_gwat//ethclient:go_default_library",
         "@network_waterfall_gitlab_waterfall_protocol_gwat//rpc:go_default_library",
-        "@network_waterfall_gitlab_waterfall_protocol_gwat//validator:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//validator/txlog:go_default_library",
         "@com_github_holiman_uint256//:go_default_library",
         "@com_github_pkg_errors//:go_default_library",
         "@com_github_prometheus_client_golang//prometheus:go_default_library",
