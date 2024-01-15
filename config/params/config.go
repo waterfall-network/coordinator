@@ -153,7 +153,7 @@ type BeaconChainConfig struct {
 	GenesisForkVersion []byte      `yaml:"GENESIS_FORK_VERSION" spec:"true"` // GenesisForkVersion is used to track fork version between state transitions.
 	AltairForkVersion  []byte      `yaml:"ALTAIR_FORK_VERSION" spec:"true"`  // AltairForkVersion is used to represent the fork version for altair.
 	AltairForkEpoch    types.Epoch `yaml:"ALTAIR_FORK_EPOCH" spec:"true"`    // AltairForkEpoch is used to represent the assigned fork epoch for altair.
-	DelegateForkEpoch  types.Epoch `yaml:"DELEGATE_FORK_EPOCH" spec:"true"`  // DelegateForkEpoch defines the epoch to start support of Delegate Stake functionalities.
+	DelegateForkSlot   types.Slot  `yaml:"DELEGATE_FORK_SLOT" spec:"true"`   // DelegateForkSlot defines the slot to start support of Delegate Stake functionalities.
 	// Deprecated
 	BellatrixForkVersion []byte `yaml:"BELLATRIX_FORK_VERSION" spec:"true"` // BellatrixForkVersion is used to represent the fork version for bellatrix.
 	// Deprecated

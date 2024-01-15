@@ -116,10 +116,8 @@ func TestConfigureNetwork(t *testing.T) {
 	set := flag.NewFlagSet("test", 0)
 	bootstrapNodes := cli.StringSlice{}
 	set.Var(&bootstrapNodes, cmd.BootstrapNode.Name, "")
-	set.Int(flags.ContractDeploymentBlock.Name, 0, "")
 	require.NoError(t, set.Set(cmd.BootstrapNode.Name, "node1"))
 	require.NoError(t, set.Set(cmd.BootstrapNode.Name, "node2"))
-	require.NoError(t, set.Set(flags.ContractDeploymentBlock.Name, strconv.Itoa(100)))
 	cliCtx := cli.NewContext(&app, set, nil)
 
 	configureNetwork(cliCtx)

@@ -222,7 +222,7 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	GenesisForkVersion:   []byte{0, 0, 0, 0},
 	AltairForkVersion:    []byte{1, 0, 0, 0},
 	AltairForkEpoch:      mainnetAltairForkEpoch,
-	DelegateForkEpoch:    math.MaxUint64,
+	DelegateForkSlot:     math.MaxUint64,
 	BellatrixForkVersion: []byte{2, 0, 0, 0},
 	BellatrixForkEpoch:   mainnetBellatrixForkEpoch,
 	ShardingForkVersion:  []byte{3, 0, 0, 0},

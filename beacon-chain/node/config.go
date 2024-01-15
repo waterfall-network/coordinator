@@ -84,6 +84,11 @@ func configureEth1Config(cliCtx *cli.Context) {
 		c.VotingRequiredSlots = cliCtx.Int(flags.VotingRequiredSlots.Name)
 		params.OverrideBeaconConfig(c)
 	}
+	if cliCtx.IsSet(flags.DelegatingStakeForkSlot.Name) {
+		c := params.BeaconConfig()
+		c.DelegateForkSlot = types.Slot(cliCtx.Uint64(flags.DelegatingStakeForkSlot.Name))
+		params.OverrideBeaconConfig(c)
+	}
 }
 
 func configureNetwork(cliCtx *cli.Context) {
@@ -91,11 +96,6 @@ func configureNetwork(cliCtx *cli.Context) {
 		c := params.BeaconNetworkConfig()
 		c.BootstrapNodes = cliCtx.StringSlice(cmd.BootstrapNode.Name)
 		params.OverrideBeaconNetworkConfig(c)
-	}
-	if cliCtx.IsSet(flags.ContractDeploymentBlock.Name) {
-		networkCfg := params.BeaconNetworkConfig()
-		networkCfg.ContractDeploymentBlock = uint64(cliCtx.Int(flags.ContractDeploymentBlock.Name))
-		params.OverrideBeaconNetworkConfig(networkCfg)
 	}
 }
 
