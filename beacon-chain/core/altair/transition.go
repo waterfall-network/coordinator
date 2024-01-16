@@ -2,6 +2,7 @@ package altair
 
 import (
 	"context"
+	"github.com/sirupsen/logrus"
 
 	"github.com/pkg/errors"
 	e "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/epoch"
@@ -104,10 +105,6 @@ func ProcessEpoch(ctx context.Context, state state.BeaconState) (state.BeaconSta
 	if err != nil {
 		return nil, err
 	}
-	state, err = e.ProcessWithdrawalOps(state)
-	if err != nil {
-		return nil, err
-	}
 	state, err = e.ProcessRandaoMixesReset(state)
 	if err != nil {
 		return nil, err
@@ -130,6 +127,15 @@ func ProcessEpoch(ctx context.Context, state state.BeaconState) (state.BeaconSta
 	}
 
 	state, err = helpers.ConsensusUpdateStateSpineFinalization(state, preJustRoot, preFinRoot)
+	if err != nil {
+		return nil, err
+	}
+
+	logrus.WithFields(logrus.Fields{
+		"stSlot": state.Slot(),
+	}).Info("ProcessWithdrawalOps: ProcessEpoch")
+
+	state, err = helpers.ProcessWithdrawalOps(state, preFinRoot)
 	if err != nil {
 		return nil, err
 	}

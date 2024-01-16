@@ -449,5 +449,14 @@ func ProcessEpochPrecompute(ctx context.Context, state state.BeaconState) (state
 		return nil, err
 	}
 
+	log.WithFields(logrus.Fields{
+		"stSlot": state.Slot(),
+	}).Info("ProcessWithdrawalOps: ProcessEpochPrecompute")
+
+	state, err = helpers.ProcessWithdrawalOps(state, preFinRoot)
+	if err != nil {
+		return nil, err
+	}
+
 	return state, nil
 }
