@@ -1,6 +1,9 @@
 package params
 
-import eth1Params "gitlab.waterfall.network/waterfall/protocol/gwat/params"
+import (
+	types "github.com/prysmaticlabs/eth2-types"
+	gwatParams "gitlab.waterfall.network/waterfall/protocol/gwat/params"
+)
 
 // UseTestnet8NetworkConfig uses the Testnet8 specific network config.
 func UseTestnet8NetworkConfig() {
@@ -25,8 +28,9 @@ func Testnet8Config() *BeaconChainConfig {
 	cfg := MainnetConfig().Copy()
 	cfg.ConfigName = ConfigNames[Testnet8]
 	cfg.DepositContractAddress = "0x6671Ed1732b6b5AF82724A1d1A94732D1AA37aa6"
-	cfg.DepositChainID = eth1Params.Testnet8ChainConfig.ChainID.Uint64()
-	cfg.DepositNetworkID = eth1Params.Testnet8ChainConfig.ChainID.Uint64()
+	cfg.DepositChainID = gwatParams.Testnet8ChainConfig.ChainID.Uint64()
+	cfg.DepositNetworkID = gwatParams.Testnet8ChainConfig.ChainID.Uint64()
+	cfg.DelegateForkSlot = types.Slot(gwatParams.Testnet8ChainConfig.ForkSlotDelegate)
 	cfg.SlotsPerArchivedPoint = 2048
 	cfg.InitializeForkSchedule()
 	return cfg

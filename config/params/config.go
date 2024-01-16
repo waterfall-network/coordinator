@@ -235,3 +235,7 @@ func configForkSchedule(b *BeaconChainConfig) map[[fieldparams.VersionLength]byt
 	fvs[bytesutil.ToBytes4(b.BellatrixForkVersion)] = b.BellatrixForkEpoch
 	return fvs
 }
+
+func (b *BeaconChainConfig) IsDelegatingStakeSlot(slot types.Slot) bool {
+	return b.DelegateForkSlot <= slot
+}
