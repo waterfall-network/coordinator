@@ -192,10 +192,10 @@ func (p *Pool) Verify(withdrawal *ethpb.Withdrawal) error {
 	if poolItm.ValidatorIndex != withdrawal.ValidatorIndex {
 		return fmt.Errorf("mismatch validators indices pool=%d received=%d", poolItm.ValidatorIndex, withdrawal.ValidatorIndex)
 	}
-	if bytes.Equal(poolItm.PublicKey, withdrawal.PublicKey) {
+	if !bytes.Equal(poolItm.PublicKey, withdrawal.PublicKey) {
 		return fmt.Errorf("mismatch publick keys pool=%#x received=%#x", poolItm.PublicKey, withdrawal.PublicKey)
 	}
-	if bytes.Equal(poolItm.InitTxHash, withdrawal.InitTxHash) {
+	if !bytes.Equal(poolItm.InitTxHash, withdrawal.InitTxHash) {
 		return fmt.Errorf("mismatch init tx hashes pool=%#x received=%#x", poolItm.InitTxHash, withdrawal.InitTxHash)
 	}
 	return nil

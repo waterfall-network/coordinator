@@ -173,7 +173,7 @@ func (p *Pool) Verify(exit *ethpb.VoluntaryExit) error {
 	if poolItm.ValidatorIndex != exit.ValidatorIndex {
 		return fmt.Errorf("mismatch validators indices pool=%d received=%d", poolItm.ValidatorIndex, exit.ValidatorIndex)
 	}
-	if bytes.Equal(poolItm.InitTxHash, exit.InitTxHash) {
+	if !bytes.Equal(poolItm.InitTxHash, exit.InitTxHash) {
 		return fmt.Errorf("mismatch init tx hashes pool=%#x received=%#x", poolItm.InitTxHash, exit.InitTxHash)
 	}
 	return nil
