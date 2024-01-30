@@ -1,0 +1,15 @@
+load("@prysm//tools/go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["utils.go"],
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/utils",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//beacon-chain/core/signing:go_default_library",
+        "//config/features:go_default_library",
+        "//crypto/bls:go_default_library",
+        "//proto/prysm/v1alpha1:go_default_library",
+        "@com_github_pkg_errors//:go_default_library",
+    ],
+)
