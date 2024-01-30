@@ -213,6 +213,7 @@ func TestService_BroadcastAttestationWithDiscoveryAttempts(t *testing.T) {
 	genesisTime := time.Now()
 	genesisValidatorsRoot := make([]byte, 32)
 	s := &Service{
+		started:               true,
 		cfg:                   cfg,
 		genesisTime:           genesisTime,
 		genesisValidatorsRoot: genesisValidatorsRoot,
@@ -290,6 +291,7 @@ func TestService_BroadcastAttestationWithDiscoveryAttempts(t *testing.T) {
 	)
 	require.NoError(t, err)
 	p := &Service{
+		started:               true,
 		host:                  hosts[0],
 		ctx:                   context.Background(),
 		pubsub:                ps1,
@@ -306,6 +308,7 @@ func TestService_BroadcastAttestationWithDiscoveryAttempts(t *testing.T) {
 	}
 
 	p2 := &Service{
+		started:               true,
 		host:                  hosts[1],
 		ctx:                   context.Background(),
 		pubsub:                ps2,

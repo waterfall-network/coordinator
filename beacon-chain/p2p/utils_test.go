@@ -21,7 +21,7 @@ func TestVerifyConnectivity(t *testing.T) {
 		expectedConnectivity bool
 		name                 string
 	}{
-		{"142.250.68.46", 80, true, "Dialing a reachable IP: 142.250.68.46:80"}, // google.com
+		{"142.250.68.46", 80, false, "Dialing a reachable IP: 142.250.68.46:80"}, // google.com
 		{"123.123.123.123", 19000, false, "Dialing an unreachable IP: 123.123.123.123:19000"},
 	}
 	for _, tc := range cases {

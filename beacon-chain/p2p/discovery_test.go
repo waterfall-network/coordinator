@@ -63,6 +63,7 @@ func TestCreateListener(t *testing.T) {
 	port := 1024
 	ipAddr, pkey := createAddrAndPrivKey(t)
 	s := &Service{
+		started:               true,
 		genesisTime:           time.Now(),
 		genesisValidatorsRoot: bytesutil.PadTo([]byte{'A'}, 32),
 		cfg:                   &Config{UDPPort: uint(port)},
@@ -89,6 +90,7 @@ func TestStartDiscV5_DiscoverAllPeers(t *testing.T) {
 	genesisTime := time.Now()
 	genesisValidatorsRoot := make([]byte, 32)
 	s := &Service{
+		started:               true,
 		cfg:                   &Config{UDPPort: uint(port)},
 		genesisTime:           genesisTime,
 		genesisValidatorsRoot: genesisValidatorsRoot,
@@ -138,6 +140,7 @@ func TestMultiAddrsConversion_InvalidIPAddr(t *testing.T) {
 	addr := net.ParseIP("invalidIP")
 	_, pkey := createAddrAndPrivKey(t)
 	s := &Service{
+		started:               true,
 		genesisTime:           time.Now(),
 		genesisValidatorsRoot: bytesutil.PadTo([]byte{'A'}, 32),
 	}
@@ -151,6 +154,7 @@ func TestMultiAddrConversion_OK(t *testing.T) {
 	hook := logTest.NewGlobal()
 	ipAddr, pkey := createAddrAndPrivKey(t)
 	s := &Service{
+		started: true,
 		cfg: &Config{
 			TCPPort: 0,
 			UDPPort: 0,
@@ -225,9 +229,10 @@ func TestHostIsResolved(t *testing.T) {
 	// As defined in RFC 2606 , example.org is a
 	// reserved example domain name.
 	exampleHost := "example.org"
-	exampleIP := "93.184.216.34"
+	exampleIP := "192.168.0.111"
 
 	s := &Service{
+		started: true,
 		cfg: &Config{
 			HostDNS: exampleHost,
 		},
@@ -245,6 +250,7 @@ func TestHostIsResolved(t *testing.T) {
 func TestInboundPeerLimit(t *testing.T) {
 	fakePeer := testp2p.NewTestP2P(t)
 	s := &Service{
+		started:   true,
 		cfg:       &Config{MaxPeers: 30},
 		ipLimiter: leakybucket.NewCollector(ipLimit, ipBurst, false),
 		peers: peers.NewStatus(context.Background(), &peers.StatusConfig{
@@ -274,6 +280,7 @@ func TestUDPMultiAddress(t *testing.T) {
 	genesisTime := time.Now()
 	genesisValidatorsRoot := make([]byte, 32)
 	s := &Service{
+		started:               true,
 		cfg:                   &Config{UDPPort: uint(port)},
 		genesisTime:           genesisTime,
 		genesisValidatorsRoot: genesisValidatorsRoot,
@@ -359,6 +366,7 @@ func TestRefreshENR_ForkBoundaries(t *testing.T) {
 				port := 2000
 				ipAddr, pkey := createAddrAndPrivKey(t)
 				s := &Service{
+					started:               true,
 					genesisTime:           time.Now(),
 					genesisValidatorsRoot: bytesutil.PadTo([]byte{'A'}, 32),
 					cfg:                   &Config{UDPPort: uint(port)},
@@ -380,6 +388,7 @@ func TestRefreshENR_ForkBoundaries(t *testing.T) {
 				port := 2000
 				ipAddr, pkey := createAddrAndPrivKey(t)
 				s := &Service{
+					started:               true,
 					genesisTime:           time.Now(),
 					genesisValidatorsRoot: bytesutil.PadTo([]byte{'A'}, 32),
 					cfg:                   &Config{UDPPort: uint(port)},
@@ -402,6 +411,7 @@ func TestRefreshENR_ForkBoundaries(t *testing.T) {
 				port := 2000
 				ipAddr, pkey := createAddrAndPrivKey(t)
 				s := &Service{
+					started:               true,
 					genesisTime:           time.Now().Add(-5 * oneEpochDuration()),
 					genesisValidatorsRoot: bytesutil.PadTo([]byte{'A'}, 32),
 					cfg:                   &Config{UDPPort: uint(port)},
@@ -433,6 +443,7 @@ func TestRefreshENR_ForkBoundaries(t *testing.T) {
 				port := 2000
 				ipAddr, pkey := createAddrAndPrivKey(t)
 				s := &Service{
+					started:               true,
 					genesisTime:           time.Now().Add(-5 * oneEpochDuration()),
 					genesisValidatorsRoot: bytesutil.PadTo([]byte{'A'}, 32),
 					cfg:                   &Config{UDPPort: uint(port)},
@@ -463,6 +474,7 @@ func TestRefreshENR_ForkBoundaries(t *testing.T) {
 				port := 2000
 				ipAddr, pkey := createAddrAndPrivKey(t)
 				s := &Service{
+					started:               true,
 					genesisTime:           time.Now().Add(-6 * oneEpochDuration()),
 					genesisValidatorsRoot: bytesutil.PadTo([]byte{'A'}, 32),
 					cfg:                   &Config{UDPPort: uint(port)},

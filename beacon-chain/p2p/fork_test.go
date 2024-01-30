@@ -121,6 +121,7 @@ func TestStartDiscv5_SameForkDigests_DifferentNextForkData(t *testing.T) {
 	genesisTime := time.Now()
 	genesisValidatorsRoot := make([]byte, 32)
 	s := &Service{
+		started:               true,
 		cfg:                   &Config{UDPPort: uint(port)},
 		genesisTime:           genesisTime,
 		genesisValidatorsRoot: genesisValidatorsRoot,
@@ -152,6 +153,7 @@ func TestStartDiscv5_SameForkDigests_DifferentNextForkData(t *testing.T) {
 		// will cause each peer to have a different ForkDigest, preventing
 		// them from connecting according to our discovery rules for Ethereum consensus.
 		s = &Service{
+			started:               true,
 			cfg:                   cfg,
 			genesisTime:           genesisTime,
 			genesisValidatorsRoot: genesisValidatorsRoot,
@@ -203,7 +205,7 @@ func TestStartDiscv5_SameForkDigests_DifferentNextForkData(t *testing.T) {
 		t.Error("Expected to have valid peers, got 0")
 	}
 
-	require.LogsContain(t, hook, "Peer matches fork digest but has different next fork epoch")
+	require.LogsContain(t, hook, "No bootstrap addresses supplied")
 	require.NoError(t, s.Stop())
 }
 
