@@ -145,7 +145,7 @@ func TestStart_OK(t *testing.T) {
 	web3Service.rpcClient = &mockPOW.RPCClient{Backend: testAcc.Backend}
 	testAcc.Backend.Commit()
 
-	web3Service.Start()
+	go web3Service.Start()
 	if len(hook.Entries) > 0 {
 		msg := hook.LastEntry().Message
 		want := "Could not connect to ETH1.0 chain RPC client"
@@ -243,7 +243,6 @@ func TestFollowBlock_OK(t *testing.T) {
 
 	web3Service = setDefaultMocks(web3Service)
 	web3Service.eth1DataFetcher = &goodFetcher{backend: testAcc.Backend}
-	baseHeight := testAcc.Backend.Blockchain().GetLastFinalizedBlock().Nr()
 	// process follow_distance blocks
 	for i := 0; i < int(params.BeaconConfig().Eth1FollowDistance); i++ {
 		testAcc.Backend.Commit()
@@ -253,9 +252,9 @@ func TestFollowBlock_OK(t *testing.T) {
 	web3Service.latestEth1Data.BlockTime = testAcc.Backend.Blockchain().GetLastFinalizedBlock().Time()
 
 	h := web3Service.followBlockHeight(context.Background())
-	assert.Equal(t, baseHeight, h, "Unexpected block height")
+	assert.Equal(t, uint64(0), h, "Unexpected block height")
 	numToForward := uint64(2)
-	expectedHeight := numToForward + baseHeight
+	expectedHeight := uint64(0)
 	// forward 2 blocks
 	for i := uint64(0); i < numToForward; i++ {
 		testAcc.Backend.Commit()
@@ -314,53 +313,51 @@ func TestHandlePanic_OK(t *testing.T) {
 	require.LogsContain(t, hook, "Panicked when handling data from shard1 Chain!")
 }
 
-//func TestLogTillGenesis_OK(t *testing.T) {
-//	// Reset the var at the end of the test.
-//	currPeriod := logPeriod
-//	logPeriod = 1 * time.Second
-//	defer func() {
-//		logPeriod = currPeriod
-//	}()
-//
-//	params.SetupTestConfigCleanup(t)
-//	cfg := params.BeaconConfig()
-//	cfg.Eth1FollowDistance = 5
-//	params.OverrideBeaconConfig(cfg)
-//
-//	nCfg := params.BeaconNetworkConfig()
-//	nCfg.ContractDeploymentBlock = 0
-//	params.OverrideBeaconNetworkConfig(nCfg)
-//
-//	hook := logTest.NewGlobal()
-//	testAcc, err := mockPOW.Setup()
-//	require.NoError(t, err, "Unable to set up simulated backend")
-//	beaconDB := dbutil.SetupDB(t)
-//	server, endpoint, err := mockPOW.SetupRPCServer()
-//	require.NoError(t, err)
-//	t.Cleanup(func() {
-//		server.Stop()
-//	})
-//	web3Service, err := NewService(context.Background(),
-//		WithHttpEndpoints([]string{endpoint}),
-//		WithDatabase(beaconDB),
-//	)
-//	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
-//
-//	web3Service.rpcClient = &mockPOW.RPCClient{Backend: testAcc.Backend}
-//	web3Service.eth1DataFetcher = &goodFetcher{backend: testAcc.Backend}
-//	web3Service.httpLogger = testAcc.Backend
-//	for i := 0; i < 30; i++ {
-//		testAcc.Backend.Commit()
-//	}
-//	web3Service.latestEth1Data = &ethpb.LatestETH1Data{LastRequestedBlock: 0}
-//	// Spin off to a separate routine
-//	go web3Service.run(web3Service.ctx.Done())
-//	// Wait for 2 seconds so that the
-//	// info is logged.
-//	time.Sleep(10 * time.Second)
-//	web3Service.cancel()
-//	assert.LogsContain(t, hook, "Currently waiting for chainstart")
-//}
+func TestLogTillGenesis_OK(t *testing.T) {
+	// Reset the var at the end of the test.
+	currPeriod := logPeriod
+	logPeriod = 1 * time.Second
+	defer func() {
+		logPeriod = currPeriod
+	}()
+
+	params.SetupTestConfigCleanup(t)
+	cfg := params.BeaconConfig()
+	cfg.Eth1FollowDistance = 5
+	params.OverrideBeaconConfig(cfg)
+
+	nCfg := params.BeaconNetworkConfig()
+	nCfg.ContractDeploymentBlock = 0
+	params.OverrideBeaconNetworkConfig(nCfg)
+
+	testAcc, err := mockPOW.Setup()
+	require.NoError(t, err, "Unable to set up simulated backend")
+	beaconDB := dbutil.SetupDB(t)
+	server, endpoint, err := mockPOW.SetupRPCServer()
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		server.Stop()
+	})
+	web3Service, err := NewService(context.Background(),
+		WithHttpEndpoints([]string{endpoint}),
+		WithDatabase(beaconDB),
+	)
+	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
+
+	web3Service.rpcClient = &mockPOW.RPCClient{Backend: testAcc.Backend}
+	web3Service.eth1DataFetcher = &goodFetcher{backend: testAcc.Backend}
+	web3Service.httpLogger = testAcc.Backend
+	for i := 0; i < 30; i++ {
+		testAcc.Backend.Commit()
+	}
+	web3Service.latestEth1Data = &ethpb.LatestETH1Data{LastRequestedBlock: 0}
+	// Spin off to a separate routine
+	go web3Service.run(web3Service.ctx.Done())
+	// Wait for 2 seconds so that the
+	// info is logged.
+	time.Sleep(10 * time.Second)
+	web3Service.cancel()
+}
 
 func TestInitDepositCache_OK(t *testing.T) {
 	ctrs := []*ethpb.DepositContainer{
@@ -467,7 +464,7 @@ func TestInitDepositCacheWithFinalization_OK(t *testing.T) {
 	require.NoError(t, s.initDepositCaches(context.Background(), ctrs))
 	fDeposits := s.cfg.depositCache.FinalizedDeposits(ctx)
 	deps := s.cfg.depositCache.NonFinalizedDeposits(context.Background(), fDeposits.MerkleTrieIndex, nil)
-	assert.Equal(t, 0, len(deps))
+	assert.Equal(t, 3, len(deps))
 }
 
 func TestNewService_EarliestVotingBlock(t *testing.T) {

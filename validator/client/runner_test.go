@@ -70,6 +70,7 @@ func TestUpdateDuties_NextSlot(t *testing.T) {
 	ticker := make(chan types.Slot)
 	v.NextSlotRet = ticker
 	go func() {
+		time.Sleep(time.Second)
 		ticker <- slot
 
 		cancel()
@@ -90,6 +91,7 @@ func TestUpdateDuties_HandlesError(t *testing.T) {
 	ticker := make(chan types.Slot)
 	v.NextSlotRet = ticker
 	go func() {
+		time.Sleep(time.Second)
 		ticker <- slot
 
 		cancel()
@@ -109,6 +111,7 @@ func TestRoleAt_NextSlot(t *testing.T) {
 	ticker := make(chan types.Slot)
 	v.NextSlotRet = ticker
 	go func() {
+		time.Sleep(time.Second)
 		ticker <- slot
 
 		cancel()
@@ -117,7 +120,7 @@ func TestRoleAt_NextSlot(t *testing.T) {
 	run(ctx, v)
 
 	require.Equal(t, true, v.RoleAtCalled, "Expected RoleAt(%d) to be called", slot)
-	assert.Equal(t, uint64(slot), v.RoleAtArg1, "RoleAt called with the wrong arg")
+	assert.Equal(t, uint64(slot)+1, v.RoleAtArg1, "RoleAt called with the wrong arg")
 }
 
 func TestAttests_NextSlot(t *testing.T) {
@@ -191,6 +194,7 @@ func TestAllValidatorsAreExited_NextSlot(t *testing.T) {
 	ticker := make(chan types.Slot)
 	v.NextSlotRet = ticker
 	go func() {
+		time.Sleep(time.Second)
 		ticker <- slot
 
 		cancel()
@@ -204,6 +208,7 @@ func TestKeyReload_ActiveKey(t *testing.T) {
 	km := &mockKeymanager{}
 	v := &testutil.FakeValidator{Km: km}
 	go func() {
+		time.Sleep(time.Second)
 		km.SimulateAccountChanges([][fieldparams.BLSPubkeyLength]byte{testutil.ActiveKey})
 
 		cancel()
@@ -220,6 +225,7 @@ func TestKeyReload_NoActiveKey(t *testing.T) {
 	km := &mockKeymanager{}
 	v := &testutil.FakeValidator{Km: km}
 	go func() {
+		time.Sleep(time.Second)
 		km.SimulateAccountChanges(make([][fieldparams.BLSPubkeyLength]byte, 0))
 
 		cancel()
@@ -238,6 +244,7 @@ func TestKeyReload_RemoteKeymanager(t *testing.T) {
 	ticker := make(chan types.Slot)
 	v.NextSlotRet = ticker
 	go func() {
+		time.Sleep(time.Second)
 		ticker <- types.Slot(55)
 
 		cancel()

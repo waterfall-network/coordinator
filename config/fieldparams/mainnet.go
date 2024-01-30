@@ -10,7 +10,7 @@ const (
 	RandaoMixesLength               = 65536                                        // EPOCHS_PER_HISTORICAL_VECTOR
 	HistoricalRootsLength           = 16777216                                     // HISTORICAL_ROOTS_LIMIT
 	ValidatorRegistryLimit          = 1099511627776                                // VALIDATOR_REGISTRY_LIMIT
-	Eth1DataVotesLength             = 2048                                         // SLOTS_PER_ETH1_VOTING_PERIOD
+	Eth1DataVotesLength             = 128                                          // SLOTS_PER_ETH1_VOTING_PERIOD
 	BlockVotingLength               = 2048                                         // 64(epochs) ×32(slots per epoch)
 	PreviousEpochAttestationsLength = 4096                                         // MAX_ATTESTATIONS * SLOTS_PER_EPOCH
 	CurrentEpochAttestationsLength  = 4096                                         // MAX_ATTESTATIONS * SLOTS_PER_EPOCH

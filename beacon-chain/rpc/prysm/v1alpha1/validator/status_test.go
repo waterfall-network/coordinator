@@ -76,6 +76,7 @@ func TestValidatorStatus_Deposited(t *testing.T) {
 		Signature:             bytesutil.PadTo([]byte("hi"), 96),
 		CreatorAddress:        bytesutil.PadTo([]byte("hey"), 20),
 		WithdrawalCredentials: bytesutil.PadTo([]byte("hey"), 20),
+		InitTxHash:            make([]byte, 32),
 	}
 	deposit := &ethpb.Deposit{
 		Data: depData,
@@ -130,6 +131,7 @@ func TestValidatorStatus_PartiallyDeposited(t *testing.T) {
 		Signature:             []byte("hi"),
 		CreatorAddress:        []byte("hey"),
 		WithdrawalCredentials: []byte("hey"),
+		InitTxHash:            make([]byte, 32),
 	}
 	deposit := &ethpb.Deposit{
 		Data: depData,
@@ -205,6 +207,7 @@ func TestValidatorStatus_Pending(t *testing.T) {
 		Signature:             bytesutil.PadTo([]byte("hi"), 96),
 		CreatorAddress:        bytesutil.PadTo([]byte("hey"), 20),
 		WithdrawalCredentials: bytesutil.PadTo([]byte("hey"), 20),
+		InitTxHash:            make([]byte, 32),
 	}
 
 	deposit := &ethpb.Deposit{
@@ -251,6 +254,7 @@ func TestValidatorStatus_Active(t *testing.T) {
 		Signature:             bytesutil.PadTo([]byte("hi"), 96),
 		CreatorAddress:        bytesutil.PadTo([]byte("hey"), 20),
 		WithdrawalCredentials: bytesutil.PadTo([]byte("hey"), 20),
+		InitTxHash:            make([]byte, 32),
 	}
 
 	deposit := &ethpb.Deposit{
@@ -339,6 +343,7 @@ func TestValidatorStatus_Exiting(t *testing.T) {
 		Signature:             bytesutil.PadTo([]byte("hi"), 96),
 		CreatorAddress:        bytesutil.PadTo([]byte("hey"), 20),
 		WithdrawalCredentials: bytesutil.PadTo([]byte("hey"), 20),
+		InitTxHash:            make([]byte, 32),
 	}
 
 	deposit := &ethpb.Deposit{
@@ -397,6 +402,7 @@ func TestValidatorStatus_Slashing(t *testing.T) {
 		Signature:             bytesutil.PadTo([]byte("hi"), 96),
 		CreatorAddress:        bytesutil.PadTo([]byte("hey"), 20),
 		WithdrawalCredentials: bytesutil.PadTo([]byte("hey"), 20),
+		InitTxHash:            make([]byte, 32),
 	}
 
 	deposit := &ethpb.Deposit{
@@ -458,6 +464,7 @@ func TestValidatorStatus_Exited(t *testing.T) {
 		Signature:             bytesutil.PadTo([]byte("hi"), 96),
 		CreatorAddress:        bytesutil.PadTo([]byte("hey"), 20),
 		WithdrawalCredentials: bytesutil.PadTo([]byte("hey"), 20),
+		InitTxHash:            make([]byte, 32),
 	}
 
 	deposit := &ethpb.Deposit{
@@ -725,6 +732,7 @@ func TestValidatorStatus_CorrectActivationQueue(t *testing.T) {
 			Signature:             bytesutil.PadTo([]byte("hi"), 96),
 			CreatorAddress:        bytesutil.PadTo([]byte("hey"), 20),
 			WithdrawalCredentials: bytesutil.PadTo([]byte("hey"), 20),
+			InitTxHash:            make([]byte, 32),
 		}
 
 		deposit := &ethpb.Deposit{

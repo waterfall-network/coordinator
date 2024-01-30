@@ -224,6 +224,7 @@ func signedDeposit(
 		CreatorAddress:        creatorAddr[:],
 		WithdrawalCredentials: withdrawalCreds[:],
 		Signature:             secretKey.Sign(sigRoot[:]).Marshal(),
+		InitTxHash:            make([]byte, 32),
 	}
 
 	deposit := &ethpb.Deposit{
@@ -403,6 +404,17 @@ func buildGenesisBeaconState(genesisTime uint64, preState state.BeaconStateAltai
 		Eth1DataVotes:    make([]*ethpb.Eth1Data, 0),
 		BlockVoting:      make([]*ethpb.BlockVoting, 0),
 		Eth1DepositIndex: preState.Eth1DepositIndex(),
+		SpineData: &ethpb.SpineData{
+			Spines:       make([]byte, 32),
+			Prefix:       make([]byte, 32),
+			Finalization: make([]byte, 32),
+			CpFinalized:  make([]byte, 32),
+			ParentSpines: []*ethpb.SpinesSeq{
+				{
+					Spines: make([]byte, 32),
+				},
+			},
+		},
 	}
 
 	bodyRoot, err := (&ethpb.BeaconBlockBodyAltair{
@@ -550,6 +562,7 @@ func setupDB(t testing.TB) *Store {
 	t.Cleanup(func() {
 		require.NoError(t, db.Close(), "Failed to close database")
 	})
+
 	return db
 }
 

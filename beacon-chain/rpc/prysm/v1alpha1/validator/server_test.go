@@ -127,6 +127,7 @@ func TestWaitForActivation_ValidatorOriginallyExists(t *testing.T) {
 		CreatorAddress:        bytesutil.PadTo([]byte("hey"), 20),
 		WithdrawalCredentials: bytesutil.PadTo([]byte("hey"), 20),
 		Signature:             make([]byte, 96),
+		InitTxHash:            make([]byte, 32),
 	}
 	domain, err := signing.ComputeDomain(params.BeaconConfig().DomainDeposit, nil, nil)
 	require.NoError(t, err)

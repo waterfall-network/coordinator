@@ -95,6 +95,9 @@ func TestWaitActivation_StreamSetupFails_AttemptsToReconnect(t *testing.T) {
 			PublicKeys: [][]byte{pubKey[:]},
 		},
 	).Return(clientStream, errors.New("failed stream")).Return(clientStream, nil)
+	client.EXPECT().PrepareBeaconProposer(gomock.AssignableToTypeOf(context.WithValue(context.Background(), "", "")),
+		gomock.AssignableToTypeOf(&ethpb.PrepareBeaconProposerRequest{})).AnyTimes()
+
 	resp := generateMockStatusResponse([][]byte{pubKey[:]})
 	resp.Statuses[0].Status.Status = ethpb.ValidatorStatus_ACTIVE
 	clientStream.EXPECT().Recv().Return(resp, nil)
@@ -134,6 +137,8 @@ func TestWaitForActivation_ReceiveErrorFromStream_AttemptsReconnection(t *testin
 			PublicKeys: [][]byte{pubKey[:]},
 		},
 	).Return(clientStream, nil)
+	client.EXPECT().PrepareBeaconProposer(gomock.AssignableToTypeOf(context.WithValue(context.Background(), "", "")),
+		gomock.AssignableToTypeOf(&ethpb.PrepareBeaconProposerRequest{})).AnyTimes()
 	// A stream fails the first time, but succeeds the second time.
 	resp := generateMockStatusResponse([][]byte{pubKey[:]})
 	resp.Statuses[0].Status.Status = ethpb.ValidatorStatus_ACTIVE
@@ -184,6 +189,9 @@ func TestWaitActivation_LogsActivationEpochOK(t *testing.T) {
 		resp,
 		nil,
 	)
+	client.EXPECT().PrepareBeaconProposer(gomock.AssignableToTypeOf(context.WithValue(context.Background(), "", "")),
+		gomock.AssignableToTypeOf(&ethpb.PrepareBeaconProposerRequest{})).AnyTimes()
+
 	assert.NoError(t, v.WaitForActivation(context.Background(), nil), "Could not wait for activation")
 	assert.LogsContain(t, hook, "Validator activated")
 }
@@ -227,6 +235,9 @@ func TestWaitForActivation_Exiting(t *testing.T) {
 		resp,
 		nil,
 	)
+	client.EXPECT().PrepareBeaconProposer(gomock.AssignableToTypeOf(context.WithValue(context.Background(), "", "")),
+		gomock.AssignableToTypeOf(&ethpb.PrepareBeaconProposerRequest{})).AnyTimes()
+
 	assert.NoError(t, v.WaitForActivation(context.Background(), nil))
 }
 
@@ -277,6 +288,9 @@ func TestWaitForActivation_RefetchKeys(t *testing.T) {
 		resp,
 		nil,
 	)
+	client.EXPECT().PrepareBeaconProposer(gomock.AssignableToTypeOf(context.WithValue(context.Background(), "", "")),
+		gomock.AssignableToTypeOf(&ethpb.PrepareBeaconProposerRequest{})).AnyTimes()
+
 	assert.NoError(t, v.waitForActivation(context.Background(), make(chan [][fieldparams.BLSPubkeyLength]byte)), "Could not wait for activation")
 	assert.LogsContain(t, hook, msgNoKeysFetched)
 	assert.LogsContain(t, hook, "Validator activated")
@@ -344,6 +358,8 @@ func TestWaitForActivation_AccountsChanged(t *testing.T) {
 			activeResp,
 			nil,
 		)
+		client.EXPECT().PrepareBeaconProposer(gomock.AssignableToTypeOf(context.WithValue(context.Background(), "", "")),
+			gomock.AssignableToTypeOf(&ethpb.PrepareBeaconProposerRequest{})).AnyTimes()
 
 		go func() {
 			// We add the active key into the keymanager and simulate a key refresh.
@@ -426,6 +442,8 @@ func TestWaitForActivation_AccountsChanged(t *testing.T) {
 			activeResp,
 			nil,
 		)
+		client.EXPECT().PrepareBeaconProposer(gomock.AssignableToTypeOf(context.WithValue(context.Background(), "", "")),
+			gomock.AssignableToTypeOf(&ethpb.PrepareBeaconProposerRequest{})).AnyTimes()
 
 		channel := make(chan [][fieldparams.BLSPubkeyLength]byte)
 		go func() {
@@ -452,6 +470,8 @@ func TestWaitForActivation_RemoteKeymanager(t *testing.T) {
 	defer ctrl.Finish()
 
 	client := mock.NewMockBeaconNodeValidatorClient(ctrl)
+	client.EXPECT().PrepareBeaconProposer(gomock.AssignableToTypeOf(context.WithValue(context.Background(), "", "")),
+		gomock.AssignableToTypeOf(&ethpb.PrepareBeaconProposerRequest{})).AnyTimes()
 	stream := mock.NewMockBeaconNodeValidator_WaitForActivationClient(ctrl)
 	client.EXPECT().WaitForActivation(
 		gomock.Any(),

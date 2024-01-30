@@ -111,6 +111,7 @@ go_test(
         "sync_committee_test.go",
         "validator_test.go",
     ],
+    data = glob(["testdata/**"]),
     embed = [":go_default_library"],
     deps = [
         "//async/event:go_default_library",
@@ -119,7 +120,6 @@ go_test(
         "//beacon-chain/cache/depositcache:go_default_library",
         "//beacon-chain/core/altair:go_default_library",
         "//beacon-chain/core/blocks:go_default_library",
-        "//beacon-chain/core/execution:go_default_library",
         "//beacon-chain/core/feed:go_default_library",
         "//beacon-chain/core/feed/block:go_default_library",
         "//beacon-chain/core/feed/operation:go_default_library",
@@ -129,6 +129,7 @@ go_test(
         "//beacon-chain/core/time:go_default_library",
         "//beacon-chain/core/transition:go_default_library",
         "//beacon-chain/db/testing:go_default_library",
+        "//beacon-chain/forkchoice/protoarray:go_default_library",
         "//beacon-chain/operations/attestations:go_default_library",
         "//beacon-chain/operations/slashings:go_default_library",
         "//beacon-chain/operations/synccommittee:go_default_library",

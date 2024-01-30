@@ -818,9 +818,9 @@ func TestSignBlock(t *testing.T) {
 	b := wrapper.WrappedPhase0BeaconBlock(blk.Block)
 	sig, blockRoot, err := validator.signBlock(ctx, pubKey, 0, 0, b)
 	require.NoError(t, err, "%x,%v", sig, err)
-	require.Equal(t, "9a00cb554245cf60a16ac4769427c7319d600e94aee89ba57f77f"+
-		"803a5a061d3fd7ab1da76d0ae4379c931e2ef31c10405907f062e4caf54241db4e73e842788e38"+
-		"6f2b35557d1debaea5aed79dc06fcc3615273e0968bc36c3592264407b568", hex.EncodeToString(sig))
+	require.Equal(t, "ae1fa1bc10e7e7505badc15316ddc7d5e5a8595993ebd78b1c7e8a38bb34e0f4e8e1e67"+
+		"b0a8574991aba593a0276b1440779f6d447e5fb1df2276d866cdd4d27f3928e60c5d9c97c66fd372cf135904febe6"+
+		"f3e0135cde2c375a15e22227dd4e", hex.EncodeToString(sig))
 
 	// Verify the returned block root matches the expected root using the proposer signature
 	// domain.

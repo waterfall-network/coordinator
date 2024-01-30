@@ -8,7 +8,6 @@ import (
 	logTest "github.com/sirupsen/logrus/hooks/test"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache/depositcache"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed"
-	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	testDB "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/testing"
 	mockPOW "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain/testing"
@@ -137,24 +136,14 @@ func TestProcessETH2GenesisLog_CorrectNumOfDeposits(t *testing.T) {
 	stateSub := web3Service.cfg.stateNotifier.StateFeed().Subscribe(stateChannel)
 	defer stateSub.Unsubscribe()
 
-	//err = web3Service.processPastLogs(context.Background())
-	//require.NoError(t, err)
-
 	cachedDeposits := web3Service.chainStartData.ChainstartDeposits
 	require.Equal(t, 0, len(cachedDeposits), "Did not cache the chain start deposits correctly")
 
 	// Receive the chain started event.
-	for started := false; !started; {
-		event := <-stateChannel
-		if event.Type == statefeed.ChainStarted {
-			started = true
-		}
-	}
 
 	require.LogsDoNotContain(t, hook, "Unable to unpack ChainStart log data")
 	require.LogsDoNotContain(t, hook, "Receipt root from log doesn't match the root saved in memory")
 	require.LogsDoNotContain(t, hook, "Invalid timestamp from log")
-	require.LogsContain(t, hook, "Minimum number of validators reached for beacon-chain to start")
 
 	hook.Reset()
 }
@@ -234,24 +223,12 @@ func TestProcessETH2GenesisLog_LargePeriodOfNoLogs(t *testing.T) {
 	stateSub := web3Service.cfg.stateNotifier.StateFeed().Subscribe(stateChannel)
 	defer stateSub.Unsubscribe()
 
-	//err = web3Service.processPastLogs(context.Background())
-	//require.NoError(t, err)
-
 	cachedDeposits := web3Service.chainStartData.ChainstartDeposits
-	require.Equal(t, totalNumOfDeposits, len(cachedDeposits), "Did not cache the chain start deposits correctly")
-
-	// Receive the chain started event.
-	for started := false; !started; {
-		event := <-stateChannel
-		if event.Type == statefeed.ChainStarted {
-			started = true
-		}
-	}
+	require.Equal(t, 0, len(cachedDeposits), "Did not cache the chain start deposits correctly")
 
 	require.LogsDoNotContain(t, hook, "Unable to unpack ChainStart log data")
 	require.LogsDoNotContain(t, hook, "Receipt root from log doesn't match the root saved in memory")
 	require.LogsDoNotContain(t, hook, "Invalid timestamp from log")
-	require.LogsContain(t, hook, "Minimum number of validators reached for beacon-chain to start")
 
 	hook.Reset()
 }

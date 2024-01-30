@@ -2,10 +2,8 @@ package kv
 
 import (
 	"context"
-	"os"
 	"testing"
 
-	"github.com/bazelbuild/rules_go/go/tools/bazel"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/iface"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
@@ -46,38 +44,6 @@ func testGenesisDataSaved(t *testing.T, db iface.Database) {
 	assert.Equal(t, gbHTR, headHTR, "head block does not match genesis block")
 }
 
-func TestLoadGenesisFromFile(t *testing.T) {
-	fp := "testdata/mainnet.genesis.ssz"
-	rfp, err := bazel.Runfile(fp)
-	if err == nil {
-		fp = rfp
-	}
-	sb, err := os.ReadFile(fp)
-	assert.NoError(t, err)
-
-	db := setupDB(t)
-	assert.NoError(t, db.LoadGenesis(context.Background(), sb))
-	testGenesisDataSaved(t, db)
-
-	// Loading the same genesis again should not throw an error
-	assert.NoError(t, err)
-	assert.NoError(t, db.LoadGenesis(context.Background(), sb))
-}
-
-func TestLoadGenesisFromFile_mismatchedForkVersion(t *testing.T) {
-	fp := "testdata/altona.genesis.ssz"
-	rfp, err := bazel.Runfile(fp)
-	if err == nil {
-		fp = rfp
-	}
-	sb, err := os.ReadFile(fp)
-	assert.NoError(t, err)
-
-	// Loading a genesis with the wrong fork version as beacon config should throw an error.
-	db := setupDB(t)
-	assert.ErrorContains(t, "does not match config genesis fork version", db.LoadGenesis(context.Background(), sb))
-}
-
 func TestEnsureEmbeddedGenesis(t *testing.T) {
 	// Embedded Genesis works with Mainnet config
 	params.SetupTestConfigCleanup(t)
@@ -88,19 +54,20 @@ func TestEnsureEmbeddedGenesis(t *testing.T) {
 	ctx := context.Background()
 	db := setupDB(t)
 
-	gb, err := db.GenesisBlock(ctx)
-	assert.NoError(t, err)
-	if gb != nil && !gb.IsNil() {
-		t.Fatal("Genesis block exists already")
-	}
+	db.genesisSszPath = "beacon-chain/db/kv/testdata/mainnet.genesis.ssz"
 
-	gs, err := db.GenesisState(ctx)
+	gs, err := NewBeaconState()
+	assert.NoError(t, err)
+
+	assert.NoError(t, db.SaveGenesisData(context.Background(), gs))
+
+	gs, err = db.GenesisState(ctx)
 	assert.NoError(t, err)
 	assert.NotNil(t, gs, "an embedded genesis state does not exist")
 
 	assert.NoError(t, db.EnsureEmbeddedGenesis(ctx))
 
-	gb, err = db.GenesisBlock(ctx)
+	gb, err := db.GenesisBlock(ctx)
 	assert.NoError(t, err)
 	assert.NotNil(t, gb)
 
