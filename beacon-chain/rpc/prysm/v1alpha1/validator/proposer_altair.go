@@ -82,10 +82,6 @@ func (vs *Server) getAltairBeaconBlock(ctx context.Context, req *ethpb.BlockRequ
 	ctx = context.WithValue(ctx, params.BeaconConfig().CtxBlockFetcherKey, db.BlockInfoFetcherFunc(vs.BeaconDB))
 	stateRoot, err := vs.computeStateRoot(ctx, wsb)
 
-	log.WithError(err).WithFields(logrus.Fields{
-		"block.slot": wsb.Block().Slot(),
-	}).Info("<<<< getAltairBeaconBlock:computeStateRoot >>>>> 1111111")
-
 	if err != nil {
 		interop.WriteBlockToDisk(wsb, true /*failed*/)
 		return nil, fmt.Errorf("could not compute state root: %v", err)

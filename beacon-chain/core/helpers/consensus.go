@@ -64,10 +64,10 @@ func ProcessWithdrawalOps(bState state.BeaconState, preFinRoot []byte) (state.Be
 	err := bState.ApplyToEveryValidator(func(idx int, val *ethpb.Validator) (bool, *ethpb.Validator, error) {
 		var upWops []*ethpb.WithdrawalOp
 		for i, wop := range val.WithdrawalOps {
-			//// skip iterate if the first itm > minSlot
-			//if i == 0 && wop.Slot > minSlot {
-			//	break
-			//}
+			// skip iterate if the first itm > minSlot
+			if i == 0 && wop.Slot > minSlot {
+				break
+			}
 			if wop.Slot <= minSlot {
 				if upWops == nil {
 					upWops = make([]*ethpb.WithdrawalOp, 0, len(val.WithdrawalOps)-1)
@@ -87,8 +87,9 @@ func ProcessWithdrawalOps(bState state.BeaconState, preFinRoot []byte) (state.Be
 			}
 		}
 		if upWops != nil {
-			val.WithdrawalOps = upWops
-			return true, val, nil
+			newWop := ethpb.CopyValidator(val)
+			newWop.WithdrawalOps = upWops
+			return true, newWop, nil
 		}
 		return false, val, nil
 	})
