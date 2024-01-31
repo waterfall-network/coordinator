@@ -178,8 +178,10 @@ func (vs *Server) computeStateRoot(ctx context.Context, block block.SignedBeacon
 		return nil, errors.Wrapf(err, "could not calculate state root at slot %d", beaconState.Slot())
 	}
 
-	log.WithField(
-		"beaconStateRoot", fmt.Sprintf("%#x", root),
-	).Info("PROPOSER: Computed state root")
+	log.WithFields(
+		logrus.Fields{
+			"slot":            fmt.Sprintf("%d", beaconState.Slot()),
+			"beaconStateRoot": fmt.Sprintf("%#x", root),
+		}).Info("PROPOSER: Computed state root")
 	return root[:], nil
 }

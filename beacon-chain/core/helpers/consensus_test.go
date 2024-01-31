@@ -5,6 +5,7 @@ import (
 	"math"
 	"testing"
 
+	types "github.com/prysmaticlabs/eth2-types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
@@ -119,7 +120,7 @@ func TestProcessWithdrawalOps_OK(t *testing.T) {
 	bstate, err := util.NewBeaconState()
 	assert.NoError(t, err)
 
-	staleAfterSlots := 100 * params.BeaconConfig().SlotsPerEpoch
+	staleAfterSlots := types.Slot(params.BeaconConfig().CleanWithdrawalsAftEpochs) * params.BeaconConfig().SlotsPerEpoch
 	params.BeaconConfig().DelegateForkSlot = staleAfterSlots
 	err = bstate.SetSlot(10 + staleAfterSlots)
 	assert.NoError(t, err)
@@ -157,7 +158,17 @@ func TestProcessWithdrawalOps_OK(t *testing.T) {
 		{Slot: 55},
 	}
 
-	postState, err := helpers.ProcessWithdrawalOps(bstate, preFinRoot)
+	postState, err := helpers.ProcessWithdrawalOps(bstate.Copy(), preFinRoot)
+	assert.NoError(t, err)
+	assert.Equal(t, fmt.Sprintf("%v", expectValidators), fmt.Sprintf("%v", postState.Validators()[0].WithdrawalOps))
+
+	// clean all withrawal op
+	err = bstate.SetSlot(100 + staleAfterSlots)
+	assert.NoError(t, err)
+
+	expectValidators = []*eth.WithdrawalOp{}
+
+	postState, err = helpers.ProcessWithdrawalOps(bstate.Copy(), preFinRoot)
 	assert.NoError(t, err)
 	assert.Equal(t, fmt.Sprintf("%v", expectValidators), fmt.Sprintf("%v", postState.Validators()[0].WithdrawalOps))
 }

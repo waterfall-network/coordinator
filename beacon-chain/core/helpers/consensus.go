@@ -56,7 +56,7 @@ func ProcessWithdrawalOps(bState state.BeaconState, preFinRoot []byte) (state.Be
 	}
 	var (
 		minSlot         types.Slot
-		staleAfterSlots = 100 * params.BeaconConfig().SlotsPerEpoch
+		staleAfterSlots = types.Slot(params.BeaconConfig().CleanWithdrawalsAftEpochs) * params.BeaconConfig().SlotsPerEpoch
 	)
 	if bState.Slot() > staleAfterSlots {
 		minSlot = bState.Slot() - staleAfterSlots
@@ -64,6 +64,10 @@ func ProcessWithdrawalOps(bState state.BeaconState, preFinRoot []byte) (state.Be
 	err := bState.ApplyToEveryValidator(func(idx int, val *ethpb.Validator) (bool, *ethpb.Validator, error) {
 		var upWops []*ethpb.WithdrawalOp
 		for i, wop := range val.WithdrawalOps {
+			// skip iterate if the first itm > minSlot
+			if i == 0 && wop.Slot > minSlot {
+				break
+			}
 			if wop.Slot <= minSlot {
 				if upWops == nil {
 					upWops = make([]*ethpb.WithdrawalOp, 0, len(val.WithdrawalOps)-1)
@@ -82,11 +86,12 @@ func ProcessWithdrawalOps(bState state.BeaconState, preFinRoot []byte) (state.Be
 				upWops = append(upWops, wop)
 			}
 		}
-		isDirty := len(upWops) > 0
-		if isDirty {
-			val.WithdrawalOps = upWops
+		if upWops != nil {
+			newWop := ethpb.CopyValidator(val)
+			newWop.WithdrawalOps = upWops
+			return true, newWop, nil
 		}
-		return isDirty, val, nil
+		return false, val, nil
 	})
 	return bState, err
 }

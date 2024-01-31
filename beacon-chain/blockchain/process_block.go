@@ -391,7 +391,9 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		slotCtx, cancel := context.WithTimeout(context.Background(), slotDeadline)
 		defer cancel()
 		if err := transition.UpdateNextSlotCache(slotCtx, blockRoot[:], postState); err != nil {
-			log.WithError(err).Debug("could not update next slot state cache")
+			log.WithError(err).WithFields(logrus.Fields{
+				"block.slot": signed.Block().Slot(),
+			}).Error("onBlock error: could not update next slot state cache")
 		}
 	}()
 
