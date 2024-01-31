@@ -122,7 +122,8 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	//Eth1FollowDistance:         64,
 	SafeSlotsToUpdateJustified: 8,
 
-	CleanWithdrawalsAftEpochs: 100,
+	//CleanWithdrawalsAftEpochs: 100,
+	CleanWithdrawalsAftEpochs: 10,
 
 	//Optimistic consensus constants.
 	VotingRequiredSlots:           3,
