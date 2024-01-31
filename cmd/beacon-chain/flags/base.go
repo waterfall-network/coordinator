@@ -105,6 +105,13 @@ var (
 		Usage: "The required number of valid peers to connect with before syncing.",
 		Value: 3,
 	}
+	// ContractDeploymentBlock is the block in which the eth1 deposit contract was deployed.
+	// Deprecated
+	ContractDeploymentBlock = &cli.IntFlag{
+		Name:  "contract-deployment-block",
+		Usage: "DEPRECATED",
+		Value: 0,
+	}
 	// DelegatingStakeForkSlot is the block in which the eth1 deposit contract was deployed.
 	DelegatingStakeForkSlot = &cli.Uint64Flag{
 		Name:  "delegating-stake-fork-slot",
