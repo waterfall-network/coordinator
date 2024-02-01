@@ -449,10 +449,10 @@ func ProcessEpochPrecompute(ctx context.Context, state state.BeaconState) (state
 		return nil, err
 	}
 
-	//state, err = helpers.ProcessWithdrawalOps(state, preFinRoot)
-	//if err != nil {
-	//	return nil, err
-	//}
+	state, err = helpers.ProcessWithdrawalOps(state, preFinRoot)
+	if err != nil {
+		return nil, err
+	}
 
 	return state, nil
 }
