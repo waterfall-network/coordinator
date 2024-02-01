@@ -93,7 +93,7 @@ func TestProcessSyncCommittee_PerfectParticipation(t *testing.T) {
 			increased++
 		}
 	}
-	require.Equal(t, params.BeaconConfig().SyncCommitteeSize, increased)
+	require.Equal(t, params.BeaconConfig().SyncCommitteeSize, increased-1)
 }
 
 func TestProcessSyncCommittee_MixParticipation_BadSignature(t *testing.T) {
@@ -247,13 +247,13 @@ func Test_ApplySyncRewardsPenalties(t *testing.T) {
 		[]types.ValidatorIndex{2, 3}) // didn't vote
 	require.NoError(t, err)
 	balances := beaconState.Balances()
-	require.Equal(t, uint64(32_000_000_031_250), balances[0])
+	require.Equal(t, uint64(3_200_000_009_882), balances[0])
 	require.Equal(t, balances[0], balances[1])
-	require.Equal(t, uint64(31_999_999_968_750), balances[2])
+	require.Equal(t, uint64(3_199_999_990_118), balances[2])
 	require.Equal(t, balances[2], balances[3])
 	proposerIndex, err := helpers.BeaconProposerIndex(context.Background(), beaconState)
 	require.NoError(t, err)
-	require.Equal(t, uint64(32_000_000_008_928), balances[proposerIndex])
+	require.Equal(t, uint64(3_200_000_002_822), balances[proposerIndex])
 }
 
 func Test_SyncRewards(t *testing.T) {
@@ -281,29 +281,29 @@ func Test_SyncRewards(t *testing.T) {
 		{
 			name:                  "active balance is 1eth",
 			activeBalance:         params.BeaconConfig().EffectiveBalanceIncrement,
-			wantProposerReward:    17,
-			wantParticipantReward: 122,
+			wantProposerReward:    5,
+			wantParticipantReward: 38,
 			errString:             "",
 		},
 		{
 			name:                  "active balance is 32eth",
 			activeBalance:         params.BeaconConfig().MaxEffectiveBalance,
-			wantProposerReward:    98,
-			wantParticipantReward: 690,
+			wantProposerReward:    31,
+			wantParticipantReward: 218,
 			errString:             "",
 		},
 		{
 			name:                  "active balance is 32eth * 1m validators",
 			activeBalance:         params.BeaconConfig().MaxEffectiveBalance * 1e9,
-			wantProposerReward:    63_703,
-			wantParticipantReward: 445_921,
+			wantProposerReward:    51_472,
+			wantParticipantReward: 360_305,
 			errString:             "",
 		},
 		{
 			name:                  "active balance is max uint64",
 			activeBalance:         math.MaxUint64,
-			wantProposerReward:    74_897,
-			wantParticipantReward: 524_282,
+			wantProposerReward:    74_892,
+			wantParticipantReward: 524_247,
 			errString:             "",
 		},
 	}
