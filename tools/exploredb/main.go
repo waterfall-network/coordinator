@@ -112,6 +112,8 @@ func main() {
 		default:
 			log.Fatal("Oops, given migration is not supported for now.")
 		}
+	default:
+		log.Fatal("bad `--command=` value provided.")
 	}
 }
 
@@ -339,6 +341,12 @@ func printStates(stateC <-chan *modifiedState, doneC chan<- bool) {
 		size, count = sizeAndCountGeneric(st.Eth1DataVotes(), nil)
 		log.Infof("eth1_data_votes               : sizeSSZ = %s, count = %d", humanize.Bytes(size), count)
 		log.Infof("eth1_deposit_index            : %d", st.Eth1DepositIndex())
+		log.Infof("spine_data                    : sizeSSZ(db) = %s (sizeSSZ(state) = %s)",
+			humanize.Bytes(calcSpineDataDbSize(st.SpineData())),
+			humanize.Bytes(uint64(st.SpineData().SizeSSZ())),
+		)
+		size, count = sizeAndCountGeneric(st.BlockVoting(), nil)
+		log.Infof("block_voting                  : sizeSSZ = %s, count = %d", humanize.Bytes(size), count)
 		size, count = sizeAndCountGeneric(st.Validators(), nil)
 		log.Infof("validators                    : sizeSSZ = %s, count = %d", humanize.Bytes(size), count)
 		size, count = sizeAndCountOfUin64List(st.Balances())
@@ -539,5 +547,23 @@ func sizeAndCountGeneric(genericItems interface{}, err error) (uint64, uint64) {
 		return size, count
 	}
 
+	if items, ok := genericItems.([]*ethpb.BlockVoting); ok {
+		for _, item := range items {
+			size += uint64(item.SizeSSZ())
+		}
+		count = uint64(len(items))
+
+		return size, count
+	}
+
 	return size, count
+}
+
+func calcSpineDataDbSize(spineData *ethpb.SpineData) uint64 {
+	var cpy *ethpb.SpineData = ethpb.CopySpineData(spineData)
+	cpy.Spines = bytesutil.PadTo([]byte{0x11}, 32)
+	cpy.Prefix = bytesutil.PadTo([]byte{0x11}, 32)
+	cpy.Finalization = bytesutil.PadTo([]byte{0x11}, 32)
+	cpy.CpFinalized = bytesutil.PadTo([]byte{0x11}, 32)
+	return uint64(cpy.SizeSSZ())
 }
