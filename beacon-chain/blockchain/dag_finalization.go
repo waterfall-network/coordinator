@@ -275,6 +275,10 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 				"syncRoot": fmt.Sprintf("%#x", syncRoot),
 				"headRoot": fmt.Sprintf("%#x", s.headRoot()),
 			}).Error("Gwat sync: failed 4")
+			// try to fix "invalid base spine"
+			if strings.Contains(err.Error(), srtErrInvalidBaseSpine) {
+				err = s.repairGwatFinalization(ctx, syncState, gwatTypes.MainSync)
+			}
 			return err
 		}
 
@@ -327,6 +331,10 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 			"headSlot": s.headSlot(),
 			"headRoot": fmt.Sprintf("%#x", s.headRoot()),
 		}).Error("Gwat sync: head failed")
+		// try to fix "invalid base spine"
+		if strings.Contains(err.Error(), srtErrInvalidBaseSpine) {
+			err = s.repairGwatFinalization(ctx, headState, gwatTypes.HeadSync)
+		}
 		return err
 	}
 
@@ -381,7 +389,6 @@ func (s *Service) processDagFinalization(headState state.BeaconState, syncMode g
 	ctx, span := trace.StartSpan(s.ctx, "blockChain.processDagFinalization")
 	defer span.End()
 
-	var finalizedSeq gwatCommon.HashArray
 	if s.IsSynced() || syncMode == gwatTypes.MainSync {
 		finParams, err := s.collectFinalizationParams(ctx, headState)
 		if err != nil {
@@ -402,10 +409,7 @@ func (s *Service) processDagFinalization(headState state.BeaconState, syncMode g
 		}).Info("Dag finalization: finalization params")
 
 		finRes, err := s.cfg.ExecutionEngineCaller.ExecutionDagFinalize(ctx, finParams)
-		baseSpine := finParams.BaseSpine
-		finalizing := finParams.Spines
 		lfSpine := finRes.LFSpine
-		//fSeq := append(gwatCommon.HashArray{*baseSpine}, finalizing...)
 		if err != nil || lfSpine == nil {
 			log.WithError(err).WithFields(logrus.Fields{
 				"params.Spines":      finParams.Spines,
@@ -463,15 +467,6 @@ func (s *Service) processDagFinalization(headState state.BeaconState, syncMode g
 				})
 			}
 		}
-
-		log.WithFields(logrus.Fields{
-			"finalized": finalizing,
-			"baseSpine": fmt.Sprintf("%#x", baseSpine),
-			"lfSpine":   fmt.Sprintf("%#x", lfSpine),
-			//"finalizationSeq":  fSeq,
-			"finalizedSeq": finalizedSeq,
-			//"isFullyFinalized": fSeq.IsEqualTo(finalizedSeq),
-		}).Debug("Dag finalization: finalization success")
 	}
 
 	return nil
@@ -749,4 +744,89 @@ func (s *Service) createGenesisCoordinatedCheckpoint(ctx context.Context, cpFinE
 		Root:     cpRoot,
 		Spine:    lfSpine,
 	}, nil
+}
+
+// collectFinalizationParams collects params to call gwat finalization api.
+func (s *Service) repairGwatFinalization(
+	ctx context.Context,
+	bState state.BeaconState,
+	syncMode gwatTypes.SyncMode,
+) error {
+	var err error
+	if bState == nil || bState.IsNil() {
+		return errors.New("repair gwat finalization: nil state received")
+	}
+	repairStates := make([]state.BeaconState, 0, params.BeaconConfig().SlotsPerEpoch*4)
+	// get gwat coordinated data
+	gwatCoordData := s.GetCachedGwatCoordinatedState()
+	if gwatCoordData == nil {
+		return errNoCoordState
+	}
+
+	log.WithFields(logrus.Fields{
+		"stSlot":        bState.Slot(),
+		"syncMode":      syncMode,
+		"coordSpine":    gwatCoordData.Spine,
+		"coordFinEpoch": gwatCoordData.FinEpoch,
+	}).Info("Repair gwat finalization: start")
+
+	curState := bState
+	for {
+		if types.Epoch(gwatCoordData.FinEpoch) > slots.ToEpoch(curState.Slot()) || curState.Slot() == 0 {
+			return errors.New("repair gwat finalization: base spine not found")
+		}
+		repairStates = append(repairStates, curState)
+		// check is gwat finalized spine in fin seq
+		finalizationSeq := helpers.GetFinalizationSequence(bState)
+		baseSpine := helpers.GetBaseSpine(bState)
+		fullFinSeq := append(gwatCommon.HashArray{baseSpine}, finalizationSeq...)
+
+		log.WithFields(logrus.Fields{
+			"curStateSlot":  curState.Slot(),
+			"curStateEpoch": types.Epoch(gwatCoordData.FinEpoch),
+			"coordFinEpoch": gwatCoordData.FinEpoch,
+		}).Info("Repair gwat finalization: handle parent state")
+
+		if fullFinSeq.Has(gwatCoordData.Spine) {
+			break
+		}
+		// retrieve parent state
+		parentRoot := bytesutil.ToBytes32(bState.LatestBlockHeader().ParentRoot)
+		curState, err = s.cfg.StateGen.SyncStateByRoot(ctx, parentRoot)
+		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"parentRoot":   fmt.Sprintf("%#x", parentRoot),
+				"curStateSlot": fmt.Sprintf("%#x", curState.Slot()),
+			}).Error("Repair gwat finalization: retrieve parent state failed")
+			return fmt.Errorf("repair gwat finalization: retrieve parent state failed err=%w", err)
+		}
+	}
+
+	log.WithFields(logrus.Fields{
+		"stSlot":        bState.Slot(),
+		"syncMode":      syncMode,
+		"coordSpine":    gwatCoordData.Spine,
+		"coordFinEpoch": gwatCoordData.FinEpoch,
+		"repairStates":  len(repairStates),
+	}).Info("Repair gwat finalization: data collected")
+
+	//run finalizations in reverse order
+	for i := len(repairStates) - 1; i > 0; i-- {
+		curState = repairStates[i]
+		log.WithFields(logrus.Fields{
+			"curStateSlot":  curState.Slot(),
+			"curStateEpoch": types.Epoch(gwatCoordData.FinEpoch),
+			"coordFinEpoch": gwatCoordData.FinEpoch,
+		}).Info("Repair gwat finalization: finalize state")
+		err = s.processDagFinalization(curState, syncMode)
+		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"curStateSlot":  curState.Slot(),
+				"curStateEpoch": types.Epoch(gwatCoordData.FinEpoch),
+				"coordFinEpoch": gwatCoordData.FinEpoch,
+			}).Error("Repair gwat finalization: finalize state failed")
+			return err
+		}
+	}
+	return err
 }
