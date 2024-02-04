@@ -769,15 +769,11 @@ func (s *Service) repairGwatFinalization(
 		"syncMode":   syncMode,
 	}).Info("Repair gwat finalization: start")
 
-	finEpochStart, err := slots.EpochStart(bState.FinalizedCheckpointEpoch())
-	if err != nil {
-		return err
-	}
 	curState := bState
 	parentRoot := bytesutil.ToBytes32(bState.LatestBlockHeader().ParentRoot)
 	var parentBlock block.SignedBeaconBlock
 	for {
-		if types.Epoch(gwatCoordData.Epoch) > slots.ToEpoch(curState.Slot()) || finEpochStart > curState.Slot() {
+		if types.Epoch(gwatCoordData.Epoch) > slots.ToEpoch(curState.Slot()) {
 			return errors.New("repair gwat finalization: base spine not found")
 		}
 		repairStates = append(repairStates, curState)
