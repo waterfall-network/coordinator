@@ -16,6 +16,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
@@ -692,8 +693,6 @@ func (s *Service) initCoordinatedState(ctx context.Context) error {
 		//cache coordinated checkpoint
 		s.CacheGwatCoordinatedState(coordCp)
 
-		//// cache last finalized spine
-		//s.SetFinalizedSpinesHead(coordCp.Spine)
 		return nil
 	}
 
@@ -764,15 +763,21 @@ func (s *Service) repairGwatFinalization(
 	}
 
 	log.WithFields(logrus.Fields{
-		"stSlot":        bState.Slot(),
-		"syncMode":      syncMode,
-		"coordSpine":    gwatCoordData.Spine,
-		"coordFinEpoch": gwatCoordData.FinEpoch,
+		"coordEpoch": gwatCoordData.Epoch,
+		"coordSpine": gwatCoordData.Spine,
+		"stSlot":     bState.Slot(),
+		"syncMode":   syncMode,
 	}).Info("Repair gwat finalization: start")
 
+	finEpochStart, err := slots.EpochStart(bState.FinalizedCheckpointEpoch())
+	if err != nil {
+		return err
+	}
 	curState := bState
+	parentRoot := bytesutil.ToBytes32(bState.LatestBlockHeader().ParentRoot)
+	var parentBlock block.SignedBeaconBlock
 	for {
-		if types.Epoch(gwatCoordData.FinEpoch) > slots.ToEpoch(curState.Slot()) || curState.Slot() == 0 {
+		if types.Epoch(gwatCoordData.Epoch) > slots.ToEpoch(curState.Slot()) || finEpochStart > curState.Slot() {
 			return errors.New("repair gwat finalization: base spine not found")
 		}
 		repairStates = append(repairStates, curState)
@@ -783,15 +788,24 @@ func (s *Service) repairGwatFinalization(
 
 		log.WithFields(logrus.Fields{
 			"curStateSlot":  curState.Slot(),
-			"curStateEpoch": types.Epoch(gwatCoordData.FinEpoch),
-			"coordFinEpoch": gwatCoordData.FinEpoch,
+			"curStateEpoch": slots.ToEpoch(curState.Slot()),
+			"coordEpoch":    gwatCoordData.Epoch,
 		}).Info("Repair gwat finalization: handle parent state")
 
 		if fullFinSeq.Has(gwatCoordData.Spine) {
 			break
 		}
+		// retrieve parent block
+		parentBlock, err = s.cfg.BeaconDB.Block(ctx, parentRoot)
+		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"parentRoot":   fmt.Sprintf("%#x", parentRoot),
+				"curStateSlot": fmt.Sprintf("%#x", curState.Slot()),
+			}).Error("Repair gwat finalization: retrieve parent state failed")
+			return fmt.Errorf("repair gwat finalization: retrieve parent block failed err=%w", err)
+		}
 		// retrieve parent state
-		parentRoot := bytesutil.ToBytes32(bState.LatestBlockHeader().ParentRoot)
+		parentRoot = bytesutil.ToBytes32(parentBlock.Block().ParentRoot())
 		curState, err = s.cfg.StateGen.SyncStateByRoot(ctx, parentRoot)
 		if err != nil {
 			log.WithError(err).WithFields(logrus.Fields{
@@ -803,11 +817,11 @@ func (s *Service) repairGwatFinalization(
 	}
 
 	log.WithFields(logrus.Fields{
-		"stSlot":        bState.Slot(),
-		"syncMode":      syncMode,
-		"coordSpine":    gwatCoordData.Spine,
-		"coordFinEpoch": gwatCoordData.FinEpoch,
-		"repairStates":  len(repairStates),
+		"stSlot":       bState.Slot(),
+		"syncMode":     syncMode,
+		"coordSpine":   gwatCoordData.Spine,
+		"coordEpoch":   gwatCoordData.Epoch,
+		"repairStates": len(repairStates),
 	}).Info("Repair gwat finalization: data collected")
 
 	//run finalizations in reverse order
@@ -815,15 +829,15 @@ func (s *Service) repairGwatFinalization(
 		curState = repairStates[i]
 		log.WithFields(logrus.Fields{
 			"curStateSlot":  curState.Slot(),
-			"curStateEpoch": types.Epoch(gwatCoordData.FinEpoch),
-			"coordFinEpoch": gwatCoordData.FinEpoch,
+			"curStateEpoch": slots.ToEpoch(curState.Slot()),
+			"coordEpoch":    gwatCoordData.Epoch,
 		}).Info("Repair gwat finalization: finalize state")
 		err = s.processDagFinalization(curState, syncMode)
 		if err != nil {
 			log.WithError(err).WithFields(logrus.Fields{
 				"curStateSlot":  curState.Slot(),
-				"curStateEpoch": types.Epoch(gwatCoordData.FinEpoch),
-				"coordFinEpoch": gwatCoordData.FinEpoch,
+				"curStateEpoch": slots.ToEpoch(curState.Slot()),
+				"coordEpoch":    gwatCoordData.Epoch,
 			}).Error("Repair gwat finalization: finalize state failed")
 			return err
 		}
