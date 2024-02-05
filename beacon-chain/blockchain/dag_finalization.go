@@ -783,9 +783,13 @@ func (s *Service) repairGwatFinalization(
 		fullFinSeq := append(gwatCommon.HashArray{baseSpine}, finalizationSeq...)
 
 		log.WithFields(logrus.Fields{
-			"curStateSlot":  curState.Slot(),
-			"curStateEpoch": slots.ToEpoch(curState.Slot()),
-			"coordEpoch":    gwatCoordData.Epoch,
+			"curStateSlot":    curState.Slot(),
+			"curStateEpoch":   slots.ToEpoch(curState.Slot()),
+			"coordEpoch":      gwatCoordData.Epoch,
+			"st.CpFinalized":  fmt.Sprintf("%#x", bState.SpineData().CpFinalized),
+			"st.Finalization": fmt.Sprintf("%#x", bState.SpineData().Finalization),
+			"fullFinSeq":      fullFinSeq,
+			"coord.Spine":     fmt.Sprintf("%#x", gwatCoordData.Spine),
 		}).Info("Repair gwat finalization: handle parent state")
 
 		if fullFinSeq.Has(gwatCoordData.Spine) {
