@@ -805,8 +805,7 @@ func (s *Service) repairGwatFinalization(
 		curState, err = s.cfg.StateGen.SyncStateByRoot(ctx, parentRoot)
 		if err != nil {
 			log.WithError(err).WithFields(logrus.Fields{
-				"parentRoot":   fmt.Sprintf("%#x", parentRoot),
-				"curStateSlot": fmt.Sprintf("%#x", curState.Slot()),
+				"parentRoot": fmt.Sprintf("%#x", parentRoot),
 			}).Error("Repair gwat finalization: retrieve parent state failed")
 			return fmt.Errorf("repair gwat finalization: retrieve parent state failed err=%w", err)
 		}
