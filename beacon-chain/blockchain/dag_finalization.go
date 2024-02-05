@@ -778,16 +778,16 @@ func (s *Service) repairGwatFinalization(
 		}
 		repairStates = append(repairStates, curState)
 		// check is gwat finalized spine in fin seq
-		finalizationSeq := helpers.GetFinalizationSequence(bState)
-		baseSpine := helpers.GetBaseSpine(bState)
+		finalizationSeq := helpers.GetFinalizationSequence(curState)
+		baseSpine := helpers.GetBaseSpine(curState)
 		fullFinSeq := append(gwatCommon.HashArray{baseSpine}, finalizationSeq...)
 
 		log.WithFields(logrus.Fields{
 			"curStateSlot":    curState.Slot(),
 			"curStateEpoch":   slots.ToEpoch(curState.Slot()),
 			"coordEpoch":      gwatCoordData.Epoch,
-			"st.CpFinalized":  fmt.Sprintf("%#x", bState.SpineData().CpFinalized),
-			"st.Finalization": fmt.Sprintf("%#x", bState.SpineData().Finalization),
+			"st.CpFinalized":  fmt.Sprintf("%#x", curState.SpineData().CpFinalized),
+			"st.Finalization": fmt.Sprintf("%#x", curState.SpineData().Finalization),
 			"fullFinSeq":      fullFinSeq,
 			"coord.Spine":     fmt.Sprintf("%#x", gwatCoordData.Spine),
 		}).Info("Repair gwat finalization: handle parent state")
