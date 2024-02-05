@@ -95,7 +95,7 @@ func (s *Service) initGwatSync() {
 
 // initParallelGwatSync launches parallel gwat synchronization process
 // which doesn't depend on if coordinator is synced or not
-func (s *Service) initParallelGwatSync(ctx context.Context) {
+func (s *Service) initParallelGwatSync() {
 	log.Info("Parallel Gwat sync: start ...")
 
 	var err error
@@ -113,7 +113,7 @@ func (s *Service) initParallelGwatSync(ctx context.Context) {
 
 	// 1. Check and init coordinated state
 	if s.GetCachedGwatCoordinatedState() == nil {
-		err = s.initCoordinatedState(ctx)
+		err = s.initCoordinatedState(s.ctx)
 		if err != nil {
 			log.WithError(err).Warning("Parallel Gwat sync: attempt to get gwat coordinated state failed ...")
 			return
@@ -121,7 +121,7 @@ func (s *Service) initParallelGwatSync(ctx context.Context) {
 		log.Info("Parallel Gwat sync: coordinated state initialization successful")
 	}
 	// 2. sync gwat to current finalized checkpoint
-	err = s.runGwatSynchronization(ctx)
+	err = s.runGwatSynchronization(s.ctx)
 	if err != nil {
 		log.WithError(err).Warning("Parallel Gwat sync: attempt failed ...")
 		if !errors.Is(err, errGwatSyncInProgress) {
