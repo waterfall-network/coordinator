@@ -745,7 +745,7 @@ func (s *Service) createGenesisCoordinatedCheckpoint(ctx context.Context, cpFinE
 	}, nil
 }
 
-// collectFinalizationParams collects params to call gwat finalization api.
+// repairGwatFinalization attempts to repair gwat finalization by running by slots.
 func (s *Service) repairGwatFinalization(
 	ctx context.Context,
 	bState state.BeaconState,
@@ -783,13 +783,11 @@ func (s *Service) repairGwatFinalization(
 		fullFinSeq := append(gwatCommon.HashArray{baseSpine}, finalizationSeq...)
 
 		log.WithFields(logrus.Fields{
-			"curStateSlot":    curState.Slot(),
-			"curStateEpoch":   slots.ToEpoch(curState.Slot()),
-			"coordEpoch":      gwatCoordData.Epoch,
-			"st.CpFinalized":  fmt.Sprintf("%#x", curState.SpineData().CpFinalized),
-			"st.Finalization": fmt.Sprintf("%#x", curState.SpineData().Finalization),
-			"fullFinSeq":      fullFinSeq,
-			"coord.Spine":     fmt.Sprintf("%#x", gwatCoordData.Spine),
+			"curStateSlot":  curState.Slot(),
+			"curStateEpoch": slots.ToEpoch(curState.Slot()),
+			"coordEpoch":    gwatCoordData.Epoch,
+			"fullFinSeq":    fullFinSeq,
+			"coord.Spine":   fmt.Sprintf("%#x", gwatCoordData.Spine),
 		}).Info("Repair gwat finalization: handle parent state")
 
 		if fullFinSeq.Has(gwatCoordData.Spine) {
