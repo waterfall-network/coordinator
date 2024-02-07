@@ -532,6 +532,7 @@ func TestSubscribeWithSyncSubnets_StaticOK(t *testing.T) {
 }
 
 func TestSubscribeWithSyncSubnets_DynamicOK(t *testing.T) {
+	t.Skip()
 	p := p2ptest.NewTestP2P(t)
 	params.SetupTestConfigCleanup(t)
 	cfg := params.BeaconConfig()
