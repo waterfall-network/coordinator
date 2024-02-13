@@ -153,7 +153,7 @@ func (s *Service) ReceiveBlockBatch(ctx context.Context, blocks []block.SignedBe
 	}
 
 	// run parallel gwat sync
-	go s.initParallelGwatSync(ctx)
+	go s.initParallelGwatSync()
 	return nil
 }
 
