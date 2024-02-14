@@ -49,7 +49,7 @@ var mainnetNetworkConfig = &NetworkConfig{
 	ContractDeploymentBlock:         0,
 	BootstrapNodes: []string{
 		// todo nt5 bootnodes
-		"enr:-LG4QKxLcvNll6Rx7fz-E2KQeKgw2dkJpk9vwlq0aRSg-vyFFjrzdK2CTsRzwoEHey7sREyo5aNaTpiw3odbhuhYRd-GAY2nuwh7h2F0dG5ldHOIAAAAAAAAAACEZXRoMpDRNOfUAAAgCf__________gmlkgnY0gmlwhAVLhyyJc2VjcDI1NmsxoQIrcNdLG-37yZoGvL1WYQXom66bgMuLGKIiwcvplrDkH4N1ZHCCD6A",
+		"enr:-LG4QCx7X0SiLWDROuUw5kFxUvIsP-ry8FmQd8c1VrEI8X7mTHF2UOetxPKSCOhd79ZrhXbW9iSSPIKtLQIy3BoRWnuGAY2pU0pEh2F0dG5ldHOIAAAAAAAAAACEZXRoMpDRNOfUAAAgCf__________gmlkgnY0gmlwhAVLhyyJc2VjcDI1NmsxoQJVcs6l_xUGB2M-I_Gi9fp7h-Cpv16gS04KFk3KGdmPR4N1ZHCCD6A",
 	},
 }
 
