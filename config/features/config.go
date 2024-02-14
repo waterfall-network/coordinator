@@ -132,7 +132,7 @@ func configureTestnet(ctx *cli.Context, cfg *Flags) {
 		params.UseTestnet8Config()
 		params.UseTestnet8NetworkConfig()
 	} else {
-		log.Warn("Running on Waterfall Consensus Testnet")
+		log.Warn("Running on Waterfall Consensus Mainnet")
 		params.UseMainnetConfig()
 	}
 }

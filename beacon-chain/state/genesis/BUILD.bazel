@@ -11,6 +11,8 @@ go_library(
         "//beacon-chain/state/v1:go_default_library",
         "//config/params:go_default_library",
         "//proto/prysm/v1alpha1:go_default_library",
+        "//io/file:go_default_library",
+        "@com_github_status_im_keycard_go//hexutils:go_default_library",
         "@com_github_golang_snappy//:go_default_library",
     ],
 )

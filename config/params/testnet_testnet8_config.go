@@ -8,7 +8,6 @@ import (
 // UseTestnet8NetworkConfig uses the Testnet8 specific network config.
 func UseTestnet8NetworkConfig() {
 	cfg := BeaconNetworkConfig().Copy()
-	cfg.ContractDeploymentBlock = 0
 	cfg.BootstrapNodes = []string{
 		// Prysm's bootnode
 		"enr:-LG4QC0DoIv8bWBuE_ZVx9zcrDaE1HbBPuNWVpl74GoStnSPXO0B73WF5VlfDJQSqTetQ775V9PWi7Yg3Ua7igL1ucOGAYvKzQeKh2F0" +

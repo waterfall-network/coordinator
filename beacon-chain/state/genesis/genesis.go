@@ -2,12 +2,12 @@ package genesis
 
 import (
 	_ "embed"
-	"fmt"
 
 	"github.com/golang/snappy"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/file"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 )
 
@@ -22,25 +22,9 @@ var (
 func State(netName, genesisPath string) (state.BeaconState, error) {
 	switch netName {
 	case params.ConfigNames[params.Mainnet]:
+		//to update snappy file use func GenerateSszSnappyState()
 		if genesisPath == "" {
-			// todo activate load mainnetRawSSZCompressed after implemented
-			/*depth
-			  "//io/file:go_default_library",
-			  "@com_github_status_im_keycard_go//hexutils:go_default_library",
-			*/
-			//serState, err := file.ReadFileAsBytes("<path-to>/coordinator-genesis.ssz")
-			//if err != nil {
-			//	return nil, err
-			//}
-			//encodedState := snappy.Encode(nil, serState)
-			//err = file.WriteFile("<path-to>/testnet8.ssz.snappy", []byte(encodedState))
-			//if err != nil {
-			//	return nil, err
-			//}
-			if false {
-				return load(mainnetRawSSZCompressed)
-			}
-			return nil, fmt.Errorf("mainnet raw genesis is not installed. Use cmd param `--genesis-state` to define path to genesis.ssz")
+			return load(mainnetRawSSZCompressed)
 		}
 		return nil, nil
 	case params.ConfigNames[params.Testnet8]:
@@ -52,6 +36,20 @@ func State(netName, genesisPath string) (state.BeaconState, error) {
 		// No state found.
 		return nil, nil
 	}
+}
+
+// GenerateSszSnappyState generate predefined mainnet.ssz.snappy from genesis.
+func GenerateSszSnappyState() error {
+	serState, err := file.ReadFileAsBytes("/home/mezin/go/src/tesseract/.data/coordinator-genesis.ssz")
+	if err != nil {
+		return err
+	}
+	encodedState := snappy.Encode(nil, serState)
+	err = file.WriteFile("/tmp/mainnet.ssz.snappy", []byte(encodedState))
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // load a compressed ssz state file into a beacon state struct.
