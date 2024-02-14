@@ -116,7 +116,7 @@ var (
 	DelegatingStakeForkSlot = &cli.Uint64Flag{
 		Name:  "delegating-stake-fork-slot",
 		Usage: "The slot of start to apply the delegating stake rules.",
-		Value: 5120,
+		Value: 2000,
 	}
 	// SetGCPercent is the percentage of current live allocations at which the garbage collector is to run.
 	SetGCPercent = &cli.IntFlag{
