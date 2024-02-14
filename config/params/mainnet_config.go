@@ -208,7 +208,7 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	GenesisForkVersion:   []byte{0, 0, 0, 0},
 	AltairForkVersion:    []byte{1, 0, 0, 0},
 	AltairForkEpoch:      mainnetAltairForkEpoch,
-	DelegateForkSlot:     5120, //todo tn5
+	DelegateForkSlot:     1600, //todo tn5
 	BellatrixForkVersion: []byte{2, 0, 0, 0},
 	BellatrixForkEpoch:   mainnetBellatrixForkEpoch,
 	ShardingForkVersion:  []byte{3, 0, 0, 0},
