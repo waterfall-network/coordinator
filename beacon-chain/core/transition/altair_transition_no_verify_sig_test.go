@@ -5,6 +5,7 @@ import (
 	"math"
 	"testing"
 
+	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/go-bitfield"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/altair"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
@@ -24,6 +25,7 @@ import (
 )
 
 func TestExecuteAltairStateTransitionNoVerify_FullProcess(t *testing.T) {
+	t.Skip() //PreviousEpochAttestations is not supported for hard fork 1 beacon state
 	beaconState, privKeys := util.DeterministicGenesisStateAltair(t, 100)
 
 	syncCommittee, err := altair.NextSyncCommittee(context.Background(), beaconState)
@@ -112,6 +114,7 @@ func TestExecuteAltairStateTransitionNoVerify_FullProcess(t *testing.T) {
 }
 
 func TestExecuteAltairStateTransitionNoVerifySignature_CouldNotVerifyStateRoot(t *testing.T) {
+	t.Skip() //PreviousEpochAttestations is not supported for hard fork 1 beacon state
 	beaconState, privKeys := util.DeterministicGenesisStateAltair(t, 100)
 
 	syncCommittee, err := altair.NextSyncCommittee(context.Background(), beaconState)
@@ -204,7 +207,21 @@ func TestExecuteStateTransitionNoVerifyAnySig_PassesProcessingConditions(t *test
 	beaconState, block := createFullAltairBlockWithOperations(t)
 	wsb, err := wrapper.WrappedSignedBeaconBlock(block)
 	require.NoError(t, err)
-	set, _, err := transition.ExecuteStateTransitionNoVerifyAnySig(context.Background(), beaconState, wsb)
+
+	ctxBlockFetcher := params.CtxBlockFetcher(func(ctx context.Context, blockRoot [32]byte) (types.ValidatorIndex, types.Slot, uint64, error) {
+		votesIncluded := uint64(0)
+		for _, att := range wsb.Block().Body().Attestations() {
+			votesIncluded += att.AggregationBits.Count()
+		}
+
+		return wsb.Block().ProposerIndex() - 1, wsb.Block().Slot() - 1, votesIncluded, nil
+	})
+
+	ctxWithFetcher := context.WithValue(context.Background(),
+		params.BeaconConfig().CtxBlockFetcherKey,
+		ctxBlockFetcher)
+
+	set, _, err := transition.ExecuteStateTransitionNoVerifyAnySig(ctxWithFetcher, beaconState, wsb)
 	require.NoError(t, err)
 	// Test Signature set verifies.
 	verified, err := set.Verify()
