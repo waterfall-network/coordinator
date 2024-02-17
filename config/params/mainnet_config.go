@@ -48,7 +48,7 @@ var mainnetNetworkConfig = &NetworkConfig{
 	MinimumPeersInSubnetSearch:      20,
 	BootstrapNodes: []string{
 		// todo nt5 bootnodes
-		"enr:-LG4QE8bbSqKAEtPkZ5BN0lyfE_XFUetMxF6HJiTlEK3XOLsZOy545IKGHFbJM51Jn8-oztLkICG-rwa-oFnRdzWP6CGAY2swb-th2F0dG5ldHOIAAAAAAAAAACEZXRoMpDRNOfUAAAgCf__________gmlkgnY0gmlwhAVLhyyJc2VjcDI1NmsxoQJH_0Do25Z1Y8c0YWWejdS2-jKuwRfPCOI-kYmG_BfppYN1ZHCCD6A",
+		"enr:-LG4QBqWpk4QBnIaY5IsfddM0MLiXJNgHlKewY7RR-3PRsZsVx0db1oz1GsT4RgIsxt666_E_zMVt1Z7XHnB0OBhpNiGAY22fa5kh2F0dG5ldHOIAAAAAAAAAACEZXRoMpDRNOfUAAAgCf__________gmlkgnY0gmlwhAVLhyyJc2VjcDI1NmsxoQLVrplnCket7vQvDnqsQEbAPR0XWg974rzSt2Y2Qs6ATYN1ZHCCD6A",
 	},
 }
 
@@ -207,7 +207,7 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	GenesisForkVersion:   []byte{0, 0, 0, 0},
 	AltairForkVersion:    []byte{1, 0, 0, 0},
 	AltairForkEpoch:      mainnetAltairForkEpoch,
-	DelegateForkSlot:     2048, //todo tn5
+	DelegateForkSlot:     6400, //todo tn5
 	BellatrixForkVersion: []byte{2, 0, 0, 0},
 	BellatrixForkEpoch:   mainnetBellatrixForkEpoch,
 	ShardingForkVersion:  []byte{3, 0, 0, 0},
