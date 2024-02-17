@@ -604,6 +604,14 @@ func (s *Service) initPOWService() {
 			s.latestEth1Data.BlockTime = header.Time
 			s.latestEth1Data.CpHash = header.CpHash.Bytes()
 			s.latestEth1Data.CpNr = header.CpNumber
+			s.latestEth1Data.LastRequestedBlock = s.followBlockHeight(ctx)
+
+			log.WithFields(logrus.Fields{
+				"EthLFinNr":            header.Nr(),
+				"EthLFinHash":          fmt.Sprintf("%#x", header.Hash()),
+				"lastEth.LastReqBlock": s.latestEth1Data.LastRequestedBlock,
+				"lastEth.CpNr":         s.latestEth1Data.CpNr,
+			}).Info("EvtLog: initPOWService")
 
 			if err := s.processPastLogs(ctx); err != nil {
 				s.retryExecutionClientConnection(ctx, err)

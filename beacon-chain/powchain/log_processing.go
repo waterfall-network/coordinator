@@ -343,13 +343,6 @@ func createGenesisTime(timeStamp uint64) uint64 {
 // updates the deposit trie with the data from each individual log.
 func (s *Service) processPastLogs(ctx context.Context) error {
 	currentBlockNum := s.latestEth1Data.LastRequestedBlock
-	deploymentBlock := params.BeaconNetworkConfig().ContractDeploymentBlock
-	// Start from the deployment block if our last requested block
-	// is behind it. This is as the deposit logs can only start from the
-	// block of the deployment of the deposit contract.
-	if deploymentBlock > currentBlockNum {
-		currentBlockNum = deploymentBlock
-	}
 	// To store all blocks.
 	headersMap := make(map[uint64]*gwatTypes.Header)
 	logCount, err := s.GetDepositCount(ctx)
@@ -359,12 +352,21 @@ func (s *Service) processPastLogs(ctx context.Context) error {
 
 	// Batch request the desired headers and store them in a
 	// map for quick access.
-	requestHeaders := func(startBlk uint64, endBlk uint64) error {
+	requestHeaders := func(startBlk, endBlk uint64) error {
 		headers, err := s.batchRequestHeaders(startBlk, endBlk)
 		if err != nil {
 			return err
 		}
-		for _, h := range headers {
+		for i, h := range headers {
+			log.WithFields(logrus.Fields{
+				"i":                    i,
+				"lastEth.LastReqBlock": s.latestEth1Data.LastRequestedBlock,
+				"lastEth.CpNr":         s.latestEth1Data.CpNr,
+				"startBlk":             startBlk,
+				"endBlk":               endBlk,
+				"bl.Nr":                h.Nr(),
+				"bl.Slot":              h.Slot,
+			}).Info("EvtLog: processPastLogs: requestHeaders: iter")
 			if h != nil && h.Number != nil {
 				headersMap[h.Nr()] = h
 			}

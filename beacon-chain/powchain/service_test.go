@@ -343,7 +343,6 @@ func TestLogTillGenesis_OK(t *testing.T) {
 	params.OverrideBeaconConfig(cfg)
 
 	nCfg := params.BeaconNetworkConfig()
-	nCfg.ContractDeploymentBlock = 0
 	params.OverrideBeaconNetworkConfig(nCfg)
 
 	hook := logTest.NewGlobal()

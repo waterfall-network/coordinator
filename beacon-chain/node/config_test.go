@@ -123,7 +123,6 @@ func TestConfigureNetwork(t *testing.T) {
 	configureNetwork(cliCtx)
 
 	assert.DeepEqual(t, []string{"node1", "node2"}, params.BeaconNetworkConfig().BootstrapNodes)
-	assert.Equal(t, uint64(100), params.BeaconNetworkConfig().ContractDeploymentBlock)
 }
 
 func TestConfigureInterop(t *testing.T) {

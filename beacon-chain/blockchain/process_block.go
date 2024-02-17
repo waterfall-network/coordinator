@@ -98,6 +98,17 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	ctx = context.WithValue(ctx, params.BeaconConfig().CtxBlockFetcherKey, db.BlockInfoFetcherFunc(s.cfg.BeaconDB))
 	defer span.End()
 
+	s.onBlockMu.Lock()
+	defer s.onBlockMu.Unlock()
+
+	if err := helpers.BeaconBlockIsNil(signed); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"curSlot": slots.CurrentSlot(uint64(s.genesisTime.Unix())),
+		}).Error("onBlock error")
+		return err
+	}
+	b := signed.Block()
+
 	defer func(start time.Time, curSlot types.Slot) {
 		log.WithField(
 			"elapsed", time.Since(start),
@@ -110,9 +121,6 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 			"root":       fmt.Sprintf("%#x", blockRoot),
 		}).Info("onBlock: end")
 	}(time.Now(), slots.CurrentSlot(uint64(s.genesisTime.Unix())))
-
-	s.onBlockMu.Lock()
-	defer s.onBlockMu.Unlock()
 
 	log.WithFields(logrus.Fields{
 		"blSlot":            signed.Block().Slot(),
@@ -176,14 +184,6 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 			}
 		}
 	}
-
-	if err := helpers.BeaconBlockIsNil(signed); err != nil {
-		log.WithError(err).WithFields(logrus.Fields{
-			"block.slot": signed.Block().Slot(),
-		}).Error("onBlock error")
-		return err
-	}
-	b := signed.Block()
 
 	preState, err := s.getBlockPreState(ctx, b)
 	if err != nil {

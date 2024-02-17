@@ -46,7 +46,6 @@ var mainnetNetworkConfig = &NetworkConfig{
 	AttSubnetKey:                    "attnets",
 	SyncCommsSubnetKey:              "syncnets",
 	MinimumPeersInSubnetSearch:      20,
-	ContractDeploymentBlock:         0,
 	BootstrapNodes: []string{
 		// todo nt5 bootnodes
 		"enr:-LG4QE8bbSqKAEtPkZ5BN0lyfE_XFUetMxF6HJiTlEK3XOLsZOy545IKGHFbJM51Jn8-oztLkICG-rwa-oFnRdzWP6CGAY2swb-th2F0dG5ldHOIAAAAAAAAAACEZXRoMpDRNOfUAAAgCf__________gmlkgnY0gmlwhAVLhyyJc2VjcDI1NmsxoQJH_0Do25Z1Y8c0YWWejdS2-jKuwRfPCOI-kYmG_BfppYN1ZHCCD6A",
