@@ -38,7 +38,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/network"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	prysmTime "gitlab.waterfall.network/waterfall/protocol/coordinator/time"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	ethereum "gitlab.waterfall.network/waterfall/protocol/gwat"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/abi/bind"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
@@ -606,9 +605,9 @@ func (s *Service) initPOWService() {
 			s.latestEth1Data.CpHash = header.CpHash.Bytes()
 			s.latestEth1Data.CpNr = header.CpNumber
 
-			if params.BeaconConfig().IsDelegatingStakeSlot(slots.CurrentSlot(header.Slot)) {
-				s.latestEth1Data.LastRequestedBlock = s.followBlockHeight(ctx)
-			}
+			//if params.BeaconConfig().IsDelegatingStakeSlot(slots.CurrentSlot(header.Slot)) {
+			//	s.latestEth1Data.LastRequestedBlock = s.followBlockHeight(ctx)
+			//}
 
 			log.WithFields(logrus.Fields{
 				"EthLFinNr":            header.Nr(),
