@@ -117,6 +117,7 @@ func (s *Service) ProcessWithdrawalLog(ctx context.Context, wtdLog gwatTypes.Log
 		"creatorAddr": fmt.Sprintf("%#x", creatorAddr),
 		"curSlot":     curSlot,
 		"curEpoch":    curEpoch,
+		"initTxHash":  fmt.Sprintf("%#x", wtdLog.TxHash),
 	}).Info("Processing withdrawal")
 
 	if err != nil {
@@ -143,6 +144,7 @@ func (s *Service) ProcessExitLog(ctx context.Context, exitLog gwatTypes.Log) err
 		"exitEpoch":   exitEpoch,
 		"pubkey":      fmt.Sprintf("%#x", pubkey),
 		"creatorAddr": fmt.Sprintf("%#x", creatorAddr),
+		"initTxHash":  fmt.Sprintf("%#x", exitLog.TxHash),
 	}).Info("Processing exit")
 
 	if err != nil {
@@ -185,6 +187,7 @@ func (s *Service) ProcessDepositLog(ctx context.Context, depositLog gwatTypes.Lo
 		"withdrawalCreds": withdrawalCredentials.Hex(),
 		"depositIndex":    depositIndex,
 		"s.lastIndex":     s.lastReceivedMerkleIndex,
+		"initTxHash":      fmt.Sprintf("%#x", depositLog.TxHash),
 	}).Info("Processing deposit")
 
 	if err != nil {
@@ -266,6 +269,7 @@ func (s *Service) ProcessDepositLog(ctx context.Context, depositLog gwatTypes.Lo
 			"eth1Block":    depositLog.BlockNumber,
 			"publicKey":    fmt.Sprintf("%#x", depositData.PublicKey),
 			"depositIndex": index,
+			"initTxHash":   fmt.Sprintf("%#x", depositLog.TxHash),
 		}).Info("Deposit registered from gwat deposit event")
 		validDepositsCount.Inc()
 		// Notify users what is going on, from time to time.
@@ -279,6 +283,7 @@ func (s *Service) ProcessDepositLog(ctx context.Context, depositLog gwatTypes.Lo
 				log.WithFields(logrus.Fields{
 					"deposits":          deposits,
 					"genesisValidators": valCount,
+					"initTxHash":        fmt.Sprintf("%#x", depositLog.TxHash),
 				}).Info("Processing deposits")
 			}
 		}
@@ -287,6 +292,7 @@ func (s *Service) ProcessDepositLog(ctx context.Context, depositLog gwatTypes.Lo
 			"eth1Block":    depositLog.BlockHash.Hex(),
 			"eth1Tx":       depositLog.TxHash.Hex(),
 			"depositIndex": index,
+			"initTxHash":   fmt.Sprintf("%#x", depositLog.TxHash),
 		}).Info("Invalid deposit registered in gwat deposit event")
 	}
 	return nil
