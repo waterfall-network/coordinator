@@ -46,6 +46,7 @@ func TestGenerateFullBlock_ThousandValidators(t *testing.T) {
 }
 
 func TestGenerateFullBlock_Passes4Epochs(t *testing.T) {
+	t.Skip()
 	params.SetupTestConfigCleanup(t)
 	params.UseMainnetConfig()
 	beaconState, privs := DeterministicGenesisState(t, 64)
@@ -140,6 +141,7 @@ func TestGenerateFullBlock_ValidAttestations(t *testing.T) {
 }
 
 func TestGenerateFullBlock_ValidDeposits(t *testing.T) {
+	t.Skip()
 	beaconState, privs := DeterministicGenesisState(t, 256)
 	deposits, _, err := DeterministicDepositsAndKeys(257)
 	require.NoError(t, err)

@@ -302,19 +302,21 @@ func BlockSignatureAltair(
 		return nil, err
 	}
 
-	ctx := context.WithValue(context.Background(),
+	ctxBlockFetcher := params.CtxBlockFetcher(func(ctx context.Context, blockRoot [32]byte) (types.ValidatorIndex, types.Slot, uint64, error) {
+		block := wsb
+		votesIncluded := uint64(0)
+		for _, att := range block.Block().Body().Attestations() {
+			votesIncluded += att.AggregationBits.Count()
+		}
+
+		return block.Block().ProposerIndex() - 1, block.Block().Slot() - 1, votesIncluded, nil
+	})
+
+	ctxWithFetcher := context.WithValue(context.Background(),
 		params.BeaconConfig().CtxBlockFetcherKey,
-		func(ctx context.Context, blockRoot [32]byte) (types.ValidatorIndex, types.Slot, uint64, error) {
-			block := wsb
-			votesIncluded := uint64(0)
-			for _, att := range block.Block().Body().Attestations() {
-				votesIncluded += att.AggregationBits.Count()
-			}
+		ctxBlockFetcher)
 
-			return block.Block().ProposerIndex(), block.Block().Slot(), votesIncluded, nil
-		})
-
-	s, err := transition.CalculateStateRoot(ctx, bState, wsb)
+	s, err := transition.CalculateStateRoot(ctxWithFetcher, bState, wsb)
 	if err != nil {
 		return nil, err
 	}
@@ -334,7 +336,7 @@ func BlockSignatureAltair(
 	if err := bState.SetSlot(block.Slot); err != nil {
 		return nil, err
 	}
-	proposerIdx, err := helpers.BeaconProposerIndex(ctx, bState)
+	proposerIdx, err := helpers.BeaconProposerIndex(ctxWithFetcher, bState)
 	if err != nil {
 		return nil, err
 	}
@@ -422,7 +424,7 @@ func GenerateFullBlockAltair(
 	}
 
 	if slot == currentSlot {
-		slot = currentSlot + 1
+		slot = currentSlot + 3
 	}
 
 	syncAgg, err := generateSyncAggregate(bState, privs, parentRoot)

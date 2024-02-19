@@ -19,7 +19,11 @@ import (
 	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
 	v2 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v2"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/tests/testutils"
 )
+
+const testDepositsCount = 16
 
 // BlockGenConfig is used to define the requested conditions
 // for block generation.
@@ -45,6 +49,19 @@ func DefaultBlockGenConfig() *BlockGenConfig {
 
 // NewBeaconBlock creates a beacon block with minimum marshalable fields.
 func NewBeaconBlock() *ethpb.SignedBeaconBlock {
+	deposits := GenerateDeposits(testDepositsCount)
+
+	withdrawals := make([]*ethpb.Withdrawal, 0)
+	for i, deposit := range deposits {
+		withdrawals = append(withdrawals, &ethpb.Withdrawal{
+			PublicKey:      deposit.Data.GetPublicKey(),
+			ValidatorIndex: types.ValidatorIndex(i),
+			Amount:         3200,
+			InitTxHash:     deposit.Data.InitTxHash,
+			Epoch:          types.Epoch(i),
+		})
+	}
+
 	return &ethpb.SignedBeaconBlock{
 		Block: &ethpb.BeaconBlock{
 			ParentRoot: make([]byte, fieldparams.RootLength),
@@ -59,22 +76,74 @@ func NewBeaconBlock() *ethpb.SignedBeaconBlock {
 				Graffiti:          make([]byte, fieldparams.RootLength),
 				Attestations:      []*ethpb.Attestation{},
 				AttesterSlashings: []*ethpb.AttesterSlashing{},
-				Deposits:          []*ethpb.Deposit{},
+				Deposits:          GenerateDeposits(testDepositsCount),
 				ProposerSlashings: []*ethpb.ProposerSlashing{},
 				VoluntaryExits:    []*ethpb.VoluntaryExit{},
-				Withdrawals: []*ethpb.Withdrawal{
-					{
-						PublicKey:      bytesutil.PadTo([]byte{0x77}, 48),
-						ValidatorIndex: 0,
-						Amount:         123456789,
-						InitTxHash:     bytesutil.PadTo([]byte{0x77}, 32),
-						Epoch:          5,
-					},
-				},
+				Withdrawals:       withdrawals,
 			},
 		},
 		Signature: make([]byte, fieldparams.BLSSignatureLength),
 	}
+}
+
+func NewBeaconBlockWithWithdrawals(vals []*ethpb.Validator) *ethpb.SignedBeaconBlock {
+	withdrawals := make([]*ethpb.Withdrawal, 0)
+	for i, val := range vals {
+		withdrawals = append(withdrawals, &ethpb.Withdrawal{
+			PublicKey:      val.GetPublicKey(),
+			ValidatorIndex: types.ValidatorIndex(i),
+			Amount:         3200,
+			InitTxHash:     val.ActivationHash,
+			Epoch:          types.Epoch(0),
+		})
+	}
+
+	return &ethpb.SignedBeaconBlock{
+		Block: &ethpb.BeaconBlock{
+			ParentRoot: make([]byte, fieldparams.RootLength),
+			StateRoot:  make([]byte, fieldparams.RootLength),
+			Body: &ethpb.BeaconBlockBody{
+				RandaoReveal: make([]byte, fieldparams.BLSSignatureLength),
+				Eth1Data: &ethpb.Eth1Data{
+					DepositRoot: make([]byte, fieldparams.RootLength),
+					BlockHash:   make([]byte, fieldparams.RootLength),
+					Candidates:  make([]byte, 0),
+				},
+				Graffiti:          make([]byte, fieldparams.RootLength),
+				Attestations:      []*ethpb.Attestation{},
+				AttesterSlashings: []*ethpb.AttesterSlashing{},
+				Deposits:          make([]*ethpb.Deposit, 0),
+				ProposerSlashings: []*ethpb.ProposerSlashing{},
+				VoluntaryExits:    []*ethpb.VoluntaryExit{},
+				Withdrawals:       withdrawals,
+			},
+		},
+		Signature: make([]byte, fieldparams.BLSSignatureLength),
+	}
+}
+
+func GenerateDeposits(count int) []*ethpb.Deposit {
+	deposits := make([]*ethpb.Deposit, count)
+	for i, deposit := range deposits {
+		proof := make([][]byte, 33)
+		for j := range proof {
+			proof[j] = make([]byte, 32)
+		}
+		deposit = &ethpb.Deposit{
+			Proof: proof,
+			Data: &ethpb.Deposit_Data{
+				PublicKey:             bytesutil.ToBytes(uint64(i), common.BlsPubKeyLength),
+				CreatorAddress:        make([]byte, 20),
+				WithdrawalCredentials: make([]byte, 20),
+				Amount:                3200000000,
+				Signature:             make([]byte, 96),
+				InitTxHash:            bytesutil.ToBytes(uint64(i), common.HashLength),
+			},
+		}
+		deposits[i] = deposit
+	}
+
+	return deposits
 }
 
 // GenerateFullBlock generates a fully valid block with the requested parameters.
@@ -376,6 +445,7 @@ func generateVoluntaryExits(
 		exit := &ethpb.VoluntaryExit{
 			Epoch:          time.PrevEpoch(bState),
 			ValidatorIndex: valIndex,
+			InitTxHash:     testutils.RandomStringInBytes(32),
 		}
 		voluntaryExits[i] = exit
 	}
@@ -463,6 +533,25 @@ func HydrateBeaconBlockBody(b *ethpb.BeaconBlockBody) *ethpb.BeaconBlockBody {
 			Candidates:  make([]byte, 0),
 		}
 	}
+
+	if b.Deposits == nil {
+		b.Deposits = GenerateDeposits(testDepositsCount)
+	}
+
+	if b.Withdrawals == nil {
+		withdrawals := make([]*ethpb.Withdrawal, 0)
+		for i, deposit := range b.Deposits {
+			withdrawals = append(withdrawals, &ethpb.Withdrawal{
+				PublicKey:      deposit.GetData().GetPublicKey(),
+				ValidatorIndex: types.ValidatorIndex(i),
+				Amount:         3200,
+				InitTxHash:     deposit.GetData().GetInitTxHash(),
+				Epoch:          types.Epoch(i),
+			})
+		}
+		b.Withdrawals = withdrawals
+	}
+
 	return b
 }
 

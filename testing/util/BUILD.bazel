@@ -7,7 +7,6 @@ go_library(
         "altair.go",
         "attestation.go",
         "bazel.go",
-        "bellatrix_state.go",
         "block.go",
         "deposits.go",
         "helpers.go",
@@ -55,6 +54,7 @@ go_library(
         "@io_bazel_rules_go//go/tools/bazel:go_default_library",
         "@network_waterfall_gitlab_waterfall_protocol_gwat//common:go_default_library",
         "@network_waterfall_gitlab_waterfall_protocol_gwat//common/hexutil:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//tests/testutils:go_default_library",
     ],
 )
 
