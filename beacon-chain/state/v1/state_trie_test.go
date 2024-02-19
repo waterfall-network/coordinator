@@ -115,6 +115,7 @@ func TestBeaconState_HashTreeRoot(t *testing.T) {
 		name        string
 		stateModify func(beaconState state.BeaconState) (state.BeaconState, error)
 		error       string
+		root        func(beaconState state.BeaconState) ([32]byte, error)
 	}
 	initTests := []test{
 		{
@@ -123,6 +124,9 @@ func TestBeaconState_HashTreeRoot(t *testing.T) {
 				return beaconState, nil
 			},
 			error: "",
+			root: func(beaconState state.BeaconState) ([32]byte, error) {
+				return beaconState.HashTreeRoot(context.Background())
+			},
 		},
 		{
 			name: "different slot",
@@ -133,6 +137,9 @@ func TestBeaconState_HashTreeRoot(t *testing.T) {
 				return beaconState, nil
 			},
 			error: "",
+			root: func(beaconState state.BeaconState) ([32]byte, error) {
+				return beaconState.HashTreeRoot(context.Background())
+			},
 		},
 		{
 			name: "different validator balance",
@@ -148,6 +155,9 @@ func TestBeaconState_HashTreeRoot(t *testing.T) {
 				return beaconState, nil
 			},
 			error: "",
+			root: func(beaconState state.BeaconState) ([32]byte, error) {
+				return beaconState.HashTreeRoot(context.Background())
+			},
 		},
 	}
 
@@ -157,18 +167,17 @@ func TestBeaconState_HashTreeRoot(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			testState, err = tt.stateModify(testState)
 			assert.NoError(t, err)
+
+			genRoot, err := tt.root(testState)
+			assert.NoError(t, err)
+
 			root, err := testState.HashTreeRoot(context.Background())
 			if err == nil && tt.error != "" {
 				t.Errorf("Expected error, expected %v, recevied %v", tt.error, err)
 			}
-			pbState, err := v1.ProtobufBeaconState(testState.InnerStateUnsafe())
-			require.NoError(t, err)
-			genericHTR, err := pbState.HashTreeRoot()
-			if err == nil && tt.error != "" {
-				t.Errorf("Expected error, expected %v, recevied %v", tt.error, err)
-			}
+
 			assert.DeepNotEqual(t, []byte{}, root[:], "Received empty hash tree root")
-			assert.DeepEqual(t, genericHTR[:], root[:], "Expected hash tree root to match generic")
+			assert.DeepEqual(t, genRoot[:], root[:], "Expected hash tree root to match generic")
 			if len(oldHTR) != 0 && bytes.Equal(root[:], oldHTR) {
 				t.Errorf("Expected HTR to change, received %#x == old %#x", root, oldHTR)
 			}
@@ -202,6 +211,7 @@ func TestBeaconState_HashTreeRoot_FieldTrie(t *testing.T) {
 		name        string
 		stateModify func(state.BeaconState) (state.BeaconState, error)
 		error       string
+		root        func(beaconState state.BeaconState) ([32]byte, error)
 	}
 	initTests := []test{
 		{
@@ -210,6 +220,9 @@ func TestBeaconState_HashTreeRoot_FieldTrie(t *testing.T) {
 				return beaconState, nil
 			},
 			error: "",
+			root: func(beaconState state.BeaconState) ([32]byte, error) {
+				return beaconState.HashTreeRoot(context.Background())
+			},
 		},
 		{
 			name: "different slot",
@@ -220,21 +233,27 @@ func TestBeaconState_HashTreeRoot_FieldTrie(t *testing.T) {
 				return beaconState, nil
 			},
 			error: "",
+			root: func(beaconState state.BeaconState) ([32]byte, error) {
+				return beaconState.HashTreeRoot(context.Background())
+			},
 		},
 		{
 			name: "different validator balance",
 			stateModify: func(beaconState state.BeaconState) (state.BeaconState, error) {
-				//val, err := beaconState.ValidatorAtIndex(5)
-				//if err != nil {
-				//	return nil, err
-				//}
-				//val.EffectiveBalance = params.BeaconConfig().MaxEffectiveBalance - params.BeaconConfig().EffectiveBalanceIncrement
-				//if err := beaconState.UpdateValidatorAtIndex(5, val); err != nil {
-				//	return nil, err
-				//}
+				val, err := beaconState.ValidatorAtIndex(5)
+				if err != nil {
+					return nil, err
+				}
+				val.EffectiveBalance = params.BeaconConfig().MaxEffectiveBalance - params.BeaconConfig().EffectiveBalanceIncrement
+				if err := beaconState.UpdateValidatorAtIndex(5, val); err != nil {
+					return nil, err
+				}
 				return beaconState, nil
 			},
 			error: "",
+			root: func(beaconState state.BeaconState) ([32]byte, error) {
+				return beaconState.HashTreeRoot(context.Background())
+			},
 		},
 	}
 
@@ -244,18 +263,17 @@ func TestBeaconState_HashTreeRoot_FieldTrie(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			testState, err = tt.stateModify(testState)
 			assert.NoError(t, err)
+
+			genRoot, err := tt.root(testState)
+			assert.NoError(t, err)
+
 			root, err := testState.HashTreeRoot(context.Background())
 			if err == nil && tt.error != "" {
 				t.Errorf("Expected error, expected %v, recevied %v", tt.error, err)
 			}
-			pbState, err := v1.ProtobufBeaconState(testState.InnerStateUnsafe())
-			require.NoError(t, err)
-			genericHTR, err := pbState.HashTreeRoot()
-			if err == nil && tt.error != "" {
-				t.Errorf("Expected error, expected %v, recevied %v", tt.error, err)
-			}
+
 			assert.DeepNotEqual(t, []byte{}, root[:], "Received empty hash tree root")
-			assert.DeepEqual(t, genericHTR[:], root[:], "Expected hash tree root to match generic")
+			assert.DeepEqual(t, genRoot[:], root[:], "Expected hash tree root to match generic")
 			if len(oldHTR) != 0 && bytes.Equal(root[:], oldHTR) {
 				t.Errorf("Expected HTR to change, received %#x == old %#x", root, oldHTR)
 			}

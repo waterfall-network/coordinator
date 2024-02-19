@@ -2,6 +2,8 @@ package stategen
 
 import (
 	"context"
+	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
+	"google.golang.org/protobuf/proto"
 	"testing"
 
 	types "github.com/prysmaticlabs/eth2-types"
@@ -30,8 +32,15 @@ func TestMigrateToCold_CanSaveFinalizedInfo(t *testing.T) {
 	require.NoError(t, service.epochBoundaryStateCache.put(br, beaconState))
 	require.NoError(t, service.MigrateToCold(ctx, br))
 
-	wanted := &finalizedInfo{state: beaconState, root: br, slot: 1}
-	assert.DeepEqual(t, wanted, service.finalizedInfo, "Incorrect finalized info")
+	wantedState, err := v1.ProtobufBeaconState(beaconState.InnerStateUnsafe())
+	assert.NoError(t, err)
+
+	finalizedState, err := v1.ProtobufBeaconState(service.finalizedInfo.state.InnerStateUnsafe())
+	assert.NoError(t, err)
+
+	if !proto.Equal(wantedState, finalizedState) {
+		t.Fatal("Incorrect finalized info")
+	}
 }
 
 func TestMigrateToCold_HappyPath(t *testing.T) {

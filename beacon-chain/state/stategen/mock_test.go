@@ -3,6 +3,8 @@ package stategen
 import (
 	"context"
 	"fmt"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	eth "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"sort"
 	"testing"
 
@@ -201,6 +203,26 @@ func newMockHistory(t *testing.T, hist []mockHistorySpec, current types.Slot) *m
 
 	// genesis state for history
 	gs, _ := util.DeterministicGenesisState(t, 32)
+	balances := gs.Balances()
+	for i, balance := range balances {
+		balances[i] = balance * 2
+	}
+
+	err := gs.SetBalances(balances)
+	require.NoError(t, err)
+
+	validators := gs.Validators()
+	for i := 0; i < len(validators); i++ {
+		validators[i].WithdrawalOps = []*eth.WithdrawalOp{{
+			Amount: params.BeaconConfig().MaxEffectiveBalance,
+			Hash:   make([]byte, 32),
+			Slot:   0,
+		}}
+	}
+
+	err = gs.SetValidators(validators)
+	require.NoError(t, err)
+
 	gsr, err := gs.HashTreeRoot(ctx)
 	require.NoError(t, err)
 
@@ -223,9 +245,8 @@ func newMockHistory(t *testing.T, hist []mockHistorySpec, current types.Slot) *m
 		require.NoError(t, err)
 
 		// create proposer block, setting values in the order seen in the validator.md spec
-		b, err := wrapper.WrappedSignedBeaconBlock(util.NewBeaconBlock())
+		b, err := wrapper.WrappedSignedBeaconBlock(util.NewBeaconBlockWithWithdrawals(gs.Validators()))
 		require.NoError(t, err)
-
 		// set slot to mock history spec value
 		require.NoError(t, wrapper.SetBlockSlot(b, spec.slot))
 

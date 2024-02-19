@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 
+	"github.com/golang/snappy"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
@@ -36,10 +37,10 @@ func State(netName, genesisPath string) (state.BeaconState, error) {
 // load a compressed ssz state file into a beacon state struct.
 func load(b []byte) (state.BeaconState, error) {
 	st := &ethpb.BeaconState{}
-	//b, err := snappy.Decode(nil /*dst*/, b)
-	//if err != nil {
-	//	return nil, err
-	//}
+	b, err := snappy.Decode(nil /*dst*/, b)
+	if err != nil {
+		return nil, err
+	}
 	if err := st.UnmarshalSSZ(b); err != nil {
 		return nil, err
 	}
