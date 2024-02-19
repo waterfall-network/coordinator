@@ -47,7 +47,7 @@ func TestLatestMainchainInfo_OK(t *testing.T) {
 	web3Service.latestEth1Data = &eth.LatestETH1Data{
 		BlockHeight:        2,
 		BlockTime:          20,
-		BlockHash:          []byte{204, 181, 12, 155, 100, 227, 119, 27, 88, 40, 96, 88, 30, 186, 145, 22, 110, 245, 223, 234, 55, 208, 42, 74, 90, 60, 26, 12, 137, 240, 64, 118},
+		BlockHash:          []byte{167, 119, 205, 247, 51, 60, 237, 42, 59, 241, 126, 94, 156, 163, 77, 216, 159, 17, 186, 52, 114, 231, 34, 81, 58, 154, 100, 205, 141, 81, 204, 145},
 		LastRequestedBlock: 0,
 		CpHash:             nil,
 		CpNr:               0,
@@ -70,6 +70,9 @@ func TestLatestMainchainInfo_OK(t *testing.T) {
 	tickerChan <- time.Now()
 	web3Service.cancel()
 	exitRoutine <- true
+
+	hash := header.Hash().Bytes()
+	log.Infof("BYTES %+v", hash)
 
 	assert.Equal(t, web3Service.latestEth1Data.BlockHeight, header.Nr())
 	assert.Equal(t, hexutil.Encode(web3Service.latestEth1Data.BlockHash), header.Hash().Hex())

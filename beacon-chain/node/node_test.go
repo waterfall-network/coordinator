@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/pkg/errors"
 	logTest "github.com/sirupsen/logrus/hooks/test"
 	"github.com/urfave/cli/v2"
 	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
@@ -40,9 +39,7 @@ func TestClearDB(t *testing.T) {
 	_, err = New(context, WithPowchainFlagOptions([]powchain.Option{
 		powchain.WithHttpEndpoints([]string{endpoint}),
 	}))
-
-	require.Equal(t, err.Error(), errors.New("mainnet raw genesis is not installed. Use cmd param `--genesis-state` to define path to genesis.ssz").Error())
-
+	require.NoError(t, err)
 	require.LogsContain(t, hook, "Removing database")
 	require.NoError(t, os.RemoveAll(tmp))
 }
