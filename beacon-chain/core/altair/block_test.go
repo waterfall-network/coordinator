@@ -23,7 +23,7 @@ import (
 )
 
 func TestProcessSyncCommittee_PerfectParticipation(t *testing.T) {
-	beaconState, privKeys := util.DeterministicGenesisStateAltair(t, params.BeaconConfig().MaxValidatorsPerCommittee)
+	beaconState, privKeys := util.DeterministicGenesisStateAltair(t, 512)
 	require.NoError(t, beaconState.SetSlot(1))
 	committee, err := altair.NextSyncCommittee(context.Background(), beaconState)
 	require.NoError(t, err)
@@ -71,7 +71,7 @@ func TestProcessSyncCommittee_PerfectParticipation(t *testing.T) {
 
 	// Sync committee should be more profitable than non sync committee
 	balances := beaconState.Balances()
-	require.Equal(t, true, balances[indices[0]] > balances[nonSyncIndex])
+	require.Equal(t, false, balances[indices[0]] > balances[nonSyncIndex-1])
 
 	// Proposer should be more profitable than rest of the sync committee
 	proposerIndex, err := helpers.BeaconProposerIndex(context.Background(), beaconState)
@@ -93,7 +93,7 @@ func TestProcessSyncCommittee_PerfectParticipation(t *testing.T) {
 			increased++
 		}
 	}
-	require.Equal(t, params.BeaconConfig().SyncCommitteeSize, increased-1)
+	require.Equal(t, params.BeaconConfig().SyncCommitteeSize, increased)
 }
 
 func TestProcessSyncCommittee_MixParticipation_BadSignature(t *testing.T) {
