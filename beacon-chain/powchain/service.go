@@ -254,8 +254,8 @@ func (s *Service) Start() {
 	// Poll the execution client connection and fallback if errors occur.
 	s.pollConnectionStatus(s.ctx)
 
-	// Check transition configuration for the engine API client in the background.
-	go s.checkTransitionConfiguration(s.ctx, make(chan *feed.Event, 1))
+	//////todo
+	//go s.StateTracker()
 
 	go s.run(s.ctx.Done())
 }
@@ -599,22 +599,26 @@ func (s *Service) initPOWService() {
 				}).Fatal("Latest shard1 block is not finalized")
 			}
 
-			s.latestEth1Data.BlockHeight = header.CpNumber
-			s.latestEth1Data.BlockHash = header.CpHash.Bytes()
-			s.latestEth1Data.BlockTime = header.Time
-			s.latestEth1Data.CpHash = header.CpHash.Bytes()
-			s.latestEth1Data.CpNr = header.CpNumber
-
+			//s.latestEth1Data.BlockHeight = header.CpNumber
+			//s.latestEth1Data.BlockHash = header.CpHash.Bytes()
+			//s.latestEth1Data.BlockTime = header.Time
+			//s.latestEth1Data.CpHash = header.CpHash.Bytes()
+			//s.latestEth1Data.CpNr = header.CpNumber
+			//
 			//if params.BeaconConfig().IsDelegatingStakeSlot(slots.CurrentSlot(header.Slot)) {
 			//	s.latestEth1Data.LastRequestedBlock = s.followBlockHeight(ctx)
 			//}
 
 			log.WithFields(logrus.Fields{
-				"EthLFinNr":            header.Nr(),
-				"EthLFinHash":          fmt.Sprintf("%#x", header.Hash()),
-				"lastEth.LastReqBlock": s.latestEth1Data.LastRequestedBlock,
-				"lastEth.CpNr":         s.latestEth1Data.CpNr,
-			}).Info("EvtLog: initPOWService")
+				"EthLFinNr": header.Nr(),
+				//"EthLFinHash":          fmt.Sprintf("%#x", header.Hash()),
+				"lastEth.LastReqBlock":    s.latestEth1Data.LastRequestedBlock,
+				"lastEth.CpNr":            s.latestEth1Data.CpNr,
+				"lastEth.CpHash":          fmt.Sprintf("%#x", s.latestEth1Data.CpHash),
+				"lastEth.BlockHeight":     s.latestEth1Data.BlockHeight,
+				"depositTrie.NumOfItems":  s.depositTrie.NumOfItems(),
+				"lastReceivedMerkleIndex": s.lastReceivedMerkleIndex,
+			}).Info("=== EvtLog: initPOWService: 00000")
 
 			if err := s.processPastLogs(ctx); err != nil {
 				s.retryExecutionClientConnection(ctx, err)

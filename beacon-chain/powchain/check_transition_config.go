@@ -3,17 +3,10 @@ package powchain
 import (
 	"context"
 	"errors"
-	"math"
-	"math/big"
 	"time"
 
 	"github.com/holiman/uint256"
 	"github.com/sirupsen/logrus"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed"
-	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/network"
-	pb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/engine/v1"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 )
 
@@ -23,68 +16,6 @@ var (
 		"Please check your execution client and restart it with the proper configuration. If this is not done, " +
 		"your node will not be able to complete the proof-of-stake transition"
 )
-
-// Checks the transition configuration between Prysm and the connected execution node to ensure
-// there are no differences in terminal block difficulty and block hash.
-// If there are any discrepancies, we must log errors to ensure users can resolve
-// the problem and be ready for the merge transition.
-func (s *Service) checkTransitionConfiguration(
-	ctx context.Context, blockNotifications chan *feed.Event,
-) {
-	// If Bellatrix fork epoch is not set, we do not run this check.
-	if params.BeaconConfig().BellatrixForkEpoch == math.MaxUint64 {
-		return
-	}
-	i := new(big.Int)
-	i.SetString(params.BeaconConfig().TerminalTotalDifficulty, 10)
-	ttd := new(uint256.Int)
-	ttd.SetFromBig(i)
-	cfg := &pb.TransitionConfiguration{
-		TerminalTotalDifficulty: ttd.Hex(),
-		TerminalBlockHash:       params.BeaconConfig().TerminalBlockHash[:],
-		TerminalBlockNumber:     big.NewInt(0).Bytes(), // A value of 0 is recommended in the request.
-	}
-	err := s.ExchangeTransitionConfiguration(ctx, cfg)
-	if err != nil {
-		if errors.Is(err, ErrConfigMismatch) {
-			log.WithError(err).Fatal(configMismatchLog)
-		}
-		log.WithError(err).Error("Could not check configuration values between execution and consensus client")
-	}
-
-	// We poll the execution client to see if the transition configuration has changed.
-	// This serves as a heartbeat to ensure the execution client and Prysm are ready for the
-	// Bellatrix hard-fork transition.
-	ticker := time.NewTicker(checkTransitionPollingInterval)
-	hasTtdReached := false
-	defer ticker.Stop()
-	sub := s.cfg.stateNotifier.StateFeed().Subscribe(blockNotifications)
-	defer sub.Unsubscribe()
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-sub.Err():
-			return
-		case ev := <-blockNotifications:
-			_, ok := ev.Data.(*statefeed.BlockProcessedData)
-			if !ok {
-				continue
-			}
-		case tm := <-ticker.C:
-			ctx, cancel := context.WithDeadline(ctx, tm.Add(network.DefaultRPCHTTPTimeout))
-			err = s.ExchangeTransitionConfiguration(ctx, cfg)
-			s.handleExchangeConfigurationError(err)
-			if !hasTtdReached {
-				hasTtdReached, err = s.logTtdStatus(ctx, ttd)
-				if err != nil {
-					log.WithError(err).Error("Could not log ttd status")
-				}
-			}
-			cancel()
-		}
-	}
-}
 
 // We check if there is a configuration mismatch error between the execution client
 // and the Prysm beacon node. If so, we need to log errors in the node as it cannot successfully

@@ -83,9 +83,6 @@ func (s *Service) ProcessLog(ctx context.Context, depositLog gwatTypes.Log) erro
 		if err := s.ProcessDepositLog(ctx, depositLog); err != nil {
 			return errors.Wrap(err, "Could not process deposit log")
 		}
-		if s.lastReceivedMerkleIndex%eth1DataSavingInterval == 0 {
-			return s.savePowchainData(ctx)
-		}
 		return nil
 	}
 	if depositLog.Topics[0] == gwatValLog.EvtExitReqLogSignature {
@@ -398,8 +395,8 @@ func (s *Service) processPastLogs(ctx context.Context) error {
 			},
 			FromBlock: big.NewInt(0).SetUint64(start),
 			ToBlock:   big.NewInt(0).SetUint64(end),
-			//handle deposit & exit only
-			Topics: [][]gwatCommon.Hash{{gwatValLog.EvtDepositLogSignature, gwatValLog.EvtExitReqLogSignature}},
+			////handle deposit & exit only
+			//Topics: [][]gwatCommon.Hash{{gwatValLog.EvtDepositLogSignature, gwatValLog.EvtExitReqLogSignature}},
 		}
 		remainingLogs := logCount - uint64(s.lastReceivedMerkleIndex+1)
 		// only change the end block if the remaining logs are below the required log limit.
@@ -488,7 +485,7 @@ func (s *Service) processPastLogs(ctx context.Context) error {
 	if fState != nil && !fState.IsNil() && fState.Eth1DepositIndex() > 0 {
 		s.cfg.depositCache.PrunePendingDeposits(ctx, int64(fState.Eth1DepositIndex())) // lint:ignore uintcast -- Deposit index should not exceed int64 in your lifetime.
 	}
-	return nil
+	return s.savePowchainData(ctx)
 }
 
 // requestBatchedHeadersAndLogs requests and processes all the headers and
@@ -516,7 +513,7 @@ func (s *Service) requestBatchedHeadersAndLogs(ctx context.Context) error {
 		s.latestEth1Data.LastRequestedBlock = i
 	}
 
-	return nil
+	return s.savePowchainData(ctx)
 }
 
 func (s *Service) retrieveBlockHashAndTime(ctx context.Context, blkNum *big.Int) ([32]byte, uint64, error) {
