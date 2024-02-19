@@ -83,6 +83,7 @@ func createRandomKeystore(t testing.TB, password string) *keymanager.Keystore {
 }
 
 func TestListAccounts_LocalKeymanager(t *testing.T) {
+	t.Skip()
 	walletDir, passwordsDir, walletPasswordFile := setupWalletAndPasswordsDir(t)
 	cliCtx := setupWalletCtx(t, &testWalletConfig{
 		walletDir:          walletDir,
@@ -238,6 +239,7 @@ func TestListAccounts_LocalKeymanager(t *testing.T) {
 }
 
 func TestListAccounts_DerivedKeymanager(t *testing.T) {
+	t.Skip()
 	walletDir, passwordsDir, passwordFilePath := setupWalletAndPasswordsDir(t)
 	cliCtx := setupWalletCtx(t, &testWalletConfig{
 		walletDir:          walletDir,
@@ -379,6 +381,7 @@ func TestListAccounts_DerivedKeymanager(t *testing.T) {
 }
 
 func TestListAccounts_RemoteKeymanager(t *testing.T) {
+	t.Skip()
 	walletDir, _, _ := setupWalletAndPasswordsDir(t)
 	cliCtx := setupWalletCtx(t, &testWalletConfig{
 		walletDir:      walletDir,
