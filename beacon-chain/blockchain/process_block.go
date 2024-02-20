@@ -380,6 +380,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 			BlockRoot:   blockRoot,
 			SignedBlock: signed,
 			Verified:    true,
+			InitialSync: false,
 		},
 	})
 

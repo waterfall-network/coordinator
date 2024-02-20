@@ -22,10 +22,10 @@ import (
 	gwat "gitlab.waterfall.network/waterfall/protocol/gwat"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	gwatTypes "gitlab.waterfall.network/waterfall/protocol/gwat/core/types"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/rpc"
 	gwatValLog "gitlab.waterfall.network/waterfall/protocol/gwat/validator/txlog"
 )
 
-const eth1DataSavingInterval = 1000
 const maxTolerableDifference = 50
 const defaultEth1HeaderReqLimit = uint64(1000)
 const depositlogRequestLimit = 10000
@@ -194,7 +194,14 @@ func (s *Service) ProcessDepositLog(ctx context.Context, depositLog gwatTypes.Lo
 	// This can happen sometimes when we receive the same log twice from the
 	// ETH1.0 network, and prevents us from updating our trie
 	// with the same log twice, causing an inconsistent state root.
-	index := int64(depositIndex) // lint:ignore uintcast -- MerkleTreeIndex should not exceed int64 in your lifetime.
+
+	var dix interface{}
+	dix = depositIndex
+	index, ok := dix.(int64)
+	if !ok {
+		log.Error("Processing deposit: depositIndex uintcast failed")
+		return errors.Wrap(err, "Processing deposit: depositIndex uintcast failed")
+	}
 	if index <= s.lastReceivedMerkleIndex {
 		return nil
 	}
@@ -346,9 +353,20 @@ func createGenesisTime(timeStamp uint64) uint64 {
 // updates the deposit trie with the data from each individual log.
 func (s *Service) processPastLogs(ctx context.Context) error {
 	currentBlockNum := s.latestEth1Data.LastRequestedBlock
+
+	log.WithFields(logrus.Fields{
+		"lastEth.LastReqBlock": s.latestEth1Data.LastRequestedBlock,
+		"lastEth.CpNr":         s.latestEth1Data.CpNr,
+		"followBlockHeight":    s.followBlockHeight(ctx),
+		"Eth1FollowDistance":   params.BeaconConfig().Eth1FollowDistance,
+	}).Info("=== LogProcessing: processPastLogs: 000")
+
 	// To store all blocks.
 	headersMap := make(map[uint64]*gwatTypes.Header)
-	logCount, err := s.GetDepositCount(ctx)
+	spineHash := gwatCommon.BytesToHash(s.latestEth1Data.CpHash)
+	logCount, err := s.GetDepositCount(ctx, &rpc.BlockNumberOrHash{
+		BlockHash: &spineHash,
+	})
 	if err != nil {
 		return err
 	}
@@ -369,7 +387,7 @@ func (s *Service) processPastLogs(ctx context.Context) error {
 				"endBlk":               endBlk,
 				"bl.Nr":                h.Nr(),
 				"bl.Slot":              h.Slot,
-			}).Info("EvtLog: processPastLogs: requestHeaders: iter")
+			}).Info("=== LogProcessing: processPastLogs: requestHeaders: iter")
 			if h != nil && h.Number != nil {
 				headersMap[h.Nr()] = h
 			}
@@ -495,6 +513,15 @@ func (s *Service) requestBatchedHeadersAndLogs(ctx context.Context) error {
 	// stabilized logs when we retrieve it from the 1.0 chain.
 
 	requestedBlock := s.followBlockHeight(ctx)
+
+	log.WithFields(logrus.Fields{
+		"lastEth.LastReqBlock": s.latestEth1Data.LastRequestedBlock,
+		"lastEth.CpNr":         s.latestEth1Data.CpNr,
+		"cond":                 requestedBlock > s.latestEth1Data.LastRequestedBlock && requestedBlock-s.latestEth1Data.LastRequestedBlock > maxTolerableDifference,
+		"cond_0":               requestedBlock > s.latestEth1Data.LastRequestedBlock,
+		"cond_1":               requestedBlock-s.latestEth1Data.LastRequestedBlock > maxTolerableDifference,
+	}).Info("=== LogProcessing: requestBatchedHeadersAndLogs: 000")
+
 	if requestedBlock > s.latestEth1Data.LastRequestedBlock &&
 		requestedBlock-s.latestEth1Data.LastRequestedBlock > maxTolerableDifference {
 		log.Infof("Falling back to historical headers and logs sync. Current difference is %d", requestedBlock-s.latestEth1Data.LastRequestedBlock)
@@ -511,6 +538,12 @@ func (s *Service) requestBatchedHeadersAndLogs(ctx context.Context) error {
 			return err
 		}
 		s.latestEth1Data.LastRequestedBlock = i
+
+		log.WithFields(logrus.Fields{
+			"i":                    i,
+			"lastEth.LastReqBlock": s.latestEth1Data.LastRequestedBlock,
+			"lastEth.CpNr":         s.latestEth1Data.CpNr,
+		}).Info("=== LogProcessing: requestBatchedHeadersAndLogs: 1111")
 	}
 
 	return s.savePowchainData(ctx)
@@ -604,4 +637,55 @@ func (s *Service) savePowchainData(ctx context.Context) error {
 		DepositContainers: s.cfg.depositCache.AllDepositContainers(ctx),
 	}
 	return s.cfg.beaconDB.SavePowchainData(ctx, eth1Data)
+}
+
+// ProcessDepositBlock processes the deposits had been received with block while sync.
+func (s *Service) ProcessDepositBlock(deposit *ethpb.Deposit, depositIndex int64) error {
+	log.WithFields(logrus.Fields{
+		"0s.depositTrie":  s.depositTrie.NumOfItems(),
+		"amount":          deposit.Data.Amount,
+		"pubkey":          fmt.Sprintf("%#x", deposit.Data.PublicKey),
+		"creatorAddr":     fmt.Sprintf("%#x", deposit.Data.CreatorAddress),
+		"withdrawalCreds": fmt.Sprintf("%#x", deposit.Data.WithdrawalCredentials),
+		"depositIndex":    depositIndex,
+		"s.lastIndex":     s.lastReceivedMerkleIndex,
+		"initTxHash":      fmt.Sprintf("%#x", deposit.Data.InitTxHash),
+	}).Info("=== LogProcessing: Block deposit processing: 000")
+
+	index := int64(depositIndex)
+	if index <= s.lastReceivedMerkleIndex {
+		return nil
+	}
+
+	if index != s.lastReceivedMerkleIndex+1 {
+		missedDepositLogsCount.Inc()
+		return errors.Errorf("block deposit processing: received incorrect merkle index: wanted %d but got %d", s.lastReceivedMerkleIndex+1, index)
+	}
+	s.lastReceivedMerkleIndex = index
+
+	depositHash, err := deposit.Data.HashTreeRoot()
+	if err != nil {
+		return errors.Wrap(err, "block deposit processing: unable to determine hashed value of deposit")
+	}
+
+	// Defensive check to validate incoming index.
+	if s.depositTrie.NumOfItems() != int(index) {
+		return errors.Errorf("block deposit processing: invalid deposit index received: wanted %d but got %d", s.depositTrie.NumOfItems(), index)
+	}
+	if err = s.depositTrie.Insert(depositHash[:], int(index)); err != nil {
+		return err
+	}
+
+	log.WithFields(logrus.Fields{
+		"0s.depositTrie":  s.depositTrie.NumOfItems(),
+		"amount":          deposit.Data.Amount,
+		"pubkey":          fmt.Sprintf("%#x", deposit.Data.PublicKey),
+		"creatorAddr":     fmt.Sprintf("%#x", deposit.Data.CreatorAddress),
+		"withdrawalCreds": fmt.Sprintf("%#x", deposit.Data.WithdrawalCredentials),
+		"depositIndex":    depositIndex,
+		"s.lastIndex":     s.lastReceivedMerkleIndex,
+		"initTxHash":      fmt.Sprintf("%#x", deposit.Data.InitTxHash),
+	}).Info("=== LogProcessing: Block deposit processing: 111")
+
+	return nil
 }

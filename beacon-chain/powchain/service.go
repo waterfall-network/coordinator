@@ -21,6 +21,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache/depositcache"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed"
 	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/voluntaryexits"
@@ -36,6 +37,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/clientstats"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/network"
+	ethpbv1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	prysmTime "gitlab.waterfall.network/waterfall/protocol/coordinator/time"
 	ethereum "gitlab.waterfall.network/waterfall/protocol/gwat"
@@ -168,6 +170,8 @@ type Service struct {
 	lastReceivedMerkleIndex int64 // Keeps track of the last received index to prevent log spam.
 	runError                error
 	preGenesisState         state.BeaconState
+	lastBeaconRoot          [32]byte          // last handled beacon block root
+	lastBeaconState         state.BeaconState // last handled beacon state
 }
 
 // NewService sets up a new instance with an ethclient when given a web3 endpoint as a string in the config.
@@ -227,7 +231,164 @@ func NewService(ctx context.Context, opts ...Option) (*Service, error) {
 	if err := s.initializeEth1Data(ctx, eth1Data); err != nil {
 		return nil, err
 	}
+
+	go s.StateTracker()
+
 	return s, nil
+}
+
+// Start a web3 service's main event loop.
+func (s *Service) StateTracker() {
+	blockNotifications := make(chan *feed.Event, 0)
+	sub := s.cfg.stateNotifier.StateFeed().Subscribe(blockNotifications)
+
+	defer sub.Unsubscribe()
+	for {
+		select {
+		case <-s.ctx.Done():
+			log.Info("Context closed, exiting goroutine")
+			return
+		//case err := <-sub.Err():
+		//	log.WithError(err).Warn("Exit by error")
+		//	return
+		case ev := <-blockNotifications:
+			//work while syncing only, check condition
+			if ev.Type == statefeed.BlockProcessed {
+				data, ok := ev.Data.(*statefeed.BlockProcessedData)
+				if !ok {
+					continue
+				}
+				if !data.InitialSync {
+					continue
+				}
+
+				s.lastBeaconRoot = data.BlockRoot
+
+				depLen := len(data.SignedBlock.Block().Body().Deposits())
+				if depLen == 0 {
+					continue
+				}
+				log.WithFields(logrus.Fields{
+					"_type":        ev.Type,
+					"ad.Slot":      data.Slot,
+					"bd.Deposites": len(data.SignedBlock.Block().Body().Deposits()),
+					"cd.Block":     fmt.Sprintf("%#x", data.BlockRoot),
+				}).Info("=== LogProcessing: StateTracker: EVT: BlockProcessed")
+
+				st, err := s.cfg.stateGen.StateByRoot(s.ctx, data.BlockRoot)
+				if err != nil {
+					log.WithField("evtType", "BlockProcessed").Fatal("Event handler: retrieve state failed")
+				}
+				var dix interface{}
+				dix = st.Eth1DepositIndex() - uint64(depLen-1)
+				depositIndex, ok := dix.(int64)
+				if !ok {
+					log.WithField("evtType", "BlockProcessed").Fatal("Event handler: depositIndex uintcast failed")
+				}
+				for i, deposit := range data.SignedBlock.Block().Body().Deposits() {
+					depositIndex += int64(i)
+					err = s.ProcessDepositBlock(deposit, depositIndex)
+					if err != nil {
+						log.WithField("evtType", "BlockProcessed").Fatal("Event handler: depositIndex uintcast failed")
+					}
+				}
+
+				baseSpine := helpers.GetBaseSpine(st)
+				log.WithFields(logrus.Fields{
+					"_baseSpine":   fmt.Sprintf("%#x", baseSpine),
+					"ad.Slot":      data.Slot,
+					"bd.Deposites": len(data.SignedBlock.Block().Body().Deposits()),
+					"cd.Block":     fmt.Sprintf("%#x", data.BlockRoot),
+				}).Info("=== LogProcessing: StateTracker: EVT: BlockProcessed: baseSpine")
+			}
+
+			// first event when last finalized checkpoint reached
+			if ev.Type == statefeed.FinalizedCheckpoint {
+				data, ok := ev.Data.(*ethpbv1.EventFinalizedCheckpoint)
+				if !ok {
+					continue
+				}
+				if s.lastBeaconState == nil {
+					//check gwat connection is established
+					if s.eth1DataFetcher == nil {
+						log.WithField("evtType", "FinalizedCheckpoint").Error("=== LogProcessing: Event handler: no gwat connection")
+						continue
+					}
+
+					//todo if no gwat connection, we can iterate over block to apdate powchain service state
+
+					prevSt, err := s.cfg.stateGen.StateByRoot(s.ctx, s.lastBeaconRoot)
+					if err != nil {
+						s.pollConnectionStatus(s.ctx)
+						log.WithField("evtType", "FinalizedCheckpoint").Error("Event handler: retrieve state failed")
+						continue
+					}
+
+					baseSpine := helpers.GetBaseSpine(prevSt)
+					prevHeader, err := s.eth1DataFetcher.HeaderByHash(s.ctx, baseSpine)
+					if err != nil {
+						s.pollConnectionStatus(s.ctx)
+						log.WithError(err).Error("Could not fetch latest shard1 header")
+						continue
+					}
+					s.lastBeaconState = prevSt
+					blockNumberGauge.Set(float64(prevHeader.Nr()))
+					s.latestEth1Data.BlockHeight = prevHeader.Nr()
+					s.latestEth1Data.BlockHash = baseSpine.Bytes()
+					s.latestEth1Data.BlockTime = prevHeader.Time
+					s.latestEth1Data.CpHash = baseSpine.Bytes()
+					s.latestEth1Data.CpNr = prevHeader.Nr()
+					s.latestEth1Data.LastRequestedBlock = s.followBlockHeight(s.ctx)
+				}
+
+				st, err := s.cfg.stateGen.StateByRoot(s.ctx, bytesutil.ToBytes32(data.Block))
+				if err != nil {
+					log.WithField("evtType", "FinalizedCheckpoint").Error("=== LogProcessing: Event handler: retrieve state failed")
+					continue
+				}
+
+				baseSpine := helpers.GetBaseSpine(st)
+				log.WithFields(logrus.Fields{
+					"_baseSpine":                  fmt.Sprintf("%#x", baseSpine),
+					"lState.DepositIndex":         fmt.Sprintf("%d", s.lastBeaconState.Eth1DepositIndex()),
+					"lastReceivedMerkleIndex":     fmt.Sprintf("%d", s.lastReceivedMerkleIndex),
+					"ad.Epoch":                    data.Epoch,
+					"bd.Block":                    fmt.Sprintf("%#x", data.Block),
+					"cd.State":                    fmt.Sprintf("%#x", data.State),
+					"st.Slot":                     st.Slot(),
+					"st.FinalizedCheckpointEpoch": st.FinalizedCheckpointEpoch(),
+					"d.isOptimistic":              data.ExecutionOptimistic,
+				}).Info("=== LogProcessing: StateTracker: EVT: FinalizedCheckpoint")
+
+				header, err := s.eth1DataFetcher.HeaderByHash(s.ctx, baseSpine)
+				if err != nil {
+					s.pollConnectionStatus(s.ctx)
+					log.WithError(err).Error("Could not fetch latest shard1 header")
+					continue
+				}
+				s.processBlockHeader(header)
+				s.handleETH1FollowDistance()
+				s.checkDefaultEndpoint(s.ctx)
+
+				s.lastBeaconRoot = bytesutil.ToBytes32(data.Block)
+				s.lastBeaconState = st
+			}
+
+			//if ev.Type == statefeed.NewHead {
+			//	data, ok := ev.Data.(*ethpbv1.EventHead)
+			//	if !ok {
+			//		continue
+			//	}
+			//	log.WithFields(logrus.Fields{
+			//		"_type":          ev.Type,
+			//		"ad.Slot":        data.Slot,
+			//		"bd.Block":       fmt.Sprintf("%#x", data.Block),
+			//		"cd.State":       fmt.Sprintf("%#x", data.State),
+			//		"d.isOptimistic": data.ExecutionOptimistic,
+			//	}).Info("=== LogProcessing: StateTracker: EVT: NewHead")
+			//}
+		}
+	}
 }
 
 // Start a web3 service's main event loop.
@@ -254,10 +415,7 @@ func (s *Service) Start() {
 	// Poll the execution client connection and fallback if errors occur.
 	s.pollConnectionStatus(s.ctx)
 
-	//////todo
-	//go s.StateTracker()
-
-	go s.run(s.ctx.Done())
+	//go s.run(s.ctx.Done())
 }
 
 // Stop the web3 service's main event loop and associated goroutines.
@@ -610,7 +768,8 @@ func (s *Service) initPOWService() {
 			//}
 
 			log.WithFields(logrus.Fields{
-				"EthLFinNr": header.Nr(),
+				"EthLFinNr":                              header.Nr(),
+				"s.preGenesisState.Eth1Data().BlockHash": fmt.Sprintf("%#x", s.preGenesisState.Eth1Data().BlockHash),
 				//"EthLFinHash":          fmt.Sprintf("%#x", header.Hash()),
 				"lastEth.LastReqBlock":    s.latestEth1Data.LastRequestedBlock,
 				"lastEth.CpNr":            s.latestEth1Data.CpNr,
@@ -618,7 +777,7 @@ func (s *Service) initPOWService() {
 				"lastEth.BlockHeight":     s.latestEth1Data.BlockHeight,
 				"depositTrie.NumOfItems":  s.depositTrie.NumOfItems(),
 				"lastReceivedMerkleIndex": s.lastReceivedMerkleIndex,
-			}).Info("=== EvtLog: initPOWService: 00000")
+			}).Info("=== LogProcessing: initPOWService: 00000")
 
 			if err := s.processPastLogs(ctx); err != nil {
 				s.retryExecutionClientConnection(ctx, err)
@@ -670,7 +829,14 @@ func (s *Service) run(done <-chan struct{}) {
 			if head.CpHash == (gwatCommon.Hash{}) {
 				//if genesis
 				if head.Height == 0 {
-					head.CpHash = head.Hash()
+					gst, err := s.cfg.beaconDB.GenesisState(s.ctx)
+					if err != nil {
+						log.Fatal(err)
+					}
+					if gst == nil || gst.IsNil() {
+						log.Fatal("cannot create genesis state: no shard1 http endpoint defined 0")
+					}
+					head.CpHash = gwatCommon.BytesToHash(gst.Eth1Data().BlockHash)
 				} else {
 					log.Error("Could not fetch latest shard1 header: bad header")
 					continue

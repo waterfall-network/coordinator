@@ -127,6 +127,7 @@ func (s *Service) ReceiveBlockBatch(ctx context.Context, blocks []block.SignedBe
 				BlockRoot:   blkRoots[i],
 				SignedBlock: blockCopy,
 				Verified:    true,
+				InitialSync: true,
 			},
 		})
 
