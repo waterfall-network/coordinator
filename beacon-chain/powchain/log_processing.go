@@ -195,13 +195,8 @@ func (s *Service) ProcessDepositLog(ctx context.Context, depositLog gwatTypes.Lo
 	// ETH1.0 network, and prevents us from updating our trie
 	// with the same log twice, causing an inconsistent state root.
 
-	var dix interface{}
-	dix = depositIndex
-	index, ok := dix.(int64)
-	if !ok {
-		log.Error("Processing deposit: depositIndex uintcast failed")
-		return errors.Wrap(err, "Processing deposit: depositIndex uintcast failed")
-	}
+	bn := new(big.Int).SetUint64(depositIndex)
+	index := bn.Int64()
 	if index <= s.lastReceivedMerkleIndex {
 		return nil
 	}

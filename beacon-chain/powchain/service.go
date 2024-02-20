@@ -279,12 +279,8 @@ func (s *Service) StateTracker() {
 				if err != nil {
 					log.WithField("evtType", "BlockProcessed").Fatal("Event handler: retrieve state failed")
 				}
-				var dix interface{}
-				dix = st.Eth1DepositIndex() - uint64(depLen-1)
-				depositIndex, ok := dix.(int64)
-				if !ok {
-					log.WithField("evtType", "BlockProcessed").Fatal("Event handler: depositIndex uintcast failed")
-				}
+				bn := new(big.Int).SetUint64(st.Eth1DepositIndex() - uint64(depLen-1))
+				depositIndex := bn.Int64()
 				for i, deposit := range data.SignedBlock.Block().Body().Deposits() {
 					depositIndex += int64(i)
 					err = s.ProcessDepositBlock(deposit, depositIndex)
