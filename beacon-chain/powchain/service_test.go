@@ -325,7 +325,7 @@ func TestHandlePanic_OK(t *testing.T) {
 	require.NoError(t, err, "unable to setup web3 shard1 chain service")
 	// nil eth1DataFetcher would panic if cached value not used
 	web3Service.eth1DataFetcher = nil
-	web3Service.processBlockHeader(nil)
+	web3Service.processBlockHeader(nil, nil)
 	require.LogsContain(t, hook, "Panicked when handling data from shard1 Chain!")
 }
 

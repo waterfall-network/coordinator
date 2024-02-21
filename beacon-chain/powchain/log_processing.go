@@ -348,23 +348,46 @@ func createGenesisTime(timeStamp uint64) uint64 {
 func (s *Service) processPastLogs(ctx context.Context) error {
 	currentBlockNum := s.latestEth1Data.LastRequestedBlock
 
+	var gdcParam *rpc.BlockNumberOrHash = nil
+	if params.BeaconConfig().IsDelegatingStakeSlot(s.lastHandledSlot) {
+		spineNr := rpc.BlockNumber(new(big.Int).SetUint64(s.latestEth1Data.BlockHeight).Int64())
+		gdcParam = &rpc.BlockNumberOrHash{
+			BlockNumber: &spineNr,
+		}
+		//spineHash := gwatCommon.BytesToHash(s.latestEth1Data.BlockHash)
+		//gdcParam = &rpc.BlockNumberOrHash{
+		//	BlockHash:        &spineHash,
+		//}
+	}
+	logCount, err := s.GetDepositCount(ctx, gdcParam)
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"gdcParam":             fmt.Sprintf("%v", gdcParam),
+			"isDldFork":            params.BeaconConfig().IsDelegatingStakeSlot(s.lastHandledState.Slot()),
+			"lastEth.BlockHash":    fmt.Sprintf("%#x", s.latestEth1Data.BlockHash),
+			"lastEth.BlockHeight":  s.latestEth1Data.BlockHeight,
+			"lastEth.LastReqBlock": s.latestEth1Data.LastRequestedBlock,
+			"lastEth.CpNr":         s.latestEth1Data.CpNr,
+			"followBlockHeight":    s.followBlockHeight(ctx),
+			"Eth1FollowDistance":   params.BeaconConfig().Eth1FollowDistance,
+		}).Warn("=== LogProcessing: processPastLogs: get deposit count failed")
+		return err
+	}
+
 	log.WithFields(logrus.Fields{
+		"gdcParam":             fmt.Sprintf("%v", gdcParam),
+		"logCount":             logCount,
+		"handleSlot":           s.lastHandledState.Slot(),
+		"isDldFork":            params.BeaconConfig().IsDelegatingStakeSlot(s.lastHandledState.Slot()),
+		"lastEth.CpHash":       fmt.Sprintf("%#x", s.latestEth1Data.CpHash),
 		"lastEth.LastReqBlock": s.latestEth1Data.LastRequestedBlock,
 		"lastEth.CpNr":         s.latestEth1Data.CpNr,
 		"followBlockHeight":    s.followBlockHeight(ctx),
 		"Eth1FollowDistance":   params.BeaconConfig().Eth1FollowDistance,
-	}).Info("=== LogProcessing: processPastLogs: 000")
+	}).Info("=== LogProcessing: processPastLogs")
 
 	// To store all blocks.
 	headersMap := make(map[uint64]*gwatTypes.Header)
-	spineHash := gwatCommon.BytesToHash(s.latestEth1Data.CpHash)
-	logCount, err := s.GetDepositCount(ctx, &rpc.BlockNumberOrHash{
-		BlockHash: &spineHash,
-	})
-	if err != nil {
-		return err
-	}
-
 	// Batch request the desired headers and store them in a
 	// map for quick access.
 	requestHeaders := func(startBlk, endBlk uint64) error {
