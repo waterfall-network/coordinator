@@ -32,10 +32,27 @@ lint:
   tags:
     - docker
   rules:
-    - if: $CI_COMMIT_REF_NAME != "main" && $CI_COMMIT_TAG == null
+    - if: $CI_COMMIT_TAG == null
       when: on_success
   script: 
     - golangci-lint run -v --out-format=github-actions --config=.golangci.yml --out-format colored-line-number
+
+test:
+  stage: test
+  tags:
+    - docker
+  rules:
+    - if: $CI_COMMIT_TAG == null
+      when: on_success
+  script: 
+    - apt-get update -y
+    - apt-get install cmake git libssl-dev libgmp-dev libtinfo5 libprotoc-dev wget -y
+    - npm install -g @bazel/bazelisk
+    - echo "machine $CI_SERVER_HOST login gitlab-ci-token password $CI_JOB_TOKEN" >> ~/.netrc
+    - export GOPRIVATE=${CI_SERVER_HOST}
+    - echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
+    - bazel version
+    - bazel test //...
 
 
 build branch:
