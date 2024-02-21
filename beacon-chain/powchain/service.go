@@ -317,10 +317,15 @@ func (s *Service) StateTracker() {
 					//check gwat connection is established
 					if s.eth1DataFetcher == nil {
 						log.WithField("evtType", "FinalizedCheckpoint").Error("=== LogProcessing: Event handler: no gwat connection")
+
+						handledCount, err := s.handleFinalizedDeposits(bytesutil.ToBytes32(data.Block))
+						log.WithError(err).WithFields(logrus.Fields{
+							"cpBlock":      fmt.Sprintf("%#x", data.Block),
+							"handledCount": handledCount,
+						}).Info("=== LogProcessing: StateTracker: EVT: FinalizedCheckpoint: handle finalized deposits 000")
+
 						continue
 					}
-
-					//todo if no gwat connection, we can iterate over block to apdate powchain service state
 
 					prevSt, err := s.cfg.stateGen.StateByRoot(s.ctx, s.lastHandledBlock)
 					if err != nil {
@@ -332,8 +337,15 @@ func (s *Service) StateTracker() {
 					baseSpine := helpers.GetBaseSpine(prevSt)
 					prevHeader, err := s.eth1DataFetcher.HeaderByHash(s.ctx, baseSpine)
 					if err != nil {
-						s.pollConnectionStatus(s.ctx)
 						log.WithError(err).Error("Could not fetch latest shard1 header")
+
+						handledCount, err := s.handleFinalizedDeposits(bytesutil.ToBytes32(data.Block))
+						log.WithError(err).WithFields(logrus.Fields{
+							"cpBlock":      fmt.Sprintf("%#x", data.Block),
+							"handledCount": handledCount,
+						}).Info("=== LogProcessing: StateTracker: EVT: FinalizedCheckpoint: handle finalized deposits 111")
+
+						s.pollConnectionStatus(s.ctx)
 						continue
 					}
 					s.lastHandledState = prevSt
@@ -367,8 +379,18 @@ func (s *Service) StateTracker() {
 
 				header, err := s.eth1DataFetcher.HeaderByHash(s.ctx, baseSpine)
 				if err != nil {
+					log.WithError(err).WithFields(logrus.Fields{
+						"baseSpine": fmt.Sprintf("%#x", baseSpine),
+						"st.Slot":   st.Slot(),
+					}).Error("=== LogProcessing: StateTracker: EVT: FinalizedCheckpoint: Could not fetch latest shard1 header")
+
+					handledCount, err := s.handleFinalizedDeposits(bytesutil.ToBytes32(data.Block))
+					log.WithError(err).WithFields(logrus.Fields{
+						"cpBlock":      fmt.Sprintf("%#x", data.Block),
+						"handledCount": handledCount,
+					}).Info("=== LogProcessing: StateTracker: EVT: FinalizedCheckpoint: handle finalized deposits 222")
+
 					s.pollConnectionStatus(s.ctx)
-					log.WithError(err).Error("Could not fetch latest shard1 header")
 					continue
 				}
 				s.processBlockHeader(header, &baseSpine)

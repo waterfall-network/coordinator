@@ -706,3 +706,58 @@ func (s *Service) ProcessDepositBlock(deposit *ethpb.Deposit, depositIndex uint6
 
 	return nil
 }
+
+// ProcessDepositBlock processes the deposits had been received with block while sync.
+func (s *Service) handleFinalizedDeposits(cpRoot [32]byte) (int, error) {
+	headSt, err := s.cfg.stateGen.StateByRoot(s.ctx, cpRoot)
+	if err != nil {
+		log.WithError(err).WithField(
+			"cpRoot", fmt.Sprintf("%#x", cpRoot),
+		).Error("=== LogProcessing: handleFinalizedDeposits: retrieve state failed")
+		return 0, err
+	}
+	var (
+		lastDepositIndex = uint64(s.lastReceivedMerkleIndex + 1)
+		cpDepositIndex   = headSt.Eth1DepositIndex()
+		currIndex        = cpDepositIndex
+		currBlockHash    = cpRoot
+	)
+	if lastDepositIndex >= cpDepositIndex {
+		return 0, nil
+	}
+
+	deposits := make(map[uint64]*ethpb.Deposit, headSt.Eth1DepositIndex()-lastDepositIndex)
+	for {
+		bBlock, err := s.cfg.beaconDB.Block(s.ctx, currBlockHash)
+		if err != nil {
+			return 0, err
+		}
+		if bBlock == nil {
+			return 0, fmt.Errorf("beacon block not found")
+		}
+		deps := bBlock.Block().Body().Deposits()
+		for i := len(deps) - 1; i >= 0; i-- {
+			deposits[currIndex] = deps[i]
+			currIndex--
+		}
+		if lastDepositIndex >= currIndex {
+			break
+		}
+		currBlockHash = bytesutil.ToBytes32(bBlock.Block().ParentRoot())
+	}
+
+	count := 0
+	for dix := lastDepositIndex + 1; deposits[dix] != nil; dix++ {
+		err = s.ProcessDepositBlock(deposits[dix], dix)
+		if err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"depIndex": dix,
+				"deposit":  fmt.Sprintf("%v", deposits[dix]),
+				"cpRoot":   fmt.Sprintf("%#x", cpRoot),
+			}).Error("=== LogProcessing: handleFinalizedDeposits: process deposit block failed")
+			return count, err
+		}
+		count++
+	}
+	return count, nil
+}
