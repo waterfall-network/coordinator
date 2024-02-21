@@ -195,8 +195,7 @@ func (s *Service) ProcessDepositLog(ctx context.Context, depositLog gwatTypes.Lo
 	// ETH1.0 network, and prevents us from updating our trie
 	// with the same log twice, causing an inconsistent state root.
 
-	bn := new(big.Int).SetUint64(depositIndex)
-	index := bn.Int64()
+	index := new(big.Int).SetUint64(depositIndex).Int64()
 	if index <= s.lastReceivedMerkleIndex {
 		return nil
 	}
@@ -635,7 +634,7 @@ func (s *Service) savePowchainData(ctx context.Context) error {
 }
 
 // ProcessDepositBlock processes the deposits had been received with block while sync.
-func (s *Service) ProcessDepositBlock(deposit *ethpb.Deposit, depositIndex int64) error {
+func (s *Service) ProcessDepositBlock(deposit *ethpb.Deposit, depositIndex uint64) error {
 	log.WithFields(logrus.Fields{
 		"0s.depositTrie":  s.depositTrie.NumOfItems(),
 		"amount":          deposit.Data.Amount,
@@ -647,7 +646,7 @@ func (s *Service) ProcessDepositBlock(deposit *ethpb.Deposit, depositIndex int64
 		"initTxHash":      fmt.Sprintf("%#x", deposit.Data.InitTxHash),
 	}).Info("=== LogProcessing: Block deposit processing: 000")
 
-	index := int64(depositIndex)
+	index := new(big.Int).SetUint64(depositIndex).Int64()
 	if index <= s.lastReceivedMerkleIndex {
 		return nil
 	}

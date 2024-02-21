@@ -268,24 +268,24 @@ func (s *Service) StateTracker() {
 				if depLen == 0 {
 					continue
 				}
-				log.WithFields(logrus.Fields{
-					"_type":        ev.Type,
-					"ad.Slot":      data.Slot,
-					"bd.Deposites": len(data.SignedBlock.Block().Body().Deposits()),
-					"cd.Block":     fmt.Sprintf("%#x", data.BlockRoot),
-				}).Info("=== LogProcessing: StateTracker: EVT: BlockProcessed")
-
 				st, err := s.cfg.stateGen.StateByRoot(s.ctx, data.BlockRoot)
 				if err != nil {
 					log.WithField("evtType", "BlockProcessed").Fatal("Event handler: retrieve state failed")
 				}
-				bn := new(big.Int).SetUint64(st.Eth1DepositIndex() - uint64(depLen-1))
-				depositIndex := bn.Int64()
+
+				log.WithFields(logrus.Fields{
+					"evtType":             ev.Type,
+					"ad.Slot":             data.Slot,
+					"bd.Deposites":        len(data.SignedBlock.Block().Body().Deposits()),
+					"st.Eth1DepositIndex": st.Eth1DepositIndex(),
+					"cd.Block":            fmt.Sprintf("%#x", data.BlockRoot),
+				}).Info("=== LogProcessing: StateTracker: EVT: BlockProcessed")
+
+				baseDepIndex := st.Eth1DepositIndex() - uint64(depLen)
 				for i, deposit := range data.SignedBlock.Block().Body().Deposits() {
-					depositIndex += int64(i)
-					err = s.ProcessDepositBlock(deposit, depositIndex)
+					err = s.ProcessDepositBlock(deposit, baseDepIndex+uint64(i))
 					if err != nil {
-						log.WithField("evtType", "BlockProcessed").Fatal("Event handler: depositIndex uintcast failed")
+						log.WithError(err).WithField("evtType", "BlockProcessed").Fatal("Event handler: depositIndex uintcast failed")
 					}
 				}
 
