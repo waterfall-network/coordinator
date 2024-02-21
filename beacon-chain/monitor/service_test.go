@@ -21,6 +21,87 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 )
 
+func setupService(t *testing.T) *Service {
+	beaconDB := testDB.SetupDB(t)
+	state, _ := util.DeterministicGenesisStateAltair(t, 256)
+
+	pubKeys := make([][]byte, 3)
+	pubKeys[0] = state.Validators()[0].PublicKey
+	pubKeys[1] = state.Validators()[1].PublicKey
+	pubKeys[2] = state.Validators()[2].PublicKey
+
+	currentSyncCommittee := util.ConvertToCommittee([][]byte{
+		pubKeys[0], pubKeys[1], pubKeys[2], pubKeys[1], pubKeys[1],
+	})
+	require.NoError(t, state.SetCurrentSyncCommittee(currentSyncCommittee))
+
+	chainService := &mock.ChainService{
+		Genesis:        time.Now(),
+		DB:             beaconDB,
+		State:          state,
+		Root:           []byte("hello-world"),
+		ValidatorsRoot: [32]byte{},
+	}
+
+	trackedVals := map[types.ValidatorIndex]bool{
+		1:  true,
+		2:  true,
+		7:  true,
+		12: true,
+	}
+	latestPerformance := map[types.ValidatorIndex]ValidatorLatestPerformance{
+		1: {
+			balance: 32000000000,
+		},
+		2: {
+			balance: 32000000000,
+		},
+		7: {
+			balance: 31900000000,
+		},
+		12: {
+			balance: 31900000000,
+		},
+	}
+	aggregatedPerformance := map[types.ValidatorIndex]ValidatorAggregatedPerformance{
+		1: {
+			startEpoch:                     0,
+			startBalance:                   31700000000,
+			totalAttestedCount:             12,
+			totalRequestedCount:            15,
+			totalDistance:                  14,
+			totalCorrectHead:               8,
+			totalCorrectSource:             11,
+			totalCorrectTarget:             12,
+			totalProposedCount:             1,
+			totalSyncComitteeContributions: 0,
+			totalSyncComitteeAggregations:  0,
+		},
+		2:  {},
+		7:  {},
+		12: {},
+	}
+	trackedSyncCommitteeIndices := map[types.ValidatorIndex][]types.CommitteeIndex{
+		1:  {0, 1, 2, 3},
+		12: {4, 5},
+	}
+	return &Service{
+		config: &ValidatorMonitorConfig{
+			StateGen:            stategen.New(beaconDB),
+			StateNotifier:       chainService.StateNotifier(),
+			HeadFetcher:         chainService,
+			AttestationNotifier: chainService.OperationNotifier(),
+		},
+
+		ctx:                         context.Background(),
+		TrackedValidators:           trackedVals,
+		latestPerformance:           latestPerformance,
+		aggregatedPerformance:       aggregatedPerformance,
+		trackedSyncCommitteeIndices: trackedSyncCommitteeIndices,
+		lastSyncedEpoch:             0,
+	}
+}
+
 func TestTrackedIndex(t *testing.T) {
 	s := &Service{
 		TrackedValidators: map[types.ValidatorIndex]bool{
@@ -215,85 +296,4 @@ func TestRun(t *testing.T) {
 	//wait for Logrus
 	time.Sleep(1000 * time.Millisecond)
 	require.LogsContain(t, hook, "Synced to head epoch, starting reporting performance")
-}
-
-func setupService(t *testing.T) *Service {
-	beaconDB := testDB.SetupDB(t)
-	state, _ := util.DeterministicGenesisStateAltair(t, 256)
-
-	pubKeys := make([][]byte, 3)
-	pubKeys[0] = state.Validators()[0].PublicKey
-	pubKeys[1] = state.Validators()[1].PublicKey
-	pubKeys[2] = state.Validators()[2].PublicKey
-
-	currentSyncCommittee := util.ConvertToCommittee([][]byte{
-		pubKeys[0], pubKeys[1], pubKeys[2], pubKeys[1], pubKeys[1],
-	})
-	require.NoError(t, state.SetCurrentSyncCommittee(currentSyncCommittee))
-
-	chainService := &mock.ChainService{
-		Genesis:        time.Now(),
-		DB:             beaconDB,
-		State:          state,
-		Root:           []byte("hello-world"),
-		ValidatorsRoot: [32]byte{},
-	}
-
-	trackedVals := map[types.ValidatorIndex]bool{
-		1:  true,
-		2:  true,
-		7:  true,
-		12: true,
-	}
-	latestPerformance := map[types.ValidatorIndex]ValidatorLatestPerformance{
-		1: {
-			balance: 32000000000,
-		},
-		2: {
-			balance: 32000000000,
-		},
-		7: {
-			balance: 31900000000,
-		},
-		12: {
-			balance: 31900000000,
-		},
-	}
-	aggregatedPerformance := map[types.ValidatorIndex]ValidatorAggregatedPerformance{
-		1: {
-			startEpoch:                     0,
-			startBalance:                   31700000000,
-			totalAttestedCount:             12,
-			totalRequestedCount:            15,
-			totalDistance:                  14,
-			totalCorrectHead:               8,
-			totalCorrectSource:             11,
-			totalCorrectTarget:             12,
-			totalProposedCount:             1,
-			totalSyncComitteeContributions: 0,
-			totalSyncComitteeAggregations:  0,
-		},
-		2:  {},
-		7:  {},
-		12: {},
-	}
-	trackedSyncCommitteeIndices := map[types.ValidatorIndex][]types.CommitteeIndex{
-		1:  {0, 1, 2, 3},
-		12: {4, 5},
-	}
-	return &Service{
-		config: &ValidatorMonitorConfig{
-			StateGen:            stategen.New(beaconDB),
-			StateNotifier:       chainService.StateNotifier(),
-			HeadFetcher:         chainService,
-			AttestationNotifier: chainService.OperationNotifier(),
-		},
-
-		ctx:                         context.Background(),
-		TrackedValidators:           trackedVals,
-		latestPerformance:           latestPerformance,
-		aggregatedPerformance:       aggregatedPerformance,
-		trackedSyncCommitteeIndices: trackedSyncCommitteeIndices,
-		lastSyncedEpoch:             0,
-	}
 }

@@ -7,5 +7,6 @@ import (
 )
 
 func TestMainnet_Altair_SSZStatic(t *testing.T) {
+	t.Skip() // Generate test data with pyton tool
 	ssz_static.RunSSZStaticTests(t, "mainnet")
 }

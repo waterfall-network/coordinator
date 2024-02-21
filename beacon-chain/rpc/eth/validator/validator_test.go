@@ -3,7 +3,6 @@ package validator
 import (
 	"context"
 	"fmt"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/forkchoice/protoarray"
 	"strconv"
 	"testing"
 	"time"
@@ -18,6 +17,7 @@ import (
 	coreTime "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/time"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition"
 	dbutil "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/testing"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/forkchoice/protoarray"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/attestations"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/attestations/mock"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/slashings"

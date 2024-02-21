@@ -7,5 +7,6 @@ import (
 )
 
 func TestMainnet_Altair_Operations_Deposit(t *testing.T) {
+	t.Skip() // Generate test data with pyton tool
 	operations.RunDepositTest(t, "mainnet")
 }

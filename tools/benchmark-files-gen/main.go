@@ -77,6 +77,9 @@ func generateGenesisBeaconState() error {
 	if err != nil {
 		return err
 	}
+
+	genesisState.Slot = 32
+
 	beaconBytes, err := genesisState.MarshalSSZ()
 	if err != nil {
 		return err

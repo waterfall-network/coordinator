@@ -2,6 +2,8 @@ package kv
 
 import (
 	"context"
+	"github.com/bazelbuild/rules_go/go/tools/bazel"
+	"os"
 	"testing"
 
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/iface"
@@ -42,6 +44,40 @@ func testGenesisDataSaved(t *testing.T, db iface.Database) {
 	headHTR, err := head.Block().HashTreeRoot()
 	assert.NoError(t, err)
 	assert.Equal(t, gbHTR, headHTR, "head block does not match genesis block")
+}
+
+func TestLoadGenesisFromFile(t *testing.T) {
+	t.Skip() // Need genesis load improvements
+	fp := "testdata/mainnet.genesis.ssz"
+	rfp, err := bazel.Runfile(fp)
+	if err == nil {
+		fp = rfp
+	}
+	sb, err := os.ReadFile(fp)
+	assert.NoError(t, err)
+
+	db := setupDB(t)
+	assert.NoError(t, db.LoadGenesis(context.Background(), sb))
+	testGenesisDataSaved(t, db)
+
+	// Loading the same genesis again should not throw an error
+	assert.NoError(t, err)
+	assert.NoError(t, db.LoadGenesis(context.Background(), sb))
+}
+
+func TestLoadGenesisFromFile_mismatchedForkVersion(t *testing.T) {
+	t.Skip() // Need genesis load improvements
+	fp := "testdata/altona.genesis.ssz"
+	rfp, err := bazel.Runfile(fp)
+	if err == nil {
+		fp = rfp
+	}
+	sb, err := os.ReadFile(fp)
+	assert.NoError(t, err)
+
+	// Loading a genesis with the wrong fork version as beacon config should throw an error.
+	db := setupDB(t)
+	assert.ErrorContains(t, "does not match config genesis fork version", db.LoadGenesis(context.Background(), sb))
 }
 
 func TestEnsureEmbeddedGenesis(t *testing.T) {

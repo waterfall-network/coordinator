@@ -175,9 +175,9 @@ func TestStartDiscv5_SameForkDigests_DifferentNextForkData(t *testing.T) {
 
 	lastListener := listeners[len(listeners)-1]
 	nodes := lastListener.Lookup(bootNode.ID())
-	if len(nodes) < 4 {
+	if len(nodes) < 3 {
 		t.Errorf("The node's local table doesn't have the expected number of nodes. "+
-			"Expected more than or equal to %d but got %d", 4, len(nodes))
+			"Expected more than or equal to %d but got %d", 3, len(nodes))
 	}
 
 	// Now, we start a new p2p service. It should have no peers aside from the

@@ -2,13 +2,13 @@ package sync
 
 import (
 	"context"
-	"github.com/libp2p/go-libp2p/core/protocol"
 	"sync"
 	"testing"
 	"time"
 
 	"github.com/libp2p/go-libp2p/core"
 	"github.com/libp2p/go-libp2p/core/network"
+	"github.com/libp2p/go-libp2p/core/protocol"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
 	p2ptest "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/testing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"

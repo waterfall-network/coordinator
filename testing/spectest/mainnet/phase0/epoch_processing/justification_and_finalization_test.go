@@ -7,5 +7,6 @@ import (
 )
 
 func TestMainnet_Phase0_EpochProcessing_JustificationAndFinalization(t *testing.T) {
+	t.Skip() // Generate test data with pyton tool
 	epoch_processing.RunJustificationAndFinalizationTests(t, "mainnet")
 }

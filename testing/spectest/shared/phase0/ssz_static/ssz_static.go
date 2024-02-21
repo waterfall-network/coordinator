@@ -86,6 +86,16 @@ func unmarshalledSSZ(t *testing.T, serializedBytes []byte, objectName string) (i
 		obj = &ethpb.Validator{}
 	case "VoluntaryExit":
 		obj = &ethpb.VoluntaryExit{}
+	case "SpinesSeq":
+		obj = &ethpb.SpinesSeq{}
+	case "SpineData":
+		obj = &ethpb.SpineData{}
+	case "Withdrawal":
+		obj = &ethpb.Withdrawal{}
+	case "WithdrawalOp":
+		obj = &ethpb.WithdrawalOp{}
+	case "BlockVoting":
+		obj = &ethpb.BlockVoting{}
 	default:
 		return nil, errors.New("type not found")
 	}

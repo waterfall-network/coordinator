@@ -2,19 +2,19 @@ package stategen
 
 import (
 	"context"
-	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
-	"google.golang.org/protobuf/proto"
 	"testing"
 
 	types "github.com/prysmaticlabs/eth2-types"
 	logTest "github.com/sirupsen/logrus/hooks/test"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
 	testDB "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/testing"
+	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
+	"google.golang.org/protobuf/proto"
 )
 
 func TestMigrateToCold_CanSaveFinalizedInfo(t *testing.T) {

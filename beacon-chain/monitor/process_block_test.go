@@ -3,6 +3,8 @@ package monitor
 import (
 	"context"
 	"fmt"
+	"testing"
+
 	types "github.com/prysmaticlabs/eth2-types"
 	logTest "github.com/sirupsen/logrus/hooks/test"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/altair"
@@ -12,7 +14,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
-	"testing"
 )
 
 func TestProcessSlashings(t *testing.T) {

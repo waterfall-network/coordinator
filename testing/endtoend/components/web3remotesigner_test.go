@@ -13,6 +13,7 @@ import (
 )
 
 func TestWeb3RemoteSigner_StartsAndReturnsPublicKeys(t *testing.T) {
+	t.Skip() // WebRemoteSigner method Start is unused.
 	require.NoError(t, e2eparams.Init(0))
 	fp, err := bazel.Runfile("config/params/testdata/e2e_config.yaml")
 	if err != nil {

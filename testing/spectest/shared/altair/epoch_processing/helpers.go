@@ -37,6 +37,8 @@ func RunEpochOperationTest(
 	preBeaconState, err := stateAltair.InitializeFromProto(preBeaconStateBase)
 	require.NoError(t, err)
 
+	beaconState, err := operationFn(t, preBeaconState)
+	require.NoError(t, err)
 	// If the post.ssz is not present, it means the test should fail on our end.
 	postSSZFilepath, err := bazel.Runfile(path.Join(testFolderPath, "post.ssz_snappy"))
 	postSSZExists := true
@@ -46,10 +48,7 @@ func RunEpochOperationTest(
 		t.Fatal(err)
 	}
 
-	beaconState, err := operationFn(t, preBeaconState)
 	if postSSZExists {
-		require.NoError(t, err)
-
 		postBeaconStateFile, err := ioutil.ReadFile(postSSZFilepath) // #nosec G304
 		require.NoError(t, err)
 		postBeaconStateSSZ, err := snappy.Decode(nil /* dst */, postBeaconStateFile)

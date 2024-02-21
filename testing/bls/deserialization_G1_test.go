@@ -13,6 +13,7 @@ import (
 )
 
 func TestDeserializationG1(t *testing.T) {
+	t.Skip() // Generate test data with pyton tool
 	t.Run("blst", testDeserializationG1)
 }
 

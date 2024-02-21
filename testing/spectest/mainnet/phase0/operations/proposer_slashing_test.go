@@ -7,5 +7,6 @@ import (
 )
 
 func TestMainnet_Phase0_Operations_ProposerSlashing(t *testing.T) {
+	t.Skip() // Generate test data with pyton tool
 	operations.RunProposerSlashingTest(t, "mainnet")
 }

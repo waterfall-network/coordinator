@@ -2,10 +2,10 @@ package forkchoice
 
 import (
 	"context"
-	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 
 	types "github.com/prysmaticlabs/eth2-types"
 	forkchoicetypes "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/forkchoice/types"
+	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 	pbrpc "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )

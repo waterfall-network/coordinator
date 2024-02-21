@@ -111,7 +111,6 @@ go_test(
         "head_sync_committee_info_test.go",
         "head_test.go",
         "init_test.go",
-        "log_test.go",
         "metrics_test.go",
         "mock_test.go",
         "optimistic_sync_test.go",

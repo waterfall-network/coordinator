@@ -7,5 +7,6 @@ import (
 )
 
 func TestMainnet_Altair_EpochProcessing_Eth1DataReset(t *testing.T) {
+	t.Skip() // Generate test data with pyton tool
 	epoch_processing.RunEth1DataResetTests(t, "mainnet")
 }

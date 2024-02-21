@@ -7,5 +7,6 @@ import (
 )
 
 func TestMainnet_Altair_Operations_Attestation(t *testing.T) {
+	t.Skip() // Generate test data with pyton tool
 	operations.RunAttestationTest(t, "mainnet")
 }

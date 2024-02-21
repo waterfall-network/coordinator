@@ -2,6 +2,7 @@ package node
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -17,6 +18,31 @@ import (
 
 // Ensure BeaconNode implements interfaces.
 var _ statefeed.Notifier = (*BeaconNode)(nil)
+
+// Test that beacon chain node can close.
+func TestNodeClose_OK(t *testing.T) {
+	hook := logTest.NewGlobal()
+
+	tmp := fmt.Sprintf("%s/datadirtest2", t.TempDir())
+
+	app := cli.App{}
+	set := flag.NewFlagSet("test", 0)
+	set.Bool("test-skip-pow", true, "skip pow dial")
+	set.String("datadir", tmp, "node data directory")
+	set.String("p2p-encoding", "ssz", "p2p encoding scheme")
+	set.Bool("demo-config", true, "demo configuration")
+	set.String("deposit-contract", "0x0000000000000000000000000000000000000000", "deposit contract address")
+
+	context := cli.NewContext(&app, set, nil)
+
+	node, err := New(context)
+	require.NoError(t, err)
+
+	node.Close()
+
+	require.LogsContain(t, hook, "Stopping beacon node")
+	require.NoError(t, os.RemoveAll(tmp))
+}
 
 // TestClearDB tests clearing the database
 func TestClearDB(t *testing.T) {

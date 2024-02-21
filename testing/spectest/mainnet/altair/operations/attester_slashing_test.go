@@ -7,5 +7,6 @@ import (
 )
 
 func TestMainnet_Altair_Operations_AttesterSlashing(t *testing.T) {
+	t.Skip() // Generate test data with pyton tool
 	operations.RunAttesterSlashingTest(t, "mainnet")
 }

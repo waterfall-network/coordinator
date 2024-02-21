@@ -7,5 +7,6 @@ import (
 )
 
 func TestMainnet_Phase0_EpochProcessing_RandaoMixesReset(t *testing.T) {
+	t.Skip() // Generate test data with pyton tool
 	epoch_processing.RunRandaoMixesResetTests(t, "mainnet")
 }
