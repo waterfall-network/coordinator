@@ -40,7 +40,6 @@ import (
 	ethpbv1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	prysmTime "gitlab.waterfall.network/waterfall/protocol/coordinator/time"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	ethereum "gitlab.waterfall.network/waterfall/protocol/gwat"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/abi/bind"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
@@ -261,13 +260,11 @@ func (s *Service) StateTracker() {
 				if !ok {
 					continue
 				}
+				s.lastHandledSlot = data.Slot
 				if !data.InitialSync {
 					continue
 				}
-
 				s.lastHandledBlock = data.BlockRoot
-				s.lastHandledSlot = data.Slot
-
 				depLen := len(data.SignedBlock.Block().Body().Deposits())
 				if depLen == 0 {
 					continue
@@ -398,7 +395,7 @@ func (s *Service) StateTracker() {
 				s.checkDefaultEndpoint(s.ctx)
 
 				s.lastHandledBlock = bytesutil.ToBytes32(data.Block)
-				s.lastHandledSlot = st.Slot()
+				//s.lastHandledSlot = st.Slot()
 				s.lastHandledState = st
 			}
 
@@ -857,7 +854,7 @@ func (s *Service) run(done <-chan struct{}) {
 			return
 		case <-s.headTicker.C:
 			// check delegating stake fork active
-			s.lastHandledSlot = slots.CurrentSlot(s.preGenesisState.GenesisTime())
+			//s.lastHandledSlot = slots.CurrentSlot(s.preGenesisState.GenesisTime())
 			if params.BeaconConfig().IsDelegatingStakeSlot(s.lastHandledSlot) {
 				log.WithFields(logrus.Fields{
 					"slot":                        s.lastHandledSlot,

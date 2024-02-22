@@ -363,7 +363,8 @@ func (s *Service) processPastLogs(ctx context.Context) error {
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"gdcParam":             fmt.Sprintf("%v", gdcParam),
-			"isDldFork":            params.BeaconConfig().IsDelegatingStakeSlot(s.lastHandledState.Slot()),
+			"handleSlot":           s.lastHandledSlot,
+			"isDldFork":            params.BeaconConfig().IsDelegatingStakeSlot(s.lastHandledSlot),
 			"lastEth.BlockHash":    fmt.Sprintf("%#x", s.latestEth1Data.BlockHash),
 			"lastEth.BlockHeight":  s.latestEth1Data.BlockHeight,
 			"lastEth.LastReqBlock": s.latestEth1Data.LastRequestedBlock,
@@ -377,8 +378,8 @@ func (s *Service) processPastLogs(ctx context.Context) error {
 	log.WithFields(logrus.Fields{
 		"gdcParam":             fmt.Sprintf("%v", gdcParam),
 		"logCount":             logCount,
-		"handleSlot":           s.lastHandledState.Slot(),
-		"isDldFork":            params.BeaconConfig().IsDelegatingStakeSlot(s.lastHandledState.Slot()),
+		"handleSlot":           s.lastHandledSlot,
+		"isDldFork":            params.BeaconConfig().IsDelegatingStakeSlot(s.lastHandledSlot),
 		"lastEth.CpHash":       fmt.Sprintf("%#x", s.latestEth1Data.CpHash),
 		"lastEth.LastReqBlock": s.latestEth1Data.LastRequestedBlock,
 		"lastEth.CpNr":         s.latestEth1Data.CpNr,
