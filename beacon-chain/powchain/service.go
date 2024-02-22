@@ -262,6 +262,12 @@ func (s *Service) StateTracker() {
 					continue
 				}
 				s.lastHandledSlot = data.Slot
+
+				log.WithFields(logrus.Fields{
+					"s.lastHandledSlot":         s.lastHandledSlot,
+					"s.lastReceivedMerkleIndex": s.lastReceivedMerkleIndex,
+				}).Info("=== LogProcessing: StateTracker: EVT: BlockProcessed 000000000")
+
 				if !data.InitialSync {
 					continue
 				}
@@ -306,9 +312,24 @@ func (s *Service) StateTracker() {
 				if !ok {
 					continue
 				}
+
+				log.WithFields(logrus.Fields{
+					"s.lastHandledSlot":         s.lastHandledSlot,
+					"s.lastReceivedMerkleIndex": s.lastReceivedMerkleIndex,
+					"IsDelegate":                params.BeaconConfig().IsDelegatingStakeSlot(s.lastHandledSlot),
+				}).Info("=== LogProcessing: StateTracker: EVT: FinalizedCheckpoint 000000000")
+
 				// check delegating stake fork active
 				if !params.BeaconConfig().IsDelegatingStakeSlot(s.lastHandledSlot) {
-					return
+					if s.pollConnActive {
+						handledCount, err := s.handleFinalizedDeposits(bytesutil.ToBytes32(data.Block))
+						log.WithError(err).WithFields(logrus.Fields{
+							"cpBlock":      fmt.Sprintf("%#x", data.Block),
+							"handledCount": handledCount,
+						}).Info("=== LogProcessing: StateTracker: EVT: FinalizedCheckpoint: handle finalized deposits 000")
+					}
+
+					continue
 				}
 
 				if s.lastHandledState == nil {
@@ -320,14 +341,16 @@ func (s *Service) StateTracker() {
 						log.WithError(err).WithFields(logrus.Fields{
 							"cpBlock":      fmt.Sprintf("%#x", data.Block),
 							"handledCount": handledCount,
-						}).Info("=== LogProcessing: StateTracker: EVT: FinalizedCheckpoint: handle finalized deposits 000")
+						}).Info("=== LogProcessing: StateTracker: EVT: FinalizedCheckpoint: handle finalized deposits 111")
 
 						continue
 					}
 
 					prevSt, err := s.cfg.stateGen.StateByRoot(s.ctx, s.lastHandledBlock)
 					if err != nil {
-						s.pollConnectionStatus(s.ctx)
+						if !s.pollConnActive {
+							go s.pollConnectionStatus(s.ctx)
+						}
 						log.WithField("evtType", "FinalizedCheckpoint").Error("Event handler: retrieve state failed")
 						continue
 					}
@@ -341,9 +364,11 @@ func (s *Service) StateTracker() {
 						log.WithError(err).WithFields(logrus.Fields{
 							"cpBlock":      fmt.Sprintf("%#x", data.Block),
 							"handledCount": handledCount,
-						}).Info("=== LogProcessing: StateTracker: EVT: FinalizedCheckpoint: handle finalized deposits 111")
+						}).Info("=== LogProcessing: StateTracker: EVT: FinalizedCheckpoint: handle finalized deposits 333")
 
-						s.pollConnectionStatus(s.ctx)
+						if !s.pollConnActive {
+							go s.pollConnectionStatus(s.ctx)
+						}
 						continue
 					}
 					s.lastHandledState = prevSt
@@ -386,9 +411,11 @@ func (s *Service) StateTracker() {
 					log.WithError(err).WithFields(logrus.Fields{
 						"cpBlock":      fmt.Sprintf("%#x", data.Block),
 						"handledCount": handledCount,
-					}).Info("=== LogProcessing: StateTracker: EVT: FinalizedCheckpoint: handle finalized deposits 222")
+					}).Info("=== LogProcessing: StateTracker: EVT: FinalizedCheckpoint: handle finalized deposits 444")
 
-					s.pollConnectionStatus(s.ctx)
+					if !s.pollConnActive {
+						go s.pollConnectionStatus(s.ctx)
+					}
 					continue
 				}
 				s.processBlockHeader(header, &baseSpine)
@@ -873,6 +900,7 @@ func (s *Service) run(done <-chan struct{}) {
 
 			log.WithFields(logrus.Fields{
 				"slot":                        s.lastHandledSlot,
+				"IsDelegate":                  params.BeaconConfig().IsDelegatingStakeSlot(s.lastHandledSlot),
 				"s.preGenesisState.BlockHash": fmt.Sprintf("%#x", s.preGenesisState.Eth1Data().BlockHash),
 				//"EthLFinHash":          fmt.Sprintf("%#x", header.Hash()),
 				"lastEth.LastReqBlock":    s.latestEth1Data.LastRequestedBlock,

@@ -708,7 +708,7 @@ func (s *Service) ProcessDepositBlock(deposit *ethpb.Deposit, depositIndex uint6
 	return nil
 }
 
-// ProcessDepositBlock processes the deposits had been received with block while sync.
+// handleFinalizedDeposits collect and processes the deposits has been received with blocks.
 func (s *Service) handleFinalizedDeposits(cpRoot [32]byte) (int, error) {
 	headSt, err := s.cfg.stateGen.StateByRoot(s.ctx, cpRoot)
 	if err != nil {
@@ -727,7 +727,7 @@ func (s *Service) handleFinalizedDeposits(cpRoot [32]byte) (int, error) {
 		return 0, nil
 	}
 
-	deposits := make(map[uint64]*ethpb.Deposit, headSt.Eth1DepositIndex()-lastDepositIndex)
+	deposits := make([]*ethpb.Deposit, 0, headSt.Eth1DepositIndex()-lastDepositIndex)
 	for {
 		bBlock, err := s.cfg.beaconDB.Block(s.ctx, currBlockHash)
 		if err != nil {
@@ -736,9 +736,8 @@ func (s *Service) handleFinalizedDeposits(cpRoot [32]byte) (int, error) {
 		if bBlock == nil {
 			return 0, fmt.Errorf("beacon block not found")
 		}
-		deps := bBlock.Block().Body().Deposits()
-		for i := len(deps) - 1; i >= 0; i-- {
-			deposits[currIndex] = deps[i]
+		for _, dep := range bBlock.Block().Body().Deposits() {
+			deposits = append(deposits, dep)
 			currIndex--
 		}
 		if lastDepositIndex >= currIndex {
@@ -747,18 +746,19 @@ func (s *Service) handleFinalizedDeposits(cpRoot [32]byte) (int, error) {
 		currBlockHash = bytesutil.ToBytes32(bBlock.Block().ParentRoot())
 	}
 
-	count := 0
-	for dix := lastDepositIndex + 1; deposits[dix] != nil; dix++ {
-		err = s.ProcessDepositBlock(deposits[dix], dix)
+	offset := 0
+	for i := len(deposits) - 1; i >= 0; i-- {
+		dix := lastDepositIndex + uint64(offset)
+		err = s.ProcessDepositBlock(deposits[i], lastDepositIndex+uint64(offset))
 		if err != nil {
 			log.WithError(err).WithFields(logrus.Fields{
 				"depIndex": dix,
 				"deposit":  fmt.Sprintf("%v", deposits[dix]),
 				"cpRoot":   fmt.Sprintf("%#x", cpRoot),
 			}).Error("=== LogProcessing: handleFinalizedDeposits: process deposit block failed")
-			return count, err
+			return offset, err
 		}
-		count++
+		offset++
 	}
-	return count, nil
+	return offset, nil
 }
