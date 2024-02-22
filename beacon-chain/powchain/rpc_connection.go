@@ -41,6 +41,12 @@ func (s *Service) setupExecutionClientConnections(ctx context.Context, currEndpo
 // Every N seconds, defined as a backoffPeriod, attempts to re-establish an execution client
 // connection and if this does not work, we fallback to the next endpoint if defined.
 func (s *Service) pollConnectionStatus(ctx context.Context) {
+	if s.pollConnActive {
+		return
+	}
+	s.pollConnActive = true
+	defer func() { s.pollConnActive = false }()
+
 	// Use a custom logger to only log errors
 	logCounter := 0
 	errorLogger := func(err error, msg string) {

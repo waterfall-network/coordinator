@@ -154,6 +154,7 @@ type config struct {
 type Service struct {
 	connectedETH1           bool
 	isRunning               bool
+	pollConnActive          bool
 	processingLock          sync.RWMutex
 	cfg                     *config
 	ctx                     context.Context
