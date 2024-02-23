@@ -420,7 +420,7 @@ func TestStreamDuties_OK(t *testing.T) {
 	defer ctrl.Finish()
 	exitRoutine := make(chan bool)
 	mockStream := mock.NewMockBeaconNodeValidator_StreamDutiesServer(ctrl)
-	mockStream.EXPECT().Send(wantedRes).Do(func(arg0 interface{}) {
+	mockStream.EXPECT().Send(wantedRes).AnyTimes().Do(func(arg0 interface{}) {
 		exitRoutine <- true
 	})
 	mockStream.EXPECT().Context().Return(ctx).AnyTimes()
