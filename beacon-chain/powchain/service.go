@@ -328,25 +328,30 @@ func (s *Service) StateTracker() {
 							"handledCount": handledCount,
 						}).Info("=== LogProcessing: StateTracker: EVT: FinalizedCheckpoint: handle finalized deposits 000")
 					}
-
 					continue
 				}
 
+				st, err := s.cfg.stateGen.StateByRoot(s.ctx, bytesutil.ToBytes32(data.Block))
+				if err != nil {
+					log.WithField("evtType", "FinalizedCheckpoint").Error("=== LogProcessing: Event handler: retrieve state failed")
+					continue
+				}
+
+				// if the first event recieved - reinit required props
 				if s.lastHandledState == nil {
 					//check gwat connection is established
 					if s.eth1DataFetcher == nil {
 						log.WithField("evtType", "FinalizedCheckpoint").Error("=== LogProcessing: Event handler: no gwat connection")
-
 						handledCount, err := s.handleFinalizedDeposits(bytesutil.ToBytes32(data.Block))
 						log.WithError(err).WithFields(logrus.Fields{
 							"cpBlock":      fmt.Sprintf("%#x", data.Block),
 							"handledCount": handledCount,
 						}).Info("=== LogProcessing: StateTracker: EVT: FinalizedCheckpoint: handle finalized deposits 111")
-
 						continue
 					}
 
-					prevSt, err := s.cfg.stateGen.StateByRoot(s.ctx, s.lastHandledBlock)
+					prevRoot := bytesutil.ToBytes32(st.FinalizedCheckpoint().Root)
+					prevSt, err := s.cfg.stateGen.StateByRoot(s.ctx, prevRoot)
 					if err != nil {
 						if !s.pollConnActive {
 							go s.pollConnectionStatus(s.ctx)
@@ -359,7 +364,6 @@ func (s *Service) StateTracker() {
 					prevHeader, err := s.eth1DataFetcher.HeaderByHash(s.ctx, baseSpine)
 					if err != nil {
 						log.WithError(err).Error("Could not fetch latest shard1 header")
-
 						handledCount, err := s.handleFinalizedDeposits(bytesutil.ToBytes32(data.Block))
 						log.WithError(err).WithFields(logrus.Fields{
 							"cpBlock":      fmt.Sprintf("%#x", data.Block),
@@ -379,12 +383,6 @@ func (s *Service) StateTracker() {
 					s.latestEth1Data.CpHash = baseSpine.Bytes()
 					s.latestEth1Data.CpNr = prevHeader.Nr()
 					s.latestEth1Data.LastRequestedBlock = s.followBlockHeight(s.ctx)
-				}
-
-				st, err := s.cfg.stateGen.StateByRoot(s.ctx, bytesutil.ToBytes32(data.Block))
-				if err != nil {
-					log.WithField("evtType", "FinalizedCheckpoint").Error("=== LogProcessing: Event handler: retrieve state failed")
-					continue
 				}
 
 				baseSpine := helpers.GetBaseSpine(st)

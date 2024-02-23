@@ -45,6 +45,14 @@ func (s *Service) Eth2GenesisPowchainInfo() (uint64, *big.Int) {
 
 // ProcessETH1Block processes the logs from the provided eth1Block.
 func (s *Service) ProcessETH1Block(ctx context.Context, blkNum uint64) error {
+
+	log.WithFields(logrus.Fields{
+		"lastEth.LastReqBlock": s.latestEth1Data.LastRequestedBlock,
+		"lastEth.CpNr":         s.latestEth1Data.CpNr,
+		"-startBlk":            blkNum,
+		"-endBlk":              blkNum,
+	}).Info("=== LogProcessing: FilterQuery: ProcessETH1Block: 0000")
+
 	query := gwat.FilterQuery{
 		Addresses: []gwatCommon.Address{
 			s.cfg.depositContractAddr,
@@ -425,6 +433,14 @@ func (s *Service) processPastLogs(ctx context.Context) error {
 		if end > latestFollowHeight {
 			end = latestFollowHeight
 		}
+
+		log.WithFields(logrus.Fields{
+			"lastEth.LastReqBlock": s.latestEth1Data.LastRequestedBlock,
+			"lastEth.CpNr":         s.latestEth1Data.CpNr,
+			"-startBlk":            start,
+			"-endBlk":              end,
+		}).Info("=== LogProcessing: FilterQuery: processPastLogs: 11111")
+
 		query := gwat.FilterQuery{
 			Addresses: []gwatCommon.Address{
 				s.cfg.depositContractAddr,
@@ -459,6 +475,14 @@ func (s *Service) processPastLogs(ctx context.Context) error {
 		// Only request headers before chainstart to correctly determine
 		// genesis.
 		if !s.chainStartData.Chainstarted {
+
+			log.WithFields(logrus.Fields{
+				"lastEth.LastReqBlock": s.latestEth1Data.LastRequestedBlock,
+				"lastEth.CpNr":         s.latestEth1Data.CpNr,
+				"startBlk":             start,
+				"endBlk":               end,
+			}).Info("=== LogProcessing: processPastLogs: requestHeaders: 00000000")
+
 			if err := requestHeaders(start, end); err != nil {
 				return err
 			}
@@ -466,6 +490,14 @@ func (s *Service) processPastLogs(ctx context.Context) error {
 
 		for _, filterLog := range logs {
 			if filterLog.BlockNumber > currentBlockNum {
+
+				log.WithFields(logrus.Fields{
+					"lastEth.LastReqBlock": s.latestEth1Data.LastRequestedBlock,
+					"lastEth.CpNr":         s.latestEth1Data.CpNr,
+					"startBlk":             currentBlockNum,
+					"endBlk":               filterLog.BlockNumber - 1,
+				}).Info("=== LogProcessing: processPastLogs: requestHeaders: 11111111")
+
 				if err := s.checkHeaderRange(ctx, currentBlockNum, filterLog.BlockNumber-1, headersMap, requestHeaders); err != nil {
 					return err
 				}
@@ -477,6 +509,14 @@ func (s *Service) processPastLogs(ctx context.Context) error {
 				return err
 			}
 		}
+
+		log.WithFields(logrus.Fields{
+			"lastEth.LastReqBlock": s.latestEth1Data.LastRequestedBlock,
+			"lastEth.CpNr":         s.latestEth1Data.CpNr,
+			"startBlk":             currentBlockNum,
+			"endBlk":               end,
+		}).Info("=== LogProcessing: processPastLogs: requestHeaders: 22222222")
+
 		if err := s.checkHeaderRange(ctx, currentBlockNum, end, headersMap, requestHeaders); err != nil {
 			return err
 		}
@@ -753,8 +793,8 @@ func (s *Service) handleFinalizedDeposits(cpRoot [32]byte) (int, error) {
 		if err != nil {
 			log.WithError(err).WithFields(logrus.Fields{
 				"depIndex": dix,
-				"deposit":  fmt.Sprintf("%v", deposits[dix]),
-				"cpRoot":   fmt.Sprintf("%#x", cpRoot),
+				//"deposit":  fmt.Sprintf("%v", deposits[dix]),
+				"cpRoot": fmt.Sprintf("%#x", cpRoot),
 			}).Error("=== LogProcessing: handleFinalizedDeposits: process deposit block failed")
 			return offset, err
 		}
