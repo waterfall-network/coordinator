@@ -7,8 +7,8 @@ import (
 )
 
 func TestBuildWithBazel(t *testing.T) {
-	t.Skip()
 	if !bazel.BuiltWithBazel() {
+		t.Skip()
 		t.Error("not built with Bazel")
 	}
 }
