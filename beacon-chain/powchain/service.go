@@ -154,7 +154,7 @@ type config struct {
 type Service struct {
 	connectedETH1           bool
 	isRunning               bool
-	pollConnActive          bool
+	pollConnActive          bool //if reconnecting to gwat
 	processingLock          sync.RWMutex
 	cfg                     *config
 	ctx                     context.Context
@@ -242,8 +242,8 @@ func NewService(ctx context.Context, opts ...Option) (*Service, error) {
 
 // Start a web3 service's main event loop.
 func (s *Service) StateTracker() {
-	blockNotifications := make(chan *feed.Event, 0)
-	sub := s.cfg.stateNotifier.StateFeed().Subscribe(blockNotifications)
+	chainEvtCh := make(chan *feed.Event, 0)
+	sub := s.cfg.stateNotifier.StateFeed().Subscribe(chainEvtCh)
 
 	defer sub.Unsubscribe()
 	for {
@@ -254,7 +254,7 @@ func (s *Service) StateTracker() {
 		//case err := <-sub.Err():
 		//	log.WithError(err).Warn("Exit by error")
 		//	return
-		case ev := <-blockNotifications:
+		case ev := <-chainEvtCh:
 			//work while syncing only, check condition
 			if ev.Type == statefeed.BlockProcessed {
 				data, ok := ev.Data.(*statefeed.BlockProcessedData)
@@ -354,7 +354,14 @@ func (s *Service) StateTracker() {
 					prevSt, err := s.cfg.stateGen.StateByRoot(s.ctx, prevRoot)
 					if err != nil {
 						if !s.pollConnActive {
-							go s.pollConnectionStatus(s.ctx)
+							// check gwat connection
+							head, err := s.eth1DataFetcher.HeaderByNumber(s.ctx, nil)
+							log.WithError(err).WithFields(logrus.Fields{
+								"head": fmt.Sprintf("%v", head),
+							}).Info("=== LogProcessing: pollConnActive: 000")
+							if err != nil {
+								go s.pollConnectionStatus(s.ctx)
+							}
 						}
 						log.WithField("evtType", "FinalizedCheckpoint").Error("Event handler: retrieve state failed")
 						continue
@@ -371,7 +378,14 @@ func (s *Service) StateTracker() {
 						}).Info("=== LogProcessing: StateTracker: EVT: FinalizedCheckpoint: handle finalized deposits 333")
 
 						if !s.pollConnActive {
-							go s.pollConnectionStatus(s.ctx)
+							// check gwat connection
+							head, err := s.eth1DataFetcher.HeaderByNumber(s.ctx, nil)
+							log.WithError(err).WithFields(logrus.Fields{
+								"head": fmt.Sprintf("%v", head),
+							}).Info("=== LogProcessing: pollConnActive: 111")
+							if err != nil {
+								go s.pollConnectionStatus(s.ctx)
+							}
 						}
 						continue
 					}
@@ -412,7 +426,14 @@ func (s *Service) StateTracker() {
 					}).Info("=== LogProcessing: StateTracker: EVT: FinalizedCheckpoint: handle finalized deposits 444")
 
 					if !s.pollConnActive {
-						go s.pollConnectionStatus(s.ctx)
+						// check gwat connection
+						head, err := s.eth1DataFetcher.HeaderByNumber(s.ctx, nil)
+						log.WithError(err).WithFields(logrus.Fields{
+							"head": fmt.Sprintf("%v", head),
+						}).Info("=== LogProcessing: pollConnActive: 222")
+						if err != nil {
+							go s.pollConnectionStatus(s.ctx)
+						}
 					}
 					continue
 				}
@@ -424,20 +445,6 @@ func (s *Service) StateTracker() {
 				//s.lastHandledSlot = st.Slot()
 				s.lastHandledState = st
 			}
-
-			//if ev.Type == statefeed.NewHead {
-			//	data, ok := ev.Data.(*ethpbv1.EventHead)
-			//	if !ok {
-			//		continue
-			//	}
-			//	log.WithFields(logrus.Fields{
-			//		"_type":          ev.Type,
-			//		"ad.Slot":        data.Slot,
-			//		"bd.Block":       fmt.Sprintf("%#x", data.Block),
-			//		"cd.State":       fmt.Sprintf("%#x", data.State),
-			//		"d.isOptimistic": data.ExecutionOptimistic,
-			//	}).Info("=== LogProcessing: StateTracker: EVT: NewHead")
-			//}
 		}
 	}
 }
