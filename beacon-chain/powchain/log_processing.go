@@ -745,6 +745,18 @@ func (s *Service) ProcessDepositBlock(deposit *ethpb.Deposit, depositIndex uint6
 		"initTxHash":      fmt.Sprintf("%#x", deposit.Data.InitTxHash),
 	}).Info("=== LogProcessing: Block deposit processing: 111")
 
+	// We always store all historical deposits in the DB.
+	fakeBlockNr := s.latestEth1Data.LastRequestedBlock + 1
+	err = s.cfg.depositCache.InsertDeposit(s.ctx, deposit, fakeBlockNr, index, s.depositTrie.HashTreeRoot())
+	if err != nil {
+		return errors.Wrap(err, "block deposit processing: unable to insert deposit into cache")
+	}
+	s.cfg.depositCache.InsertFinalizedDeposits(s.ctx, index)
+	// Deposit proofs are only used during state transition and can be safely removed to save space.
+	if err = s.cfg.depositCache.PruneProofs(s.ctx, index); err != nil {
+		return errors.Wrap(err, "block deposit processing: could not prune deposit proofs")
+	}
+	validDepositsCount.Inc()
 	return nil
 }
 

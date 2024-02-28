@@ -297,7 +297,7 @@ func (s *Service) StateTracker() {
 					}
 				}
 
-				baseSpine := helpers.GetBaseSpine(st)
+				baseSpine := helpers.GetTerminalFinalizedSpine(st)
 				log.WithFields(logrus.Fields{
 					"_baseSpine":   fmt.Sprintf("%#x", baseSpine),
 					"ad.Slot":      data.Slot,
@@ -367,7 +367,7 @@ func (s *Service) StateTracker() {
 						continue
 					}
 
-					baseSpine := helpers.GetBaseSpine(prevSt)
+					baseSpine := helpers.GetTerminalFinalizedSpine(prevSt)
 					prevHeader, err := s.eth1DataFetcher.HeaderByHash(s.ctx, baseSpine)
 					if err != nil {
 						log.WithError(err).Error("Could not fetch latest shard1 header")
@@ -399,7 +399,7 @@ func (s *Service) StateTracker() {
 					s.latestEth1Data.LastRequestedBlock = s.followBlockHeight(s.ctx)
 				}
 
-				baseSpine := helpers.GetBaseSpine(st)
+				baseSpine := helpers.GetTerminalFinalizedSpine(st)
 				log.WithFields(logrus.Fields{
 					"_baseSpine":                  fmt.Sprintf("%#x", baseSpine),
 					"lState.DepositIndex":         fmt.Sprintf("%d", s.lastHandledState.Eth1DepositIndex()),

@@ -153,7 +153,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 						"InitTxHash":     fmt.Sprintf("%#x", itm.InitTxHash),
 						"PublicKey":      fmt.Sprintf("%#x", itm.PublicKey),
 						"ValidatorIndex": fmt.Sprintf("%d", itm.ValidatorIndex),
-					}).Error("onBlock:: withdrawal")
+					}).Error("onBlock: withdrawal")
 					return err
 				}
 			}
@@ -178,7 +178,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 						"Epoch":          fmt.Sprintf("%d", itm.Epoch),
 						"InitTxHash":     fmt.Sprintf("%#x", itm.InitTxHash),
 						"ValidatorIndex": fmt.Sprintf("%d", itm.ValidatorIndex),
-					}).Error("onBlock:: exit")
+					}).Error("onBlock: exit")
 					return err
 				}
 			}
