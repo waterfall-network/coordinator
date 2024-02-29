@@ -350,18 +350,12 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 // runProcessDagFinalize This routine processes gwat finalization process.
 func (s *Service) runProcessDagFinalize() {
 	go func() {
-		var headRoot []byte
 		for {
 			select {
 			case <-s.ctx.Done():
 				log.Info("Dag finalization: context done")
 				return
 			case newHead := <-s.newHeadCh:
-				if bytes.Equal(headRoot, newHead.root[:]) {
-					log.Info("Dag finalization: skip (head duplicated)")
-					continue
-				}
-
 				err := s.processDagFinalization(newHead.state, gwatTypes.NoSync)
 				if err != nil {
 					// reset if failed
