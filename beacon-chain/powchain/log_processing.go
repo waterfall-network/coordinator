@@ -17,7 +17,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
-	prysmTime "gitlab.waterfall.network/waterfall/protocol/coordinator/time"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	gwat "gitlab.waterfall.network/waterfall/protocol/gwat"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
@@ -112,7 +111,10 @@ func (s *Service) ProcessLog(ctx context.Context, depositLog gwatTypes.Log) erro
 func (s *Service) ProcessWithdrawalLog(ctx context.Context, wtdLog gwatTypes.Log) error {
 	pubkey, creatorAddr, valIndex, amtGwei, err := gwatValLog.UnpackWithdrawalLogData(wtdLog.Data)
 
-	curSlot := slots.CurrentSlot(s.cfg.finalizedStateAtStartup.GenesisTime())
+	curSlot := s.lastHandledSlot
+	if !params.BeaconConfig().IsDelegatingStakeSlot(s.lastHandledSlot) {
+		curSlot = slots.CurrentSlot(s.cfg.finalizedStateAtStartup.GenesisTime())
+	}
 	curEpoch := slots.ToEpoch(curSlot)
 
 	log.WithError(err).WithFields(logrus.Fields{
@@ -156,20 +158,18 @@ func (s *Service) ProcessExitLog(ctx context.Context, exitLog gwatTypes.Log) err
 		return errors.Wrap(err, "Could not unpack log (exit)")
 	}
 
-	totalSecondsPassed := uint64(prysmTime.Now().Unix()) - s.cfg.finalizedStateAtStartup.GenesisTime()
-	currentEpoch := types.Epoch(uint64(totalSecondsPassed) / uint64(params.BeaconConfig().SlotsPerEpoch.Mul(params.BeaconConfig().SecondsPerSlot)))
+	curSlot := s.lastHandledSlot
+	if !params.BeaconConfig().IsDelegatingStakeSlot(s.lastHandledSlot) {
+		curSlot = slots.CurrentSlot(s.cfg.finalizedStateAtStartup.GenesisTime())
+	}
+	curEpoch := slots.ToEpoch(curSlot)
 
-	if exitEpoch != nil && *exitEpoch > uint64(currentEpoch) {
-		currentEpoch = types.Epoch(*exitEpoch)
+	if exitEpoch != nil && *exitEpoch > uint64(curEpoch) {
+		curEpoch = types.Epoch(*exitEpoch)
 	}
 
-	//deposit, _ := s.cfg.depositCache.DepositByPubkey(ctx, pubkey.Bytes())
-	//if deposit == nil {
-	//	return errors.New("unable to find deposit with the provided public key (exit)")
-	//}
-
 	exit := &ethpb.VoluntaryExit{
-		Epoch:          currentEpoch,
+		Epoch:          curEpoch,
 		ValidatorIndex: types.ValidatorIndex(valIndex),
 		InitTxHash:     exitLog.TxHash.Bytes(),
 	}

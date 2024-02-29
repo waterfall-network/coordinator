@@ -38,7 +38,7 @@ type BlockProcessedData struct {
 	SignedBlock block.SignedBeaconBlock
 	// Verified is true if the block's BLS contents have been verified.
 	Verified bool
-	// Verified is true if the block's BLS contents have been verified.
+	// InitialSync is true while initial-sync.
 	InitialSync bool
 }
 

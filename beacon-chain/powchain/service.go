@@ -261,7 +261,6 @@ func (s *Service) StateTracker() {
 				if !ok {
 					continue
 				}
-				s.lastHandledSlot = data.Slot
 
 				log.WithFields(logrus.Fields{
 					"s.lastHandledSlot":         s.lastHandledSlot,
@@ -271,6 +270,7 @@ func (s *Service) StateTracker() {
 				if !data.InitialSync {
 					continue
 				}
+				s.lastHandledSlot = data.Slot
 				s.lastHandledBlock = data.BlockRoot
 				depLen := len(data.SignedBlock.Block().Body().Deposits())
 				if depLen == 0 {
@@ -312,6 +312,7 @@ func (s *Service) StateTracker() {
 				if !ok {
 					continue
 				}
+				s.lastHandledSlot = data.FinalizationSlot
 
 				log.WithFields(logrus.Fields{
 					"s.lastHandledSlot":         s.lastHandledSlot,

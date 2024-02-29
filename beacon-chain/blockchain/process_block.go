@@ -143,7 +143,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 				"ValidatorIndex": fmt.Sprintf("%d", itm.ValidatorIndex),
 			}).Info("onBlock: withdrawal")
 
-			if !s.IsGwatSynchronizing() && params.BeaconConfig().IsDelegatingStakeSlot(signed.Block().Slot()) {
+			if !s.IsGwatSynchronizing() && !s.isSynchronizing() && params.BeaconConfig().IsDelegatingStakeSlot(signed.Block().Slot()) {
 				if err := s.cfg.WithdrawalPool.Verify(itm); err != nil {
 					log.WithError(err).WithFields(logrus.Fields{
 						"i":              i,
@@ -170,7 +170,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 				"ValidatorIndex": fmt.Sprintf("%d", itm.ValidatorIndex),
 			}).Info("onBlock: exit")
 
-			if !s.IsGwatSynchronizing() && params.BeaconConfig().IsDelegatingStakeSlot(signed.Block().Slot()) {
+			if !s.IsGwatSynchronizing() && !s.isSynchronizing() && params.BeaconConfig().IsDelegatingStakeSlot(signed.Block().Slot()) {
 				if err := s.cfg.ExitPool.Verify(itm); err != nil {
 					log.WithError(err).WithFields(logrus.Fields{
 						"i":              i,
@@ -440,6 +440,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 					Block:               postState.FinalizedCheckpoint().Root,
 					State:               signed.Block().StateRoot(),
 					ExecutionOptimistic: isOptimistic,
+					FinalizationSlot:    signed.Block().Slot(),
 				},
 			})
 
