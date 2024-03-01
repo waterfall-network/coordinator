@@ -290,10 +290,22 @@ func (s *Service) StateTracker() {
 				}).Info("=== LogProcessing: StateTracker: EVT: BlockProcessed")
 
 				baseDepIndex := st.Eth1DepositIndex() - uint64(depLen)
+				if s.lastReceivedMerkleIndex+1 < new(big.Int).SetUint64(baseDepIndex).Int64() {
+					handledCount, err := s.handleFinalizedDeposits(bytesutil.ToBytes32(data.SignedBlock.Block().ParentRoot()))
+					if err != nil {
+						log.WithError(err).WithFields(logrus.Fields{
+							"parent":       fmt.Sprintf("%#x", data.SignedBlock.Block().ParentRoot()),
+							"block":        fmt.Sprintf("%#x", data.BlockRoot),
+							"handledCount": handledCount,
+							"evtType":      "BlockProcessed",
+						}).Fatal("Event handler: rebuild merkle trie failed")
+					}
+				}
+
 				for i, deposit := range data.SignedBlock.Block().Body().Deposits() {
 					err = s.ProcessDepositBlock(deposit, baseDepIndex+uint64(i))
 					if err != nil {
-						log.WithError(err).WithField("evtType", "BlockProcessed").Fatal("Event handler: depositIndex uintcast failed")
+						log.WithError(err).WithField("evtType", "BlockProcessed").Fatal("Event handler: failed")
 					}
 				}
 
