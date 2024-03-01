@@ -183,9 +183,9 @@ func (p *Pool) Verify(withdrawal *ethpb.Withdrawal) error {
 	}
 	poolItm := p.pending[index]
 
-	if poolItm.Epoch != withdrawal.Epoch {
-		return fmt.Errorf("mismatch epochs pool=%d received=%d", poolItm.Epoch, withdrawal.Epoch)
-	}
+	//if poolItm.Epoch != withdrawal.Epoch {
+	//	return fmt.Errorf("mismatch epochs pool=%d received=%d", poolItm.Epoch, withdrawal.Epoch)
+	//}
 	if poolItm.Amount != withdrawal.Amount {
 		return fmt.Errorf("mismatch amounts pool=%d received=%d", poolItm.Amount, withdrawal.Amount)
 	}
