@@ -2,11 +2,15 @@ package helpers
 
 import (
 	"bytes"
+	"fmt"
+	"math/big"
 
 	"github.com/pkg/errors"
+	types "github.com/prysmaticlabs/eth2-types"
 	log "github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
@@ -38,6 +42,58 @@ func ConsensusUpdateStateSpineFinalization(beaconState state.BeaconState, preJus
 	err := beaconState.SetSpineData(spineData)
 
 	return beaconState, err
+}
+
+func ProcessWithdrawalOps(bState state.BeaconState, preFinRoot []byte) (state.BeaconState, error) {
+	// check activation slot
+	if !params.BeaconConfig().IsDelegatingStakeSlot(bState.Slot()) {
+		return bState, nil
+	}
+	// handle only cp changed
+	finRoot := bState.FinalizedCheckpoint().GetRoot()
+	if bytes.Equal(finRoot, preFinRoot) {
+		return bState, nil
+	}
+	var (
+		minSlot         types.Slot
+		staleAfterSlots = types.Slot(params.BeaconConfig().CleanWithdrawalsAftEpochs) * params.BeaconConfig().SlotsPerEpoch
+	)
+	if bState.Slot() > staleAfterSlots {
+		minSlot = bState.Slot() - staleAfterSlots
+	}
+	err := bState.ApplyToEveryValidator(func(idx int, val *ethpb.Validator) (bool, *ethpb.Validator, error) {
+		var upWops []*ethpb.WithdrawalOp
+		for i, wop := range val.WithdrawalOps {
+			// skip iterate if the first itm > minSlot
+			if i == 0 && wop.Slot > minSlot {
+				break
+			}
+			if wop.Slot <= minSlot {
+				if upWops == nil {
+					upWops = make([]*ethpb.WithdrawalOp, 0, len(val.WithdrawalOps)-1)
+					copy(val.WithdrawalOps[0:i], val.WithdrawalOps[:i])
+				}
+				log.WithFields(log.Fields{
+					"rm":            !(wop.Slot >= minSlot),
+					"bState.Slot":   fmt.Sprintf("%d", bState.Slot()),
+					"w.Slot":        fmt.Sprintf("%d", wop.Slot),
+					"w.Amount":      fmt.Sprintf("%d", wop.Amount),
+					"w.Hash":        fmt.Sprintf("%#x", wop.Hash),
+					"val.Index":     fmt.Sprintf("%d", idx),
+					"val.PublicKey": fmt.Sprintf("%#x", val.PublicKey),
+				}).Info("WithdrawalOps transition: rm stale (epoch proc)")
+			} else if upWops != nil {
+				upWops = append(upWops, wop)
+			}
+		}
+		if upWops != nil {
+			newWop := ethpb.CopyValidator(val)
+			newWop.WithdrawalOps = upWops
+			return true, newWop, nil
+		}
+		return false, val, nil
+	})
+	return bState, err
 }
 
 // CalculateCandidates candidates sequence from optimistic spines for publication in block.
@@ -163,4 +219,8 @@ func ConsensusCopyUnpublishedChains(unpublishedChains []gwatCommon.HashArray) []
 		cpy[i] = chain.Copy()
 	}
 	return cpy
+}
+
+func GweiToWei(gwei uint64) *big.Int {
+	return new(big.Int).Mul(new(big.Int).SetUint64(gwei), new(big.Int).SetUint64(1000000000))
 }

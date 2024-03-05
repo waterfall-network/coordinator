@@ -127,12 +127,12 @@ func configureTestnet(ctx *cli.Context, cfg *Flags) {
 		params.UsePyrmontConfig()
 		params.UsePyrmontNetworkConfig()
 		cfg.PyrmontTestnet = true
-	} else if ctx.Bool(PraterTestnet.Name) {
-		log.Warn("Running on the Prater Testnet")
-		params.UsePraterConfig()
-		params.UsePraterNetworkConfig()
+	} else if ctx.Bool(Testnet8.Name) {
+		log.Warn("Running on the Testnet8")
+		params.UseTestnet8Config()
+		params.UseTestnet8NetworkConfig()
 	} else {
-		log.Warn("Running on Waterfall Consensus Testnet")
+		log.Warn("Running on Waterfall Consensus Mainnet")
 		params.UseMainnetConfig()
 	}
 }

@@ -29,7 +29,7 @@ var Commands = &cli.Command{
 				flags.DeletePublicKeysFlag,
 				features.Mainnet,
 				features.PyrmontTestnet,
-				features.PraterTestnet,
+				features.Testnet8,
 				cmd.AcceptTosFlag,
 			}),
 			Before: func(cliCtx *cli.Context) error {
@@ -63,7 +63,7 @@ var Commands = &cli.Command{
 				flags.GrpcRetryDelayFlag,
 				features.Mainnet,
 				features.PyrmontTestnet,
-				features.PraterTestnet,
+				features.Testnet8,
 				cmd.AcceptTosFlag,
 			}),
 			Before: func(cliCtx *cli.Context) error {
@@ -94,7 +94,7 @@ var Commands = &cli.Command{
 				flags.BackupPasswordFile,
 				features.Mainnet,
 				features.PyrmontTestnet,
-				features.PraterTestnet,
+				features.Testnet8,
 				cmd.AcceptTosFlag,
 			}),
 			Before: func(cliCtx *cli.Context) error {
@@ -122,7 +122,7 @@ var Commands = &cli.Command{
 				flags.ImportPrivateKeyFileFlag,
 				features.Mainnet,
 				features.PyrmontTestnet,
-				features.PraterTestnet,
+				features.Testnet8,
 				cmd.AcceptTosFlag,
 			}),
 			Before: func(cliCtx *cli.Context) error {
@@ -156,7 +156,7 @@ var Commands = &cli.Command{
 				flags.ExitAllFlag,
 				features.Mainnet,
 				features.PyrmontTestnet,
-				features.PraterTestnet,
+				features.Testnet8,
 				cmd.AcceptTosFlag,
 			}),
 			Before: func(cliCtx *cli.Context) error {

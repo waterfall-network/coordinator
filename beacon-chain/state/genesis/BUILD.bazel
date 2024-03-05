@@ -3,7 +3,7 @@ load("@prysm//tools/go:def.bzl", "go_library", "go_test")
 go_library(
     name = "go_default_library",
     srcs = ["genesis.go"],
-    embedsrcs = ["mainnet.ssz.snappy"],
+    embedsrcs = ["mainnet.ssz.snappy", "testnet8.ssz.snappy"],
     importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/genesis",
     visibility = ["//beacon-chain/db:__subpackages__"],
     deps = [
@@ -11,6 +11,8 @@ go_library(
         "//beacon-chain/state/v1:go_default_library",
         "//config/params:go_default_library",
         "//proto/prysm/v1alpha1:go_default_library",
+        "//io/file:go_default_library",
+        "@com_github_status_im_keycard_go//hexutils:go_default_library",
         "@com_github_golang_snappy//:go_default_library",
     ],
 )

@@ -115,6 +115,7 @@ func ProcessWithdrawal(
 		}
 
 		log.WithFields(logrus.Fields{
+			"stSlot":           beaconState.Slot(),
 			"VIndex":           fmt.Sprintf("%d", withdrawal.ValidatorIndex),
 			"PublicKey":        fmt.Sprintf("%#x", withdrawal.PublicKey),
 			"Epoch":            fmt.Sprintf("%d", withdrawal.Epoch),
@@ -123,7 +124,6 @@ func ProcessWithdrawal(
 			"availableBalance": availableBalance,
 			"WithdrawalOps":    len(upVal.WithdrawalOps),
 		}).Info("Withdrawal transition: success")
-
 	}
 	return beaconState, nil
 }
