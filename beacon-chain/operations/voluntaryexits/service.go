@@ -167,9 +167,9 @@ func (p *Pool) Verify(exit *ethpb.VoluntaryExit) error {
 	}
 	poolItm := p.pending[index]
 
-	if poolItm.Epoch != exit.Epoch {
-		return fmt.Errorf("mismatch epochs pool=%d received=%d", poolItm.Epoch, exit.Epoch)
-	}
+	//if poolItm.Epoch != exit.Epoch {
+	//	return fmt.Errorf("mismatch epochs pool=%d received=%d", poolItm.Epoch, exit.Epoch)
+	//}
 	if poolItm.ValidatorIndex != exit.ValidatorIndex {
 		return fmt.Errorf("mismatch validators indices pool=%d received=%d", poolItm.ValidatorIndex, exit.ValidatorIndex)
 	}

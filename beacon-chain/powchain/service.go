@@ -21,6 +21,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache/depositcache"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed"
 	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/voluntaryexits"
@@ -36,6 +37,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/clientstats"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/network"
+	ethpbv1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	prysmTime "gitlab.waterfall.network/waterfall/protocol/coordinator/time"
 	ethereum "gitlab.waterfall.network/waterfall/protocol/gwat"
@@ -152,6 +154,7 @@ type config struct {
 type Service struct {
 	connectedETH1           bool
 	isRunning               bool
+	pollConnActive          bool //if reconnecting to gwat
 	processingLock          sync.RWMutex
 	cfg                     *config
 	ctx                     context.Context
@@ -168,6 +171,10 @@ type Service struct {
 	lastReceivedMerkleIndex int64 // Keeps track of the last received index to prevent log spam.
 	runError                error
 	preGenesisState         state.BeaconState
+	//tracking handled beacon state
+	lastHandledBlock [32]byte          // last handled beacon block root
+	lastHandledSlot  ethTypes.Slot     // last handled beacon block slot
+	lastHandledState state.BeaconState // last handled beacon state
 }
 
 // NewService sets up a new instance with an ethclient when given a web3 endpoint as a string in the config.
@@ -227,7 +234,232 @@ func NewService(ctx context.Context, opts ...Option) (*Service, error) {
 	if err := s.initializeEth1Data(ctx, eth1Data); err != nil {
 		return nil, err
 	}
+
+	go s.StateTracker()
+
 	return s, nil
+}
+
+// Start a web3 service's main event loop.
+func (s *Service) StateTracker() {
+	chainEvtCh := make(chan *feed.Event, 0)
+	sub := s.cfg.stateNotifier.StateFeed().Subscribe(chainEvtCh)
+
+	defer sub.Unsubscribe()
+	for {
+		select {
+		case <-s.ctx.Done():
+			log.Info("Context closed, exiting goroutine")
+			return
+		//case err := <-sub.Err():
+		//	log.WithError(err).Warn("Exit by error")
+		//	return
+		case ev := <-chainEvtCh:
+			//work while syncing only, check condition
+			if ev.Type == statefeed.BlockProcessed {
+				data, ok := ev.Data.(*statefeed.BlockProcessedData)
+				if !ok {
+					continue
+				}
+
+				log.WithFields(logrus.Fields{
+					"s.lastHandledSlot":         s.lastHandledSlot,
+					"s.lastReceivedMerkleIndex": s.lastReceivedMerkleIndex,
+				}).Info("=== LogProcessing: StateTracker: EVT: BlockProcessed 000000000")
+
+				if !data.InitialSync {
+					continue
+				}
+				s.lastHandledSlot = data.Slot
+				s.lastHandledBlock = data.BlockRoot
+				depLen := len(data.SignedBlock.Block().Body().Deposits())
+				if depLen == 0 {
+					continue
+				}
+				st, err := s.cfg.stateGen.StateByRoot(s.ctx, data.BlockRoot)
+				if err != nil {
+					log.WithField("evtType", "BlockProcessed").Fatal("Event handler: retrieve state failed")
+				}
+
+				log.WithFields(logrus.Fields{
+					"evtType":             ev.Type,
+					"ad.Slot":             data.Slot,
+					"bd.Deposites":        len(data.SignedBlock.Block().Body().Deposits()),
+					"st.Eth1DepositIndex": st.Eth1DepositIndex(),
+					"cd.Block":            fmt.Sprintf("%#x", data.BlockRoot),
+				}).Info("=== LogProcessing: StateTracker: EVT: BlockProcessed")
+
+				baseDepIndex := st.Eth1DepositIndex() - uint64(depLen)
+				if s.lastReceivedMerkleIndex+1 < new(big.Int).SetUint64(baseDepIndex).Int64() {
+					handledCount, err := s.handleFinalizedDeposits(bytesutil.ToBytes32(data.SignedBlock.Block().ParentRoot()))
+					if err != nil {
+						log.WithError(err).WithFields(logrus.Fields{
+							"parent":       fmt.Sprintf("%#x", data.SignedBlock.Block().ParentRoot()),
+							"block":        fmt.Sprintf("%#x", data.BlockRoot),
+							"handledCount": handledCount,
+							"evtType":      "BlockProcessed",
+						}).Fatal("Event handler: rebuild merkle trie failed")
+					}
+				}
+
+				for i, deposit := range data.SignedBlock.Block().Body().Deposits() {
+					err = s.ProcessDepositBlock(deposit, baseDepIndex+uint64(i))
+					if err != nil {
+						log.WithError(err).WithField("evtType", "BlockProcessed").Fatal("Event handler: failed")
+					}
+				}
+
+				baseSpine := helpers.GetTerminalFinalizedSpine(st)
+				log.WithFields(logrus.Fields{
+					"_baseSpine":   fmt.Sprintf("%#x", baseSpine),
+					"ad.Slot":      data.Slot,
+					"bd.Deposites": len(data.SignedBlock.Block().Body().Deposits()),
+					"cd.Block":     fmt.Sprintf("%#x", data.BlockRoot),
+				}).Info("=== LogProcessing: StateTracker: EVT: BlockProcessed: baseSpine")
+			}
+
+			// first event when last finalized checkpoint reached
+			if ev.Type == statefeed.FinalizedCheckpoint {
+				data, ok := ev.Data.(*ethpbv1.EventFinalizedCheckpoint)
+				if !ok {
+					continue
+				}
+				s.lastHandledSlot = data.FinalizationSlot
+
+				log.WithFields(logrus.Fields{
+					"s.lastHandledSlot":         s.lastHandledSlot,
+					"s.lastReceivedMerkleIndex": s.lastReceivedMerkleIndex,
+					"IsDelegate":                params.BeaconConfig().IsDelegatingStakeSlot(s.lastHandledSlot),
+				}).Info("=== LogProcessing: StateTracker: EVT: FinalizedCheckpoint 000000000")
+
+				// check delegating stake fork active
+				if !params.BeaconConfig().IsDelegatingStakeSlot(s.lastHandledSlot) {
+					if s.pollConnActive {
+						handledCount, err := s.handleFinalizedDeposits(bytesutil.ToBytes32(data.Block))
+						log.WithError(err).WithFields(logrus.Fields{
+							"cpBlock":      fmt.Sprintf("%#x", data.Block),
+							"handledCount": handledCount,
+						}).Info("=== LogProcessing: StateTracker: EVT: FinalizedCheckpoint: handle finalized deposits 000")
+					}
+					continue
+				}
+
+				st, err := s.cfg.stateGen.StateByRoot(s.ctx, bytesutil.ToBytes32(data.Block))
+				if err != nil {
+					log.WithField("evtType", "FinalizedCheckpoint").Error("=== LogProcessing: Event handler: retrieve state failed")
+					continue
+				}
+
+				// if the first event recieved - reinit required props
+				if s.lastHandledState == nil {
+					//check gwat connection is established
+					if s.eth1DataFetcher == nil {
+						log.WithField("evtType", "FinalizedCheckpoint").Error("=== LogProcessing: Event handler: no gwat connection")
+						handledCount, err := s.handleFinalizedDeposits(bytesutil.ToBytes32(data.Block))
+						log.WithError(err).WithFields(logrus.Fields{
+							"cpBlock":      fmt.Sprintf("%#x", data.Block),
+							"handledCount": handledCount,
+						}).Info("=== LogProcessing: StateTracker: EVT: FinalizedCheckpoint: handle finalized deposits 111")
+						continue
+					}
+
+					prevRoot := bytesutil.ToBytes32(st.FinalizedCheckpoint().Root)
+					prevSt, err := s.cfg.stateGen.StateByRoot(s.ctx, prevRoot)
+					if err != nil {
+						if !s.pollConnActive {
+							// check gwat connection
+							head, err := s.eth1DataFetcher.HeaderByNumber(s.ctx, nil)
+							log.WithError(err).WithFields(logrus.Fields{
+								"head": fmt.Sprintf("%v", head),
+							}).Info("=== LogProcessing: pollConnActive: 000")
+							if err != nil {
+								go s.pollConnectionStatus(s.ctx)
+							}
+						}
+						log.WithField("evtType", "FinalizedCheckpoint").Error("Event handler: retrieve state failed")
+						continue
+					}
+
+					baseSpine := helpers.GetTerminalFinalizedSpine(prevSt)
+					prevHeader, err := s.eth1DataFetcher.HeaderByHash(s.ctx, baseSpine)
+					if err != nil {
+						log.WithError(err).Error("Could not fetch latest shard1 header")
+						handledCount, err := s.handleFinalizedDeposits(bytesutil.ToBytes32(data.Block))
+						log.WithError(err).WithFields(logrus.Fields{
+							"cpBlock":      fmt.Sprintf("%#x", data.Block),
+							"handledCount": handledCount,
+						}).Info("=== LogProcessing: StateTracker: EVT: FinalizedCheckpoint: handle finalized deposits 333")
+
+						if !s.pollConnActive {
+							// check gwat connection
+							head, err := s.eth1DataFetcher.HeaderByNumber(s.ctx, nil)
+							log.WithError(err).WithFields(logrus.Fields{
+								"head": fmt.Sprintf("%v", head),
+							}).Info("=== LogProcessing: pollConnActive: 111")
+							if err != nil {
+								go s.pollConnectionStatus(s.ctx)
+							}
+						}
+						continue
+					}
+					s.lastHandledState = prevSt
+					blockNumberGauge.Set(float64(prevHeader.Nr()))
+					s.latestEth1Data.BlockHeight = prevHeader.Nr()
+					s.latestEth1Data.BlockHash = baseSpine.Bytes()
+					s.latestEth1Data.BlockTime = prevHeader.Time
+					s.latestEth1Data.CpHash = baseSpine.Bytes()
+					s.latestEth1Data.CpNr = prevHeader.Nr()
+					s.latestEth1Data.LastRequestedBlock = s.followBlockHeight(s.ctx)
+				}
+
+				baseSpine := helpers.GetTerminalFinalizedSpine(st)
+				log.WithFields(logrus.Fields{
+					"_baseSpine":                  fmt.Sprintf("%#x", baseSpine),
+					"lState.DepositIndex":         fmt.Sprintf("%d", s.lastHandledState.Eth1DepositIndex()),
+					"lastReceivedMerkleIndex":     fmt.Sprintf("%d", s.lastReceivedMerkleIndex),
+					"ad.Epoch":                    data.Epoch,
+					"bd.Block":                    fmt.Sprintf("%#x", data.Block),
+					"cd.State":                    fmt.Sprintf("%#x", data.State),
+					"st.Slot":                     st.Slot(),
+					"st.FinalizedCheckpointEpoch": st.FinalizedCheckpointEpoch(),
+					"d.isOptimistic":              data.ExecutionOptimistic,
+				}).Info("=== LogProcessing: StateTracker: EVT: FinalizedCheckpoint")
+
+				header, err := s.eth1DataFetcher.HeaderByHash(s.ctx, baseSpine)
+				if err != nil {
+					log.WithError(err).WithFields(logrus.Fields{
+						"baseSpine": fmt.Sprintf("%#x", baseSpine),
+						"st.Slot":   st.Slot(),
+					}).Error("=== LogProcessing: StateTracker: EVT: FinalizedCheckpoint: Could not fetch latest shard1 header")
+
+					handledCount, err := s.handleFinalizedDeposits(bytesutil.ToBytes32(data.Block))
+					log.WithError(err).WithFields(logrus.Fields{
+						"cpBlock":      fmt.Sprintf("%#x", data.Block),
+						"handledCount": handledCount,
+					}).Info("=== LogProcessing: StateTracker: EVT: FinalizedCheckpoint: handle finalized deposits 444")
+
+					if !s.pollConnActive {
+						// check gwat connection
+						head, err := s.eth1DataFetcher.HeaderByNumber(s.ctx, nil)
+						log.WithError(err).WithFields(logrus.Fields{
+							"head": fmt.Sprintf("%v", head),
+						}).Info("=== LogProcessing: pollConnActive: 222")
+						if err != nil {
+							go s.pollConnectionStatus(s.ctx)
+						}
+					}
+					continue
+				}
+				s.processBlockHeader(header, &baseSpine)
+				s.handleETH1FollowDistance()
+				s.checkDefaultEndpoint(s.ctx)
+
+				s.lastHandledBlock = bytesutil.ToBytes32(data.Block)
+				//s.lastHandledSlot = st.Slot()
+				s.lastHandledState = st
+			}
+		}
+	}
 }
 
 // Start a web3 service's main event loop.
@@ -254,9 +486,7 @@ func (s *Service) Start() {
 	// Poll the execution client connection and fallback if errors occur.
 	s.pollConnectionStatus(s.ctx)
 
-	// Check transition configuration for the engine API client in the background.
-	go s.checkTransitionConfiguration(s.ctx, make(chan *feed.Event, 1))
-
+	// old logic (before delegating stake fork)
 	go s.run(s.ctx.Done())
 }
 
@@ -379,6 +609,9 @@ func (s *Service) ETH1ConnectionErrors() []error {
 // SECONDS_PER_ETH1_BLOCK * ETH1_FOLLOW_DISTANCE <= current_unix_time
 func (s *Service) followBlockHeight(_ context.Context) uint64 {
 	latestValidBlock := uint64(0)
+	if params.BeaconConfig().IsDelegatingStakeSlot(s.lastHandledSlot) {
+		return s.latestEth1Data.BlockHeight
+	}
 	if s.latestEth1Data.CpNr > params.BeaconConfig().Eth1FollowDistance {
 		latestValidBlock = s.latestEth1Data.CpNr - params.BeaconConfig().Eth1FollowDistance
 	}
@@ -444,7 +677,7 @@ func (s *Service) initDepositCaches(ctx context.Context, ctrs []*ethpb.DepositCo
 
 // processBlockHeader adds a newly observed eth1 block to the block cache and
 // updates the latest blockHeight, blockHash, and blockTime properties of the service.
-func (s *Service) processBlockHeader(header *gwatTypes.Header) {
+func (s *Service) processBlockHeader(header *gwatTypes.Header, hash *gwatCommon.Hash) {
 	defer safelyHandlePanic()
 	if header.Nr() == 0 && header.Height != 0 {
 		log.WithFields(logrus.Fields{
@@ -454,15 +687,21 @@ func (s *Service) processBlockHeader(header *gwatTypes.Header) {
 		}).Warn("Latest shard1 chain event: skipping not finalized block")
 		return
 	}
-	if s.latestEth1Data.BlockHeight > header.CpNumber {
+	if s.latestEth1Data.BlockHeight > header.Nr() {
 		return
 	}
-	blockNumberGauge.Set(float64(header.Nr()))
-	s.latestEth1Data.BlockHeight = header.CpNumber
-	s.latestEth1Data.BlockHash = header.CpHash.Bytes()
+
+	//note: something wrong with calculating hash from header
+	s.latestEth1Data.BlockHash = header.Hash().Bytes()
+	if hash != nil {
+		s.latestEth1Data.BlockHash = hash.Bytes()
+	}
+	s.latestEth1Data.BlockHeight = header.Nr()
 	s.latestEth1Data.BlockTime = header.Time
 	s.latestEth1Data.CpHash = header.CpHash.Bytes()
 	s.latestEth1Data.CpNr = header.CpNumber
+
+	blockNumberGauge.Set(float64(header.Nr()))
 
 	log.WithFields(logrus.Fields{
 		"slot":        header.Slot,
@@ -532,13 +771,6 @@ func (s *Service) handleETH1FollowDistance() {
 	defer safelyHandlePanic()
 	ctx := s.ctx
 
-	//// use a 5 minutes timeout for block time, because the max mining time is 278 sec (block 7208027)
-	//// (analyzed the time of the block from 2018-09-01 to 2019-02-13)
-	//fiveMinutesTimeout := prysmTime.Now().Add(-5 * time.Minute)
-	//// check that web3 client is syncing
-	//if time.Unix(int64(s.latestEth1Data.BlockTime), 0).Before(fiveMinutesTimeout) {
-	//	log.Warn("Execution client is not syncing")
-	//}
 	if !s.chainStartData.Chainstarted {
 		if err := s.checkBlockNumberForChainStart(ctx, s.latestEth1Data.LastRequestedBlock); err != nil {
 			s.runError = err
@@ -546,15 +778,7 @@ func (s *Service) handleETH1FollowDistance() {
 			return
 		}
 	}
-	// If the last requested block has not changed,
-	// we do not request batched logs as this means there are no new
-	// logs for the powchain service to process. Also is a potential
-	// failure condition as would mean we have not respected the protocol
-	// threshold.
-	if s.latestEth1Data.LastRequestedBlock == s.latestEth1Data.BlockHeight && s.latestEth1Data.BlockHeight > 0 {
-		log.Error("Beacon node is not respecting the follow distance")
-		return
-	}
+
 	if err := s.requestBatchedHeadersAndLogs(ctx); err != nil {
 		s.runError = err
 		log.Error(err)
@@ -599,22 +823,23 @@ func (s *Service) initPOWService() {
 				}).Fatal("Latest shard1 block is not finalized")
 			}
 
-			s.latestEth1Data.BlockHeight = header.CpNumber
-			s.latestEth1Data.BlockHash = header.CpHash.Bytes()
-			s.latestEth1Data.BlockTime = header.Time
-			s.latestEth1Data.CpHash = header.CpHash.Bytes()
-			s.latestEth1Data.CpNr = header.CpNumber
-
-			//if params.BeaconConfig().IsDelegatingStakeSlot(slots.CurrentSlot(header.Slot)) {
-			//	s.latestEth1Data.LastRequestedBlock = s.followBlockHeight(ctx)
-			//}
+			//s.latestEth1Data.BlockHeight = header.CpNumber
+			//s.latestEth1Data.BlockHash = header.CpHash.Bytes()
+			//s.latestEth1Data.BlockTime = header.Time
+			//s.latestEth1Data.CpHash = header.CpHash.Bytes()
+			//s.latestEth1Data.CpNr = header.CpNumber
 
 			log.WithFields(logrus.Fields{
-				"EthLFinNr":            header.Nr(),
-				"EthLFinHash":          fmt.Sprintf("%#x", header.Hash()),
-				"lastEth.LastReqBlock": s.latestEth1Data.LastRequestedBlock,
-				"lastEth.CpNr":         s.latestEth1Data.CpNr,
-			}).Info("EvtLog: initPOWService")
+				"EthLFinNr":                              header.Nr(),
+				"s.preGenesisState.Eth1Data().BlockHash": fmt.Sprintf("%#x", s.preGenesisState.Eth1Data().BlockHash),
+				//"EthLFinHash":          fmt.Sprintf("%#x", header.Hash()),
+				"lastEth.LastReqBlock":    s.latestEth1Data.LastRequestedBlock,
+				"lastEth.CpNr":            s.latestEth1Data.CpNr,
+				"lastEth.CpHash":          fmt.Sprintf("%#x", s.latestEth1Data.CpHash),
+				"lastEth.BlockHeight":     s.latestEth1Data.BlockHeight,
+				"depositTrie.NumOfItems":  s.depositTrie.NumOfItems(),
+				"lastReceivedMerkleIndex": s.lastReceivedMerkleIndex,
+			}).Info("=== LogProcessing: initPOWService: 00000")
 
 			if err := s.processPastLogs(ctx); err != nil {
 				s.retryExecutionClientConnection(ctx, err)
@@ -640,6 +865,23 @@ func (s *Service) initPOWService() {
 func (s *Service) run(done <-chan struct{}) {
 	s.runError = nil
 
+	// check delegating stake fork active
+	if params.BeaconConfig().IsDelegatingStakeSlot(s.lastHandledSlot) {
+		log.WithFields(logrus.Fields{
+			"slot":                        s.lastHandledSlot,
+			"s.preGenesisState.BlockHash": fmt.Sprintf("%#x", s.preGenesisState.Eth1Data().BlockHash),
+			//"EthLFinHash":          fmt.Sprintf("%#x", header.Hash()),
+			"lastEth.LastReqBlock":    s.latestEth1Data.LastRequestedBlock,
+			"lastEth.CpNr":            s.latestEth1Data.CpNr,
+			"lastEth.CpHash":          fmt.Sprintf("%#x", s.latestEth1Data.CpHash),
+			"lastEth.BlockHeight":     s.latestEth1Data.BlockHeight,
+			"depositTrie.NumOfItems":  s.depositTrie.NumOfItems(),
+			"lastReceivedMerkleIndex": s.lastReceivedMerkleIndex,
+		}).Info("=== LogProcessing: run: start the delegating stake fork")
+
+		return
+	}
+
 	s.initPOWService()
 
 	chainstartTicker := time.NewTicker(logPeriod)
@@ -657,6 +899,36 @@ func (s *Service) run(done <-chan struct{}) {
 			log.Info("Context closed, exiting goroutine")
 			return
 		case <-s.headTicker.C:
+			// check delegating stake fork active
+			//s.lastHandledSlot = slots.CurrentSlot(s.preGenesisState.GenesisTime())
+			if params.BeaconConfig().IsDelegatingStakeSlot(s.lastHandledSlot) {
+				log.WithFields(logrus.Fields{
+					"slot":                        s.lastHandledSlot,
+					"s.preGenesisState.BlockHash": fmt.Sprintf("%#x", s.preGenesisState.Eth1Data().BlockHash),
+					//"EthLFinHash":          fmt.Sprintf("%#x", header.Hash()),
+					"lastEth.LastReqBlock":    s.latestEth1Data.LastRequestedBlock,
+					"lastEth.CpNr":            s.latestEth1Data.CpNr,
+					"lastEth.CpHash":          fmt.Sprintf("%#x", s.latestEth1Data.CpHash),
+					"lastEth.BlockHeight":     s.latestEth1Data.BlockHeight,
+					"depositTrie.NumOfItems":  s.depositTrie.NumOfItems(),
+					"lastReceivedMerkleIndex": s.lastReceivedMerkleIndex,
+				}).Info("=== LogProcessing: run ticker: start the delegating stake fork")
+				return
+			}
+
+			log.WithFields(logrus.Fields{
+				"slot":                        s.lastHandledSlot,
+				"IsDelegate":                  params.BeaconConfig().IsDelegatingStakeSlot(s.lastHandledSlot),
+				"s.preGenesisState.BlockHash": fmt.Sprintf("%#x", s.preGenesisState.Eth1Data().BlockHash),
+				//"EthLFinHash":          fmt.Sprintf("%#x", header.Hash()),
+				"lastEth.LastReqBlock":    s.latestEth1Data.LastRequestedBlock,
+				"lastEth.CpNr":            s.latestEth1Data.CpNr,
+				"lastEth.CpHash":          fmt.Sprintf("%#x", s.latestEth1Data.CpHash),
+				"lastEth.BlockHeight":     s.latestEth1Data.BlockHeight,
+				"depositTrie.NumOfItems":  s.depositTrie.NumOfItems(),
+				"lastReceivedMerkleIndex": s.lastReceivedMerkleIndex,
+			}).Info("=== LogProcessing: run ticker")
+
 			head, err := s.eth1DataFetcher.HeaderByNumber(s.ctx, nil)
 			if err != nil {
 				s.pollConnectionStatus(s.ctx)
@@ -666,13 +938,20 @@ func (s *Service) run(done <-chan struct{}) {
 			if head.CpHash == (gwatCommon.Hash{}) {
 				//if genesis
 				if head.Height == 0 {
-					head.CpHash = head.Hash()
+					gst, err := s.cfg.beaconDB.GenesisState(s.ctx)
+					if err != nil {
+						log.Fatal(err)
+					}
+					if gst == nil || gst.IsNil() {
+						log.Fatal("cannot create genesis state: no shard1 http endpoint defined 0")
+					}
+					head.CpHash = gwatCommon.BytesToHash(gst.Eth1Data().BlockHash)
 				} else {
 					log.Error("Could not fetch latest shard1 header: bad header")
 					continue
 				}
 			}
-			s.processBlockHeader(head)
+			s.processBlockHeader(head, nil)
 			s.handleETH1FollowDistance()
 			s.checkDefaultEndpoint(s.ctx)
 		case <-chainstartTicker.C:

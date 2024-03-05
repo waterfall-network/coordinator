@@ -143,7 +143,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 				"ValidatorIndex": fmt.Sprintf("%d", itm.ValidatorIndex),
 			}).Info("onBlock: withdrawal")
 
-			if !s.IsGwatSynchronizing() && params.BeaconConfig().IsDelegatingStakeSlot(signed.Block().Slot()) {
+			if !s.IsGwatSynchronizing() && !s.isSynchronizing() && params.BeaconConfig().IsDelegatingStakeSlot(signed.Block().Slot()) {
 				if err := s.cfg.WithdrawalPool.Verify(itm); err != nil {
 					log.WithError(err).WithFields(logrus.Fields{
 						"i":              i,
@@ -153,7 +153,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 						"InitTxHash":     fmt.Sprintf("%#x", itm.InitTxHash),
 						"PublicKey":      fmt.Sprintf("%#x", itm.PublicKey),
 						"ValidatorIndex": fmt.Sprintf("%d", itm.ValidatorIndex),
-					}).Error("onBlock:: withdrawal")
+					}).Error("onBlock: withdrawal")
 					return err
 				}
 			}
@@ -170,7 +170,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 				"ValidatorIndex": fmt.Sprintf("%d", itm.ValidatorIndex),
 			}).Info("onBlock: exit")
 
-			if !s.IsGwatSynchronizing() && params.BeaconConfig().IsDelegatingStakeSlot(signed.Block().Slot()) {
+			if !s.IsGwatSynchronizing() && !s.isSynchronizing() && params.BeaconConfig().IsDelegatingStakeSlot(signed.Block().Slot()) {
 				if err := s.cfg.ExitPool.Verify(itm); err != nil {
 					log.WithError(err).WithFields(logrus.Fields{
 						"i":              i,
@@ -178,7 +178,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 						"Epoch":          fmt.Sprintf("%d", itm.Epoch),
 						"InitTxHash":     fmt.Sprintf("%#x", itm.InitTxHash),
 						"ValidatorIndex": fmt.Sprintf("%d", itm.ValidatorIndex),
-					}).Error("onBlock:: exit")
+					}).Error("onBlock: exit")
 					return err
 				}
 			}
@@ -380,6 +380,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 			BlockRoot:   blockRoot,
 			SignedBlock: signed,
 			Verified:    true,
+			InitialSync: false,
 		},
 	})
 
@@ -439,6 +440,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 					Block:               postState.FinalizedCheckpoint().Root,
 					State:               signed.Block().StateRoot(),
 					ExecutionOptimistic: isOptimistic,
+					FinalizationSlot:    signed.Block().Slot(),
 				},
 			})
 
