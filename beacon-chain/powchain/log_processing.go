@@ -148,7 +148,7 @@ func (s *Service) ProcessExitLog(ctx context.Context, exitLog gwatTypes.Log) err
 
 	log.WithError(err).WithFields(logrus.Fields{
 		"valIndex":    valIndex,
-		"exitEpoch":   exitEpoch,
+		"exitEpoch":   *exitEpoch,
 		"pubkey":      fmt.Sprintf("%#x", pubkey),
 		"creatorAddr": fmt.Sprintf("%#x", creatorAddr),
 		"initTxHash":  fmt.Sprintf("%#x", exitLog.TxHash),
@@ -162,19 +162,29 @@ func (s *Service) ProcessExitLog(ctx context.Context, exitLog gwatTypes.Log) err
 	if !params.BeaconConfig().IsDelegatingStakeSlot(s.lastHandledSlot) {
 		curSlot = slots.CurrentSlot(s.cfg.finalizedStateAtStartup.GenesisTime())
 	}
-	curEpoch := slots.ToEpoch(curSlot)
 
-	if exitEpoch != nil && *exitEpoch > uint64(curEpoch) {
-		curEpoch = types.Epoch(*exitEpoch)
+	valExitEpoch := slots.ToEpoch(curSlot)
+	if !params.BeaconConfig().IsDelegatingStakeSlot(s.lastHandledSlot) {
+		if exitEpoch != nil && *exitEpoch > uint64(valExitEpoch) {
+			valExitEpoch = types.Epoch(*exitEpoch)
+		}
+	} else {
+		valExitEpoch += 2
 	}
 
 	exit := &ethpb.VoluntaryExit{
-		Epoch:          curEpoch,
+		Epoch:          valExitEpoch,
 		ValidatorIndex: types.ValidatorIndex(valIndex),
 		InitTxHash:     exitLog.TxHash.Bytes(),
 	}
 
 	s.cfg.exitPool.InsertVoluntaryExitByGwat(ctx, exit)
+
+	log.WithError(err).WithFields(logrus.Fields{
+		"exit.valIndex":   exit.ValidatorIndex,
+		"exit.Epoch":      exit.Epoch,
+		"exit.initTxHash": fmt.Sprintf("%#x", exit.InitTxHash),
+	}).Info("Processing exit: add to pool")
 
 	return nil
 }

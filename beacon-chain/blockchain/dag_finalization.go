@@ -569,8 +569,9 @@ func (s *Service) collectValidatorSyncData(ctx context.Context, st state.BeaconS
 				InitTxHash: gwatCommon.BytesToHash(validator.ActivationHash),
 			})
 			log.WithFields(logrus.Fields{
-				"validator.ActivationEpoch": validator.ActivationEpoch,
 				"currentEpoch":              currentEpoch,
+				"validator.ActivationEpoch": validator.ActivationEpoch,
+				"InitTxHash":                fmt.Sprintf("%#x", validator.ActivationHash),
 			}).Info("activate params")
 		}
 		// deactivation
@@ -585,8 +586,9 @@ func (s *Service) collectValidatorSyncData(ctx context.Context, st state.BeaconS
 			})
 
 			log.WithFields(logrus.Fields{
-				"validator.ExitEpoch": validator.ExitEpoch,
 				"currentEpoch":        currentEpoch,
+				"validator.ExitEpoch": validator.ExitEpoch,
+				"InitTxHash":          fmt.Sprintf("%#x", validator.ExitHash),
 			}).Info("Exit params")
 		}
 	}
@@ -629,10 +631,11 @@ func (s *Service) collectValidatorSyncData(ctx context.Context, st state.BeaconS
 			}
 			validatorSyncData = append(validatorSyncData, vsd)
 			log.WithFields(logrus.Fields{
-				"st.Slot":   st.Slot(),
-				"wop.Slot":  wop.Slot,
-				"valSyncOp": vsd.Print(),
-				"exit":      validator.ExitEpoch <= currentEpoch,
+				"st.Slot":    st.Slot(),
+				"wop.Slot":   wop.Slot,
+				"valSyncOp":  vsd.Print(),
+				"exit":       validator.ExitEpoch <= currentEpoch,
+				"InitTxHash": fmt.Sprintf("%#x", wop.Hash),
 			}).Info("Withdrawals: Update balance params")
 		}
 	}
