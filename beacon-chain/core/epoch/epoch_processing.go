@@ -310,43 +310,6 @@ func ProcessEffectiveBalanceUpdates(state state.BeaconState) (state.BeaconState,
 	return state, nil
 }
 
-func ProcessWithdrawalOps(bState state.BeaconState) (state.BeaconState, error) {
-	//todo fix call it onBlock
-	//// Note: the operations totally removes withdrawals data over all bState
-	//// including that should contain it.
-	//var (
-	//	minSlot         types.Slot
-	//	staleAfterSlots = 100 * params.BeaconConfig().SlotsPerEpoch
-	//)
-	//if bState.Slot() > staleAfterSlots {
-	//	minSlot = bState.Slot() - staleAfterSlots
-	//}
-	//err := bState.ApplyToEveryValidator(func(idx int, val *ethpb.Validator) (bool, *ethpb.Validator, error) {
-	//	upWops := make([]*ethpb.WithdrawalOp, 0, len(val.WithdrawalOps))
-	//	for _, wop := range val.WithdrawalOps {
-	//		if wop.Slot >= minSlot {
-	//			upWops = append(upWops, wop)
-	//		} else {
-	//			logrus.WithFields(logrus.Fields{
-	//				"rm":            !(wop.Slot >= minSlot),
-	//				"bState.Slot":   fmt.Sprintf("%d", bState.Slot()),
-	//				"w.Slot":        fmt.Sprintf("%d", wop.Slot),
-	//				"w.Amount":      fmt.Sprintf("%d", wop.Amount),
-	//				"w.Hash":        fmt.Sprintf("%#x", wop.Hash),
-	//				"val.Index":     fmt.Sprintf("%d", idx),
-	//				"val.PublicKey": fmt.Sprintf("%#x", val.PublicKey),
-	//			}).Info("WithdrawalOps transition: rm stale (epoch proc)")
-	//		}
-	//	}
-	//	isDirty := len(val.WithdrawalOps) != len(upWops)
-	//	if isDirty {
-	//		val.WithdrawalOps = upWops
-	//	}
-	//	return isDirty, val, nil
-	//})
-	return bState, nil
-}
-
 // ProcessSlashingsReset processes the total slashing balances updates during epoch processing.
 //
 // Spec pseudocode definition:
@@ -478,11 +441,6 @@ func ProcessFinalUpdates(state state.BeaconState) (state.BeaconState, error) {
 	state, err = ProcessSlashingsReset(state)
 	if err != nil {
 		return nil, err
-	}
-
-	state, err = ProcessWithdrawalOps(state)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not process withdrawal")
 	}
 
 	// Set RANDAO mix.

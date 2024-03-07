@@ -12,7 +12,7 @@ go_library(
         "minimal_config.go",
         "network_config.go",
         "testnet_e2e_config.go",
-        "testnet_prater_config.go",
+        "testnet_testnet8_config.go",
         "testnet_pyrmont_config.go",
         "testutils.go",
         "values.go",
@@ -41,7 +41,7 @@ go_test(
         "config_test.go",
         "loader_test.go",
         "testnet_config_test.go",
-        "testnet_prater_config_test.go",
+        "testnet_testnet8_config_test.go",
     ],
     data = glob(["*.yaml"]) + [
         "@consensus_spec//:spec_data",

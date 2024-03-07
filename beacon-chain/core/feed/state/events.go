@@ -38,6 +38,8 @@ type BlockProcessedData struct {
 	SignedBlock block.SignedBeaconBlock
 	// Verified is true if the block's BLS contents have been verified.
 	Verified bool
+	// InitialSync is true while initial-sync.
+	InitialSync bool
 }
 
 // ChainStartedData is the data sent with ChainStarted events.

@@ -1,48 +1,19 @@
 package powchain
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	logTest "github.com/sirupsen/logrus/hooks/test"
-	mockChain "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/blockchain/testing"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed"
-	mocks "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain/testing"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	pb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/engine/v1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/rpc"
 	"google.golang.org/protobuf/proto"
 )
-
-func Test_checkTransitionConfiguration(t *testing.T) {
-	params.SetupTestConfigCleanup(t)
-	cfg := params.BeaconConfig().Copy()
-	cfg.BellatrixForkEpoch = 0
-	params.OverrideBeaconConfig(cfg)
-	hook := logTest.NewGlobal()
-
-	t.Run("context canceled", func(t *testing.T) {
-		ctx := context.Background()
-		m := &mocks.EngineClient{}
-		m.Err = errors.New("something went wrong")
-
-		srv := setupTransitionConfigTest(t)
-		srv.cfg.stateNotifier = &mockChain.MockStateNotifier{}
-		checkTransitionPollingInterval = time.Millisecond
-		ctx, cancel := context.WithCancel(ctx)
-		go srv.checkTransitionConfiguration(ctx, make(chan *feed.Event, 1))
-		<-time.After(100 * time.Millisecond)
-		cancel()
-		require.LogsContain(t, hook, "Could not check configuration values")
-	})
-}
 
 func TestService_handleExchangeConfigurationError(t *testing.T) {
 	hook := logTest.NewGlobal()

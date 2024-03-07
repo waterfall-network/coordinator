@@ -236,7 +236,7 @@ func (s *Service) GetHeaderByNumber(ctx context.Context, nr *big.Int) (*gwatType
 }
 
 // GetDepositCount retrieves current gwat deposit count
-func (s *Service) GetDepositCount(ctx context.Context) (uint64, error) {
+func (s *Service) GetDepositCount(ctx context.Context, blockNrOrHash *rpc.BlockNumberOrHash) (uint64, error) {
 	ctx, span := trace.StartSpan(ctx, "powchain.dag-api-client.GetDepositCount")
 	defer span.End()
 	defer func(start time.Time) {
@@ -251,7 +251,7 @@ func (s *Service) GetDepositCount(ctx context.Context) (uint64, error) {
 		ctx,
 		&result,
 		ExecutionDepositCountMethod,
-		nil,
+		blockNrOrHash,
 	)
 	if err != nil {
 		log.WithError(err).Error("GetDepositCount")

@@ -23,7 +23,7 @@ var Commands = &cli.Command{
 				flags.SlashingProtectionExportDirFlag,
 				features.Mainnet,
 				features.PyrmontTestnet,
-				features.PraterTestnet,
+				features.Testnet8,
 				cmd.AcceptTosFlag,
 			}),
 			Before: func(cliCtx *cli.Context) error {
@@ -48,7 +48,7 @@ var Commands = &cli.Command{
 				flags.SlashingProtectionJSONFileFlag,
 				features.Mainnet,
 				features.PyrmontTestnet,
-				features.PraterTestnet,
+				features.Testnet8,
 				cmd.AcceptTosFlag,
 			}),
 			Before: func(cliCtx *cli.Context) error {

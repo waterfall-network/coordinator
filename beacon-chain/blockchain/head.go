@@ -124,6 +124,11 @@ func (s *Service) saveHead(ctx context.Context, headRoot [32]byte, headBlock blo
 		return err
 	}
 	if headRoot == bytesutil.ToBytes32(r) {
+		go func() {
+			if !s.IsGwatSynchronizing() && headRoot != params.BeaconConfig().ZeroHash {
+				s.newHeadCh <- s.head
+			}
+		}()
 		return nil
 	}
 	if err := helpers.BeaconBlockIsNil(headBlock); err != nil {

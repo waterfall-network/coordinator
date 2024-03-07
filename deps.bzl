@@ -4405,12 +4405,13 @@ def prysm_deps():
     )
     go_repository(
         name = "network_waterfall_gitlab_waterfall_protocol_gwat",
+        build_naming_convention = "go_default_library",
         build_directives = [
             "gazelle:resolve go github.com/karalabe/usb @prysm//third_party/usb:go_default_library",
         ],
         importpath = "gitlab.waterfall.network/waterfall/protocol/gwat",
-        sum = "h1:KU4HyawshuMdIIwhvlCxe7lir3GvU4zkw60yj4+YmC8=",
-        version = "v0.8.6",
+        sum = "h1:sO1/uvMBOZeGWI+q1nE5p6qHyojqOfkrmgHrrgGLPcE=",
+        version = "v0.9.0",
 
         ## to use local repo comment `sum` & `version`, and uncomment follows below
         #vcs = "git",

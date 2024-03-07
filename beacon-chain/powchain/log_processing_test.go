@@ -411,7 +411,6 @@ func TestProcessETH2GenesisLog_CorrectNumOfDeposits(t *testing.T) {
 	bConfig.SecondsPerETH1Block = 10
 	params.OverrideBeaconConfig(bConfig)
 	nConfig := params.BeaconNetworkConfig()
-	nConfig.ContractDeploymentBlock = 0
 	params.OverrideBeaconNetworkConfig(nConfig)
 
 	testAcc.Backend.Commit()
@@ -508,7 +507,6 @@ func TestProcessETH2GenesisLog_LargePeriodOfNoLogs(t *testing.T) {
 	bConfig.SecondsPerETH1Block = 10
 	params.OverrideBeaconConfig(bConfig)
 	nConfig := params.BeaconNetworkConfig()
-	nConfig.ContractDeploymentBlock = 0
 	params.OverrideBeaconNetworkConfig(nConfig)
 
 	testAcc.Backend.Commit()

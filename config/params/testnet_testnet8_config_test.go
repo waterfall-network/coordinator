@@ -6,13 +6,13 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 )
 
-func TestPraterConfigMatchesUpstreamYaml(t *testing.T) {
+func TestTestnet8ConfigMatchesUpstreamYaml(t *testing.T) {
 	presetFPs := presetsFilePath(t, "mainnet")
 	for _, fp := range presetFPs {
 		params.LoadChainConfigFile(fp, nil)
 	}
-	configFP := testnetConfigFilePath(t, "prater")
+	configFP := testnetConfigFilePath(t, "testnet8")
 	params.LoadChainConfigFile(configFP, nil)
 	fields := fieldsFromYamls(t, append(presetFPs, configFP))
-	assertYamlFieldsMatch(t, "prater", fields, params.BeaconConfig(), params.PraterConfig())
+	assertYamlFieldsMatch(t, "testnet8", fields, params.BeaconConfig(), params.Testnet8Config())
 }

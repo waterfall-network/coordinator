@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"math/big"
 	"strings"
 	"time"
 
@@ -351,18 +350,12 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 // runProcessDagFinalize This routine processes gwat finalization process.
 func (s *Service) runProcessDagFinalize() {
 	go func() {
-		var headRoot []byte
 		for {
 			select {
 			case <-s.ctx.Done():
 				log.Info("Dag finalization: context done")
 				return
 			case newHead := <-s.newHeadCh:
-				if bytes.Equal(headRoot, newHead.root[:]) {
-					log.Info("Dag finalization: skip (head duplicated)")
-					continue
-				}
-
 				err := s.processDagFinalization(newHead.state, gwatTypes.NoSync)
 				if err != nil {
 					// reset if failed
@@ -576,8 +569,9 @@ func (s *Service) collectValidatorSyncData(ctx context.Context, st state.BeaconS
 				InitTxHash: gwatCommon.BytesToHash(validator.ActivationHash),
 			})
 			log.WithFields(logrus.Fields{
-				"validator.ActivationEpoch": validator.ActivationEpoch,
 				"currentEpoch":              currentEpoch,
+				"validator.ActivationEpoch": validator.ActivationEpoch,
+				"InitTxHash":                fmt.Sprintf("%#x", validator.ActivationHash),
 			}).Info("activate params")
 		}
 		// deactivation
@@ -592,8 +586,9 @@ func (s *Service) collectValidatorSyncData(ctx context.Context, st state.BeaconS
 			})
 
 			log.WithFields(logrus.Fields{
-				"validator.ExitEpoch": validator.ExitEpoch,
 				"currentEpoch":        currentEpoch,
+				"validator.ExitEpoch": validator.ExitEpoch,
+				"InitTxHash":          fmt.Sprintf("%#x", validator.ExitHash),
 			}).Info("Exit params")
 		}
 	}
@@ -617,21 +612,30 @@ func (s *Service) collectValidatorSyncData(ctx context.Context, st state.BeaconS
 			if wop.Slot < minSlot {
 				continue
 			}
-			//gwei to wei
-			amt := new(big.Int).Mul(new(big.Int).SetUint64(wop.Amount), new(big.Int).SetUint64(1000000000))
+			balance := validator.EffectiveBalance
+			if validator.ExitEpoch <= currentEpoch {
+				//if validator is deactivated
+				balance, err = st.BalanceAtIndex(types.ValidatorIndex(idx))
+				if err != nil {
+					return nil, err
+				}
+			}
 			vsd := &gwatTypes.ValidatorSync{
 				OpType:     gwatTypes.UpdateBalance,
 				ProcEpoch:  uint64(currentEpoch) + 1,
 				Index:      uint64(idx),
 				Creator:    gwatCommon.BytesToAddress(validator.CreatorAddress),
-				Amount:     amt,
+				Amount:     helpers.GweiToWei(wop.Amount),
 				InitTxHash: gwatCommon.BytesToHash(wop.Hash),
+				Balance:    helpers.GweiToWei(balance),
 			}
 			validatorSyncData = append(validatorSyncData, vsd)
 			log.WithFields(logrus.Fields{
-				"st.Slot":   st.Slot(),
-				"wop.Slot":  wop.Slot,
-				"valSyncOp": vsd.Print(),
+				"st.Slot":    st.Slot(),
+				"wop.Slot":   wop.Slot,
+				"valSyncOp":  vsd.Print(),
+				"exit":       validator.ExitEpoch <= currentEpoch,
+				"InitTxHash": fmt.Sprintf("%#x", wop.Hash),
 			}).Info("Withdrawals: Update balance params")
 		}
 	}

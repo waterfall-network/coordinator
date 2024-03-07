@@ -110,13 +110,13 @@ func (s *State) MigrateToCold(ctx context.Context, fRoot [32]byte) error {
 	}
 	if ok {
 		s.SaveFinalizedState(fSlot, fRoot, fInfo.state)
-		if err := s.beaconDB.SaveState(ctx, fInfo.state, fRoot); err != nil {
-			return err
-		}
-		log.WithFields(logrus.Fields{
-			"slot": fInfo.state.Slot(),
-			"root": fmt.Sprintf("%#x", fRoot),
-		}).Info("Saved state of fin cp in DB")
+		//if err := s.beaconDB.SaveState(ctx, fInfo.state, fRoot); err != nil {
+		//	return err
+		//}
+		//log.WithFields(logrus.Fields{
+		//	"slot": fInfo.state.Slot(),
+		//	"root": fmt.Sprintf("%#x", fRoot),
+		//}).Info("Saved state of fin cp in DB")
 	}
 
 	return nil

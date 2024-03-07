@@ -104,10 +104,6 @@ func ProcessEpoch(ctx context.Context, state state.BeaconState) (state.BeaconSta
 	if err != nil {
 		return nil, err
 	}
-	state, err = e.ProcessWithdrawalOps(state)
-	if err != nil {
-		return nil, err
-	}
 	state, err = e.ProcessRandaoMixesReset(state)
 	if err != nil {
 		return nil, err
@@ -130,6 +126,11 @@ func ProcessEpoch(ctx context.Context, state state.BeaconState) (state.BeaconSta
 	}
 
 	state, err = helpers.ConsensusUpdateStateSpineFinalization(state, preJustRoot, preFinRoot)
+	if err != nil {
+		return nil, err
+	}
+
+	state, err = helpers.ProcessWithdrawalOps(state, preFinRoot)
 	if err != nil {
 		return nil, err
 	}
