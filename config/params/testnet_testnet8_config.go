@@ -29,7 +29,7 @@ func Testnet8Config() *BeaconChainConfig {
 	cfg.DepositChainID = gwatParams.Testnet8ChainConfig.ChainID.Uint64()
 	cfg.DepositNetworkID = gwatParams.Testnet8ChainConfig.ChainID.Uint64()
 	//cfg.DelegateForkSlot = types.Slot(gwatParams.Testnet8ChainConfig.ForkSlotDelegate)
-	cfg.DelegateForkSlot = 2600320
+	cfg.DelegateForkSlot = 2729920
 	cfg.SlotsPerArchivedPoint = 2048
 	cfg.InitializeForkSchedule()
 	return cfg
