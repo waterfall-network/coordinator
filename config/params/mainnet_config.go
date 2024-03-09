@@ -105,7 +105,7 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	SafeSlotsToUpdateJustified: 8,
 
 	//CleanWithdrawalsAftEpochs: 100,
-	CleanWithdrawalsAftEpochs: 10,
+	CleanWithdrawalsAftEpochs: 100,
 
 	//Optimistic consensus constants.
 	VotingRequiredSlots:           3,
