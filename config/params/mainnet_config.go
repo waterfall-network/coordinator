@@ -142,6 +142,7 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	HistoricalRootsLimit:      16777216,
 	ValidatorRegistryLimit:    1099511627776,
 	WithdrawalOpsLimit:        1024,
+	AllSpinesLimit:            128,
 
 	// Reward and penalty quotients constants.
 	BaseRewardFactor:               64,

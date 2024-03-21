@@ -224,3 +224,15 @@ func ConsensusCopyUnpublishedChains(unpublishedChains []gwatCommon.HashArray) []
 func GweiToWei(gwei uint64) *big.Int {
 	return new(big.Int).Mul(new(big.Int).SetUint64(gwei), new(big.Int).SetUint64(1000000000))
 }
+
+func CountUniqSpines(beaconState state.BeaconState) int {
+	finSeq := GetFinalizationSequence(beaconState)
+	prefixSeq := gwatCommon.HashArrayFromBytes(beaconState.SpineData().Prefix)
+	spineSeq := gwatCommon.HashArrayFromBytes(beaconState.SpineData().Spines)
+	fullSeq := make(gwatCommon.HashArray, 0, len(finSeq)+len(prefixSeq)+len(spineSeq))
+	fullSeq = append(fullSeq, finSeq...)
+	fullSeq = append(fullSeq, prefixSeq...)
+	fullSeq = append(fullSeq, spineSeq...)
+	fullSeq.Deduplicate()
+	return len(fullSeq)
+}

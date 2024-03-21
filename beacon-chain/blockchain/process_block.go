@@ -201,6 +201,17 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		return err
 	}
 
+	//validate limitation of all spines count
+	if spinesCount := helpers.CountUniqSpines(postState); spinesCount > params.BeaconConfig().AllSpinesLimit {
+		err = errAllSpinesLimitExceeded
+		log.WithError(err).WithFields(logrus.Fields{
+			"block.slot":     signed.Block().Slot(),
+			"spinesCount":    spinesCount,
+			"AllSpinesLimit": params.BeaconConfig().AllSpinesLimit,
+		}).Error("onBlock error")
+		return err
+	}
+
 	log.WithError(err).WithFields(logrus.Fields{
 		"block.slot": signed.Block().Slot(),
 		//"postBlockVoting": helpers.PrintBlockVotingArr(postState.BlockVoting()),
