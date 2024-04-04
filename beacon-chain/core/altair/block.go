@@ -3,7 +3,6 @@ package altair
 import (
 	"context"
 	"errors"
-
 	types "github.com/prysmaticlabs/eth2-types"
 	log "github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
@@ -141,7 +140,6 @@ func ApplySyncRewardsPenalties(ctx context.Context, s state.BeaconStateAltair, v
 	// Apply sync committee rewards.
 	earnedProposerReward := uint64(0)
 	for _, index := range votedIndices {
-
 		//log.WithFields(log.Fields{
 		//	"Slot":              s.Slot(),
 		//	"Validator":         index,

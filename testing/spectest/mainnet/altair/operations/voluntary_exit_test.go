@@ -7,6 +7,6 @@ import (
 )
 
 func TestMainnet_Altair_Operations_VoluntaryExit(t *testing.T) {
-	t.Skip() // Generate test data with pyton tool
+	t.Skip()
 	operations.RunVoluntaryExitTest(t, "mainnet")
 }

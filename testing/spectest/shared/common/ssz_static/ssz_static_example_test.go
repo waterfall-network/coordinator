@@ -1,15 +1,12 @@
 package ssz_static_test
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
 	fssz "github.com/ferranbt/fastssz"
 	"github.com/pkg/errors"
-	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 	common "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/spectest/shared/common/ssz_static"
 )
 
@@ -45,26 +42,13 @@ func ExampleRunSSZStaticTests() {
 	// This argument may be nil if your test does not require custom HTR methods.
 	// Most commonly, this is used when a handwritten HTR method with specialized caching
 	// is used and you want to ensure it passes spectests.
-	customHTR := func(t *testing.T, htrs []common.HTR, object interface{}) []common.HTR {
-		switch object.(type) {
-		case *ethpb.BeaconState:
-			htrs = append(htrs, func(s interface{}) ([32]byte, error) {
-				beaconState, err := v1.InitializeFromProto(s.(*ethpb.BeaconState))
-				require.NoError(t, err)
-				return beaconState.HashTreeRoot(context.TODO())
-			})
-		}
-		return htrs
-	}
-
 	var t *testing.T
 	// common.RunSSZStaticTests will run all of the tests found in the spec test folder with the
 	// given config and forkOrPhase. It will then use the unmarshaller to hydrate the types and
 	// ensure that fastssz generated methods match the expected results. It will also test custom
 	// HTR methods if provided.
 	common.RunSSZStaticTests(t,
-		"mainnet", // Network configuration
-		"phase0",  // Fork or phase
-		unmarshaller,
-		customHTR) // nil customHTR is acceptable.
+		"mainnet",    // Network configuration
+		"phase0",     // Fork or phase
+		unmarshaller) // nil customHTR is acceptable.
 }

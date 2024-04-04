@@ -14,6 +14,5 @@ func TestMain(m *testing.M) {
 }
 
 func TestMainnet_Phase0_Rewards(t *testing.T) {
-	t.Skip() // Generate test data with pyton tool
 	rewards.RunPrecomputeRewardsAndPenaltiesTests(t, "mainnet")
 }

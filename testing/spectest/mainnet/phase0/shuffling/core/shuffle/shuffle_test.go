@@ -7,6 +7,5 @@ import (
 )
 
 func TestMainnet_Phase0_Shuffling_Core_Shuffle(t *testing.T) {
-	t.Skip() // Generate test data with pyton tool
 	shuffle.RunShuffleTests(t, "mainnet")
 }

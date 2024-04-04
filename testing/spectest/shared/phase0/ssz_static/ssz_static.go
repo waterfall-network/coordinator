@@ -1,32 +1,17 @@
 package ssz_static
 
 import (
-	"context"
 	"errors"
 	"testing"
 
 	fssz "github.com/ferranbt/fastssz"
-	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 	common "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/spectest/shared/common/ssz_static"
 )
 
 // RunSSZStaticTests executes "ssz_static" tests.
 func RunSSZStaticTests(t *testing.T, config string) {
-	common.RunSSZStaticTests(t, config, "phase0", unmarshalledSSZ, customHtr)
-}
-
-func customHtr(t *testing.T, htrs []common.HTR, object interface{}) []common.HTR {
-	switch object.(type) {
-	case *ethpb.BeaconState:
-		htrs = append(htrs, func(s interface{}) ([32]byte, error) {
-			beaconState, err := v1.InitializeFromProto(s.(*ethpb.BeaconState))
-			require.NoError(t, err)
-			return beaconState.HashTreeRoot(context.TODO())
-		})
-	}
-	return htrs
+	common.RunSSZStaticTests(t, config, "phase0", unmarshalledSSZ)
 }
 
 // unmarshalledSSZ unmarshalls serialized input.
@@ -96,6 +81,8 @@ func unmarshalledSSZ(t *testing.T, serializedBytes []byte, objectName string) (i
 		obj = &ethpb.WithdrawalOp{}
 	case "BlockVoting":
 		obj = &ethpb.BlockVoting{}
+	case "CommitteeVote":
+		obj = &ethpb.CommitteeVote{}
 	default:
 		return nil, errors.New("type not found")
 	}

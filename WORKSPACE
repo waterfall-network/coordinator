@@ -237,12 +237,12 @@ filegroup(
     url = "https://github.com/eth-clients/slashing-protection-interchange-tests/archive/b8413ca42dc92308019d0d4db52c87e9e125c4e9.tar.gz",
 )
 
-consensus_spec_version = "v1.1.10"
+coordinator_spec_version = "v0.0.1"
 
 bls_test_version = "v0.1.1"
 
 http_archive(
-    name = "consensus_spec_tests_general",
+    name = "coordinator_spec_tests_general",
     build_file_content = """
 filegroup(
     name = "test_data",
@@ -253,12 +253,12 @@ filegroup(
     visibility = ["//visibility:public"],
 )
     """,
-    sha256 = "28043009cc2f6fc9804e73c8c1fc2cb27062f1591e6884f3015ae1dd7a276883",
-    url = "https://github.com/ethereum/consensus-spec-tests/releases/download/%s/general.tar.gz" % consensus_spec_version,
+#    sha256 = "28043009cc2f6fc9804e73c8c1fc2cb27062f1591e6884f3015ae1dd7a276883",
+    url = "https://docs.waterfall.network/files/tests/v0.0.1/general.tar.gz",
 )
 
 http_archive(
-    name = "consensus_spec_tests_minimal",
+    name = "coordinator_spec_tests_mainnet",
     build_file_content = """
 filegroup(
     name = "test_data",
@@ -269,40 +269,8 @@ filegroup(
     visibility = ["//visibility:public"],
 )
     """,
-    sha256 = "bc1a283ca068f310f04d70c4f6a8eaa0b8f7e9318073a8bdc2ee233111b4e339",
-    url = "https://github.com/ethereum/consensus-spec-tests/releases/download/%s/minimal.tar.gz" % consensus_spec_version,
-)
-
-http_archive(
-    name = "consensus_spec_tests_mainnet",
-    build_file_content = """
-filegroup(
-    name = "test_data",
-    srcs = glob([
-        "**/*.ssz_snappy",
-        "**/*.yaml",
-    ]),
-    visibility = ["//visibility:public"],
-)
-    """,
-    sha256 = "bbabb482c229ff9d4e2c7b77c992edb452f9d0af7c6d8dd4f922f06a7b101e81",
-    url = "https://github.com/ethereum/consensus-spec-tests/releases/download/%s/mainnet.tar.gz" % consensus_spec_version,
-)
-
-http_archive(
-    name = "consensus_spec",
-    build_file_content = """
-filegroup(
-    name = "spec_data",
-    srcs = glob([
-        "**/*.yaml",
-    ]),
-    visibility = ["//visibility:public"],
-)
-    """,
-    sha256 = "408a5524548ad3fcf387f65ac7ec52781d9ee899499720bb12451b48a15818d4",
-    strip_prefix = "consensus-specs-" + consensus_spec_version[1:],
-    url = "https://github.com/ethereum/consensus-specs/archive/refs/tags/%s.tar.gz" % consensus_spec_version,
+#    sha256 = "bbabb482c229ff9d4e2c7b77c992edb452f9d0af7c6d8dd4f922f06a7b101e81",
+    url = "https://docs.waterfall.network/files/tests/v0.0.1/mainnet.tar.gz",
 )
 
 http_archive(

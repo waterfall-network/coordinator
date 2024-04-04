@@ -10,7 +10,7 @@ go_test(
         "slots_test.go",
     ],
     data = glob(["*.yaml"]) + [
-        "@consensus_spec_tests_mainnet//:test_data",
+        "@coordinator_spec_tests_mainnet//:test_data",
     ],
     tags = ["spectest"],
     deps = [

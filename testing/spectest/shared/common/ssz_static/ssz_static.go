@@ -16,7 +16,7 @@ import (
 // RunSSZStaticTests executes "ssz_static" tests for the given fork of phase using the provided
 // unmarshaller to hydrate serialized test data into go struct pointers and also applies any custom
 // HTR methods via the customHTR callback.
-func RunSSZStaticTests(t *testing.T, config, forkOrPhase string, unmarshaller Unmarshaller, customHtr CustomHTRAdder) {
+func RunSSZStaticTests(t *testing.T, config, forkOrPhase string, unmarshaller Unmarshaller) {
 	require.NoError(t, utils.SetConfig(t, config))
 	testFolders, _ := utils.TestFolders(t, config, forkOrPhase, "ssz_static")
 
@@ -63,11 +63,6 @@ func RunSSZStaticTests(t *testing.T, config, forkOrPhase string, unmarshaller Un
 						}
 						return sszObj.HashTreeRoot()
 					})
-
-					// Apply custom HTR methods, if any.
-					if customHtr != nil {
-						htrs = customHtr(t, htrs, object)
-					}
 
 					if len(htrs) == 0 {
 						t.Fatal("no HTRs to run")

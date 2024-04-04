@@ -10,10 +10,12 @@ import (
 
 	"github.com/bazelbuild/rules_go/go/tools/bazel"
 	"github.com/golang/snappy"
+	types "github.com/prysmaticlabs/eth2-types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
@@ -63,7 +65,20 @@ func RunBlockProcessingTest(t *testing.T, config, folderPath string) {
 				require.NoError(t, block.UnmarshalSSZ(blockSSZ), "Failed to unmarshal")
 				wsb, err := wrapper.WrappedSignedBeaconBlock(block)
 				require.NoError(t, err)
-				processedState, transitionError = transition.ExecuteStateTransition(context.Background(), beaconState, wsb)
+				ctxBlockFetcher := params.CtxBlockFetcher(func(ctx context.Context, blockRoot [32]byte) (types.ValidatorIndex, types.Slot, uint64, error) {
+					block := wsb
+					votesIncluded := uint64(0)
+					for _, att := range block.Block().Body().Attestations() {
+						votesIncluded += att.AggregationBits.Count()
+					}
+
+					return block.Block().ProposerIndex(), block.Block().Slot(), votesIncluded, nil
+				})
+
+				ctxWithFetcher := context.WithValue(context.Background(),
+					params.BeaconConfig().CtxBlockFetcherKey,
+					ctxBlockFetcher)
+				processedState, transitionError = transition.ExecuteStateTransition(ctxWithFetcher, beaconState, wsb)
 				if transitionError != nil {
 					break
 				}

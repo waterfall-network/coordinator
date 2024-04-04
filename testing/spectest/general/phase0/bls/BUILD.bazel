@@ -26,7 +26,7 @@ go_test(
         "verify_test.go",
     ],
     data = [
-        "@consensus_spec_tests_general//:test_data",
+        "@coordinator_spec_tests_general//:test_data",
     ],
     embed = [":go_default_library"],
     tags = ["spectest"],

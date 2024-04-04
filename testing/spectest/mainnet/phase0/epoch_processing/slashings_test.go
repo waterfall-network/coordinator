@@ -7,6 +7,5 @@ import (
 )
 
 func TestMainnet_Phase0_EpochProcessing_Slashings(t *testing.T) {
-	t.Skip() // Generate test data with pyton tool
 	epoch_processing.RunSlashingsTests(t, "mainnet")
 }

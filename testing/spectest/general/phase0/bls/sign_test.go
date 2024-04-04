@@ -16,12 +16,11 @@ import (
 )
 
 func TestSign(t *testing.T) {
-	t.Skip() // Generate test data with pyton tool
 	t.Run("blst", testSign)
 }
 
 func testSign(t *testing.T) {
-	testFolders, testFolderPath := utils.TestFolders(t, "general", "phase0", "bls/sign/small")
+	testFolders, testFolderPath := utils.TestFolders(t, "general", "phase0", "bls/sign/bls")
 
 	for i, folder := range testFolders {
 		t.Run(folder.Name(), func(t *testing.T) {

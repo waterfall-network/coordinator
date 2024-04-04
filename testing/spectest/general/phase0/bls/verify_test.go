@@ -15,12 +15,11 @@ import (
 )
 
 func TestVerify(t *testing.T) {
-	t.Skip() // Generate test data with pyton tool
 	t.Run("blst", testVerify)
 }
 
 func testVerify(t *testing.T) {
-	testFolders, testFolderPath := utils.TestFolders(t, "general", "phase0", "bls/verify/small")
+	testFolders, testFolderPath := utils.TestFolders(t, "general", "phase0", "bls/verify/bls")
 
 	for i, folder := range testFolders {
 		t.Run(folder.Name(), func(t *testing.T) {

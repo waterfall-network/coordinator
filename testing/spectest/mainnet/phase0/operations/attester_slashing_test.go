@@ -7,6 +7,5 @@ import (
 )
 
 func TestMainnet_Phase0_Operations_AttesterSlashing(t *testing.T) {
-	t.Skip() // Generate test data with pyton tool
 	operations.RunAttesterSlashingTest(t, "mainnet")
 }

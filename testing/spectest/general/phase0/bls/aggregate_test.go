@@ -15,12 +15,11 @@ import (
 )
 
 func TestAggregate(t *testing.T) {
-	t.Skip() // Generate test data with pyton tool
 	t.Run("blst", testAggregate)
 }
 
 func testAggregate(t *testing.T) {
-	testFolders, testFolderPath := utils.TestFolders(t, "general", "phase0", "bls/aggregate/small")
+	testFolders, testFolderPath := utils.TestFolders(t, "general", "phase0", "bls/aggregate/bls")
 
 	for _, folder := range testFolders {
 		t.Run(folder.Name(), func(t *testing.T) {
