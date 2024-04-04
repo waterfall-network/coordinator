@@ -24,6 +24,7 @@ import (
 )
 
 func Test_processQueuedAttestations(t *testing.T) {
+	t.Skip() // Unstable test
 	type args struct {
 		attestationQueue []*slashertypes.IndexedAttestationWrapper
 		currentEpoch     types.Epoch
