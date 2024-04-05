@@ -1,17 +1,22 @@
 image: node:16
+
 stages:
   - test
   - build
   - release
 
+variables:
+  BAZEL_CACHE_DIR: "$CI_PROJECT_DIR/.cache"
+
 .job_build:
   script: &job_build |-
     apt-get update -y
     apt-get install cmake git libssl-dev libgmp-dev libtinfo5 libprotoc-dev wget -y
+    apt-get install zlib1g-dev 
     npm install -g @bazel/bazelisk
     echo "machine $CI_SERVER_HOST login gitlab-ci-token password $CI_JOB_TOKEN" >> ~/.netrc
     export GOPRIVATE=${CI_SERVER_HOST}
-    echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
+    echo "build --disk_cache=$BAZEL_CACHE_DIR" >> .bazelrc
     mkdir -p ./dist
     bazel version
     cp runtime/version/version.go /tmp/version.go
@@ -34,7 +39,7 @@ lint:
   rules:
     - if: $CI_COMMIT_TAG == null
       when: on_success
-  script: 
+  script:
     - golangci-lint run -v --out-format=github-actions --config=.golangci.yml --out-format colored-line-number
 
 test:
@@ -44,17 +49,15 @@ test:
   rules:
     - if: $CI_COMMIT_TAG == null
       when: on_success
-  script: 
+  script:
     - apt-get update -y
     - apt-get install cmake git libssl-dev libgmp-dev libtinfo5 libprotoc-dev wget -y
     - npm install -g @bazel/bazelisk
     - echo "machine $CI_SERVER_HOST login gitlab-ci-token password $CI_JOB_TOKEN" >> ~/.netrc
     - export GOPRIVATE=${CI_SERVER_HOST}
-    - echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
-#    - echo "build --disk_cache=no" >> .bazelrc
+    - echo "build --disk_cache=$BAZEL_CACHE_DIR" >> .bazelrc
     - bazel version
     - bazel test //...
-
 
 build branch:
   stage: build
@@ -108,3 +111,10 @@ cache:
   key: bazel_cache
   paths:
     - .cache/
+
+clean_cache:
+  stage: cleanup
+  script:
+    - rm -rf $BAZEL_CACHE_DIR
+    - bazel clean --expunge
+  when: always
