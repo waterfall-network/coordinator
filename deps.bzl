@@ -2034,8 +2034,8 @@ def prysm_deps():
     go_repository(
         name = "com_github_karalabe_usb",
         importpath = "github.com/karalabe/usb",
-        sum = "h1:M6QQBNxF+CQ8OFvxrT90BA0qBOXymndZnk5q235mFc4=",
-        version = "v0.0.2",
+        sum = "h1:BGJeMa7efLsbPri2WJxtFOcjDPyjCdNlZWERE11GJAE=",
+        version = "v0.0.3-0.20231219215548-8627268f6b0a",
     )
 
     go_repository(
@@ -4405,21 +4405,18 @@ def prysm_deps():
     )
     go_repository(
         name = "network_waterfall_gitlab_waterfall_protocol_gwat",
-        build_naming_convention = "go_default_library",
         build_directives = [
             "gazelle:resolve go github.com/karalabe/usb @prysm//third_party/usb:go_default_library",
         ],
-#        importpath = "gitlab.waterfall.network/waterfall/protocol/gwat",
-#                        sum = "h1:KU4HyawshuMdIIwhvlCxe7lir3GvU4zkw60yj4+YmC8=",
-#                        version = "v0.8.6",
+        build_naming_convention = "go_default_library",
         importpath = "gitlab.waterfall.network/waterfall/protocol/gwat",
-                        sum = "h1:mHpdL+GllSBmmfL1kLPjoZqtfhpIK/kEkmrBU23RE0g=",
-                        version = "v0.8.7-0.20240209193737-e4906a7db728",
+        sum = "h1:mHpdL+GllSBmmfL1kLPjoZqtfhpIK/kEkmrBU23RE0g=",
+        version = "v0.8.7-0.20240209193737-e4906a7db728",
 
         ## to use local repo comment `sum` & `version`, and uncomment follows below
-#        vcs = "git",
-#        remote = "file:///Users/dimarogovij/JOB/Waterfall/gwat",
-#        tag = "17-fix-tests",
+        #        vcs = "git",
+        #        remote = "file:///Users/dimarogovij/JOB/Waterfall/gwat",
+        #        tag = "17-fix-tests",
     )
 
     go_repository(

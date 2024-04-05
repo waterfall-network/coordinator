@@ -42,7 +42,7 @@ go_test(
         "loader_test.go",
     ],
     data = glob(["*.yaml"]) + [
-#        "@coordinator_spec//:spec_data",
+        #        "@coordinator_spec//:spec_data",
         "@coordinator_spec_tests_mainnet//:test_data",
         "@eth2_networks//:configs",
         "testdata/e2e_config.yaml",

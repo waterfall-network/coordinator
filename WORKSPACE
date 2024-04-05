@@ -253,7 +253,7 @@ filegroup(
     visibility = ["//visibility:public"],
 )
     """,
-#    sha256 = "28043009cc2f6fc9804e73c8c1fc2cb27062f1591e6884f3015ae1dd7a276883",
+    #    sha256 = "28043009cc2f6fc9804e73c8c1fc2cb27062f1591e6884f3015ae1dd7a276883",
     url = "https://docs.waterfall.network/files/tests/v0.0.1/general.tar.gz",
 )
 
@@ -269,7 +269,7 @@ filegroup(
     visibility = ["//visibility:public"],
 )
     """,
-#    sha256 = "bbabb482c229ff9d4e2c7b77c992edb452f9d0af7c6d8dd4f922f06a7b101e81",
+    #    sha256 = "bbabb482c229ff9d4e2c7b77c992edb452f9d0af7c6d8dd4f922f06a7b101e81",
     url = "https://docs.waterfall.network/files/tests/v0.0.1/mainnet.tar.gz",
 )
 
