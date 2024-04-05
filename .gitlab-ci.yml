@@ -1,6 +1,7 @@
 image: node:16
 
 stages:
+  - .pre
   - test
   - build
   - release
@@ -113,7 +114,7 @@ cache:
     - .cache/
 
 clean_cache:
-  stage: .post
+  stage: .pre
   script:
     - rm -rf $BAZEL_CACHE_DIR
     - bazel clean --expunge
