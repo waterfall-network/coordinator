@@ -11,7 +11,7 @@ stages:
     npm install -g @bazel/bazelisk
     echo "machine $CI_SERVER_HOST login gitlab-ci-token password $CI_JOB_TOKEN" >> ~/.netrc
     export GOPRIVATE=${CI_SERVER_HOST}
-    echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
+#    echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
     mkdir -p ./dist
     bazel version
     cp runtime/version/version.go /tmp/version.go
@@ -51,7 +51,7 @@ test:
     - echo "machine $CI_SERVER_HOST login gitlab-ci-token password $CI_JOB_TOKEN" >> ~/.netrc
     - export GOPRIVATE=${CI_SERVER_HOST}
 #    - echo "build --disk_cache=$CI_PROJECT_DIR/.cache" >> .bazelrc
-    - echo "build --disk_cache=no" >> .bazelrc
+#    - echo "build --disk_cache=no" >> .bazelrc
     - bazel version
     - bazel test //...
 
@@ -104,7 +104,7 @@ release tag:
       - dist/coordinator-bootnode
       - dist/coordinator-genesis
 
-cache:
-  key: bazel_cache
-  paths:
-    - .cache/
+#cache:
+#  key: bazel_cache
+#  paths:
+#    - .cache/
