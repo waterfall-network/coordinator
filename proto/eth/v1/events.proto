@@ -103,4 +103,7 @@ message EventFinalizedCheckpoint {
 
   // Information about optimistic sync.
   bool execution_optimistic = 4;
+
+  // finalization_slot is a slot of finalization block.
+  uint64 finalization_slot = 5 [(ethereum.eth.ext.cast_type) = "github.com/prysmaticlabs/eth2-types.Slot"];
 }

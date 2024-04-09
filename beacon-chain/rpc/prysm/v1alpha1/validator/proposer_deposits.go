@@ -3,9 +3,11 @@ package validator
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"math/big"
 
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
@@ -177,7 +179,11 @@ func (vs *Server) depositTrie(ctx context.Context, canonicalEth1Data *ethpb.Eth1
 	valid, err := validateDepositTrie(depositTrie, canonicalEth1Data)
 	// Log a warning here, as the cached trie is invalid.
 	if !valid {
-		log.Warnf("Cached deposit trie is invalid, rebuilding it now: %v", err)
+		log.WithFields(logrus.Fields{
+			"canonicalEth1DataHeight":        canonicalEth1DataHeight.String(),
+			"canonicalEth1Data.DepositCount": canonicalEth1Data.DepositCount,
+			"canonicalEth1Data.BlockHash":    fmt.Sprintf("%#x", canonicalEth1Data.BlockHash),
+		}).Warnf("Cached deposit trie is invalid, rebuilding it now: %v", err)
 		return vs.rebuildDepositTrie(ctx, canonicalEth1Data, canonicalEth1DataHeight)
 	}
 
@@ -207,7 +213,11 @@ func (vs *Server) rebuildDepositTrie(ctx context.Context, canonicalEth1Data *eth
 	valid, err := validateDepositTrie(depositTrie, canonicalEth1Data)
 	// Log an error here, as even with rebuilding the trie, it is still invalid.
 	if !valid {
-		log.Errorf("Rebuilt deposit trie is invalid: %v", err)
+		log.WithFields(logrus.Fields{
+			"canonicalEth1DataHeight":        canonicalEth1DataHeight.String(),
+			"canonicalEth1Data.DepositCount": canonicalEth1Data.DepositCount,
+			"canonicalEth1Data.BlockHash":    fmt.Sprintf("%#x", canonicalEth1Data.BlockHash),
+		}).Errorf("Rebuilt deposit trie is invalid: %v", err)
 	}
 	return depositTrie, nil
 }

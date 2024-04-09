@@ -22,7 +22,7 @@ import (
 // PoolManager maintains pending and seen withdrawals.
 // This pool is used by proposers to insert withdrawals into new blocks.
 type PoolManager interface {
-	PendingWithdrawals(slot types.Slot, noLimit bool) []*ethpb.Withdrawal
+	PendingWithdrawals(slot types.Slot, st state.ReadOnlyBeaconState, noLimit bool) []*ethpb.Withdrawal
 	InsertWithdrawal(ctx context.Context, withdrawal *ethpb.Withdrawal)
 	MarkIncluded(withdrawal *ethpb.Withdrawal)
 	OnSlot(st state.ReadOnlyBeaconState)
@@ -45,7 +45,7 @@ func NewPool() *Pool {
 
 // PendingWithdrawals returns withdrawals that are ready for inclusion at the given slot. This method will not
 // return more than the block enforced MaxWithdrawals.
-func (p *Pool) PendingWithdrawals(slot types.Slot, noLimit bool) []*ethpb.Withdrawal {
+func (p *Pool) PendingWithdrawals(slot types.Slot, st state.ReadOnlyBeaconState, noLimit bool) []*ethpb.Withdrawal {
 	p.lock.RLock()
 	defer p.lock.RUnlock()
 
@@ -55,6 +55,7 @@ func (p *Pool) PendingWithdrawals(slot types.Slot, noLimit bool) []*ethpb.Withdr
 	if noLimit {
 		maxWithdrawals = uint64(len(p.pending))
 	}
+	availBalMap := map[types.ValidatorIndex]uint64{}
 	pending := make([]*ethpb.Withdrawal, 0, maxWithdrawals)
 	for _, itm := range p.pending {
 		// not activated validator withdrawal
@@ -64,6 +65,59 @@ func (p *Pool) PendingWithdrawals(slot types.Slot, noLimit bool) []*ethpb.Withdr
 		if itm.Epoch > slots.ToEpoch(slot) {
 			continue
 		}
+		// check in withdrawal already in state
+		roVal, err := st.ValidatorAtIndexReadOnly(itm.ValidatorIndex)
+		if err != nil {
+			log.WithError(err).WithFields(log.Fields{
+				"VIndex":     fmt.Sprintf("%d", itm.ValidatorIndex),
+				"PublicKey":  fmt.Sprintf("%#x", itm.PublicKey),
+				"Epoch":      fmt.Sprintf("%d", itm.Epoch),
+				"Amount":     fmt.Sprintf("%d", itm.Amount),
+				"InitTxHash": fmt.Sprintf("%#x", itm.InitTxHash),
+			}).Error("WithdrawalPool pool: get pending: get validator err")
+			continue
+		}
+		for _, wop := range roVal.WithdrawalOps() {
+			if bytes.Equal(wop.Hash, itm.InitTxHash) {
+				log.WithFields(log.Fields{
+					"VIndex":       fmt.Sprintf("%d", itm.ValidatorIndex),
+					"PublicKey":    fmt.Sprintf("%#x", itm.PublicKey),
+					"Epoch":        fmt.Sprintf("%d", itm.Epoch),
+					"Amount":       fmt.Sprintf("%d", itm.Amount),
+					"availBalance": fmt.Sprintf("%d", availBalMap[itm.ValidatorIndex]),
+					"InitTxHash":   fmt.Sprintf("%#x", itm.InitTxHash),
+				}).Error("WithdrawalPool pool: get pending: skip already handled item item")
+				continue
+			}
+		}
+		// check available balance
+		if _, ok := availBalMap[itm.ValidatorIndex]; !ok {
+			bal, err := helpers.AvailableWithdrawalAmount(itm.ValidatorIndex, st)
+			if err != nil {
+				log.WithError(err).WithFields(log.Fields{
+					"VIndex":     fmt.Sprintf("%d", itm.ValidatorIndex),
+					"PublicKey":  fmt.Sprintf("%#x", itm.PublicKey),
+					"Epoch":      fmt.Sprintf("%d", itm.Epoch),
+					"Amount":     fmt.Sprintf("%d", itm.Amount),
+					"InitTxHash": fmt.Sprintf("%#x", itm.InitTxHash),
+				}).Error("WithdrawalPool pool: get pending: check balance err")
+				continue
+			}
+			availBalMap[itm.ValidatorIndex] = bal
+		}
+		if availBalMap[itm.ValidatorIndex] < itm.Amount {
+			log.WithFields(log.Fields{
+				"VIndex":       fmt.Sprintf("%d", itm.ValidatorIndex),
+				"PublicKey":    fmt.Sprintf("%#x", itm.PublicKey),
+				"Epoch":        fmt.Sprintf("%d", itm.Epoch),
+				"Amount":       fmt.Sprintf("%d", itm.Amount),
+				"availBalance": fmt.Sprintf("%d", availBalMap[itm.ValidatorIndex]),
+				"InitTxHash":   fmt.Sprintf("%#x", itm.InitTxHash),
+			}).Error("WithdrawalPool pool: get pending: skip item due to low available balance")
+			continue
+		}
+		availBalMap[itm.ValidatorIndex] -= itm.Amount
+
 		pending = append(pending, itm)
 		if uint64(len(pending)) == maxWithdrawals {
 			break
@@ -129,19 +183,19 @@ func (p *Pool) Verify(withdrawal *ethpb.Withdrawal) error {
 	}
 	poolItm := p.pending[index]
 
-	if poolItm.Epoch != withdrawal.Epoch {
-		return fmt.Errorf("mismatch epochs pool=%d received=%d", poolItm.Epoch, withdrawal.Epoch)
-	}
+	//if poolItm.Epoch != withdrawal.Epoch {
+	//	return fmt.Errorf("mismatch epochs pool=%d received=%d", poolItm.Epoch, withdrawal.Epoch)
+	//}
 	if poolItm.Amount != withdrawal.Amount {
 		return fmt.Errorf("mismatch amounts pool=%d received=%d", poolItm.Amount, withdrawal.Amount)
 	}
 	if poolItm.ValidatorIndex != withdrawal.ValidatorIndex {
 		return fmt.Errorf("mismatch validators indices pool=%d received=%d", poolItm.ValidatorIndex, withdrawal.ValidatorIndex)
 	}
-	if bytes.Equal(poolItm.PublicKey, withdrawal.PublicKey) {
+	if !bytes.Equal(poolItm.PublicKey, withdrawal.PublicKey) {
 		return fmt.Errorf("mismatch publick keys pool=%#x received=%#x", poolItm.PublicKey, withdrawal.PublicKey)
 	}
-	if bytes.Equal(poolItm.InitTxHash, withdrawal.InitTxHash) {
+	if !bytes.Equal(poolItm.InitTxHash, withdrawal.InitTxHash) {
 		return fmt.Errorf("mismatch init tx hashes pool=%#x received=%#x", poolItm.InitTxHash, withdrawal.InitTxHash)
 	}
 	return nil

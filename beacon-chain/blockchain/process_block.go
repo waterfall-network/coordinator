@@ -98,6 +98,17 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	ctx = context.WithValue(ctx, params.BeaconConfig().CtxBlockFetcherKey, db.BlockInfoFetcherFunc(s.cfg.BeaconDB))
 	defer span.End()
 
+	s.onBlockMu.Lock()
+	defer s.onBlockMu.Unlock()
+
+	if err := helpers.BeaconBlockIsNil(signed); err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			"curSlot": slots.CurrentSlot(uint64(s.genesisTime.Unix())),
+		}).Error("onBlock error")
+		return err
+	}
+	b := signed.Block()
+
 	defer func(start time.Time, curSlot types.Slot) {
 		log.WithField(
 			"elapsed", time.Since(start),
@@ -111,14 +122,13 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		}).Info("onBlock: end")
 	}(time.Now(), slots.CurrentSlot(uint64(s.genesisTime.Unix())))
 
-	s.onBlockMu.Lock()
-	defer s.onBlockMu.Unlock()
-
 	log.WithFields(logrus.Fields{
-		"slot":       signed.Block().Slot(),
-		"root":       fmt.Sprintf("%#x", blockRoot),
-		"parentRoot": fmt.Sprintf("%#x", signed.Block().ParentRoot()),
-		"\u2692":     version.BuildId,
+		"blSlot":            signed.Block().Slot(),
+		"root":              fmt.Sprintf("%#x", blockRoot),
+		"parentRoot":        fmt.Sprintf("%#x", signed.Block().ParentRoot()),
+		"delegateFork":      params.BeaconConfig().IsDelegatingStakeSlot(signed.Block().Slot()),
+		"gwatSynchronizing": s.IsGwatSynchronizing(),
+		"\u2692":            version.BuildId,
 	}).Info("onBlock: start")
 
 	if len(signed.Block().Body().Withdrawals()) > 0 {
@@ -133,19 +143,20 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 				"ValidatorIndex": fmt.Sprintf("%d", itm.ValidatorIndex),
 			}).Info("onBlock: withdrawal")
 
-			////todo req. fork change handling
-			//if err := s.cfg.WithdrawalPool.Verify(itm); err != nil {
-			//	log.WithError(err).WithFields(logrus.Fields{
-			//		"i":              i,
-			//		"slot":           signed.Block().Slot(),
-			//		"Amount":         fmt.Sprintf("%d", itm.Amount),
-			//		"Epoch":          fmt.Sprintf("%d", itm.Epoch),
-			//		"InitTxHash":     fmt.Sprintf("%#x", itm.InitTxHash),
-			//		"PublicKey":      fmt.Sprintf("%#x", itm.PublicKey),
-			//		"ValidatorIndex": fmt.Sprintf("%d", itm.ValidatorIndex),
-			//	}).Error("onBlock:: withdrawal")
-			//	return err
-			//}
+			if !s.IsGwatSynchronizing() && !s.isSynchronizing() && params.BeaconConfig().IsDelegatingStakeSlot(signed.Block().Slot()) {
+				if err := s.cfg.WithdrawalPool.Verify(itm); err != nil {
+					log.WithError(err).WithFields(logrus.Fields{
+						"i":              i,
+						"slot":           signed.Block().Slot(),
+						"Amount":         fmt.Sprintf("%d", itm.Amount),
+						"Epoch":          fmt.Sprintf("%d", itm.Epoch),
+						"InitTxHash":     fmt.Sprintf("%#x", itm.InitTxHash),
+						"PublicKey":      fmt.Sprintf("%#x", itm.PublicKey),
+						"ValidatorIndex": fmt.Sprintf("%d", itm.ValidatorIndex),
+					}).Error("onBlock: withdrawal")
+					return err
+				}
+			}
 		}
 	}
 
@@ -159,27 +170,20 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 				"ValidatorIndex": fmt.Sprintf("%d", itm.ValidatorIndex),
 			}).Info("onBlock: exit")
 
-			////todo req. fork change handling
-			//if err := s.cfg.ExitPool.Verify(itm); err != nil {
-			//	log.WithError(err).WithFields(logrus.Fields{
-			//		"i":              i,
-			//		"slot":           signed.Block().Slot(),
-			//		"Epoch":          fmt.Sprintf("%d", itm.Epoch),
-			//		"InitTxHash":     fmt.Sprintf("%#x", itm.InitTxHash),
-			//		"ValidatorIndex": fmt.Sprintf("%d", itm.ValidatorIndex),
-			//	}).Error("onBlock:: exit")
-			//	return err
-			//}
+			if !s.IsGwatSynchronizing() && !s.isSynchronizing() && params.BeaconConfig().IsDelegatingStakeSlot(signed.Block().Slot()) {
+				if err := s.cfg.ExitPool.Verify(itm); err != nil {
+					log.WithError(err).WithFields(logrus.Fields{
+						"i":              i,
+						"slot":           signed.Block().Slot(),
+						"Epoch":          fmt.Sprintf("%d", itm.Epoch),
+						"InitTxHash":     fmt.Sprintf("%#x", itm.InitTxHash),
+						"ValidatorIndex": fmt.Sprintf("%d", itm.ValidatorIndex),
+					}).Error("onBlock: exit")
+					return err
+				}
+			}
 		}
 	}
-
-	if err := helpers.BeaconBlockIsNil(signed); err != nil {
-		log.WithError(err).WithFields(logrus.Fields{
-			"block.slot": signed.Block().Slot(),
-		}).Error("onBlock error")
-		return err
-	}
-	b := signed.Block()
 
 	preState, err := s.getBlockPreState(ctx, b)
 	if err != nil {
@@ -376,6 +380,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 			BlockRoot:   blockRoot,
 			SignedBlock: signed,
 			Verified:    true,
+			InitialSync: false,
 		},
 	})
 
@@ -387,7 +392,9 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		slotCtx, cancel := context.WithTimeout(context.Background(), slotDeadline)
 		defer cancel()
 		if err := transition.UpdateNextSlotCache(slotCtx, blockRoot[:], postState); err != nil {
-			log.WithError(err).Debug("could not update next slot state cache")
+			log.WithError(err).WithFields(logrus.Fields{
+				"block.slot": signed.Block().Slot(),
+			}).Error("onBlock error: could not update next slot state cache")
 		}
 	}()
 
@@ -433,6 +440,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 					Block:               postState.FinalizedCheckpoint().Root,
 					State:               signed.Block().StateRoot(),
 					ExecutionOptimistic: isOptimistic,
+					FinalizationSlot:    signed.Block().Slot(),
 				},
 			})
 
@@ -446,15 +454,6 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 			}
 		}()
 	}
-
-	// Deprecated
-	////create gwat synchronization params
-	//if currEpoch := slots.ToEpoch(postState.Slot()); currEpoch > s.store.LastEpoch() {
-	//	if err = s.saveGwatSyncState(ctx, blockRoot); err != nil {
-	//		return err
-	//	}
-	//	s.store.SetLastEpoch(currEpoch)
-	//}
 
 	defer reportAttestationInclusion(b)
 

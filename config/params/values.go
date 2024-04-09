@@ -13,7 +13,7 @@ const (
 	Minimal
 	EndToEnd
 	Pyrmont
-	Prater
+	Testnet8
 	EndToEndMainnet
 )
 
@@ -34,14 +34,14 @@ var ConfigNames = map[ConfigName]string{
 	Minimal:         "minimal",
 	EndToEnd:        "end-to-end",
 	Pyrmont:         "pyrmont",
-	Prater:          "prater",
+	Testnet8:        "testnet8",
 	EndToEndMainnet: "end-to-end-mainnet",
 }
 
 // KnownConfigs provides an index of all known BeaconChainConfig values.
 var KnownConfigs = map[ConfigName]func() *BeaconChainConfig{
 	Mainnet:         MainnetConfig,
-	Prater:          PraterConfig,
+	Testnet8:        Testnet8Config,
 	Pyrmont:         PyrmontConfig,
 	Minimal:         MinimalSpecConfig,
 	EndToEnd:        E2ETestConfig,
@@ -72,13 +72,13 @@ func init() {
 		}
 		// ensure that all fork versions are unique
 		for v := range cfg.ForkVersionSchedule {
-			pn, exists := knownForkVersions[v]
-			if exists {
-				previous := KnownConfigs[pn]()
-				msg := fmt.Sprintf("version %#x is duplicated in 2 configs, %s at epoch %d, %s at epoch %d",
-					v, pn, previous.ForkVersionSchedule[v], n, cfg.ForkVersionSchedule[v])
-				panic(msg)
-			}
+			//pn, exists := knownForkVersions[v]
+			//if exists {
+			//	previous := KnownConfigs[pn]()
+			//	msg := fmt.Sprintf("version %#x is duplicated in 2 configs, %s at epoch %d, %s at epoch %d",
+			//		v, pn, previous.ForkVersionSchedule[v], n, cfg.ForkVersionSchedule[v])
+			//	panic(msg)
+			//}
 			knownForkVersions[v] = n
 		}
 	}

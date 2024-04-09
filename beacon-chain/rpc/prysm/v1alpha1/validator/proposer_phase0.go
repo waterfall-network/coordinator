@@ -249,17 +249,17 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 	for _, exit := range exits {
 		val, err := head.ValidatorAtIndexReadOnly(exit.ValidatorIndex)
 		if err != nil {
-			log.WithError(err).Warn("Proposer: invalid withdrawal")
+			log.WithError(err).Warn("Proposer: exit op: get validator feiled ")
 			continue
 		}
 		if err := blocks.VerifyExitData(val, head.Slot(), exit); err != nil {
-			log.WithError(err).Warn("Proposer: invalid withdrawal")
+			log.WithError(err).Warn("Proposer: exit op: invalid data")
 			continue
 		}
 		validExits = append(validExits, exit)
 	}
 
-	withdrawals := vs.WithdrawalPool.PendingWithdrawals(req.Slot, false)
+	withdrawals := vs.WithdrawalPool.PendingWithdrawals(req.Slot, head, false)
 
 	if len(withdrawals) > 0 {
 		log.WithFields(logrus.Fields{

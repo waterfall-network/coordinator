@@ -17,8 +17,9 @@ import (
 )
 
 var (
-	beacon  = flag.String("beacon", "127.0.0.1:4000", "gRPC address of the Prysm beacon node")
-	genesis = flag.Uint64("genesis", 1606824023, "Genesis time. mainnet=1606824023, prater=1616508000, pyrmont=1605722407")
+	beacon = flag.String("beacon", "127.0.0.1:4000", "gRPC address of the Prysm beacon node")
+	//genesis timestamp
+	genesis = flag.Uint64("genesis", 1707916380, "Genesis time. mainnet=1707916380, testnet8=1699915452")
 )
 
 func main() {

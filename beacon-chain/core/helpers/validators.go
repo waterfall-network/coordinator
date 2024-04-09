@@ -437,7 +437,7 @@ func AvailableWithdrawalAmount(vInderx types.ValidatorIndex, st state.ReadOnlyBe
 		return bal, nil
 	}
 
-	//if validator id deactivated
+	//if validator is deactivated
 	if vld.ExitEpoch() <= slots.ToEpoch(st.Slot()) {
 		return bal, nil
 	}
