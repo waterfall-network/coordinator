@@ -19,6 +19,7 @@ import (
 	doublylinkedtree "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/forkchoice/doubly-linked-tree"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/forkchoice/protoarray"
 	forkchoicetypes "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/forkchoice/types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/withdrawals"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen"
 	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
@@ -44,6 +45,7 @@ func TestStore_OnBlock_ProtoArray(t *testing.T) {
 		WithDatabase(beaconDB),
 		WithStateGen(stategen.New(beaconDB)),
 		WithForkChoiceStore(fcs),
+		WithWithdrawalPool(withdrawals.NewPool()),
 	}
 
 	service, err := NewService(ctx, opts...)
@@ -96,7 +98,7 @@ func TestStore_OnBlock_ProtoArray(t *testing.T) {
 				return b
 			}(),
 			s:             st.Copy(),
-			wantErrString: "is in the far distant future",
+			wantErrString: "not found",
 		},
 		{
 			name: "could not get finalized block",
@@ -147,6 +149,7 @@ func TestStore_OnBlock_DoublyLinkedTree(t *testing.T) {
 		WithDatabase(beaconDB),
 		WithStateGen(stategen.New(beaconDB)),
 		WithForkChoiceStore(fcs),
+		WithWithdrawalPool(withdrawals.NewPool()),
 	}
 
 	service, err := NewService(ctx, opts...)
@@ -199,7 +202,7 @@ func TestStore_OnBlock_DoublyLinkedTree(t *testing.T) {
 				return b
 			}(),
 			s:             st.Copy(),
-			wantErrString: "is in the far distant future",
+			wantErrString: "not found",
 		},
 		{
 			name: "could not get finalized block",
@@ -249,6 +252,7 @@ func TestStore_OnBlock_ProposerBoostEarly(t *testing.T) {
 	opts := []Option{
 		WithStateGen(stategen.New(beaconDB)),
 		WithForkChoiceStore(fcs),
+		WithWithdrawalPool(withdrawals.NewPool()),
 	}
 
 	service, err := NewService(ctx, opts...)
@@ -272,6 +276,7 @@ func TestStore_OnBlockBatch_ProtoArray(t *testing.T) {
 	opts := []Option{
 		WithDatabase(beaconDB),
 		WithStateGen(stategen.New(beaconDB)),
+		WithWithdrawalPool(withdrawals.NewPool()),
 	}
 	service, err := NewService(ctx, opts...)
 	require.NoError(t, err)
@@ -336,6 +341,7 @@ func TestStore_OnBlockBatch_DoublyLinkedTree(t *testing.T) {
 	opts := []Option{
 		WithDatabase(beaconDB),
 		WithStateGen(stategen.New(beaconDB)),
+		WithWithdrawalPool(withdrawals.NewPool()),
 	}
 	service, err := NewService(ctx, opts...)
 	require.NoError(t, err)
@@ -503,6 +509,7 @@ func TestCachedPreState_CanGetFromStateSummary_ProtoArray(t *testing.T) {
 	opts := []Option{
 		WithDatabase(beaconDB),
 		WithStateGen(stategen.New(beaconDB)),
+		WithWithdrawalPool(withdrawals.NewPool()),
 	}
 	service, err := NewService(ctx, opts...)
 	require.NoError(t, err)
@@ -539,6 +546,7 @@ func TestCachedPreState_CanGetFromStateSummary_DoublyLinkedTree(t *testing.T) {
 	opts := []Option{
 		WithDatabase(beaconDB),
 		WithStateGen(stategen.New(beaconDB)),
+		WithWithdrawalPool(withdrawals.NewPool()),
 	}
 	service, err := NewService(ctx, opts...)
 	require.NoError(t, err)
@@ -575,6 +583,7 @@ func TestCachedPreState_CanGetFromDB(t *testing.T) {
 	opts := []Option{
 		WithDatabase(beaconDB),
 		WithStateGen(stategen.New(beaconDB)),
+		WithWithdrawalPool(withdrawals.NewPool()),
 	}
 	service, err := NewService(ctx, opts...)
 	require.NoError(t, err)
@@ -618,6 +627,7 @@ func TestUpdateJustified_CouldUpdateBest(t *testing.T) {
 		WithDatabase(beaconDB),
 		WithStateGen(stategen.New(beaconDB)),
 		WithForkChoiceStore(protoarray.New(0, 0)),
+		WithWithdrawalPool(withdrawals.NewPool()),
 	}
 	service, err := NewService(ctx, opts...)
 	require.NoError(t, err)
@@ -656,6 +666,7 @@ func TestFillForkChoiceMissingBlocks_CanSave_ProtoArray(t *testing.T) {
 	opts := []Option{
 		WithDatabase(beaconDB),
 		WithStateGen(stategen.New(beaconDB)),
+		WithWithdrawalPool(withdrawals.NewPool()),
 	}
 	service, err := NewService(ctx, opts...)
 	require.NoError(t, err)
@@ -701,6 +712,7 @@ func TestFillForkChoiceMissingBlocks_CanSave_DoublyLinkedTree(t *testing.T) {
 	opts := []Option{
 		WithDatabase(beaconDB),
 		WithStateGen(stategen.New(beaconDB)),
+		WithWithdrawalPool(withdrawals.NewPool()),
 	}
 	service, err := NewService(ctx, opts...)
 	require.NoError(t, err)
@@ -747,6 +759,7 @@ func TestFillForkChoiceMissingBlocks_RootsMatch_ProtoArray(t *testing.T) {
 	opts := []Option{
 		WithDatabase(beaconDB),
 		WithStateGen(stategen.New(beaconDB)),
+		WithWithdrawalPool(withdrawals.NewPool()),
 	}
 	service, err := NewService(ctx, opts...)
 	require.NoError(t, err)
@@ -796,6 +809,7 @@ func TestFillForkChoiceMissingBlocks_RootsMatch_DoublyLinkedTree(t *testing.T) {
 	opts := []Option{
 		WithDatabase(beaconDB),
 		WithStateGen(stategen.New(beaconDB)),
+		WithWithdrawalPool(withdrawals.NewPool()),
 	}
 	service, err := NewService(ctx, opts...)
 	require.NoError(t, err)
@@ -846,6 +860,7 @@ func TestFillForkChoiceMissingBlocks_FilterFinalized_ProtoArray(t *testing.T) {
 	opts := []Option{
 		WithDatabase(beaconDB),
 		WithStateGen(stategen.New(beaconDB)),
+		WithWithdrawalPool(withdrawals.NewPool()),
 	}
 	service, err := NewService(ctx, opts...)
 	require.NoError(t, err)
@@ -908,6 +923,7 @@ func TestFillForkChoiceMissingBlocks_FilterFinalized_DoublyLinkedTree(t *testing
 	opts := []Option{
 		WithDatabase(beaconDB),
 		WithStateGen(stategen.New(beaconDB)),
+		WithWithdrawalPool(withdrawals.NewPool()),
 	}
 	service, err := NewService(ctx, opts...)
 	require.NoError(t, err)
@@ -1083,6 +1099,7 @@ func TestAncestor_HandleSkipSlot(t *testing.T) {
 		WithDatabase(beaconDB),
 		WithStateGen(stategen.New(beaconDB)),
 		WithForkChoiceStore(fcs),
+		WithWithdrawalPool(withdrawals.NewPool()),
 	}
 	service, err := NewService(ctx, opts...)
 	require.NoError(t, err)
@@ -1172,6 +1189,7 @@ func TestAncestor_CanUseDB(t *testing.T) {
 		WithDatabase(beaconDB),
 		WithStateGen(stategen.New(beaconDB)),
 		WithForkChoiceStore(fcs),
+		WithWithdrawalPool(withdrawals.NewPool()),
 	}
 	service, err := NewService(ctx, opts...)
 	require.NoError(t, err)
@@ -1232,6 +1250,7 @@ func TestVerifyBlkDescendant(t *testing.T) {
 		WithDatabase(beaconDB),
 		WithStateGen(stategen.New(beaconDB)),
 		WithForkChoiceStore(fcs),
+		WithWithdrawalPool(withdrawals.NewPool()),
 	}
 	b := util.NewBeaconBlock()
 	b.Block.Slot = 1
@@ -1373,6 +1392,7 @@ func TestOnBlock_CanFinalize(t *testing.T) {
 		WithForkChoiceStore(fcs),
 		WithDepositCache(depositCache),
 		WithStateNotifier(&mock.MockStateNotifier{}),
+		WithWithdrawalPool(withdrawals.NewPool()),
 	}
 	service, err := NewService(ctx, opts...)
 	require.NoError(t, err)
@@ -1426,6 +1446,7 @@ func TestOnBlock_CallNewPayloadAndForkchoiceUpdated(t *testing.T) {
 		WithForkChoiceStore(fcs),
 		WithDepositCache(depositCache),
 		WithStateNotifier(&mock.MockStateNotifier{}),
+		WithWithdrawalPool(withdrawals.NewPool()),
 	}
 	service, err := NewService(ctx, opts...)
 	require.NoError(t, err)

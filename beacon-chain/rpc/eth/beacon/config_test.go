@@ -148,7 +148,7 @@ func TestGetSpec(t *testing.T) {
 	resp, err := server.GetSpec(context.Background(), &emptypb.Empty{})
 	require.NoError(t, err)
 
-	assert.Equal(t, 110, len(resp.Data))
+	assert.Equal(t, 112, len(resp.Data))
 	for k, v := range resp.Data {
 		switch k {
 		case "CONFIG_NAME":
@@ -387,6 +387,10 @@ func TestGetSpec(t *testing.T) {
 			assert.Equal(t, "12", v)
 		case "DAG_TIMELY_VOTING_WEIGHT":
 			assert.Equal(t, "0x0d", v)
+		case "CLEAN_WITHDRAWALS_AFT_EPOCHS":
+			assert.Equal(t, "100", v)
+		case "DELEGATE_FORK_SLOT":
+			assert.Equal(t, "2048", v)
 		default:
 			t.Errorf("Incorrect key: %s", k)
 		}

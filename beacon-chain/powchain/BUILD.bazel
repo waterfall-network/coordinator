@@ -50,8 +50,8 @@ go_library(
         "//network:go_default_library",
         "//network/authorization:go_default_library",
         "//proto/engine/v1:go_default_library",
-        "//proto/prysm/v1alpha1:go_default_library",
         "//proto/eth/v1:go_default_library",
+        "//proto/prysm/v1alpha1:go_default_library",
         "//time:go_default_library",
         "//time/slots:go_default_library",
         "@com_github_holiman_uint256//:go_default_library",
@@ -69,7 +69,7 @@ go_library(
         "@network_waterfall_gitlab_waterfall_protocol_gwat//core/types:go_default_library",
         "@network_waterfall_gitlab_waterfall_protocol_gwat//ethclient:go_default_library",
         "@network_waterfall_gitlab_waterfall_protocol_gwat//rpc:go_default_library",
-        "@network_waterfall_gitlab_waterfall_protocol_gwat//validator:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//validator/txlog:go_default_library",
     ],
 )
 

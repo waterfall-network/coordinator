@@ -4410,8 +4410,8 @@ def prysm_deps():
         ],
         build_naming_convention = "go_default_library",
         importpath = "gitlab.waterfall.network/waterfall/protocol/gwat",
-        sum = "h1:mHpdL+GllSBmmfL1kLPjoZqtfhpIK/kEkmrBU23RE0g=",
-        version = "v0.8.7-0.20240209193737-e4906a7db728",
+        sum = "h1:t6JbvDGmuUllLXhYeMZVPvKe6L7vzvHWr65/33YiLJg=",
+        version = "v0.9.1",
 
         ## to use local repo comment `sum` & `version`, and uncomment follows below
         #        vcs = "git",

@@ -160,12 +160,10 @@ go_test(
 go_test(
     name = "go_raceon_test",
     srcs = [
-        "chain_info_norace_test.go",
         "checktags_test.go",
         "init_test.go",
         "mock_test.go",
         "receive_block_test.go",
-        "service_norace_test.go",
     ],
     embed = [":go_default_library"],
     gc_goopts = [

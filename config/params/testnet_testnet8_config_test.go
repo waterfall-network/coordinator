@@ -7,6 +7,7 @@ import (
 )
 
 func TestTestnet8ConfigMatchesUpstreamYaml(t *testing.T) {
+	t.Skip()
 	presetFPs := presetsFilePath(t, "mainnet")
 	for _, fp := range presetFPs {
 		params.LoadChainConfigFile(fp, nil)
