@@ -935,6 +935,12 @@ def prysm_deps():
         sum = "h1:MRQwO/qZtHJFQA7M3uQBadrscFC5org7fWm8CCBRzMM=",
         version = "v0.0.0-20220110145812-fafb696cae88",
     )
+    go_repository(
+        name = "com_github_waterfall_network_fastssz",
+        importpath = "github.com/waterfall-network/fastssz",
+        sum = "h1:iQkvWit5XOuIs1waYFGBG1RwXlcWbyrDuOqZr0mV2iA=",
+        version = "v0.1.4",
+    )
 
     go_repository(
         name = "com_github_fjl_memsize",
@@ -4410,8 +4416,8 @@ def prysm_deps():
         ],
         build_naming_convention = "go_default_library",
         importpath = "gitlab.waterfall.network/waterfall/protocol/gwat",
-        sum = "h1:t6JbvDGmuUllLXhYeMZVPvKe6L7vzvHWr65/33YiLJg=",
-        version = "v0.9.1",
+        sum = "h1:NTGVxhQTWw0Lr1KGr7wFElysq+jokV8XV1j0JsgR6yo=",
+        version = "v0.9.3",
 
         ## to use local repo comment `sum` & `version`, and uncomment follows below
         #        vcs = "git",
