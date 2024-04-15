@@ -2,10 +2,10 @@ package kv
 
 import (
 	"context"
-	"github.com/bazelbuild/rules_go/go/tools/bazel"
 	"os"
 	"testing"
 
+	"github.com/bazelbuild/rules_go/go/tools/bazel"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/iface"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
