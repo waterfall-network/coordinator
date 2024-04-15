@@ -146,7 +146,7 @@ func hackBellatrixMaxuint() (*params.BeaconChainConfig, func()) {
 	// Unfortunately we have unit tests that assert our config matches the upstream config, so we have to choose between
 	// breaking conformance, adding a special case to the conformance unit test, or patch it here.
 	previous := params.BeaconConfig()
-	bc := params.MainnetConfig().Copy()
+	bc := params.Testnet8Config().Copy()
 	bc.BellatrixForkEpoch = math.MaxUint32
 	bc.InitializeForkSchedule()
 	params.OverrideBeaconConfig(bc)
