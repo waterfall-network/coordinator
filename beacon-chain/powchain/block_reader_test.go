@@ -37,6 +37,7 @@ func TestLatestMainchainInfo_OK(t *testing.T) {
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "Unable to setup web3 ETH1.0 chain service")
 
@@ -86,6 +87,7 @@ func TestBlockHashByHeight_ReturnsHash(t *testing.T) {
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 
@@ -119,6 +121,7 @@ func TestBlockHashByHeight_ReturnsError_WhenNoEth1Client(t *testing.T) {
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 
@@ -140,6 +143,7 @@ func TestBlockExists_ValidHash(t *testing.T) {
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 
@@ -176,6 +180,7 @@ func TestBlockExists_InvalidHash(t *testing.T) {
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 
@@ -195,6 +200,7 @@ func TestBlockExists_UsesCachedBlockInfo(t *testing.T) {
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 	// nil eth1DataFetcher would panic if cached value not used
@@ -223,6 +229,7 @@ func TestBlockExistsWithCache_UsesCachedHeaderInfo(t *testing.T) {
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 
@@ -250,6 +257,7 @@ func TestBlockExistsWithCache_HeaderNotCached(t *testing.T) {
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 
@@ -269,6 +277,7 @@ func TestService_BlockTimeByHeight_ReturnsError_WhenNoEth1Client(t *testing.T) {
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 

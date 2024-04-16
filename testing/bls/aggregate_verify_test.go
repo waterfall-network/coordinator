@@ -14,7 +14,6 @@ import (
 )
 
 func TestAggregateVerify(t *testing.T) {
-	t.Skip() // Generate test data with pyton tool
 	t.Run("blst", testAggregateVerify)
 }
 
