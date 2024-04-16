@@ -1,7 +1,7 @@
 image: node:16
 
 stages:
-  # - .pre
+  - .pre
   - test
   - build
   - release
@@ -33,7 +33,7 @@ variables:
     cp -r /tmp/version.go runtime/version/version.go
 
 lint:
-  stage: test
+  stage: .pre
   image: golangci/golangci-lint:v1.52.2
   tags:
     - docker
