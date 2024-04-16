@@ -9,21 +9,18 @@ import (
 	"net/http"
 	"testing"
 
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
-
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/network/forks"
-	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
-
+	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/ssz/detect"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/network/forks"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
-
-	"github.com/pkg/errors"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 )
 
 type testRT struct {

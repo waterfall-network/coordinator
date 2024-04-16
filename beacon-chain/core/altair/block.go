@@ -3,6 +3,7 @@ package altair
 import (
 	"context"
 	"errors"
+
 	types "github.com/prysmaticlabs/eth2-types"
 	log "github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"

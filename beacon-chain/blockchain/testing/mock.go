@@ -5,7 +5,6 @@ package testing
 import (
 	"bytes"
 	"context"
-	"gitlab.waterfall.network/waterfall/protocol/gwat/tests/testutils"
 	"sync"
 	"time"
 
@@ -28,6 +27,7 @@ import (
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/tests/testutils"
 )
 
 var ErrNilState = errors.New("nil state")
