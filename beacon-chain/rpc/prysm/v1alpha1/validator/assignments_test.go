@@ -476,12 +476,13 @@ func TestStreamDuties_OK_ChainReorg(t *testing.T) {
 	require.NoError(t, err)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	exitRoutine := make(chan bool, 10)
+	exitRoutine := make(chan bool)
 	mockStream := mock.NewMockBeaconNodeValidator_StreamDutiesServer(ctrl)
 	mockStream.EXPECT().Send(wantedRes).Return(nil)
 	mockStream.EXPECT().Send(wantedRes).Do(func(arg0 interface{}) {
 		exitRoutine <- true
-	}).AnyTimes()
+	})
+	mockStream.EXPECT().Send(wantedRes).Return(nil).AnyTimes()
 	mockStream.EXPECT().Context().Return(ctx).AnyTimes()
 	go func(tt *testing.T) {
 		assert.ErrorContains(t, "context canceled", vs.StreamDuties(req, mockStream))
