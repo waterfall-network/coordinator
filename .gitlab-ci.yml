@@ -150,6 +150,8 @@ cache:
 
 clean_cache:
   stage: .pre
+  tags:
+    - docker
   script:
     - rm -rf $BAZEL_CACHE_DIR
     - bazel clean --expunge
