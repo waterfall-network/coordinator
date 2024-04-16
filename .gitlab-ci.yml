@@ -17,7 +17,6 @@ variables:
     npm install -g @bazel/bazelisk
     echo "machine $CI_SERVER_HOST login gitlab-ci-token password $CI_JOB_TOKEN" >> ~/.netrc
     export GOPRIVATE=${CI_SERVER_HOST}
-#    echo "build --disk_cache=$BAZEL_CACHE_DIR" >> .bazelrc
     mkdir -p ./dist
     bazel version
     cp runtime/version/version.go /tmp/version.go
