@@ -5,6 +5,7 @@ stages:
   - test
   - build
   - release
+  - .post
 
 variables:
   BAZEL_CACHE_DIR: "$CI_PROJECT_DIR/.cache"
@@ -95,7 +96,7 @@ test:
 #    - bazel test //build/...
 
 full_test:
-  stage: test
+  stage: .post
   tags:
     - docker
   rules:
