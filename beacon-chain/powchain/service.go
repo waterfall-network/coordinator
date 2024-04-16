@@ -233,9 +233,7 @@ func NewService(ctx context.Context, opts ...Option) (*Service, error) {
 		return nil, err
 	}
 
-	if s.cfg.stateNotifier != nil {
-		go s.StateTracker()
-	}
+	go s.StateTracker()
 
 	return s, nil
 }

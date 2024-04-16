@@ -163,6 +163,7 @@ func TestStart_NoHttpEndpointDefinedFails_WithoutChainStarted(t *testing.T) {
 	_, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{""}),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err)
 	require.LogsDoNotContain(t, hook, "missing address")
@@ -231,6 +232,7 @@ func TestFollowBlock_OK(t *testing.T) {
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 
@@ -305,6 +307,7 @@ func TestHandlePanic_OK(t *testing.T) {
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 shard1 chain service")
 	// nil eth1DataFetcher would panic if cached value not used
@@ -340,6 +343,7 @@ func TestLogTillGenesis_OK(t *testing.T) {
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 
@@ -478,6 +482,7 @@ func TestNewService_EarliestVotingBlock(t *testing.T) {
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 	web3Service.eth1DataFetcher = &goodFetcher{backend: testAcc.Backend}
@@ -519,6 +524,7 @@ func TestNewService_Eth1HeaderRequLimit(t *testing.T) {
 	s1, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 	assert.Equal(t, defaultEth1HeaderReqLimit, s1.cfg.eth1HeaderReqLimit, "default eth1 header request limit not set")
@@ -526,6 +532,7 @@ func TestNewService_Eth1HeaderRequLimit(t *testing.T) {
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
 		WithEth1HeaderRequestLimit(uint64(150)),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 	assert.Equal(t, uint64(150), s2.cfg.eth1HeaderReqLimit, "unable to set eth1HeaderRequestLimit")
@@ -565,6 +572,7 @@ func TestServiceFallbackCorrectly(t *testing.T) {
 		WithHttpEndpoints([]string{firstEndpoint}),
 		WithDatabase(beaconDB),
 		WithBeaconNodeStatsUpdater(mbs),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err)
 	s1.cfg.beaconNodeStatsUpdater = mbs
@@ -625,6 +633,7 @@ func TestService_EnsureConsistentPowchainData(t *testing.T) {
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
 		WithDepositCache(cache),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err)
 	genState, err := util.NewBeaconState()
@@ -655,6 +664,7 @@ func TestService_InitializeCorrectly(t *testing.T) {
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
 		WithDepositCache(cache),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err)
 	genState, err := util.NewBeaconState()
@@ -684,6 +694,7 @@ func TestService_EnsureValidPowchainData(t *testing.T) {
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
 		WithDepositCache(cache),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err)
 	genState, err := util.NewBeaconState()
@@ -791,6 +802,7 @@ func TestETH1Endpoints(t *testing.T) {
 		WithHttpEndpoints(endpoints),
 		WithDatabase(beaconDB),
 		WithBeaconNodeStatsUpdater(mbs),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	s1.cfg.beaconNodeStatsUpdater = mbs
 	require.NoError(t, err)

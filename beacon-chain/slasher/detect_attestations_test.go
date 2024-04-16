@@ -64,17 +64,16 @@ func Test_processQueuedAttestations(t *testing.T) {
 				currentEpoch: 4,
 			},
 		},
-		// Temporary turn off this case
-		//{
-		//	name: "Detects double vote, (source 1, target 2), (source 0, target 2)",
-		//	args: args{
-		//		attestationQueue: []*slashertypes.IndexedAttestationWrapper{
-		//			createAttestationWrapper(t, 1, 2, []uint64{0, 1}, nil),
-		//			createAttestationWrapper(t, 0, 2, []uint64{0, 1}, nil),
-		//		},
-		//		currentEpoch: 4,
-		//	},
-		//},
+		{
+			name: "Detects double vote, (source 1, target 2), (source 0, target 2)",
+			args: args{
+				attestationQueue: []*slashertypes.IndexedAttestationWrapper{
+					createAttestationWrapper(t, 1, 2, []uint64{0, 1}, nil),
+					createAttestationWrapper(t, 0, 2, []uint64{0, 1}, nil),
+				},
+				currentEpoch: 4,
+			},
+		},
 		{
 			name: "Not slashable, surrounding but non-overlapping attesting indices within same validator chunk index",
 			args: args{

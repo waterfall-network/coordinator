@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	v1alpha1 "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
@@ -16,6 +17,7 @@ func TestCopyETH1Data(t *testing.T) {
 	if !reflect.DeepEqual(got, data) {
 		t.Errorf("CopyETH1Data() = %v, want %v", got, data)
 	}
+	assert.NotEmpty(t, got, "Copied eth1data has empty fields")
 }
 
 func TestCopySpineData(t *testing.T) {
@@ -25,6 +27,7 @@ func TestCopySpineData(t *testing.T) {
 	if !reflect.DeepEqual(got, data) {
 		t.Errorf("CopyETH1Data() = %v, want %v", got, data)
 	}
+	assert.NotEmpty(t, got, "Copied eth1data has empty fields")
 }
 
 func TestCopyPendingAttestation(t *testing.T) {
@@ -34,6 +37,7 @@ func TestCopyPendingAttestation(t *testing.T) {
 	if !reflect.DeepEqual(got, pa) {
 		t.Errorf("CopyPendingAttestation() = %v, want %v", got, pa)
 	}
+	assert.NotEmpty(t, got, "Copied pending attestation has empty fields")
 }
 
 func TestCopyAttestation(t *testing.T) {
@@ -43,6 +47,7 @@ func TestCopyAttestation(t *testing.T) {
 	if !reflect.DeepEqual(got, att) {
 		t.Errorf("CopyAttestation() = %v, want %v", got, att)
 	}
+	assert.NotEmpty(t, got, "Copied attestation has empty fields")
 }
 func TestCopyAttestationData(t *testing.T) {
 	att := genAttData()
@@ -51,6 +56,7 @@ func TestCopyAttestationData(t *testing.T) {
 	if !reflect.DeepEqual(got, att) {
 		t.Errorf("CopyAttestationData() = %v, want %v", got, att)
 	}
+	assert.NotEmpty(t, got, "Copied attestation data has empty fields")
 }
 
 func TestCopyCheckpoint(t *testing.T) {
@@ -60,6 +66,7 @@ func TestCopyCheckpoint(t *testing.T) {
 	if !reflect.DeepEqual(got, cp) {
 		t.Errorf("CopyCheckpoint() = %v, want %v", got, cp)
 	}
+	assert.NotEmpty(t, got, "Copied checkpoint has empty fields")
 }
 
 func TestCopySignedBeaconBlock(t *testing.T) {
@@ -69,6 +76,7 @@ func TestCopySignedBeaconBlock(t *testing.T) {
 	if !reflect.DeepEqual(got, blk) {
 		t.Errorf("CopySignedBeaconBlock() = %v, want %v", got, blk)
 	}
+	assert.NotEmpty(t, got, "Copied signed beacon block has empty fields")
 }
 
 func TestCopyBeaconBlock(t *testing.T) {
@@ -78,6 +86,7 @@ func TestCopyBeaconBlock(t *testing.T) {
 	if !reflect.DeepEqual(got, blk) {
 		t.Errorf("CopyBeaconBlock() = %v, want %v", got, blk)
 	}
+	assert.NotEmpty(t, got, "Copied beacon block has empty fields")
 }
 
 func TestCopyBeaconBlockBody(t *testing.T) {
@@ -87,6 +96,7 @@ func TestCopyBeaconBlockBody(t *testing.T) {
 	if !reflect.DeepEqual(got, body) {
 		t.Errorf("CopyBeaconBlockBody() = %v, want %v", got, body)
 	}
+	assert.NotEmpty(t, got, "Copied beacon block body has empty fields")
 }
 
 func TestCopySignedBeaconBlockAltair(t *testing.T) {
@@ -96,6 +106,7 @@ func TestCopySignedBeaconBlockAltair(t *testing.T) {
 	if !reflect.DeepEqual(got, sbb) {
 		t.Errorf("CopySignedBeaconBlockAltair() = %v, want %v", got, sbb)
 	}
+	assert.NotEmpty(t, sbb, "Copied signed beacon block altair has empty fields")
 }
 
 func TestCopyBeaconBlockAltair(t *testing.T) {
@@ -105,6 +116,7 @@ func TestCopyBeaconBlockAltair(t *testing.T) {
 	if !reflect.DeepEqual(got, b) {
 		t.Errorf("CopyBeaconBlockAltair() = %v, want %v", got, b)
 	}
+	assert.NotEmpty(t, b, "Copied beacon block altair has empty fields")
 }
 
 func TestCopyBeaconBlockBodyAltair(t *testing.T) {
@@ -114,6 +126,7 @@ func TestCopyBeaconBlockBodyAltair(t *testing.T) {
 	if !reflect.DeepEqual(got, bb) {
 		t.Errorf("CopyBeaconBlockBodyAltair() = %v, want %v", got, bb)
 	}
+	assert.NotEmpty(t, bb, "Copied beacon block body altair has empty fields")
 }
 
 func TestCopyProposerSlashings(t *testing.T) {
@@ -123,6 +136,7 @@ func TestCopyProposerSlashings(t *testing.T) {
 	if !reflect.DeepEqual(got, ps) {
 		t.Errorf("CopyProposerSlashings() = %v, want %v", got, ps)
 	}
+	assert.NotEmpty(t, got, "Copied proposer slashings have empty fields")
 }
 
 func TestCopyProposerSlashing(t *testing.T) {
@@ -132,6 +146,7 @@ func TestCopyProposerSlashing(t *testing.T) {
 	if !reflect.DeepEqual(got, ps) {
 		t.Errorf("CopyProposerSlashing() = %v, want %v", got, ps)
 	}
+	assert.NotEmpty(t, got, "Copied proposer slashing has empty fields")
 }
 
 func TestCopySignedBeaconBlockHeader(t *testing.T) {
@@ -141,6 +156,7 @@ func TestCopySignedBeaconBlockHeader(t *testing.T) {
 	if !reflect.DeepEqual(got, sbh) {
 		t.Errorf("CopySignedBeaconBlockHeader() = %v, want %v", got, sbh)
 	}
+	assert.NotEmpty(t, got, "Copied signed beacon block header has empty fields")
 }
 
 func TestCopyBeaconBlockHeader(t *testing.T) {
@@ -150,6 +166,7 @@ func TestCopyBeaconBlockHeader(t *testing.T) {
 	if !reflect.DeepEqual(got, bh) {
 		t.Errorf("CopyBeaconBlockHeader() = %v, want %v", got, bh)
 	}
+	assert.NotEmpty(t, got, "Copied beacon block header has empty fields")
 }
 
 func TestCopyAttesterSlashings(t *testing.T) {
@@ -159,6 +176,7 @@ func TestCopyAttesterSlashings(t *testing.T) {
 	if !reflect.DeepEqual(got, as) {
 		t.Errorf("CopyAttesterSlashings() = %v, want %v", got, as)
 	}
+	assert.NotEmpty(t, got, "Copied attester slashings have empty fields")
 }
 
 func TestCopyIndexedAttestation(t *testing.T) {
@@ -168,6 +186,7 @@ func TestCopyIndexedAttestation(t *testing.T) {
 	if !reflect.DeepEqual(got, ia) {
 		t.Errorf("CopyIndexedAttestation() = %v, want %v", got, ia)
 	}
+	assert.NotEmpty(t, got, "Copied indexed attestation has empty fields")
 }
 
 func TestCopyAttestations(t *testing.T) {
@@ -177,6 +196,7 @@ func TestCopyAttestations(t *testing.T) {
 	if !reflect.DeepEqual(got, atts) {
 		t.Errorf("CopyAttestations() = %v, want %v", got, atts)
 	}
+	assert.NotEmpty(t, got, "Copied attestations have empty fields")
 }
 
 func TestCopyDeposits(t *testing.T) {
@@ -186,6 +206,7 @@ func TestCopyDeposits(t *testing.T) {
 	if !reflect.DeepEqual(got, d) {
 		t.Errorf("CopyDeposits() = %v, want %v", got, d)
 	}
+	assert.NotEmpty(t, got, "Copied deposits have empty fields")
 }
 
 func TestCopyDeposit(t *testing.T) {
@@ -195,6 +216,7 @@ func TestCopyDeposit(t *testing.T) {
 	if !reflect.DeepEqual(got, d) {
 		t.Errorf("CopyDeposit() = %v, want %v", got, d)
 	}
+	assert.NotEmpty(t, got, "Copied deposit has empty fields")
 }
 
 func TestCopyDepositData(t *testing.T) {
@@ -204,6 +226,7 @@ func TestCopyDepositData(t *testing.T) {
 	if !reflect.DeepEqual(got, dd) {
 		t.Errorf("CopyDepositData() = %v, want %v", got, dd)
 	}
+	assert.NotEmpty(t, got, "Copied deposit data has empty fields")
 }
 
 func TestCopyVoluntaryExits(t *testing.T) {
@@ -213,6 +236,7 @@ func TestCopyVoluntaryExits(t *testing.T) {
 	if !reflect.DeepEqual(got, sv) {
 		t.Errorf("CopyVoluntaryExits() = %v, want %v", got, sv)
 	}
+	assert.NotEmpty(t, got, "Copied signed voluntary exits have empty fields")
 }
 
 func TestCopyVoluntaryExit(t *testing.T) {
@@ -222,6 +246,7 @@ func TestCopyVoluntaryExit(t *testing.T) {
 	if !reflect.DeepEqual(got, sv) {
 		t.Errorf("CopyVoluntaryExit() = %v, want %v", got, sv)
 	}
+	assert.NotEmpty(t, got, "Copied signed voluntary exit has empty fields")
 }
 
 func TestCopyValidator(t *testing.T) {
@@ -231,6 +256,7 @@ func TestCopyValidator(t *testing.T) {
 	if !reflect.DeepEqual(got, v) {
 		t.Errorf("CopyValidator() = %v, want %v", got, v)
 	}
+	assert.NotEmpty(t, got, "Copied validator has empty fields")
 }
 
 func TestCopySyncCommitteeMessage(t *testing.T) {
@@ -240,6 +266,7 @@ func TestCopySyncCommitteeMessage(t *testing.T) {
 	if !reflect.DeepEqual(got, scm) {
 		t.Errorf("CopySyncCommitteeMessage() = %v, want %v", got, scm)
 	}
+	assert.NotEmpty(t, got, "Copied sync committee message has empty fields")
 }
 
 func TestCopySyncCommitteeContribution(t *testing.T) {
@@ -249,6 +276,7 @@ func TestCopySyncCommitteeContribution(t *testing.T) {
 	if !reflect.DeepEqual(got, scc) {
 		t.Errorf("CopySyncCommitteeContribution() = %v, want %v", got, scc)
 	}
+	assert.NotEmpty(t, got, "Copied sync committee contribution has empty fields")
 }
 
 func TestCopySyncAggregate(t *testing.T) {
@@ -258,6 +286,7 @@ func TestCopySyncAggregate(t *testing.T) {
 	if !reflect.DeepEqual(got, sa) {
 		t.Errorf("CopySyncAggregate() = %v, want %v", got, sa)
 	}
+	assert.NotEmpty(t, got, "Copied sync aggregate has empty fields")
 }
 
 func TestCopyPendingAttestationSlice(t *testing.T) {

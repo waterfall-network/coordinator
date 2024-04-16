@@ -8,7 +8,6 @@ import (
 
 func TestBuildWithBazel(t *testing.T) {
 	if !bazel.BuiltWithBazel() {
-		t.Skip()
 		t.Error("not built with Bazel")
 	}
 }
