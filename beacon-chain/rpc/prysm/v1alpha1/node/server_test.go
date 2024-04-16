@@ -27,6 +27,23 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+func TestNodeServer_GetPeer(t *testing.T) {
+	server := grpc.NewServer()
+	peersProvider := &mockP2p.MockPeersProvider{}
+	ns := &Server{
+		PeersFetcher: peersProvider,
+	}
+	ethpb.RegisterNodeServer(server, ns)
+	reflection.Register(server)
+	firstPeer := peersProvider.Peers().All()[0]
+
+	res, err := ns.GetPeer(context.Background(), &ethpb.PeerRequest{PeerId: firstPeer.String()})
+	require.NoError(t, err)
+	assert.Equal(t, firstPeer.String(), res.PeerId, "Unexpected peer ID")
+	assert.Equal(t, int(ethpb.PeerDirection_INBOUND), int(res.Direction), "Expected 1st peer to be an inbound connection")
+	assert.Equal(t, ethpb.ConnectionState_CONNECTED, res.ConnectionState, "Expected peer to be connected")
+}
+
 func TestNodeServer_GetSyncStatus(t *testing.T) {
 	mSync := &mockSync.Sync{IsSyncing: false}
 	ns := &Server{
@@ -115,23 +132,6 @@ func TestNodeServer_GetHost(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, mP2P.PeerID().String(), h.PeerId)
 	assert.Equal(t, stringENR, h.Enr)
-}
-
-func TestNodeServer_GetPeer(t *testing.T) {
-	server := grpc.NewServer()
-	peersProvider := &mockP2p.MockPeersProvider{}
-	ns := &Server{
-		PeersFetcher: peersProvider,
-	}
-	ethpb.RegisterNodeServer(server, ns)
-	reflection.Register(server)
-	firstPeer := peersProvider.Peers().All()[0]
-
-	res, err := ns.GetPeer(context.Background(), &ethpb.PeerRequest{PeerId: firstPeer.String()})
-	require.NoError(t, err)
-	assert.Equal(t, firstPeer.String(), res.PeerId, "Unexpected peer ID")
-	assert.Equal(t, int(ethpb.PeerDirection_INBOUND), int(res.Direction), "Expected 1st peer to be an inbound connection")
-	assert.Equal(t, ethpb.ConnectionState_CONNECTED, res.ConnectionState, "Expected peer to be connected")
 }
 
 func TestNodeServer_ListPeers(t *testing.T) {
