@@ -6,9 +6,6 @@ stages:
   - build
   - release
 
-variables:
-  BAZEL_CACHE_DIR: "$CI_PROJECT_DIR/.cache"
-
 .job_build:
   script: &job_build |-
     apt-get update -y
