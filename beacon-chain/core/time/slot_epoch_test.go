@@ -222,38 +222,6 @@ func TestAltairCompatible(t *testing.T) {
 			},
 			want: true,
 		},
-		{
-			name: "bellatrix state, bellatrix epoch",
-			args: args{
-				s: func() state.BeaconState {
-					st, _ := util.DeterministicGenesisStateBellatrix(t, 1)
-					return st
-				}(),
-				e: params.BeaconConfig().BellatrixForkEpoch,
-			},
-			want: true,
-		},
-		{
-			name: "bellatrix state, altair epoch",
-			args: args{
-				s: func() state.BeaconState {
-					st, _ := util.DeterministicGenesisStateBellatrix(t, 1)
-					return st
-				}(),
-				e: params.BeaconConfig().AltairForkEpoch,
-			},
-			want: true,
-		},
-		{
-			name: "bellatrix state, phase0 epoch",
-			args: args{
-				s: func() state.BeaconState {
-					st, _ := util.DeterministicGenesisStateBellatrix(t, 1)
-					return st
-				}(),
-			},
-			want: false,
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

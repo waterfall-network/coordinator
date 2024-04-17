@@ -317,6 +317,8 @@ func TestStore_SaveCheckpointState(t *testing.T) {
 		PublicKey:             bytesutil.PadTo([]byte("foo"), 48),
 		CreatorAddress:        bytesutil.PadTo([]byte("bar"), fieldparams.AddressLength),
 		WithdrawalCredentials: bytesutil.PadTo([]byte("bar"), fieldparams.AddressLength),
+		ActivationHash:        bytesutil.PadTo([]byte("foo"), 32),
+		ExitHash:              bytesutil.PadTo([]byte("bar"), 32),
 	}
 	err = s.SetValidators([]*ethpb.Validator{val})
 	require.NoError(t, err)
@@ -331,32 +333,32 @@ func TestStore_SaveCheckpointState(t *testing.T) {
 	service.store.SetPrevFinalizedCheckpt(&ethpb.Checkpoint{Root: r[:]})
 
 	r = bytesutil.ToBytes32([]byte{'A'})
-	cp1 := &ethpb.Checkpoint{Epoch: 1, Root: bytesutil.PadTo([]byte{'A'}, fieldparams.RootLength)}
+	cp1 := &ethpb.Checkpoint{Epoch: 0, Root: bytesutil.PadTo([]byte{'A'}, fieldparams.RootLength)}
 	require.NoError(t, service.cfg.BeaconDB.SaveState(ctx, s, bytesutil.ToBytes32([]byte{'A'})))
 	require.NoError(t, service.cfg.BeaconDB.SaveStateSummary(ctx, &ethpb.StateSummary{Root: bytesutil.PadTo([]byte{'A'}, fieldparams.RootLength)}))
 
 	s1, err := service.getAttPreState(ctx, cp1)
 	require.NoError(t, err)
-	assert.Equal(t, 1*params.BeaconConfig().SlotsPerEpoch, s1.Slot(), "Unexpected state slot")
+	assert.Equal(t, types.Slot(0), s1.Slot(), "Unexpected state slot")
 
-	cp2 := &ethpb.Checkpoint{Epoch: 2, Root: bytesutil.PadTo([]byte{'B'}, fieldparams.RootLength)}
+	cp2 := &ethpb.Checkpoint{Epoch: 0, Root: bytesutil.PadTo([]byte{'B'}, fieldparams.RootLength)}
 	require.NoError(t, service.cfg.BeaconDB.SaveState(ctx, s, bytesutil.ToBytes32([]byte{'B'})))
 	require.NoError(t, service.cfg.BeaconDB.SaveStateSummary(ctx, &ethpb.StateSummary{Root: bytesutil.PadTo([]byte{'B'}, fieldparams.RootLength)}))
 	s2, err := service.getAttPreState(ctx, cp2)
 	require.NoError(t, err)
-	assert.Equal(t, 2*params.BeaconConfig().SlotsPerEpoch, s2.Slot(), "Unexpected state slot")
+	assert.Equal(t, types.Slot(0), s2.Slot(), "Unexpected state slot")
 
 	s1, err = service.getAttPreState(ctx, cp1)
 	require.NoError(t, err)
-	assert.Equal(t, 1*params.BeaconConfig().SlotsPerEpoch, s1.Slot(), "Unexpected state slot")
+	assert.Equal(t, types.Slot(0), s1.Slot(), "Unexpected state slot")
 
 	s1, err = service.checkpointStateCache.StateByCheckpoint(cp1)
 	require.NoError(t, err)
-	assert.Equal(t, 1*params.BeaconConfig().SlotsPerEpoch, s1.Slot(), "Unexpected state slot")
+	assert.Equal(t, types.Slot(0), s1.Slot(), "Unexpected state slot")
 
 	s2, err = service.checkpointStateCache.StateByCheckpoint(cp2)
 	require.NoError(t, err)
-	assert.Equal(t, 2*params.BeaconConfig().SlotsPerEpoch, s2.Slot(), "Unexpected state slot")
+	assert.Equal(t, types.Slot(0), s2.Slot(), "Unexpected state slot")
 
 	require.NoError(t, s.SetSlot(params.BeaconConfig().SlotsPerEpoch+1))
 	service.store.SetJustifiedCheckpt(&ethpb.Checkpoint{Root: r[:]})

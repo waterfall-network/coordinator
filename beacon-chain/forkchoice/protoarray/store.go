@@ -411,7 +411,7 @@ func (s *Store) insert(ctx context.Context,
 	attsData := &AttestationsData{
 		justifiedRoot: justifiedRoot,
 		finalizedRoot: finalizedRoot,
-		votes:         map[uint64]Vote{},
+		votes:         make(map[uint64]Vote),
 	}
 
 	n := &Node{

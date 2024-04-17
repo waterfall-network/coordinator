@@ -321,8 +321,3 @@ func (f *ForkChoice) ForkChoiceNodes() []*pbrpc.ForkChoiceNode {
 	ret := make([]*pbrpc.ForkChoiceNode, len(f.store.nodeByRoot))
 	return f.store.treeRootNode.rpcNodes(ret)
 }
-
-// SetOptimisticToInvalid removes a block with an invalid execution payload from fork choice store
-func (f *ForkChoice) SetOptimisticToInvalid(ctx context.Context, root, payloadHash [fieldparams.RootLength]byte) ([][32]byte, error) {
-	return f.store.setOptimisticToInvalid(ctx, root, payloadHash)
-}

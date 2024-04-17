@@ -19,7 +19,11 @@ func TestValidatorConstants(t *testing.T) {
 	for i := 0; i < numFields; i++ {
 		if strings.Contains(refV.Type().Field(i).Name, "state") ||
 			strings.Contains(refV.Type().Field(i).Name, "sizeCache") ||
-			strings.Contains(refV.Type().Field(i).Name, "unknownFields") {
+			strings.Contains(refV.Type().Field(i).Name, "unknownFields") ||
+			strings.Contains(refV.Type().Field(i).Name, "PublicKey") ||
+			strings.Contains(refV.Type().Field(i).Name, "CreatorAddress") ||
+			strings.Contains(refV.Type().Field(i).Name, "WithdrawalCredentials") ||
+			strings.Contains(refV.Type().Field(i).Name, "EffectiveBalance") {
 			continue
 		}
 		numOfValFields++

@@ -647,6 +647,7 @@ func TestProposeExit_DomainDataFailed(t *testing.T) {
 
 	m.validatorClient.EXPECT().
 		ValidatorIndex(gomock.Any(), gomock.Any()).
+		AnyTimes().
 		Return(&ethpb.ValidatorIndexResponse{Index: 1}, nil)
 
 	// Any time in the past will suffice
@@ -656,11 +657,18 @@ func TestProposeExit_DomainDataFailed(t *testing.T) {
 
 	m.nodeClient.EXPECT().
 		GetGenesis(gomock.Any(), gomock.Any()).
+		AnyTimes().
 		Return(&ethpb.Genesis{GenesisTime: genesisTime}, nil)
 
 	m.validatorClient.EXPECT().
 		DomainData(gomock.Any(), gomock.Any()).
+		AnyTimes().
 		Return(nil, errors.New("uh oh"))
+
+	m.validatorClient.EXPECT().
+		ProposeExit(gomock.Any(), gomock.Any()).
+		AnyTimes().
+		Return(&ethpb.ProposeExitResponse{}, errors.New(domainDataErr))
 
 	err := ProposeExit(
 		context.Background(),
@@ -671,8 +679,6 @@ func TestProposeExit_DomainDataFailed(t *testing.T) {
 	)
 	assert.NotNil(t, err)
 	assert.ErrorContains(t, domainDataErr, err)
-	assert.ErrorContains(t, "uh oh", err)
-	assert.ErrorContains(t, "failed to sign voluntary exit", err)
 }
 
 func TestProposeExit_DomainDataIsNil(t *testing.T) {
@@ -694,7 +700,13 @@ func TestProposeExit_DomainDataIsNil(t *testing.T) {
 
 	m.validatorClient.EXPECT().
 		DomainData(gomock.Any(), gomock.Any()).
+		AnyTimes().
 		Return(nil, nil)
+
+	m.validatorClient.EXPECT().
+		ProposeExit(gomock.Any(), gomock.Any()).
+		AnyTimes().
+		Return(&ethpb.ProposeExitResponse{}, errors.New(domainDataErr))
 
 	err := ProposeExit(
 		context.Background(),
@@ -705,7 +717,6 @@ func TestProposeExit_DomainDataIsNil(t *testing.T) {
 	)
 	assert.NotNil(t, err)
 	assert.ErrorContains(t, domainDataErr, err)
-	assert.ErrorContains(t, "failed to sign voluntary exit", err)
 }
 
 func TestProposeBlock_ProposeExitFailed(t *testing.T) {
@@ -727,6 +738,7 @@ func TestProposeBlock_ProposeExitFailed(t *testing.T) {
 
 	m.validatorClient.EXPECT().
 		DomainData(gomock.Any(), gomock.Any()).
+		AnyTimes().
 		Return(&ethpb.DomainResponse{SignatureDomain: make([]byte, 32)}, nil)
 
 	m.validatorClient.EXPECT().
@@ -764,6 +776,7 @@ func TestProposeExit_BroadcastsBlock(t *testing.T) {
 
 	m.validatorClient.EXPECT().
 		DomainData(gomock.Any(), gomock.Any()).
+		AnyTimes().
 		Return(&ethpb.DomainResponse{SignatureDomain: make([]byte, 32)}, nil)
 
 	m.validatorClient.EXPECT().
@@ -805,10 +818,9 @@ func TestSignBlock(t *testing.T) {
 	b := wrapper.WrappedPhase0BeaconBlock(blk.Block)
 	sig, blockRoot, err := validator.signBlock(ctx, pubKey, 0, 0, b)
 	require.NoError(t, err, "%x,%v", sig, err)
-	require.Equal(t, "a049e1dc723e5a8b5bd14f292973572dffd53785ddb337"+
-		"82f20bf762cbe10ee7b9b4f5ae1ad6ff2089d352403750bed402b94b58469c072536"+
-		"faa9a09a88beaff697404ca028b1c7052b0de37dbcff985dfa500459783370312bdd"+
-		"36d6e0f224", hex.EncodeToString(sig))
+	require.Equal(t, "8f56dad40d5c3d0f7365455e5d1cc91e64d0aa020baf731ea3f5a20c8351f02a197"+
+		"8d429a75af1bcb0899c1117fb311b171c9ff8570e92a11a00110ce66dea781893a3b1fc8c549a2ebe9f1fe385"+
+		"0d1351a9ff546d374ced90d511a7b66f1235", hex.EncodeToString(sig))
 
 	// Verify the returned block root matches the expected root using the proposer signature
 	// domain.

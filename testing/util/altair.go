@@ -177,6 +177,14 @@ func buildGenesisBeaconState(genesisTime uint64, preState state.BeaconStateAltai
 		Eth1DataVotes:    make([]*ethpb.Eth1Data, 0),
 		BlockVoting:      make([]*ethpb.BlockVoting, 0),
 		Eth1DepositIndex: preState.Eth1DepositIndex(),
+
+		SpineData: &ethpb.SpineData{
+			Spines:       make([]byte, 32),
+			Prefix:       make([]byte, 32),
+			Finalization: make([]byte, 32),
+			CpFinalized:  make([]byte, 32),
+			ParentSpines: make([]*ethpb.SpinesSeq, 0),
+		},
 	}
 
 	bodyRoot, err := (&ethpb.BeaconBlockBodyAltair{
@@ -293,7 +301,22 @@ func BlockSignatureAltair(
 	if err != nil {
 		return nil, err
 	}
-	s, err := transition.CalculateStateRoot(context.Background(), bState, wsb)
+
+	ctxBlockFetcher := params.CtxBlockFetcher(func(ctx context.Context, blockRoot [32]byte) (types.ValidatorIndex, types.Slot, uint64, error) {
+		block := wsb
+		votesIncluded := uint64(0)
+		for _, att := range block.Block().Body().Attestations() {
+			votesIncluded += att.AggregationBits.Count()
+		}
+
+		return block.Block().ProposerIndex() - 1, block.Block().Slot() - 1, votesIncluded, nil
+	})
+
+	ctxWithFetcher := context.WithValue(context.Background(),
+		params.BeaconConfig().CtxBlockFetcherKey,
+		ctxBlockFetcher)
+
+	s, err := transition.CalculateStateRoot(ctxWithFetcher, bState, wsb)
 	if err != nil {
 		return nil, err
 	}
@@ -309,10 +332,11 @@ func BlockSignatureAltair(
 	// Temporarily increasing the beacon state slot here since BeaconProposerIndex is a
 	// function deterministic on beacon state slot.
 	currentSlot := bState.Slot()
+
 	if err := bState.SetSlot(block.Slot); err != nil {
 		return nil, err
 	}
-	proposerIdx, err := helpers.BeaconProposerIndex(context.Background(), bState)
+	proposerIdx, err := helpers.BeaconProposerIndex(ctxWithFetcher, bState)
 	if err != nil {
 		return nil, err
 	}
@@ -400,7 +424,7 @@ func GenerateFullBlockAltair(
 	}
 
 	if slot == currentSlot {
-		slot = currentSlot + 1
+		slot = currentSlot + 3
 	}
 
 	syncAgg, err := generateSyncAggregate(bState, privs, parentRoot)
@@ -423,8 +447,14 @@ func GenerateFullBlockAltair(
 		return nil, err
 	}
 
+	stateRoot, err := bState.HashTreeRoot(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	block := &ethpb.BeaconBlockAltair{
 		Slot:          slot,
+		StateRoot:     stateRoot[:],
 		ParentRoot:    parentRoot[:],
 		ProposerIndex: idx,
 		Body: &ethpb.BeaconBlockBodyAltair{

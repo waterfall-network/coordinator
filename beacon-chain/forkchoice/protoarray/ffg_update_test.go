@@ -2,6 +2,7 @@ package protoarray
 
 import (
 	"context"
+	"sync"
 	"testing"
 
 	types "github.com/prysmaticlabs/eth2-types"
@@ -194,6 +195,12 @@ func setup(justifiedEpoch, finalizedEpoch types.Epoch) *ForkChoice {
 		bestChild:      NonExistentNode,
 		bestDescendant: NonExistentNode,
 		weight:         0,
+		attsData: &AttestationsData{
+			justifiedRoot: [32]byte{},
+			finalizedRoot: [32]byte{},
+			votes:         make(map[uint64]Vote),
+			mu:            sync.Mutex{},
+		},
 	})
 
 	return f

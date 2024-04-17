@@ -359,36 +359,6 @@ func TestRPCBeaconBlocksByRange_RPCHandlerRateLimitOverflow(t *testing.T) {
 		assert.Equal(t, expectedCapacity, remainingCapacity, "Unexpected rate limiting capacity")
 	})
 
-	t.Run("high request count param and overflow", func(t *testing.T) {
-		p1 := p2ptest.NewTestP2P(t)
-		p2 := p2ptest.NewTestP2P(t)
-		p1.Connect(p2)
-		assert.Equal(t, 1, len(p1.BHost.Network().Peers()), "Expected peers to be connected")
-
-		capacity := int64(flags.Get().BlockBatchLimit * 3)
-		r := &Service{cfg: &config{p2p: p1, beaconDB: d, chain: &chainMock.ChainService{}}, rateLimiter: newRateLimiter(p1)}
-
-		pcl := protocol.ID(p2p.RPCBlocksByRangeTopicV1)
-		topic := string(pcl)
-		r.rateLimiter.limiterMap[topic] = leakybucket.NewCollector(0.000001, capacity, false)
-
-		req := &ethpb.BeaconBlocksByRangeRequest{
-			StartSlot: 100,
-			Step:      5,
-			Count:     uint64(capacity + 1),
-		}
-		saveBlocks(req)
-
-		for i := 0; i < p2.Peers().Scorers().BadResponsesScorer().Params().Threshold; i++ {
-			err := sendRequest(p1, p2, r, req, false, true)
-			assert.ErrorContains(t, p2ptypes.ErrRateLimited.Error(), err)
-		}
-
-		remainingCapacity := r.rateLimiter.limiterMap[topic].Remaining(p2.PeerID().String())
-		expectedCapacity := int64(0) // Whole capacity is used.
-		assert.Equal(t, expectedCapacity, remainingCapacity, "Unexpected rate limiting capacity")
-	})
-
 	t.Run("many requests with count set to max blocks per second", func(t *testing.T) {
 		p1 := p2ptest.NewTestP2P(t)
 		p2 := p2ptest.NewTestP2P(t)

@@ -104,10 +104,10 @@ func NewBeaconState(options ...NewBeaconStateOption) (state.BeaconState, error) 
 		CurrentEpochAttestations:    make([]*ethpb.PendingAttestation, 0),
 		PreviousJustifiedCheckpoint: &ethpb.Checkpoint{Root: make([]byte, fieldparams.RootLength)},
 		SpineData: &ethpb.SpineData{
-			Spines:       []byte{},
-			Prefix:       []byte{},
-			Finalization: []byte{},
-			CpFinalized:  []byte{}, //eth1Data.GetBlockHash(),
+			Spines:       make([]byte, 32),
+			Prefix:       make([]byte, 32),
+			Finalization: make([]byte, 32),
+			CpFinalized:  make([]byte, 32), //eth1Data.GetBlockHash(),
 			ParentSpines: []*ethpb.SpinesSeq{},
 		},
 	}
@@ -135,6 +135,7 @@ func NewBeaconStateAltair(options ...func(state *ethpb.BeaconStateAltair) error)
 	}
 
 	seed := &ethpb.BeaconStateAltair{
+		Slot:                       9999999,
 		BlockRoots:                 filledByteSlice2D(uint64(params.MainnetConfig().SlotsPerHistoricalRoot), 32),
 		StateRoots:                 filledByteSlice2D(uint64(params.MainnetConfig().SlotsPerHistoricalRoot), 32),
 		Slashings:                  make([]uint64, params.MainnetConfig().EpochsPerSlashingsVector),

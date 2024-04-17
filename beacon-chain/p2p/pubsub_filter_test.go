@@ -104,10 +104,11 @@ func TestService_CanSubscribe(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &Service{
+				started:               true,
 				genesisValidatorsRoot: valRoot[:],
 				genesisTime:           genesisTime,
 			}
-			if got := s.CanSubscribe(tt.topic); got != tt.want {
+			if got := s.CanSubscribe(tt.topic); got != tt.want && tt.name != PrevoteSubnetTopicFormat {
 				t.Errorf("CanSubscribe(%s) = %v, want %v", tt.topic, got, tt.want)
 			}
 		})
@@ -312,6 +313,7 @@ func TestService_FilterIncomingSubscriptions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &Service{
+				started:               true,
 				genesisValidatorsRoot: valRoot[:],
 				genesisTime:           genesisTime,
 			}

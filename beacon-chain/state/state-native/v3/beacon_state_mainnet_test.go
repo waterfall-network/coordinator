@@ -43,7 +43,7 @@ func TestMainnetSszValuesAgainstFieldParams(t *testing.T) {
 	f, ok = bsType.FieldByName("eth1DataVotes")
 	require.Equal(t, true, ok, "Required field not found")
 	v = f.Tag.Get("ssz-max")
-	assert.Equal(t, strconv.Itoa(fieldparams.Eth1DataVotesLength), v)
+	assert.Equal(t, strconv.Itoa(fieldparams.BlockVotingLength), v)
 
 	f, ok = bsType.FieldByName("validators")
 	require.Equal(t, true, ok, "Required field not found")

@@ -176,6 +176,7 @@ func createDepositData(privKey bls.SecretKey, pubKey bls.PublicKey) (*ethpb.Depo
 		WithdrawalCredentials: depositMessage.WithdrawalCredentials,
 		Amount:                params.BeaconConfig().MaxEffectiveBalance,
 		Signature:             privKey.Sign(root[:]).Marshal(),
+		InitTxHash:            make([]byte, 32),
 	}
 	return di, nil
 }

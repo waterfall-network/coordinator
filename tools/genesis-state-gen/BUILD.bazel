@@ -10,7 +10,6 @@ go_library(
     importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/tools/genesis-state-gen",
     visibility = ["//visibility:private"],
     deps = [
-        "//config/params:go_default_library",
         "//io/file:go_default_library",
         "//proto/prysm/v1alpha1:go_default_library",
         "//runtime/interop:go_default_library",

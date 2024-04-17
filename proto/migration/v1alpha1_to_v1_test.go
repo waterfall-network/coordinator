@@ -226,6 +226,7 @@ func Test_V1Alpha1ExitToV1(t *testing.T) {
 	alphaExit := &ethpbalpha.VoluntaryExit{
 		Epoch:          epoch,
 		ValidatorIndex: validatorIndex,
+		InitTxHash:     make([]byte, 32),
 	}
 
 	v1Exit := V1Alpha1ExitToV1(alphaExit)
@@ -240,6 +241,7 @@ func Test_V1ExitToV1Alpha1(t *testing.T) {
 	v1Exit := &ethpbv1.VoluntaryExit{
 		Epoch:          epoch,
 		ValidatorIndex: validatorIndex,
+		InitTxHash:     make([]byte, 32),
 	}
 
 	alphaExit := V1ExitToV1Alpha1(v1Exit)

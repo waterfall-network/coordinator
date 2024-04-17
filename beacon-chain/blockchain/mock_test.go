@@ -7,6 +7,7 @@ import (
 
 	testDB "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/testing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/forkchoice/protoarray"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/operations/withdrawals"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen"
 )
@@ -18,6 +19,7 @@ func testServiceOptsWithDB(t *testing.T) []Option {
 		WithDatabase(beaconDB),
 		WithStateGen(stategen.New(beaconDB)),
 		WithForkChoiceStore(fcs),
+		WithWithdrawalPool(withdrawals.NewPool()),
 	}
 }
 

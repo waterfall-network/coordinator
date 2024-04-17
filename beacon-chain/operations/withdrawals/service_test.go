@@ -6,8 +6,10 @@ import (
 	"testing"
 
 	types "github.com/prysmaticlabs/eth2-types"
+	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -441,9 +443,9 @@ func TestPool_PendingWithdrawals(t *testing.T) {
 			p := &Pool{
 				pending: tt.fields.pending,
 			}
-			//s, err := v1.InitializeFromProtoUnsafe(&ethpb.BeaconState{Validators: []*ethpb.Validator{{WithdrawalEpoch: params.BeaconConfig().FarFutureEpoch}}})
-			//require.NoError(t, err)
-			if got := p.PendingWithdrawals(tt.args.slot, tt.fields.noLimit); !reflect.DeepEqual(got, tt.want) {
+			s, err := v1.InitializeFromProtoUnsafe(&ethpb.BeaconState{Validators: []*ethpb.Validator{{WithdrawableEpoch: params.BeaconConfig().FarFutureEpoch}}})
+			require.NoError(t, err)
+			if got := p.PendingWithdrawals(tt.args.slot, s, tt.fields.noLimit); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("PendingWithdrawals() = %v, want %v", got, tt.want)
 			}
 		})

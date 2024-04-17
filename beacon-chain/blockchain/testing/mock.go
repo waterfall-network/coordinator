@@ -27,6 +27,7 @@ import (
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/tests/testutils"
 )
 
 var ErrNilState = errors.New("nil state")
@@ -63,11 +64,23 @@ type ChainService struct {
 	Genesis                     time.Time
 	ForkChoiceStore             forkchoice.ForkChoicer
 	ReceiveBlockMockErr         error
+	IsSyncFn                    func() bool
+}
+
+func (s *ChainService) SetIsSyncFn(fn func() bool) {
+	s.IsSyncFn = fn
 }
 
 func (s *ChainService) GetOptimisticSpines(ctx context.Context, baseSpine common.Hash) ([]common.HashArray, error) {
-	//TODO implement me
-	panic("implement me")
+	spines := make([]common.HashArray, 4)
+	for i := 0; i < 4; i++ {
+		spines[i] = make(common.HashArray, 10)
+		for j := 0; j < 10; j++ {
+			spines[i][j] = common.BytesToHash(testutils.RandomData(32))
+		}
+	}
+
+	return spines, nil
 }
 
 func (s *ChainService) IsGwatSynchronizing() bool {

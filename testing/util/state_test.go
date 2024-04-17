@@ -7,6 +7,7 @@ import (
 
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"google.golang.org/protobuf/proto"
 )
 
 func TestNewBeaconState(t *testing.T) {
@@ -28,19 +29,11 @@ func TestNewBeaconStateAltair(t *testing.T) {
 	require.NoError(t, err)
 	got := &ethpb.BeaconStateAltair{}
 	require.NoError(t, got.UnmarshalSSZ(b))
-	if !reflect.DeepEqual(st.InnerStateUnsafe(), got) {
-		t.Fatal("State did not match after round trip marshal")
+	want, ok := st.InnerStateUnsafe().(*ethpb.BeaconStateAltair)
+	if !ok {
+		t.Fatal("invalid state type")
 	}
-}
-
-func TestNewBeaconStateBellatrix(t *testing.T) {
-	st, err := NewBeaconStateBellatrix()
-	require.NoError(t, err)
-	b, err := st.MarshalSSZ()
-	require.NoError(t, err)
-	got := &ethpb.BeaconStateBellatrix{}
-	require.NoError(t, got.UnmarshalSSZ(b))
-	if !reflect.DeepEqual(st.InnerStateUnsafe(), got) {
+	if !proto.Equal(want, got) {
 		t.Fatal("State did not match after round trip marshal")
 	}
 }

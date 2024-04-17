@@ -98,6 +98,7 @@ func TestService_InterceptBannedIP(t *testing.T) {
 func TestService_RejectInboundPeersBeyondLimit(t *testing.T) {
 	limit := 20
 	s := &Service{
+		started:   true,
 		ipLimiter: leakybucket.NewCollector(ipLimit, ipBurst, false),
 		peers: peers.NewStatus(context.Background(), &peers.StatusConfig{
 			PeerLimit:    limit,
@@ -140,6 +141,7 @@ func TestPeer_BelowMaxLimit(t *testing.T) {
 	listen, err := ma.NewMultiaddr(fmt.Sprintf("/ip4/%s/tcp/%d", ipAddr, 2000))
 	require.NoError(t, err, "Failed to p2p listen")
 	s := &Service{
+		started:   true,
 		ipLimiter: leakybucket.NewCollector(ipLimit, ipBurst, false),
 	}
 	s.peers = peers.NewStatus(context.Background(), &peers.StatusConfig{
@@ -191,6 +193,7 @@ func TestPeerAllowList(t *testing.T) {
 	listen, err := ma.NewMultiaddr(fmt.Sprintf("/ip4/%s/tcp/%d", ipAddr, 2000))
 	require.NoError(t, err, "Failed to p2p listen")
 	s := &Service{
+		started:   true,
 		ipLimiter: leakybucket.NewCollector(ipLimit, ipBurst, false),
 		peers: peers.NewStatus(context.Background(), &peers.StatusConfig{
 			ScorerParams: &scorers.Config{},
@@ -237,6 +240,7 @@ func TestPeerDenyList(t *testing.T) {
 	listen, err := ma.NewMultiaddr(fmt.Sprintf("/ip4/%s/tcp/%d", ipAddr, 2000))
 	require.NoError(t, err, "Failed to p2p listen")
 	s := &Service{
+		started:   true,
 		ipLimiter: leakybucket.NewCollector(ipLimit, ipBurst, false),
 		peers: peers.NewStatus(context.Background(), &peers.StatusConfig{
 			ScorerParams: &scorers.Config{},
@@ -272,6 +276,7 @@ func TestPeerDenyList(t *testing.T) {
 
 func TestService_InterceptAddrDial_Allow(t *testing.T) {
 	s := &Service{
+		started:   true,
 		ipLimiter: leakybucket.NewCollector(ipLimit, ipBurst, false),
 		peers: peers.NewStatus(context.Background(), &peers.StatusConfig{
 			ScorerParams: &scorers.Config{},
@@ -292,6 +297,7 @@ func TestService_InterceptAddrDial_Allow(t *testing.T) {
 
 func TestService_InterceptAddrDial_Public(t *testing.T) {
 	s := &Service{
+		started:   true,
 		ipLimiter: leakybucket.NewCollector(ipLimit, ipBurst, false),
 		peers: peers.NewStatus(context.Background(), &peers.StatusConfig{
 			ScorerParams: &scorers.Config{},
@@ -340,6 +346,7 @@ func TestService_InterceptAddrDial_Public(t *testing.T) {
 
 func TestService_InterceptAddrDial_Private(t *testing.T) {
 	s := &Service{
+		started:   true,
 		ipLimiter: leakybucket.NewCollector(ipLimit, ipBurst, false),
 		peers: peers.NewStatus(context.Background(), &peers.StatusConfig{
 			ScorerParams: &scorers.Config{},
@@ -369,6 +376,7 @@ func TestService_InterceptAddrDial_Private(t *testing.T) {
 
 func TestService_InterceptAddrDial_AllowPrivate(t *testing.T) {
 	s := &Service{
+		started:   true,
 		ipLimiter: leakybucket.NewCollector(ipLimit, ipBurst, false),
 		peers: peers.NewStatus(context.Background(), &peers.StatusConfig{
 			ScorerParams: &scorers.Config{},
@@ -398,6 +406,7 @@ func TestService_InterceptAddrDial_AllowPrivate(t *testing.T) {
 
 func TestService_InterceptAddrDial_DenyPublic(t *testing.T) {
 	s := &Service{
+		started:   true,
 		ipLimiter: leakybucket.NewCollector(ipLimit, ipBurst, false),
 		peers: peers.NewStatus(context.Background(), &peers.StatusConfig{
 			ScorerParams: &scorers.Config{},
@@ -427,6 +436,7 @@ func TestService_InterceptAddrDial_DenyPublic(t *testing.T) {
 
 func TestService_InterceptAddrDial_AllowConflict(t *testing.T) {
 	s := &Service{
+		started:   true,
 		ipLimiter: leakybucket.NewCollector(ipLimit, ipBurst, false),
 		peers: peers.NewStatus(context.Background(), &peers.StatusConfig{
 			ScorerParams: &scorers.Config{},

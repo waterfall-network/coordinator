@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/prysmaticlabs/go-bitfield"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/fieldtrie"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stateutil"
 	stateTypes "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/types"
@@ -56,68 +55,10 @@ func TestFieldTrie_RecomputeTrie(t *testing.T) {
 	assert.Equal(t, expectedRoot, root)
 }
 
-func TestFieldTrie_RecomputeTrieBlockVoting(t *testing.T) {
-	newState, _ := util.DeterministicGenesisState(t, 32)
-	// 10 represents the enum value of validators
-
-	trie, err := fieldtrie.NewFieldTrie(21, stateTypes.CompositeArray, newState.BlockVoting(), 2048)
-	require.NoError(t, err)
-
-	changedIdx := []uint64{0}
-	beaconBlockRoot := [32]byte{0x11, 0x22, 0x33}
-
-	bitlist := bitfield.NewBitlist(128)
-	bitlist.SetBitAt(0, true)
-	bitlist.SetBitAt(1, true)
-
-	err = newState.AppendBlockVotingAtt(&ethpb.Attestation{
-		AggregationBits: bitlist,
-		Data: &ethpb.AttestationData{
-			Slot:            1,
-			CommitteeIndex:  0,
-			BeaconBlockRoot: beaconBlockRoot[:],
-			Source: &ethpb.Checkpoint{
-				Epoch: 0,
-				Root:  beaconBlockRoot[:],
-			},
-			Target: &ethpb.Checkpoint{
-				Epoch: 0,
-				Root:  beaconBlockRoot[:],
-			},
-		},
-		Signature: []byte{0x77},
-	})
-	require.NoError(t, err)
-	err = newState.AppendBlockVotingAtt(&ethpb.Attestation{
-		AggregationBits: bitlist,
-		Data: &ethpb.AttestationData{
-			Slot:            1,
-			CommitteeIndex:  0,
-			BeaconBlockRoot: beaconBlockRoot[:],
-			Source: &ethpb.Checkpoint{
-				Epoch: 0,
-				Root:  beaconBlockRoot[:],
-			},
-			Target: &ethpb.Checkpoint{
-				Epoch: 0,
-				Root:  beaconBlockRoot[:],
-			},
-		},
-		Signature: []byte{0x77},
-	})
-	require.NoError(t, err)
-
-	expectedRoot, err := stateutil.BlockVotingsRoot(newState.BlockVoting())
-	require.NoError(t, err)
-	root, err := trie.RecomputeTrie(changedIdx, newState.BlockVoting())
-	require.NoError(t, err)
-	assert.Equal(t, expectedRoot, root)
-}
-
 func TestFieldTrie_CopyTrieImmutable(t *testing.T) {
 	newState, _ := util.DeterministicGenesisState(t, 32)
 	// 12 represents the enum value of randao mixes.
-	trie, err := fieldtrie.NewFieldTrie(13, stateTypes.BasicArray, newState.RandaoMixes(), uint64(params.BeaconConfig().EpochsPerHistoricalVector))
+	trie, err := fieldtrie.NewFieldTrie(14, stateTypes.BasicArray, newState.RandaoMixes(), uint64(params.BeaconConfig().EpochsPerHistoricalVector))
 	require.NoError(t, err)
 
 	newTrie := trie.CopyTrie()

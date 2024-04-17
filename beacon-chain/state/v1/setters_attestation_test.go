@@ -51,6 +51,7 @@ func TestAppendBeyondIndicesLimit(t *testing.T) {
 		BlockRoots:                mockblockRoots,
 		StateRoots:                mockstateRoots,
 		RandaoMixes:               mockrandaoMixes,
+		SpineData:                 &ethpb.SpineData{},
 	})
 	require.NoError(t, err)
 	_, err = newState.HashTreeRoot(context.Background())

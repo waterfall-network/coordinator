@@ -28,17 +28,17 @@ func TestInfostream_EpochToTimestamp(t *testing.T) {
 		{
 			name:      "One",
 			epoch:     1,
-			timestamp: 384,
+			timestamp: 128,
 		},
 		{
 			name:      "Two",
 			epoch:     2,
-			timestamp: 768,
+			timestamp: 256,
 		},
 		{
 			name:      "OneHundred",
 			epoch:     100,
-			timestamp: 38400,
+			timestamp: 12800,
 		},
 	}
 

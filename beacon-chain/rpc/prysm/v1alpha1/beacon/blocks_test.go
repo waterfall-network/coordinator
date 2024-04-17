@@ -885,16 +885,6 @@ func TestServer_ListBeaconBlocks_Genesis(t *testing.T) {
 			Block: &ethpb.BeaconBlockContainer_AltairBlock{AltairBlock: blk}}
 		runListBlocksGenesis(t, wrapped, blkContainer)
 	})
-	t.Run("bellatrix block", func(t *testing.T) {
-		parentRoot := [32]byte{'a'}
-		blk := util.NewBeaconBlockBellatrix()
-		blk.Block.ParentRoot = parentRoot[:]
-		wrapped, err := wrapper.WrappedSignedBeaconBlock(blk)
-		assert.NoError(t, err)
-		blkContainer := &ethpb.BeaconBlockContainer{
-			Block: &ethpb.BeaconBlockContainer_BellatrixBlock{BellatrixBlock: blk}}
-		runListBlocksGenesis(t, wrapped, blkContainer)
-	})
 }
 
 func runListBlocksGenesis(t *testing.T, blk block.SignedBeaconBlock, blkContainer *ethpb.BeaconBlockContainer) {
@@ -958,21 +948,6 @@ func TestServer_ListBeaconBlocks_Genesis_MultiBlocks(t *testing.T) {
 		blk.Block.ParentRoot = parentRoot[:]
 		blockCreator := func(i types.Slot) block.SignedBeaconBlock {
 			b := util.NewBeaconBlockAltair()
-			b.Block.Slot = i
-			wrappedB, err := wrapper.WrappedSignedBeaconBlock(b)
-			assert.NoError(t, err)
-			return wrappedB
-		}
-		gBlock, err := wrapper.WrappedSignedBeaconBlock(blk)
-		assert.NoError(t, err)
-		runListBeaconBlocksGenesisMultiBlocks(t, gBlock, blockCreator)
-	})
-	t.Run("bellatrix block", func(t *testing.T) {
-		parentRoot := [32]byte{1, 2, 3}
-		blk := util.NewBeaconBlockBellatrix()
-		blk.Block.ParentRoot = parentRoot[:]
-		blockCreator := func(i types.Slot) block.SignedBeaconBlock {
-			b := util.NewBeaconBlockBellatrix()
 			b.Block.Slot = i
 			wrappedB, err := wrapper.WrappedSignedBeaconBlock(b)
 			assert.NoError(t, err)
@@ -1057,30 +1032,6 @@ func TestServer_ListBeaconBlocks_Pagination(t *testing.T) {
 			ctr := &ethpb.BeaconBlockContainer{
 				Block: &ethpb.BeaconBlockContainer_AltairBlock{
 					AltairBlock: util.HydrateSignedBeaconBlockAltair(b)},
-				BlockRoot: root,
-				Canonical: canonical}
-			return ctr
-		}
-		orphanedB, err := wrapper.WrappedSignedBeaconBlock(blk)
-		assert.NoError(t, err)
-		runListBeaconBlocksPagination(t, orphanedB, blockCreator, containerCreator)
-	})
-	t.Run("bellatrix block", func(t *testing.T) {
-		blk := util.NewBeaconBlockBellatrix()
-		blk.Block.Slot = 300
-		blockCreator := func(i types.Slot) block.SignedBeaconBlock {
-			b := util.NewBeaconBlockBellatrix()
-			b.Block.Slot = i
-			wrappedB, err := wrapper.WrappedSignedBeaconBlock(b)
-			assert.NoError(t, err)
-			return wrappedB
-		}
-		containerCreator := func(i types.Slot, root []byte, canonical bool) *ethpb.BeaconBlockContainer {
-			b := util.NewBeaconBlockBellatrix()
-			b.Block.Slot = i
-			ctr := &ethpb.BeaconBlockContainer{
-				Block: &ethpb.BeaconBlockContainer_BellatrixBlock{
-					BellatrixBlock: util.HydrateSignedBeaconBlockBellatrix(b)},
 				BlockRoot: root,
 				Canonical: canonical}
 			return ctr

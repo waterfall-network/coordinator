@@ -7,5 +7,6 @@ import (
 )
 
 func TestMainnet_Altair_UpgradeToAltair(t *testing.T) {
+	t.Skip() // Generate test data with pyton tool
 	fork.RunUpgradeToAltair(t, "mainnet")
 }

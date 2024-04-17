@@ -187,6 +187,7 @@ func TestBeaconState_AppendBalanceWithTrie(t *testing.T) {
 		CurrentJustifiedCheckpoint:  &ethpb.Checkpoint{Root: make([]byte, fieldparams.RootLength)},
 		FinalizedCheckpoint:         &ethpb.Checkpoint{Root: make([]byte, fieldparams.RootLength)},
 		Slashings:                   make([]uint64, params.BeaconConfig().EpochsPerSlashingsVector),
+		SpineData:                   &ethpb.SpineData{},
 	})
 	assert.NoError(t, err)
 	st, ok := newState.(*BeaconState)

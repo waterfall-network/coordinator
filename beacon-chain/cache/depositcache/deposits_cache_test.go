@@ -14,6 +14,7 @@ import (
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
 )
 
 const nilDepositErr = "Ignoring nil deposit insertion"
@@ -43,31 +44,31 @@ func TestInsertDeposit_MaintainsSortedOrderByIndex(t *testing.T) {
 	}{
 		{
 			blkNum:      0,
-			deposit:     &ethpb.Deposit{Data: &ethpb.Deposit_Data{PublicKey: []byte{'A'}}},
+			deposit:     &ethpb.Deposit{Data: &ethpb.Deposit_Data{PublicKey: []byte{'A'}, InitTxHash: util.RandomData(32)}},
 			index:       0,
 			expectedErr: "",
 		},
 		{
 			blkNum:      0,
-			deposit:     &ethpb.Deposit{Data: &ethpb.Deposit_Data{PublicKey: []byte{'B'}}},
+			deposit:     &ethpb.Deposit{Data: &ethpb.Deposit_Data{PublicKey: []byte{'B'}, InitTxHash: util.RandomData(32)}},
 			index:       3,
 			expectedErr: "wanted deposit with index 1 to be inserted but received 3",
 		},
 		{
 			blkNum:      0,
-			deposit:     &ethpb.Deposit{Data: &ethpb.Deposit_Data{PublicKey: []byte{'C'}}},
+			deposit:     &ethpb.Deposit{Data: &ethpb.Deposit_Data{PublicKey: []byte{'C'}, InitTxHash: util.RandomData(32)}},
 			index:       1,
 			expectedErr: "",
 		},
 		{
 			blkNum:      0,
-			deposit:     &ethpb.Deposit{Data: &ethpb.Deposit_Data{PublicKey: []byte{'D'}}},
+			deposit:     &ethpb.Deposit{Data: &ethpb.Deposit_Data{PublicKey: []byte{'D'}, InitTxHash: util.RandomData(32)}},
 			index:       4,
 			expectedErr: "wanted deposit with index 2 to be inserted but received 4",
 		},
 		{
 			blkNum:      0,
-			deposit:     &ethpb.Deposit{Data: &ethpb.Deposit_Data{PublicKey: []byte{'E'}}},
+			deposit:     &ethpb.Deposit{Data: &ethpb.Deposit_Data{PublicKey: []byte{'E'}, InitTxHash: util.RandomData(32)}},
 			index:       2,
 			expectedErr: "",
 		},
@@ -385,6 +386,7 @@ func TestFinalizedDeposits_DepositsCachedCorrectly(t *testing.T) {
 					CreatorAddress:        make([]byte, 20),
 					WithdrawalCredentials: make([]byte, 20),
 					Signature:             make([]byte, 96),
+					InitTxHash:            util.RandomData(32),
 				},
 			},
 			Index: 0,
@@ -396,6 +398,7 @@ func TestFinalizedDeposits_DepositsCachedCorrectly(t *testing.T) {
 					CreatorAddress:        make([]byte, 20),
 					WithdrawalCredentials: make([]byte, 20),
 					Signature:             make([]byte, 96),
+					InitTxHash:            util.RandomData(32),
 				},
 			},
 			Index: 1,
@@ -407,6 +410,7 @@ func TestFinalizedDeposits_DepositsCachedCorrectly(t *testing.T) {
 					CreatorAddress:        make([]byte, 20),
 					WithdrawalCredentials: make([]byte, 20),
 					Signature:             make([]byte, 96),
+					InitTxHash:            util.RandomData(32),
 				},
 			},
 			Index: 2,
@@ -419,6 +423,7 @@ func TestFinalizedDeposits_DepositsCachedCorrectly(t *testing.T) {
 				CreatorAddress:        make([]byte, 20),
 				WithdrawalCredentials: make([]byte, 20),
 				Signature:             make([]byte, 96),
+				InitTxHash:            util.RandomData(32),
 			},
 		},
 		Index: 3,
@@ -453,6 +458,7 @@ func TestFinalizedDeposits_UtilizesPreviouslyCachedDeposits(t *testing.T) {
 					CreatorAddress:        make([]byte, 20),
 					WithdrawalCredentials: make([]byte, 20),
 					Signature:             make([]byte, 96),
+					InitTxHash:            util.RandomData(32),
 				},
 			},
 			Index: 0,
@@ -464,6 +470,7 @@ func TestFinalizedDeposits_UtilizesPreviouslyCachedDeposits(t *testing.T) {
 					CreatorAddress:        make([]byte, 20),
 					WithdrawalCredentials: make([]byte, 20),
 					Signature:             make([]byte, 96),
+					InitTxHash:            util.RandomData(32),
 				},
 			},
 			Index: 1,
@@ -476,6 +483,7 @@ func TestFinalizedDeposits_UtilizesPreviouslyCachedDeposits(t *testing.T) {
 				CreatorAddress:        make([]byte, 20),
 				WithdrawalCredentials: make([]byte, 20),
 				Signature:             make([]byte, 96),
+				InitTxHash:            util.RandomData(32),
 			},
 		},
 		Index: 2,
@@ -525,6 +533,7 @@ func TestFinalizedDeposits_HandleSmallerThanExpectedDeposits(t *testing.T) {
 					CreatorAddress:        make([]byte, 20),
 					WithdrawalCredentials: make([]byte, 20),
 					Signature:             make([]byte, 96),
+					InitTxHash:            util.RandomData(32),
 				},
 			},
 			Index: 0,
@@ -536,6 +545,7 @@ func TestFinalizedDeposits_HandleSmallerThanExpectedDeposits(t *testing.T) {
 					CreatorAddress:        make([]byte, 20),
 					WithdrawalCredentials: make([]byte, 20),
 					Signature:             make([]byte, 96),
+					InitTxHash:            util.RandomData(32),
 				},
 			},
 			Index: 1,
@@ -547,6 +557,7 @@ func TestFinalizedDeposits_HandleSmallerThanExpectedDeposits(t *testing.T) {
 					CreatorAddress:        make([]byte, 20),
 					WithdrawalCredentials: make([]byte, 20),
 					Signature:             make([]byte, 96),
+					InitTxHash:            util.RandomData(32),
 				},
 			},
 			Index: 2,
@@ -573,6 +584,7 @@ func TestFinalizedDeposits_HandleLowerEth1DepositIndex(t *testing.T) {
 					CreatorAddress:        make([]byte, 20),
 					WithdrawalCredentials: make([]byte, 20),
 					Signature:             make([]byte, 96),
+					InitTxHash:            util.RandomData(32),
 				},
 			},
 			Index: 0,
@@ -584,6 +596,7 @@ func TestFinalizedDeposits_HandleLowerEth1DepositIndex(t *testing.T) {
 					CreatorAddress:        make([]byte, 20),
 					WithdrawalCredentials: make([]byte, 20),
 					Signature:             make([]byte, 96),
+					InitTxHash:            util.RandomData(32),
 				},
 			},
 			Index: 1,
@@ -595,6 +608,7 @@ func TestFinalizedDeposits_HandleLowerEth1DepositIndex(t *testing.T) {
 					CreatorAddress:        make([]byte, 20),
 					WithdrawalCredentials: make([]byte, 20),
 					Signature:             make([]byte, 96),
+					InitTxHash:            util.RandomData(32),
 				},
 			},
 			Index: 2,
@@ -606,6 +620,7 @@ func TestFinalizedDeposits_HandleLowerEth1DepositIndex(t *testing.T) {
 					CreatorAddress:        make([]byte, 20),
 					WithdrawalCredentials: make([]byte, 20),
 					Signature:             make([]byte, 96),
+					InitTxHash:            util.RandomData(32),
 				},
 			},
 			Index: 3,
@@ -617,6 +632,7 @@ func TestFinalizedDeposits_HandleLowerEth1DepositIndex(t *testing.T) {
 					CreatorAddress:        make([]byte, 20),
 					WithdrawalCredentials: make([]byte, 20),
 					Signature:             make([]byte, 96),
+					InitTxHash:            util.RandomData(32),
 				},
 			},
 			Index: 4,
@@ -628,6 +644,7 @@ func TestFinalizedDeposits_HandleLowerEth1DepositIndex(t *testing.T) {
 					CreatorAddress:        make([]byte, 20),
 					WithdrawalCredentials: make([]byte, 20),
 					Signature:             make([]byte, 96),
+					InitTxHash:            util.RandomData(32),
 				},
 			},
 			Index: 5,
@@ -790,6 +807,7 @@ func TestFinalizedDeposits_ReturnsTrieCorrectly(t *testing.T) {
 					CreatorAddress:        make([]byte, 20),
 					WithdrawalCredentials: make([]byte, 20),
 					Signature:             make([]byte, 96),
+					InitTxHash:            util.RandomData(32),
 				},
 			},
 			Index: index,
@@ -869,25 +887,25 @@ func TestPruneProofs_Ok(t *testing.T) {
 		{
 			blkNum: 0,
 			deposit: &ethpb.Deposit{Proof: makeDepositProof(),
-				Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk0"), 48)}},
+				Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk0"), 48), InitTxHash: util.RandomData(32)}},
 			index: 0,
 		},
 		{
 			blkNum: 0,
 			deposit: &ethpb.Deposit{Proof: makeDepositProof(),
-				Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk1"), 48)}},
+				Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk1"), 48), InitTxHash: util.RandomData(32)}},
 			index: 1,
 		},
 		{
 			blkNum: 0,
 			deposit: &ethpb.Deposit{Proof: makeDepositProof(),
-				Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk2"), 48)}},
+				Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk2"), 48), InitTxHash: util.RandomData(32)}},
 			index: 2,
 		},
 		{
 			blkNum: 0,
 			deposit: &ethpb.Deposit{Proof: makeDepositProof(),
-				Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk3"), 48)}},
+				Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk3"), 48), InitTxHash: util.RandomData(32)}},
 			index: 3,
 		},
 	}
@@ -916,23 +934,23 @@ func TestPruneProofs_SomeAlreadyPruned(t *testing.T) {
 		{
 			blkNum: 0,
 			deposit: &ethpb.Deposit{Proof: nil, Data: &ethpb.Deposit_Data{
-				PublicKey: bytesutil.PadTo([]byte("pk0"), 48)}},
+				PublicKey: bytesutil.PadTo([]byte("pk0"), 48), InitTxHash: util.RandomData(32)}},
 			index: 0,
 		},
 		{
 			blkNum: 0,
 			deposit: &ethpb.Deposit{Proof: nil, Data: &ethpb.Deposit_Data{
-				PublicKey: bytesutil.PadTo([]byte("pk1"), 48)}}, index: 1,
+				PublicKey: bytesutil.PadTo([]byte("pk1"), 48), InitTxHash: util.RandomData(32)}}, index: 1,
 		},
 		{
 			blkNum:  0,
-			deposit: &ethpb.Deposit{Proof: makeDepositProof(), Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk2"), 48)}},
+			deposit: &ethpb.Deposit{Proof: makeDepositProof(), Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk2"), 48), InitTxHash: util.RandomData(32)}},
 			index:   2,
 		},
 		{
 			blkNum: 0,
 			deposit: &ethpb.Deposit{Proof: makeDepositProof(),
-				Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk3"), 48)}},
+				Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk3"), 48), InitTxHash: util.RandomData(32)}},
 			index: 3,
 		},
 	}
@@ -958,25 +976,25 @@ func TestPruneProofs_PruneAllWhenDepositIndexTooBig(t *testing.T) {
 		{
 			blkNum: 0,
 			deposit: &ethpb.Deposit{Proof: makeDepositProof(),
-				Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk0"), 48)}},
+				Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk0"), 48), InitTxHash: util.RandomData(32)}},
 			index: 0,
 		},
 		{
 			blkNum: 0,
 			deposit: &ethpb.Deposit{Proof: makeDepositProof(),
-				Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk1"), 48)}},
+				Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk1"), 48), InitTxHash: util.RandomData(32)}},
 			index: 1,
 		},
 		{
 			blkNum: 0,
 			deposit: &ethpb.Deposit{Proof: makeDepositProof(),
-				Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk2"), 48)}},
+				Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk2"), 48), InitTxHash: util.RandomData(32)}},
 			index: 2,
 		},
 		{
 			blkNum: 0,
 			deposit: &ethpb.Deposit{Proof: makeDepositProof(),
-				Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk3"), 48)}},
+				Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk3"), 48), InitTxHash: util.RandomData(32)}},
 			index: 3,
 		},
 	}
@@ -1005,25 +1023,25 @@ func TestPruneProofs_CorrectlyHandleLastIndex(t *testing.T) {
 		{
 			blkNum: 0,
 			deposit: &ethpb.Deposit{Proof: makeDepositProof(),
-				Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk0"), 48)}},
+				Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk0"), 48), InitTxHash: util.RandomData(32)}},
 			index: 0,
 		},
 		{
 			blkNum: 0,
 			deposit: &ethpb.Deposit{Proof: makeDepositProof(),
-				Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk1"), 48)}},
+				Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk1"), 48), InitTxHash: util.RandomData(32)}},
 			index: 1,
 		},
 		{
 			blkNum: 0,
 			deposit: &ethpb.Deposit{Proof: makeDepositProof(),
-				Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk2"), 48)}},
+				Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk2"), 48), InitTxHash: util.RandomData(32)}},
 			index: 2,
 		},
 		{
 			blkNum: 0,
 			deposit: &ethpb.Deposit{Proof: makeDepositProof(),
-				Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk3"), 48)}},
+				Data: &ethpb.Deposit_Data{PublicKey: bytesutil.PadTo([]byte("pk3"), 48), InitTxHash: util.RandomData(32)}},
 			index: 3,
 		},
 	}
@@ -1049,14 +1067,14 @@ func TestDepositMap_WorksCorrectly(t *testing.T) {
 	var nilDep *ethpb.Deposit
 	assert.DeepEqual(t, nilDep, dep)
 
-	dep = &ethpb.Deposit{Proof: makeDepositProof(), Data: &ethpb.Deposit_Data{PublicKey: pk0, Amount: 1000}}
+	dep = &ethpb.Deposit{Proof: makeDepositProof(), Data: &ethpb.Deposit_Data{PublicKey: pk0, Amount: 1000, InitTxHash: util.RandomData(32)}}
 	assert.NoError(t, dc.InsertDeposit(context.Background(), dep, 1000, 0, [32]byte{}))
 
 	dep, _ = dc.DepositByPubkey(context.Background(), pk0)
 	assert.NotEqual(t, nilDep, dep)
 	assert.Equal(t, uint64(1000), dep.Data.Amount)
 
-	dep = &ethpb.Deposit{Proof: makeDepositProof(), Data: &ethpb.Deposit_Data{PublicKey: pk0, Amount: 10000}}
+	dep = &ethpb.Deposit{Proof: makeDepositProof(), Data: &ethpb.Deposit_Data{PublicKey: pk0, Amount: 10000, InitTxHash: util.RandomData(32)}}
 	assert.NoError(t, dc.InsertDeposit(context.Background(), dep, 1000, 1, [32]byte{}))
 
 	// Make sure we have the same deposit returned over here.

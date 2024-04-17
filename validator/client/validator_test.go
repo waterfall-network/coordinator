@@ -391,6 +391,8 @@ func TestWaitMultipleActivation_LogsActivationEpochOK(t *testing.T) {
 		resp,
 		nil,
 	)
+
+	client.EXPECT().PrepareBeaconProposer(gomock.AssignableToTypeOf(context.WithValue(context.Background(), "", "")), gomock.AssignableToTypeOf(&ethpb.PrepareBeaconProposerRequest{}))
 	require.NoError(t, v.WaitForActivation(ctx, nil), "Could not wait for activation")
 	require.LogsContain(t, hook, "Validator activated")
 }
@@ -436,6 +438,7 @@ func TestWaitActivation_NotAllValidatorsActivatedOK(t *testing.T) {
 		resp,
 		nil,
 	)
+	client.EXPECT().PrepareBeaconProposer(gomock.AssignableToTypeOf(context.WithValue(context.Background(), "", "")), gomock.AssignableToTypeOf(&ethpb.PrepareBeaconProposerRequest{}))
 	assert.NoError(t, v.WaitForActivation(context.Background(), nil), "Could not wait for activation")
 }
 
@@ -991,9 +994,11 @@ func TestAllValidatorsAreExited_CorrectRequest(t *testing.T) {
 	}
 
 	client.EXPECT().MultipleValidatorStatus(
-		gomock.Any(), // ctx
-		request,      // request
-	).Return(&ethpb.MultipleValidatorStatusResponse{Statuses: statuses}, nil /*err*/)
+		gomock.Any(),                       // ctx
+		gomock.AssignableToTypeOf(request), // request
+	).AnyTimes().Return(&ethpb.MultipleValidatorStatusResponse{Statuses: statuses}, nil /*err*/)
+	client.EXPECT().PrepareBeaconProposer(gomock.AssignableToTypeOf(context.WithValue(context.Background(), "", "")),
+		gomock.AssignableToTypeOf(&ethpb.PrepareBeaconProposerRequest{})).AnyTimes()
 
 	keysMap := make(map[[fieldparams.BLSPubkeyLength]byte]bls.SecretKey)
 	// secretKey below is just filler and is used multiple times
@@ -1028,6 +1033,8 @@ func TestService_ReceiveBlocks_NilBlock(t *testing.T) {
 		gomock.Any(),
 		&ethpb.StreamBlocksRequest{VerifiedOnly: true},
 	).Return(stream, nil)
+	valClient.EXPECT().PrepareBeaconProposer(gomock.AssignableToTypeOf(context.WithValue(context.Background(), "", "")),
+		gomock.AssignableToTypeOf(&ethpb.PrepareBeaconProposerRequest{})).AnyTimes()
 	stream.EXPECT().Context().Return(ctx).AnyTimes()
 	stream.EXPECT().Recv().Return(
 		&ethpb.StreamBlocksResponse{Block: &ethpb.StreamBlocksResponse_Phase0Block{
@@ -1495,6 +1502,8 @@ func TestValidator_UdpateFeeRecipient(t *testing.T) {
 				).Return(&ethpb.ValidatorIndexResponse{
 					Index: 1,
 				}, nil)
+				client.EXPECT().PrepareBeaconProposer(gomock.AssignableToTypeOf(context.Background()),
+					gomock.AssignableToTypeOf(&ethpb.PrepareBeaconProposerRequest{})).AnyTimes()
 
 				return &v
 			},

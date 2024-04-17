@@ -2,9 +2,9 @@ run:
   skip-files:
     - .*_test.go
   skip-dirs:
-    - beacon-chain/p2p/testing
     - beacon-chain/powchain/testing
     - beacon-chain/p2p/testing
+    - beacon-chain/blockchain/testing
     - proto/
     - contracts/
     - testing/

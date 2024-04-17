@@ -52,6 +52,7 @@ func TestProcessDeposits_MerkleBranchFailsVerification(t *testing.T) {
 			CreatorAddress:        make([]byte, 20),
 			WithdrawalCredentials: make([]byte, 20),
 			Signature:             make([]byte, 96),
+			InitTxHash:            make([]byte, 32),
 		},
 	}
 	leaf, err := deposit.Data.HashTreeRoot()
@@ -122,6 +123,7 @@ func TestProcessDeposits_RepeatedDeposit_IncreasesValidatorBalance(t *testing.T)
 			CreatorAddress:        make([]byte, 20),
 			WithdrawalCredentials: make([]byte, 20),
 			Signature:             make([]byte, 96),
+			InitTxHash:            make([]byte, 32),
 		},
 	}
 	sr, err := signing.ComputeSigningRoot(deposit.Data, bytesutil.ToBytes(3, 32))

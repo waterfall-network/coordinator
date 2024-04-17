@@ -8,10 +8,10 @@ go_library(
     deps = [
         "//proto/prysm/v1alpha1:go_default_library",
         "//proto/prysm/v1alpha1/metadata:go_default_library",
-        "@network_waterfall_gitlab_waterfall_protocol_gwat//p2p/enr:go_default_library",
         "@com_github_libp2p_go_libp2p//core/network:go_default_library",
         "@com_github_libp2p_go_libp2p//core/peer:go_default_library",
         "@com_github_multiformats_go_multiaddr//:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//p2p/enr:go_default_library",
     ],
 )
 

@@ -9,7 +9,6 @@ go_library(
     importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block",
     visibility = ["//visibility:public"],
     deps = [
-        "//proto/engine/v1:go_default_library",
         "//proto/prysm/v1alpha1:go_default_library",
         "//proto/prysm/v1alpha1/validator-client:go_default_library",
         "@com_github_ferranbt_fastssz//:go_default_library",

@@ -469,6 +469,9 @@ func CopyValidator(val *Validator) *Validator {
 
 // CopyWithdrawalOps copies the provided WithdrawalOp array.
 func CopyWithdrawalOps(withdrawalOps []*WithdrawalOp) []*WithdrawalOp {
+	if withdrawalOps == nil {
+		return nil
+	}
 	wops := make([]*WithdrawalOp, len(withdrawalOps))
 	for i, w := range withdrawalOps {
 		wops[i] = CopyWithdrawalOp(w)

@@ -227,7 +227,12 @@ func TestAggregateAndSaveForkChoiceAtts_Multiple(t *testing.T) {
 	sort.Slice(received, func(i, j int) bool {
 		return received[i].Data.Slot < received[j].Data.Slot
 	})
-	assert.DeepEqual(t, wanted, received)
+
+	for i, attestation := range wanted {
+		assert.DeepEqual(t, attestation.Data, received[i].Data)
+		assert.DeepEqual(t, attestation.AggregationBits, received[i].AggregationBits)
+		assert.DeepEqual(t, attestation.Signature, received[i].Signature)
+	}
 }
 
 func TestSeenAttestations_PresentInCache(t *testing.T) {

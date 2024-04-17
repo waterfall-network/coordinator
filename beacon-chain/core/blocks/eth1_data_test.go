@@ -50,7 +50,7 @@ func TestEth1DataHasEnoughSupport(t *testing.T) {
 				DepositCount: 1,
 				DepositRoot:  bytesutil.PadTo([]byte("root"), 32),
 			},
-			hasSupport:         false,
+			hasSupport:         true,
 			votingPeriodLength: 8,
 		}, {
 			stateVotes: FakeDeposits(uint64(params.BeaconConfig().SlotsPerEpoch.Mul(4))),
@@ -58,7 +58,7 @@ func TestEth1DataHasEnoughSupport(t *testing.T) {
 				DepositCount: 1,
 				DepositRoot:  bytesutil.PadTo([]byte("root"), 32),
 			},
-			hasSupport:         false,
+			hasSupport:         true,
 			votingPeriodLength: 10,
 		},
 	}

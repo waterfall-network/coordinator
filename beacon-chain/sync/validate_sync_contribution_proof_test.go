@@ -1068,14 +1068,29 @@ func fillUpBlocksAndState(ctx context.Context, t *testing.T, beaconDB db.Databas
 
 	testState := gs.Copy()
 	hRoot := [32]byte{}
-	for i := types.Slot(1); i <= params.BeaconConfig().SlotsPerEpoch; i++ {
+	for i := types.Slot(1); i < params.BeaconConfig().SlotsPerEpoch; i++ {
 		blk, err := util.GenerateFullBlockAltair(testState, keys, util.DefaultBlockGenConfig(), i)
 		require.NoError(t, err)
 		r, err := blk.Block.HashTreeRoot()
 		require.NoError(t, err)
 		wsb, err := wrapper.WrappedSignedBeaconBlock(blk)
 		require.NoError(t, err)
-		_, testState, err = transition.ExecuteStateTransitionNoVerifyAnySig(ctx, testState, wsb)
+
+		ctxBlockFetcher := params.CtxBlockFetcher(func(ctx context.Context, blockRoot [32]byte) (types.ValidatorIndex, types.Slot, uint64, error) {
+			block := wsb
+			votesIncluded := uint64(0)
+			for _, att := range block.Block().Body().Attestations() {
+				votesIncluded += att.AggregationBits.Count()
+			}
+
+			return block.Block().ProposerIndex() - 1, block.Block().Slot() - 1, votesIncluded, nil
+		})
+
+		ctxWithFetcher := context.WithValue(context.Background(),
+			params.BeaconConfig().CtxBlockFetcherKey,
+			ctxBlockFetcher)
+
+		_, testState, err = transition.ExecuteStateTransitionNoVerifyAnySig(ctxWithFetcher, testState, wsb)
 		assert.NoError(t, err)
 		assert.NoError(t, beaconDB.SaveBlock(ctx, wsb))
 		assert.NoError(t, beaconDB.SaveStateSummary(ctx, &ethpb.StateSummary{Slot: i, Root: r[:]}))

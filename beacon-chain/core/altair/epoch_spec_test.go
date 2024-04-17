@@ -126,7 +126,7 @@ func TestProcessSlashings_SlashedLess(t *testing.T) {
 				Balances:  []uint64{params.BeaconConfig().MaxEffectiveBalance, params.BeaconConfig().MaxEffectiveBalance},
 				Slashings: []uint64{0, 1e9},
 			},
-			want: uint64(30000000000),
+			want: uint64(3200000000000),
 		},
 		{
 			state: &ethpb.BeaconStateAltair{
@@ -140,7 +140,7 @@ func TestProcessSlashings_SlashedLess(t *testing.T) {
 				Balances:  []uint64{params.BeaconConfig().MaxEffectiveBalance, params.BeaconConfig().MaxEffectiveBalance},
 				Slashings: []uint64{0, 1e9},
 			},
-			want: uint64(31000000000),
+			want: uint64(3200000000000),
 		},
 		{
 			state: &ethpb.BeaconStateAltair{
@@ -154,7 +154,7 @@ func TestProcessSlashings_SlashedLess(t *testing.T) {
 				Balances:  []uint64{params.BeaconConfig().MaxEffectiveBalance, params.BeaconConfig().MaxEffectiveBalance},
 				Slashings: []uint64{0, 2 * 1e9},
 			},
-			want: uint64(30000000000),
+			want: uint64(3200000000000),
 		},
 		{
 			state: &ethpb.BeaconStateAltair{
@@ -166,7 +166,7 @@ func TestProcessSlashings_SlashedLess(t *testing.T) {
 				Balances:  []uint64{params.BeaconConfig().MaxEffectiveBalance - params.BeaconConfig().EffectiveBalanceIncrement, params.BeaconConfig().MaxEffectiveBalance - params.BeaconConfig().EffectiveBalanceIncrement},
 				Slashings: []uint64{0, 1e9},
 			},
-			want: uint64(29000000000),
+			want: uint64(3100000000000),
 		},
 	}
 

@@ -1,32 +1,17 @@
 package ssz_static
 
 import (
-	"context"
 	"errors"
 	"testing"
 
 	fssz "github.com/ferranbt/fastssz"
-	stateAltair "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v2"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 	common "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/spectest/shared/common/ssz_static"
 )
 
 // RunSSZStaticTests executes "ssz_static" tests.
 func RunSSZStaticTests(t *testing.T, config string) {
-	common.RunSSZStaticTests(t, config, "altair", unmarshalledSSZ, customHtr)
-}
-
-func customHtr(t *testing.T, htrs []common.HTR, object interface{}) []common.HTR {
-	switch object.(type) {
-	case *ethpb.BeaconStateAltair:
-		htrs = append(htrs, func(s interface{}) ([32]byte, error) {
-			beaconState, err := stateAltair.InitializeFromProto(s.(*ethpb.BeaconStateAltair))
-			require.NoError(t, err)
-			return beaconState.HashTreeRoot(context.Background())
-		})
-	}
-	return htrs
+	common.RunSSZStaticTests(t, config, "altair", unmarshalledSSZ)
 }
 
 // unmarshalledSSZ unmarshalls serialized input.
@@ -106,6 +91,30 @@ func unmarshalledSSZ(t *testing.T, serializedBytes []byte, folderName string) (i
 	case "LightClientUpdate":
 		t.Skip("not a beacon node type, this is a light node type")
 		return nil, nil
+	case "LightClientFinalityUpdate":
+		t.Skip("not a beacon node type, this is a light node type")
+		return nil, nil
+	case "LightClientHeader":
+		t.Skip("not a beacon node type, this is a light node type")
+		return nil, nil
+	case "LightClientBootstrap":
+		t.Skip("not a beacon node type, this is a light node type")
+		return nil, nil
+	case "LightClientOptimisticUpdate":
+		t.Skip("not a beacon node type, this is a light node type")
+		return nil, nil
+	case "SpinesSeq":
+		obj = &ethpb.SpinesSeq{}
+	case "SpineData":
+		obj = &ethpb.SpineData{}
+	case "Withdrawal":
+		obj = &ethpb.Withdrawal{}
+	case "WithdrawalOp":
+		obj = &ethpb.WithdrawalOp{}
+	case "CommitteeVote":
+		obj = &ethpb.CommitteeVote{}
+	case "BlockVoting":
+		obj = &ethpb.BlockVoting{}
 	default:
 		return nil, errors.New("type not found")
 	}

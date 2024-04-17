@@ -54,7 +54,6 @@ type FakeValidator struct {
 
 func (fv *FakeValidator) SubmitPrevote(ctx context.Context, slot types.Slot, pubKey [48]byte) {
 	//TODO implement me
-	panic("implement me")
 }
 
 func (fv *FakeValidator) RolesAtNextEpoch(ctx context.Context, slot types.Slot) (map[[48]byte][]iface.ValidatorRole, error) {

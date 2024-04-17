@@ -250,6 +250,7 @@ func TestProcessDeposit_IncompleteDeposit(t *testing.T) {
 			CreatorAddress:        bytesutil.PadTo([]byte("testing"), 20),
 			WithdrawalCredentials: bytesutil.PadTo([]byte("testing"), 20),
 			Signature:             bytesutil.PadTo([]byte("test"), fieldparams.BLSSignatureLength),
+			InitTxHash:            make([]byte, 32),
 		},
 	}
 

@@ -670,7 +670,7 @@ func TestAltairState_CanSaveRetrieve(t *testing.T) {
 
 	require.Equal(t, false, db.HasState(context.Background(), r))
 
-	st, _ := DeterministicGenesisStateAltair(t, 1)
+	st, _ := DeterministicGenesisStateAltair(t, 16)
 	require.NoError(t, st.SetSlot(100))
 
 	require.NoError(t, db.SaveState(context.Background(), st, r))

@@ -99,6 +99,7 @@ func TestBeaconState_AppendBalanceWithTrie(t *testing.T) {
 			Pubkeys:         pubKeys,
 			AggregatePubkey: make([]byte, fieldparams.BLSPubkeyLength),
 		},
+		SpineData: &ethpb.SpineData{},
 	})
 	assert.NoError(t, err)
 	_, err = st.HashTreeRoot(context.Background())
@@ -183,5 +184,6 @@ func createState(count uint64) *ethpb.BeaconStateAltair {
 		PreviousEpochParticipation: make([]byte, count),
 		Validators:                 vals,
 		Balances:                   bals,
+		SpineData:                  &ethpb.SpineData{},
 	}
 }

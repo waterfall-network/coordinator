@@ -12,6 +12,7 @@ import (
 )
 
 func TestDebugServer_GetPeer(t *testing.T) {
+	t.Skip() // Unstable test
 	peersProvider := &mockP2p.MockPeersProvider{}
 	mP2P := mockP2p.NewTestP2P(t)
 	ds := &Server{

@@ -106,6 +106,19 @@ func TestGetSpec(t *testing.T) {
 	config.TerminalBlockHashActivationEpoch = 72
 	config.TerminalTotalDifficulty = "73"
 	config.DefaultFeeRecipient = common.HexToAddress("DefaultFeeRecipient")
+	config.MaxWithdrawals = 1
+	config.WithdrawalBalanceLockPeriod = 2
+	config.DAGTimelyVotingFlagIndex = 3
+	config.MaxAnnualizedReturnRate = 4
+	config.DAGTimelyTargetWeight = 5
+	config.DAGTimelySourceWeight = 6
+	config.WithdrawalOpsLimit = 7
+	config.DAGTimelyHeadWeight = 8
+	config.BaseRewardMultiplier = 9
+	config.OptValidatorsNum = 10
+	config.VotingRequiredSlots = 11
+	config.GwatSyncIntervalMs = 12
+	config.DAGTimelyVotingWeight = 13
 
 	var dbp [4]byte
 	copy(dbp[:], []byte{'0', '0', '0', '1'})
@@ -135,7 +148,7 @@ func TestGetSpec(t *testing.T) {
 	resp, err := server.GetSpec(context.Background(), &emptypb.Empty{})
 	require.NoError(t, err)
 
-	assert.Equal(t, 98, len(resp.Data))
+	assert.Equal(t, 112, len(resp.Data))
 	for k, v := range resp.Data {
 		switch k {
 		case "CONFIG_NAME":
@@ -348,6 +361,36 @@ func TestGetSpec(t *testing.T) {
 			assert.Equal(t, "3", v)
 		case "SAFE_SLOTS_TO_IMPORT_OPTIMISTICALLY":
 			assert.Equal(t, "128", v)
+		case "MAX_WITHDRAWALS":
+			assert.Equal(t, "1", v)
+		case "WITHDRAWAL_BALANCE_LOCK_PERIOD":
+			assert.Equal(t, "2", v)
+		case "DAG_TIMELY_VOTING_FLAG_INDEX":
+			assert.Equal(t, "0x03", v)
+		case "MAX_ANNUALIZED_RETURN_RATE":
+			assert.Equal(t, "0x04", v)
+		case "DAG_TIMELY_TARGET_WEIGHT":
+			assert.Equal(t, "0x05", v)
+		case "DAG_TIMELY_SOURCE_WEIGHT":
+			assert.Equal(t, "0x06", v)
+		case "WITHDRAWAL_OPS_LIMIT":
+			assert.Equal(t, "7", v)
+		case "DAG_TIMELY_HEAD_WEIGHT":
+			assert.Equal(t, "0x08", v)
+		case "BASE_REWARD_MULTIPLIER":
+			assert.Equal(t, "0x09", v)
+		case "OPT_VALIDATORS_NUM":
+			assert.Equal(t, "10", v)
+		case "VOTING_REQUIRED_SLOTS":
+			assert.Equal(t, "11", v)
+		case "GWAT_SYNC_INTERVAL":
+			assert.Equal(t, "12", v)
+		case "DAG_TIMELY_VOTING_WEIGHT":
+			assert.Equal(t, "0x0d", v)
+		case "CLEAN_WITHDRAWALS_AFT_EPOCHS":
+			assert.Equal(t, "100", v)
+		case "DELEGATE_FORK_SLOT":
+			assert.Equal(t, "2048", v)
 		default:
 			t.Errorf("Incorrect key: %s", k)
 		}
