@@ -18,6 +18,7 @@ stages:
     bazel version
     cp runtime/version/version.go /tmp/version.go
     sed -i "s/\\\u2692/${CI_COMMIT_SHORT_SHA}/g" runtime/version/version.go
+    bazel clean --expunge
     bazel build //beacon-chain:beacon-chain --config=release
     cp ./bazel-bin/cmd/beacon-chain/beacon-chain_/beacon-chain ./dist/coordinator-beacon
     bazel build //validator:validator --config=release
