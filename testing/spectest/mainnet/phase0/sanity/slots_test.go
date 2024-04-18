@@ -7,5 +7,6 @@ import (
 )
 
 func TestMainnet_Phase0_Sanity_Slots(t *testing.T) {
+	t.Skip() // Generate test data with pyton tool
 	sanity.RunSlotProcessingTests(t, "mainnet")
 }

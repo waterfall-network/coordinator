@@ -449,6 +449,26 @@ func genBeaconBlockBody() *v1alpha1.BeaconBlockBody {
 		Attestations:      genAttestations(5),
 		Deposits:          genDeposits(5),
 		VoluntaryExits:    genVoluntaryExits(5),
+		Withdrawals:       genWithdrawals(5),
+	}
+}
+
+func genWithdrawals(num int) []*v1alpha1.Withdrawal {
+	d := make([]*v1alpha1.Withdrawal, num)
+	for i := 0; i < num; i++ {
+		d[i] = genWithdrawal()
+	}
+
+	return d
+}
+
+func genWithdrawal() *v1alpha1.Withdrawal {
+	return &v1alpha1.Withdrawal{
+		PublicKey:      bytes(),
+		ValidatorIndex: 12345,
+		Amount:         3200,
+		InitTxHash:     bytes(),
+		Epoch:          99999,
 	}
 }
 
@@ -514,6 +534,7 @@ func genDepositData() *v1alpha1.Deposit_Data {
 		WithdrawalCredentials: bytes(),
 		Amount:                20000,
 		Signature:             bytes(),
+		InitTxHash:            bytes(),
 	}
 }
 
@@ -536,6 +557,7 @@ func genVoluntaryExit() *v1alpha1.VoluntaryExit {
 	return &v1alpha1.VoluntaryExit{
 		Epoch:          5432,
 		ValidatorIndex: 888888,
+		InitTxHash:     bytes(),
 	}
 }
 
@@ -557,9 +579,14 @@ func genValidator() *v1alpha1.Validator {
 		ActivationEpoch:            14325,
 		ExitEpoch:                  23425,
 		WithdrawableEpoch:          30000,
-		ActivationHash:             make([]byte, 32),
-		ExitHash:                   make([]byte, 32),
-		WithdrawalOps:              make([]*v1alpha1.WithdrawalOp, 0),
+		ActivationHash:             bytes(),
+		ExitHash:                   bytes(),
+		WithdrawalOps: []*v1alpha1.WithdrawalOp{{
+			Amount: 3200,
+			Hash:   bytes(),
+			Slot:   55,
+		}},
+		CreatorAddress: bytes(),
 	}
 }
 
@@ -591,6 +618,7 @@ func genBeaconBlockBodyAltair() *v1alpha1.BeaconBlockBodyAltair {
 		Deposits:          genDeposits(5),
 		VoluntaryExits:    genVoluntaryExits(12),
 		SyncAggregate:     genSyncAggregate(),
+		Withdrawals:       genWithdrawals(5),
 	}
 }
 

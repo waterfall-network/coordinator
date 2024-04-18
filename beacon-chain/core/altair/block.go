@@ -141,7 +141,6 @@ func ApplySyncRewardsPenalties(ctx context.Context, s state.BeaconStateAltair, v
 	// Apply sync committee rewards.
 	earnedProposerReward := uint64(0)
 	for _, index := range votedIndices {
-
 		//log.WithFields(log.Fields{
 		//	"Slot":              s.Slot(),
 		//	"Validator":         index,

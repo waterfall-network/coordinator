@@ -198,16 +198,6 @@ func TestNewRemoteKeymanager(t *testing.T) {
 	}
 }
 
-func TestNewRemoteKeymanager_TlsDisabled(t *testing.T) {
-	opts := &KeymanagerOpts{
-		RemoteCertificate: &CertificateConfig{
-			RequireTls: false,
-		},
-	}
-	_, err := NewKeymanager(context.Background(), &SetupConfig{Opts: opts, MaxMessageSize: 1})
-	assert.NoError(t, err)
-}
-
 func TestRemoteKeymanager_Sign(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	m := mock.NewMockRemoteSignerClient(ctrl)

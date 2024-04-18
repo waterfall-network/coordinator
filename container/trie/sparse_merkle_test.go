@@ -7,13 +7,11 @@ import (
 	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/container/trie"
-	contracts "gitlab.waterfall.network/waterfall/protocol/coordinator/contracts/deposit/mock"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
-	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/abi/bind"
 )
 
 func TestMarshalDepositWithProof(t *testing.T) {
@@ -42,6 +40,7 @@ func TestMarshalDepositWithProof(t *testing.T) {
 			WithdrawalCredentials: someRoot[:],
 			Amount:                32,
 			Signature:             someSig[:],
+			InitTxHash:            make([]byte, 32),
 		},
 	}
 	enc, err := dep.MarshalSSZ()
@@ -70,17 +69,6 @@ func TestMerkleTrie_MerkleProofOutOfRange(t *testing.T) {
 	if _, err := m.MerkleProof(6); err == nil {
 		t.Error("Expected out of range failure, received nil", err)
 	}
-}
-
-func TestMerkleTrieRoot_EmptyTrie(t *testing.T) {
-	trie, err := trie.NewTrie(params.BeaconConfig().DepositContractTreeDepth)
-	require.NoError(t, err)
-	testAccount, err := contracts.Setup()
-	require.NoError(t, err)
-
-	depRoot, err := testAccount.Contract.GetDepositRoot(&bind.CallOpts{})
-	require.NoError(t, err)
-	require.DeepEqual(t, depRoot, trie.HashTreeRoot())
 }
 
 func TestGenerateTrieFromItems_NoItemsProvided(t *testing.T) {

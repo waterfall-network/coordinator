@@ -68,7 +68,6 @@ func (r *testRunner) run() {
 	t.Logf("Starting time: %s\n", time.Now().String())
 	t.Logf("Log Path: %s\n", e2e.TestParams.LogPath)
 
-	minGenesisActiveCount := int(params.BeaconConfig().MinGenesisActiveValidatorCount)
 	multiClientActive := e2e.TestParams.LighthouseBeaconNodeCount > 0
 	var keyGen, lighthouseValidatorNodes e2etypes.ComponentRunner
 	var lighthouseNodes *components.LighthouseBeaconNodeSet
@@ -142,9 +141,6 @@ func (r *testRunner) run() {
 	g.Go(func() error {
 		if err := helpers.ComponentsStarted(ctx, []e2etypes.ComponentRunner{eth1Nodes}); err != nil {
 			return errors.Wrap(err, "sending and mining deposits require ETH1 nodes to run")
-		}
-		if err := components.SendAndMineDeposits(eth1Miner.KeystorePath(), minGenesisActiveCount, 0, true /* partial */); err != nil {
-			return errors.Wrap(err, "failed to send and mine deposits")
 		}
 		return nil
 	})
@@ -342,13 +338,6 @@ func (r *testRunner) testDepositsAndTx(ctx context.Context, g *errgroup.Group,
 			return fmt.Errorf("deposit check validator node requires beacon nodes to run: %w", err)
 		}
 		go func() {
-			if r.config.TestDeposits {
-				log.Info("Running deposit tests")
-				err := components.SendAndMineDeposits(keystorePath, int(e2e.DepositCount), minGenesisActiveCount, false /* partial */)
-				if err != nil {
-					r.t.Fatal(err)
-				}
-			}
 			r.testTxGeneration(ctx, g, keystorePath, []e2etypes.ComponentRunner{})
 		}()
 		if r.config.TestDeposits {

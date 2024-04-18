@@ -15,8 +15,8 @@ import (
 	"github.com/bazelbuild/rules_go/go/tools/bazel"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain/testing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
-	contracts "gitlab.waterfall.network/waterfall/protocol/coordinator/contracts/deposit/mock"
 	io "gitlab.waterfall.network/waterfall/protocol/coordinator/io/file"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/helpers"
 	e2e "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/params"
@@ -202,7 +202,7 @@ func (m *Miner) Start(ctx context.Context) error {
 	}
 	txOpts.Nonce = big.NewInt(0).SetUint64(nonce)
 	txOpts.Context = ctx
-	contractAddr, tx, _, err := contracts.DeployDepositContract(txOpts, web3)
+	contractAddr, tx, err := testing.DeployDepositContract(txOpts, web3)
 	if err != nil {
 		return fmt.Errorf("failed to deploy deposit contract: %w", err)
 	}

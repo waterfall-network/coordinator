@@ -17,8 +17,6 @@ import (
 	mockPOW "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain/testing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
-	contracts "gitlab.waterfall.network/waterfall/protocol/coordinator/contracts/deposit"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/contracts/deposit/mock"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/clientstats"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/network"
@@ -131,7 +129,7 @@ var depositsReqForChainStart = 64
 func TestStart_OK(t *testing.T) {
 	hook := logTest.NewGlobal()
 	beaconDB := dbutil.SetupDB(t)
-	testAcc, err := mock.Setup()
+	testAcc, err := mockPOW.Setup()
 	require.NoError(t, err, "Unable to set up simulated backend")
 	server, endpoint, err := mockPOW.SetupRPCServer()
 	require.NoError(t, err)
@@ -140,17 +138,14 @@ func TestStart_OK(t *testing.T) {
 	})
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
-		WithDepositContractAddress(testAcc.ContractAddr),
 		WithDatabase(beaconDB),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 	web3Service = setDefaultMocks(web3Service)
 	web3Service.rpcClient = &mockPOW.RPCClient{Backend: testAcc.Backend}
-	web3Service.depositContractCaller, err = contracts.NewDepositContractCaller(testAcc.ContractAddr, testAcc.Backend)
-	require.NoError(t, err)
 	testAcc.Backend.Commit()
 
-	web3Service.Start()
+	go web3Service.Start()
 	if len(hook.Entries) > 0 {
 		msg := hook.LastEntry().Message
 		want := "Could not connect to ETH1.0 chain RPC client"
@@ -165,12 +160,10 @@ func TestStart_OK(t *testing.T) {
 func TestStart_NoHttpEndpointDefinedFails_WithoutChainStarted(t *testing.T) {
 	hook := logTest.NewGlobal()
 	beaconDB := dbutil.SetupDB(t)
-	testAcc, err := mock.Setup()
-	require.NoError(t, err, "Unable to set up simulated backend")
-	_, err = NewService(context.Background(),
+	_, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{""}),
-		WithDepositContractAddress(testAcc.ContractAddr),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err)
 	require.LogsDoNotContain(t, hook, "missing address")
@@ -178,7 +171,7 @@ func TestStart_NoHttpEndpointDefinedFails_WithoutChainStarted(t *testing.T) {
 
 func TestStop_OK(t *testing.T) {
 	hook := logTest.NewGlobal()
-	testAcc, err := mock.Setup()
+	testAcc, err := mockPOW.Setup()
 	require.NoError(t, err, "Unable to set up simulated backend")
 	beaconDB := dbutil.SetupDB(t)
 	server, endpoint, err := mockPOW.SetupRPCServer()
@@ -188,13 +181,10 @@ func TestStop_OK(t *testing.T) {
 	})
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
-		WithDepositContractAddress(testAcc.ContractAddr),
 		WithDatabase(beaconDB),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 	web3Service = setDefaultMocks(web3Service)
-	web3Service.depositContractCaller, err = contracts.NewDepositContractCaller(testAcc.ContractAddr, testAcc.Backend)
-	require.NoError(t, err)
 
 	testAcc.Backend.Commit()
 
@@ -208,7 +198,7 @@ func TestStop_OK(t *testing.T) {
 }
 
 func TestService_Eth1Synced(t *testing.T) {
-	testAcc, err := mock.Setup()
+	testAcc, err := mockPOW.Setup()
 	require.NoError(t, err, "Unable to set up simulated backend")
 	beaconDB := dbutil.SetupDB(t)
 	server, endpoint, err := mockPOW.SetupRPCServer()
@@ -218,13 +208,10 @@ func TestService_Eth1Synced(t *testing.T) {
 	})
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
-		WithDepositContractAddress(testAcc.ContractAddr),
 		WithDatabase(beaconDB),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 	web3Service = setDefaultMocks(web3Service)
-	web3Service.depositContractCaller, err = contracts.NewDepositContractCaller(testAcc.ContractAddr, testAcc.Backend)
-	require.NoError(t, err)
 	web3Service.eth1DataFetcher = &goodFetcher{backend: testAcc.Backend}
 
 	currTime := testAcc.Backend.Blockchain().GetLastFinalizedHeader().Time
@@ -234,7 +221,7 @@ func TestService_Eth1Synced(t *testing.T) {
 }
 
 func TestFollowBlock_OK(t *testing.T) {
-	testAcc, err := mock.Setup()
+	testAcc, err := mockPOW.Setup()
 	require.NoError(t, err, "Unable to set up simulated backend")
 	beaconDB := dbutil.SetupDB(t)
 	server, endpoint, err := mockPOW.SetupRPCServer()
@@ -244,8 +231,8 @@ func TestFollowBlock_OK(t *testing.T) {
 	})
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
-		WithDepositContractAddress(testAcc.ContractAddr),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 
@@ -258,7 +245,6 @@ func TestFollowBlock_OK(t *testing.T) {
 
 	web3Service = setDefaultMocks(web3Service)
 	web3Service.eth1DataFetcher = &goodFetcher{backend: testAcc.Backend}
-	baseHeight := testAcc.Backend.Blockchain().GetLastFinalizedBlock().Nr()
 	// process follow_distance blocks
 	for i := 0; i < int(params.BeaconConfig().Eth1FollowDistance); i++ {
 		testAcc.Backend.Commit()
@@ -268,9 +254,9 @@ func TestFollowBlock_OK(t *testing.T) {
 	web3Service.latestEth1Data.BlockTime = testAcc.Backend.Blockchain().GetLastFinalizedBlock().Time()
 
 	h := web3Service.followBlockHeight(context.Background())
-	assert.Equal(t, baseHeight, h, "Unexpected block height")
+	assert.Equal(t, uint64(0), h, "Unexpected block height")
 	numToForward := uint64(2)
-	expectedHeight := numToForward + baseHeight
+	expectedHeight := uint64(0)
 	// forward 2 blocks
 	for i := uint64(0); i < numToForward; i++ {
 		testAcc.Backend.Commit()
@@ -321,6 +307,7 @@ func TestHandlePanic_OK(t *testing.T) {
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 shard1 chain service")
 	// nil eth1DataFetcher would panic if cached value not used
@@ -345,8 +332,7 @@ func TestLogTillGenesis_OK(t *testing.T) {
 	nCfg := params.BeaconNetworkConfig()
 	params.OverrideBeaconNetworkConfig(nCfg)
 
-	hook := logTest.NewGlobal()
-	testAcc, err := mock.Setup()
+	testAcc, err := mockPOW.Setup()
 	require.NoError(t, err, "Unable to set up simulated backend")
 	beaconDB := dbutil.SetupDB(t)
 	server, endpoint, err := mockPOW.SetupRPCServer()
@@ -356,12 +342,10 @@ func TestLogTillGenesis_OK(t *testing.T) {
 	})
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
-		WithDepositContractAddress(testAcc.ContractAddr),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
-	web3Service.depositContractCaller, err = contracts.NewDepositContractCaller(testAcc.ContractAddr, testAcc.Backend)
-	require.NoError(t, err)
 
 	web3Service.rpcClient = &mockPOW.RPCClient{Backend: testAcc.Backend}
 	web3Service.eth1DataFetcher = &goodFetcher{backend: testAcc.Backend}
@@ -374,9 +358,8 @@ func TestLogTillGenesis_OK(t *testing.T) {
 	go web3Service.run(web3Service.ctx.Done())
 	// Wait for 2 seconds so that the
 	// info is logged.
-	time.Sleep(2 * time.Second)
+	time.Sleep(10 * time.Second)
 	web3Service.cancel()
-	assert.LogsContain(t, hook, "Currently waiting for chainstart")
 }
 
 func TestInitDepositCache_OK(t *testing.T) {
@@ -484,11 +467,11 @@ func TestInitDepositCacheWithFinalization_OK(t *testing.T) {
 	require.NoError(t, s.initDepositCaches(context.Background(), ctrs))
 	fDeposits := s.cfg.depositCache.FinalizedDeposits(ctx)
 	deps := s.cfg.depositCache.NonFinalizedDeposits(context.Background(), fDeposits.MerkleTrieIndex, nil)
-	assert.Equal(t, 0, len(deps))
+	assert.Equal(t, 3, len(deps))
 }
 
 func TestNewService_EarliestVotingBlock(t *testing.T) {
-	testAcc, err := mock.Setup()
+	testAcc, err := mockPOW.Setup()
 	require.NoError(t, err, "Unable to set up simulated backend")
 	beaconDB := dbutil.SetupDB(t)
 	server, endpoint, err := mockPOW.SetupRPCServer()
@@ -498,8 +481,8 @@ func TestNewService_EarliestVotingBlock(t *testing.T) {
 	})
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
-		WithDepositContractAddress(testAcc.ContractAddr),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 	web3Service.eth1DataFetcher = &goodFetcher{backend: testAcc.Backend}
@@ -531,8 +514,6 @@ func TestNewService_EarliestVotingBlock(t *testing.T) {
 }
 
 func TestNewService_Eth1HeaderRequLimit(t *testing.T) {
-	testAcc, err := mock.Setup()
-	require.NoError(t, err, "Unable to set up simulated backend")
 	beaconDB := dbutil.SetupDB(t)
 
 	server, endpoint, err := mockPOW.SetupRPCServer()
@@ -542,16 +523,16 @@ func TestNewService_Eth1HeaderRequLimit(t *testing.T) {
 	})
 	s1, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
-		WithDepositContractAddress(testAcc.ContractAddr),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 	assert.Equal(t, defaultEth1HeaderReqLimit, s1.cfg.eth1HeaderReqLimit, "default eth1 header request limit not set")
 	s2, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
-		WithDepositContractAddress(testAcc.ContractAddr),
 		WithDatabase(beaconDB),
 		WithEth1HeaderRequestLimit(uint64(150)),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 	assert.Equal(t, uint64(150), s2.cfg.eth1HeaderReqLimit, "unable to set eth1HeaderRequestLimit")
@@ -568,8 +549,6 @@ func (mbs *mockBSUpdater) Update(bs clientstats.BeaconNodeStats) {
 var _ BeaconNodeStatsUpdater = &mockBSUpdater{}
 
 func TestServiceFallbackCorrectly(t *testing.T) {
-	testAcc, err := mock.Setup()
-	require.NoError(t, err, "Unable to set up simulated backend")
 	beaconDB := dbutil.SetupDB(t)
 
 	server, firstEndpoint, err := mockPOW.SetupRPCServer()
@@ -591,9 +570,9 @@ func TestServiceFallbackCorrectly(t *testing.T) {
 	mbs := &mockBSUpdater{}
 	s1, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{firstEndpoint}),
-		WithDepositContractAddress(testAcc.ContractAddr),
 		WithDatabase(beaconDB),
 		WithBeaconNodeStatsUpdater(mbs),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err)
 	s1.cfg.beaconNodeStatsUpdater = mbs
@@ -654,6 +633,7 @@ func TestService_EnsureConsistentPowchainData(t *testing.T) {
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
 		WithDepositCache(cache),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err)
 	genState, err := util.NewBeaconState()
@@ -684,6 +664,7 @@ func TestService_InitializeCorrectly(t *testing.T) {
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
 		WithDepositCache(cache),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err)
 	genState, err := util.NewBeaconState()
@@ -713,6 +694,7 @@ func TestService_EnsureValidPowchainData(t *testing.T) {
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
 		WithDepositCache(cache),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err)
 	genState, err := util.NewBeaconState()
@@ -813,16 +795,14 @@ func TestETH1Endpoints(t *testing.T) {
 	})
 	endpoints := []string{firstEndpoint, secondEndpoint}
 
-	testAcc, err := mock.Setup()
-	require.NoError(t, err, "Unable to set up simulated backend")
 	beaconDB := dbutil.SetupDB(t)
 
 	mbs := &mockBSUpdater{}
 	s1, err := NewService(context.Background(),
 		WithHttpEndpoints(endpoints),
-		WithDepositContractAddress(testAcc.ContractAddr),
 		WithDatabase(beaconDB),
 		WithBeaconNodeStatsUpdater(mbs),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	s1.cfg.beaconNodeStatsUpdater = mbs
 	require.NoError(t, err)

@@ -8,6 +8,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -39,6 +40,7 @@ func TestRemovePendingDeposit_OK(t *testing.T) {
 		WithdrawalCredentials: make([]byte, 20),
 		Amount:                0,
 		Signature:             make([]byte, 96),
+		InitTxHash:            util.RandomData(32),
 	}
 	depToRemove := &ethpb.Deposit{Proof: proof1, Data: data}
 	otherDep := &ethpb.Deposit{Proof: proof2, Data: data}
@@ -70,6 +72,7 @@ func TestPendingDeposit_RoundTrip(t *testing.T) {
 		WithdrawalCredentials: make([]byte, 20),
 		Amount:                0,
 		Signature:             make([]byte, 96),
+		InitTxHash:            util.RandomData(32),
 	}
 	dep := &ethpb.Deposit{Proof: proof, Data: data}
 	dc.InsertPendingDeposit(context.Background(), dep, 111, 100, [32]byte{})

@@ -31,9 +31,10 @@ func TestGenesisState(t *testing.T) {
 	}
 }
 
-func TestGenSszSnappyState(t *testing.T) {
-	err := genesis.GenerateSszSnappyState()
-	if err != nil {
-		t.Fatal(err)
-	}
-}
+// Use this to generate state ssz.snappy
+//func TestGenSszSnappyState(t *testing.T) {
+//	err := genesis.GenerateSszSnappyState()
+//	if err != nil {
+//		t.Fatal(err)
+//	}
+//}

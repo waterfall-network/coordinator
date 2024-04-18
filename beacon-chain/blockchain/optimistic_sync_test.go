@@ -86,7 +86,13 @@ func Test_UpdateLastValidatedCheckpoint(t *testing.T) {
 	require.NoError(t, err)
 	assert.NoError(t, beaconDB.SaveGenesisBlockRoot(ctx, genesisRoot))
 	require.NoError(t, fcs.InsertOptimisticBlock(ctx, 0, genesisRoot, params.BeaconConfig().ZeroHash,
-		0, 0, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], nil))
+		0, 0, params.BeaconConfig().ZeroHash[:], params.BeaconConfig().ZeroHash[:], &ethpb.SpineData{
+			Spines:       make([]byte, 0),
+			Prefix:       make([]byte, 0),
+			Finalization: make([]byte, 0),
+			CpFinalized:  make([]byte, 0),
+			ParentSpines: make([]*ethpb.SpinesSeq, 0),
+		}))
 	genesisSummary := &ethpb.StateSummary{
 		Root: genesisStateRoot[:],
 		Slot: 0,
@@ -181,7 +187,7 @@ func TestService_removeInvalidBlockAndState(t *testing.T) {
 	require.NoError(t, err)
 	r1, err := blk1.Block().HashTreeRoot()
 	require.NoError(t, err)
-	st, _ := util.DeterministicGenesisStateBellatrix(t, 1)
+	st, _ := util.DeterministicGenesisStateAltair(t, 1)
 	require.NoError(t, service.cfg.BeaconDB.SaveBlock(ctx, blk1))
 	require.NoError(t, service.cfg.BeaconDB.SaveStateSummary(ctx, &ethpb.StateSummary{
 		Slot: 1,

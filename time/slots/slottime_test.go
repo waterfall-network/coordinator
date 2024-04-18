@@ -103,21 +103,21 @@ func TestMultiplySlotBy(t *testing.T) {
 			args: args{
 				times: 1,
 			},
-			want: time.Duration(12) * time.Second,
+			want: time.Duration(4) * time.Second,
 		},
 		{
 			name: "multiply by 2",
 			args: args{
 				times: 2,
 			},
-			want: time.Duration(24) * time.Second,
+			want: time.Duration(8) * time.Second,
 		},
 		{
 			name: "multiply by 10",
 			args: args{
 				times: 10,
 			},
-			want: time.Duration(120) * time.Second,
+			want: time.Duration(40) * time.Second,
 		},
 	}
 	for _, tt := range tests {

@@ -57,6 +57,7 @@ func TestProposeExit_Notification(t *testing.T) {
 	req := &ethpb.VoluntaryExit{
 		Epoch:          epoch,
 		ValidatorIndex: validatorIndex,
+		InitTxHash:     make([]byte, 32),
 	}
 
 	resp, err := server.ProposeExit(context.Background(), req)
@@ -117,22 +118,16 @@ func TestProposeExit_NoPanic(t *testing.T) {
 
 	req := &ethpb.VoluntaryExit{}
 	_, err = server.ProposeExit(context.Background(), req)
-	require.ErrorContains(t, "voluntary exit does not exist", err, "Expected error for no exit existing")
+	require.ErrorContains(t, "Could not get tree hash of exit: bytes array does not have the correct length", err, "Expected error for no exit existing")
 
 	// Send the request, expect a result on the state feed.
 	validatorIndex := types.ValidatorIndex(0)
 	req = &ethpb.VoluntaryExit{
 		Epoch:          epoch,
 		ValidatorIndex: validatorIndex,
+		InitTxHash:     make([]byte, 32),
 	}
 
-	_, err = server.ProposeExit(context.Background(), req)
-	require.ErrorContains(t, "invalid signature provided", err, "Expected error for no signature exists")
-
-	_, err = server.ProposeExit(context.Background(), req)
-	require.ErrorContains(t, "invalid signature provided", err, "Expected error for invalid signature length")
-
-	require.NoError(t, err)
 	resp, err := server.ProposeExit(context.Background(), req)
 	require.NoError(t, err)
 	expectedRoot, err := req.HashTreeRoot()

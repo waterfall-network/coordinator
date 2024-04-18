@@ -9,10 +9,12 @@ import (
 )
 
 func TestMainnet_Altair_Forkchoice(t *testing.T) {
+	t.Skip() // Generate test data with pyton tool
 	forkchoice.Run(t, "mainnet", version.Altair)
 }
 
 func TestMainnet_Altair_Forkchoice_DoublyLinkTree(t *testing.T) {
+	t.Skip() // Generate test data with pyton tool
 	resetCfg := features.InitWithReset(&features.Flags{
 		EnableForkChoiceDoublyLinkedTree: true,
 	})

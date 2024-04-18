@@ -151,7 +151,7 @@ func TestSaveState_CanSaveHotStateToDB(t *testing.T) {
 	r := [32]byte{'A'}
 	require.NoError(t, service.saveStateByRoot(ctx, r, beaconState))
 
-	require.LogsContain(t, hook, "Saving hot state to DB")
+	require.LogsContain(t, hook, "Save state by root: save to db success")
 	// Should have saved in DB.
 	require.Equal(t, true, beaconDB.HasState(ctx, r))
 }

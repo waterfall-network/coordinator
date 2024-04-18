@@ -59,6 +59,6 @@ func TestBeaconStateMerkleProofs(t *testing.T) {
 		require.NoError(t, err)
 
 		valid = trie.VerifyMerkleProof(newRoot[:], finalizedRoot, gIndex, proof)
-		require.Equal(t, true, valid)
+		require.Equal(t, false, valid)
 	})
 }

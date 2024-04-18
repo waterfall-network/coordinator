@@ -1,12 +1,9 @@
 package components
 
 import (
-	"bytes"
 	"context"
 	"encoding/hex"
 	"fmt"
-	"io/ioutil"
-	"math/big"
 	"os"
 	"os/exec"
 	"path"
@@ -18,18 +15,10 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/validator/flags"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
-	contracts "gitlab.waterfall.network/waterfall/protocol/coordinator/contracts/deposit"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/interop"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/components/eth1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/helpers"
 	e2e "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/params"
 	e2etypes "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/types"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
-	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/abi/bind"
-	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/keystore"
-	"gitlab.waterfall.network/waterfall/protocol/gwat/ethclient"
-	"gitlab.waterfall.network/waterfall/protocol/gwat/rpc"
 )
 
 const depositGasLimit = 4000000
@@ -212,88 +201,4 @@ func (v *ValidatorNode) Start(ctx context.Context) error {
 // Started checks whether validator node is started and ready to be queried.
 func (v *ValidatorNode) Started() <-chan struct{} {
 	return v.started
-}
-
-// SendAndMineDeposits sends the requested amount of deposits and mines the chain after to ensure the deposits are seen.
-func SendAndMineDeposits(keystorePath string, validatorNum, offset int, partial bool) error {
-	client, err := rpc.DialHTTP(fmt.Sprintf("http://127.0.0.1:%d", e2e.TestParams.Ports.Eth1RPCPort))
-	if err != nil {
-		return err
-	}
-	defer client.Close()
-	web3 := ethclient.NewClient(client)
-
-	keystoreBytes, err := ioutil.ReadFile(keystorePath) // #nosec G304
-	if err != nil {
-		return err
-	}
-	if err = sendDeposits(web3, keystoreBytes, validatorNum, offset, partial); err != nil {
-		return err
-	}
-	mineKey, err := keystore.DecryptKey(keystoreBytes, eth1.KeystorePassword)
-	if err != nil {
-		return err
-	}
-	if err = eth1.WaitForBlocks(web3, mineKey, params.BeaconConfig().Eth1FollowDistance); err != nil {
-		return fmt.Errorf("failed to mine blocks %w", err)
-	}
-	return nil
-}
-
-// sendDeposits uses the passed in web3 and keystore bytes to send the requested deposits.
-func sendDeposits(web3 *ethclient.Client, keystoreBytes []byte, num, offset int, partial bool) error {
-	txOps, err := bind.NewTransactorWithChainID(bytes.NewReader(keystoreBytes), eth1.KeystorePassword, big.NewInt(eth1.NetworkId))
-	if err != nil {
-		return err
-	}
-	txOps.GasLimit = depositGasLimit
-	txOps.Context = context.Background()
-	nonce, err := web3.PendingNonceAt(context.Background(), txOps.From)
-	if err != nil {
-		return err
-	}
-	txOps.Nonce = big.NewInt(0).SetUint64(nonce)
-
-	contract, err := contracts.NewDepositContract(e2e.TestParams.ContractAddress, web3)
-	if err != nil {
-		return err
-	}
-
-	balances := make([]uint64, num+offset)
-	for i := 0; i < len(balances); i++ {
-		if i < len(balances)/2 && partial {
-			balances[i] = params.BeaconConfig().MaxEffectiveBalance / 2
-		} else {
-			balances[i] = params.BeaconConfig().MaxEffectiveBalance
-		}
-	}
-	deposits, trie, err := util.DepositsWithBalance(balances)
-	if err != nil {
-		return err
-	}
-	allDeposits := deposits
-	allRoots := trie.Items()
-	allBalances := balances
-	if partial {
-		deposits2, trie2, err := util.DepositsWithBalance(balances)
-		if err != nil {
-			return err
-		}
-		allDeposits = append(deposits, deposits2[:len(balances)/2]...)
-		allRoots = append(trie.Items(), trie2.Items()[:len(balances)/2]...)
-		allBalances = append(balances, balances[:len(balances)/2]...)
-	}
-	for index, dd := range allDeposits {
-		if index < offset {
-			continue
-		}
-		depositInGwei := big.NewInt(int64(allBalances[index]))
-		txOps.Value = depositInGwei.Mul(depositInGwei, big.NewInt(int64(params.BeaconConfig().GweiPerEth)))
-		_, err = contract.Deposit(txOps, dd.Data.PublicKey, dd.Data.WithdrawalCredentials, dd.Data.Signature, bytesutil.ToBytes32(allRoots[index]))
-		if err != nil {
-			return errors.Wrap(err, "unable to send transaction to contract")
-		}
-		txOps.Nonce = txOps.Nonce.Add(txOps.Nonce, big.NewInt(1))
-	}
-	return nil
 }

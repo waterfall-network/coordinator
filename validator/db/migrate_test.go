@@ -18,7 +18,7 @@ func TestMigrateUp_NoDBFound(t *testing.T) {
 	require.NoError(t, set.Set(cmd.DataDirFlag.Name, ""))
 	cliCtx := cli.NewContext(&app, set, nil)
 	err := MigrateUp(cliCtx)
-	assert.ErrorContains(t, "No validator db found at path", err)
+	assert.ErrorContains(t, "no validator db found at path", err)
 }
 
 func TestMigrateUp_OK(t *testing.T) {
@@ -40,7 +40,7 @@ func TestMigrateDown_NoDBFound(t *testing.T) {
 	require.NoError(t, set.Set(cmd.DataDirFlag.Name, ""))
 	cliCtx := cli.NewContext(&app, set, nil)
 	err := MigrateDown(cliCtx)
-	assert.ErrorContains(t, "No validator db found at path", err)
+	assert.ErrorContains(t, "no validator db found at path", err)
 }
 
 func TestMigrateDown_OK(t *testing.T) {

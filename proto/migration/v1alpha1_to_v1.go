@@ -214,6 +214,7 @@ func V1Alpha1ExitToV1(v1alpha1Exit *ethpbalpha.VoluntaryExit) *ethpbv1.Voluntary
 	return &ethpbv1.VoluntaryExit{
 		Epoch:          v1alpha1Exit.Epoch,
 		ValidatorIndex: v1alpha1Exit.ValidatorIndex,
+		InitTxHash:     v1alpha1Exit.InitTxHash,
 	}
 }
 
@@ -225,6 +226,7 @@ func V1ExitToV1Alpha1(v1Exit *ethpbv1.VoluntaryExit) *ethpbalpha.VoluntaryExit {
 	return &ethpbalpha.VoluntaryExit{
 		Epoch:          v1Exit.Epoch,
 		ValidatorIndex: v1Exit.ValidatorIndex,
+		InitTxHash:     v1Exit.InitTxHash,
 	}
 }
 

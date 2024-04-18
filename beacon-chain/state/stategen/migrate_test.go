@@ -8,11 +8,13 @@ import (
 	logTest "github.com/sirupsen/logrus/hooks/test"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
 	testDB "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/testing"
+	v1 "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/v1"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
+	"google.golang.org/protobuf/proto"
 )
 
 func TestMigrateToCold_CanSaveFinalizedInfo(t *testing.T) {
@@ -30,8 +32,15 @@ func TestMigrateToCold_CanSaveFinalizedInfo(t *testing.T) {
 	require.NoError(t, service.epochBoundaryStateCache.put(br, beaconState))
 	require.NoError(t, service.MigrateToCold(ctx, br))
 
-	wanted := &finalizedInfo{state: beaconState, root: br, slot: 1}
-	assert.DeepEqual(t, wanted, service.finalizedInfo, "Incorrect finalized info")
+	wantedState, err := v1.ProtobufBeaconState(beaconState.InnerStateUnsafe())
+	assert.NoError(t, err)
+
+	finalizedState, err := v1.ProtobufBeaconState(service.finalizedInfo.state.InnerStateUnsafe())
+	assert.NoError(t, err)
+
+	if !proto.Equal(wantedState, finalizedState) {
+		t.Fatal("Incorrect finalized info")
+	}
 }
 
 func TestMigrateToCold_HappyPath(t *testing.T) {

@@ -36,21 +36,21 @@ func Test_BaseReward(t *testing.T) {
 			name:      "active balance is 32eth",
 			valIdx:    0,
 			st:        genState(1),
-			want:      11448672,
+			want:      114486688,
 			errString: "",
 		},
 		{
 			name:      "active balance is 32eth * target committee size",
 			valIdx:    0,
 			st:        genState(params.BeaconConfig().TargetCommitteeSize),
-			want:      1011904,
+			want:      10119264,
 			errString: "",
 		},
 		{
 			name:      "active balance is 32eth * max validator per  committee size",
 			valIdx:    0,
 			st:        genState(params.BeaconConfig().MaxValidatorsPerCommittee),
-			want:      252960,
+			want:      2529792,
 			errString: "",
 		},
 	}
@@ -93,35 +93,35 @@ func Test_BaseRewardWithTotalBalance(t *testing.T) {
 			name:          "active balance is 1",
 			valIdx:        0,
 			activeBalance: 1,
-			want:          2048000000000,
+			want:          204800000000000,
 			errString:     "",
 		},
 		{
 			name:          "active balance is 1eth",
 			valIdx:        0,
 			activeBalance: params.BeaconConfig().EffectiveBalanceIncrement,
-			want:          64765024,
+			want:          647636032,
 			errString:     "",
 		},
 		{
 			name:          "active balance is 32eth",
 			valIdx:        0,
 			activeBalance: params.BeaconConfig().MaxEffectiveBalance,
-			want:          11448672,
+			want:          114486688,
 			errString:     "",
 		},
 		{
 			name:          "active balance is 32eth * 1m validators",
 			valIdx:        0,
 			activeBalance: params.BeaconConfig().MaxEffectiveBalance * 1e9,
-			want:          544,
+			want:          69376,
 			errString:     "",
 		},
 		{
 			name:          "active balance is max uint64",
 			valIdx:        0,
 			activeBalance: math.MaxUint64,
-			want:          448,
+			want:          47680,
 			errString:     "",
 		},
 	}
@@ -153,31 +153,31 @@ func Test_BaseRewardPerIncrement(t *testing.T) {
 		{
 			name:          "active balance is 1",
 			activeBalance: 1,
-			want:          64000000000,
+			want:          6400000000000,
 			errString:     "",
 		},
 		{
 			name:          "active balance is 1eth",
 			activeBalance: params.BeaconConfig().EffectiveBalanceIncrement,
-			want:          2023907,
+			want:          20238626,
 			errString:     "",
 		},
 		{
 			name:          "active balance is 32eth",
 			activeBalance: params.BeaconConfig().MaxEffectiveBalance,
-			want:          357771,
+			want:          3577709,
 			errString:     "",
 		},
 		{
 			name:          "active balance is 32eth * 1m validators",
 			activeBalance: params.BeaconConfig().MaxEffectiveBalance * 1e9,
-			want:          17,
+			want:          2168,
 			errString:     "",
 		},
 		{
 			name:          "active balance is max uint64",
 			activeBalance: math.MaxUint64,
-			want:          14,
+			want:          1490,
 			errString:     "",
 		},
 	}
@@ -212,7 +212,7 @@ func Test_CalculateBaseReward(t *testing.T) {
 			committeesNum:          4,
 			membersPerCommitteeNum: 2048,
 			rewardMultiplier:       2.0,
-			want:                   1_227_274,
+			want:                   122_727,
 		},
 		{
 			name:                   "base reward when 2048 validators and 4 committees with 128 members each",
@@ -220,7 +220,7 @@ func Test_CalculateBaseReward(t *testing.T) {
 			committeesNum:          4,
 			membersPerCommitteeNum: 128,
 			rewardMultiplier:       2.0,
-			want:                   19_636_389,
+			want:                   1_963_638,
 		},
 		{
 			name:                   "base reward when 2048 validators and 4 committees with 512 members each",
@@ -228,7 +228,7 @@ func Test_CalculateBaseReward(t *testing.T) {
 			committeesNum:          4,
 			membersPerCommitteeNum: 512,
 			rewardMultiplier:       2.0,
-			want:                   4_909_097,
+			want:                   490_909,
 		},
 		{
 			name:                   "base reward when 2048 validators and 64 committees with 2048 members each",
@@ -236,7 +236,7 @@ func Test_CalculateBaseReward(t *testing.T) {
 			committeesNum:          64,
 			membersPerCommitteeNum: 2048,
 			rewardMultiplier:       2.0,
-			want:                   76_704,
+			want:                   7_670,
 		},
 		{
 			name:                   "base reward when 2048 validators and 64 committees with 128 members each",
@@ -244,7 +244,7 @@ func Test_CalculateBaseReward(t *testing.T) {
 			committeesNum:          64,
 			membersPerCommitteeNum: 128,
 			rewardMultiplier:       2.0,
-			want:                   1_227_274,
+			want:                   122_727,
 		},
 		{
 			name:                   "base reward when 300000 validators and 4 committees with 2048 members each",
@@ -252,7 +252,7 @@ func Test_CalculateBaseReward(t *testing.T) {
 			committeesNum:          4,
 			membersPerCommitteeNum: 2048,
 			rewardMultiplier:       2.0,
-			want:                   14_853_791,
+			want:                   1_485_379,
 		},
 		{
 			name:                   "base reward when 300000 validators and 64 committees with 2048 members each",
@@ -260,7 +260,7 @@ func Test_CalculateBaseReward(t *testing.T) {
 			committeesNum:          4,
 			membersPerCommitteeNum: 2048,
 			rewardMultiplier:       2.0,
-			want:                   14_853_791,
+			want:                   1_485_379,
 		},
 		{
 			name:                   "base reward when 300000 validators and 64 committees with 128 members each",
@@ -268,7 +268,7 @@ func Test_CalculateBaseReward(t *testing.T) {
 			committeesNum:          64,
 			membersPerCommitteeNum: 128,
 			rewardMultiplier:       2.0,
-			want:                   14_853_791,
+			want:                   1_485_379,
 		},
 		{
 			name:                   "base reward when 1 validator and 4 committees with 2048 members each",
@@ -276,7 +276,7 @@ func Test_CalculateBaseReward(t *testing.T) {
 			committeesNum:          4,
 			membersPerCommitteeNum: 2048,
 			rewardMultiplier:       2.0,
-			want:                   27_119,
+			want:                   2_711,
 		},
 		{
 			name:                   "base reward when 1 validator and 64 committees with 2048 members each",
@@ -284,7 +284,7 @@ func Test_CalculateBaseReward(t *testing.T) {
 			committeesNum:          64,
 			membersPerCommitteeNum: 2048,
 			rewardMultiplier:       2.0,
-			want:                   1_694,
+			want:                   169,
 		},
 		{
 			name:                   "base reward when 1 validator and 64 committees with 128 members each",
@@ -292,7 +292,7 @@ func Test_CalculateBaseReward(t *testing.T) {
 			committeesNum:          64,
 			membersPerCommitteeNum: 128,
 			rewardMultiplier:       2.0,
-			want:                   27_119,
+			want:                   2_711,
 		},
 		{
 			name:                   "base reward when 2048 validators and 64 committees with 128 members each with reward multiplier 1.0",
@@ -300,7 +300,7 @@ func Test_CalculateBaseReward(t *testing.T) {
 			committeesNum:          64,
 			membersPerCommitteeNum: 128,
 			rewardMultiplier:       1.0,
-			want:                   2_454_548,
+			want:                   245_454,
 		},
 		{
 			name:                   "base reward when 2048 validators and 64 committees with 128 members each with reward multiplier 0.5",
@@ -308,7 +308,7 @@ func Test_CalculateBaseReward(t *testing.T) {
 			committeesNum:          64,
 			membersPerCommitteeNum: 128,
 			rewardMultiplier:       0.5,
-			want:                   4_909_097,
+			want:                   490_909,
 		},
 	}
 	for _, tt := range tests {

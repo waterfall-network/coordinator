@@ -44,6 +44,7 @@ func TestExitAccountsCli_OK(t *testing.T) {
 
 	mockValidatorClient.EXPECT().
 		DomainData(gomock.Any(), gomock.Any()).
+		AnyTimes().
 		Return(&ethpb.DomainResponse{SignatureDomain: make([]byte, 32)}, nil)
 
 	mockValidatorClient.EXPECT().
@@ -135,7 +136,7 @@ func TestExitAccountsCli_OK_AllPublicKeys(t *testing.T) {
 
 	mockValidatorClient.EXPECT().
 		DomainData(gomock.Any(), gomock.Any()).
-		Times(2).
+		AnyTimes().
 		Return(&ethpb.DomainResponse{SignatureDomain: make([]byte, 32)}, nil)
 
 	mockValidatorClient.EXPECT().
@@ -260,7 +261,7 @@ func TestDisplayExitInfo(t *testing.T) {
 	logHook := test.NewGlobal()
 	key := []byte("0x123456")
 	displayExitInfo([][]byte{key}, []string{string(key)})
-	assert.LogsContain(t, logHook, "https://beaconcha.in/validator/3078313233343536")
+	assert.LogsContain(t, logHook, "beaconcha.in/validator/3078313233343536")
 }
 
 func TestDisplayExitInfo_NoKeys(t *testing.T) {

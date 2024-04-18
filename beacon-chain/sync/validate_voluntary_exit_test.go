@@ -30,6 +30,7 @@ func setupValidExit(t *testing.T) (*ethpb.VoluntaryExit, state.BeaconState) {
 	exit := &ethpb.VoluntaryExit{
 		ValidatorIndex: 0,
 		Epoch:          1 + params.BeaconConfig().ShardCommitteePeriod,
+		InitTxHash:     make([]byte, 32),
 	}
 	registry := []*ethpb.Validator{
 		{

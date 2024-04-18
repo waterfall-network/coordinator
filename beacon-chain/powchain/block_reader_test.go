@@ -8,8 +8,7 @@ import (
 
 	dbutil "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/testing"
 	mockPOW "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain/testing"
-	contracts "gitlab.waterfall.network/waterfall/protocol/coordinator/contracts/deposit"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/contracts/deposit/mock"
+	eth "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
@@ -26,7 +25,7 @@ func setDefaultMocks(service *Service) *Service {
 }
 
 func TestLatestMainchainInfo_OK(t *testing.T) {
-	testAcc, err := mock.Setup()
+	testAcc, err := mockPOW.Setup()
 	require.NoError(t, err, "Unable to set up simulated backend")
 
 	beaconDB := dbutil.SetupDB(t)
@@ -37,8 +36,8 @@ func TestLatestMainchainInfo_OK(t *testing.T) {
 	})
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
-		WithDepositContractAddress(testAcc.ContractAddr),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "Unable to setup web3 ETH1.0 chain service")
 
@@ -46,8 +45,15 @@ func TestLatestMainchainInfo_OK(t *testing.T) {
 	web3Service.rpcClient = &mockPOW.RPCClient{Backend: testAcc.Backend}
 	web3Service.eth1DataFetcher = &goodFetcher{backend: testAcc.Backend}
 
-	web3Service.depositContractCaller, err = contracts.NewDepositContractCaller(testAcc.ContractAddr, testAcc.Backend)
-	require.NoError(t, err)
+	web3Service.latestEth1Data = &eth.LatestETH1Data{
+		BlockHeight:        2,
+		BlockTime:          20,
+		BlockHash:          []byte{167, 119, 205, 247, 51, 60, 237, 42, 59, 241, 126, 94, 156, 163, 77, 216, 159, 17, 186, 52, 114, 231, 34, 81, 58, 154, 100, 205, 141, 81, 204, 145},
+		LastRequestedBlock: 0,
+		CpHash:             nil,
+		CpNr:               0,
+	}
+
 	testAcc.Backend.Commit()
 
 	exitRoutine := make(chan bool)
@@ -60,7 +66,7 @@ func TestLatestMainchainInfo_OK(t *testing.T) {
 	header, err := web3Service.eth1DataFetcher.HeaderByNumber(web3Service.ctx, nil)
 	require.NoError(t, err)
 
-	tickerChan := make(chan time.Time)
+	tickerChan := make(chan time.Time, 1)
 	web3Service.headTicker = &time.Ticker{C: tickerChan}
 	tickerChan <- time.Now()
 	web3Service.cancel()
@@ -81,6 +87,7 @@ func TestBlockHashByHeight_ReturnsHash(t *testing.T) {
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 
@@ -114,6 +121,7 @@ func TestBlockHashByHeight_ReturnsError_WhenNoEth1Client(t *testing.T) {
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 
@@ -135,6 +143,7 @@ func TestBlockExists_ValidHash(t *testing.T) {
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 
@@ -171,6 +180,7 @@ func TestBlockExists_InvalidHash(t *testing.T) {
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 
@@ -190,11 +200,12 @@ func TestBlockExists_UsesCachedBlockInfo(t *testing.T) {
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 	// nil eth1DataFetcher would panic if cached value not used
-	web3Service.eth1DataFetcher = nil
-	nr_0 := uint64(0)
+	//web3Service.eth1DataFetcher = nil
+	nr_0 := uint64(1)
 	header := &gethTypes.Header{
 		Number: &nr_0,
 	}
@@ -218,6 +229,7 @@ func TestBlockExistsWithCache_UsesCachedHeaderInfo(t *testing.T) {
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 
@@ -245,6 +257,7 @@ func TestBlockExistsWithCache_HeaderNotCached(t *testing.T) {
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 
@@ -264,6 +277,7 @@ func TestService_BlockTimeByHeight_ReturnsError_WhenNoEth1Client(t *testing.T) {
 	web3Service, err := NewService(context.Background(),
 		WithHttpEndpoints([]string{endpoint}),
 		WithDatabase(beaconDB),
+		WithStateNotifier(&goodNotifier{}),
 	)
 	require.NoError(t, err, "unable to setup web3 ETH1.0 chain service")
 
