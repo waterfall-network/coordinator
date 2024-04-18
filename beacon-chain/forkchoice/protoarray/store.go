@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"sync"
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
@@ -822,4 +823,113 @@ func (f *ForkChoice) ForkChoiceNodes() []*pbrpc.ForkChoiceNode {
 		}
 	}
 	return ret
+}
+
+func (f *ForkChoice) Copy() *ForkChoice {
+	if f == nil {
+		return nil
+	}
+
+	f.mu.Lock()
+	f.votesLock.Lock()
+	defer func() {
+		f.votesLock.Unlock()
+		f.mu.Unlock()
+	}()
+
+	var votes []Vote
+	if f.votes != nil {
+		votes = make([]Vote, len(f.votes))
+		for i, v := range f.votes {
+			votes[i] = *v.Copy()
+		}
+	}
+
+	var balances []uint64
+	if f.balances != nil {
+		balances = append(make([]uint64, 0, len(f.balances)), f.balances...)
+	}
+
+	return &ForkChoice{
+		store:     f.store.Copy(),
+		votes:     votes,
+		balances:  balances,
+		votesLock: sync.RWMutex{},
+		mu:        sync.RWMutex{},
+	}
+}
+
+func (s *Store) Copy() *Store {
+	if s == nil {
+		return nil
+	}
+
+	s.nodesLock.Lock()
+	s.proposerBoostLock.Lock()
+	s.balancesLock.Lock()
+	defer func() {
+		s.nodesLock.Unlock()
+		s.proposerBoostLock.Unlock()
+		s.balancesLock.Unlock()
+	}()
+
+	var nodes []*Node
+	if s.nodes != nil {
+		nodes = make([]*Node, len(s.nodes))
+		for i, n := range s.nodes {
+			nodes[i] = copyNode(n)
+		}
+	}
+
+	var nodesIndices map[[32]byte]uint64
+	if len(s.nodesIndices) > 0 {
+		nodesIndices = make(map[[32]byte]uint64)
+		for r, ix := range s.nodesIndices {
+			nodesIndices[r] = ix
+		}
+	}
+
+	var canonicalNodes map[[32]byte]bool
+	if s.canonicalNodes != nil {
+		canonicalNodes = make(map[[32]byte]bool)
+		for r, is := range s.canonicalNodes {
+			canonicalNodes[r] = is
+		}
+	}
+
+	var balances map[[32]byte][]uint64
+	if s.balances != nil {
+		balances = make(map[[32]byte][]uint64)
+		for r, bs := range s.balances {
+			balances[r] = append(make([]uint64, 0, len(bs)), bs...)
+		}
+	}
+
+	return &Store{
+		pruneThreshold:             s.pruneThreshold,
+		justifiedEpoch:             s.justifiedEpoch,
+		finalizedEpoch:             s.finalizedEpoch,
+		proposerBoostRoot:          bytesutil.ToBytes32(s.proposerBoostRoot[:]),
+		previousProposerBoostRoot:  bytesutil.ToBytes32(s.previousProposerBoostRoot[:]),
+		previousProposerBoostScore: s.previousProposerBoostScore,
+		nodes:                      nodes,
+		nodesIndices:               nodesIndices,
+		canonicalNodes:             canonicalNodes,
+		balances:                   balances,
+
+		nodesLock:         sync.RWMutex{},
+		proposerBoostLock: sync.RWMutex{},
+		balancesLock:      sync.RWMutex{},
+	}
+}
+
+func (v *Vote) Copy() *Vote {
+	if v == nil {
+		return nil
+	}
+	return &Vote{
+		currentRoot: bytesutil.ToBytes32(v.currentRoot[:]),
+		nextRoot:    bytesutil.ToBytes32(v.nextRoot[:]),
+		nextEpoch:   v.nextEpoch,
+	}
 }
