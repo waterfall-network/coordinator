@@ -15,6 +15,9 @@ const (
 	maxForkChoiceCacheSize = int(4)
 )
 
+// cacheForkChoice main cache instance
+var cacheForkChoice *ForkChoiceCache = NewForkChoiceCache()
+
 // ForkChoiceCache is a struct with 1 LRU cache for looking up forkchoice.
 type ForkChoiceCache struct {
 	cache *lru.Cache
@@ -88,8 +91,10 @@ func (c *ForkChoiceCache) maxSlotKeyMap() map[[32]byte]types.Slot {
 	return slotKeyMap
 }
 
-func (c *ForkChoiceCache) SearchCompatibleFc(rootIndexMap map[[32]byte]uint64) (fc *ForkChoice, excluded map[[32]byte]uint64) {
-	excluded = make(map[[32]byte]uint64)
+// SearchCompatibleFc searches cached forkchoice compatible with rootIndexMap
+// and calculate nodes that are not included in forkchoice.
+func (c *ForkChoiceCache) SearchCompatibleFc(rootIndexMap map[[32]byte]uint64) (fc *ForkChoice, diff map[[32]byte]uint64) {
+	diff = make(map[[32]byte]uint64)
 
 	// descending sort node's indexes
 	nodeIndexes := make(gwatCommon.SorterDescU64, 0, len(rootIndexMap))
@@ -112,10 +117,31 @@ func (c *ForkChoiceCache) SearchCompatibleFc(rootIndexMap map[[32]byte]uint64) (
 		if exists {
 			fc, ok := value.(*ForkChoice)
 			if ok {
-				return fc.Copy(), excluded
+				return fc.Copy(), diff
 			}
 		}
-		excluded[r] = rootIndexMap[r]
+		diff[r] = rootIndexMap[r]
 	}
-	return nil, excluded
+	return nil, diff
+}
+
+// getCompatibleFc searches/create forkchoice inctance compatible with rootIndexMap
+// and calculate nodes that are not included in forkchoice.
+// Helper function for workflow optimization.
+func getCompatibleFc(nodesRootIndexMap map[[32]byte]uint64, currFc *ForkChoice) (fc *ForkChoice, diff map[[32]byte]uint64) {
+	// if current fc is equivalent target fc
+	if cacheKeyByRootIndexMap(currFc.store.nodesIndices) == cacheKeyByRootIndexMap(nodesRootIndexMap) {
+		fc = currFc.Copy()
+		diff = map[[32]byte]uint64{}
+		return fc, diff
+	}
+	// search cached fc
+	fc, diff = cacheForkChoice.SearchCompatibleFc(nodesRootIndexMap)
+	if fc != nil {
+		return fc, diff
+	}
+	// create new ForkChoice instance
+	fc = New(currFc.store.justifiedEpoch, currFc.store.finalizedEpoch)
+	diff = nodesRootIndexMap
+	return fc, diff
 }

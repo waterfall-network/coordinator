@@ -129,8 +129,8 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 		"store.finalizedEpoch": f.store.finalizedEpoch,
 	}).Info("Calculate head root by nodes indexes")
 
-	// create ForkChoice instance
-	fcInstance := New(f.store.justifiedEpoch, f.store.finalizedEpoch)
+	var fcInstance *ForkChoice
+	fcInstance, nodesRootIndexMap = getCompatibleFc(nodesRootIndexMap, f)
 
 	// sort node's indexes
 	nodeIndexes := make(gwatCommon.SorterAscU64, 0, len(nodesRootIndexMap))
@@ -142,18 +142,9 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 	sort.Sort(nodeIndexes)
 
 	// fill ForkChoice instance
-	var justifiedRoot [32]byte
 	var headRoot [32]byte
-	for i, index := range nodeIndexes {
-
+	for _, index := range nodeIndexes {
 		node := f.store.nodes[index]
-		if i == 0 {
-			justifiedRoot = node.root
-		}
-		if fcInstance.HasNode(node.attsData.justifiedRoot) {
-			justifiedRoot = node.attsData.justifiedRoot
-		}
-
 		n := copyNode(node)
 		n.bestChild = NonExistentNode
 		n.bestDescendant = NonExistentNode
@@ -200,6 +191,17 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 	}
 
 	topNode := fcInstance.store.nodes[len(fcInstance.store.nodes)-1]
+
+	//calc 	justifiedRoot
+	var justifiedRoot [32]byte
+	for i, node := range fcInstance.store.nodes {
+		if i == 0 {
+			justifiedRoot = node.root
+		}
+		if fcInstance.HasNode(node.attsData.justifiedRoot) {
+			justifiedRoot = node.attsData.justifiedRoot
+		}
+	}
 
 	// todo check use insead of f.balances
 	//balances := f.getBalances(ctx, topNode.root)
