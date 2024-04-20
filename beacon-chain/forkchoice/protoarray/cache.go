@@ -41,8 +41,6 @@ func (c *ForkChoiceCache) Add(fc *ForkChoice) {
 	if fc == nil || fc.store == nil || len(fc.store.nodesIndices) == 0 {
 		return
 	}
-	c.lock.Lock()
-	defer c.lock.Unlock()
 
 	cpy := fc.Copy()
 	key := cacheKeyByRootIndexMap(cpy.store.nodesIndices)
@@ -81,6 +79,9 @@ func cacheKeyByRootIndexMap(rootIndexMap map[[32]byte]uint64) [32]byte {
 
 // incrInactivity increments all inactivity keys excluding activeKey.
 func (c *ForkChoiceCache) incrInactivity(activeKey [32]byte) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
 	for _, k := range c.cache.Keys() {
 		key, ok := k.([32]byte)
 		if !ok || key == activeKey {
@@ -92,8 +93,8 @@ func (c *ForkChoiceCache) incrInactivity(activeKey [32]byte) {
 
 // removeInactiveItems removes all items with max inactivity score.
 func (c *ForkChoiceCache) removeInactiveItems() {
-	c.lock.RLock()
-	defer c.lock.RUnlock()
+	c.lock.Lock()
+	defer c.lock.Unlock()
 
 	for k, score := range c.inactivity {
 		//remove item

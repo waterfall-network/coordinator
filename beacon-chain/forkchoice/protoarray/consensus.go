@@ -90,6 +90,7 @@ func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines 
 	}
 	fc := f
 	log.WithFields(logrus.Fields{
+		"accRootIndexMap":      len(acceptableRootIndexMap),
 		"acceptLeafsArr":       len(acceptLeafsArr),
 		"fcRoots":              len(fRoots),
 		"votes":                len(fc.votes),
@@ -129,14 +130,17 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 		"store.finalizedEpoch": f.store.finalizedEpoch,
 	}).Info("Calculate head root by nodes indexes")
 
+	indexRootMap := make(map[uint64][32]byte, len(nodesRootIndexMap))
+	for r, index := range nodesRootIndexMap {
+		indexRootMap[index] = r
+	}
+
 	fcInstance, diffRootIndexMap := getCompatibleFc(nodesRootIndexMap, f)
 
 	// sort node's indexes
 	nodeIndexes := make(gwatCommon.SorterAscU64, 0, len(diffRootIndexMap))
-	indexRootMap := make(map[uint64][32]byte, len(diffRootIndexMap))
-	for r, index := range diffRootIndexMap {
+	for _, index := range diffRootIndexMap {
 		nodeIndexes = append(nodeIndexes, index)
-		indexRootMap[index] = r
 	}
 	sort.Sort(nodeIndexes)
 
@@ -239,16 +243,16 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 		"diff":              fmt.Sprintf("%d", len(diffRootIndexMap)),
 	}).Info("FC cache")
 
-	//log.WithFields(logrus.Fields{
-	//	"headRoot":             fmt.Sprintf("%#x", headRoot),
-	//	"votes":                len(fcInstance.votes),
-	//	"_votes":               len(f.votes),
-	//	"balances":             len(fcInstance.balances),
-	//	"_balances":            len(f.balances),
-	//	"store.justifiedEpoch": fcInstance.store.justifiedEpoch,
-	//	"store.finalizedEpoch": fcInstance.store.finalizedEpoch,
-	//	//"store.[0].root":       fmt.Sprintf("%#x", fcInstance.store.nodes[0].root),
-	//}).Info("Get parent by optimistic spines res")
+	log.WithFields(logrus.Fields{
+		"headRoot": fmt.Sprintf("%#x", headRoot),
+		//"votes":                len(fcInstance.votes),
+		//"_votes":               len(f.votes),
+		//"balances":             len(fcInstance.balances),
+		//"_balances":            len(f.balances),
+		//"store.justifiedEpoch": fcInstance.store.justifiedEpoch,
+		//"store.finalizedEpoch": fcInstance.store.finalizedEpoch,
+		//"store.[0].root":       fmt.Sprintf("%#x", fcInstance.store.nodes[0].root),
+	}).Info("Get parent by optimistic spines res")
 
 	return headRoot, nil
 }
