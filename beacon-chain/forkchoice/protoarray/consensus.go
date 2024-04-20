@@ -65,8 +65,8 @@ func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines 
 		}).Info("forkchoice: get parent end")
 	}(time.Now())
 
-	f.mu.Lock()
-	defer f.mu.Unlock()
+	f.mu.RLock()
+	defer f.mu.RUnlock()
 
 	//removes empty values
 	_optSpines := make([]gwatCommon.HashArray, 0, len(optSpines))

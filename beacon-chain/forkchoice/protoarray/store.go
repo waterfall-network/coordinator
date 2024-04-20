@@ -830,11 +830,11 @@ func (f *ForkChoice) Copy() *ForkChoice {
 		return nil
 	}
 
-	f.mu.Lock()
-	f.votesLock.Lock()
+	f.mu.RLock()
+	f.votesLock.RLock()
 	defer func() {
-		f.votesLock.Unlock()
-		f.mu.Unlock()
+		f.votesLock.RUnlock()
+		f.mu.RUnlock()
 	}()
 
 	var votes []Vote
@@ -864,13 +864,13 @@ func (s *Store) Copy() *Store {
 		return nil
 	}
 
-	s.nodesLock.Lock()
-	s.proposerBoostLock.Lock()
-	s.balancesLock.Lock()
+	s.nodesLock.RLock()
+	s.proposerBoostLock.RLock()
+	s.balancesLock.RLock()
 	defer func() {
-		s.nodesLock.Unlock()
-		s.proposerBoostLock.Unlock()
-		s.balancesLock.Unlock()
+		s.nodesLock.RUnlock()
+		s.proposerBoostLock.RUnlock()
+		s.balancesLock.RUnlock()
 	}()
 
 	var nodes []*Node
