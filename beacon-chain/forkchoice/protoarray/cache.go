@@ -53,8 +53,8 @@ func (c *ForkChoiceCache) Get(rootIndexMap map[[32]byte]uint64) *ForkChoice {
 	if len(rootIndexMap) == 0 {
 		return nil
 	}
-	c.lock.RLock()
-	defer c.lock.RUnlock()
+	//c.lock.RLock()
+	//defer c.lock.RUnlock()
 
 	key := cacheKeyByRootIndexMap(rootIndexMap)
 	value, exists := c.cache.Get(key)

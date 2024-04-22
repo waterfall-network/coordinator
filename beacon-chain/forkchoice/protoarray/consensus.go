@@ -65,8 +65,10 @@ func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines 
 		}).Info("FC: get parent end")
 	}(time.Now())
 
-	f.mu.RLock()
-	defer f.mu.RUnlock()
+	fc := f.Copy()
+
+	//f.mu.RLock()
+	//defer f.mu.RUnlock()
 
 	//removes empty values
 	_optSpines := make([]gwatCommon.HashArray, 0, len(optSpines))
@@ -77,18 +79,18 @@ func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines 
 	}
 
 	// collect nodes of T(G) tree
-	acceptableRootIndexMap, acceptableLeafs := collectTgTreeNodesByOptimisticSpines(f, _optSpines, jCpRoot)
+	acceptableRootIndexMap, acceptableLeafs := collectTgTreeNodesByOptimisticSpines(fc, _optSpines, jCpRoot)
 
 	//todo rm
 	acceptLeafsArr := make(gwatCommon.HashArray, 0, len(acceptableLeafs))
 	for k := range acceptableLeafs {
 		acceptLeafsArr = append(acceptLeafsArr, k)
 	}
-	fRoots := make(gwatCommon.HashArray, len(f.store.nodes))
-	for i, n := range f.store.nodes {
+	fRoots := make(gwatCommon.HashArray, len(fc.store.nodes))
+	for i, n := range fc.store.nodes {
 		fRoots[i] = n.root
 	}
-	fc := f
+	//fc := f
 	log.WithFields(logrus.Fields{
 		"accRootIndexMap":      len(acceptableRootIndexMap),
 		"acceptLeafsArr":       len(acceptLeafsArr),
@@ -105,7 +107,7 @@ func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines 
 		return [32]byte{}, nil
 	}
 
-	headRoot, err = f.calculateHeadRootByNodesIndexes(ctx, acceptableRootIndexMap)
+	headRoot, err = fc.calculateHeadRootByNodesIndexes(ctx, acceptableRootIndexMap)
 	if err != nil {
 		return [32]byte{}, err
 	}
@@ -137,6 +139,11 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 
 	fcInstance, diffRootIndexMap := getCompatibleFc(nodesRootIndexMap, f)
 
+	log.WithFields(logrus.Fields{
+		"diffRootIndexMap":  len(diffRootIndexMap),
+		"nodesRootIndexMap": len(nodesRootIndexMap),
+	}).Info("Calculate head root by nodes indexes 111")
+
 	// sort node's indexes
 	nodeIndexes := make(gwatCommon.SorterAscU64, 0, len(diffRootIndexMap))
 	for _, index := range diffRootIndexMap {
@@ -159,7 +166,12 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 			}
 			n.parent = fcInstance.store.nodesIndices[parentRoot]
 		}
+
+		log.WithFields(logrus.Fields{"index": index}).Info("Calculate head root by nodes indexes: i 000")
+
 		err := fcInstance.store.insertNode(ctx, n)
+
+		log.WithError(err).WithFields(logrus.Fields{"index": index}).Info("Calculate head root by nodes indexes: i 111")
 
 		if err != nil {
 			return [32]byte{}, err
@@ -171,6 +183,8 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 			validatorIndexes = append(validatorIndexes, ix)
 		}
 		sort.Sort(validatorIndexes)
+
+		log.WithError(err).WithFields(logrus.Fields{"index": index}).Info("Calculate head root by nodes indexes: i 333")
 
 		for _, vi := range validatorIndexes {
 			vote := n.AttestationsData().votes[vi]
@@ -190,8 +204,15 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 				fcInstance.votes[vi].nextEpoch = targetEpoch
 				fcInstance.votes[vi].nextRoot = blockRoot
 			}
+
+			log.WithError(err).WithFields(logrus.Fields{"index": index, "vi": vi}).Info("Calculate head root by nodes indexes: i 444")
 		}
 	}
+
+	log.WithFields(logrus.Fields{
+		"diffRootIndexMap":  len(diffRootIndexMap),
+		"nodesRootIndexMap": len(nodesRootIndexMap),
+	}).Info("Calculate head root by nodes indexes 555")
 
 	topNode := fcInstance.store.nodes[len(fcInstance.store.nodes)-1]
 
@@ -205,6 +226,11 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 			justifiedRoot = node.attsData.justifiedRoot
 		}
 	}
+
+	log.WithFields(logrus.Fields{
+		"diffRootIndexMap":  len(diffRootIndexMap),
+		"nodesRootIndexMap": len(nodesRootIndexMap),
+	}).Info("Calculate head root by nodes indexes 666")
 
 	// todo check use insead of f.balances
 	//balances := f.getBalances(ctx, topNode.root)
