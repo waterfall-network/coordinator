@@ -62,7 +62,7 @@ func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines 
 			"optSpines": len(optSpines),
 			"headRoot":  fmt.Sprintf("%#x", headRoot),
 			"jCpRoot":   fmt.Sprintf("%#x", jCpRoot),
-		}).Info("forkchoice: get parent end")
+		}).Info("FC: get parent end")
 	}(time.Now())
 
 	f.mu.RLock()

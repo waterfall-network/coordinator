@@ -128,7 +128,7 @@ func (f *ForkChoice) ProcessAttestation(ctx context.Context, validatorIndices []
 		"blockRoot":        fmt.Sprintf("%#x", blockRoot),
 		"node.votes":       len(f.store.nodes[f.NodeCount()-1].AttestationsData().votes),
 		"node.votesByRoot": len(f.getNodeVotes(f.store.nodes[f.NodeCount()-1].root)),
-	}).Info("Get parent by optimistic spines: process attestation")
+	}).Info("FC: process attestation")
 
 	processedAttestationCount.Inc()
 }

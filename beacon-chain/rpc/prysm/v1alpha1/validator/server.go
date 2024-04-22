@@ -247,7 +247,7 @@ func (vs *Server) getOptimisticSpine(ctx context.Context) ([]gwatCommon.HashArra
 		"baseSpine": fmt.Sprintf("%#x", baseSpine),
 		"jcp.Epoch": currHead.CurrentJustifiedCheckpoint().Epoch,
 		"jcp.Root":  fmt.Sprintf("%#x", currHead.CurrentJustifiedCheckpoint().Root),
-		//"optSpines":        optSpines,
+		"optSpines": len(optSpines),
 	}).Info("Get optimistic spines: data retrieved")
 
 	//prepend current optimistic finalization to optimistic spine to calc parent

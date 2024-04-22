@@ -20,4 +20,6 @@ var (
 	errNoCoordState = errors.New("no gwat coordinated state")
 	// errAllSpinesLimitExceeded  is returned if length of all spines in spineData is exceeded.
 	errAllSpinesLimitExceeded = errors.New("exceeded AllSpinesLimit")
+	//errNoOptSpines
+	errNoOptSpines = errors.New("no optimistic spines")
 )
