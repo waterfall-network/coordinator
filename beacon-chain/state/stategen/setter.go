@@ -199,9 +199,16 @@ func (s *State) DisableSaveHotStateToDB(ctx context.Context) error {
 
 	// Delete previous saved states in DB as we are turning this mode off.
 	s.saveHotStateDB.enabled = false
-	if err := s.beaconDB.DeleteStates(ctx, s.saveHotStateDB.savedStateRoots); err != nil {
-		return err
+	for _, r := range s.saveHotStateDB.savedStateRoots {
+		if err := s.beaconDB.DeleteState(ctx, r); err != nil {
+			log.WithError(err).WithFields(logrus.Fields{
+				"root": fmt.Sprintf("%#x", r),
+			}).Warn("Exiting mode to save hot states in DB: delete stale state ignored")
+		}
 	}
+	//if err := s.beaconDB.DeleteStates(ctx, s.saveHotStateDB.savedStateRoots); err != nil {
+	//	return err
+	//}
 	s.saveHotStateDB.savedStateRoots = nil
 
 	return nil
