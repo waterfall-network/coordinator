@@ -277,7 +277,12 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 			}).Error("Gwat sync: failed 4")
 			// try to fix "invalid base spine"
 			if strings.Contains(err.Error(), srtErrInvalidBaseSpine) {
-				err = s.repairGwatFinalization(ctx, syncState, gwatTypes.MainSync)
+				errRepair := s.repairGwatFinalization(ctx, syncState, gwatTypes.MainSync)
+				if errRepair != nil {
+					log.WithError(errRepair).Error("Gwat sync: repair finalization failed 5")
+					return errRepair
+				}
+				err = errGwatSyncInProgress
 			}
 			return err
 		}
