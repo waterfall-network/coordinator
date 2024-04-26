@@ -47,7 +47,7 @@ func ProcessDagConsensus(ctx context.Context, beaconState state.BeaconState, sig
 	}
 
 	//add item of block voting for the current block
-	if len(candidates) > 0 {
+	if len(prefix) > 0 {
 		blockVoting = addBlockVoting(blockVoting, beaconBlock.ParentRoot(), beaconBlock.Slot()-1, prefix.ToBytes())
 	}
 	//append attestations of the current block to block voting
