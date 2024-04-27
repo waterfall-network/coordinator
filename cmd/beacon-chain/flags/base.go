@@ -112,11 +112,17 @@ var (
 		Usage: "DEPRECATED",
 		Value: 0,
 	}
-	// DelegatingStakeForkSlot is the block in which the eth1 deposit contract was deployed.
+	// DelegatingStakeForkSlot is the slot of start to apply the delegating stake rules.
 	DelegatingStakeForkSlot = &cli.Uint64Flag{
 		Name:  "delegating-stake-fork-slot",
 		Usage: "The slot of start to apply the delegating stake rules.",
 		Value: 2048,
+	}
+	// PrefixFinForkSlot is the block in which the eth1 deposit contract was deployed.
+	PrefixFinForkSlot = &cli.Uint64Flag{
+		Name:  "prefix-fin-fork-slot",
+		Usage: "The slot to apply prfix finalization fix.",
+		Value: 0,
 	}
 	// SetGCPercent is the percentage of current live allocations at which the garbage collector is to run.
 	SetGCPercent = &cli.IntFlag{
