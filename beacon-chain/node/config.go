@@ -89,6 +89,11 @@ func configureEth1Config(cliCtx *cli.Context) {
 		c.DelegateForkSlot = types.Slot(cliCtx.Uint64(flags.DelegatingStakeForkSlot.Name))
 		params.OverrideBeaconConfig(c)
 	}
+	if cliCtx.IsSet(flags.PrefixFinForkSlot.Name) {
+		c := params.BeaconConfig()
+		c.PrefixFinForkSlot = types.Slot(cliCtx.Uint64(flags.PrefixFinForkSlot.Name))
+		params.OverrideBeaconConfig(c)
+	}
 }
 
 func configureNetwork(cliCtx *cli.Context) {
