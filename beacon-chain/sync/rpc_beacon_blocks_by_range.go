@@ -65,7 +65,7 @@ func (s *Service) beaconBlocksByRangeRPCHandler(ctx context.Context, msg interfa
 		trace.Int64Attribute("end", int64(endReqSlot)),  // lint:ignore uintcast -- This conversion is OK for tracing.
 		trace.Int64Attribute("step", int64(m.Step)),
 		trace.Int64Attribute("count", int64(m.Count)),
-		trace.StringAttribute("peer", stream.Conn().RemotePeer().Pretty()),
+		trace.StringAttribute("peer", stream.Conn().RemotePeer().String()),
 		trace.Int64Attribute("remaining_capacity", remainingBucketCapacity),
 	)
 	// prevRoot is used to ensure that returned chains are strictly linear for singular steps

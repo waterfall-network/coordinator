@@ -40,7 +40,7 @@ func (ns *Server) GetIdentity(ctx context.Context, _ *emptypb.Empty) (*ethpb.Ide
 	_, span := trace.StartSpan(ctx, "node.GetIdentity")
 	defer span.End()
 
-	peerId := ns.PeerManager.PeerID().Pretty()
+	peerId := ns.PeerManager.PeerID().String()
 
 	serializedEnr, err := p2p.SerializeENR(ns.PeerManager.ENR())
 	if err != nil {
@@ -207,7 +207,7 @@ func (ns *Server) ListPeers(ctx context.Context, req *ethpb.PeersRequest) (*ethp
 	var filteredIds []peer.ID
 	for _, stateId := range stateIds {
 		for _, directionId := range directionIds {
-			if stateId.Pretty() == directionId.Pretty() {
+			if stateId.String() == directionId.String() {
 				filteredIds = append(filteredIds, stateId)
 				break
 			}
@@ -359,7 +359,7 @@ func peerInfo(peerStatus *peers.Status, id peer.ID) (*ethpb.Peer, error) {
 		return nil, errors.Wrapf(err, "could not handle peer direction")
 	}
 	p := ethpb.Peer{
-		PeerId:    id.Pretty(),
+		PeerId:    id.String(),
 		State:     v1ConnState,
 		Direction: v1PeerDirection,
 	}

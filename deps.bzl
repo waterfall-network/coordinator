@@ -2446,10 +2446,10 @@ def prysm_deps():
     )
 
     go_repository(
-        name = "com_github_mariusvanderwijden_tx_fuzz",
-        importpath = "github.com/MariusVanDerWijden/tx-fuzz",
-        sum = "h1:sVb99a9AUxf26t06VNnDO5DReatE0lXCp6amDOaalXM=",
-        version = "v0.0.0-20220321065247-ebb195301a27",
+        name = "com_github_waterfall_network_tx_fuzz",
+        importpath = "github.com/waterfall-network/tx-fuzz",
+        sum = "h1:QGOrRUDgx8e1rc59+Sl2LqZoE42ipaqZwhYHAVjpXbY=",
+        version = "v1.4.1",
     )
     go_repository(
         name = "com_github_marten_seemann_qpack",

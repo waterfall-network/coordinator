@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/MariusVanDerWijden/FuzzyVM/filler"
-	txfuzz "github.com/MariusVanDerWijden/tx-fuzz"
 	"github.com/sirupsen/logrus"
+	txfuzz "github.com/waterfall-network/tx-fuzz"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/rand"
 	e2e "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/params"
