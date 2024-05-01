@@ -1320,8 +1320,8 @@ def prysm_deps():
         importpath = "github.com/golang/protobuf",
         patch_args = ["-p1"],
         patches = ["@io_bazel_rules_go//third_party:com_github_golang_protobuf-extras.patch"],
-        sum = "h1:KhyjKVUg7Usr/dYsdSqoFveMYd5ko72D+zANwlG1mmg=",
-        version = "v1.5.3",
+        sum = "h1:i7eJL8qZTpSEXOPTxNKhASYpMn+8e5Q6AdndVa1dWek=",
+        version = "v1.5.4",
     )
 
     go_repository(
@@ -1525,9 +1525,9 @@ def prysm_deps():
             "//third_party:com_github_grpc_ecosystem_grpc_gateway_v2.patch",
         ],
         replace = "github.com/prysmaticlabs/grpc-gateway/v2",
+        repo_mapping = {"@go_googleapis": "@googleapis"},
         sum = "h1:xcu59yYL6AWWTl6jtejBfE0y8uF35fArCBeZjRlvJss=",
         version = "v2.3.1-0.20210702154020-550e1cd83ec1",
-        repo_mapping = {"@go_googleapis": "@googleapis"},
     )
     go_repository(
         name = "com_github_gxed_hashland_keccakpg",
