@@ -1,6 +1,8 @@
 module gitlab.waterfall.network/waterfall/protocol/coordinator
 
-go 1.21.9
+go 1.21
+
+toolchain go1.21.5
 
 require (
 	contrib.go.opencensus.io/exporter/jaeger v0.2.1
@@ -21,7 +23,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.3.0
 	github.com/golang/gddo v0.0.0-20200528160355-8d077c1d8f4c
 	github.com/golang/mock v1.6.0
-	github.com/golang/protobuf v1.5.3
+	github.com/golang/protobuf v1.5.4
 	github.com/golang/snappy v0.0.4
 	github.com/google/gofuzz v1.2.0
 	github.com/google/uuid v1.3.0
@@ -71,7 +73,7 @@ require (
 	github.com/tyler-smith/go-bip39 v1.1.0
 	github.com/urfave/cli/v2 v2.3.0
 	github.com/uudashr/gocognit v1.0.5
-	github.com/waterfall-network/tx-fuzz v1.4.1
+	github.com/waterfall-network/tx-fuzz v1.4.2
 	github.com/wealdtech/go-bytesutil v1.1.1
 	github.com/wealdtech/go-eth2-util v1.6.3
 	github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4 v1.1.3
@@ -87,7 +89,7 @@ require (
 	golang.org/x/tools v0.15.0
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1
 	google.golang.org/grpc v1.56.3
-	google.golang.org/protobuf v1.31.0
+	google.golang.org/protobuf v1.33.0
 	gopkg.in/d4l3k/messagediff.v1 v1.2.1
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/client-go v0.18.3
@@ -253,7 +255,7 @@ require (
 replace github.com/json-iterator/go => github.com/prestonvanloon/go v1.1.7-0.20190722034630-4f2e55fcf87b
 
 // See https://github.com/prysmaticlabs/grpc-gateway/issues/2
-replace github.com/grpc-ecosystem/grpc-gateway/v2 => github.com/prysmaticlabs/grpc-gateway/v2 v2.3.1-0.20210702154020-550e1cd83ec1
+replace github.com/grpc-ecosystem/grpc-gateway/v2 => github.com/prysmaticlabs/grpc-gateway/v2 v2.3.1-0.20230315201114-09284ba20446
 
 replace github.com/ferranbt/fastssz => github.com/prysmaticlabs/fastssz v0.0.0-20220110145812-fafb696cae88
 

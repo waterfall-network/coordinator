@@ -41,11 +41,12 @@ go_test(
         "config_test.go",
         "loader_test.go",
         "testnet_config_test.go",
+        "testnet_testnet8_config_test.go",
     ],
     data = glob(["*.yaml"]) + [
+        "testdata/e2e_config.yaml",
         "@coordinator_spec_tests_mainnet//:test_data",
         "@eth2_networks//:configs",
-        "testdata/e2e_config.yaml",
     ],
     gotags = ["develop"],
     race = "on",
