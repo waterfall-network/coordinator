@@ -2,8 +2,6 @@ module gitlab.waterfall.network/waterfall/protocol/coordinator
 
 go 1.21
 
-toolchain go1.21.5
-
 require (
 	contrib.go.opencensus.io/exporter/jaeger v0.2.1
 	github.com/MariusVanDerWijden/FuzzyVM v0.0.0-20220304110512-764253afa8c2
