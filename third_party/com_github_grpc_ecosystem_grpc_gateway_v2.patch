@@ -1,12 +1,32 @@
-diff --git a/internal/descriptor/apiconfig/BUILD.bazel b/internal/descriptor/apiconfig/BUILD.bazel
-index 80dc57a2..76d4374f 100644
---- a/internal/descriptor/apiconfig/BUILD.bazel
-+++ b/internal/descriptor/apiconfig/BUILD.bazel
-@@ -11,6 +11,7 @@ proto_library(
+diff -ur '--exclude=.git' b/internal/descriptor/apiconfig/BUILD.bazel a/internal/descriptor/apiconfig/BUILD.bazel
+--- b/internal/descriptor/apiconfig/BUILD.bazel	2024-05-02 14:37:16.214708796 +0300
++++ a/internal/descriptor/apiconfig/BUILD.bazel	2024-05-02 13:10:32.587359365 +0300
+@@ -11,6 +11,7 @@
      ],
      deps = [
          "@go_googleapis//google/api:annotations_proto",
 +        "@go_googleapis//google/api:http_proto",
      ],
  )
- 
+
+diff -ur '--exclude=.git' b/protoc-gen-grpc-gateway/internal/gengateway/template.go a/protoc-gen-grpc-gateway/internal/gengateway/template.go
+--- b/protoc-gen-grpc-gateway/internal/gengateway/template.go	2024-05-02 14:37:16.214708796 +0300
++++ a/protoc-gen-grpc-gateway/internal/gengateway/template.go	2024-05-02 13:19:22.099326173 +0300
+@@ -243,8 +243,7 @@
+ package {{.GoPkg.Name}}
+ import (
+ 	github_com_prysmaticlabs_eth2_types "github.com/prysmaticlabs/eth2-types"
+-	emptypb "github.com/golang/protobuf/ptypes/empty"
+-	"github.com/golang/protobuf/ptypes/empty"
++	"google.golang.org/protobuf/types/known/emptypb"
+ 	{{range $i := .Imports}}{{if $i | printf "%q" | ne "github.com/golang/protobuf/ptypes/empty"}}{{$i | printf "%s\n"}}{{end}}{{end}}
+ )
+
+@@ -257,7 +256,6 @@
+ var _ = metadata.Join
+ var _ = github_com_prysmaticlabs_eth2_types.Epoch(0)
+ var _ = emptypb.Empty{}
+-var _ = empty.Empty{}
+ `))
+
+ 	handlerTemplate = template.Must(template.New("handler").Parse(`
