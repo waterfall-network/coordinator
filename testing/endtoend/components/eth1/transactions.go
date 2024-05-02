@@ -11,10 +11,10 @@ import (
 
 	"github.com/MariusVanDerWijden/FuzzyVM/filler"
 	"github.com/sirupsen/logrus"
-	txfuzz "github.com/waterfall-network/tx-fuzz"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/rand"
 	e2e "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/endtoend/params"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/txfuzz"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/accounts/keystore"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/core/types"

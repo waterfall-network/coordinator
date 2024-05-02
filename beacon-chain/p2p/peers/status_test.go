@@ -959,7 +959,7 @@ func TestInbound(t *testing.T) {
 
 	result := p.Inbound()
 	require.Equal(t, 1, len(result))
-	assert.Equal(t, inbound.Pretty(), result[0].Pretty())
+	assert.Equal(t, inbound.String(), result[0].String())
 }
 
 func TestOutbound(t *testing.T) {
@@ -978,7 +978,7 @@ func TestOutbound(t *testing.T) {
 
 	result := p.Outbound()
 	require.Equal(t, 1, len(result))
-	assert.Equal(t, outbound.Pretty(), result[0].Pretty())
+	assert.Equal(t, outbound.String(), result[0].String())
 }
 
 // addPeer is a helper to add a peer with a given connection state)
