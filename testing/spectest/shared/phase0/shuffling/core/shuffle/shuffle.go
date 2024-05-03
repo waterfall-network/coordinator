@@ -7,13 +7,13 @@ import (
 	"path"
 	"testing"
 
-	"github.com/go-yaml/yaml"
 	types "github.com/prysmaticlabs/eth2-types"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/spectest/utils"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
+	"gopkg.in/yaml.v2"
 )
 
 // RunShuffleTests executes "shuffling/core/shuffle" tests.
