@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"flag"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -15,29 +14,30 @@ func TestLoadFlagsFromConfig(t *testing.T) {
 	set := flag.NewFlagSet("test", 0)
 	context := cli.NewContext(&app, set, nil)
 
-	require.NoError(t, ioutil.WriteFile("flags_test.yaml", []byte("testflag: 100"), 0666))
+	require.NoError(t, os.WriteFile("flags_test.yaml", []byte("testflag: 100"), 0666))
 
 	require.NoError(t, set.Parse([]string{"test-command", "--" + ConfigFileFlag.Name, "flags_test.yaml"}))
+	comFlags := WrapFlags([]cli.Flag{
+		&cli.StringFlag{
+			Name: ConfigFileFlag.Name,
+		},
+		&cli.IntFlag{
+			Name:  "testflag",
+			Value: 0,
+		},
+	})
 	command := &cli.Command{
-		Name: "test-command",
-		Flags: WrapFlags([]cli.Flag{
-			&cli.StringFlag{
-				Name: ConfigFileFlag.Name,
-			},
-			&cli.IntFlag{
-				Name:  "testflag",
-				Value: 0,
-			},
-		}),
+		Name:  "test-command",
+		Flags: comFlags,
 		Before: func(cliCtx *cli.Context) error {
-			return LoadFlagsFromConfig(cliCtx, cliCtx.Command.Flags)
+			return LoadFlagsFromConfig(cliCtx, comFlags)
 		},
 		Action: func(cliCtx *cli.Context) error {
 			require.Equal(t, 100, cliCtx.Int("testflag"))
 			return nil
 		},
 	}
-	require.NoError(t, command.Run(context))
+	require.NoError(t, command.Run(context, context.Args().Slice()...))
 	require.NoError(t, os.Remove("flags_test.yaml"))
 }
 
