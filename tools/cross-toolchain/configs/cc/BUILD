@@ -24,19 +24,16 @@ licenses(["notice"])  # Apache 2.0
 
 cc_library(
     name = "malloc",
-    tags = ["manual"],
 )
 
 filegroup(
     name = "empty",
     srcs = [],
-    tags = ["manual"],
 )
 
 filegroup(
     name = "cc_wrapper",
     srcs = ["cc_wrapper.sh"],
-    tags = ["manual"],
 )
 
 filegroup(
@@ -45,7 +42,6 @@ filegroup(
         ["extra_tools/**"],
         allow_empty = True,
     ) + [":builtin_include_directory_paths"],
-    tags = ["manual"],
 )
 
 # This is the entry point for --crosstool_top.  Toolchains are found
@@ -53,7 +49,6 @@ filegroup(
 # the "${CPU}" entry in the toolchains attribute.
 cc_toolchain_suite(
     name = "toolchain",
-    tags = ["manual"],
     toolchains = {
         "k8|clang": ":cc-compiler-k8",
         "k8": ":cc-compiler-k8",
@@ -74,7 +69,6 @@ cc_toolchain(
     objcopy_files = ":empty",
     strip_files = ":empty",
     supports_param_files = 1,
-    tags = ["manual"],
     toolchain_config = ":local",
     toolchain_identifier = "local",
 )
@@ -84,11 +78,11 @@ cc_toolchain_config(
     abi_libc_version = "local",
     abi_version = "local",
     compile_flags = [
-        "-U_FORTIFY_SOURCE",
         "-fstack-protector",
         "-Wall",
         "-Wthread-safety",
         "-Wself-assign",
+        "-Wno-free-nonheap-object",
         "-fcolor-diagnostics",
         "-fno-omit-frame-pointer",
     ],
@@ -101,13 +95,13 @@ cc_toolchain_config(
     cpu = "k8",
     cxx_builtin_include_directories = [
         "/usr/local/include",
-        "/usr/lib/clang/10.0.0/include",
+        "/usr/lib/clang/12.0.0/include",
         "/usr/include/x86_64-linux-gnu",
         "/usr/include",
-        "/usr/lib/clang/10.0.0/share",
-        "/usr/include/c++/8",
-        "/usr/include/x86_64-linux-gnu/c++/8",
-        "/usr/include/c++/8/backward",
+        "/usr/lib/clang/12.0.0/share",
+        "/usr/include/c++/10",
+        "/usr/include/x86_64-linux-gnu/c++/10",
+        "/usr/include/c++/10/backward",
         "/usr/include/c++/v1",
     ],
     cxx_flags = ["-std=c++0x"],
@@ -132,15 +126,15 @@ cc_toolchain_config(
     ],
     opt_link_flags = ["-Wl,--gc-sections"],
     supports_start_end_lib = True,
-    tags = ["manual"],
     target_libc = "local",
     target_system_name = "local",
     tool_paths = {
         "ar": "/usr/bin/ar",
         "ld": "/usr/bin/ld",
         "llvm-cov": "/usr/bin/llvm-cov",
+        "llvm-profdata": "/usr/bin/llvm-profdata",
         "cpp": "/usr/bin/cpp",
-        "gcc": "/usr/bin/clang-10",
+        "gcc": "/usr/bin/clang-12",
         "dwp": "/usr/bin/dwp",
         "gcov": "/usr/bin/llvm-profdata",
         "nm": "/usr/bin/nm",
@@ -170,12 +164,8 @@ cc_toolchain(
     objcopy_files = ":empty",
     strip_files = ":empty",
     supports_param_files = 1,
-    tags = ["manual"],
     toolchain_config = ":stub_armeabi-v7a",
     toolchain_identifier = "stub_armeabi-v7a",
 )
 
-armeabi_cc_toolchain_config(
-    name = "stub_armeabi-v7a",
-    tags = ["manual"],
-)
+armeabi_cc_toolchain_config(name = "stub_armeabi-v7a")

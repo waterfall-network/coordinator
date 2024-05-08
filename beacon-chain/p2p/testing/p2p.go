@@ -56,7 +56,7 @@ func (p *TestP2P) BroadcastPrevoting(ctx context.Context, subnet uint64, sMsg *e
 // NewTestP2P initializes a new p2p test service.
 func NewTestP2P(t *testing.T) *TestP2P {
 	ctx := context.Background()
-	h := bhost.NewBlankHost(swarmt.GenSwarm(t))
+	h := bhost.NewBlankHost(swarmt.GenSwarm(t, swarmt.OptDisableQUIC))
 	ps, err := pubsub.NewFloodSub(ctx, h,
 		pubsub.WithMessageSigning(false),
 		pubsub.WithStrictSignatureVerification(false),
@@ -96,7 +96,7 @@ func connect(a, b host.Host) error {
 
 // ReceiveRPC simulates an incoming RPC.
 func (p *TestP2P) ReceiveRPC(topic string, msg proto.Message) {
-	h := bhost.NewBlankHost(swarmt.GenSwarm(p.t))
+	h := bhost.NewBlankHost(swarmt.GenSwarm(p.t, swarmt.OptDisableQUIC))
 	if err := connect(h, p.BHost); err != nil {
 		p.t.Fatalf("Failed to connect two peers for RPC: %v", err)
 	}
@@ -126,7 +126,7 @@ func (p *TestP2P) ReceiveRPC(topic string, msg proto.Message) {
 
 // ReceivePubSub simulates an incoming message over pubsub on a given topic.
 func (p *TestP2P) ReceivePubSub(topic string, msg proto.Message) {
-	h := bhost.NewBlankHost(swarmt.GenSwarm(p.t))
+	h := bhost.NewBlankHost(swarmt.GenSwarm(p.t, swarmt.OptDisableQUIC))
 	ps, err := pubsub.NewFloodSub(context.Background(), h,
 		pubsub.WithMessageSigning(false),
 		pubsub.WithStrictSignatureVerification(false),

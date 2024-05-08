@@ -12,6 +12,7 @@ go_library(
     importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/powchain/testing",
     visibility = [
         "//beacon-chain:__subpackages__",
+        "//testing:__subpackages__",
     ],
     deps = [
         "//async/event:go_default_library",

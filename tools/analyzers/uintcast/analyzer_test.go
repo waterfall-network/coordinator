@@ -15,7 +15,6 @@ func init() {
 }
 
 func TestAnalyzer(t *testing.T) {
-	t.Skip() //go tool not available
 	testdata := bazel.TestDataPath(t)
 	analysistest.TestData = func() string { return testdata }
 	analysistest.Run(t, testdata, uintcast.Analyzer)
