@@ -5,11 +5,11 @@ import (
 	"testing"
 
 	"github.com/bazelbuild/rules_go/go/tools/bazel"
-	"github.com/go-yaml/yaml"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/interop"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
+	"gopkg.in/yaml.v2"
 )
 
 type TestCase struct {

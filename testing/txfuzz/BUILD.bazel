@@ -1,0 +1,22 @@
+load("@prysm//tools/go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "accesslist.go",
+        "random.go",
+        "transactions.go",
+    ],
+    importpath = "gitlab.waterfall.network/waterfall/protocol/coordinator/testing/txfuzz",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_mariusvanderwijden_fuzzyvm//filler:go_default_library",
+        "@com_github_mariusvanderwijden_fuzzyvm//generator:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//common:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//core/types:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//ethclient:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//ethclient/gethclient:go_default_library",
+        "@network_waterfall_gitlab_waterfall_protocol_gwat//rpc:go_default_library",
+    ],
+)
