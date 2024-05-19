@@ -32,7 +32,6 @@ lint:
     - if: $CI_COMMIT_TAG == null
       when: on_success
   script:
-    - bazel version
 #    TODO uncomment
 #    - golangci-lint run -v --out-format=github-actions --config=.golangci.yml --out-format colored-line-number
 
