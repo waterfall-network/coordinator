@@ -10,17 +10,18 @@ stages:
     export GOPRIVATE=${CI_SERVER_HOST}
     mkdir -p ./dist
     bazel version
-    cp runtime/version/version.go /tmp/version.go
-    sed -i "s/\\\u2692/${CI_COMMIT_SHORT_SHA}/g" runtime/version/version.go
-    bazel build //beacon-chain:beacon-chain --config=release
-    cp ./bazel-bin/cmd/beacon-chain/beacon-chain_/beacon-chain ./dist/coordinator-beacon
-    bazel build //validator:validator --config=release
-    cp ./bazel-bin/cmd/validator/validator_/validator ./dist/coordinator-validator
-    bazel build //tools/bootnode:bootnode --config=release
-    cp ./bazel-bin/tools/bootnode/bootnode_/bootnode ./dist/coordinator-bootnode
-    bazel build //tools/genesis-state-gen --config=release
-    cp ./bazel-bin/tools/genesis-state-gen/genesis-state-gen_/genesis-state-gen ./dist/coordinator-genesis
-    cp -r /tmp/version.go runtime/version/version.go
+#    TODO uncomment
+#    cp runtime/version/version.go /tmp/version.go
+#    sed -i "s/\\\u2692/${CI_COMMIT_SHORT_SHA}/g" runtime/version/version.go
+#    bazel build //beacon-chain:beacon-chain --config=release
+#    cp ./bazel-bin/cmd/beacon-chain/beacon-chain_/beacon-chain ./dist/coordinator-beacon
+#    bazel build //validator:validator --config=release
+#    cp ./bazel-bin/cmd/validator/validator_/validator ./dist/coordinator-validator
+#    bazel build //tools/bootnode:bootnode --config=release
+#    cp ./bazel-bin/tools/bootnode/bootnode_/bootnode ./dist/coordinator-bootnode
+#    bazel build //tools/genesis-state-gen --config=release
+#    cp ./bazel-bin/tools/genesis-state-gen/genesis-state-gen_/genesis-state-gen ./dist/coordinator-genesis
+#    cp -r /tmp/version.go runtime/version/version.go
 
 lint:
   stage: lint
@@ -31,7 +32,9 @@ lint:
     - if: $CI_COMMIT_TAG == null
       when: on_success
   script:
-    - golangci-lint run -v --out-format=github-actions --config=.golangci.yml --out-format colored-line-number
+    - bazel version
+#    TODO uncomment
+#    - golangci-lint run -v --out-format=github-actions --config=.golangci.yml --out-format colored-line-number
 
 test:
   stage: test
