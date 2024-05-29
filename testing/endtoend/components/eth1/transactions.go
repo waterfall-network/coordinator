@@ -113,6 +113,13 @@ func SendTransaction(client *rpc.Client, key *ecdsa.PrivateKey, f *filler.Filler
 				return nil
 			}
 			err = backend.SendTransaction(context.Background(), signedTx)
+			if err != nil {
+				// We continue on if the constructed transaction is invalid
+				// and can't be submitted on chain.
+				//nolint:nilerr
+				return nil
+			}
+
 			return nil
 		})
 
