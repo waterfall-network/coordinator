@@ -1,8 +1,6 @@
 package accounts
 
 import (
-	"os"
-
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd"
@@ -135,40 +133,6 @@ var Commands = &cli.Command{
 				features.ConfigureValidator(cliCtx)
 				if err := accounts.ImportAccountsCli(cliCtx); err != nil {
 					log.Fatalf("Could not import accounts: %v", err)
-				}
-				return nil
-			},
-		},
-		{
-			Name:        "voluntary-exit",
-			Description: "Performs a voluntary exit on selected accounts",
-			Flags: cmd.WrapFlags([]cli.Flag{
-				flags.WalletDirFlag,
-				flags.WalletPasswordFileFlag,
-				flags.AccountPasswordFileFlag,
-				flags.VoluntaryExitPublicKeysFlag,
-				flags.BeaconRPCProviderFlag,
-				cmd.GrpcMaxCallRecvMsgSizeFlag,
-				flags.CertFlag,
-				flags.GrpcHeadersFlag,
-				flags.GrpcRetriesFlag,
-				flags.GrpcRetryDelayFlag,
-				flags.ExitAllFlag,
-				features.Mainnet,
-				features.PyrmontTestnet,
-				features.Testnet8,
-				cmd.AcceptTosFlag,
-			}),
-			Before: func(cliCtx *cli.Context) error {
-				if err := cmd.LoadFlagsFromConfig(cliCtx, cliCtx.Command.Flags); err != nil {
-					return err
-				}
-				return tos.VerifyTosAcceptedOrPrompt(cliCtx)
-			},
-			Action: func(cliCtx *cli.Context) error {
-				features.ConfigureValidator(cliCtx)
-				if err := accounts.ExitAccountsCli(cliCtx, os.Stdin); err != nil {
-					log.Fatalf("Could not perform voluntary exit: %v", err)
 				}
 				return nil
 			},
