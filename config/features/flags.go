@@ -144,7 +144,7 @@ var (
 	}
 	enableForkChoiceDoublyLinkedTree = &cli.BoolFlag{
 		Name:  "enable-forkchoice-doubly-linked-tree",
-		Usage: "Enables new forkchoice store structure that uses doubly linked trees",
+		Usage: "Enables new forkchoice store structure that uses doubly linked trees. (Warning): This feature is still in development and temporary disabled by default.",
 	}
 )
 
