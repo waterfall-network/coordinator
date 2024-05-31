@@ -3,6 +3,7 @@ package local
 import (
 	"bytes"
 	"context"
+
 	"github.com/sirupsen/logrus"
 	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"

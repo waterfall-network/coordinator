@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-
 	"strings"
 
 	"github.com/k0kubun/go-ansi"
