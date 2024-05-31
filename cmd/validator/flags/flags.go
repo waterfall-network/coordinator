@@ -199,20 +199,6 @@ var (
 		Usage: "Comma-separated list of public key hex strings to specify which validator accounts to backup",
 		Value: "",
 	}
-	// VoluntaryExitPublicKeysFlag defines a comma-separated list of hex string public keys
-	// for accounts on which a user wants to perform a voluntary exit.
-	VoluntaryExitPublicKeysFlag = &cli.StringFlag{
-		Name: "public-keys",
-		Usage: "Comma-separated list of public key hex strings to specify on which validator accounts to perform " +
-			"a voluntary exit",
-		Value: "",
-	}
-	// ExitAllFlag allows stakers to select all validating keys for exit. This will still require the staker
-	// to confirm a userprompt for this action given it is a dangerous one.
-	ExitAllFlag = &cli.BoolFlag{
-		Name:  "exit-all",
-		Usage: "Exit all validators. This will still require the staker to confirm a userprompt for the action",
-	}
 	// BackupPasswordFile for encrypting accounts a user wishes to back up.
 	BackupPasswordFile = &cli.StringFlag{
 		Name:  "backup-password-file",
@@ -323,7 +309,6 @@ var (
 		Usage: "Enables more verbose logging for counting down to duty",
 		Value: false,
 	}
-
 	// FeeRecipientConfigFileFlag defines the path or URL to a file with proposer config.
 	FeeRecipientConfigFileFlag = &cli.StringFlag{
 		Name:  "fee-recipient-config-file",
@@ -336,7 +321,6 @@ var (
 		Usage: "Set URL to a REST endpoint containing coordinator mappings to Waterfall addresses for receiving transaction fees when proposing blocks (i.e. --fee-recipient-config-url=https://example.com/api/getConfig). File format found in docs",
 		Value: "",
 	}
-
 	// SuggestedFeeRecipientFlag defines the address of the fee recipient.
 	SuggestedFeeRecipientFlag = &cli.StringFlag{
 		Name:  "suggested-fee-recipient",
