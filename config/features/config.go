@@ -232,7 +232,9 @@ func ConfigureBeaconChain(ctx *cli.Context) {
 	}
 	if ctx.Bool(enableForkChoiceDoublyLinkedTree.Name) {
 		logEnabled(enableForkChoiceDoublyLinkedTree)
-		cfg.EnableForkChoiceDoublyLinkedTree = true
+		// TODO: Enable this flag when doubly linked tree is ready for production
+		//cfg.EnableForkChoiceDoublyLinkedTree = true
+		cfg.EnableForkChoiceDoublyLinkedTree = false // disabled by default
 	}
 	Init(cfg)
 }
