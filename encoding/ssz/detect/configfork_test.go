@@ -169,6 +169,7 @@ func TestUnmarshalBlock(t *testing.T) {
 	genv := bytesutil.ToBytes4(bc.GenesisForkVersion)
 	altairv := bytesutil.ToBytes4(bc.AltairForkVersion)
 	altairS, err := slots.EpochStart(bc.AltairForkEpoch)
+	require.NoError(t, err)
 	bellaS, err := slots.EpochStart(bc.BellatrixForkEpoch)
 	require.NoError(t, err)
 	cases := []struct {

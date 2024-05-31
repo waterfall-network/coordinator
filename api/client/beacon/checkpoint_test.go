@@ -128,6 +128,7 @@ func TestDownloadOriginData(t *testing.T) {
 	wst, err := util.NewBeaconState()
 	require.NoError(t, err)
 	fork, err := forkForEpoch(cfg, epoch)
+	require.NoError(t, err)
 	require.NoError(t, wst.SetFork(fork))
 
 	// set up checkpoint block
@@ -231,6 +232,7 @@ func TestDownloadBackwardsCompatibleCombined(t *testing.T) {
 	wst, err := util.NewBeaconState()
 	require.NoError(t, err)
 	fork, err := forkForEpoch(cfg, cfg.GenesisEpoch)
+	require.NoError(t, err)
 	require.NoError(t, wst.SetFork(fork))
 
 	// set up checkpoint block
