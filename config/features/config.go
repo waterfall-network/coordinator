@@ -20,11 +20,11 @@ The process for implementing new features using this package is as follows:
 package features
 
 import (
-	"github.com/urfave/cli/v2"
 	"sync"
 	"time"
 
 	"github.com/sirupsen/logrus"
+	"github.com/urfave/cli/v2"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 )
 
