@@ -124,12 +124,12 @@ func NewBeaconBlockWithWithdrawals(vals []*ethpb.Validator) *ethpb.SignedBeaconB
 
 func GenerateDeposits(count int) []*ethpb.Deposit {
 	deposits := make([]*ethpb.Deposit, count)
-	for i, deposit := range deposits {
+	for i := range deposits {
 		proof := make([][]byte, 33)
 		for j := range proof {
 			proof[j] = make([]byte, 32)
 		}
-		deposit = &ethpb.Deposit{
+		deposits[i] = &ethpb.Deposit{
 			Proof: proof,
 			Data: &ethpb.Deposit_Data{
 				PublicKey:             bytesutil.ToBytes(uint64(i), common.BlsPubKeyLength),
@@ -140,7 +140,6 @@ func GenerateDeposits(count int) []*ethpb.Deposit {
 				InitTxHash:            bytesutil.ToBytes(uint64(i), common.HashLength),
 			},
 		}
-		deposits[i] = deposit
 	}
 
 	return deposits

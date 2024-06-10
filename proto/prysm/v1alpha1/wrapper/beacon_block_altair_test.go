@@ -212,6 +212,7 @@ func TestAltairBeaconBlock_SSZ_2(t *testing.T) {
 	assert.NoError(t, wb.UnmarshalSSZ(b))
 
 	wb2, err := wrapper.WrappedAltairBeaconBlock(util.HydrateBeaconBlockAltair(&ethpb.BeaconBlockAltair{}))
+	require.NoError(t, err)
 	assert.NoError(t, wb2.UnmarshalSSZ(b))
 
 	finRez := gwatCommon.HashArrayFromBytes(wb2.Body().Eth1Data().Candidates)
