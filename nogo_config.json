@@ -145,6 +145,7 @@
       "rules_go_work-.*": "Third party code",
       ".*\\.pb.*.go": "Generated code is ok",
       ".*generated\\.ssz\\.go": "Generated code is ok"
+    }
   },
   "properpermissions": {
     "only_files": {
