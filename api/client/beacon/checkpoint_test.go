@@ -133,6 +133,7 @@ func TestDownloadOriginData(t *testing.T) {
 
 	// set up checkpoint block
 	b, err := wrapper.WrappedSignedBeaconBlock(util.NewBeaconBlock())
+	require.NoError(t, err)
 	require.NoError(t, wrapper.SetBlockParentRoot(b, cfg.ZeroHash))
 	require.NoError(t, wrapper.SetBlockSlot(b, wSlot))
 	require.NoError(t, wrapper.SetProposerIndex(b, 0))
@@ -237,6 +238,7 @@ func TestDownloadBackwardsCompatibleCombined(t *testing.T) {
 
 	// set up checkpoint block
 	b, err := wrapper.WrappedSignedBeaconBlock(util.NewBeaconBlock())
+	require.NoError(t, err)
 	require.NoError(t, wrapper.SetBlockParentRoot(b, cfg.ZeroHash))
 	require.NoError(t, wrapper.SetBlockSlot(b, wSlot))
 	require.NoError(t, wrapper.SetProposerIndex(b, 0))
