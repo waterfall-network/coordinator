@@ -5,11 +5,11 @@ package main
 import (
 	"encoding/hex"
 	"flag"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
 	"net"
 
 	"github.com/libp2p/go-libp2p/core/crypto"
 	log "github.com/sirupsen/logrus"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/io/file"
 	_ "gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/maxprocs"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enode"
