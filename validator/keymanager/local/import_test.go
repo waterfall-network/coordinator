@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/google/uuid"
 	logTest "github.com/sirupsen/logrus/hooks/test"
 	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
@@ -17,6 +16,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 	mock "gitlab.waterfall.network/waterfall/protocol/coordinator/validator/accounts/testing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/validator/keymanager"
+	"gitlab.waterfall.network/waterfall/protocol/gwat/common/hexutil"
 )
 
 const password = "secretPassw0rd$1999"
