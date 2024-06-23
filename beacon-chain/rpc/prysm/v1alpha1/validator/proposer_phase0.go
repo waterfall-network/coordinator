@@ -293,6 +293,13 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		}).Info("Build block data: add withdrawals")
 	}
 
+	log.WithFields(logrus.Fields{
+		"eth1.DepositRoot":  fmt.Sprintf("%#x", eth1Data.DepositRoot),
+		"eth1.DepositCount": eth1Data.DepositCount,
+		"eth1.BlockHash":    fmt.Sprintf("%#x", eth1Data.BlockHash),
+		"req.Slot":          req.Slot,
+	}).Info("Build block data: eth1Data")
+
 	return &blockData{
 		ParentRoot:        parentRoot[:],
 		Graffiti:          graffiti,

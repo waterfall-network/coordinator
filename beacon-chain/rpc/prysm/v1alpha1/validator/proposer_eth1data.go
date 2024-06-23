@@ -58,6 +58,7 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 	if cpDepositCount >= vs.HeadFetcher.HeadETH1Data().DepositCount {
 
 		log.WithFields(logrus.Fields{
+			" BlockHash":                  fmt.Sprintf("%#x", cpSpine.Bytes()),
 			"cpDepositRoot":               fmt.Sprintf("%#x", cpDepositRoot),
 			"cpDepositCount":              cpDepositCount,
 			"HeadETH1Data().DepositCount": vs.HeadFetcher.HeadETH1Data().DepositCount,
