@@ -19,10 +19,6 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-var (
-	ErrInvalidDepositTrie = errors.New("invalid deposit tree")
-)
-
 func (vs *Server) packDepositsAndAttestations(ctx context.Context, head state.BeaconState, eth1Data *ethpb.Eth1Data, parentRoot [32]byte) ([]*ethpb.Deposit, []*ethpb.Attestation, error) {
 	if features.Get().EnableGetBlockOptimizations {
 		deposits, atts, err := vs.optimizedPackDepositsAndAttestations(ctx, head, eth1Data, parentRoot)
@@ -35,18 +31,7 @@ func (vs *Server) packDepositsAndAttestations(ctx context.Context, head state.Be
 	// Pack ETH1 deposits which have not been included in the beacon chain.
 	deposits, err := vs.deposits(ctx, head, eth1Data)
 	if err != nil {
-		switch err {
-		case ErrInvalidDepositTrie:
-			deposits = []*ethpb.Deposit{}
-			log.WithError(err).WithFields(logrus.Fields{
-				"slot":              head.Slot(),
-				"eth1.DepositCount": fmt.Sprintf("%#x", eth1Data.DepositCount),
-				"eth1.BlockHash":    fmt.Sprintf("%#x", eth1Data.BlockHash),
-				"eth1.DepositRoot":  fmt.Sprintf("%#x", eth1Data.DepositRoot),
-			}).Error("Pack deposits non-opt: deposit trie is invalid")
-		default:
-			return nil, nil, status.Errorf(codes.Internal, "Could not get ETH1 deposits: %v", err)
-		}
+		return nil, nil, status.Errorf(codes.Internal, "Could not get ETH1 deposits: %v", err)
 	}
 
 	// Pack aggregated attestations which have not been included in the beacon chain.
@@ -67,18 +52,7 @@ func (vs *Server) optimizedPackDepositsAndAttestations(ctx context.Context, head
 		// Pack ETH1 deposits which have not been included in the beacon chain.
 		localDeposits, err := vs.deposits(egctx, head, eth1Data)
 		if err != nil {
-			switch err {
-			case ErrInvalidDepositTrie:
-				localDeposits = []*ethpb.Deposit{}
-				log.WithError(err).WithFields(logrus.Fields{
-					"slot":              head.Slot(),
-					"eth1.DepositCount": fmt.Sprintf("%#x", eth1Data.DepositCount),
-					"eth1.BlockHash":    fmt.Sprintf("%#x", eth1Data.BlockHash),
-					"eth1.DepositRoot":  fmt.Sprintf("%#x", eth1Data.DepositRoot),
-				}).Error("Pack deposits optimized: deposit trie is invalid")
-			default:
-				return status.Errorf(codes.Internal, "Could not get ETH1 deposits: %v", err)
-			}
+			return status.Errorf(codes.Internal, "Could not get ETH1 deposits: %v", err)
 		}
 		// if the original context is cancelled, then cancel this routine too
 		select {
@@ -243,8 +217,7 @@ func (vs *Server) rebuildDepositTrie(ctx context.Context, canonicalEth1Data *eth
 			"canonicalEth1DataHeight":        canonicalEth1DataHeight.String(),
 			"canonicalEth1Data.DepositCount": canonicalEth1Data.DepositCount,
 			"canonicalEth1Data.BlockHash":    fmt.Sprintf("%#x", canonicalEth1Data.BlockHash),
-		}).Errorf("Rebuilt deposit trie is invalid: %v", err)
-		return nil, ErrInvalidDepositTrie
+		}).Errorf("Rebuilt deposit trie is invalid")
 	}
 	return depositTrie, nil
 }

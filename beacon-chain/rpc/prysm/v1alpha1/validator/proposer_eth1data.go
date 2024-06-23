@@ -38,7 +38,8 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 	defer cancel()
 
 	prevEth1Data := beaconState.Eth1Data()
-	if !vs.Eth1InfoFetcher.IsConnectedToETH1() {
+	// todo need fork to support testnet-8
+	if !vs.Eth1InfoFetcher.IsConnectedToETH1() || beaconState.Slot() < params.BeaconConfig().SlotsPerEpoch*types.Slot(params.BeaconConfig().EpochsPerEth1VotingPeriod) {
 		return &ethpb.Eth1Data{
 			BlockHash:    prevEth1Data.GetBlockHash(),
 			DepositCount: prevEth1Data.GetDepositCount(),
@@ -46,7 +47,28 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 		}, nil
 	}
 	eth1DataNotification = false
-	cpSpine := helpers.GetBaseSpine(beaconState)
+
+	// todo need fork to support testnet-8
+	fCpRoot := bytesutil.ToBytes32(beaconState.FinalizedCheckpoint().Root)
+	if fCpRoot == params.BeaconConfig().ZeroHash {
+		log.Warn("eth1DataMajorityVote: get finalized state failed")
+		return &ethpb.Eth1Data{
+			BlockHash:    prevEth1Data.GetBlockHash(),
+			DepositCount: prevEth1Data.GetDepositCount(),
+			DepositRoot:  prevEth1Data.GetDepositRoot(),
+		}, nil
+	}
+
+	finSt, err := vs.StateGen.StateByRoot(ctx, fCpRoot)
+	if err != nil {
+		log.WithError(err).Warn("eth1DataMajorityVote: get finalized state failed")
+		return &ethpb.Eth1Data{
+			BlockHash:    prevEth1Data.GetBlockHash(),
+			DepositCount: prevEth1Data.GetDepositCount(),
+			DepositRoot:  prevEth1Data.GetDepositRoot(),
+		}, nil
+	}
+	cpSpine := helpers.GetBaseSpine(finSt)
 
 	cpSpineExists, cpSpineNum, err := vs.Eth1BlockFetcher.BlockExists(ctx, cpSpine)
 	if !cpSpineExists || err != nil {
