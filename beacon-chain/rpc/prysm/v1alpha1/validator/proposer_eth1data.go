@@ -91,7 +91,7 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 		return nil, errors.Wrap(err, "eth1DataMajorityVote: could not retrieve checkpoint terminal spine")
 	}
 
-	if cpSpineNum.Cmp(prevEth1BlockNr) < 0 {
+	if cpSpineNum.Cmp(prevEth1BlockNr) < 0 || cpSpineNum.Uint64() == 0 {
 		log.WithFields(logrus.Fields{
 			"slot":              beaconState.Slot(),
 			"forkSlot":          params.BeaconConfig().FinEth1ForkSlot,
