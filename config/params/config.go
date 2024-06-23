@@ -157,6 +157,7 @@ type BeaconChainConfig struct {
 	AltairForkEpoch    types.Epoch `yaml:"ALTAIR_FORK_EPOCH" spec:"true"`    // AltairForkEpoch is used to represent the assigned fork epoch for altair.
 	DelegateForkSlot   types.Slot  `yaml:"DELEGATE_FORK_SLOT" spec:"true"`   // DelegateForkSlot defines the slot to start support of Delegate Stake functionalities.
 	PrefixFinForkSlot  types.Slot  `yaml:"PREFIX_FIN_FORK_SLOT" spec:"true"` // PrefixFinForkSlot defines the slot to apply prfix finalization fix.
+	FinEth1ForkSlot    types.Slot  `yaml:"FIN_ETH1_FORK_SLOT" spec:"true"`   // FinEth1ForkSlot defines the slot to start to calculate eth1Data by finalized state.
 	// Deprecated
 	BellatrixForkVersion []byte `yaml:"BELLATRIX_FORK_VERSION" spec:"true"` // BellatrixForkVersion is used to represent the fork version for bellatrix.
 	// Deprecated
@@ -245,4 +246,8 @@ func (b *BeaconChainConfig) IsDelegatingStakeSlot(slot types.Slot) bool {
 
 func (b *BeaconChainConfig) IsPrefixFinForkSlot(slot types.Slot) bool {
 	return b.PrefixFinForkSlot <= slot
+}
+
+func (b *BeaconChainConfig) IsFinEth1ForkSlot(slot types.Slot) bool {
+	return b.FinEth1ForkSlot <= slot
 }

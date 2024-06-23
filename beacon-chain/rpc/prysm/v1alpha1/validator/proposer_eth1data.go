@@ -17,7 +17,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
-	"gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
@@ -38,7 +37,6 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 	defer cancel()
 
 	prevEth1Data := beaconState.Eth1Data()
-	// todo need fork to support testnet-8
 	if !vs.Eth1InfoFetcher.IsConnectedToETH1() || beaconState.Slot() < params.BeaconConfig().SlotsPerEpoch*types.Slot(params.BeaconConfig().EpochsPerEth1VotingPeriod) {
 		return &ethpb.Eth1Data{
 			BlockHash:    prevEth1Data.GetBlockHash(),
@@ -48,33 +46,68 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 	}
 	eth1DataNotification = false
 
-	// todo need fork to support testnet-8
-	fCpRoot := bytesutil.ToBytes32(beaconState.FinalizedCheckpoint().Root)
-	if fCpRoot == params.BeaconConfig().ZeroHash {
-		log.Warn("eth1DataMajorityVote: get finalized state failed")
-		return &ethpb.Eth1Data{
-			BlockHash:    prevEth1Data.GetBlockHash(),
-			DepositCount: prevEth1Data.GetDepositCount(),
-			DepositRoot:  prevEth1Data.GetDepositRoot(),
-		}, nil
+	prevEth1BlockHash := gwatCommon.BytesToHash(prevEth1Data.GetBlockHash())
+	prevExists, prevEth1BlockNr, err := vs.Eth1BlockFetcher.BlockExists(ctx, prevEth1BlockHash)
+	if !prevExists || err != nil {
+		log.WithError(err).Warn("eth1DataMajorityVote: eth1 block not found")
+		return nil, errors.Wrap(err, "eth1 block not found")
 	}
 
-	finSt, err := vs.StateGen.StateByRoot(ctx, fCpRoot)
-	if err != nil {
-		log.WithError(err).Warn("eth1DataMajorityVote: get finalized state failed")
-		return &ethpb.Eth1Data{
-			BlockHash:    prevEth1Data.GetBlockHash(),
-			DepositCount: prevEth1Data.GetDepositCount(),
-			DepositRoot:  prevEth1Data.GetDepositRoot(),
-		}, nil
+	cpSpine := helpers.GetBaseSpine(beaconState)
+	if params.BeaconConfig().IsFinEth1ForkSlot(beaconState.Slot()) {
+		log.WithFields(logrus.Fields{
+			"slot":              beaconState.Slot(),
+			"forkSlot":          params.BeaconConfig().FinEth1ForkSlot,
+			"eth1.DepositCount": prevEth1Data.DepositCount,
+			"eth1.BlockHash":    fmt.Sprintf("%#x", prevEth1Data.BlockHash),
+			"eth1.DepositRoot":  fmt.Sprintf("%#x", prevEth1Data.DepositRoot),
+		}).Info("eth1DataMajorityVote: finalized eth1 fork active")
+
+		fCpRoot := bytesutil.ToBytes32(beaconState.FinalizedCheckpoint().Root)
+		if fCpRoot == params.BeaconConfig().ZeroHash {
+			log.Warn("eth1DataMajorityVote: finalized root empty")
+			return &ethpb.Eth1Data{
+				BlockHash:    prevEth1Data.GetBlockHash(),
+				DepositCount: prevEth1Data.GetDepositCount(),
+				DepositRoot:  prevEth1Data.GetDepositRoot(),
+			}, nil
+		}
+
+		finSt, err := vs.StateGen.StateByRoot(ctx, fCpRoot)
+		if err != nil {
+			log.WithError(err).Warn("eth1DataMajorityVote: get finalized state failed")
+			return &ethpb.Eth1Data{
+				BlockHash:    prevEth1Data.GetBlockHash(),
+				DepositCount: prevEth1Data.GetDepositCount(),
+				DepositRoot:  prevEth1Data.GetDepositRoot(),
+			}, nil
+		}
+		cpSpine = helpers.GetBaseSpine(finSt)
 	}
-	cpSpine := helpers.GetBaseSpine(finSt)
 
 	cpSpineExists, cpSpineNum, err := vs.Eth1BlockFetcher.BlockExists(ctx, cpSpine)
 	if !cpSpineExists || err != nil {
 		log.WithError(err).Warn("eth1DataMajorityVote: could not retrieve checkpoint terminal spine")
 		return nil, errors.Wrap(err, "eth1DataMajorityVote: could not retrieve checkpoint terminal spine")
 	}
+
+	if cpSpineNum.Cmp(prevEth1BlockNr) < 0 {
+		log.WithFields(logrus.Fields{
+			"slot":              beaconState.Slot(),
+			"forkSlot":          params.BeaconConfig().FinEth1ForkSlot,
+			"eth1.DepositCount": prevEth1Data.DepositCount,
+			"eth1.BlockHash":    fmt.Sprintf("%#x", prevEth1Data.BlockHash),
+			"eth1.DepositRoot":  fmt.Sprintf("%#x", prevEth1Data.DepositRoot),
+			"prevEth1BlockNr":   prevEth1BlockNr.String(),
+			"cpSpineNum":        cpSpineNum.String(),
+		}).Warn("eth1DataMajorityVote: low next block number: using current")
+		return &ethpb.Eth1Data{
+			BlockHash:    prevEth1Data.GetBlockHash(),
+			DepositCount: prevEth1Data.GetDepositCount(),
+			DepositRoot:  prevEth1Data.GetDepositRoot(),
+		}, nil
+	}
+
 	cpDepositCount, cpDepositRoot := vs.DepositFetcher.DepositsNumberAndRootAtHeight(ctx, cpSpineNum)
 
 	if cpDepositCount >= vs.HeadFetcher.HeadETH1Data().DepositCount {
@@ -152,7 +185,7 @@ func (vs *Server) mockETH1DataVote(ctx context.Context, slot types.Slot) (*ethpb
 	depRoot := hash.Hash(enc)
 	blockHash := hash.Hash(depRoot[:])
 
-	finHash := &common.Hash{}
+	finHash := &gwatCommon.Hash{}
 	finHash.SetBytes(depRoot[:])
 	candidates := gwatCommon.HashArray{*finHash}
 

@@ -94,6 +94,11 @@ func configureEth1Config(cliCtx *cli.Context) {
 		c.PrefixFinForkSlot = types.Slot(cliCtx.Uint64(flags.PrefixFinForkSlot.Name))
 		params.OverrideBeaconConfig(c)
 	}
+	if cliCtx.IsSet(flags.FinEth1ForkSlot.Name) {
+		c := params.BeaconConfig()
+		c.FinEth1ForkSlot = types.Slot(cliCtx.Uint64(flags.FinEth1ForkSlot.Name))
+		params.OverrideBeaconConfig(c)
+	}
 }
 
 func configureNetwork(cliCtx *cli.Context) {

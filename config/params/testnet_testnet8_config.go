@@ -1,6 +1,8 @@
 package params
 
 import (
+	"math"
+
 	gwatParams "gitlab.waterfall.network/waterfall/protocol/gwat/params"
 )
 
@@ -40,8 +42,9 @@ func Testnet8Config() *BeaconChainConfig {
 	cfg.DepositNetworkID = gwatParams.Testnet8ChainConfig.ChainID.Uint64()
 	//cfg.DelegateForkSlot = types.Slot(gwatParams.Testnet8ChainConfig.ForkSlotDelegate)
 	cfg.DelegateForkSlot = 2729920
-	//cfg.PrefixFinForkSlot = math.MaxUint64
 	cfg.PrefixFinForkSlot = 4058240
+	//todo require
+	cfg.FinEth1ForkSlot = math.MaxUint64
 	cfg.SlotsPerArchivedPoint = 2048
 	cfg.InitializeForkSchedule()
 	return cfg
