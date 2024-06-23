@@ -61,6 +61,7 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 			"eth1.DepositCount": prevEth1Data.DepositCount,
 			"eth1.BlockHash":    fmt.Sprintf("%#x", prevEth1Data.BlockHash),
 			"eth1.DepositRoot":  fmt.Sprintf("%#x", prevEth1Data.DepositRoot),
+			"prevEth1BlockNr":   prevEth1BlockNr.String(),
 		}).Info("eth1DataMajorityVote: finalized eth1 fork active")
 
 		fCpRoot := bytesutil.ToBytes32(beaconState.FinalizedCheckpoint().Root)
@@ -91,7 +92,7 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 		return nil, errors.Wrap(err, "eth1DataMajorityVote: could not retrieve checkpoint terminal spine")
 	}
 
-	if cpSpineNum.Cmp(prevEth1BlockNr) < 0 || cpSpineNum.Uint64() == 0 {
+	if cpSpineNum.Cmp(prevEth1BlockNr) < 0 || cpSpineNum.Cmp(prevEth1BlockNr) == 0 {
 		log.WithFields(logrus.Fields{
 			"slot":              beaconState.Slot(),
 			"forkSlot":          params.BeaconConfig().FinEth1ForkSlot,
@@ -118,6 +119,8 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 			"cpDepositCount":              cpDepositCount,
 			"HeadETH1Data().DepositCount": vs.HeadFetcher.HeadETH1Data().DepositCount,
 			"condition":                   cpDepositCount >= vs.HeadFetcher.HeadETH1Data().DepositCount,
+			"prevEth1BlockNr":             prevEth1BlockNr.String(),
+			"cpSpineNum":                  cpSpineNum.String(),
 		}).Info("eth1DataMajorityVote: update deposit eth1 data")
 
 		return &ethpb.Eth1Data{
