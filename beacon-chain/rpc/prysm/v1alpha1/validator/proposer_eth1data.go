@@ -111,7 +111,7 @@ func (vs *Server) eth1DataMajorityVote(ctx context.Context, beaconState state.Be
 
 	cpDepositCount, cpDepositRoot := vs.DepositFetcher.DepositsNumberAndRootAtHeight(ctx, cpSpineNum)
 
-	if cpDepositCount >= vs.HeadFetcher.HeadETH1Data().DepositCount {
+	if cpDepositCount >= vs.HeadFetcher.HeadETH1Data().DepositCount && cpDepositCount > 0 {
 
 		log.WithFields(logrus.Fields{
 			" BlockHash":                  fmt.Sprintf("%#x", cpSpine.Bytes()),
