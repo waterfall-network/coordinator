@@ -1,3 +1,13 @@
+# Go Waterfall
+## Building the source
+**We strongly recommend installing go version 1.21.11 or later**
+
+Install Basel version 6.4.0
+
+```shell
+bazel build //beacon-chain:beacon-chain --config=release
+```
+
 # Prysm: An Ethereum Consensus Implementation Written in Go
 
 [![Build status](https://badge.buildkite.com/b555891daf3614bae4284dcf365b2340cefc0089839526f096.svg?branch=master)](https://buildkite.com/prysmatic-labs/prysm)
