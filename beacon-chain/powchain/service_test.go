@@ -241,6 +241,7 @@ func TestFollowBlock_OK(t *testing.T) {
 	params.SetupTestConfigCleanup(t)
 	conf := params.BeaconConfig()
 	conf.SecondsPerETH1Block = 10
+	conf.DelegateForkSlot = 2048
 	params.OverrideBeaconConfig(conf)
 
 	web3Service = setDefaultMocks(web3Service)
