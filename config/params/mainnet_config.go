@@ -152,7 +152,7 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	ProportionalSlashingMultiplier: 1,
 	BaseRewardMultiplier:           2.0,
 	MaxAnnualizedReturnRate:        0.2,
-	OptValidatorsNum:               300_000,
+	OptValidatorsNum:               3_000_000,
 
 	// Max operations per block constants.
 	MaxProposerSlashings: 16,
