@@ -203,6 +203,31 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		}
 	}
 
+	//check AllSpinesLimit
+	if spinesCount := CountUniqSpinesWithCandidates(head, candidates); spinesCount > params.BeaconConfig().AllSpinesLimit {
+		//reduce candidates length
+		dif := spinesCount - params.BeaconConfig().AllSpinesLimit
+		if len(candidates) < dif {
+			err = fmt.Errorf("spines in state exceeded of AllSpinesLimit")
+			log.WithError(err).WithFields(logrus.Fields{
+				"req.Slot":    req.Slot,
+				"candidates":  len(candidates),
+				"spinesCount": spinesCount,
+				"dif":         dif,
+			}).Error("Build block data: spines in state exceeded of AllSpinesLimit")
+			return nil, err
+		}
+		candidatesLen := len(candidates) - dif
+		log.WithError(err).WithFields(logrus.Fields{
+			"req.Slot":    req.Slot,
+			"candidates":  len(candidates),
+			"spinesCount": spinesCount,
+			"dif":         dif,
+			"newLen":      candidatesLen,
+		}).Error("Build block data: reduce candidates to AllSpinesLimit")
+		candidates = candidates[0:candidatesLen]
+	}
+
 	eth1Data.Candidates = candidates.ToBytes()
 	log.WithFields(logrus.Fields{
 		"1.req.Slot":   req.Slot,
@@ -268,6 +293,13 @@ func (vs *Server) buildPhase0BlockData(ctx context.Context, req *ethpb.BlockRequ
 		}).Info("Build block data: add withdrawals")
 	}
 
+	log.WithFields(logrus.Fields{
+		"eth1.DepositRoot":  fmt.Sprintf("%#x", eth1Data.DepositRoot),
+		"eth1.DepositCount": eth1Data.DepositCount,
+		"eth1.BlockHash":    fmt.Sprintf("%#x", eth1Data.BlockHash),
+		"req.Slot":          req.Slot,
+	}).Info("Build block data: eth1Data")
+
 	return &blockData{
 		ParentRoot:        parentRoot[:],
 		Graffiti:          graffiti,
@@ -299,4 +331,15 @@ func (vs *Server) prepareAndProcessPrevoteData(optCandidates gwatCommon.HashArra
 
 	// Process prevote data and calculate longest chain of spines with most of the votes
 	return vs.processPrevoteData(prevoteData, optCandidates)
+}
+
+func CountUniqSpinesWithCandidates(beaconState state.BeaconState, candidates gwatCommon.HashArray) int {
+	finSeq := helpers.GetFinalizationSequence(beaconState)
+	prefixSeq := gwatCommon.HashArrayFromBytes(beaconState.SpineData().Prefix)
+	fullSeq := make(gwatCommon.HashArray, 0, len(finSeq)+len(prefixSeq)+len(candidates))
+	fullSeq = append(fullSeq, finSeq...)
+	fullSeq = append(fullSeq, prefixSeq...)
+	fullSeq = append(fullSeq, candidates...)
+	fullSeq.Deduplicate()
+	return len(fullSeq)
 }

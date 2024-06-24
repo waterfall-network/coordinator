@@ -119,6 +119,10 @@ func TestGetSpec(t *testing.T) {
 	config.VotingRequiredSlots = 11
 	config.GwatSyncIntervalMs = 12
 	config.DAGTimelyVotingWeight = 13
+	config.AllSpinesLimit = 128
+	config.DelegateForkSlot = 2048
+	config.PrefixFinForkSlot = 256
+	config.FinEth1ForkSlot = 1024
 
 	var dbp [4]byte
 	copy(dbp[:], []byte{'0', '0', '0', '1'})
@@ -148,7 +152,7 @@ func TestGetSpec(t *testing.T) {
 	resp, err := server.GetSpec(context.Background(), &emptypb.Empty{})
 	require.NoError(t, err)
 
-	assert.Equal(t, 112, len(resp.Data))
+	assert.Equal(t, 115, len(resp.Data))
 	for k, v := range resp.Data {
 		switch k {
 		case "CONFIG_NAME":
@@ -391,6 +395,12 @@ func TestGetSpec(t *testing.T) {
 			assert.Equal(t, "100", v)
 		case "DELEGATE_FORK_SLOT":
 			assert.Equal(t, "2048", v)
+		case "PREFIX_FIN_FORK_SLOT":
+			assert.Equal(t, "256", v)
+		case "FIN_ETH1_FORK_SLOT":
+			assert.Equal(t, "1024", v)
+		case "ALL_SPINES_LIMIT":
+			assert.Equal(t, "128", v)
 		default:
 			t.Errorf("Incorrect key: %s", k)
 		}

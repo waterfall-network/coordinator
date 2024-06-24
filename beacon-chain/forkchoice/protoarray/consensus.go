@@ -62,11 +62,13 @@ func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines 
 			"optSpines": len(optSpines),
 			"headRoot":  fmt.Sprintf("%#x", headRoot),
 			"jCpRoot":   fmt.Sprintf("%#x", jCpRoot),
-		}).Info("forkchoice: get parent end")
+		}).Info("FC: get parent end")
 	}(time.Now())
 
-	f.mu.Lock()
-	defer f.mu.Unlock()
+	fc := f.Copy()
+
+	//f.mu.RLock()
+	//defer f.mu.RUnlock()
 
 	//removes empty values
 	_optSpines := make([]gwatCommon.HashArray, 0, len(optSpines))
@@ -77,19 +79,20 @@ func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines 
 	}
 
 	// collect nodes of T(G) tree
-	acceptableRootIndexMap, acceptableLeafs := collectTgTreeNodesByOptimisticSpines(f, _optSpines, jCpRoot)
+	acceptableRootIndexMap, acceptableLeafs := collectTgTreeNodesByOptimisticSpines(fc, _optSpines, jCpRoot)
 
 	//todo rm
 	acceptLeafsArr := make(gwatCommon.HashArray, 0, len(acceptableLeafs))
 	for k := range acceptableLeafs {
 		acceptLeafsArr = append(acceptLeafsArr, k)
 	}
-	fRoots := make(gwatCommon.HashArray, len(f.store.nodes))
-	for i, n := range f.store.nodes {
+	fRoots := make(gwatCommon.HashArray, len(fc.store.nodes))
+	for i, n := range fc.store.nodes {
 		fRoots[i] = n.root
 	}
-	fc := f
+	//fc := f
 	log.WithFields(logrus.Fields{
+		"accRootIndexMap":      len(acceptableRootIndexMap),
 		"acceptLeafsArr":       len(acceptLeafsArr),
 		"fcRoots":              len(fRoots),
 		"votes":                len(fc.votes),
@@ -104,7 +107,7 @@ func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines 
 		return [32]byte{}, nil
 	}
 
-	headRoot, err = f.calculateHeadRootByNodesIndexes(ctx, acceptableRootIndexMap)
+	headRoot, err = fc.calculateHeadRootByNodesIndexes(ctx, acceptableRootIndexMap)
 	if err != nil {
 		return [32]byte{}, err
 	}
@@ -129,31 +132,29 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 		"store.finalizedEpoch": f.store.finalizedEpoch,
 	}).Info("Calculate head root by nodes indexes")
 
-	// create ForkChoice instance
-	fcInstance := New(f.store.justifiedEpoch, f.store.finalizedEpoch)
-
-	// sort node's indexes
-	nodeIndexes := make(gwatCommon.SorterAscU64, 0, len(nodesRootIndexMap))
 	indexRootMap := make(map[uint64][32]byte, len(nodesRootIndexMap))
 	for r, index := range nodesRootIndexMap {
-		nodeIndexes = append(nodeIndexes, index)
 		indexRootMap[index] = r
+	}
+
+	fcInstance, diffRootIndexMap := getCompatibleFc(nodesRootIndexMap, f)
+
+	log.WithFields(logrus.Fields{
+		"diffRootIndexMap":  len(diffRootIndexMap),
+		"nodesRootIndexMap": len(nodesRootIndexMap),
+	}).Info("Calculate head root by nodes indexes 111")
+
+	// sort node's indexes
+	nodeIndexes := make(gwatCommon.SorterAscU64, 0, len(diffRootIndexMap))
+	for _, index := range diffRootIndexMap {
+		nodeIndexes = append(nodeIndexes, index)
 	}
 	sort.Sort(nodeIndexes)
 
 	// fill ForkChoice instance
-	var justifiedRoot [32]byte
 	var headRoot [32]byte
-	for i, index := range nodeIndexes {
-
+	for _, index := range nodeIndexes {
 		node := f.store.nodes[index]
-		if i == 0 {
-			justifiedRoot = node.root
-		}
-		if fcInstance.HasNode(node.attsData.justifiedRoot) {
-			justifiedRoot = node.attsData.justifiedRoot
-		}
-
 		n := copyNode(node)
 		n.bestChild = NonExistentNode
 		n.bestDescendant = NonExistentNode
@@ -165,7 +166,12 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 			}
 			n.parent = fcInstance.store.nodesIndices[parentRoot]
 		}
+
+		log.WithFields(logrus.Fields{"index": index}).Info("Calculate head root by nodes indexes: i 000")
+
 		err := fcInstance.store.insertNode(ctx, n)
+
+		log.WithError(err).WithFields(logrus.Fields{"index": index}).Info("Calculate head root by nodes indexes: i 111")
 
 		if err != nil {
 			return [32]byte{}, err
@@ -177,6 +183,8 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 			validatorIndexes = append(validatorIndexes, ix)
 		}
 		sort.Sort(validatorIndexes)
+
+		log.WithError(err).WithFields(logrus.Fields{"index": index}).Info("Calculate head root by nodes indexes: i 333")
 
 		for _, vi := range validatorIndexes {
 			vote := n.AttestationsData().votes[vi]
@@ -196,10 +204,33 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 				fcInstance.votes[vi].nextEpoch = targetEpoch
 				fcInstance.votes[vi].nextRoot = blockRoot
 			}
+
+			log.WithError(err).WithFields(logrus.Fields{"index": index, "vi": vi}).Info("Calculate head root by nodes indexes: i 444")
 		}
 	}
 
+	log.WithFields(logrus.Fields{
+		"diffRootIndexMap":  len(diffRootIndexMap),
+		"nodesRootIndexMap": len(nodesRootIndexMap),
+	}).Info("Calculate head root by nodes indexes 555")
+
 	topNode := fcInstance.store.nodes[len(fcInstance.store.nodes)-1]
+
+	//calc 	justifiedRoot
+	var justifiedRoot [32]byte
+	for i, node := range fcInstance.store.nodes {
+		if i == 0 {
+			justifiedRoot = node.root
+		}
+		if fcInstance.HasNode(node.attsData.justifiedRoot) {
+			justifiedRoot = node.attsData.justifiedRoot
+		}
+	}
+
+	log.WithFields(logrus.Fields{
+		"diffRootIndexMap":  len(diffRootIndexMap),
+		"nodesRootIndexMap": len(nodesRootIndexMap),
+	}).Info("Calculate head root by nodes indexes 666")
 
 	// todo check use insead of f.balances
 	//balances := f.getBalances(ctx, topNode.root)
@@ -228,14 +259,24 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 		return [32]byte{}, err
 	}
 
+	updateCache(fcInstance, len(diffRootIndexMap))
+
 	log.WithFields(logrus.Fields{
-		"headRoot":             fmt.Sprintf("%#x", headRoot),
-		"votes":                len(fcInstance.votes),
-		"_votes":               len(f.votes),
-		"balances":             len(fcInstance.balances),
-		"_balances":            len(f.balances),
-		"store.justifiedEpoch": fcInstance.store.justifiedEpoch,
-		"store.finalizedEpoch": fcInstance.store.finalizedEpoch,
+		"items":             fmt.Sprintf("%d", cacheForkChoice.cache.Len()),
+		"inactivity":        fmt.Sprintf("%v", cacheForkChoice.inactivity),
+		"inact_len":         fmt.Sprintf("%d", len(cacheForkChoice.inactivity)),
+		"nodesRootIndexMap": fmt.Sprintf("%d", len(nodesRootIndexMap)),
+		"diff":              fmt.Sprintf("%d", len(diffRootIndexMap)),
+	}).Info("FC cache")
+
+	log.WithFields(logrus.Fields{
+		"headRoot": fmt.Sprintf("%#x", headRoot),
+		//"votes":                len(fcInstance.votes),
+		//"_votes":               len(f.votes),
+		//"balances":             len(fcInstance.balances),
+		//"_balances":            len(f.balances),
+		//"store.justifiedEpoch": fcInstance.store.justifiedEpoch,
+		//"store.finalizedEpoch": fcInstance.store.finalizedEpoch,
 		//"store.[0].root":       fmt.Sprintf("%#x", fcInstance.store.nodes[0].root),
 	}).Info("Get parent by optimistic spines res")
 

@@ -3,6 +3,7 @@ package stategen
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
@@ -53,10 +54,23 @@ func (s *State) MigrateToCold(ctx context.Context, fRoot [32]byte) error {
 				aRoot = cached.root
 				aState = cached.state
 			} else {
+
+				log.WithFields(logrus.Fields{
+					"slot": slot,
+				}).Info("MigrateToCold: no cached state 000")
+				checkTime := time.Now()
+
 				blks, err := s.beaconDB.HighestSlotBlocksBelow(ctx, slot)
 				if err != nil {
 					return err
 				}
+
+				log.WithFields(logrus.Fields{
+					"slot":    slot,
+					"elapsed": time.Since(checkTime),
+				}).Info("MigrateToCold: no cached state 111")
+				checkTime = time.Now()
+
 				// Given the block has been finalized, the db should not have more than one block in a given slot.
 				// We should error out when this happens.
 				if len(blks) != 1 {
@@ -70,11 +84,33 @@ func (s *State) MigrateToCold(ctx context.Context, fRoot [32]byte) error {
 				// There's no need to generate the state if the state already exists on the DB.
 				// We can skip saving the state.
 				if !s.beaconDB.HasState(ctx, aRoot) {
+
+					log.WithFields(logrus.Fields{
+						"slot":     slot,
+						"aRoot":    fmt.Sprintf("%#x", aRoot),
+						"HasState": false,
+						"elapsed":  time.Since(checkTime),
+					}).Info("MigrateToCold: no cached state 222 (no state)")
+					checkTime = time.Now()
+
 					aState, err = s.StateByRoot(ctx, missingRoot)
 					if err != nil {
 						return err
 					}
+
+					log.WithFields(logrus.Fields{
+						"slot":     slot,
+						"aRoot":    fmt.Sprintf("%#x", aRoot),
+						"HasState": false,
+						"elapsed":  time.Since(checkTime),
+					}).Info("MigrateToCold: no cached state 333 (no state)")
 				}
+				log.WithFields(logrus.Fields{
+					"slot":     slot,
+					"aRoot":    fmt.Sprintf("%#x", aRoot),
+					"HasState": true,
+					"elapsed":  time.Since(checkTime),
+				}).Info("MigrateToCold: no cached state 222 (has state)")
 			}
 
 			if s.beaconDB.HasState(ctx, aRoot) {

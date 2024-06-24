@@ -31,13 +31,21 @@ func (s *Service) GetOptimisticSpines(ctx context.Context, baseSpine gwatCommon.
 		log.WithError(fmt.Errorf("Node syncing to latest head, not ready to respond")).WithFields(logrus.Fields{
 			"Syncing": s.isSynchronizing(),
 		}).Warn("Get Optimistic Spines: skipped (synchronizing)")
-		return s.GetCacheOptimisticSpines(baseSpine), nil
+		optSpines := s.GetCacheOptimisticSpines(baseSpine)
+		if len(optSpines) == 0 {
+			return optSpines, errNoOptSpines
+		}
+		return optSpines, nil
 	}
 	if s.IsGwatSynchronizing() {
 		log.WithError(fmt.Errorf("GWAT synchronization process is running, not ready to respond")).WithFields(logrus.Fields{
 			"Syncing": s.IsGwatSynchronizing(),
 		}).Warn("Get Optimistic Spines: skipped (gwat synchronizing)")
-		return s.GetCacheOptimisticSpines(baseSpine), nil
+		optSpines := s.GetCacheOptimisticSpines(baseSpine)
+		if len(optSpines) == 0 {
+			return optSpines, errNoOptSpines
+		}
+		return optSpines, nil
 	}
 
 	tout := time.Duration((params.BeaconConfig().SecondsPerSlot*1000)/4) * time.Millisecond

@@ -100,6 +100,8 @@ var appHelpFlagGroups = []flagGroup{
 			flags.DepositContractFlag,
 			flags.ContractDeploymentBlock,
 			flags.DelegatingStakeForkSlot,
+			flags.PrefixFinForkSlot,
+			flags.FinEth1ForkSlot,
 			flags.RPCHost,
 			flags.RPCPort,
 			flags.CertFlag,

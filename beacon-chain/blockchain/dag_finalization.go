@@ -277,7 +277,12 @@ func (s *Service) runGwatSynchronization(ctx context.Context) error {
 			}).Error("Gwat sync: failed 4")
 			// try to fix "invalid base spine"
 			if strings.Contains(err.Error(), srtErrInvalidBaseSpine) {
-				err = s.repairGwatFinalization(ctx, syncState, gwatTypes.MainSync)
+				errRepair := s.repairGwatFinalization(ctx, syncState, gwatTypes.MainSync)
+				if errRepair != nil {
+					log.WithError(errRepair).Error("Gwat sync: repair finalization failed 5")
+					return errRepair
+				}
+				err = errGwatSyncInProgress
 			}
 			return err
 		}
@@ -548,18 +553,32 @@ func (s *Service) getRequestGwatCheckpoint(
 }
 
 // collectValidatorSyncData collect data for ValSyncData param to call gwat finalization api.
-func (s *Service) collectValidatorSyncData(ctx context.Context, st state.BeaconState) ([]*gwatTypes.ValidatorSync, error) {
-	if st == nil || st.IsNil() {
+func (s *Service) collectValidatorSyncData(ctx context.Context, headState state.BeaconState) ([]*gwatTypes.ValidatorSync, error) {
+	if headState == nil || headState.IsNil() {
 		return nil, errors.New("Collect finalization params: nil head state received")
 	}
 	var validatorSyncData []*gwatTypes.ValidatorSync
-	currentEpoch := slots.ToEpoch(st.Slot())
-	vals := st.Validators()
+	currentSlot := headState.Slot()
+
+	checkpoint := headState.FinalizedCheckpoint()
+	cpRoot := bytesutil.ToBytes32(checkpoint.Root)
+	cpState, err := s.cfg.StateGen.SyncStateByRoot(ctx, cpRoot)
+	if err != nil {
+		return nil, err
+	}
+
+	workState := headState
+	if params.BeaconConfig().IsFinEth1ForkSlot(headState.Slot()) {
+		workState = cpState
+	}
+	workEpoch := slots.ToEpoch(workState.Slot())
+
+	vals := workState.Validators()
 	ffepoch := params.BeaconConfig().FarFutureEpoch
 
 	for idx, validator := range vals {
 		// activation
-		if validator.ActivationEpoch < ffepoch && validator.ActivationEpoch > 0 && validator.ActivationEpoch > currentEpoch {
+		if validator.ActivationEpoch < ffepoch && validator.ActivationEpoch > 0 && validator.ActivationEpoch > workEpoch {
 			validatorSyncData = append(validatorSyncData, &gwatTypes.ValidatorSync{
 				OpType:     gwatTypes.Activate,
 				ProcEpoch:  uint64(validator.ActivationEpoch),
@@ -569,13 +588,13 @@ func (s *Service) collectValidatorSyncData(ctx context.Context, st state.BeaconS
 				InitTxHash: gwatCommon.BytesToHash(validator.ActivationHash),
 			})
 			log.WithFields(logrus.Fields{
-				"currentEpoch":              currentEpoch,
+				"workEpoch":                 workEpoch,
 				"validator.ActivationEpoch": validator.ActivationEpoch,
 				"InitTxHash":                fmt.Sprintf("%#x", validator.ActivationHash),
 			}).Info("activate params")
 		}
 		// deactivation
-		if validator.ExitEpoch < ffepoch && validator.ExitEpoch > 0 && validator.ExitEpoch > currentEpoch {
+		if validator.ExitEpoch < ffepoch && validator.ExitEpoch > 0 && validator.ExitEpoch > workEpoch {
 			validatorSyncData = append(validatorSyncData, &gwatTypes.ValidatorSync{
 				OpType:     gwatTypes.Deactivate,
 				ProcEpoch:  uint64(validator.ExitEpoch),
@@ -586,7 +605,7 @@ func (s *Service) collectValidatorSyncData(ctx context.Context, st state.BeaconS
 			})
 
 			log.WithFields(logrus.Fields{
-				"currentEpoch":        currentEpoch,
+				"workEpoch":           workEpoch,
 				"validator.ExitEpoch": validator.ExitEpoch,
 				"InitTxHash":          fmt.Sprintf("%#x", validator.ExitHash),
 			}).Info("Exit params")
@@ -594,12 +613,6 @@ func (s *Service) collectValidatorSyncData(ctx context.Context, st state.BeaconS
 	}
 
 	// withdrawals (update balance) calculate for finalized cp
-	checkpoint := st.FinalizedCheckpoint()
-	cpRoot := bytesutil.ToBytes32(checkpoint.Root)
-	cpState, err := s.cfg.StateGen.SyncStateByRoot(ctx, cpRoot)
-	if err != nil {
-		return nil, err
-	}
 	minSlot, err := slots.EpochStart(cpState.FinalizedCheckpointEpoch() + 1)
 	if err != nil {
 		return nil, err
@@ -613,16 +626,16 @@ func (s *Service) collectValidatorSyncData(ctx context.Context, st state.BeaconS
 				continue
 			}
 			balance := validator.EffectiveBalance
-			if validator.ExitEpoch <= currentEpoch {
+			if validator.ExitEpoch <= workEpoch {
 				//if validator is deactivated
-				balance, err = st.BalanceAtIndex(types.ValidatorIndex(idx))
+				balance, err = workState.BalanceAtIndex(types.ValidatorIndex(idx))
 				if err != nil {
 					return nil, err
 				}
 			}
 			vsd := &gwatTypes.ValidatorSync{
 				OpType:     gwatTypes.UpdateBalance,
-				ProcEpoch:  uint64(currentEpoch) + 1,
+				ProcEpoch:  uint64(workEpoch) + 1,
 				Index:      uint64(idx),
 				Creator:    gwatCommon.BytesToAddress(validator.CreatorAddress),
 				Amount:     helpers.GweiToWei(wop.Amount),
@@ -631,10 +644,10 @@ func (s *Service) collectValidatorSyncData(ctx context.Context, st state.BeaconS
 			}
 			validatorSyncData = append(validatorSyncData, vsd)
 			log.WithFields(logrus.Fields{
-				"st.Slot":    st.Slot(),
+				"st.Slot":    currentSlot,
 				"wop.Slot":   wop.Slot,
 				"valSyncOp":  vsd.Print(),
-				"exit":       validator.ExitEpoch <= currentEpoch,
+				"exit":       validator.ExitEpoch <= workEpoch,
 				"InitTxHash": fmt.Sprintf("%#x", wop.Hash),
 			}).Info("Withdrawals: Update balance params")
 		}

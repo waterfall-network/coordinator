@@ -259,9 +259,11 @@ func (s *Service) updateFinalized(ctx context.Context, cp *ethpb.Checkpoint) err
 			return err
 		}
 	}
-	if err := s.cfg.StateGen.MigrateToCold(ctx, fRoot); err != nil {
-		return errors.Wrap(err, "could not migrate to cold")
-	}
+	go func() {
+		if err := s.cfg.StateGen.MigrateToCold(s.ctx, fRoot); err != nil {
+			log.WithError(err).Error("could not migrate to cold")
+		}
+	}()
 	return nil
 }
 

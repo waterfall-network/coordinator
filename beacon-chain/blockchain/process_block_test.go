@@ -39,6 +39,7 @@ import (
 func TestStore_OnBlock_ProtoArray(t *testing.T) {
 	ctx := context.Background()
 
+	params.BeaconConfig().DelegateForkSlot = 1_000_000
 	beaconDB := testDB.SetupDB(t)
 	fcs := protoarray.New(0, 0)
 	opts := []Option{
@@ -143,6 +144,7 @@ func TestStore_OnBlock_ProtoArray(t *testing.T) {
 func TestStore_OnBlock_DoublyLinkedTree(t *testing.T) {
 	ctx := context.Background()
 
+	params.BeaconConfig().DelegateForkSlot = 1_000_000
 	beaconDB := testDB.SetupDB(t)
 	fcs := doublylinkedtree.New(0, 0)
 	opts := []Option{

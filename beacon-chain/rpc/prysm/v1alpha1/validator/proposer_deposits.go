@@ -213,11 +213,11 @@ func (vs *Server) rebuildDepositTrie(ctx context.Context, canonicalEth1Data *eth
 	valid, err := validateDepositTrie(depositTrie, canonicalEth1Data)
 	// Log an error here, as even with rebuilding the trie, it is still invalid.
 	if !valid {
-		log.WithFields(logrus.Fields{
+		log.WithError(err).WithFields(logrus.Fields{
 			"canonicalEth1DataHeight":        canonicalEth1DataHeight.String(),
 			"canonicalEth1Data.DepositCount": canonicalEth1Data.DepositCount,
 			"canonicalEth1Data.BlockHash":    fmt.Sprintf("%#x", canonicalEth1Data.BlockHash),
-		}).Errorf("Rebuilt deposit trie is invalid: %v", err)
+		}).Errorf("Rebuilt deposit trie is invalid")
 	}
 	return depositTrie, nil
 }

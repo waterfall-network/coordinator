@@ -49,6 +49,8 @@ var appFlags = []cli.Flag{
 	flags.MinSyncPeers,
 	flags.ContractDeploymentBlock,
 	flags.DelegatingStakeForkSlot,
+	flags.PrefixFinForkSlot,
+	flags.FinEth1ForkSlot,
 	flags.SetGCPercent,
 	flags.HeadSync,
 	flags.DisableSync,
