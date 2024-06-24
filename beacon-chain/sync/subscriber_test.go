@@ -221,6 +221,8 @@ func TestSubscribe_ReceivesProposerSlashing(t *testing.T) {
 }
 
 func TestSubscribe_HandlesPanic(t *testing.T) {
+	params.BeaconConfig().DelegateForkSlot = 1_000_000
+
 	p := p2ptest.NewTestP2P(t)
 	r := Service{
 		ctx: context.Background(),
