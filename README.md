@@ -6,6 +6,7 @@ Install Basel version 6.4.0
 
 ```shell
 bazel build //beacon-chain:beacon-chain --config=release
+bazel build //validator:validator --config=release
 ```
 
 # Prysm: An Ethereum Consensus Implementation Written in Go
