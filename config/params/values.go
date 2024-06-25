@@ -15,6 +15,7 @@ const (
 	Pyrmont
 	Testnet8
 	EndToEndMainnet
+	Test
 )
 
 // ConfigName enum describes the type of known network in use.
@@ -36,6 +37,7 @@ var ConfigNames = map[ConfigName]string{
 	Pyrmont:         "pyrmont",
 	Testnet8:        "testnet8",
 	EndToEndMainnet: "end-to-end-mainnet",
+	Test:            "test",
 }
 
 // KnownConfigs provides an index of all known BeaconChainConfig values.
@@ -46,6 +48,7 @@ var KnownConfigs = map[ConfigName]func() *BeaconChainConfig{
 	Minimal:         MinimalSpecConfig,
 	EndToEnd:        E2ETestConfig,
 	EndToEndMainnet: E2EMainnetTestConfig,
+	Test:            TestConfig,
 }
 
 var knownForkVersions map[[fieldparams.VersionLength]byte]ConfigName
