@@ -52,6 +52,8 @@ func TestDepositContractAddress_OK(t *testing.T) {
 }
 
 func TestProcessDeposit_OK(t *testing.T) {
+	params.UseTestConfig()
+
 	beaconDB := testDB.SetupDB(t)
 	server, endpoint, err := testing2.SetupRPCServer()
 	require.NoError(t, err)

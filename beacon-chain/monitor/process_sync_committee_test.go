@@ -5,6 +5,7 @@ import (
 
 	"github.com/prysmaticlabs/go-bitfield"
 	logTest "github.com/sirupsen/logrus/hooks/test"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
@@ -27,6 +28,7 @@ func TestProcessSyncCommitteeContribution(t *testing.T) {
 }
 
 func TestProcessSyncAggregate(t *testing.T) {
+	params.UseTestConfig()
 	hook := logTest.NewGlobal()
 	s := setupService(t)
 	beaconState, _ := util.DeterministicGenesisStateAltair(t, 256)

@@ -736,6 +736,7 @@ func TestService_AddPendingBlockToQueueOverMax(t *testing.T) {
 }
 
 func TestService_ProcessPendingBlockOnCorrectSlot(t *testing.T) {
+	params.UseTestConfig()
 	ctx := context.Background()
 	db := dbtest.SetupDB(t)
 
@@ -816,6 +817,7 @@ func TestService_ProcessPendingBlockOnCorrectSlot(t *testing.T) {
 }
 
 func TestService_ProcessBadPendingBlocks(t *testing.T) {
+	params.UseTestConfig()
 	ctx := context.Background()
 	db := dbtest.SetupDB(t)
 

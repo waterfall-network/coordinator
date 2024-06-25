@@ -114,6 +114,7 @@ func TestSubscribe_UnsubscribeTopic(t *testing.T) {
 }
 
 func TestSubscribe_ReceivesAttesterSlashing(t *testing.T) {
+	params.UseTestConfig()
 	p2pService := p2ptest.NewTestP2P(t)
 	ctx := context.Background()
 	d := db.SetupDB(t)
@@ -168,6 +169,7 @@ func TestSubscribe_ReceivesAttesterSlashing(t *testing.T) {
 }
 
 func TestSubscribe_ReceivesProposerSlashing(t *testing.T) {
+	params.UseTestConfig()
 	p2pService := p2ptest.NewTestP2P(t)
 	ctx := context.Background()
 	chainService := &mockChain.ChainService{

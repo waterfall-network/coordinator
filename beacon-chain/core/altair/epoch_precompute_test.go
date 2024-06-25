@@ -208,6 +208,7 @@ func TestProcessEpochParticipation_InactiveValidator(t *testing.T) {
 }
 
 func TestAttestationsDelta(t *testing.T) {
+	params.UseTestConfig()
 	s, err := testState()
 	require.NoError(t, err)
 	validators, balance, err := InitializePrecomputeValidators(context.Background(), s)
@@ -239,6 +240,7 @@ func TestAttestationsDelta(t *testing.T) {
 }
 
 func TestAttestationsDeltaBellatrix(t *testing.T) {
+	params.UseTestConfig()
 	s, err := testStateBellatrix()
 	require.NoError(t, err)
 	validators, balance, err := InitializePrecomputeValidators(context.Background(), s)
@@ -302,6 +304,7 @@ func TestProcessRewardsAndPenaltiesPrecompute_Ok(t *testing.T) {
 }
 
 func TestProcessRewardsAndPenaltiesPrecompute_InactivityLeak(t *testing.T) {
+	params.UseTestConfig()
 	s, err := testState()
 	require.NoError(t, err)
 	validators, balance, err := InitializePrecomputeValidators(context.Background(), s)

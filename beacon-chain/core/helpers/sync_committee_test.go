@@ -210,6 +210,7 @@ func TestCurrentEpochSyncSubcommitteeIndices_UsingCache(t *testing.T) {
 }
 
 func TestCurrentEpochSyncSubcommitteeIndices_UsingCommittee(t *testing.T) {
+	params.UseTestConfig()
 	validators := make([]*ethpb.Validator, params.BeaconConfig().SyncCommitteeSize)
 	syncCommittee := &ethpb.SyncCommittee{
 		AggregatePubkey: bytesutil.PadTo([]byte{}, params.BeaconConfig().BLSPubkeyLength),

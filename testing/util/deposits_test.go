@@ -13,6 +13,7 @@ import (
 )
 
 func TestSetupInitialDeposits_1024Entries(t *testing.T) {
+	params.UseTestConfig()
 	entries := 1
 	resetCache()
 	deposits, privKeys, err := DeterministicDepositsAndKeys(uint64(entries))
@@ -164,6 +165,7 @@ func TestDepositsWithBalance_MatchesDeterministic_Cached(t *testing.T) {
 }
 
 func TestSetupInitialDeposits_1024Entries_PartialDeposits(t *testing.T) {
+	params.UseTestConfig()
 	entries := 1
 	resetCache()
 	balances := make([]uint64, entries)

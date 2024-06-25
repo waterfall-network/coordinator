@@ -134,6 +134,7 @@ func TestProcessSlashings(t *testing.T) {
 }
 
 func TestProcessProposedBlock(t *testing.T) {
+	params.UseTestConfig()
 	tests := []struct {
 		name      string
 		block     *ethpb.BeaconBlock
@@ -179,6 +180,7 @@ func TestProcessProposedBlock(t *testing.T) {
 }
 
 func TestProcessBlock_AllEventsTrackedVals(t *testing.T) {
+	params.UseTestConfig()
 	hook := logTest.NewGlobal()
 	ctx := context.Background()
 

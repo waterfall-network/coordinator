@@ -30,6 +30,7 @@ import (
 )
 
 func TestService_validateCommitteeIndexBeaconAttestation(t *testing.T) {
+	params.UseTestConfig()
 	ctx := context.Background()
 	p := p2ptest.NewTestP2P(t)
 	db := dbtest.SetupDB(t)

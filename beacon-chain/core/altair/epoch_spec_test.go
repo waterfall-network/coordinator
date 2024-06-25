@@ -112,6 +112,7 @@ func TestProcessSlashings_NotSlashed(t *testing.T) {
 }
 
 func TestProcessSlashings_SlashedLess(t *testing.T) {
+	params.UseTestConfig()
 	tests := []struct {
 		state *ethpb.BeaconStateAltair
 		want  uint64
