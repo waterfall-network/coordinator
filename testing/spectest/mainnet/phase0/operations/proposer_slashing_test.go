@@ -7,5 +7,5 @@ import (
 )
 
 func TestMainnet_Phase0_Operations_ProposerSlashing(t *testing.T) {
-	operations.RunProposerSlashingTest(t, "mainnet")
+	operations.RunProposerSlashingTest(t, "test")
 }

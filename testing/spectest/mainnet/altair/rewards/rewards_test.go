@@ -14,5 +14,5 @@ func TestMain(m *testing.M) {
 }
 
 func TestMainnet_Altair_Rewards(t *testing.T) {
-	rewards.RunPrecomputeRewardsAndPenaltiesTests(t, "mainnet")
+	rewards.RunPrecomputeRewardsAndPenaltiesTests(t, "test")
 }

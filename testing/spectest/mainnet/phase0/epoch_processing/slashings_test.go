@@ -7,5 +7,5 @@ import (
 )
 
 func TestMainnet_Phase0_EpochProcessing_Slashings(t *testing.T) {
-	epoch_processing.RunSlashingsTests(t, "mainnet")
+	epoch_processing.RunSlashingsTests(t, "test")
 }

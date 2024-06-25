@@ -7,5 +7,5 @@ import (
 )
 
 func TestMainnet_Altair_Operations_BlockHeader(t *testing.T) {
-	operations.RunBlockHeaderTest(t, "mainnet")
+	operations.RunBlockHeaderTest(t, "test")
 }

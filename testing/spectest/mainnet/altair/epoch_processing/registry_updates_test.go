@@ -7,5 +7,5 @@ import (
 )
 
 func TestMainnet_Altair_EpochProcessing_ResetRegistryUpdates(t *testing.T) {
-	epoch_processing.RunRegistryUpdatesTests(t, "mainnet")
+	epoch_processing.RunRegistryUpdatesTests(t, "test")
 }

@@ -10,7 +10,7 @@ import (
 
 func TestMainnet_Altair_Forkchoice(t *testing.T) {
 	t.Skip() // Generate test data with pyton tool
-	forkchoice.Run(t, "mainnet", version.Altair)
+	forkchoice.Run(t, "test", version.Altair)
 }
 
 func TestMainnet_Altair_Forkchoice_DoublyLinkTree(t *testing.T) {
@@ -19,5 +19,5 @@ func TestMainnet_Altair_Forkchoice_DoublyLinkTree(t *testing.T) {
 		EnableForkChoiceDoublyLinkedTree: true,
 	})
 	defer resetCfg()
-	forkchoice.Run(t, "mainnet", version.Altair)
+	forkchoice.Run(t, "test", version.Altair)
 }

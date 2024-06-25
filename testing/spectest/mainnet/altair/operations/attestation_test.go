@@ -7,5 +7,5 @@ import (
 )
 
 func TestMainnet_Altair_Operations_Attestation(t *testing.T) {
-	operations.RunAttestationTest(t, "mainnet")
+	operations.RunAttestationTest(t, "test")
 }

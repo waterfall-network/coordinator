@@ -8,5 +8,5 @@ import (
 
 func TestMainnet_Phase0_Finality(t *testing.T) {
 	t.Skip() // Generate test data with pyton tool
-	finality.RunFinalityTest(t, "mainnet")
+	finality.RunFinalityTest(t, "test")
 }
