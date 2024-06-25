@@ -7,5 +7,5 @@ import (
 )
 
 func TestMainnet_Phase0_EpochProcessing_JustificationAndFinalization(t *testing.T) {
-	epoch_processing.RunJustificationAndFinalizationTests(t, "mainnet")
+	epoch_processing.RunJustificationAndFinalizationTests(t, "test")
 }

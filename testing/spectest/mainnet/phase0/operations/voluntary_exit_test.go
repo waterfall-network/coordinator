@@ -8,5 +8,5 @@ import (
 
 func TestMainnet_Phase0_Operations_VoluntaryExit(t *testing.T) {
 	t.Skip() // Generate test data with pyton tool
-	operations.RunVoluntaryExitTest(t, "mainnet")
+	operations.RunVoluntaryExitTest(t, "test")
 }

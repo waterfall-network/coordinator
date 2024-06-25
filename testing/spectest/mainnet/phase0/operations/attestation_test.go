@@ -7,5 +7,5 @@ import (
 )
 
 func TestMainnet_Phase0_Operations_Attestation(t *testing.T) {
-	operations.RunAttestationTest(t, "mainnet")
+	operations.RunAttestationTest(t, "test")
 }

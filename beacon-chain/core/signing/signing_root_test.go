@@ -48,6 +48,7 @@ func TestSigningRoot_ComputeDomain(t *testing.T) {
 }
 
 func TestSigningRoot_ComputeDomainAndSign(t *testing.T) {
+	params.UseTestConfig()
 	tests := []struct {
 		name       string
 		genState   func(t *testing.T) (state.BeaconState, []bls.SecretKey)

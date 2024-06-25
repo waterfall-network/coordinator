@@ -7,5 +7,5 @@ import (
 )
 
 func TestMainnet_Phase0_EpochProcessing_HistoricalRootsUpdate(t *testing.T) {
-	epoch_processing.RunHistoricalRootsUpdateTests(t, "mainnet")
+	epoch_processing.RunHistoricalRootsUpdateTests(t, "test")
 }

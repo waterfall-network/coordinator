@@ -7,5 +7,5 @@ import (
 )
 
 func TestMainnet_Phase0_EpochProcessing_RewardsAndPenalties(t *testing.T) {
-	epoch_processing.RunRewardsAndPenaltiesTests(t, "mainnet")
+	epoch_processing.RunRewardsAndPenaltiesTests(t, "test")
 }

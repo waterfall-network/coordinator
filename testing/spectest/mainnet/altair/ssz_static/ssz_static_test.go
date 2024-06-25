@@ -7,5 +7,5 @@ import (
 )
 
 func TestMainnet_Altair_SSZStatic(t *testing.T) {
-	ssz_static.RunSSZStaticTests(t, "mainnet")
+	ssz_static.RunSSZStaticTests(t, "test")
 }

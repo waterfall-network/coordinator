@@ -7,5 +7,5 @@ import (
 )
 
 func TestMainnet_Altair_Operations_Deposit(t *testing.T) {
-	operations.RunDepositTest(t, "mainnet")
+	operations.RunDepositTest(t, "test")
 }

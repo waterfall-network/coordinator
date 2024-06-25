@@ -209,6 +209,7 @@ func TestVerifyWithdrawalData_Ok(t *testing.T) {
 }
 
 func TestProcessWithdrawal_Ok(t *testing.T) {
+	params.UseTestConfig()
 	withdrawals := []*ethpb.Withdrawal{{
 		PublicKey:      bytesutil.PadTo([]byte{0x11}, 48),
 		ValidatorIndex: 0,
@@ -257,6 +258,7 @@ func TestProcessWithdrawal_Ok(t *testing.T) {
 }
 
 func TestProcessWithdrawal_SkippingAlreadyApplied(t *testing.T) {
+	params.UseTestConfig()
 	withdrawals := []*ethpb.Withdrawal{
 		{
 			PublicKey:      bytesutil.PadTo([]byte{0x11}, 48),
@@ -326,6 +328,7 @@ func TestProcessWithdrawal_SkippingAlreadyApplied(t *testing.T) {
 }
 
 func TestProcessWithdrawal_WithdrawalOpsLimit(t *testing.T) {
+	params.UseTestConfig()
 	withdrawals := []*ethpb.Withdrawal{
 		{
 			PublicKey:      bytesutil.PadTo([]byte{0x11}, 48),
@@ -416,6 +419,7 @@ func TestProcessWithdrawal_WithdrawalOpsLimit(t *testing.T) {
 }
 
 func TestProcessWithdrawal_WithdrawalEntireAvailableBalance(t *testing.T) {
+	params.UseTestConfig()
 	withdrawals := []*ethpb.Withdrawal{{
 		PublicKey:      bytesutil.PadTo([]byte{0x11}, 48),
 		ValidatorIndex: 0,

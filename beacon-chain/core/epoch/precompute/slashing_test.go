@@ -44,6 +44,7 @@ func TestProcessSlashingsPrecompute_NotSlashedWithSlashedFalse(t *testing.T) {
 }
 
 func TestProcessSlashingsPrecompute_SlashedLess(t *testing.T) {
+	params.UseTestConfig()
 	tests := []struct {
 		state *ethpb.BeaconState
 		want  uint64

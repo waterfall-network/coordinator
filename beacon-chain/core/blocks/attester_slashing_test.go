@@ -97,6 +97,7 @@ func TestProcessAttesterSlashings_IndexedAttestationFailedToVerify(t *testing.T)
 }
 
 func TestProcessAttesterSlashings_AppliesCorrectStatus(t *testing.T) {
+	params.UseTestConfig()
 	beaconState, privKeys := util.DeterministicGenesisState(t, 100)
 	for _, vv := range beaconState.Validators() {
 		vv.WithdrawableEpoch = types.Epoch(params.BeaconConfig().SlotsPerEpoch)
@@ -166,6 +167,7 @@ func TestProcessAttesterSlashings_AppliesCorrectStatus(t *testing.T) {
 }
 
 func TestProcessAttesterSlashings_AppliesCorrectStatusAltair(t *testing.T) {
+	params.UseTestConfig()
 	beaconState, privKeys := util.DeterministicGenesisStateAltair(t, 100)
 	for _, vv := range beaconState.Validators() {
 		vv.WithdrawableEpoch = types.Epoch(params.BeaconConfig().SlotsPerEpoch)

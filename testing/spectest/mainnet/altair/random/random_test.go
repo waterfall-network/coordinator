@@ -15,5 +15,5 @@ func TestMain(m *testing.M) {
 
 func TestMainnet_Altair_Random(t *testing.T) {
 	t.Skip() // Generate test data with pyton tool
-	sanity.RunBlockProcessingTest(t, "mainnet", "random/random/pyspec_tests")
+	sanity.RunBlockProcessingTest(t, "test", "random/random/pyspec_tests")
 }

@@ -7,5 +7,5 @@ import (
 )
 
 func TestMainnet_Altair_Operations_SyncCommittee(t *testing.T) {
-	operations.RunSyncCommitteeTest(t, "mainnet")
+	operations.RunSyncCommitteeTest(t, "test")
 }

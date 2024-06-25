@@ -20,6 +20,9 @@ func SetConfig(t testing.TB, config string) error {
 	case "mainnet":
 		params.OverrideBeaconConfig(params.MainnetConfig())
 		return nil
+	case "test":
+		params.OverrideBeaconConfig(params.TestConfig())
+		return nil
 	case "":
 		return errors.New("no config provided")
 	default:

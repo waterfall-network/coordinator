@@ -7,5 +7,5 @@ import (
 )
 
 func TestMainnet_Altair_EpochProcessing_InactivityUpdates(t *testing.T) {
-	epoch_processing.RunInactivityUpdatesTest(t, "mainnet")
+	epoch_processing.RunInactivityUpdatesTest(t, "test")
 }

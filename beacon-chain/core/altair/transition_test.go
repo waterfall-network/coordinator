@@ -11,6 +11,7 @@ import (
 )
 
 func TestProcessEpoch_CanProcess(t *testing.T) {
+	params.UseTestConfig()
 	st, _ := util.DeterministicGenesisStateAltair(t, params.BeaconConfig().MaxValidatorsPerCommittee)
 	require.NoError(t, st.SetSlot(10*params.BeaconConfig().SlotsPerEpoch))
 	newState, err := altair.ProcessEpoch(context.Background(), st)

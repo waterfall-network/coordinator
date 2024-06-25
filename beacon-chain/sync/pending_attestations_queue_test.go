@@ -56,6 +56,7 @@ func TestProcessPendingAtts_NoBlockRequestBlock(t *testing.T) {
 }
 
 func TestProcessPendingAtts_HasBlockSaveUnAggregatedAtt(t *testing.T) {
+	params.UseTestConfig()
 	hook := logTest.NewGlobal()
 	db := dbtest.SetupDB(t)
 	p1 := p2ptest.NewTestP2P(t)
@@ -140,6 +141,7 @@ func TestProcessPendingAtts_HasBlockSaveUnAggregatedAtt(t *testing.T) {
 }
 
 func TestProcessPendingAtts_NoBroadcastWithBadSignature(t *testing.T) {
+	params.UseTestConfig()
 	db := dbtest.SetupDB(t)
 	p1 := p2ptest.NewTestP2P(t)
 
@@ -243,6 +245,7 @@ func TestProcessPendingAtts_NoBroadcastWithBadSignature(t *testing.T) {
 }
 
 func TestProcessPendingAtts_HasBlockSaveAggregatedAtt(t *testing.T) {
+	params.UseTestConfig()
 	hook := logTest.NewGlobal()
 	db := dbtest.SetupDB(t)
 	p1 := p2ptest.NewTestP2P(t)

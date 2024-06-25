@@ -17,6 +17,7 @@ import (
 )
 
 func TestWeakSubjectivity_ComputeWeakSubjectivityPeriod(t *testing.T) {
+	params.UseTestConfig()
 	tests := []struct {
 		valCount   uint64
 		avgBalance uint64

@@ -7,5 +7,5 @@ import (
 )
 
 func TestMainnet_Altair_EpochProcessing_RandaoMixesReset(t *testing.T) {
-	epoch_processing.RunRandaoMixesResetTests(t, "mainnet")
+	epoch_processing.RunRandaoMixesResetTests(t, "test")
 }

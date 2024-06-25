@@ -241,6 +241,7 @@ func Test_VerifySyncCommitteeSig(t *testing.T) {
 }
 
 func Test_ApplySyncRewardsPenalties(t *testing.T) {
+	params.UseTestConfig()
 	beaconState, _ := util.DeterministicGenesisStateAltair(t, params.BeaconConfig().MaxValidatorsPerCommittee)
 	beaconState, err := altair.ApplySyncRewardsPenalties(context.Background(), beaconState,
 		[]types.ValidatorIndex{0, 1}, // voted
@@ -257,6 +258,7 @@ func Test_ApplySyncRewardsPenalties(t *testing.T) {
 }
 
 func Test_SyncRewards(t *testing.T) {
+	params.UseTestConfig()
 	tests := []struct {
 		name                  string
 		activeBalance         uint64

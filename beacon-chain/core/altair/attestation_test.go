@@ -573,6 +573,7 @@ func TestSetParticipationAndRewardProposer(t *testing.T) {
 }
 
 func TestEpochParticipation(t *testing.T) {
+	params.UseTestConfig()
 	beaconState, _ := util.DeterministicGenesisStateAltair(t, params.BeaconConfig().MaxValidatorsPerCommittee)
 	cfg := params.BeaconConfig()
 	sourceFlagIndex := cfg.TimelySourceFlagIndex

@@ -8,5 +8,5 @@ import (
 
 func TestMainnet_Altair_Transition(t *testing.T) {
 	t.Skip() // Generate test data with pyton tool
-	fork.RunForkTransitionTest(t, "mainnet")
+	fork.RunForkTransitionTest(t, "test")
 }

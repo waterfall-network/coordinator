@@ -303,6 +303,7 @@ func TestValidateAggregateAndProof_ExistedInPool(t *testing.T) {
 }
 
 func TestValidateAggregateAndProof_CanValidate(t *testing.T) {
+	params.UseTestConfig()
 	db := dbtest.SetupDB(t)
 	p := p2ptest.NewTestP2P(t)
 
@@ -400,6 +401,7 @@ func TestValidateAggregateAndProof_CanValidate(t *testing.T) {
 }
 
 func TestVerifyIndexInCommittee_SeenAggregatorEpoch(t *testing.T) {
+	params.UseTestConfig()
 	db := dbtest.SetupDB(t)
 	p := p2ptest.NewTestP2P(t)
 
@@ -515,7 +517,7 @@ func TestVerifyIndexInCommittee_SeenAggregatorEpoch(t *testing.T) {
 }
 
 func TestValidateAggregateAndProof_BadBlock(t *testing.T) {
-
+	params.UseTestConfig()
 	db := dbtest.SetupDB(t)
 	p := p2ptest.NewTestP2P(t)
 
@@ -606,6 +608,7 @@ func TestValidateAggregateAndProof_BadBlock(t *testing.T) {
 }
 
 func TestValidateAggregateAndProof_RejectWhenAttEpochDoesntEqualTargetEpoch(t *testing.T) {
+	params.UseTestConfig()
 	db := dbtest.SetupDB(t)
 	p := p2ptest.NewTestP2P(t)
 

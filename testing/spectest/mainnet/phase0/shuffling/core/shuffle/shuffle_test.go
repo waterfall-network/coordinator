@@ -7,5 +7,5 @@ import (
 )
 
 func TestMainnet_Phase0_Shuffling_Core_Shuffle(t *testing.T) {
-	shuffle.RunShuffleTests(t, "mainnet")
+	shuffle.RunShuffleTests(t, "test")
 }

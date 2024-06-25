@@ -7,5 +7,5 @@ import (
 )
 
 func TestMainnet_Phase0_EpochProcessing_EffectiveBalanceUpdates(t *testing.T) {
-	epoch_processing.RunEffectiveBalanceUpdatesTests(t, "mainnet")
+	epoch_processing.RunEffectiveBalanceUpdatesTests(t, "test")
 }

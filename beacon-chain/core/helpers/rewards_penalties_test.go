@@ -15,6 +15,7 @@ import (
 )
 
 func TestTotalBalance_OK(t *testing.T) {
+	params.UseTestConfig()
 	state, err := v1.InitializeFromProto(&ethpb.BeaconState{Validators: []*ethpb.Validator{
 		{EffectiveBalance: 27 * 1e9}, {EffectiveBalance: 28 * 1e9},
 		{EffectiveBalance: 32 * 1e9}, {EffectiveBalance: 40 * 1e9},

@@ -50,6 +50,7 @@ import (
 )
 
 func TestGetAttesterDuties(t *testing.T) {
+	params.UseTestConfig()
 	ctx := context.Background()
 	genesis := util.NewBeaconBlock()
 	depChainStart := params.BeaconConfig().MinGenesisActiveValidatorCount

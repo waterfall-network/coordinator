@@ -15,6 +15,7 @@ import (
 	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
 	testDB "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/testing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state/stategen"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
@@ -161,6 +162,7 @@ func TestStart(t *testing.T) {
 }
 
 func TestInitializePerformanceStructures(t *testing.T) {
+	params.UseTestConfig()
 	hook := logTest.NewGlobal()
 	ctx := context.Background()
 	s := setupService(t)
@@ -203,6 +205,7 @@ func TestInitializePerformanceStructures(t *testing.T) {
 }
 
 func TestMonitorRoutine(t *testing.T) {
+	params.UseTestConfig()
 	ctx := context.Background()
 	hook := logTest.NewGlobal()
 	s := setupService(t)

@@ -8,6 +8,7 @@ import (
 	"github.com/prysmaticlabs/go-bitfield"
 	"github.com/sirupsen/logrus"
 	logTest "github.com/sirupsen/logrus/hooks/test"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
@@ -16,6 +17,7 @@ import (
 )
 
 func TestGetAttestingIndices(t *testing.T) {
+	params.UseTestConfig()
 	ctx := context.Background()
 	beaconState, _ := util.DeterministicGenesisState(t, 256)
 	att := &ethpb.Attestation{
@@ -32,6 +34,7 @@ func TestGetAttestingIndices(t *testing.T) {
 }
 
 func TestProcessIncludedAttestationTwoTracked(t *testing.T) {
+	params.UseTestConfig()
 	hook := logTest.NewGlobal()
 	s := setupService(t)
 	state, _ := util.DeterministicGenesisStateAltair(t, 256)
@@ -95,6 +98,7 @@ func TestProcessUnaggregatedAttestationStateNotCached(t *testing.T) {
 }
 
 func TestProcessUnaggregatedAttestationStateCached(t *testing.T) {
+	params.UseTestConfig()
 	ctx := context.Background()
 	hook := logTest.NewGlobal()
 
@@ -206,6 +210,7 @@ func TestProcessAggregatedAttestationStateCached(t *testing.T) {
 }
 
 func TestProcessAttestations(t *testing.T) {
+	params.UseTestConfig()
 	hook := logTest.NewGlobal()
 	s := setupService(t)
 	ctx := context.Background()

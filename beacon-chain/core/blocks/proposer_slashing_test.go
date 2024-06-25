@@ -144,6 +144,7 @@ func TestProcessProposerSlashings_ValidatorNotSlashable(t *testing.T) {
 func TestProcessProposerSlashings_AppliesCorrectStatus(t *testing.T) {
 	// We test the case when data is correct and verify the validator
 	// registry has been updated.
+	params.UseTestConfig()
 	beaconState, privKeys := util.DeterministicGenesisState(t, 100)
 	proposerIdx := types.ValidatorIndex(1)
 
@@ -192,6 +193,7 @@ func TestProcessProposerSlashings_AppliesCorrectStatus(t *testing.T) {
 func TestProcessProposerSlashings_AppliesCorrectStatusAltair(t *testing.T) {
 	// We test the case when data is correct and verify the validator
 	// registry has been updated.
+	params.UseTestConfig()
 	beaconState, privKeys := util.DeterministicGenesisStateAltair(t, 100)
 	proposerIdx := types.ValidatorIndex(1)
 

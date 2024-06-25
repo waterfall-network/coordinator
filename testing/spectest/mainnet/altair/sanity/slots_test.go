@@ -8,5 +8,5 @@ import (
 
 func TestMainnet_Altair_Sanity_Slots(t *testing.T) {
 	t.Skip() // Generate test data with pyton tool
-	sanity.RunSlotProcessingTests(t, "mainnet")
+	sanity.RunSlotProcessingTests(t, "test")
 }
