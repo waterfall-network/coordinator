@@ -117,6 +117,7 @@ func TestSubmitAggregateAndProof_Ok(t *testing.T) {
 }
 
 func TestWaitForSlotTwoThird_WaitCorrectly(t *testing.T) {
+	params.UseTestConfig()
 	validator, _, _, finish := setup(t)
 	defer finish()
 	currentTime := time.Now()

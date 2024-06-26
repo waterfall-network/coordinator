@@ -14,7 +14,7 @@ import (
 
 func TestInfostream_EpochToTimestamp(t *testing.T) {
 	params.SetupTestConfigCleanup(t)
-	params.OverrideBeaconConfig(params.MainnetConfig())
+	params.UseTestConfig()
 	tests := []struct {
 		name      string
 		epoch     types.Epoch
