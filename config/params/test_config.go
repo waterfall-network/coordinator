@@ -17,6 +17,8 @@ func TestConfig() *BeaconChainConfig {
 	cfg.EffectiveBalanceIncrement = 100 * 1e9
 	cfg.OptValidatorsNum = 3_000_000
 
+	cfg.SecondsPerSlot = 4
+
 	cfg.InitializeForkSchedule()
 
 	return cfg
