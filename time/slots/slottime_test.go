@@ -90,6 +90,7 @@ func TestAbsoluteValueSlotDifference(t *testing.T) {
 }
 
 func TestMultiplySlotBy(t *testing.T) {
+	params.UseTestConfig()
 	type args struct {
 		times int64
 	}
