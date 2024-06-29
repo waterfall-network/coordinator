@@ -21,5 +21,5 @@ func TestConfig() *BeaconChainConfig {
 
 	cfg.InitializeForkSchedule()
 
-	return cfg
+	return cfg.Copy()
 }

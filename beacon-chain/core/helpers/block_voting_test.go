@@ -11,8 +11,9 @@ import (
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
+// Deprecated
 func TestBlockVotingsCalcFinalization_AggregateCommitteeVote_OK(t *testing.T) {
-	//t.Skip()//unstable
+	t.Skip() // Unstable
 	// Case 1: aggregate
 	list_0 := bitfield.NewBitlist(10)
 	list_0.SetBitAt(0, true)
@@ -109,7 +110,6 @@ func TestBlockVotingsCalcFinalization_AggregateCommitteeVote_OK(t *testing.T) {
 		AggregationBits: want_bits_4,
 	})
 
-	//want = helpers.AggregateCommitteeVote(want)
 	agrVotes = helpers.AggregateCommitteeVote(votes)
 
 	assert.DeepEqual(t, want, agrVotes)
