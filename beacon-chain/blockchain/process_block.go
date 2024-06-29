@@ -216,7 +216,7 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		"block.slot": signed.Block().Slot(),
 		//"postBlockVoting": helpers.PrintBlockVotingArr(postState.BlockVoting()),
 		"postBlockVoting": len(postState.BlockVoting()),
-	}).Info("State transition executed")
+	}).Info("onBlock: State transition executed")
 
 	if err := s.insertBlockAndAttestationsToForkChoiceStore(ctx, signed.Block(), blockRoot, postState); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{

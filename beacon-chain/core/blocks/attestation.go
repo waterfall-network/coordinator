@@ -30,8 +30,8 @@ func ProcessAttestationsNoVerifySignature(
 	}
 	body := b.Block().Body()
 	var err error
-	for idx, attestation := range body.Attestations() {
-		beaconState, err = ProcessAttestationNoVerifySignature(ctx, beaconState, attestation)
+	for idx, atts := range body.Attestations() {
+		beaconState, err = ProcessAttestationNoVerifySignature(ctx, beaconState, atts)
 		if err != nil {
 			return nil, errors.Wrapf(err, "could not verify attestation at index %d in block", idx)
 		}
@@ -80,7 +80,6 @@ func VerifyAttestationNoVerifySignature(
 
 	s := att.Data.Slot
 	minInclusionCheck := s+params.BeaconConfig().MinAttestationInclusionDelay <= beaconState.Slot()
-	epochInclusionCheck := beaconState.Slot() <= s+params.BeaconConfig().SlotsPerEpoch
 	if !minInclusionCheck {
 		return fmt.Errorf(
 			"attestation slot %d + inclusion delay %d > state slot %d",
@@ -89,6 +88,7 @@ func VerifyAttestationNoVerifySignature(
 			beaconState.Slot(),
 		)
 	}
+	epochInclusionCheck := beaconState.Slot() <= s+params.BeaconConfig().SlotsPerEpoch
 	if !epochInclusionCheck {
 		return fmt.Errorf(
 			"state slot %d > attestation slot %d + SLOTS_PER_EPOCH %d",

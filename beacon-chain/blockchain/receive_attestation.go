@@ -100,7 +100,11 @@ func (s *Service) VerifyFinalizedConsistency(ctx context.Context, root []byte) e
 	if err != nil {
 		return err
 	}
-	if !bytes.Equal(f.Root, r) {
+	if !bytes.Equal(f.Root, r) && ss != 0 {
+		logrus.WithFields(logrus.Fields{
+			"r":      fmt.Sprintf("%#x", r),
+			"f.Root": fmt.Sprintf("%#x", f.Root),
+		}).Error("Root and finalized store are not consistent")
 		return errors.New("Root and finalized store are not consistent")
 	}
 

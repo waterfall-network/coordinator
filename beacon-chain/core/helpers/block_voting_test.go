@@ -11,226 +11,206 @@ import (
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
-//func TestBlockVotingsCalcFinalization_finalization_OK(t *testing.T) {
-//	state, keys := util.DeterministicGenesisState(t, 128)
-//
-//	sig := keys[0].Sign([]byte{'t', 'e', 's', 't'})
-//
-//	list := bitfield.NewBitlist(4)
-//	list.SetBitAt(0, true)
-//	list.SetBitAt(1, true)
-//	list.SetBitAt(2, true)
-//
-//	root_0 := gwatCommon.BytesToHash([]byte("root-0--------------------------"))
-//	var atts_0 []*ethpb.CommitteeVote
-//	atts_0 = append(atts_0, &ethpb.CommitteeVote{
-//		Index:           0,
-//		Slot:            types.Slot(5),
-//		AggregationBits: list,
-//	})
-//
-//	root_1 := gwatCommon.BytesToHash([]byte("root-1--------------------------"))
-//	var atts_1 []*ethpb.CommitteeVote
-//
-//	atts_1 = append(atts_1, &ethpb.CommitteeVote{
-//		Index:           0,
-//		Slot:            types.Slot(6),
-//		AggregationBits: list,
-//	})
-//
-//	root_2 := gwatCommon.BytesToHash([]byte("root-2--------------------------"))
-//	var atts_2 []*ethpb.CommitteeVote
-//	atts_2 = append(atts_2, &ethpb.CommitteeVote{
-//		Index:           0,
-//		Slot:            types.Slot(7),
-//		AggregationBits: list,
-//	})
-//
-//	blobVotings := []*ethpb.BlockVoting{
-//		{
-//			Root: root_0[:],
-//			Slot: 8,
-//			Candidates: gwatCommon.HashArray{
-//				gwatCommon.Hash{0xff, 0x02},
-//				gwatCommon.Hash{0xff, 0x01},
-//				gwatCommon.Hash{0xff, 0xff},
-//
-//				gwatCommon.Hash{0x11, 0x11},
-//				gwatCommon.Hash{0x11, 0x22},
-//				gwatCommon.Hash{0x11, 0x33},
-//
-//				gwatCommon.Hash{0xaa, 0x66},
-//			}.ToBytes(),
-//			Votes: atts_0,
-//		},
-//		{
-//			Root: root_1[:],
-//			Slot: 8,
-//			Candidates: gwatCommon.HashArray{
-//				gwatCommon.Hash{0xff, 0x03},
-//				gwatCommon.Hash{0xff, 0x02},
-//				gwatCommon.Hash{0xff, 0x01},
-//				gwatCommon.Hash{0xff, 0xff},
-//
-//				gwatCommon.Hash{0x11, 0x11},
-//				gwatCommon.Hash{0x11, 0x22},
-//				gwatCommon.Hash{0x11, 0x33},
-//
-//				gwatCommon.Hash{0xaa, 0x55},
-//			}.ToBytes(),
-//			Votes: atts_1,
-//		},
-//		{
-//			Root: root_2[:],
-//			Slot: 8,
-//			Candidates: gwatCommon.HashArray{
-//
-//				gwatCommon.Hash{0x11, 0x11},
-//				gwatCommon.Hash{0x11, 0x22},
-//
-//				gwatCommon.Hash{0x22, 0x33},
-//				gwatCommon.Hash{0xaa, 0x77},
-//			}.ToBytes(),
-//			Votes: atts_2,
-//		},
-//	}
-//
-//	want := gwatCommon.HashArray{
-//		gwatCommon.Hash{0x11, 0x11},
-//		gwatCommon.Hash{0x11, 0x22},
-//	}
-//
-//	finalization, err := helpers.BlockVotingsCalcFinalization(context.Background(), state, blobVotings, gwatCommon.Hash{0xff, 0xff})
-//
-//	assert.NoError(t, err)
-//	assert.DeepEqual(t, fmt.Sprintf("%v", want), fmt.Sprintf("%v", finalization))
-//}
+func TestBlockVotingsCalcFinalization_AggregateCommitteeVote_OK(t *testing.T) {
+	//t.Skip()//unstable
+	// Case 1: aggregate
+	list_0 := bitfield.NewBitlist(10)
+	list_0.SetBitAt(0, true)
+	list_0.SetBitAt(1, true)
+	list_0.SetBitAt(2, true)
 
-//func TestBlockVotingsCalcFinalization_fin_after_3_slots(t *testing.T) {
-//	state, keys := util.DeterministicGenesisState(t, 128)
-//
-//	sig := keys[0].Sign([]byte{'t', 'e', 's', 't'})
-//
-//	list := bitfield.NewBitlist(4)
-//	list.SetBitAt(0, true)
-//	list.SetBitAt(1, true)
-//	list.SetBitAt(2, true)
-//
-//	root_0 := gwatCommon.BytesToHash([]byte("root-0--------------------------"))
-//	var atts_0 []*ethpb.Attestation
-//	atts_0 = append(atts_0, &ethpb.Attestation{
-//		Data: &ethpb.AttestationData{
-//			CommitteeIndex:  0,
-//			Slot:            types.Slot(5),
-//			BeaconBlockRoot: root_0[:],
-//		},
-//		Signature:       sig.Marshal(),
-//		AggregationBits: list,
-//	})
-//
-//	atts_0 = append(atts_0, &ethpb.Attestation{
-//		Data: &ethpb.AttestationData{
-//			CommitteeIndex:  0,
-//			Slot:            types.Slot(6),
-//			BeaconBlockRoot: root_0[:],
-//		},
-//		Signature:       sig.Marshal(),
-//		AggregationBits: list,
-//	})
-//
-//	atts_0 = append(atts_0, &ethpb.Attestation{
-//		Data: &ethpb.AttestationData{
-//			CommitteeIndex:  0,
-//			Slot:            types.Slot(7),
-//			BeaconBlockRoot: root_0[:],
-//		},
-//		Signature:       sig.Marshal(),
-//		AggregationBits: list,
-//	})
-//
-//	blobVotings := []*ethpb.BlockVoting{
-//		{
-//			Root: root_0[:],
-//			Slot: 5,
-//			Candidates: gwatCommon.HashArray{
-//				gwatCommon.Hash{0x11, 0x11},
-//			}.ToBytes(),
-//			Attestations: atts_0,
-//		},
-//	}
-//
-//	want := gwatCommon.HashArray{
-//		gwatCommon.Hash{0x11, 0x11},
-//	}
-//
-//	finalization, err := helpers.BlockVotingsCalcFinalization(context.Background(), state, blobVotings, gwatCommon.Hash{0xff, 0xff})
-//
-//	assert.NoError(t, err)
-//	assert.DeepEqual(t, fmt.Sprintf("%v", want), fmt.Sprintf("%v", finalization))
-//}
+	var votes []*ethpb.CommitteeVote
+	votes = append(votes, &ethpb.CommitteeVote{
+		Index:           0,
+		Slot:            types.Slot(5),
+		AggregationBits: list_0,
+	})
 
-//func TestBlockVotingsCalcFinalization_fin_after_3_slots_v2(t *testing.T) {
-//	state, keys := util.DeterministicGenesisState(t, 128)
-//
-//	sig := keys[0].Sign([]byte{'t', 'e', 's', 't'})
-//
-//	list := bitfield.NewBitlist(4)
-//	list.SetBitAt(0, true)
-//	list.SetBitAt(1, true)
-//	list.SetBitAt(2, true)
-//
-//	root_0 := gwatCommon.BytesToHash([]byte("root-0--------------------------"))
-//	var atts_0 []*ethpb.Attestation
-//	atts_0 = append(atts_0, &ethpb.Attestation{
-//		Data: &ethpb.AttestationData{
-//			CommitteeIndex:  0,
-//			Slot:            types.Slot(5),
-//			BeaconBlockRoot: root_0[:],
-//		},
-//		Signature:       sig.Marshal(),
-//		AggregationBits: list,
-//	})
-//
-//	blobVotings := []*ethpb.BlockVoting{
-//		{
-//			Root: root_0[:],
-//			Slot: 5,
-//			Candidates: gwatCommon.HashArray{
-//				gwatCommon.Hash{0x11, 0x11},
-//				gwatCommon.Hash{0x11, 0x22},
-//			}.ToBytes(),
-//			Attestations: atts_0,
-//		},
-//		{
-//			Root: root_0[:],
-//			Slot: 6,
-//			Candidates: gwatCommon.HashArray{
-//				gwatCommon.Hash{0x11, 0x11},
-//				gwatCommon.Hash{0x11, 0x22},
-//			}.ToBytes(),
-//			Attestations: atts_0,
-//		},
-//		{
-//			Root: root_0[:],
-//			Slot: 7,
-//			Candidates: gwatCommon.HashArray{
-//				gwatCommon.Hash{0x11, 0x11},
-//				gwatCommon.Hash{0x11, 0x22},
-//			}.ToBytes(),
-//			Attestations: atts_0,
-//		},
-//	}
-//
-//	want := gwatCommon.HashArray{
-//		gwatCommon.Hash{0x11, 0x11},
-//		gwatCommon.Hash{0x11, 0x22},
-//	}
-//
-//	finalization, err := helpers.BlockVotingsCalcFinalization(context.Background(), state, blobVotings, gwatCommon.Hash{0xff, 0xff})
-//
-//	assert.NoError(t, err)
-//	assert.DeepEqual(t, fmt.Sprintf("%v", want), fmt.Sprintf("%v", finalization))
-//}
+	// Vote to aggregate
+	list_1 := bitfield.NewBitlist(10)
+	list_1.SetBitAt(4, true)
+	list_1.SetBitAt(6, true)
+	list_1.SetBitAt(8, true)
+	addVote := &ethpb.CommitteeVote{
+		Index:           0,
+		Slot:            types.Slot(5),
+		AggregationBits: list_1,
+	}
+	votes = append(votes, addVote)
+
+	//diff committee
+	list_2 := bitfield.NewBitlist(10)
+	list_2.SetBitAt(5, true)
+	votes = append(votes, &ethpb.CommitteeVote{
+		Index:           1,
+		Slot:            types.Slot(5),
+		AggregationBits: list_2,
+	})
+	//diff slot
+	list_3 := bitfield.NewBitlist(10)
+	list_3.SetBitAt(7, true)
+	votes = append(votes, &ethpb.CommitteeVote{
+		Index:           0,
+		Slot:            types.Slot(6),
+		AggregationBits: list_3,
+	})
+
+	var want []*ethpb.CommitteeVote
+	var want_bits = bitfield.NewBitlist(10)
+	want_bits.SetBitAt(0, true)
+	want_bits.SetBitAt(1, true)
+	want_bits.SetBitAt(2, true)
+	want_bits.SetBitAt(4, true)
+	want_bits.SetBitAt(6, true)
+	want_bits.SetBitAt(8, true)
+
+	//aggregated
+	want = append(want, &ethpb.CommitteeVote{
+		Index:           0,
+		Slot:            types.Slot(5),
+		AggregationBits: want_bits,
+	})
+	//diff committee
+	want_bits_2 := bitfield.NewBitlist(10)
+	want_bits_2.SetBitAt(5, true)
+	want = append(want, &ethpb.CommitteeVote{
+		Index:           1,
+		Slot:            types.Slot(5),
+		AggregationBits: want_bits_2,
+	})
+	//diff slot
+	want_bits_3 := bitfield.NewBitlist(10)
+	want_bits_3.SetBitAt(7, true)
+	want = append(want, &ethpb.CommitteeVote{
+		Index:           0,
+		Slot:            types.Slot(6),
+		AggregationBits: want_bits_3,
+	})
+
+	agrVotes := helpers.AggregateCommitteeVote(votes)
+	assert.DeepEqual(t, want, agrVotes)
+
+	// Case 2: append new
+	// Vote to append
+	list_4 := bitfield.NewBitlist(10)
+	list_4.SetBitAt(4, true)
+	appVote := &ethpb.CommitteeVote{
+		Index:           7,
+		Slot:            types.Slot(10),
+		AggregationBits: list_4,
+	}
+	votes = append(votes, appVote)
+
+	want_bits_4 := bitfield.NewBitlist(10)
+	want_bits_4.SetBitAt(4, true)
+	want = append(want, &ethpb.CommitteeVote{
+		Index:           7,
+		Slot:            types.Slot(10),
+		AggregationBits: want_bits_4,
+	})
+
+	//want = helpers.AggregateCommitteeVote(want)
+	agrVotes = helpers.AggregateCommitteeVote(votes)
+
+	assert.DeepEqual(t, want, agrVotes)
+}
+
+func TestBlockVotingsCalcFinalization_AddAggregateCommitteeVote_OK(t *testing.T) {
+	// Case 1: aggregate
+	list_0 := bitfield.NewBitlist(10)
+	list_0.SetBitAt(0, true)
+	list_0.SetBitAt(1, true)
+	list_0.SetBitAt(2, true)
+
+	var votes []*ethpb.CommitteeVote
+	votes = append(votes, &ethpb.CommitteeVote{
+		Index:           0,
+		Slot:            types.Slot(5),
+		AggregationBits: list_0,
+	})
+
+	// Vote to aggregate
+	list_1 := bitfield.NewBitlist(10)
+	list_1.SetBitAt(4, true)
+	list_1.SetBitAt(6, true)
+	list_1.SetBitAt(8, true)
+	addVote := &ethpb.CommitteeVote{
+		Index:           0,
+		Slot:            types.Slot(5),
+		AggregationBits: list_1,
+	}
+	//diff committee
+	list_2 := bitfield.NewBitlist(10)
+	list_2.SetBitAt(5, true)
+	votes = append(votes, &ethpb.CommitteeVote{
+		Index:           1,
+		Slot:            types.Slot(5),
+		AggregationBits: list_2,
+	})
+	//diff slot
+	list_3 := bitfield.NewBitlist(10)
+	list_3.SetBitAt(7, true)
+	votes = append(votes, &ethpb.CommitteeVote{
+		Index:           0,
+		Slot:            types.Slot(6),
+		AggregationBits: list_3,
+	})
+
+	var want []*ethpb.CommitteeVote
+	var want_bits = bitfield.NewBitlist(10)
+	want_bits.SetBitAt(0, true)
+	want_bits.SetBitAt(1, true)
+	want_bits.SetBitAt(2, true)
+	want_bits.SetBitAt(4, true)
+	want_bits.SetBitAt(6, true)
+	want_bits.SetBitAt(8, true)
+
+	//aggregated
+	want = append(want, &ethpb.CommitteeVote{
+		Index:           0,
+		Slot:            types.Slot(5),
+		AggregationBits: want_bits,
+	})
+	//diff committee
+	want_bits_2 := bitfield.NewBitlist(10)
+	want_bits_2.SetBitAt(5, true)
+	want = append(want, &ethpb.CommitteeVote{
+		Index:           1,
+		Slot:            types.Slot(5),
+		AggregationBits: want_bits_2,
+	})
+	//diff slot
+	want_bits_3 := bitfield.NewBitlist(10)
+	want_bits_3.SetBitAt(7, true)
+	want = append(want, &ethpb.CommitteeVote{
+		Index:           0,
+		Slot:            types.Slot(6),
+		AggregationBits: want_bits_3,
+	})
+
+	agrVotes := helpers.AddAggregateCommitteeVote(votes, addVote)
+	assert.DeepEqual(t, want, agrVotes)
+
+	// Case 2: append new
+	// Vote to append
+	list_4 := bitfield.NewBitlist(10)
+	list_4.SetBitAt(4, true)
+	appVote := &ethpb.CommitteeVote{
+		Index:           7,
+		Slot:            types.Slot(10),
+		AggregationBits: list_4,
+	}
+
+	want_bits_4 := bitfield.NewBitlist(10)
+	want_bits_4.SetBitAt(4, true)
+	want = append(want, &ethpb.CommitteeVote{
+		Index:           7,
+		Slot:            types.Slot(10),
+		AggregationBits: want_bits_4,
+	})
+	agrVotes = helpers.AddAggregateCommitteeVote(votes, appVote)
+	assert.DeepEqual(t, want, agrVotes)
+}
 
 func TestAttestationArrSort(t *testing.T) {
 	list := bitfield.NewBitlist(4)

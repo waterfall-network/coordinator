@@ -47,6 +47,8 @@ func Testnet8Config() *BeaconChainConfig {
 	cfg.FinEth1ForkSlot = math.MaxUint64
 	cfg.SlotsPerArchivedPoint = 2048
 
+	cfg.SlotsPerEpoch = 32
+	cfg.SecondsPerSlot = 4
 	cfg.MinDepositAmount = 100 * 1e9
 	cfg.MaxEffectiveBalance = 3200 * 1e9
 	cfg.EjectionBalance = 1600 * 1e9
