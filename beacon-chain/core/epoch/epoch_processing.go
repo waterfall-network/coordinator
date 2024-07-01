@@ -90,17 +90,17 @@ func AttestingBalance(ctx context.Context, state state.ReadOnlyBeaconState, atts
 //	 for index in activation_queue[:get_validator_churn_limit(state)]:
 //	     validator = state.validators[index]
 //	     validator.activation_epoch = compute_activation_exit_epoch(get_current_epoch(state))
-func ProcessRegistryUpdates(ctx context.Context, state state.BeaconState) (state.BeaconState, error) {
-	currentEpoch := time.CurrentEpoch(state)
-	vals := state.Validators()
+func ProcessRegistryUpdates(ctx context.Context, st state.BeaconState) (state.BeaconState, error) {
+	currentEpoch := time.CurrentEpoch(st)
+	vals := st.Validators()
 	var err error
 	ejectionBal := params.BeaconConfig().EjectionBalance
-	activationEligibilityEpoch := time.CurrentEpoch(state) + 1
+	activationEligibilityEpoch := time.CurrentEpoch(st) + 1
 	for idx, validator := range vals {
 		// Process the validators for activation eligibility.
 		if helpers.IsEligibleForActivationQueue(validator) {
 			validator.ActivationEligibilityEpoch = activationEligibilityEpoch
-			if err := state.UpdateValidatorAtIndex(types.ValidatorIndex(idx), validator); err != nil {
+			if err := st.UpdateValidatorAtIndex(types.ValidatorIndex(idx), validator); err != nil {
 				return nil, err
 			}
 		}
@@ -110,7 +110,7 @@ func ProcessRegistryUpdates(ctx context.Context, state state.BeaconState) (state
 		belowEjectionBalance := validator.EffectiveBalance <= ejectionBal
 		if isActive && belowEjectionBalance {
 			ejectionHash := bytesutil.ToBytes32(validator.CreatorAddress)
-			state, err = validators.InitiateValidatorExit(ctx, state, types.ValidatorIndex(idx), ejectionHash)
+			st, err = validators.InitiateValidatorExit(ctx, st, types.ValidatorIndex(idx), ejectionHash)
 			if err != nil {
 				return nil, errors.Wrapf(err, "could not initiate exit for validator %d", idx)
 			}
@@ -120,7 +120,7 @@ func ProcessRegistryUpdates(ctx context.Context, state state.BeaconState) (state
 	// Queue validators eligible for activation and not yet dequeued for activation.
 	var activationQ []types.ValidatorIndex
 	for idx, validator := range vals {
-		if helpers.IsEligibleForActivation(state, validator) {
+		if helpers.IsEligibleForActivation(st, validator) {
 			activationQ = append(activationQ, types.ValidatorIndex(idx))
 		}
 	}
@@ -129,7 +129,7 @@ func ProcessRegistryUpdates(ctx context.Context, state state.BeaconState) (state
 
 	// Only activate just enough validators according to the activation churn limit.
 	limit := uint64(len(activationQ))
-	activeValidatorCount, err := helpers.ActiveValidatorCount(ctx, state, currentEpoch)
+	activeValidatorCount, err := helpers.ActiveValidatorCount(ctx, st, currentEpoch)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get active validator count")
 	}
@@ -146,16 +146,16 @@ func ProcessRegistryUpdates(ctx context.Context, state state.BeaconState) (state
 
 	activationExitEpoch := helpers.ActivationExitEpoch(currentEpoch)
 	for _, index := range activationQ[:limit] {
-		validator, err := state.ValidatorAtIndex(index)
+		validator, err := st.ValidatorAtIndex(index)
 		if err != nil {
 			return nil, err
 		}
 		validator.ActivationEpoch = activationExitEpoch
-		if err := state.UpdateValidatorAtIndex(index, validator); err != nil {
+		if err := st.UpdateValidatorAtIndex(index, validator); err != nil {
 			return nil, err
 		}
 	}
-	return state, nil
+	return st, nil
 }
 
 // ProcessSlashings processes the slashed validators during epoch processing,

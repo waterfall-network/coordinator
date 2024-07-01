@@ -1393,6 +1393,7 @@ go_repository(
 
 go_repository(
     name = "com_github_cockroachdb_errors",
+    build_file_proto_mode = "disable_global",
     importpath = "github.com/cockroachdb/errors",
     sum = "h1:xSEW75zKaKCWzR3OfxXUxgrk/NtT4G1MiOv5lWZazG8=",
     version = "v1.11.1",

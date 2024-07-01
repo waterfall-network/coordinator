@@ -8,6 +8,7 @@ import (
 	"math"
 	"sort"
 
+	lru "github.com/hashicorp/golang-lru"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
@@ -57,8 +58,9 @@ func ProcessDagConsensus(ctx context.Context, beaconState state.BeaconState, sig
 		}
 	}
 	//append attestations of the current block to block voting
+	isBlockVotingForkSlot := params.BeaconConfig().IsBlockVotingForkSlot(beaconState.Slot())
 	for _, att := range attestations {
-		blockVoting = appendBlockVotingAtt(blockVoting, att)
+		blockVoting = appendBlockVotingAtt(blockVoting, att, isBlockVotingForkSlot)
 	}
 
 	//calculation of finalization sequence
@@ -282,8 +284,32 @@ func calcFinalization(ctx context.Context, beaconState state.BeaconState, blockV
 	return resFinalization, nil
 }
 
+var minSupportCache *lru.Cache
+
 // BlockVotingMinSupport calc minimal required number of votes for BlockVoting consensus.
 func BlockVotingMinSupport(ctx context.Context, state state.BeaconState, slot types.Slot) (int, error) {
+	var err error
+	if minSupportCache == nil {
+		minSupportCache, err = lru.New(int(params.BeaconConfig().SlotsPerEpoch) * 10)
+		if err != nil {
+			minSupportCache = nil
+		}
+	}
+	if minSupportCache.Contains(slot) {
+		cval, ok1 := minSupportCache.Get(slot)
+		if ok1 {
+			ms, ok2 := cval.(int)
+			if ok2 {
+				log.WithFields(logrus.Fields{
+					"slot":        slot,
+					"minSupport":  ms,
+					"cachedSlots": minSupportCache.Len(),
+				}).Info("minSupportCache used")
+				return ms, nil
+			}
+		}
+	}
+
 	// 50% + 1
 	minSupport := params.BeaconConfig().BlockVotingMinSupportPrc
 	committees, err := helpers.CalcSlotCommitteesIndexes(ctx, state, slot)
@@ -296,7 +322,10 @@ func BlockVotingMinSupport(ctx context.Context, state state.BeaconState, slot ty
 	}
 	val := int(math.Ceil((float64(slotAtts)/100)*float64(minSupport))) + 1
 	if val > slotAtts {
-		return slotAtts, nil
+		val = slotAtts
+	}
+	if minSupportCache != nil {
+		minSupportCache.Add(slot, val)
 	}
 	return val, nil
 }
@@ -390,6 +419,7 @@ func getBlockVotingRootsLtSlot(blockVoting []*ethpb.BlockVoting, slot types.Slot
 // cleanBlockVotingStaleVotes removes unsupported BlockVoting.Votes and empty BlockVoting older than 2 epochs.
 func cleanBlockVotingStaleVotes(ctx context.Context, blockVoting []*ethpb.BlockVoting, bState state.BeaconState) ([]*ethpb.BlockVoting, error) {
 	// define slot of deprecation
+	stSlot := bState.Slot()
 	targetEpoch := slots.ToEpoch(bState.Slot())
 	if targetEpoch <= 2 {
 		return blockVoting, nil
@@ -406,9 +436,16 @@ func cleanBlockVotingStaleVotes(ctx context.Context, blockVoting []*ethpb.BlockV
 			slotsArr := make([]types.Slot, 0, len(bv.Votes))
 			for _, vote := range bv.Votes {
 				slot := vote.Slot
-				slotsArr = append(slotsArr, slot)
-				if slotMap[slot] == nil {
-					slotMap[slot] = []*ethpb.CommitteeVote{}
+				if params.BeaconConfig().IsBlockVotingForkSlot(stSlot) {
+					if slotMap[slot] == nil {
+						slotMap[slot] = []*ethpb.CommitteeVote{}
+						slotsArr = append(slotsArr, slot)
+					}
+				} else {
+					slotsArr = append(slotsArr, slot)
+					if slotMap[slot] == nil {
+						slotMap[slot] = []*ethpb.CommitteeVote{}
+					}
 				}
 				slotMap[slot] = append(slotMap[slot], vote)
 			}
@@ -443,6 +480,9 @@ func cleanBlockVotingStaleVotes(ctx context.Context, blockVoting []*ethpb.BlockV
 			}
 			resVotes := make([]*ethpb.CommitteeVote, 0, resLen)
 			for _, slot := range slotsArr {
+				//for _, vote := range slotMap[slot] {
+				//	resVotes = helpers.AddAggregateCommitteeVote(resVotes, vote)
+				//}
 				if len(slotMap[slot]) > 0 {
 					resVotes = append(resVotes, slotMap[slot]...)
 				}
@@ -468,6 +508,12 @@ func cleanBlockVotingStaleVotes(ctx context.Context, blockVoting []*ethpb.BlockV
 
 // handleBlockVotingVotesLimit checks BlockVoting.Votes len limitation and reduces len in needed.
 func handleBlockVotingVotesLimit(ctx context.Context, blockVoting []*ethpb.BlockVoting, bState state.BeaconState) ([]*ethpb.BlockVoting, error) {
+	var (
+		minSupport    int
+		err           error
+		minSupportMap = make(map[types.Slot]int)
+		stSlot        = bState.Slot()
+	)
 	for i, bv := range blockVoting {
 		// check Votes len limit
 		if len(bv.Votes) > 64 {
@@ -477,9 +523,16 @@ func handleBlockVotingVotesLimit(ctx context.Context, blockVoting []*ethpb.Block
 			slotsArr := make([]types.Slot, 0, len(bv.Votes))
 			for _, vote := range bv.Votes {
 				slot := vote.Slot
-				slotsArr = append(slotsArr, slot)
-				if slotMap[slot] == nil {
-					slotMap[slot] = []*ethpb.CommitteeVote{}
+				if params.BeaconConfig().IsBlockVotingForkSlot(stSlot) {
+					if slotMap[slot] == nil {
+						slotMap[slot] = []*ethpb.CommitteeVote{}
+						slotsArr = append(slotsArr, slot)
+					}
+				} else {
+					slotsArr = append(slotsArr, slot)
+					if slotMap[slot] == nil {
+						slotMap[slot] = []*ethpb.CommitteeVote{}
+					}
 				}
 				slotMap[slot] = append(slotMap[slot], vote)
 			}
@@ -492,9 +545,14 @@ func handleBlockVotingVotesLimit(ctx context.Context, blockVoting []*ethpb.Block
 				votes := slotMap[slot]
 				// find unsupported with min slot
 				//unsupported BlockVoting and older 2 epochs
-				minSupport, err := BlockVotingMinSupport(ctx, bState, slot)
-				if err != nil {
-					return []*ethpb.BlockVoting{}, err
+				if v, ok := minSupportMap[slot]; ok {
+					minSupport = v
+				} else {
+					minSupport, err = BlockVotingMinSupport(ctx, bState, slot)
+					if err != nil {
+						return []*ethpb.BlockVoting{}, err
+					}
+					minSupportMap[slot] = minSupport
 				}
 				// if no enough support rm slot votes
 				if helpers.CountCommitteeVotes(votes) < uint64(minSupport) {
@@ -505,6 +563,9 @@ func handleBlockVotingVotesLimit(ctx context.Context, blockVoting []*ethpb.Block
 			}
 			resVotes := make([]*ethpb.CommitteeVote, 0, resLen)
 			for _, slot := range slotsArr {
+				//for _, vote := range slotMap[slot] {
+				//	resVotes = helpers.AddAggregateCommitteeVote(resVotes, vote)
+				//}
 				if len(slotMap[slot]) > 0 {
 					resVotes = append(resVotes, slotMap[slot]...)
 				}
@@ -549,7 +610,7 @@ func addBlockVoting(votes []*ethpb.BlockVoting, root []byte, slot types.Slot, ca
 	return votes
 }
 
-func appendBlockVotingAtt(votes []*ethpb.BlockVoting, val *ethpb.Attestation) []*ethpb.BlockVoting {
+func appendBlockVotingAtt(votes []*ethpb.BlockVoting, val *ethpb.Attestation, isBlockVotingForkSlot bool) []*ethpb.BlockVoting {
 	root := val.GetData().BeaconBlockRoot
 	if !isBlockVotingExists(votes, root) {
 		return votes
@@ -563,7 +624,12 @@ func appendBlockVotingAtt(votes []*ethpb.BlockVoting, val *ethpb.Attestation) []
 	cpy := helpers.BlockVotingArrCopy(votes)
 	for _, itm := range cpy {
 		if bytes.Equal(itm.Root, root) {
-			itm.Votes = helpers.AggregateCommitteeVote(append(itm.GetVotes(), newVote))
+			if isBlockVotingForkSlot {
+				itm.Votes = helpers.AddAggregateCommitteeVote(itm.GetVotes(), newVote)
+			} else {
+				itm.Votes = helpers.AggregateCommitteeVote(append(itm.GetVotes(), newVote))
+			}
+			break
 		}
 	}
 	return cpy
@@ -573,7 +639,7 @@ func removeBlockVoting(votes []*ethpb.BlockVoting, roots [][]byte) []*ethpb.Bloc
 	if len(roots) == 0 {
 		return votes
 	}
-	upVotes := make([]*ethpb.BlockVoting, 0)
+	upVotes := make([]*ethpb.BlockVoting, 0, len(votes))
 	for _, itm := range votes {
 		if helpers.IndexOfRoot(roots, itm.Root) == -1 {
 			upVotes = append(upVotes, itm)
