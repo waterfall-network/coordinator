@@ -98,6 +98,14 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 	ctx = context.WithValue(ctx, params.BeaconConfig().CtxBlockFetcherKey, db.BlockInfoFetcherFunc(s.cfg.BeaconDB))
 	defer span.End()
 
+	rmBlRootProc := true
+	s.setBlRootProcessing(blockRoot)
+	defer func() {
+		if rmBlRootProc {
+			s.rmBlRootProcessing(blockRoot)
+		}
+	}()
+
 	s.onBlockMu.Lock()
 	defer s.onBlockMu.Unlock()
 

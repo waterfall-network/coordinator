@@ -173,6 +173,7 @@ func reportSlotMetrics(stateSlot, headSlot, clockSlot types.Slot, finalizedCheck
 
 // reportEpochMetrics reports epoch related metrics.
 func reportEpochMetrics(ctx context.Context, postState, headState state.BeaconState) error {
+	var err error
 	currentEpoch := types.Epoch(postState.Slot() / params.BeaconConfig().SlotsPerEpoch)
 
 	// Validator instances
@@ -191,40 +192,44 @@ func reportEpochMetrics(ctx context.Context, postState, headState state.BeaconSt
 	slashingBalance := uint64(0)
 	slashingEffectiveBalance := uint64(0)
 
-	for i, validator := range postState.Validators() {
+	err = postState.ReadFromEveryValidator(func(i int, validator state.ReadOnlyValidator) error {
 		bal, err := postState.BalanceAtIndex(types.ValidatorIndex(i))
 		if err != nil {
 			log.Errorf("Could not load validator balance: %v", err)
-			continue
+			return nil
 		}
-		if validator.Slashed {
-			if currentEpoch < validator.ExitEpoch {
+		if validator.Slashed() {
+			if currentEpoch < validator.ExitEpoch() {
 				slashingInstances++
 				slashingBalance += bal
-				slashingEffectiveBalance += validator.EffectiveBalance
+				slashingEffectiveBalance += validator.EffectiveBalance()
 			} else {
 				slashedInstances++
 			}
-			continue
+			return nil
 		}
-		if validator.ExitEpoch != params.BeaconConfig().FarFutureEpoch {
-			if currentEpoch < validator.ExitEpoch {
+		if validator.ExitEpoch() != params.BeaconConfig().FarFutureEpoch {
+			if currentEpoch < validator.ExitEpoch() {
 				exitingInstances++
 				exitingBalance += bal
-				exitingEffectiveBalance += validator.EffectiveBalance
+				exitingEffectiveBalance += validator.EffectiveBalance()
 			} else {
 				exitedInstances++
 			}
-			continue
+			return nil
 		}
-		if currentEpoch < validator.ActivationEpoch {
+		if currentEpoch < validator.ActivationEpoch() {
 			pendingInstances++
 			pendingBalance += bal
-			continue
+			return nil
 		}
 		activeInstances++
 		activeBalance += bal
-		activeEffectiveBalance += validator.EffectiveBalance
+		activeEffectiveBalance += validator.EffectiveBalance()
+		return nil
+	})
+	if err != nil {
+		return err
 	}
 	activeInstances += exitingInstances + slashingInstances
 	activeBalance += exitingBalance + slashingBalance
@@ -261,7 +266,6 @@ func reportEpochMetrics(ctx context.Context, postState, headState state.BeaconSt
 
 	var b *precompute.Balance
 	var v []*precompute.Validator
-	var err error
 	switch headState.Version() {
 	case version.Phase0:
 		// Validator participation should be viewed on the canonical chain.

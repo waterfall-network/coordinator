@@ -14,6 +14,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/migration"
+	pb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc/codes"
@@ -217,16 +218,15 @@ func valContainersByRequestIds(st state.BeaconState, validatorIds [][]byte) ([]*
 	var valContainers []*ethpb.ValidatorContainer
 	allBalances := st.Balances()
 	if len(validatorIds) == 0 {
-		allValidators := st.Validators()
-		valContainers = make([]*ethpb.ValidatorContainer, len(allValidators))
-		for i, validator := range allValidators {
+		valContainers = make([]*ethpb.ValidatorContainer, st.NumValidators())
+		err := st.ApplyToEveryValidator(func(i int, validator *pb.Validator) (bool, *pb.Validator, error) {
 			readOnlyVal, err := v1.NewValidator(validator)
 			if err != nil {
-				return nil, status.Errorf(codes.Internal, "Could not convert validator: %v", err)
+				return false, validator, status.Errorf(codes.Internal, "Could not convert validator: %v", err)
 			}
 			subStatus, err := helpers.ValidatorSubStatus(readOnlyVal, epoch)
 			if err != nil {
-				return nil, errors.Wrap(err, "could not get validator sub status")
+				return false, validator, errors.Wrap(err, "could not get validator sub status")
 			}
 			valContainers[i] = &ethpb.ValidatorContainer{
 				Index:     types.ValidatorIndex(i),
@@ -234,6 +234,10 @@ func valContainersByRequestIds(st state.BeaconState, validatorIds [][]byte) ([]*
 				Status:    subStatus,
 				Validator: migration.V1Alpha1ValidatorToV1(validator),
 			}
+			return false, validator, nil
+		})
+		if err != nil {
+			return nil, err
 		}
 	} else {
 		valContainers = make([]*ethpb.ValidatorContainer, 0, len(validatorIds))

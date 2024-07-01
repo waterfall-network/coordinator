@@ -142,6 +142,18 @@ func TestNewForkChoiceCache_getCompatibleFc(t *testing.T) {
 			finalization: gwatCommon.HashArray{{'a', '1'}},
 			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
 		}},
+		{slot: 3, root: nrToHash(3), parent: 2, spinesData: &SpinesData{
+			spines:       gwatCommon.HashArray{{'a', '2'}, {'a', '3'}},
+			prefix:       gwatCommon.HashArray{},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
+		}},
+		{slot: 4, root: nrToHash(4), parent: 3, spinesData: &SpinesData{
+			spines:       gwatCommon.HashArray{{'a', '2'}, {'a', '3'}},
+			prefix:       gwatCommon.HashArray{},
+			finalization: gwatCommon.HashArray{{'a', '1'}},
+			cpFinalized:  gwatCommon.HashArray{{'x', 'x', 'x'}},
+		}},
 	}
 	f.balances = []uint64{123, 456, 798, 987, 654, 321}
 
@@ -153,7 +165,7 @@ func TestNewForkChoiceCache_getCompatibleFc(t *testing.T) {
 	}
 	expExld := map[[32]byte]uint64{}
 
-	cachedFc, excluded := getCompatibleFc(nodesIndices, f)
+	cachedFc, excluded, _ := getCompatibleFc(nodesIndices, f)
 	require.DeepEqual(t, f, cachedFc)
 	require.DeepEqual(t, expExld, excluded)
 
@@ -168,7 +180,7 @@ func TestNewForkChoiceCache_getCompatibleFc(t *testing.T) {
 	expExld = nodesIndices
 	expNewFc := New(f.store.justifiedEpoch, f.store.finalizedEpoch)
 
-	cachedFc, excluded = getCompatibleFc(nodesIndices, f)
+	cachedFc, excluded, _ = getCompatibleFc(nodesIndices, f)
 	require.DeepEqual(t, expNewFc, cachedFc)
 	require.DeepEqual(t, expExld, excluded)
 
@@ -188,7 +200,7 @@ func TestNewForkChoiceCache_getCompatibleFc(t *testing.T) {
 		nrToHash(4): 4,
 	}
 
-	cachedFc, excluded = getCompatibleFc(nodesIndices, f)
+	cachedFc, excluded, _ = getCompatibleFc(nodesIndices, f)
 	require.DeepEqual(t, f, cachedFc)
 	require.DeepEqual(t, expExld, excluded)
 
@@ -200,7 +212,7 @@ func TestNewForkChoiceCache_getCompatibleFc(t *testing.T) {
 	expExld = nodesIndices
 	var expFc *ForkChoice = New(f.store.justifiedEpoch, f.store.finalizedEpoch)
 
-	cachedFc, excluded = getCompatibleFc(nodesIndices, f)
+	cachedFc, excluded, _ = getCompatibleFc(nodesIndices, f)
 	require.DeepEqual(t, expFc, cachedFc)
 	require.DeepEqual(t, expExld, excluded)
 }
@@ -230,14 +242,14 @@ func TestNewForkChoiceCache_inactivity(t *testing.T) {
 	require.Equal(t, 3, testCache.cache.Len())
 	require.Equal(t, 0, len(testCache.inactivity))
 
-	key0 := cacheKeyByRootIndexMap(map[[32]byte]uint64{
+	key0, _ := cacheKeyByRootIndexMap(map[[32]byte]uint64{
 		nrToHash(0): 0,
 	})
-	key1 := cacheKeyByRootIndexMap(map[[32]byte]uint64{
+	key1, _ := cacheKeyByRootIndexMap(map[[32]byte]uint64{
 		nrToHash(0): 0,
 		nrToHash(1): 1,
 	})
-	key2 := cacheKeyByRootIndexMap(map[[32]byte]uint64{
+	key2, _ := cacheKeyByRootIndexMap(map[[32]byte]uint64{
 		nrToHash(0): 0,
 		nrToHash(1): 1,
 		nrToHash(2): 2,

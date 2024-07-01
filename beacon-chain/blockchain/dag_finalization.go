@@ -15,6 +15,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
+	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
@@ -573,10 +574,9 @@ func (s *Service) collectValidatorSyncData(ctx context.Context, headState state.
 	}
 	workEpoch := slots.ToEpoch(workState.Slot())
 
-	vals := workState.Validators()
 	ffepoch := params.BeaconConfig().FarFutureEpoch
 
-	for idx, validator := range vals {
+	err = workState.ApplyToEveryValidator(func(idx int, validator *ethpb.Validator) (bool, *ethpb.Validator, error) {
 		// activation
 		if validator.ActivationEpoch < ffepoch && validator.ActivationEpoch > 0 && validator.ActivationEpoch > workEpoch {
 			validatorSyncData = append(validatorSyncData, &gwatTypes.ValidatorSync{
@@ -610,6 +610,10 @@ func (s *Service) collectValidatorSyncData(ctx context.Context, headState state.
 				"InitTxHash":          fmt.Sprintf("%#x", validator.ExitHash),
 			}).Info("Exit params")
 		}
+		return false, validator, nil
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	// withdrawals (update balance) calculate for finalized cp
@@ -617,10 +621,8 @@ func (s *Service) collectValidatorSyncData(ctx context.Context, headState state.
 	if err != nil {
 		return nil, err
 	}
-	cpValidators := cpState.Validators()
 
-	// collect withdrawal validator sync op
-	for idx, validator := range cpValidators {
+	err = cpState.ApplyToEveryValidator(func(idx int, validator *ethpb.Validator) (bool, *ethpb.Validator, error) {
 		for _, wop := range validator.WithdrawalOps {
 			if wop.Slot < minSlot {
 				continue
@@ -630,7 +632,7 @@ func (s *Service) collectValidatorSyncData(ctx context.Context, headState state.
 				//if validator is deactivated
 				balance, err = workState.BalanceAtIndex(types.ValidatorIndex(idx))
 				if err != nil {
-					return nil, err
+					return false, validator, err
 				}
 			}
 			vsd := &gwatTypes.ValidatorSync{
@@ -651,6 +653,10 @@ func (s *Service) collectValidatorSyncData(ctx context.Context, headState state.
 				"InitTxHash": fmt.Sprintf("%#x", wop.Hash),
 			}).Info("Withdrawals: Update balance params")
 		}
+		return false, validator, nil
+	})
+	if err != nil {
+		return nil, err
 	}
 	return validatorSyncData, nil
 }

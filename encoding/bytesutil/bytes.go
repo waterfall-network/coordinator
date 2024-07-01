@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/bits"
 	"regexp"
+	"unsafe"
 
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
@@ -124,6 +125,13 @@ func ToBytes48(x []byte) [48]byte {
 	var y [48]byte
 	copy(y[:], x)
 	return y
+}
+
+func ToPtrBytes48(x []byte) (a *[48]byte) {
+	if len(a) <= len(x) {
+		a = (*[len(a)]byte)(unsafe.Pointer(&x[0]))
+	}
+	return a
 }
 
 // ToBytes64 is a convenience method for converting a byte slice to a fix
