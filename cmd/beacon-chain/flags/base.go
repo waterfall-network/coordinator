@@ -3,6 +3,7 @@
 package flags
 
 import (
+	"math"
 	"strings"
 
 	"github.com/urfave/cli/v2"
@@ -129,6 +130,11 @@ var (
 		Name:  "fin-eth1-fork-slot",
 		Usage: "The slot to start to calculate eth1Data by finalized state.",
 		Value: 0,
+	}
+	BlockVotingForkSlot = &cli.Uint64Flag{
+		Name:  "block-voting-fork-slot",
+		Usage: "The slot to start fixed handling of BlockVoting.",
+		Value: math.MaxUint64,
 	}
 	// SetGCPercent is the percentage of current live allocations at which the garbage collector is to run.
 	SetGCPercent = &cli.IntFlag{

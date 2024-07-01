@@ -58,9 +58,9 @@ func ProcessDagConsensus(ctx context.Context, beaconState state.BeaconState, sig
 		}
 	}
 	//append attestations of the current block to block voting
-	isFinEth1ForkSlot := params.BeaconConfig().IsFinEth1ForkSlot(beaconState.Slot())
+	isBlockVotingForkSlot := params.BeaconConfig().IsBlockVotingForkSlot(beaconState.Slot())
 	for _, att := range attestations {
-		blockVoting = appendBlockVotingAtt(blockVoting, att, isFinEth1ForkSlot)
+		blockVoting = appendBlockVotingAtt(blockVoting, att, isBlockVotingForkSlot)
 	}
 
 	//calculation of finalization sequence
@@ -436,7 +436,7 @@ func cleanBlockVotingStaleVotes(ctx context.Context, blockVoting []*ethpb.BlockV
 			slotsArr := make([]types.Slot, 0, len(bv.Votes))
 			for _, vote := range bv.Votes {
 				slot := vote.Slot
-				if params.BeaconConfig().IsFinEth1ForkSlot(stSlot) {
+				if params.BeaconConfig().IsBlockVotingForkSlot(stSlot) {
 					if slotMap[slot] == nil {
 						slotMap[slot] = []*ethpb.CommitteeVote{}
 						slotsArr = append(slotsArr, slot)
@@ -523,7 +523,7 @@ func handleBlockVotingVotesLimit(ctx context.Context, blockVoting []*ethpb.Block
 			slotsArr := make([]types.Slot, 0, len(bv.Votes))
 			for _, vote := range bv.Votes {
 				slot := vote.Slot
-				if params.BeaconConfig().IsFinEth1ForkSlot(stSlot) {
+				if params.BeaconConfig().IsBlockVotingForkSlot(stSlot) {
 					if slotMap[slot] == nil {
 						slotMap[slot] = []*ethpb.CommitteeVote{}
 						slotsArr = append(slotsArr, slot)
@@ -610,7 +610,7 @@ func addBlockVoting(votes []*ethpb.BlockVoting, root []byte, slot types.Slot, ca
 	return votes
 }
 
-func appendBlockVotingAtt(votes []*ethpb.BlockVoting, val *ethpb.Attestation, isFinEth1ForkSlot bool) []*ethpb.BlockVoting {
+func appendBlockVotingAtt(votes []*ethpb.BlockVoting, val *ethpb.Attestation, isBlockVotingForkSlot bool) []*ethpb.BlockVoting {
 	root := val.GetData().BeaconBlockRoot
 	if !isBlockVotingExists(votes, root) {
 		return votes
@@ -624,7 +624,7 @@ func appendBlockVotingAtt(votes []*ethpb.BlockVoting, val *ethpb.Attestation, is
 	cpy := helpers.BlockVotingArrCopy(votes)
 	for _, itm := range cpy {
 		if bytes.Equal(itm.Root, root) {
-			if isFinEth1ForkSlot {
+			if isBlockVotingForkSlot {
 				itm.Votes = helpers.AddAggregateCommitteeVote(itm.GetVotes(), newVote)
 			} else {
 				itm.Votes = helpers.AggregateCommitteeVote(append(itm.GetVotes(), newVote))
