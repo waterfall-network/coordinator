@@ -86,12 +86,14 @@ func (s *Service) registerSubscribers(epoch types.Epoch, digest [4]byte) {
 			s.committeeIndexBeaconAttestationSubscriber, /* message handler */
 			digest,
 		)
-		s.subscribeStaticWithSubnets(
-			p2p.PrevoteSubnetTopicFormat,
-			s.validateCommitteeIndexPrevote,
-			s.committeeIndexBeaconPrevoteSubscriber,
-			digest,
-		)
+		if !params.BeaconConfig().PrevotingDisabled {
+			s.subscribeStaticWithSubnets(
+				p2p.PrevoteSubnetTopicFormat,
+				s.validateCommitteeIndexPrevote,
+				s.committeeIndexBeaconPrevoteSubscriber,
+				digest,
+			)
+		}
 	} else {
 		s.subscribeDynamicWithSubnets(
 			p2p.AttestationSubnetTopicFormat,
@@ -99,12 +101,14 @@ func (s *Service) registerSubscribers(epoch types.Epoch, digest [4]byte) {
 			s.committeeIndexBeaconAttestationSubscriber, /* message handler */
 			digest,
 		)
-		s.subscribeDynamicWithSubnets(
-			p2p.PrevoteSubnetTopicFormat,
-			s.validateCommitteeIndexPrevote,         /* validator */
-			s.committeeIndexBeaconPrevoteSubscriber, /* message handler */
-			digest,
-		)
+		if !params.BeaconConfig().PrevotingDisabled {
+			s.subscribeDynamicWithSubnets(
+				p2p.PrevoteSubnetTopicFormat,
+				s.validateCommitteeIndexPrevote,         /* validator */
+				s.committeeIndexBeaconPrevoteSubscriber, /* message handler */
+				digest,
+			)
+		}
 	}
 	// Altair Fork Version
 	if epoch >= params.BeaconConfig().AltairForkEpoch {
@@ -433,7 +437,7 @@ func (s *Service) subscribeDynamicWithSubnets(
 					"2:digest":      fmt.Sprintf("%#x", digest),
 					"3:s.curSlot":   s.cfg.chain.CurrentSlot(),
 					"4:calcSlot":    slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
-				}).Debug("Validator subscription: subscribeDynamicWithSubnets: slot ticker 0")
+				}).Info("Validator subscription: subscribeDynamicWithSubnets: slot ticker 0")
 
 				if s.chainStarted.IsSet() && s.cfg.initialSync.Syncing() {
 					continue
@@ -478,7 +482,7 @@ func (s *Service) subscribeDynamicWithSubnets(
 					"2:digest":      fmt.Sprintf("%#x", digest),
 					"3:s.curSlot":   s.cfg.chain.CurrentSlot(),
 					"4:calcSlot":    slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
-				}).Debug("Validator subscription: subscribeDynamicWithSubnets: start subscribe aggregator subnet 2")
+				}).Info("SUBSCRIBER: Validator subscription: subscribeDynamicWithSubnets: start subscribe aggregator subnet 2")
 
 				switch topicFormat {
 				case p2p.AttestationSubnetTopicFormat:
@@ -499,7 +503,7 @@ func (s *Service) subscribeDynamicWithSubnets(
 						"2:digest":      fmt.Sprintf("%#x", digest),
 						"3:s.curSlot":   s.cfg.chain.CurrentSlot(),
 						"4:calcSlot":    slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
-					}).Debug("Validator subscription: subscribeDynamicWithSubnets: start lookup Attester Subnets 3")
+					}).Info("SUBSCRIBER: Validator subscription: subscribeDynamicWithSubnets: start lookup Attester Subnets 3")
 
 					for _, idx := range attesterSubs {
 						s.lookupAttesterSubnets(digest, idx)
@@ -527,7 +531,7 @@ func (s *Service) subscribeDynamicWithSubnets(
 						"2:digest":      fmt.Sprintf("%#x", digest),
 						"3:s.curSlot":   s.cfg.chain.CurrentSlot(),
 						"4:calcSlot":    slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
-					}).Debug("Validator subscription: subscribeDynamicWithSubnets: success 4")
+					}).Info("SUBSCRIBER: Validator subscription: subscribeDynamicWithSubnets: success 4")
 				}
 			}
 		}
@@ -847,6 +851,15 @@ func (s *Service) retrievePersistentSubs(currSlot types.Slot) []uint64 {
 	wantedSubs = append(wantedSubs, persistentSubs...)
 	wantedSubs = append(wantedSubs, aggrSubs...)
 	wantedSubs = append(wantedSubs, prevotingSubs...)
+
+	log.WithFields(logrus.Fields{
+		"slot":           currSlot,
+		"persistentSubs": persistentSubs,
+		"aggrSubs":       aggrSubs,
+		"prevotingSubs":  prevotingSubs,
+		"res":            slice.SetUint64(wantedSubs),
+	}).Info("SUBSCRIBER: retrievePersistentSubs")
+
 	//uniq
 	return slice.SetUint64(wantedSubs)
 }

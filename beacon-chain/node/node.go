@@ -131,6 +131,7 @@ func New(cliCtx *cli.Context, opts ...Option) (*BeaconNode, error) {
 	configureSafeSlotsToImportOptimistically(cliCtx)
 	configureSlotsPerArchivedPoint(cliCtx)
 	configureEth1Config(cliCtx)
+	configurePrevoting(cliCtx)
 	configureNetwork(cliCtx)
 	configureInteropConfig(cliCtx)
 	configureDataConfig(cliCtx)

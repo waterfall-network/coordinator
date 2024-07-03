@@ -8,6 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/cache"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
@@ -27,6 +28,10 @@ func (vs *Server) GetPrevoteData(ctx context.Context, req *ethpb.PreVoteRequest)
 		trace.Int64Attribute("slot", int64(req.Slot)),
 		trace.Int64Attribute("committeeIndex", int64(req.CommitteeIndex)),
 	)
+
+	if params.BeaconConfig().PrevotingDisabled {
+		return nil, status.Errorf(codes.Unavailable, "Prevoting process is disabled")
+	}
 
 	if vs.SyncChecker.Syncing() {
 		return nil, status.Errorf(codes.Unavailable, "Syncing to latest head, not ready to respond")
@@ -134,6 +139,10 @@ func (vs *Server) GetPrevoteData(ctx context.Context, req *ethpb.PreVoteRequest)
 func (vs *Server) ProposePrevote(ctx context.Context, pv *ethpb.PreVote) (*ethpb.PrevoteResponse, error) {
 	ctx, span := trace.StartSpan(ctx, "PrevoteServer.ProposePrevote")
 	defer span.End()
+
+	if params.BeaconConfig().PrevotingDisabled {
+		return nil, status.Errorf(codes.Unavailable, "Prevoting process is disabled")
+	}
 
 	if _, err := bls.SignatureFromBytes(pv.Signature); err != nil {
 		return nil, status.Error(codes.InvalidArgument, "Incorrect prevote signature")

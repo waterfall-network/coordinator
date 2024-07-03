@@ -65,6 +65,7 @@ var appHelpFlagGroups = []flagGroup{
 			cmd.EnableBackupWebhookFlag,
 			flags.MonitoringPortFlag,
 			cmd.DisableMonitoringFlag,
+			cmd.PrevotingDisableFlag,
 			cmd.MaxGoroutines,
 			cmd.ForceClearDB,
 			cmd.ClearDB,

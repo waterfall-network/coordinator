@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/altair"
 	b "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
@@ -17,7 +16,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/monitoring/tracing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/block"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
-	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	"go.opencensus.io/trace"
 )
 
@@ -293,34 +291,6 @@ func ProcessBlockForStateRoot(
 		).Error("ProcessBlockForStateRoot:Err")
 		return nil, errors.Wrap(err, "could not hash tree root beacon block body")
 	}
-
-	//tmp log
-	sigRoot, err := blk.HashTreeRoot()
-	if err != nil {
-		log.WithError(
-			errors.Wrap(err, "could not hash tree root siBlock"),
-		).Error("ProcessBlockForStateRoot:Err:000")
-		return nil, errors.Wrap(err, "could not hash tree root siBlock")
-	}
-	log.WithFields(logrus.Fields{
-		"slot":         bState.Slot(),
-		"Validators":   len(bState.Validators()),
-		"BlockVoting":  len(bState.BlockVoting()),
-		"Spines":       gwatCommon.HashArrayFromBytes(bState.SpineData().Spines),
-		"Prefix":       gwatCommon.HashArrayFromBytes(bState.SpineData().Prefix),
-		"Finalization": gwatCommon.HashArrayFromBytes(bState.SpineData().Finalization),
-		"CpFinalized":  gwatCommon.HashArrayFromBytes(bState.SpineData().CpFinalized),
-	}).Debug("ProcessBlockForStateRoot:state:111")
-
-	log.WithFields(logrus.Fields{
-		"slot":         blk.Slot(),
-		"Withdrawals":  fmt.Sprintf("%d", len(blk.Body().Withdrawals())),
-		"bodyRoot":     fmt.Sprintf("%#x", bodyRoot),
-		"ParentRoot":   fmt.Sprintf("%#x", blk.ParentRoot()),
-		"sigRoot":      fmt.Sprintf("%#x", sigRoot),
-		"Attestations": len(blk.Body().Attestations()),
-		"Candidates":   gwatCommon.HashArrayFromBytes(blk.Body().Eth1Data().Candidates),
-	}).Debug("ProcessBlockForStateRoot:Block:222")
 
 	bState, err = b.ProcessBlockHeaderNoVerify(ctx, bState, blk.Slot(), blk.ProposerIndex(), blk.ParentRoot(), bodyRoot[:])
 	if err != nil {

@@ -222,27 +222,29 @@ func run(ctx context.Context, v iface.Validator) {
 				}
 			}
 
-			// run pre voting process
-			var nextRoles map[[fieldparams.BLSPubkeyLength]byte][]iface.ValidatorRole
-			if slots.IsEpochEnd(slot) {
-				nextRoles, err = v.RolesAtNextEpoch(ctx, slot+1)
-			} else {
-				nextRoles, err = v.RolesAt(ctx, slot+1)
-			}
-			if err == nil {
-				for pubKey, roles := range nextRoles {
-					wg.Add(len(roles))
-					for _, role := range roles {
-						go func(role iface.ValidatorRole, pubKey [fieldparams.BLSPubkeyLength]byte) {
-							defer wg.Done()
-							if role == iface.RoleAttester {
-								v.SubmitPrevote(slotCtx, slot+1, pubKey)
-							}
-						}(role, pubKey)
-					}
+			if !params.BeaconConfig().PrevotingDisabled {
+				// run pre voting process
+				var nextRoles map[[fieldparams.BLSPubkeyLength]byte][]iface.ValidatorRole
+				if slots.IsEpochEnd(slot) {
+					nextRoles, err = v.RolesAtNextEpoch(ctx, slot+1)
+				} else {
+					nextRoles, err = v.RolesAt(ctx, slot+1)
 				}
-			} else {
-				log.WithError(err).Error("Prevote: get validators failed")
+				if err == nil {
+					for pubKey, roles := range nextRoles {
+						wg.Add(len(roles))
+						for _, role := range roles {
+							go func(role iface.ValidatorRole, pubKey [fieldparams.BLSPubkeyLength]byte) {
+								defer wg.Done()
+								if role == iface.RoleAttester {
+									v.SubmitPrevote(slotCtx, slot+1, pubKey)
+								}
+							}(role, pubKey)
+						}
+					}
+				} else {
+					log.WithError(err).Error("Prevote: get validators failed")
+				}
 			}
 
 			// Wait for all processes to complete, then report span complete.

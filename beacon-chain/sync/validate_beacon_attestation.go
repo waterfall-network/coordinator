@@ -169,20 +169,25 @@ func (s *Service) validateCommitteeIndexBeaconAttestation(ctx context.Context, p
 
 	// Verify the block being voted and the processed state is in beaconDB and the block has passed validation if it's in the beaconDB.
 	blockRoot := bytesutil.ToBytes32(att.Data.BeaconBlockRoot)
-	if !s.hasBlockAndState(ctx, blockRoot) {
+	if s.cfg.chain.IsBlockRootProcessing(blockRoot) || !s.hasBlockAndState(ctx, blockRoot) {
+
+		// A node doesn't have the block, it'll request from peer while saving the pending attestation to a queue.
+		s.savePendingAtt(&eth.SignedAggregateAttestationAndProof{Message: &eth.AggregateAttestationAndProof{Aggregate: att}})
+
 		log.WithError(err).WithFields(logrus.Fields{
 			"pid":     fmt.Sprintf("%s", pid),
 			"topic":   fmt.Sprintf("%s", *msg.Topic),
 			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+			"root":    fmt.Sprintf("%#x", blockRoot),
 		}).Error("Atts: incoming: validate att: no block and state")
-		// A node doesn't have the block, it'll request from peer while saving the pending attestation to a queue.
-		s.savePendingAtt(&eth.SignedAggregateAttestationAndProof{Message: &eth.AggregateAttestationAndProof{Aggregate: att}})
+
 		return pubsub.ValidationIgnore, nil
 	}
 
 	if err := s.cfg.chain.VerifyFinalizedConsistency(ctx, att.Data.BeaconBlockRoot); err != nil {
 		tracing.AnnotateError(span, err)
 		log.WithError(err).WithFields(logrus.Fields{
+			"attSlot": att.GetData().Slot,
 			"pid":     fmt.Sprintf("%s", pid),
 			"topic":   fmt.Sprintf("%s", *msg.Topic),
 			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
@@ -326,8 +331,17 @@ func (s *Service) setSeenCommitteeIndicesSlot(slot types.Slot, committeeID types
 // hasBlockAndState returns true if the beacon node knows about a block and associated state in the
 // database or cache.
 func (s *Service) hasBlockAndState(ctx context.Context, blockRoot [32]byte) bool {
+	if s.hasBlockStateCache.Contains(blockRoot) {
+		return true
+	}
 	hasStateSummary := s.cfg.beaconDB.HasStateSummary(ctx, blockRoot)
 	hasState := hasStateSummary || s.cfg.beaconDB.HasState(ctx, blockRoot)
+	if !hasState {
+		return false
+	}
 	hasBlock := s.cfg.chain.HasInitSyncBlock(blockRoot) || s.cfg.beaconDB.HasBlock(ctx, blockRoot)
-	return hasState && hasBlock
+	if hasBlock {
+		s.hasBlockStateCache.Add(blockRoot, true)
+	}
+	return hasBlock
 }

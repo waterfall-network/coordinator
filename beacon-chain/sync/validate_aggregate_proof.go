@@ -253,6 +253,11 @@ func validateIndexInCommittee(ctx context.Context, bs state.ReadOnlyBeaconState,
 	if err != nil {
 		return err
 	}
+
+	if a.AggregationBits.Count() == 0 {
+		return errors.New("no attesting indices")
+	}
+
 	var withinCommittee bool
 	for _, i := range committee {
 		if validatorIndex == i {
@@ -276,7 +281,7 @@ func validateSelectionIndex(
 	validatorIndex types.ValidatorIndex,
 	proof []byte,
 ) (*bls.SignatureBatch, error) {
-	_, span := trace.StartSpan(ctx, "sync.validateSelectionIndex")
+	ctx, span := trace.StartSpan(ctx, "sync.validateSelectionIndex")
 	defer span.End()
 
 	committee, err := helpers.BeaconCommitteeFromState(ctx, bs, data.Slot, data.CommitteeIndex)

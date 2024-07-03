@@ -317,6 +317,7 @@ func TestProcessPendingAtts_HasBlockSaveAggregatedAtt(t *testing.T) {
 		blkRootToPendingAtts:           make(map[[32]byte][]*ethpb.SignedAggregateAttestationAndProof),
 		seenAggregatedAttestationCache: lruwrpr.New(10),
 	}
+	r.initCaches()
 
 	s, err := util.NewBeaconState()
 	require.NoError(t, err)

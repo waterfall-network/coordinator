@@ -188,21 +188,36 @@ func ReplayProcessSlots(ctx context.Context, state state.BeaconState, slot types
 			return nil, errors.Wrap(err, "could not process slot")
 		}
 		if prysmtime.CanProcessEpoch(state) {
-			switch state.Version() {
-			case version.Phase0:
-				state, err = transition.ProcessEpochPrecompute(ctx, state)
-				if err != nil {
-					tracing.AnnotateError(span, err)
-					return nil, errors.Wrap(err, "could not process epoch with optimizations")
+			// new epoch
+			//check nextSlotCache
+			nscState, err := transition.GetNextEpochStateByState(ctx, state)
+			if err != nil {
+				log.WithError(err).WithFields(logrus.Fields{
+					"slot": state.Slot(),
+				}).Warn("Transition: process epoch: next slot cache not found")
+			}
+			if nscState == nil {
+				switch state.Version() {
+				case version.Phase0:
+					state, err = transition.ProcessEpochPrecompute(ctx, state)
+					if err != nil {
+						tracing.AnnotateError(span, err)
+						return nil, errors.Wrap(err, "could not process epoch with optimizations")
+					}
+				case version.Altair, version.Bellatrix:
+					state, err = altair.ProcessEpoch(ctx, state)
+					if err != nil {
+						tracing.AnnotateError(span, err)
+						return nil, errors.Wrap(err, "could not process epoch")
+					}
+				default:
+					return nil, errors.New("beacon state should have a version")
 				}
-			case version.Altair, version.Bellatrix:
-				state, err = altair.ProcessEpoch(ctx, state)
-				if err != nil {
-					tracing.AnnotateError(span, err)
-					return nil, errors.Wrap(err, "could not process epoch")
-				}
-			default:
-				return nil, errors.New("beacon state should have a version")
+			} else {
+				log.WithFields(logrus.Fields{
+					"slot": state.Slot(),
+				}).Info("Reply: process epoch: next slot cache success")
+				state = nscState
 			}
 		}
 		if err := state.SetSlot(state.Slot() + 1); err != nil {

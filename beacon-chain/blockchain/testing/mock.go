@@ -68,8 +68,7 @@ type ChainService struct {
 }
 
 func (s *ChainService) IsBlockRootProcessing(root [32]byte) bool {
-	//TODO implement me
-	panic("implement me")
+	return false
 }
 
 func (s *ChainService) SetIsSyncFn(fn func() bool) {

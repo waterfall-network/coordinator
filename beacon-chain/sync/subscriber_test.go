@@ -444,7 +444,12 @@ func Test_wrapAndReportValidation(t *testing.T) {
 
 func TestFilterSubnetPeers(t *testing.T) {
 	gFlags := new(flags.GlobalFlags)
+	tmpMinimumPeersPerSubnet := gFlags.MinimumPeersPerSubnet
+	defer func() {
+		gFlags.MinimumPeersPerSubnet = tmpMinimumPeersPerSubnet
+	}()
 	gFlags.MinimumPeersPerSubnet = 4
+
 	flags.Init(gFlags)
 	// Reset config.
 	defer flags.Init(new(flags.GlobalFlags))

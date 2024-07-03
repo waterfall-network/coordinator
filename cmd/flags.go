@@ -83,6 +83,11 @@ var (
 		Name:  "disable-monitoring",
 		Usage: "Disable monitoring service.",
 	}
+	// PrevotingDisableFlag Disables prevoting process.
+	PrevotingDisableFlag = &cli.BoolFlag{
+		Name:  "prevoting-disable",
+		Usage: "Disables prevoting process",
+	}
 	// NoDiscovery specifies whether we are running a local network and have no need for connecting
 	// to the bootstrap nodes in the cloud
 	NoDiscovery = &cli.BoolFlag{
