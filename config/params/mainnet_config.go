@@ -47,8 +47,7 @@ var mainnetNetworkConfig = &NetworkConfig{
 	SyncCommsSubnetKey:              "syncnets",
 	MinimumPeersInSubnetSearch:      20,
 	BootstrapNodes: []string{
-		// todo nt5 bootnodes
-		"enr:-LG4QGvZHX73ge93GhSqNM5zZuEV6-XVc_ZRSO3CgmHBjhNKFtwx_QypXxUoILmsvxfvvxUY8-fGSKvZyOJfsoL17kyGAY4PBui9h2F0dG5ldHOIAAAAAAAAAACEZXRoMpDRNOfUAAAgCf__________gmlkgnY0gmlwhAVLhyyJc2VjcDI1NmsxoQMALOe9eiMN54YHZ6w5g8DvTAigbgtfCaPQrSbkR_ChI4N1ZHCCD6A",
+		"enr:-LG4QAGJyiJYWVjQnJ2ANfWE_AtbYnYEVcYS3k5iyUaALWKBI7OL30dc_-Nxigt7FpiB4b0cfmq62iGXB76C8BmRVGeGAZBd0Ihph2F0dG5ldHOIAAAAAAAAAACEZXRoMpB5pkc4AAAgCf__________gmlkgnY0gmlwhCImhDKJc2VjcDI1NmsxoQND0I1D6IIk-kwev1LftepaWrPOyN3pgkTbDrHfJN0bGIN1ZHCCD6A",
 	},
 }
 
@@ -117,9 +116,9 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	IntervalsPerSlot:   3,
 
 	// Shard node mainnet settings.
-	DepositChainID:         1501865,                                      // Chain ID of eth1 mainnet. //todo tn5
-	DepositNetworkID:       1501865,                                      // Network ID of eth1 mainnet. //todo tn5
-	DepositContractAddress: "0x68933556d6fb9240d5831c828009fe42eb971361", //todo tn5
+	DepositChainID:         181, // Chain ID of eth1 mainnet.
+	DepositNetworkID:       181, // Network ID of eth1 mainnet.
+	DepositContractAddress: "0x329c3A3d65Ab0bE08c6eff6695933391Cfc02cCA",
 
 	// Validator params.
 	RandomSubnetsPerValidator:         1 << 0,

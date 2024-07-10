@@ -116,7 +116,7 @@ var (
 	DelegatingStakeForkSlot = &cli.Uint64Flag{
 		Name:  "delegating-stake-fork-slot",
 		Usage: "The slot of start to apply the delegating stake rules.",
-		Value: 2048,
+		Value: 0,
 	}
 	// PrefixFinForkSlot is the block in which the eth1 deposit contract was deployed.
 	PrefixFinForkSlot = &cli.Uint64Flag{
