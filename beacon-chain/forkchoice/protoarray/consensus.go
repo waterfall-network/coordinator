@@ -19,8 +19,8 @@ func (f *ForkChoice) setBalances(root [32]byte, balances []uint64) {
 	f.store.balances[root] = balances
 }
 func (f *ForkChoice) getBalances(root [32]byte) []uint64 {
-	f.store.balancesLock.Lock()
-	defer f.store.balancesLock.Unlock()
+	f.store.balancesLock.RLock()
+	defer f.store.balancesLock.RUnlock()
 	return f.store.balances[root]
 }
 
@@ -79,18 +79,35 @@ func (fc *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines
 	}
 
 	fc.mu.RLock()
+	//todo check
+	fc.votesLock.RLock()
+	fc.store.balancesLock.RLock()
+	fc.store.nodesLock.RLock()
 
 	// collect nodes of T(G) tree
 	acceptableRootIndexMap, _ := collectTgTreeNodesByOptimisticSpines(fc, _optSpines, jCpRoot)
 
+	log.WithFields(logrus.Fields{
+		"acceptableRootIndexMap": fmt.Sprintf("%d", len(acceptableRootIndexMap)),
+	}).Info("FC: TG Tree")
+
 	if len(acceptableRootIndexMap) == 0 {
 		fc.mu.RUnlock()
+		//todo check
+		fc.votesLock.RUnlock()
+		fc.store.balancesLock.RUnlock()
+		fc.store.nodesLock.RUnlock()
+
 		return [32]byte{}, nil
 	}
 
 	// check cached fc
 	fcBase, diffRootIndexMap, diffNodes := getCompatibleFc(acceptableRootIndexMap, fc)
 	fc.mu.RUnlock()
+	//todo check
+	fc.votesLock.RUnlock()
+	fc.store.balancesLock.RUnlock()
+	fc.store.nodesLock.RUnlock()
 
 	log.WithFields(logrus.Fields{
 		"items":                  fmt.Sprintf("%d", cacheForkChoice.cache.Len()),
