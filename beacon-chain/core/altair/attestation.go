@@ -295,17 +295,17 @@ func EpochParticipation(
 			}
 			proposerReward += uint64(float64(baseReward) * (cfg.DAGTimelyVotingWeight / 2))
 		}
-		log.WithFields(log.Fields{
-			"Slot":             beaconState.Slot(),
-			"Validator":        index,
-			"NumValidators":    numOfValidators,
-			"ActiveValidators": activeValidatorsForSlot,
-			"BaseReward":       baseReward,
-			"sourceVoting":     participatedFlags[sourceFlagIndex],
-			"targetVoting":     participatedFlags[targetFlagIndex],
-			"headVoting":       participatedFlags[headFlagIndex],
-			"timelyVoting":     participatedFlags[sourceFlagIndex] && participatedFlags[targetFlagIndex] && participatedFlags[headFlagIndex],
-		}).Debug("Reward proposer: calc by epoch participation incr")
+		//log.WithFields(log.Fields{
+		//	"Slot":             beaconState.Slot(),
+		//	"Validator":        index,
+		//	"NumValidators":    numOfValidators,
+		//	"ActiveValidators": activeValidatorsForSlot,
+		//	"BaseReward":       baseReward,
+		//	"sourceVoting":     participatedFlags[sourceFlagIndex],
+		//	"targetVoting":     participatedFlags[targetFlagIndex],
+		//	"headVoting":       participatedFlags[headFlagIndex],
+		//	"timelyVoting":     participatedFlags[sourceFlagIndex] && participatedFlags[targetFlagIndex] && participatedFlags[headFlagIndex],
+		//}).Debug("Reward proposer: calc by epoch participation incr")
 	}
 
 	return proposerReward, epochParticipation, nil

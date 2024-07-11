@@ -53,6 +53,7 @@ go_library(
         "@io_opencensus_go//trace:go_default_library",
         "@network_waterfall_gitlab_waterfall_protocol_gwat//common:go_default_library",
         "@org_golang_google_protobuf//proto:go_default_library",
+        "@com_github_hashicorp_golang_lru//:go_default_library",
     ],
 )
 

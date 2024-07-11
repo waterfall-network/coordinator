@@ -63,38 +63,38 @@ import (
 //	post.current_sync_committee = get_next_sync_committee(post)
 //	post.next_sync_committee = get_next_sync_committee(post)
 //	return post
-func UpgradeToAltair(ctx context.Context, state state.BeaconState) (state.BeaconStateAltair, error) {
-	epoch := time.CurrentEpoch(state)
+func UpgradeToAltair(ctx context.Context, st state.BeaconState) (state.BeaconStateAltair, error) {
+	epoch := time.CurrentEpoch(st)
 
-	numValidators := state.NumValidators()
+	numValidators := st.NumValidators()
 	s := &ethpb.BeaconStateAltair{
-		GenesisTime:           state.GenesisTime(),
-		GenesisValidatorsRoot: state.GenesisValidatorsRoot(),
-		Slot:                  state.Slot(),
+		GenesisTime:           st.GenesisTime(),
+		GenesisValidatorsRoot: st.GenesisValidatorsRoot(),
+		Slot:                  st.Slot(),
 		Fork: &ethpb.Fork{
-			PreviousVersion: state.Fork().CurrentVersion,
+			PreviousVersion: st.Fork().CurrentVersion,
 			CurrentVersion:  params.BeaconConfig().AltairForkVersion,
 			Epoch:           epoch,
 		},
-		LatestBlockHeader:           state.LatestBlockHeader(),
-		BlockRoots:                  state.BlockRoots(),
-		StateRoots:                  state.StateRoots(),
-		HistoricalRoots:             state.HistoricalRoots(),
-		Eth1Data:                    state.Eth1Data(),
-		Eth1DataVotes:               state.Eth1DataVotes(),
-		Eth1DepositIndex:            state.Eth1DepositIndex(),
-		BlockVoting:                 state.BlockVoting(),
-		Validators:                  state.Validators(),
-		SpineData:                   state.SpineData(),
-		Balances:                    state.Balances(),
-		RandaoMixes:                 state.RandaoMixes(),
-		Slashings:                   state.Slashings(),
+		LatestBlockHeader:           st.LatestBlockHeader(),
+		BlockRoots:                  st.BlockRoots(),
+		StateRoots:                  st.StateRoots(),
+		HistoricalRoots:             st.HistoricalRoots(),
+		Eth1Data:                    st.Eth1Data(),
+		Eth1DataVotes:               st.Eth1DataVotes(),
+		Eth1DepositIndex:            st.Eth1DepositIndex(),
+		BlockVoting:                 st.BlockVoting(),
+		Validators:                  st.Validators(),
+		SpineData:                   st.SpineData(),
+		Balances:                    st.Balances(),
+		RandaoMixes:                 st.RandaoMixes(),
+		Slashings:                   st.Slashings(),
 		PreviousEpochParticipation:  make([]byte, numValidators),
 		CurrentEpochParticipation:   make([]byte, numValidators),
-		JustificationBits:           state.JustificationBits(),
-		PreviousJustifiedCheckpoint: state.PreviousJustifiedCheckpoint(),
-		CurrentJustifiedCheckpoint:  state.CurrentJustifiedCheckpoint(),
-		FinalizedCheckpoint:         state.FinalizedCheckpoint(),
+		JustificationBits:           st.JustificationBits(),
+		PreviousJustifiedCheckpoint: st.PreviousJustifiedCheckpoint(),
+		CurrentJustifiedCheckpoint:  st.CurrentJustifiedCheckpoint(),
+		FinalizedCheckpoint:         st.FinalizedCheckpoint(),
 		InactivityScores:            make([]uint64, numValidators),
 	}
 
@@ -102,7 +102,7 @@ func UpgradeToAltair(ctx context.Context, state state.BeaconState) (state.Beacon
 	if err != nil {
 		return nil, err
 	}
-	prevEpochAtts, err := state.PreviousEpochAttestations()
+	prevEpochAtts, err := st.PreviousEpochAttestations()
 	if err != nil {
 		return nil, err
 	}

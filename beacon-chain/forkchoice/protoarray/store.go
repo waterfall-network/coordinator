@@ -67,17 +67,6 @@ func (f *ForkChoice) Head(
 	defer f.store.nodesLock.Unlock()
 	deltas, newVotes, err := computeDeltas(ctx, f.store.nodesIndices, f.votes, f.balances, newBalances)
 
-	log.WithFields(logrus.Fields{
-		"bal-prev-equal": fmt.Sprintf("%#v", newBalances) == fmt.Sprintf("%#v", f.getBalances(justifiedRoot)),
-		"bal-FCh-equal":  fmt.Sprintf("%#v", newBalances) == fmt.Sprintf("%#v", f.balances),
-		//"deltas":        deltas,
-		"len(newVotes)":              len(newVotes),
-		"justifiedEpoch":             justifiedEpoch,
-		"justifiedRoot":              fmt.Sprintf("%#x", justifiedRoot),
-		"justifiedStateBalances.len": len(justifiedStateBalances),
-		"finalizedEpoch":             finalizedEpoch,
-	}).Debug("Get bc head")
-
 	if err != nil {
 		return [32]byte{}, errors.Wrap(err, "Could not compute deltas")
 	}
@@ -100,6 +89,7 @@ func (f *ForkChoice) ProcessAttestation(ctx context.Context, validatorIndices []
 	f.votesLock.Lock()
 	defer f.votesLock.Unlock()
 
+	var maxNode *int
 	for _, index := range validatorIndices {
 		// Validator indices will grow the vote cache.
 		for index >= uint64(len(f.votes)) {
@@ -115,20 +105,9 @@ func (f *ForkChoice) ProcessAttestation(ctx context.Context, validatorIndices []
 			f.votes[index].nextEpoch = targetEpoch
 			f.votes[index].nextRoot = blockRoot
 
-			f.setNodeVotes(index, Vote{
-				currentRoot: bytesutil.ToBytes32(bytesutil.SafeCopyBytes(f.votes[index].currentRoot[:])),
-				nextRoot:    bytesutil.ToBytes32(bytesutil.SafeCopyBytes(f.votes[index].nextRoot[:])),
-				nextEpoch:   f.votes[index].nextEpoch,
-			})
+			maxNode = f.setNodeVotes(index, f.votes[index], maxNode)
 		}
 	}
-
-	log.WithFields(logrus.Fields{
-		"validatorIndexes": validatorIndices,
-		"blockRoot":        fmt.Sprintf("%#x", blockRoot),
-		"node.votes":       len(f.store.nodes[f.NodeCount()-1].AttestationsData().votes),
-		"node.votesByRoot": len(f.getNodeVotes(f.store.nodes[f.NodeCount()-1].root)),
-	}).Info("FC: process attestation")
 
 	processedAttestationCount.Inc()
 }
@@ -847,7 +826,10 @@ func (f *ForkChoice) Copy() *ForkChoice {
 
 	var balances []uint64
 	if f.balances != nil {
-		balances = append(make([]uint64, 0, len(f.balances)), f.balances...)
+		balances = make([]uint64, len(f.balances))
+		for i, v := range f.balances {
+			balances[i] = v
+		}
 	}
 
 	return &ForkChoice{

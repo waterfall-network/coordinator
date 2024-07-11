@@ -111,6 +111,8 @@ func prepareConfigSpec() (map[string]string, error) {
 			data[tagValue] = hexutil.Encode([]byte{uint8(vField.Uint())})
 		case reflect.Float64:
 			data[tagValue] = hexutil.Encode([]byte{uint8(vField.Float())})
+		case reflect.Bool:
+			data[tagValue] = strconv.FormatBool(vField.Bool())
 		default:
 			return nil, fmt.Errorf("unsupported config field type: %s (tagValue=%s)", vField.Kind().String(), tagValue)
 		}

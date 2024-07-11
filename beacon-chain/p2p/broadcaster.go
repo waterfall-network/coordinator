@@ -182,7 +182,7 @@ func (s *Service) broadcastAttestation(ctx context.Context, subnet uint64, att *
 			}
 			return errors.New("failed to find peers for subnet")
 		}(); err != nil {
-			//log.WithError(err).Error("Failed to find peers")
+			log.WithError(err).Error("Failed to find peers")
 			tracing.AnnotateError(span, err)
 		}
 	}
@@ -190,7 +190,10 @@ func (s *Service) broadcastAttestation(ctx context.Context, subnet uint64, att *
 	// acceptable threshold, we exit early and do not broadcast it.
 	currSlot := slots.CurrentSlot(uint64(s.genesisTime.Unix()))
 	if att.Data.Slot+params.BeaconConfig().SlotsPerEpoch < currSlot {
-		log.Warnf("Attestation is too old to broadcast, discarding it. Current Slot: %d , Attestation Slot: %d", currSlot, att.Data.Slot)
+		log.WithFields(logrus.Fields{
+			"attestationSlot": att.Data.Slot,
+			"currentSlot":     currSlot,
+		}).Warning("Attestation is too old to broadcast, discarding it")
 		return
 	}
 
@@ -210,7 +213,7 @@ func (s *Service) broadcastAttestation(ctx context.Context, subnet uint64, att *
 }
 
 func (s *Service) broadcastSyncCommittee(ctx context.Context, subnet uint64, sMsg *ethpb.SyncCommitteeMessage, forkDigest [4]byte) {
-	ctx, span := trace.StartSpan(ctx, "p2p.broadcastSyncCommittee")
+	_, span := trace.StartSpan(ctx, "p2p.broadcastSyncCommittee")
 	defer span.End()
 	ctx = trace.NewContext(context.Background(), span) // clear parent context / deadline.
 
@@ -247,14 +250,14 @@ func (s *Service) broadcastSyncCommittee(ctx context.Context, subnet uint64, sMs
 			}
 			return errors.New("failed to find peers for subnet")
 		}(); err != nil {
-			//log.WithError(err).Error("Failed to find peers")
+			log.WithError(err).Error("Failed to find peers")
 			tracing.AnnotateError(span, err)
 		}
 	}
 	// In the event our sync message is outdated and beyond the
 	// acceptable threshold, we exit early and do not broadcast it.
 	if err := altair.ValidateSyncMessageTime(sMsg.Slot, s.genesisTime, params.BeaconNetworkConfig().MaximumGossipClockDisparity); err != nil {
-		//log.Warnf("Sync Committee Message is too old to broadcast, discarding it. %v", err)
+		log.WithError(err).Warn("Sync Committee Message is too old to broadcast, discarding it")
 		return
 	}
 

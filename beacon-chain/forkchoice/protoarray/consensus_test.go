@@ -698,7 +698,8 @@ func TestGetParentByOptimisticSpines_TwoBranches(t *testing.T) {
 	assert.Equal(t, nrToHash(0), r, "Incorrect head with genesis")
 
 	nodesRootIndexMap = map[[32]byte]uint64{nrToHash(0): 0}
-	hRoot, hrErr = f.calculateHeadRootByNodesIndexes(context.Background(), nodesRootIndexMap)
+	fcBase, _, diffNodes := getCompatibleFc(nodesRootIndexMap, f)
+	hRoot, hrErr = calculateHeadRootByNodesIndexes(context.Background(), fcBase, diffNodes, nodesRootIndexMap)
 	require.NoError(t, hrErr)
 	assert.Equal(t, nrToHash(0), hRoot, "Incorrect head with justified epoch at 0")
 
@@ -757,7 +758,10 @@ func TestGetParentByOptimisticSpines_TwoBranches(t *testing.T) {
 		nrToHash(8):  9,
 		nrToHash(10): 10,
 	}
-	hRoot, hrErr = f.calculateHeadRootByNodesIndexes(context.Background(), nodesRootIndexMap)
+
+	fcBase, _, diffNodes = getCompatibleFc(nodesRootIndexMap, f)
+
+	hRoot, hrErr = calculateHeadRootByNodesIndexes(context.Background(), fcBase, diffNodes, nodesRootIndexMap)
 	require.NoError(t, hrErr)
 	assert.Equal(t, nrToHash(10), hRoot, "Incorrect head with justified epoch at 0")
 
@@ -805,7 +809,8 @@ func TestGetParentByOptimisticSpines_TwoBranches(t *testing.T) {
 		//nrToHash(8):  9,
 		//nrToHash(10): 10,
 	}
-	hRoot, hrErr = f.calculateHeadRootByNodesIndexes(context.Background(), nodesRootIndexMap)
+	fcBase, _, diffNodes = getCompatibleFc(nodesRootIndexMap, f)
+	hRoot, hrErr = calculateHeadRootByNodesIndexes(context.Background(), fcBase, diffNodes, nodesRootIndexMap)
 	require.NoError(t, hrErr)
 	assert.Equal(t, nrToHash(9), hRoot, "Incorrect head with justified epoch at 0")
 
@@ -853,7 +858,8 @@ func TestGetParentByOptimisticSpines_TwoBranches(t *testing.T) {
 		//nrToHash(8):  8,
 		//nrToHash(10): 10,
 	}
-	hRoot, hrErr = f.calculateHeadRootByNodesIndexes(context.Background(), nodesRootIndexMap)
+	fcBase, _, diffNodes = getCompatibleFc(nodesRootIndexMap, f)
+	hRoot, hrErr = calculateHeadRootByNodesIndexes(context.Background(), fcBase, diffNodes, nodesRootIndexMap)
 	require.NoError(t, hrErr)
 	assert.Equal(t, nrToHash(9), hRoot, "Incorrect head with justified epoch at 0")
 

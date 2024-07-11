@@ -24,19 +24,24 @@ func (f *ForkChoice) getBalances(root [32]byte) []uint64 {
 	return f.store.balances[root]
 }
 
-func (f *ForkChoice) setNodeVotes(validator uint64, vote Vote) {
+func (f *ForkChoice) setNodeVotes(validator uint64, vote Vote, node *int) (maxNode *int) {
 	var (
 		maxSlot types.Slot
 		index   int
 	)
-	for i, n := range f.store.nodes {
-		if n.slot > maxSlot {
-			maxSlot = n.slot
-			index = i
+	if node == nil {
+		for i, n := range f.store.nodes {
+			if n.slot > maxSlot {
+				maxSlot = n.slot
+				index = i
+			}
 		}
+	} else {
+		index = *node
 	}
 	lastNode := f.store.nodes[index]
 	lastNode.attsData.votes[validator] = vote
+	return &index
 }
 
 func (f *ForkChoice) getNodeVotes(nodeRoot [32]byte) map[uint64]Vote {
@@ -48,7 +53,7 @@ func (f *ForkChoice) getNodeVotes(nodeRoot [32]byte) map[uint64]Vote {
 }
 
 // GetParentByOptimisticSpines retrieves node by root.
-func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines []gwatCommon.HashArray, jCpRoot [32]byte) ([32]byte, error) {
+func (fc *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines []gwatCommon.HashArray, jCpRoot [32]byte) ([32]byte, error) {
 	ctx, span := trace.StartSpan(ctx, "protoArrayForkChoice.GetParentByOptimisticSpines")
 	defer span.End()
 
@@ -62,13 +67,8 @@ func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines 
 			"optSpines": len(optSpines),
 			"headRoot":  fmt.Sprintf("%#x", headRoot),
 			"jCpRoot":   fmt.Sprintf("%#x", jCpRoot),
-		}).Info("FC: get parent end")
+		}).Info("FC: GetParentByOptimisticSpines end")
 	}(time.Now())
-
-	fc := f.Copy()
-
-	//f.mu.RLock()
-	//defer f.mu.RUnlock()
 
 	//removes empty values
 	_optSpines := make([]gwatCommon.HashArray, 0, len(optSpines))
@@ -78,75 +78,54 @@ func (f *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines 
 		}
 	}
 
-	// collect nodes of T(G) tree
-	acceptableRootIndexMap, acceptableLeafs := collectTgTreeNodesByOptimisticSpines(fc, _optSpines, jCpRoot)
+	fc.mu.RLock()
 
-	//todo rm
-	acceptLeafsArr := make(gwatCommon.HashArray, 0, len(acceptableLeafs))
-	for k := range acceptableLeafs {
-		acceptLeafsArr = append(acceptLeafsArr, k)
-	}
-	fRoots := make(gwatCommon.HashArray, len(fc.store.nodes))
-	for i, n := range fc.store.nodes {
-		fRoots[i] = n.root
-	}
-	//fc := f
-	log.WithFields(logrus.Fields{
-		"accRootIndexMap":      len(acceptableRootIndexMap),
-		"acceptLeafsArr":       len(acceptLeafsArr),
-		"fcRoots":              len(fRoots),
-		"votes":                len(fc.votes),
-		"balances":             len(fc.balances),
-		"store.justifiedEpoch": fc.store.justifiedEpoch,
-		"store.finalizedEpoch": fc.store.finalizedEpoch,
-		"jCpRoot":              fmt.Sprintf("%#x", jCpRoot),
-		//"store.[0].root":       fmt.Sprintf("%#x", fc.store.nodes[0].root),
-	}).Info("Get parent by optimistic spines")
+	// collect nodes of T(G) tree
+	acceptableRootIndexMap, _ := collectTgTreeNodesByOptimisticSpines(fc, _optSpines, jCpRoot)
 
 	if len(acceptableRootIndexMap) == 0 {
+		fc.mu.RUnlock()
 		return [32]byte{}, nil
 	}
 
-	headRoot, err = fc.calculateHeadRootByNodesIndexes(ctx, acceptableRootIndexMap)
+	// check cached fc
+	fcBase, diffRootIndexMap, diffNodes := getCompatibleFc(acceptableRootIndexMap, fc)
+	fc.mu.RUnlock()
+
+	log.WithFields(logrus.Fields{
+		"items":                  fmt.Sprintf("%d", cacheForkChoice.cache.Len()),
+		"inactivity":             fmt.Sprintf("%v", cacheForkChoice.inactivity),
+		"inact_len":              fmt.Sprintf("%d", len(cacheForkChoice.inactivity)),
+		"acceptableRootIndexMap": fmt.Sprintf("%d", len(acceptableRootIndexMap)),
+		"diff":                   fmt.Sprintf("%d", len(diffRootIndexMap)),
+	}).Info("FC: cache")
+
+	headRoot, err = calculateHeadRootByNodesIndexes(ctx, fcBase, diffNodes, acceptableRootIndexMap)
 	if err != nil {
 		return [32]byte{}, err
 	}
+
+	updateCache(fcBase, len(diffRootIndexMap))
 
 	return headRoot, nil
 }
 
 // calculateHeadRootOfForks retrieves root of head of passed forks.
-func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesRootIndexMap map[[32]byte]uint64) ([32]byte, error) {
+func calculateHeadRootByNodesIndexes(
+	ctx context.Context,
+	fcBase *ForkChoice,
+	diffNodes map[uint64]*Node,
+	rootIndexMap map[[32]byte]uint64,
+) ([32]byte, error) {
 
-	//todo rm
-	fRoots := make(gwatCommon.HashArray, len(f.store.nodes))
-	for i, n := range f.store.nodes {
-		fRoots[i] = n.root
-	}
-
-	log.WithFields(logrus.Fields{
-		"fcRoots":              len(fRoots),
-		"votes":                len(f.votes),
-		"balances":             len(f.balances),
-		"store.justifiedEpoch": f.store.justifiedEpoch,
-		"store.finalizedEpoch": f.store.finalizedEpoch,
-	}).Info("Calculate head root by nodes indexes")
-
-	indexRootMap := make(map[uint64][32]byte, len(nodesRootIndexMap))
-	for r, index := range nodesRootIndexMap {
+	indexRootMap := make(map[uint64][32]byte, len(rootIndexMap))
+	for r, index := range rootIndexMap {
 		indexRootMap[index] = r
 	}
 
-	fcInstance, diffRootIndexMap := getCompatibleFc(nodesRootIndexMap, f)
-
-	log.WithFields(logrus.Fields{
-		"diffRootIndexMap":  len(diffRootIndexMap),
-		"nodesRootIndexMap": len(nodesRootIndexMap),
-	}).Info("Calculate head root by nodes indexes 111")
-
 	// sort node's indexes
-	nodeIndexes := make(gwatCommon.SorterAscU64, 0, len(diffRootIndexMap))
-	for _, index := range diffRootIndexMap {
+	nodeIndexes := make(gwatCommon.SorterAscU64, 0, len(diffNodes))
+	for index := range diffNodes {
 		nodeIndexes = append(nodeIndexes, index)
 	}
 	sort.Sort(nodeIndexes)
@@ -154,22 +133,24 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 	// fill ForkChoice instance
 	var headRoot [32]byte
 	for _, index := range nodeIndexes {
-		node := f.store.nodes[index]
-		n := copyNode(node)
+		n := diffNodes[index]
 		n.bestChild = NonExistentNode
 		n.bestDescendant = NonExistentNode
 		n.weight = 0
-		if node.parent != NonExistentNode {
-			parentRoot, ok := indexRootMap[node.parent]
+
+		if n.parent != NonExistentNode {
+			//if node.parent != NonExistentNode {
+			parentRoot, ok := indexRootMap[n.parent]
+			//parentRoot, ok := indexRootMap[node.parent]
 			if !ok {
 				return [32]byte{}, errParentNodFound
 			}
-			n.parent = fcInstance.store.nodesIndices[parentRoot]
+			n.parent = fcBase.store.nodesIndices[parentRoot]
 		}
 
 		log.WithFields(logrus.Fields{"index": index}).Info("Calculate head root by nodes indexes: i 000")
 
-		err := fcInstance.store.insertNode(ctx, n)
+		err := fcBase.store.insertNode(ctx, n)
 
 		log.WithError(err).WithFields(logrus.Fields{"index": index}).Info("Calculate head root by nodes indexes: i 111")
 
@@ -178,106 +159,60 @@ func (f *ForkChoice) calculateHeadRootByNodesIndexes(ctx context.Context, nodesR
 		}
 
 		// sort validators' indexes
-		validatorIndexes := make(gwatCommon.SorterAscU64, 0, len(node.AttestationsData().Votes()))
-		for ix := range node.AttestationsData().Votes() {
+		validatorIndexes := make(gwatCommon.SorterAscU64, 0, len(n.AttestationsData().Votes()))
+		for ix := range n.AttestationsData().Votes() {
 			validatorIndexes = append(validatorIndexes, ix)
 		}
 		sort.Sort(validatorIndexes)
 
-		log.WithError(err).WithFields(logrus.Fields{"index": index}).Info("Calculate head root by nodes indexes: i 333")
+		log.WithError(err).WithFields(logrus.Fields{
+			"index":            index,
+			"validatorIndexes": len(validatorIndexes),
+		}).Info("Calculate head root by nodes indexes: i 333")
 
 		for _, vi := range validatorIndexes {
 			vote := n.AttestationsData().votes[vi]
 			targetEpoch := vote.nextEpoch
 			blockRoot := vote.nextRoot
 			// Validator indices will grow the vote cache.
-			for vi >= uint64(len(fcInstance.votes)) {
-				fcInstance.votes = append(fcInstance.votes, Vote{currentRoot: params.BeaconConfig().ZeroHash, nextRoot: params.BeaconConfig().ZeroHash})
+			for vi >= uint64(len(fcBase.votes)) {
+				fcBase.votes = append(fcBase.votes, Vote{currentRoot: params.BeaconConfig().ZeroHash, nextRoot: params.BeaconConfig().ZeroHash})
 			}
 
 			// Newly allocated vote if the root fields are untouched.
-			newVote := fcInstance.votes[vi].nextRoot == params.BeaconConfig().ZeroHash &&
-				fcInstance.votes[vi].currentRoot == params.BeaconConfig().ZeroHash
+			newVote := fcBase.votes[vi].nextRoot == params.BeaconConfig().ZeroHash &&
+				fcBase.votes[vi].currentRoot == params.BeaconConfig().ZeroHash
 
 			// Vote gets updated if it's newly allocated or high target epoch.
-			if newVote || targetEpoch > fcInstance.votes[vi].nextEpoch {
-				fcInstance.votes[vi].nextEpoch = targetEpoch
-				fcInstance.votes[vi].nextRoot = blockRoot
+			if newVote || targetEpoch > fcBase.votes[vi].nextEpoch {
+				fcBase.votes[vi].nextEpoch = targetEpoch
+				fcBase.votes[vi].nextRoot = blockRoot
 			}
-
-			log.WithError(err).WithFields(logrus.Fields{"index": index, "vi": vi}).Info("Calculate head root by nodes indexes: i 444")
 		}
 	}
-
-	log.WithFields(logrus.Fields{
-		"diffRootIndexMap":  len(diffRootIndexMap),
-		"nodesRootIndexMap": len(nodesRootIndexMap),
-	}).Info("Calculate head root by nodes indexes 555")
-
-	topNode := fcInstance.store.nodes[len(fcInstance.store.nodes)-1]
+	topNode := fcBase.store.nodes[len(fcBase.store.nodes)-1]
 
 	//calc 	justifiedRoot
 	var justifiedRoot [32]byte
-	for i, node := range fcInstance.store.nodes {
+	for i, node := range fcBase.store.nodes {
 		if i == 0 {
 			justifiedRoot = node.root
 		}
-		if fcInstance.HasNode(node.attsData.justifiedRoot) {
+		if fcBase.HasNode(node.attsData.justifiedRoot) {
 			justifiedRoot = node.attsData.justifiedRoot
 		}
 	}
 
-	log.WithFields(logrus.Fields{
-		"diffRootIndexMap":  len(diffRootIndexMap),
-		"nodesRootIndexMap": len(nodesRootIndexMap),
-	}).Info("Calculate head root by nodes indexes 666")
-
-	// todo check use insead of f.balances
-	//balances := f.getBalances(ctx, topNode.root)
-
 	// apply LMD GHOST
-	headRoot, err := fcInstance.Head(ctx, topNode.justifiedEpoch, justifiedRoot, f.balances, topNode.finalizedEpoch)
-
-	//todo rm
-	log.WithError(err).WithFields(logrus.Fields{
-		"headRoot":            fmt.Sprintf("%#x", headRoot),
-		"len(nodes)":          len(nodeIndexes),
-		"nodeCount":           f.NodeCount(),
-		"fc.roots":            len(fcInstance.GetRoots()),
-		"_f.roots":            len(f.GetRoots()),
-		"topNode.root":        fmt.Sprintf("%#x", topNode.root),
-		"parent":              topNode.parent,
-		"bestChild":           topNode.bestChild,
-		"bestDescendant":      topNode.bestDescendant,
-		"weight":              topNode.weight,
-		"att.justRoot":        fmt.Sprintf("%#x", topNode.AttestationsData().justifiedRoot),
-		"justifiedRoot":       fmt.Sprintf("%#x", justifiedRoot),
-		"len(node.att.votes)": len(topNode.AttestationsData().votes),
-	}).Info("Get parent by optimistic spines 1")
+	headRoot, err := fcBase.Head(ctx, topNode.justifiedEpoch, justifiedRoot, fcBase.balances, topNode.finalizedEpoch)
 
 	if err != nil {
 		return [32]byte{}, err
 	}
 
-	updateCache(fcInstance, len(diffRootIndexMap))
-
-	log.WithFields(logrus.Fields{
-		"items":             fmt.Sprintf("%d", cacheForkChoice.cache.Len()),
-		"inactivity":        fmt.Sprintf("%v", cacheForkChoice.inactivity),
-		"inact_len":         fmt.Sprintf("%d", len(cacheForkChoice.inactivity)),
-		"nodesRootIndexMap": fmt.Sprintf("%d", len(nodesRootIndexMap)),
-		"diff":              fmt.Sprintf("%d", len(diffRootIndexMap)),
-	}).Info("FC cache")
-
 	log.WithFields(logrus.Fields{
 		"headRoot": fmt.Sprintf("%#x", headRoot),
-		//"votes":                len(fcInstance.votes),
-		//"_votes":               len(f.votes),
-		//"balances":             len(fcInstance.balances),
-		//"_balances":            len(f.balances),
-		//"store.justifiedEpoch": fcInstance.store.justifiedEpoch,
-		//"store.finalizedEpoch": fcInstance.store.finalizedEpoch,
-		//"store.[0].root":       fmt.Sprintf("%#x", fcInstance.store.nodes[0].root),
+		"balances": len(fcBase.balances),
 	}).Info("Get parent by optimistic spines res")
 
 	return headRoot, nil
@@ -559,7 +494,6 @@ func (f *ForkChoice) GetForks() []*Fork {
 		}
 		fork := f.GetFork(node.Root())
 		if fork == nil {
-			//handledRoots[node.Root()] = nil
 			continue
 		}
 		for r, n := range fork.nodesMap {

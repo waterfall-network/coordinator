@@ -42,6 +42,7 @@ type BlockReceiver interface {
 	ReceiveBlock(ctx context.Context, block block.SignedBeaconBlock, blockRoot [32]byte) error
 	ReceiveBlockBatch(ctx context.Context, blocks []block.SignedBeaconBlock, blkRoots [][32]byte) error
 	HasInitSyncBlock(root [32]byte) bool
+	IsBlockRootProcessing(root [32]byte) bool
 }
 
 // ReceiveBlock is a function that defines the operations (minus pubsub)
@@ -236,4 +237,17 @@ func (s *Service) rmBlockProcessing(slot types.Slot, proposerIdx types.Validator
 	defer s.procBlockLock.Unlock()
 	key := append(bytesutil.Bytes32(uint64(slot)), bytesutil.Bytes32(uint64(proposerIdx))...)
 	s.procBlockCache.Remove(string(key))
+}
+
+func (s *Service) IsBlockRootProcessing(root [32]byte) bool {
+	_, isProc := s.procBlockCache.Get(root)
+	return isProc
+}
+
+func (s *Service) setBlRootProcessing(root [32]byte) {
+	s.procBlockCache.Add(root, true)
+}
+
+func (s *Service) rmBlRootProcessing(root [32]byte) {
+	s.procBlockCache.Remove(root)
 }

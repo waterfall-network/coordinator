@@ -14,6 +14,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/eth/v1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/migration"
+	pb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc/codes"
@@ -212,21 +213,20 @@ func (bs *Server) ListCommittees(ctx context.Context, req *ethpb.StateCommittees
 
 // This function returns the validator object based on the passed in ID. The validator ID could be its public key,
 // or its index.
-func valContainersByRequestIds(state state.BeaconState, validatorIds [][]byte) ([]*ethpb.ValidatorContainer, error) {
-	epoch := slots.ToEpoch(state.Slot())
+func valContainersByRequestIds(st state.BeaconState, validatorIds [][]byte) ([]*ethpb.ValidatorContainer, error) {
+	epoch := slots.ToEpoch(st.Slot())
 	var valContainers []*ethpb.ValidatorContainer
-	allBalances := state.Balances()
+	allBalances := st.Balances()
 	if len(validatorIds) == 0 {
-		allValidators := state.Validators()
-		valContainers = make([]*ethpb.ValidatorContainer, len(allValidators))
-		for i, validator := range allValidators {
+		valContainers = make([]*ethpb.ValidatorContainer, st.NumValidators())
+		err := st.ApplyToEveryValidator(func(i int, validator *pb.Validator) (bool, *pb.Validator, error) {
 			readOnlyVal, err := v1.NewValidator(validator)
 			if err != nil {
-				return nil, status.Errorf(codes.Internal, "Could not convert validator: %v", err)
+				return false, validator, status.Errorf(codes.Internal, "Could not convert validator: %v", err)
 			}
 			subStatus, err := helpers.ValidatorSubStatus(readOnlyVal, epoch)
 			if err != nil {
-				return nil, errors.Wrap(err, "could not get validator sub status")
+				return false, validator, errors.Wrap(err, "could not get validator sub status")
 			}
 			valContainers[i] = &ethpb.ValidatorContainer{
 				Index:     types.ValidatorIndex(i),
@@ -234,6 +234,10 @@ func valContainersByRequestIds(state state.BeaconState, validatorIds [][]byte) (
 				Status:    subStatus,
 				Validator: migration.V1Alpha1ValidatorToV1(validator),
 			}
+			return false, validator, nil
+		})
+		if err != nil {
+			return nil, err
 		}
 	} else {
 		valContainers = make([]*ethpb.ValidatorContainer, 0, len(validatorIds))
@@ -241,7 +245,7 @@ func valContainersByRequestIds(state state.BeaconState, validatorIds [][]byte) (
 			var valIndex types.ValidatorIndex
 			if len(validatorId) == params.BeaconConfig().BLSPubkeyLength {
 				var ok bool
-				valIndex, ok = state.ValidatorIndexByPubkey(bytesutil.ToBytes48(validatorId))
+				valIndex, ok = st.ValidatorIndexByPubkey(bytesutil.ToBytes48(validatorId))
 				if !ok {
 					// Ignore well-formed yet unknown public keys.
 					continue
@@ -254,7 +258,7 @@ func valContainersByRequestIds(state state.BeaconState, validatorIds [][]byte) (
 				}
 				valIndex = types.ValidatorIndex(index)
 			}
-			validator, err := state.ValidatorAtIndex(valIndex)
+			validator, err := st.ValidatorAtIndex(valIndex)
 			if _, ok := err.(*v1.ValidatorIndexOutOfRangeError); ok {
 				// Ignore well-formed yet unknown indexes.
 				continue

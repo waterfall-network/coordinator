@@ -204,7 +204,7 @@ func TestGetAltairDuties_SyncCommitteeOK(t *testing.T) {
 
 func TestGetAltairDuties_UnknownPubkey(t *testing.T) {
 	params.SetupTestConfigCleanup(t)
-	cfg := params.MainnetConfig()
+	cfg := params.MainnetConfig().Copy()
 	cfg.AltairForkEpoch = types.Epoch(0)
 	params.OverrideBeaconConfig(cfg)
 

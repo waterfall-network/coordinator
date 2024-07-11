@@ -35,7 +35,8 @@ func CommitteeVoteKey(committeeVote *ethpb.CommitteeVote) [32]byte {
 	return key
 }
 
-// CommitteeVoteKey create key for CommitteeVote instance.
+// AggregateCommitteeVote aggregates votes of committee for blockVoting.
+// Deprecated
 func AggregateCommitteeVote(committeeVotes []*ethpb.CommitteeVote) []*ethpb.CommitteeVote {
 	var err error
 	// mapping by keys
@@ -72,6 +73,35 @@ func AggregateCommitteeVote(committeeVotes []*ethpb.CommitteeVote) []*ethpb.Comm
 		i++
 	}
 	return res
+}
+
+// AddAggregateCommitteeVote aggregates votes of committee for blockVoting.
+// Optimized version.
+func AddAggregateCommitteeVote(committeeVotes []*ethpb.CommitteeVote, addVote *ethpb.CommitteeVote) []*ethpb.CommitteeVote {
+	var isAggregated bool
+	for _, v := range committeeVotes {
+		//find target committee
+		if v.Slot == addVote.Slot && v.Index == addVote.Index {
+			//aggregate
+			bits, err := v.AggregationBits.Or(addVote.AggregationBits)
+			if err != nil {
+				log.WithError(err).WithFields(log.Fields{
+					"committee":       v.Index,
+					"slot":            v.Slot,
+					"curCommitteeLen": v.AggregationBits.Len(),
+					"addCommitteeLen": addVote.AggregationBits.Len(),
+				}).Error("Block voting: aggregate committee votes error")
+				continue
+			}
+			v.AggregationBits = bits
+			isAggregated = true
+			break
+		}
+	}
+	if !isAggregated {
+		committeeVotes = append(committeeVotes, addVote)
+	}
+	return committeeVotes
 }
 
 func BlockVotingCopy(vote *ethpb.BlockVoting) *ethpb.BlockVoting {

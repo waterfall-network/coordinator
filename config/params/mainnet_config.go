@@ -210,6 +210,7 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	DelegateForkSlot:     0,
 	PrefixFinForkSlot:    0,
 	FinEth1ForkSlot:      0,
+	BlockVotingForkSlot:  216000,
 	BellatrixForkVersion: []byte{2, 0, 0, 0},
 	BellatrixForkEpoch:   mainnetBellatrixForkEpoch,
 	ShardingForkVersion:  []byte{3, 0, 0, 0},

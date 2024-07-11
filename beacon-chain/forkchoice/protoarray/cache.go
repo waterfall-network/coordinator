@@ -1,21 +1,26 @@
 package protoarray
 
 import (
+	"bytes"
 	"sort"
 	"sync"
+	"time"
 
 	lru "github.com/hashicorp/golang-lru"
+	"github.com/sirupsen/logrus"
 	lruwrpr "gitlab.waterfall.network/waterfall/protocol/coordinator/cache/lru"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/hash"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 )
 
 const (
 	// maxForkChoiceCacheSize defines the max number of items can cache.
-	maxForkChoiceCacheSize = 8
+	maxForkChoiceCacheSize = 16
 	// maxInactivityScore max inactivity score to keep items in cache.
 	maxInactivityScore = 128
 	// diffLenToCache defines diff lentgth of rootIndexMap to add item to cache.
-	diffLenToCache = 16
+	diffLenToCache = 8
 )
 
 // cacheForkChoice main cache instance
@@ -26,6 +31,7 @@ type ForkChoiceCache struct {
 	cache      *lru.Cache
 	lock       sync.RWMutex
 	inactivity map[[32]byte]int
+	keyCache   *lru.Cache
 }
 
 // NewForkChoiceCache creates a new cache of forkchoice.
@@ -33,6 +39,7 @@ func NewForkChoiceCache() *ForkChoiceCache {
 	return &ForkChoiceCache{
 		cache:      lruwrpr.New(maxForkChoiceCacheSize),
 		inactivity: make(map[[32]byte]int),
+		keyCache:   lruwrpr.New(maxForkChoiceCacheSize),
 	}
 }
 
@@ -43,8 +50,9 @@ func (c *ForkChoiceCache) Add(fc *ForkChoice) {
 	}
 
 	cpy := fc.Copy()
-	key := cacheKeyByRootIndexMap(cpy.store.nodesIndices)
+	key, keyData := cacheKeyByRootIndexMap(cpy.store.nodesIndices)
 	_ = c.cache.Add(key, cpy)
+	_ = c.keyCache.Add(key, keyData)
 	return
 }
 
@@ -53,10 +61,7 @@ func (c *ForkChoiceCache) Get(rootIndexMap map[[32]byte]uint64) *ForkChoice {
 	if len(rootIndexMap) == 0 {
 		return nil
 	}
-	//c.lock.RLock()
-	//defer c.lock.RUnlock()
-
-	key := cacheKeyByRootIndexMap(rootIndexMap)
+	key, _ := cacheKeyByRootIndexMap(rootIndexMap)
 	value, exists := c.cache.Get(key)
 	if !exists {
 		return nil
@@ -64,17 +69,25 @@ func (c *ForkChoiceCache) Get(rootIndexMap map[[32]byte]uint64) *ForkChoice {
 	return value.(*ForkChoice).Copy()
 }
 
-func cacheKeyByRootIndexMap(rootIndexMap map[[32]byte]uint64) [32]byte {
+func cacheKeyByRootIndexMap(rootIndexMap map[[32]byte]uint64) ([32]byte, []byte) {
 	if len(rootIndexMap) == 0 {
-		return [32]byte{}
+		return [32]byte{}, []byte{}
 	}
-	roots := make(gwatCommon.HashArray, len(rootIndexMap))
+	irMap := make(map[uint64][32]byte, len(rootIndexMap))
+	iArr := make(gwatCommon.SorterDescU64, len(rootIndexMap))
 	i := 0
-	for r := range rootIndexMap {
-		roots[i] = r
+	for r, idx := range rootIndexMap {
+		irMap[idx] = r
+		iArr[i] = idx
 		i++
 	}
-	return roots.Key()
+	sort.Sort(iArr)
+	keyData := make([]byte, 32*len(iArr))
+	for i, idx := range iArr {
+		root := irMap[idx]
+		copy(keyData[32*i:32*(i+1)], root[:])
+	}
+	return hash.FastSum256(keyData), keyData
 }
 
 // incrInactivity increments all inactivity keys excluding activeKey.
@@ -101,6 +114,7 @@ func (c *ForkChoiceCache) removeInactiveItems() {
 		if score > maxInactivityScore {
 			c.cache.Remove(k)
 			delete(c.inactivity, k)
+			c.keyCache.Remove(k)
 		}
 	}
 }
@@ -116,21 +130,32 @@ func (c *ForkChoiceCache) SearchCompatibleFc(rootIndexMap map[[32]byte]uint64) (
 
 	// descending sort node's indexes
 	nodeIndexes := make(gwatCommon.SorterDescU64, 0, len(rootIndexMap))
-	indexRootMap := make(map[uint64]gwatCommon.Hash, len(rootIndexMap))
+	indexRootMap := make(map[uint64][32]byte, len(rootIndexMap))
 	for r, index := range rootIndexMap {
 		nodeIndexes = append(nodeIndexes, index)
 		indexRootMap[index] = r
 	}
 	sort.Sort(nodeIndexes)
 	// collect descending sorted nodes' roots
-	roots := make(gwatCommon.HashArray, len(nodeIndexes))
+	//optimized version
+	binRoots := make([]byte, len(nodeIndexes)*32)
 	for i, index := range nodeIndexes {
-		roots[i] = indexRootMap[index]
+		root := indexRootMap[index]
+		copy(binRoots[32*i:32*(i+1)], root[:])
 	}
-	// search compatible key and
-	for i, r := range roots {
-		keyRoots := roots[i:]
-		var key [32]byte = keyRoots.Key()
+
+	key, keyData := c.searchCompatibleFcKey(binRoots)
+	if len(keyData) > 0 {
+		//calc difference
+		diffBinLen := len(binRoots) - len(keyData)
+		diffLen := diffBinLen / 32
+		binDiff := make([]byte, diffBinLen)
+		copy(binDiff, keyData[len(keyData):])
+		for i := 0; i < diffLen; i++ {
+			r := bytesutil.ToBytes32(binRoots[32*i : 32*(i+1)])
+			diff[r] = rootIndexMap[r]
+		}
+		//get cached fc
 		value, exists := c.cache.Get(key)
 		if exists {
 			fc, ok := value.(*ForkChoice)
@@ -139,32 +164,107 @@ func (c *ForkChoiceCache) SearchCompatibleFc(rootIndexMap map[[32]byte]uint64) (
 				return fc.Copy(), diff
 			}
 		}
-		diff[r] = rootIndexMap[r]
 	}
-	return nil, diff
+	return nil, rootIndexMap
+}
+
+func (c *ForkChoiceCache) searchCompatibleFcKey(binRoots []byte) (key [32]byte, keyRoots []byte) {
+	for _, k := range c.keyCache.Keys() {
+		val, exists := c.keyCache.Get(k)
+		if exists {
+			keyData, isOk := val.([]byte)
+			if isOk && bytes.Contains(binRoots, keyData) && len(keyRoots) < len(keyData) {
+				if v, ok := k.([32]byte); ok {
+					key = v
+					keyRoots = make([]byte, len(keyData))
+					copy(keyRoots, keyData)
+				}
+			}
+		}
+	}
+	return key, keyRoots
+}
+
+func isValidCachedFc(fc *ForkChoice, rootIndexMap map[[32]byte]uint64) bool {
+	if fc == nil || fc.store == nil || len(fc.store.nodesIndices) == 0 {
+		return false
+	}
+	fc.store.nodesLock.RLock()
+	defer fc.store.nodesLock.RUnlock()
+	for _, n := range fc.store.nodes {
+		if _, ok := rootIndexMap[n.root]; !ok {
+			return false
+		}
+	}
+	return true
 }
 
 // getCompatibleFc searches/create forkchoice inctance compatible with rootIndexMap
 // and calculate nodes that are not included in forkchoice.
 // Helper function for workflow optimization.
-func getCompatibleFc(nodesRootIndexMap map[[32]byte]uint64, currFc *ForkChoice) (fc *ForkChoice, diff map[[32]byte]uint64) {
+func getCompatibleFc(nodesRootIndexMap map[[32]byte]uint64, currFc *ForkChoice) (fc *ForkChoice, diff map[[32]byte]uint64, diffNodes map[uint64]*Node) {
+	diffNodes = make(map[uint64]*Node)
+	tstart := time.Now()
 	// if current fc is equivalent target fc
-	if cacheKeyByRootIndexMap(currFc.store.nodesIndices) == cacheKeyByRootIndexMap(nodesRootIndexMap) {
+	//if cacheKeyByRootIndexMap(currFc.store.nodesIndices) == cacheKeyByRootIndexMap(nodesRootIndexMap) {
+	if len(currFc.store.nodesIndices) == len(nodesRootIndexMap) {
 		fc = currFc.Copy()
 		diff = map[[32]byte]uint64{}
 		cacheForkChoice.incrInactivity([32]byte{})
-		return fc, diff
+
+		log.WithFields(logrus.Fields{
+			"elapsed":           time.Since(tstart),
+			"nodesIndices":      len(currFc.store.nodesIndices),
+			"nodesRootIndexMap": len(nodesRootIndexMap),
+		}).Info("FC: getCompatibleFc 111 end")
+
+		return fc, diff, diffNodes
 	}
+
+	log.WithFields(logrus.Fields{
+		"elapsed":           time.Since(tstart),
+		"nodesIndices":      len(currFc.store.nodesIndices),
+		"nodesRootIndexMap": len(nodesRootIndexMap),
+	}).Info("FC: getCompatibleFc 111")
+	tstart = time.Now()
+
 	// search cached fc
 	fc, diff = cacheForkChoice.SearchCompatibleFc(nodesRootIndexMap)
 	if fc != nil {
-		return fc, diff
+		log.WithFields(logrus.Fields{
+			"elapsed":           time.Since(tstart),
+			"nodesIndices":      len(currFc.store.nodesIndices),
+			"nodesRootIndexMap": len(nodesRootIndexMap),
+		}).Info("FC: getCompatibleFc 222 end")
+
+		for _, idx := range diff {
+			diffNodes[idx] = copyNode(currFc.store.nodes[idx])
+		}
+		return fc, diff, diffNodes
 	}
+
+	log.WithFields(logrus.Fields{
+		"elapsed":           time.Since(tstart),
+		"nodesIndices":      len(currFc.store.nodesIndices),
+		"nodesRootIndexMap": len(nodesRootIndexMap),
+	}).Info("FC: getCompatibleFc 222")
+	tstart = time.Now()
+
 	// create new ForkChoice instance
 	fc = New(currFc.store.justifiedEpoch, currFc.store.finalizedEpoch)
 	diff = nodesRootIndexMap
+	for _, idx := range nodesRootIndexMap {
+		diffNodes[idx] = copyNode(currFc.store.nodes[idx])
+	}
 	cacheForkChoice.incrInactivity([32]byte{})
-	return fc, diff
+
+	log.WithFields(logrus.Fields{
+		"elapsed":           time.Since(tstart),
+		"nodesIndices":      len(currFc.store.nodesIndices),
+		"nodesRootIndexMap": len(nodesRootIndexMap),
+	}).Info("FC: getCompatibleFc 333 end")
+
+	return fc, diff, diffNodes
 }
 
 // updateCache

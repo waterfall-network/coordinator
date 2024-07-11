@@ -80,6 +80,7 @@ type Service struct {
 	initSyncBlocksLock    sync.RWMutex
 	procBlockLock         sync.RWMutex
 	procBlockCache        *lru.Cache
+	procBlRootCache       *lru.Cache
 	justifiedBalances     *stateBalanceCache
 	wsVerifier            *WeakSubjectivityVerifier
 	store                 *store.Store
@@ -121,7 +122,11 @@ func NewService(ctx context.Context, opts ...Option) (*Service, error) {
 	var err error
 	procBlockCache, err := lru.New(procBlockSize)
 	if err != nil {
-		panic(fmt.Errorf("lru new failed: %w", err))
+		panic(fmt.Errorf("lru new procBlockCache failed: %w", err))
+	}
+	procBlRootCache, err := lru.New(procBlockSize)
+	if err != nil {
+		panic(fmt.Errorf("lru new procBlRootCache failed: %w", err))
 	}
 	srv := &Service{
 		ctx:                  ctx,
@@ -135,6 +140,7 @@ func NewService(ctx context.Context, opts ...Option) (*Service, error) {
 		newHeadCh:            make(chan *head),
 		isGwatSyncing:        abool.New(),
 		procBlockCache:       procBlockCache,
+		procBlRootCache:      procBlRootCache,
 	}
 	for _, opt := range opts {
 		if err := opt(srv); err != nil {

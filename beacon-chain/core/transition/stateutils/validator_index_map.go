@@ -21,7 +21,12 @@ func ValidatorIndexMap(validators []*ethpb.Validator) map[[fieldparams.BLSPubkey
 		if record == nil {
 			continue
 		}
-		key := bytesutil.ToBytes48(record.PublicKey)
+		var key [48]byte
+		if ptrKey := bytesutil.ToPtrBytes48(record.PublicKey); ptrKey != nil {
+			key = *ptrKey
+		} else {
+			key = bytesutil.ToBytes48(record.PublicKey)
+		}
 		m[key] = types.ValidatorIndex(idx)
 	}
 	return m

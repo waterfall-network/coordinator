@@ -67,6 +67,11 @@ type ChainService struct {
 	IsSyncFn                    func() bool
 }
 
+func (s *ChainService) IsBlockRootProcessing(root [32]byte) bool {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (s *ChainService) SetIsSyncFn(fn func() bool) {
 	s.IsSyncFn = fn
 }
@@ -407,6 +412,10 @@ func (s *ChainService) HasInitSyncBlock(rt [32]byte) bool {
 		return false
 	}
 	return s.InitSyncBlockRoots[rt]
+}
+
+func (s *ChainService) IsBlockProcessing(root [32]byte) bool {
+	return false
 }
 
 // HeadGenesisValidatorsRoot mocks HeadGenesisValidatorsRoot method in chain service.
