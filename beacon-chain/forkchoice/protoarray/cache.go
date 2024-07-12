@@ -205,10 +205,16 @@ func isValidCachedFc(fc *ForkChoice, rootIndexMap map[[32]byte]uint64) bool {
 func getCompatibleFc(nodesRootIndexMap map[[32]byte]uint64, currFc *ForkChoice) (fc *ForkChoice, diff map[[32]byte]uint64, diffNodes map[uint64]*Node) {
 	diffNodes = make(map[uint64]*Node)
 	tstart := time.Now()
+
+	log.WithFields(logrus.Fields{
+		"nodesIndices":      len(currFc.store.nodesIndices),
+		"nodesRootIndexMap": len(nodesRootIndexMap),
+	}).Info("FC: getCompatibleFc 000 start")
+
 	// if current fc is equivalent target fc
 	//if cacheKeyByRootIndexMap(currFc.store.nodesIndices) == cacheKeyByRootIndexMap(nodesRootIndexMap) {
 	if len(currFc.store.nodesIndices) == len(nodesRootIndexMap) {
-		fc = currFc.Copy()
+		fc = currFc //.Copy()
 		diff = map[[32]byte]uint64{}
 		cacheForkChoice.incrInactivity([32]byte{})
 
