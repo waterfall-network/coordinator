@@ -810,7 +810,6 @@ func (f *ForkChoice) Copy() *ForkChoice {
 		return nil
 	}
 
-	//todo rollback
 	log.WithFields(logrus.Fields{}).Info("FC: Copy start")
 	defer func(t time.Time) {
 		log.WithFields(logrus.Fields{
@@ -819,13 +818,9 @@ func (f *ForkChoice) Copy() *ForkChoice {
 	}(time.Now())
 
 	f.mu.RLock()
-
 	log.WithFields(logrus.Fields{}).Info("FC: Copy f.mu.RLock()")
-
 	f.votesLock.RLock()
-
 	log.WithFields(logrus.Fields{}).Info("FC: Copy f.votesLock.RLock()")
-
 	defer func() {
 		f.votesLock.RUnlock()
 		f.mu.RUnlock()
@@ -861,7 +856,6 @@ func (s *Store) Copy() *Store {
 		return nil
 	}
 
-	//todo rollback
 	log.WithFields(logrus.Fields{}).Info("FC: store.Copy start")
 	defer func(t time.Time) {
 		log.WithFields(logrus.Fields{
@@ -870,17 +864,11 @@ func (s *Store) Copy() *Store {
 	}(time.Now())
 
 	s.nodesLock.RLock()
-
 	log.WithFields(logrus.Fields{}).Info("FC: store.Copy s.nodesLock.RLock()")
-
 	s.proposerBoostLock.RLock()
-
 	log.WithFields(logrus.Fields{}).Info("FC: store.Copy s.proposerBoostLock.RLock()")
-
 	s.balancesLock.RLock()
-
 	log.WithFields(logrus.Fields{}).Info("FC: store.Copy s.balancesLock.RLock()")
-
 	defer func() {
 		s.nodesLock.RUnlock()
 		s.proposerBoostLock.RUnlock()

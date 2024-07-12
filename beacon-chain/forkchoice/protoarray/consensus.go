@@ -19,24 +19,8 @@ func (f *ForkChoice) setBalances(root [32]byte, balances []uint64) {
 	f.store.balances[root] = balances
 }
 func (f *ForkChoice) getBalances(root [32]byte) []uint64 {
-
-	//todo rollback
-	log.WithFields(logrus.Fields{
-		"root": fmt.Sprintf("%#x", root),
-	}).Info("FC: getBalances start")
-
-	defer func(t time.Time) {
-		log.WithFields(logrus.Fields{
-			"elapsed": time.Since(t),
-			"root":    fmt.Sprintf("%#x", root),
-		}).Info("FC: getBalances end")
-	}(time.Now())
-
-	f.store.balancesLock.Lock()
-	defer f.store.balancesLock.Unlock()
-
-	//f.store.balancesLock.RLock()
-	//defer f.store.balancesLock.RUnlock()
+	f.store.balancesLock.RLock()
+	defer f.store.balancesLock.RUnlock()
 	return f.store.balances[root]
 }
 
