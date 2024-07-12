@@ -19,8 +19,24 @@ func (f *ForkChoice) setBalances(root [32]byte, balances []uint64) {
 	f.store.balances[root] = balances
 }
 func (f *ForkChoice) getBalances(root [32]byte) []uint64 {
-	f.store.balancesLock.RLock()
-	defer f.store.balancesLock.RUnlock()
+
+	//todo rollback
+	log.WithFields(logrus.Fields{
+		"root": fmt.Sprintf("%#x", root),
+	}).Info("FC: getBalances start")
+
+	defer func(t time.Time) {
+		log.WithFields(logrus.Fields{
+			"elapsed": time.Since(t),
+			"root":    fmt.Sprintf("%#x", root),
+		}).Info("FC: getBalances end")
+	}(time.Now())
+
+	f.store.balancesLock.Lock()
+	defer f.store.balancesLock.Unlock()
+
+	//f.store.balancesLock.RLock()
+	//defer f.store.balancesLock.RUnlock()
 	return f.store.balances[root]
 }
 
@@ -79,10 +95,10 @@ func (fc *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines
 	}
 
 	fc.mu.RLock()
-	//todo check
-	fc.votesLock.RLock()
-	fc.store.balancesLock.RLock()
-	fc.store.nodesLock.RLock()
+	////todo rollback
+	//fc.votesLock.RLock()
+	//fc.store.balancesLock.RLock()
+	//fc.store.nodesLock.RLock()
 
 	// collect nodes of T(G) tree
 	acceptableRootIndexMap, _ := collectTgTreeNodesByOptimisticSpines(fc, _optSpines, jCpRoot)
@@ -93,10 +109,10 @@ func (fc *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines
 
 	if len(acceptableRootIndexMap) == 0 {
 		fc.mu.RUnlock()
-		//todo check
-		fc.votesLock.RUnlock()
-		fc.store.balancesLock.RUnlock()
-		fc.store.nodesLock.RUnlock()
+		////todo rollback
+		//fc.votesLock.RUnlock()
+		//fc.store.balancesLock.RUnlock()
+		//fc.store.nodesLock.RUnlock()
 
 		return [32]byte{}, nil
 	}
@@ -104,10 +120,10 @@ func (fc *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines
 	// check cached fc
 	fcBase, diffRootIndexMap, diffNodes := getCompatibleFc(acceptableRootIndexMap, fc)
 	fc.mu.RUnlock()
-	//todo check
-	fc.votesLock.RUnlock()
-	fc.store.balancesLock.RUnlock()
-	fc.store.nodesLock.RUnlock()
+	////todo rollback
+	//fc.votesLock.RUnlock()
+	//fc.store.balancesLock.RUnlock()
+	//fc.store.nodesLock.RUnlock()
 
 	log.WithFields(logrus.Fields{
 		"items":                  fmt.Sprintf("%d", cacheForkChoice.cache.Len()),
