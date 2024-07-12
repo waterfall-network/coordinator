@@ -214,7 +214,7 @@ func getCompatibleFc(nodesRootIndexMap map[[32]byte]uint64, currFc *ForkChoice) 
 	// if current fc is equivalent target fc
 	//if cacheKeyByRootIndexMap(currFc.store.nodesIndices) == cacheKeyByRootIndexMap(nodesRootIndexMap) {
 	if len(currFc.store.nodesIndices) == len(nodesRootIndexMap) {
-		//fc = currFc.Copy()
+		fc = currFc //.Copy()
 		diff = map[[32]byte]uint64{}
 		cacheForkChoice.incrInactivity([32]byte{})
 
