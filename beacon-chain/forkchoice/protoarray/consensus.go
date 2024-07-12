@@ -94,36 +94,21 @@ func (fc *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines
 		}
 	}
 
-	fc.mu.RLock()
-	////todo rollback
-	//fc.votesLock.RLock()
-	//fc.store.balancesLock.RLock()
-	//fc.store.nodesLock.RLock()
+	fcCpy := fc.Copy()
 
 	// collect nodes of T(G) tree
-	acceptableRootIndexMap, _ := collectTgTreeNodesByOptimisticSpines(fc, _optSpines, jCpRoot)
+	acceptableRootIndexMap, _ := collectTgTreeNodesByOptimisticSpines(fcCpy, _optSpines, jCpRoot)
 
 	log.WithFields(logrus.Fields{
 		"acceptableRootIndexMap": fmt.Sprintf("%d", len(acceptableRootIndexMap)),
 	}).Info("FC: TG Tree")
 
 	if len(acceptableRootIndexMap) == 0 {
-		fc.mu.RUnlock()
-		////todo rollback
-		//fc.votesLock.RUnlock()
-		//fc.store.balancesLock.RUnlock()
-		//fc.store.nodesLock.RUnlock()
-
 		return [32]byte{}, nil
 	}
 
 	// check cached fc
-	fcBase, diffRootIndexMap, diffNodes := getCompatibleFc(acceptableRootIndexMap, fc)
-	fc.mu.RUnlock()
-	////todo rollback
-	//fc.votesLock.RUnlock()
-	//fc.store.balancesLock.RUnlock()
-	//fc.store.nodesLock.RUnlock()
+	fcBase, diffRootIndexMap, diffNodes := getCompatibleFc(acceptableRootIndexMap, fcCpy)
 
 	log.WithFields(logrus.Fields{
 		"items":                  fmt.Sprintf("%d", cacheForkChoice.cache.Len()),
