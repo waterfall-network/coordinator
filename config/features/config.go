@@ -131,6 +131,14 @@ func configureTestnet(ctx *cli.Context, cfg *Flags) {
 		log.Warn("Running on the Testnet8")
 		params.UseTestnet8Config()
 		params.UseTestnet8NetworkConfig()
+	} else if ctx.Bool(Testnet5.Name) {
+		log.Warn("Running on the Testnet5")
+		params.UseTestnet5Config()
+		params.UseTestnet5NetworkConfig()
+	} else if ctx.Bool(Testnet9.Name) {
+		log.Warn("Running on the Testnet9")
+		params.UseTestnet9Config()
+		params.UseTestnet9NetworkConfig()
 	} else {
 		log.Warn("Running on Waterfall Consensus Mainnet")
 		params.UseMainnetConfig()

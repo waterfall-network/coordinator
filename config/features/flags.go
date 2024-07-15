@@ -12,6 +12,16 @@ var (
 		Name:  "pyrmont",
 		Usage: "This defines the flag through which we can run on the Pyrmont Multiclient Testnet",
 	}
+	// Testnet5 flag to override node configuration.
+	Testnet5 = &cli.BoolFlag{
+		Name:  "testnet5",
+		Usage: "Override node configuration for the testnet5 network",
+	}
+	// Testnet9 flag to override node configuration.
+	Testnet9 = &cli.BoolFlag{
+		Name:  "testnet9",
+		Usage: "Override node configuration for the testnet9 network",
+	}
 	// Testnet8 flag for the multiclient waterfall consensus testnet.
 	Testnet8 = &cli.BoolFlag{
 		Name:  "testnet8",
@@ -160,6 +170,8 @@ var ValidatorFlags = append(deprecatedFlags, []cli.Flag{
 	enableExternalSlasherProtectionFlag,
 	disableAttestingHistoryDBCache,
 	PyrmontTestnet,
+	//Testnet5,
+	//Testnet9,
 	Testnet8,
 	Mainnet,
 	dynamicKeyReloadDebounceInterval,
@@ -180,6 +192,8 @@ var BeaconChainFlags = append(deprecatedFlags, []cli.Flag{
 	disableGRPCConnectionLogging,
 	PyrmontTestnet,
 	Testnet8,
+	Testnet5,
+	Testnet9,
 	Mainnet,
 	disablePeerScorer,
 	enablePeerScorer,

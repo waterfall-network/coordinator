@@ -144,6 +144,10 @@ func displayExitInfo(rawExitedKeys [][]byte, trimmedExitedKeys []string) {
 				baseUrl = "https://pyrmont.beaconcha.in/validator/"
 			} else if params.BeaconConfig().ConfigName == params.ConfigNames[params.Testnet8] {
 				baseUrl = "https://testnet8.beaconcha.in/validator/"
+			} else if params.BeaconConfig().ConfigName == params.ConfigNames[params.Testnet5] {
+				baseUrl = "https://testnet5.beaconcha.in/validator/"
+			} else if params.BeaconConfig().ConfigName == params.ConfigNames[params.Testnet9] {
+				baseUrl = "https://testnet9.beaconcha.in/validator/"
 			} else if params.BeaconConfig().ConfigName == params.ConfigNames[params.Mainnet] {
 				baseUrl = "https://mainnet.beaconcha.in/validator/"
 			} else {

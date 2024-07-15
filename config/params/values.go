@@ -16,6 +16,8 @@ const (
 	Testnet8
 	EndToEndMainnet
 	Test
+	Testnet5
+	Testnet9
 )
 
 // ConfigName enum describes the type of known network in use.
