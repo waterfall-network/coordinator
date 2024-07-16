@@ -17,16 +17,16 @@ func Testnet5Config() *BeaconChainConfig {
 	cfg := MainnetConfig().Copy()
 
 	cfg.ConfigName = ConfigNames[Testnet5]
-	//cfg.DepositContractAddress = "0x6671Ed1732b6b5AF82724A1d1A94732D1AA37aa6"
-	//cfg.DepositChainID = 1501865
-	//cfg.DepositNetworkID = 1501865
+	//cfg.DepositContractAddress = "0x501bf68fC5945FF6449A18d301C99016fEBe2437"
+	cfg.DepositChainID = 1501865
+	cfg.DepositNetworkID = 1501865
 
 	cfg.DelegateForkSlot = 0
 	cfg.DelegateForkSlot = 0
 	cfg.PrefixFinForkSlot = 0
 	cfg.FinEth1ForkSlot = 0
 	cfg.BlockVotingForkSlot = 0
-	cfg.SlotsPerArchivedPoint = 0
+	//cfg.SlotsPerArchivedPoint = 2048
 
 	//cfg.SlotsPerEpoch = 32
 	//cfg.SecondsPerSlot = 6
