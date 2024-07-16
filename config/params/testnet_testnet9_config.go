@@ -11,7 +11,7 @@ func UseTestnet9NetworkConfig() {
 
 // UseTestnet9Config sets the main beacon chain config for Testnet9.
 func UseTestnet9Config() {
-	beaconConfig = Testnet8Config()
+	beaconConfig = Testnet9Config()
 }
 
 // Testnet9Config defines the config for the Testnet9.
@@ -19,10 +19,9 @@ func Testnet9Config() *BeaconChainConfig {
 	cfg := MainnetConfig().Copy()
 
 	cfg.ConfigName = ConfigNames[Testnet9]
-	//cfg.DepositContractAddress = "0x6671Ed1732b6b5AF82724A1d1A94732D1AA37aa6"
+	//cfg.DepositContractAddress = "0xc3653BD746859b94839c3bA0a8020fEbEc009714"
 	cfg.DepositChainID = 1501869
 	cfg.DepositNetworkID = 1501869
-	cfg.DelegateForkSlot = 0
 	cfg.DelegateForkSlot = 0
 	cfg.PrefixFinForkSlot = 0
 	cfg.FinEth1ForkSlot = 0

@@ -38,6 +38,8 @@ var ConfigNames = map[ConfigName]string{
 	EndToEnd:        "end-to-end",
 	Pyrmont:         "pyrmont",
 	Testnet8:        "testnet8",
+	Testnet5:        "testnet5",
+	Testnet9:        "testnet9",
 	EndToEndMainnet: "end-to-end-mainnet",
 	Test:            "test",
 }
