@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
@@ -53,7 +54,21 @@ func (s *State) saveStateByRoot(ctx context.Context, blockRoot [32]byte, st stat
 	// Duration can't be 0 to prevent panic for division.
 	duration := uint64(math.Max(float64(s.saveHotStateDB.duration), 1))
 
+	log.WithFields(logrus.Fields{
+		"slot":  st.Slot(),
+		"cond1": s.saveHotStateDB.enabled,
+		"cond2": st.Slot().Mod(duration) == 0,
+	}).Info("Save state by root: 000")
+	tstart := time.Now()
+
 	s.saveHotStateDB.lock.Lock()
+
+	log.WithFields(logrus.Fields{
+		"slot":    st.Slot(),
+		"elapsed": time.Since(tstart),
+	}).Info("Save state by root: 111")
+	tstart = time.Now()
+
 	if s.saveHotStateDB.enabled && st.Slot().Mod(duration) == 0 {
 		if err := s.beaconDB.SaveState(ctx, st, blockRoot); err != nil {
 			s.saveHotStateDB.lock.Unlock()
@@ -72,12 +87,32 @@ func (s *State) saveStateByRoot(ctx context.Context, blockRoot [32]byte, st stat
 			"root":                   fmt.Sprintf("%#x", blockRoot),
 		}).Info("Save state by root: save to db success")
 	}
+
+	log.WithFields(logrus.Fields{
+		"slot":    st.Slot(),
+		"elapsed": time.Since(tstart),
+	}).Info("Save state by root: 222")
+	tstart = time.Now()
+
 	s.saveHotStateDB.lock.Unlock()
+
+	log.WithFields(logrus.Fields{
+		"slot":    st.Slot(),
+		"elapsed": time.Since(tstart),
+	}).Info("Save state by root: 333")
+	tstart = time.Now()
 
 	// If the hot state is already in cache, one can be sure the state was processed and in the DB.
 	if s.hotStateCache.has(blockRoot) {
 		return nil
 	}
+
+	log.WithFields(logrus.Fields{
+		"slot":         st.Slot(),
+		"IsEpochStart": slots.IsEpochStart(st.Slot()),
+		"elapsed":      time.Since(tstart),
+	}).Info("Save state by root: 444")
+	tstart = time.Now()
 
 	// Only on an epoch boundary slot, saves epoch boundary state in epoch boundary root state cache.
 	if slots.IsEpochStart(st.Slot()) {
@@ -93,7 +128,7 @@ func (s *State) saveStateByRoot(ctx context.Context, blockRoot [32]byte, st stat
 			"0epoch": slots.ToEpoch(st.Slot()),
 			"1slot":  fmt.Sprintf("%d", st.Slot()),
 			"root":   fmt.Sprintf("%#x", blockRoot),
-		}).Debug("Save state by root: add epoch boundary cache success")
+		}).Info("Save state by root: add epoch boundary cache success")
 	} else {
 		// Always check that the correct epoch boundary states have been saved
 		// for the current epoch.
@@ -121,6 +156,15 @@ func (s *State) saveStateByRoot(ctx context.Context, blockRoot [32]byte, st stat
 			}).Error("Save state by root: check epoch boundary cache failed")
 			return err
 		}
+
+		log.WithFields(logrus.Fields{
+			"slot":         st.Slot(),
+			"IsEpochStart": slots.IsEpochStart(st.Slot()),
+			"ok":           ok,
+			"elapsed":      time.Since(tstart),
+		}).Info("Save state by root: 555")
+		tstart = time.Now()
+
 		// We would only recover the boundary states under this condition:
 		//
 		// 1) Would indicate that the epoch boundary was skipped due to a missed slot, we
@@ -132,7 +176,7 @@ func (s *State) saveStateByRoot(ctx context.Context, blockRoot [32]byte, st stat
 				log.WithFields(logrus.Fields{
 					"slot": epochStart,
 					"root": fmt.Sprintf("%#x", bRoot),
-				}).Debug("Save state by root: recovering state")
+				}).Info("Save state by root: recovering state")
 
 				hState := s.hotStateCache.get([32]byte(bRoot))
 				if err := s.epochBoundaryStateCache.put([32]byte(bRoot), hState); err != nil {
@@ -149,8 +193,15 @@ func (s *State) saveStateByRoot(ctx context.Context, blockRoot [32]byte, st stat
 			"1slot":         fmt.Sprintf("%d", st.Slot()),
 			"2cachedBefore": ok,
 			"root":          fmt.Sprintf("%#x", blockRoot),
-		}).Debug("Save state by root: add epoch boundary cache success")
+		}).Info("Save state by root: add epoch boundary cache success")
 	}
+
+	log.WithFields(logrus.Fields{
+		"slot":         st.Slot(),
+		"IsEpochStart": slots.IsEpochStart(st.Slot()),
+		"elapsed":      time.Since(tstart),
+	}).Info("Save state by root: 666")
+	tstart = time.Now()
 
 	// On an intermediate slots, save state summary.
 	if err := s.beaconDB.SaveStateSummary(ctx, &ethpb.StateSummary{
@@ -160,8 +211,21 @@ func (s *State) saveStateByRoot(ctx context.Context, blockRoot [32]byte, st stat
 		return err
 	}
 
+	log.WithFields(logrus.Fields{
+		"slot":         st.Slot(),
+		"IsEpochStart": slots.IsEpochStart(st.Slot()),
+		"elapsed":      time.Since(tstart),
+	}).Info("Save state by root: 777")
+	tstart = time.Now()
+
 	// Store the copied state in the hot state cache.
 	s.hotStateCache.put(blockRoot, st.Copy())
+
+	log.WithFields(logrus.Fields{
+		"slot":         st.Slot(),
+		"IsEpochStart": slots.IsEpochStart(st.Slot()),
+		"elapsed":      time.Since(tstart),
+	}).Info("Save state by root: 888")
 
 	return nil
 }

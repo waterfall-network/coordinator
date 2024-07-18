@@ -810,14 +810,36 @@ func (s *Service) insertBlockToForkChoiceStore(
 func (s *Service) savePostStateInfo(ctx context.Context, r [32]byte, b block.SignedBeaconBlock, st state.BeaconState, initSync bool) error {
 	ctx, span := trace.StartSpan(ctx, "blockChain.savePostStateInfo")
 	defer span.End()
+
+	log.WithFields(logrus.Fields{
+		"slot":     b.Block().Slot(),
+		"initSync": initSync,
+	}).Info("onBlock: savePostStateInfo 000")
+	tstart := time.Now()
+
 	if initSync {
 		s.saveInitSyncBlock(r, b)
 	} else if err := s.cfg.BeaconDB.SaveBlock(ctx, b); err != nil {
 		return errors.Wrapf(err, "could not save block from slot %d", b.Block().Slot())
 	}
+
+	log.WithFields(logrus.Fields{
+		"slot":     b.Block().Slot(),
+		"initSync": initSync,
+		"elapsed":  time.Since(tstart),
+	}).Info("onBlock: savePostStateInfo block")
+	tstart = time.Now()
+
 	if err := s.cfg.StateGen.SaveState(ctx, r, st); err != nil {
 		return errors.Wrap(err, "could not save state")
 	}
+
+	log.WithFields(logrus.Fields{
+		"slot":     b.Block().Slot(),
+		"initSync": initSync,
+		"elapsed":  time.Since(tstart),
+	}).Info("onBlock: savePostStateInfo state")
+
 	return nil
 }
 
