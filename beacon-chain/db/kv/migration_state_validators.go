@@ -58,7 +58,7 @@ func migrateStateValidators(ctx context.Context, db *bolt.DB) error {
 
 	// get all the keys to migrate
 	var keys [][]byte
-	if err := db.Update(func(tx *bolt.Tx) error {
+	if err := db.Batch(func(tx *bolt.Tx) error {
 		stateBkt := tx.Bucket(stateBucket)
 		if stateBkt == nil {
 			return nil
@@ -79,7 +79,7 @@ func migrateStateValidators(ctx context.Context, db *bolt.DB) error {
 
 	batchNo := 0
 	for batchIndex := 0; batchIndex < len(keys); batchIndex += batchSize {
-		if err := db.Update(func(tx *bolt.Tx) error {
+		if err := db.Batch(func(tx *bolt.Tx) error {
 			//create the source and destination buckets
 			stateBkt := tx.Bucket(stateBucket)
 			if stateBkt == nil {
@@ -178,7 +178,7 @@ func migrateStateValidators(ctx context.Context, db *bolt.DB) error {
 	}
 
 	// set the migration entry to done
-	if err := db.Update(func(tx *bolt.Tx) error {
+	if err := db.Batch(func(tx *bolt.Tx) error {
 		mb := tx.Bucket(migrationsBucket)
 		if mb == nil {
 			return nil

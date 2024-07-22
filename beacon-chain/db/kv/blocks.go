@@ -4,13 +4,11 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"time"
 
 	ssz "github.com/ferranbt/fastssz"
 	"github.com/golang/snappy"
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
-	"github.com/sirupsen/logrus"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db/filters"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/container/slice"
@@ -264,34 +262,13 @@ func (s *Store) SaveBlock(ctx context.Context, signed block.SignedBeaconBlock) e
 	ctx, span := trace.StartSpan(ctx, "BeaconDB.SaveBlock")
 	defer span.End()
 
-	defer func(tstart time.Time) {
-		log.WithFields(logrus.Fields{
-			"slot":    signed.Block().Slot(),
-			"elapsed": time.Since(tstart),
-		}).Info("SaveBlock end")
-	}(time.Now())
-	tstart := time.Now()
-
 	blockRoot, err := signed.Block().HashTreeRoot()
 	if err != nil {
 		return err
 	}
-
-	log.WithFields(logrus.Fields{
-		"slot":    signed.Block().Slot(),
-		"elapsed": time.Since(tstart),
-	}).Info("SaveBlock 111")
-	tstart = time.Now()
-
 	if v, ok := s.blockCache.Get(string(blockRoot[:])); v != nil && ok {
 		return nil
 	}
-
-	log.WithFields(logrus.Fields{
-		"slot":    signed.Block().Slot(),
-		"elapsed": time.Since(tstart),
-	}).Info("SaveBlock 222")
-
 	return s.SaveBlocks(ctx, []block.SignedBeaconBlock{signed})
 }
 
@@ -306,98 +283,33 @@ func (s *Store) SaveBlocks(ctx context.Context, blocks []block.SignedBeaconBlock
 	encodedBlocks := make([][]byte, len(blocks))
 	indicesForBlocks := make([]map[string][]byte, len(blocks))
 	for i, blk := range blocks {
-		tstart := time.Now()
-
 		blockRoot, err := blk.Block().HashTreeRoot()
 		if err != nil {
 			return err
 		}
-
-		log.WithFields(logrus.Fields{
-			"i":       i,
-			"slot":    blk.Block().Slot(),
-			"elapsed": time.Since(tstart),
-		}).Info("SaveBlock iter 000")
-		tstart = time.Now()
-
 		enc, err := marshalBlock(ctx, blk)
 		if err != nil {
 			return err
 		}
-
-		log.WithFields(logrus.Fields{
-			"i":       i,
-			"slot":    blk.Block().Slot(),
-			"elapsed": time.Since(tstart),
-		}).Info("SaveBlock iter 111")
-		tstart = time.Now()
-
 		blockRoots[i] = blockRoot[:]
 		encodedBlocks[i] = enc
 		indicesByBucket := createBlockIndicesFromBlock(ctx, blk.Block())
 		indicesForBlocks[i] = indicesByBucket
-
-		log.WithFields(logrus.Fields{
-			"i":       i,
-			"slot":    blk.Block().Slot(),
-			"elapsed": time.Since(tstart),
-		}).Info("SaveBlock iter 111")
 	}
 
-	defer func(tstart time.Time) {
-		if len(blocks) > 0 {
-			log.WithFields(logrus.Fields{
-				"slot":    blocks[0].Block().Slot(),
-				"elapsed": time.Since(tstart),
-			}).Info("SaveBlock update end")
-		}
-	}(time.Now())
-
-	return s.db.Update(func(tx *bolt.Tx) error {
+	return s.db.Batch(func(tx *bolt.Tx) error {
 		bkt := tx.Bucket(blocksBucket)
 		for i, blk := range blocks {
-			tstart := time.Now()
-
 			if existingBlock := bkt.Get(blockRoots[i]); existingBlock != nil {
 				continue
 			}
-
-			log.WithFields(logrus.Fields{
-				"i":       i,
-				"slot":    blk.Block().Slot(),
-				"elapsed": time.Since(tstart),
-			}).Info("SaveBlock update 000")
-			tstart = time.Now()
-
 			if err := updateValueForIndices(ctx, indicesForBlocks[i], blockRoots[i], tx); err != nil {
 				return errors.Wrap(err, "could not update DB indices")
 			}
-
-			log.WithFields(logrus.Fields{
-				"i":       i,
-				"slot":    blk.Block().Slot(),
-				"elapsed": time.Since(tstart),
-			}).Info("SaveBlock update 111")
-			tstart = time.Now()
-
 			s.blockCache.Set(string(blockRoots[i]), blk, int64(len(encodedBlocks[i])))
-
-			log.WithFields(logrus.Fields{
-				"i":       i,
-				"slot":    blk.Block().Slot(),
-				"elapsed": time.Since(tstart),
-			}).Info("SaveBlock update 222")
-			tstart = time.Now()
-
 			if err := bkt.Put(blockRoots[i], encodedBlocks[i]); err != nil {
 				return err
 			}
-
-			log.WithFields(logrus.Fields{
-				"i":       i,
-				"slot":    blk.Block().Slot(),
-				"elapsed": time.Since(tstart),
-			}).Info("SaveBlock update 333")
 		}
 		return nil
 	})
@@ -407,7 +319,7 @@ func (s *Store) SaveBlocks(ctx context.Context, blocks []block.SignedBeaconBlock
 func (s *Store) SaveHeadBlockRoot(ctx context.Context, blockRoot [32]byte) error {
 	_, span := trace.StartSpan(ctx, "BeaconDB.SaveHeadBlockRoot")
 	defer span.End()
-	return s.db.Update(func(tx *bolt.Tx) error {
+	return s.db.Batch(func(tx *bolt.Tx) error {
 		hasStateSummary := s.hasStateSummaryBytes(tx, blockRoot)
 		hasStateInDB := tx.Bucket(stateBucket).Get(blockRoot[:]) != nil
 		if !(hasStateInDB || hasStateSummary) {
@@ -458,7 +370,7 @@ func (s *Store) GenesisBlockRoot(ctx context.Context) ([32]byte, error) {
 func (s *Store) SaveGenesisBlockRoot(ctx context.Context, blockRoot [32]byte) error {
 	_, span := trace.StartSpan(ctx, "BeaconDB.SaveGenesisBlockRoot")
 	defer span.End()
-	return s.db.Update(func(tx *bolt.Tx) error {
+	return s.db.Batch(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(blocksBucket)
 		return bucket.Put(genesisBlockRootKey, blockRoot[:])
 	})
@@ -471,7 +383,7 @@ func (s *Store) SaveGenesisBlockRoot(ctx context.Context, blockRoot [32]byte) er
 func (s *Store) SaveOriginCheckpointBlockRoot(ctx context.Context, blockRoot [32]byte) error {
 	_, span := trace.StartSpan(ctx, "BeaconDB.SaveOriginCheckpointBlockRoot")
 	defer span.End()
-	return s.db.Update(func(tx *bolt.Tx) error {
+	return s.db.Batch(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(blocksBucket)
 		return bucket.Put(originCheckpointBlockRootKey, blockRoot[:])
 	})
@@ -482,7 +394,7 @@ func (s *Store) SaveOriginCheckpointBlockRoot(ctx context.Context, blockRoot [32
 func (s *Store) SaveBackfillBlockRoot(ctx context.Context, blockRoot [32]byte) error {
 	_, span := trace.StartSpan(ctx, "BeaconDB.SaveBackfillBlockRoot")
 	defer span.End()
-	return s.db.Update(func(tx *bolt.Tx) error {
+	return s.db.Batch(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(blocksBucket)
 		return bucket.Put(backfillBlockRootKey, blockRoot[:])
 	})

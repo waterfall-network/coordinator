@@ -13,7 +13,7 @@ import (
 var migrationArchivedIndex0Key = []byte("archive_index_0")
 
 func migrateArchivedIndex(ctx context.Context, db *bolt.DB) error {
-	if updateErr := db.Update(func(tx *bolt.Tx) error {
+	if updateErr := db.Batch(func(tx *bolt.Tx) error {
 		mb := tx.Bucket(migrationsBucket)
 		if b := mb.Get(migrationArchivedIndex0Key); bytes.Equal(b, migrationCompleted) {
 			return nil // Migration already completed.
