@@ -44,7 +44,7 @@ func (s *Store) WriteSpines(ctx context.Context, spines wrapper.Spines) ([32]byt
 	ctx, span := trace.StartSpan(ctx, "BeaconDB.WriteSpines")
 	defer span.End()
 	key := spines.Key()
-	return key, s.db.Update(func(tx *bolt.Tx) error {
+	return key, s.db.Batch(func(tx *bolt.Tx) error {
 		bkt := tx.Bucket(spinesBucket)
 		if err := bkt.Put(key[:], spines); err != nil {
 			return err
@@ -61,7 +61,7 @@ func (s *Store) DeleteSpines(ctx context.Context, key [32]byte) error {
 	defer span.End()
 
 	s.spinesCache.Remove(key)
-	return s.db.Update(func(tx *bolt.Tx) error {
+	return s.db.Batch(func(tx *bolt.Tx) error {
 		if err := tx.Bucket(spinesBucket).Delete(key[:]); err != nil {
 			return err
 		}

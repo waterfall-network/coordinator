@@ -12,7 +12,7 @@ import (
 var migrationBlockSlotIndex0Key = []byte("block_slot_index_0")
 
 func migrateBlockSlotIndex(ctx context.Context, db *bolt.DB) error {
-	if updateErr := db.Update(func(tx *bolt.Tx) error {
+	if updateErr := db.Batch(func(tx *bolt.Tx) error {
 		mb := tx.Bucket(migrationsBucket)
 		if b := mb.Get(migrationBlockSlotIndex0Key); bytes.Equal(b, migrationCompleted) {
 			return nil // Migration already completed.

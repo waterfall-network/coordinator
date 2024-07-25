@@ -268,7 +268,7 @@ func (s *Store) SaveStates(ctx context.Context, states []state.ReadOnlyBeaconSta
 		multipleEncs[i] = stateBytes
 	}
 
-	return s.db.Update(func(tx *bolt.Tx) error {
+	return s.db.Batch(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(stateBucket)
 		for i, rt := range blockRoots {
 			indicesByBucket := createStateIndicesFromStateSlot(ctx, states[i].Slot())
@@ -359,7 +359,7 @@ func (s *Store) SaveStatesEfficient(ctx context.Context, states []state.ReadOnly
 		validatorKeys[i] = snappy.Encode(nil, hashes)
 	}
 
-	if err := s.db.Update(func(tx *bolt.Tx) error {
+	if err := s.db.Batch(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(stateBucket)
 		valIdxBkt := tx.Bucket(blockRootValidatorHashesBucket)
 		var _ = bucket
@@ -479,7 +479,7 @@ func (s *Store) DeleteState(ctx context.Context, blockRoot [32]byte) error {
 	ctx, span := trace.StartSpan(ctx, "BeaconDB.DeleteState")
 	defer span.End()
 
-	return s.db.Update(func(tx *bolt.Tx) error {
+	return s.db.Batch(func(tx *bolt.Tx) error {
 		bkt := tx.Bucket(blocksBucket)
 		genesisBlockRoot := bkt.Get(genesisBlockRootKey)
 

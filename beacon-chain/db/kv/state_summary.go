@@ -96,7 +96,7 @@ func (s *Store) saveCachedStateSummariesDB(ctx context.Context) error {
 		}
 		encs[i] = enc
 	}
-	if err := s.db.Update(func(tx *bolt.Tx) error {
+	if err := s.db.Batch(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(stateSummaryBucket)
 		for i, s := range summaries {
 			if err := bucket.Put(s.Root, encs[i]); err != nil {
@@ -114,7 +114,7 @@ func (s *Store) saveCachedStateSummariesDB(ctx context.Context) error {
 // deleteStateSummary deletes a state summary object from the db using input block root.
 func (s *Store) deleteStateSummary(blockRoot [32]byte) error {
 	s.stateSummaryCache.delete(blockRoot)
-	return s.db.Update(func(tx *bolt.Tx) error {
+	return s.db.Batch(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(stateSummaryBucket)
 		return bucket.Delete(blockRoot[:])
 	})

@@ -22,7 +22,7 @@ func (s *Store) SavePowchainData(ctx context.Context, data *v2.ETH1ChainData) er
 		return err
 	}
 
-	err := s.db.Update(func(tx *bolt.Tx) error {
+	err := s.db.Batch(func(tx *bolt.Tx) error {
 		bkt := tx.Bucket(powchainBucket)
 		enc, err := proto.Marshal(data)
 		if err != nil {
