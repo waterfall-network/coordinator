@@ -94,7 +94,10 @@ func (fc *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines
 	// check cached fc
 	fcBase, diffRootIndexMap, diffNodes := getCompatibleFc(acceptableRootIndexMap, fcCpy)
 
+	fcBase.balances = fcCpy.getBalances(jCpRoot)
+
 	log.WithFields(logrus.Fields{
+		"balances":               len(fcCpy.getBalances(jCpRoot)),
 		"items":                  fmt.Sprintf("%d", cacheForkChoice.cache.Len()),
 		"inactivity":             fmt.Sprintf("%v", cacheForkChoice.inactivity),
 		"inact_len":              fmt.Sprintf("%d", len(cacheForkChoice.inactivity)),
@@ -102,7 +105,7 @@ func (fc *ForkChoice) GetParentByOptimisticSpines(ctx context.Context, optSpines
 		"diff":                   fmt.Sprintf("%d", len(diffRootIndexMap)),
 	}).Info("FC: cache")
 
-	headRoot, err = calculateHeadRootByNodesIndexes(ctx, fcBase, diffNodes, acceptableRootIndexMap)
+	headRoot, err = calculateHeadRootByNodesIndexes(ctx, fcBase, diffNodes, acceptableRootIndexMap, jCpRoot)
 	if err != nil {
 		return [32]byte{}, err
 	}
@@ -118,6 +121,7 @@ func calculateHeadRootByNodesIndexes(
 	fcBase *ForkChoice,
 	diffNodes map[uint64]*Node,
 	rootIndexMap map[[32]byte]uint64,
+	justifiedRoot [32]byte,
 ) ([32]byte, error) {
 
 	indexRootMap := make(map[uint64][32]byte, len(rootIndexMap))
@@ -193,17 +197,6 @@ func calculateHeadRootByNodesIndexes(
 		}
 	}
 	topNode := fcBase.store.nodes[len(fcBase.store.nodes)-1]
-
-	//calc 	justifiedRoot
-	var justifiedRoot [32]byte
-	for i, node := range fcBase.store.nodes {
-		if i == 0 {
-			justifiedRoot = node.root
-		}
-		if fcBase.HasNode(node.attsData.justifiedRoot) {
-			justifiedRoot = node.attsData.justifiedRoot
-		}
-	}
 
 	// apply LMD GHOST
 	headRoot, err := fcBase.Head(ctx, topNode.justifiedEpoch, justifiedRoot, fcBase.balances, topNode.finalizedEpoch)

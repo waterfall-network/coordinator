@@ -699,7 +699,7 @@ func TestGetParentByOptimisticSpines_TwoBranches(t *testing.T) {
 
 	nodesRootIndexMap = map[[32]byte]uint64{nrToHash(0): 0}
 	fcBase, _, diffNodes := getCompatibleFc(nodesRootIndexMap, f)
-	hRoot, hrErr = calculateHeadRootByNodesIndexes(context.Background(), fcBase, diffNodes, nodesRootIndexMap)
+	hRoot, hrErr = calculateHeadRootByNodesIndexes(context.Background(), fcBase, diffNodes, nodesRootIndexMap, justifiedRoot)
 	require.NoError(t, hrErr)
 	assert.Equal(t, nrToHash(0), hRoot, "Incorrect head with justified epoch at 0")
 
@@ -761,7 +761,7 @@ func TestGetParentByOptimisticSpines_TwoBranches(t *testing.T) {
 
 	fcBase, _, diffNodes = getCompatibleFc(nodesRootIndexMap, f)
 
-	hRoot, hrErr = calculateHeadRootByNodesIndexes(context.Background(), fcBase, diffNodes, nodesRootIndexMap)
+	hRoot, hrErr = calculateHeadRootByNodesIndexes(context.Background(), fcBase, diffNodes, nodesRootIndexMap, justifiedRoot)
 	require.NoError(t, hrErr)
 	assert.Equal(t, nrToHash(10), hRoot, "Incorrect head with justified epoch at 0")
 
@@ -810,7 +810,7 @@ func TestGetParentByOptimisticSpines_TwoBranches(t *testing.T) {
 		//nrToHash(10): 10,
 	}
 	fcBase, _, diffNodes = getCompatibleFc(nodesRootIndexMap, f)
-	hRoot, hrErr = calculateHeadRootByNodesIndexes(context.Background(), fcBase, diffNodes, nodesRootIndexMap)
+	hRoot, hrErr = calculateHeadRootByNodesIndexes(context.Background(), fcBase, diffNodes, nodesRootIndexMap, justifiedRoot)
 	require.NoError(t, hrErr)
 	assert.Equal(t, nrToHash(9), hRoot, "Incorrect head with justified epoch at 0")
 
@@ -859,7 +859,7 @@ func TestGetParentByOptimisticSpines_TwoBranches(t *testing.T) {
 		//nrToHash(10): 10,
 	}
 	fcBase, _, diffNodes = getCompatibleFc(nodesRootIndexMap, f)
-	hRoot, hrErr = calculateHeadRootByNodesIndexes(context.Background(), fcBase, diffNodes, nodesRootIndexMap)
+	hRoot, hrErr = calculateHeadRootByNodesIndexes(context.Background(), fcBase, diffNodes, nodesRootIndexMap, justifiedRoot)
 	require.NoError(t, hrErr)
 	assert.Equal(t, nrToHash(9), hRoot, "Incorrect head with justified epoch at 0")
 
