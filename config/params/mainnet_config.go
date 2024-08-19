@@ -47,8 +47,18 @@ var mainnetNetworkConfig = &NetworkConfig{
 	SyncCommsSubnetKey:              "syncnets",
 	MinimumPeersInSubnetSearch:      20,
 	BootstrapNodes: []string{
-		// todo nt5 bootnodes
-		"enr:-LG4QGvZHX73ge93GhSqNM5zZuEV6-XVc_ZRSO3CgmHBjhNKFtwx_QypXxUoILmsvxfvvxUY8-fGSKvZyOJfsoL17kyGAY4PBui9h2F0dG5ldHOIAAAAAAAAAACEZXRoMpDRNOfUAAAgCf__________gmlkgnY0gmlwhAVLhyyJc2VjcDI1NmsxoQMALOe9eiMN54YHZ6w5g8DvTAigbgtfCaPQrSbkR_ChI4N1ZHCCD6A",
+		"enr:-LG4QAGJyiJYWVjQnJ2ANfWE_AtbYnYEVcYS3k5iyUaALWKBI7OL30dc_-Nxigt7FpiB4b0cfmq62iGXB76C8BmRVGeGAZBd0Ihph2F0dG5ldHOIAAAAAAAAAACEZXRoMpB5pkc4AAAgCf__________gmlkgnY0gmlwhCImhDKJc2VjcDI1NmsxoQND0I1D6IIk-kwev1LftepaWrPOyN3pgkTbDrHfJN0bGIN1ZHCCD6A",
+		"enr:-LG4QLMIXca_9nOcCfvGrO_214_l5lSWAchwHZbfFwLDGY-dc0JXVqRb2-mSjlQ13A8K5ztYYyhoyk6Iu1AIBwMYPLCGAZCwyG9xh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB5pkc4AAAgCf__________gmlkgnY0gmlwhKUWFmeJc2VjcDI1NmsxoQMjY_D90oGB2dLQXEFQo3-ait2innKYEQdS4cU2D5wY4YN1ZHCCD6E",
+		"enr:-LG4QKPw-TJftwQSVV1pvbD-tUegL1rdK09fLWy5a6a1KZenDJhStaH1Y1Qsb_nMEs-cu6WBBqVe58d5g86biTYXvW-GAZCwyGqgh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB5pkc4AAAgCf__________gmlkgnY0gmlwhES3xj6Jc2VjcDI1NmsxoQJ-s2l20ud2p830t0hOrNkGoTPrqeZwOBoxcjtBE9sihoN1ZHCCD6E",
+		"enr:-LG4QLRe_wvUmKSV8u1TSXzZazhX9NPxtQNkt0Av9-lKervWPbrkirBxdd7-TT3Mex4_dpW--yIBnskXslsQ3_3xJzyGAZCwyE8rh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB5pkc4AAAgCf__________gmlkgnY0gmlwhI9uuGWJc2VjcDI1NmsxoQP92cFXNZPEy-X5R492RnmxwPWCQaoqBJ3TTR7hvkXZyYN1ZHCCD6E",
+		"enr:-LG4QNKJi6AAiz9ZZ1N5YWkoUWPydtHd8hVq6JSgtdAcvKBgaUg9zny_2QWG3-mv9f6xMg8fa4zr4ggX2SSOE3EI67WGAZCwx2aPh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB5pkc4AAAgCf__________gmlkgnY0gmlwhE4vZPKJc2VjcDI1NmsxoQJdpDQ7ZzJhnrxqMyy9atE9SyOv8kyogXHHqdpt1FJ49YN1ZHCCD6E",
+		"enr:-LG4QH_6bcF-WqgU8CE8g-o0JRzQtom6IWiYOk-dMi471oPjMtaJUwyt3ReSjfYMoOh6Npl9GxsyCXfuOhMxxiehofmGAZCwx20Vh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB5pkc4AAAgCf__________gmlkgnY0gmlwhEFs2WOJc2VjcDI1NmsxoQL7ZxxxxRu-HSCwA-C-aeCDGiPD5qZfoipv8fEi_4QmhoN1ZHCCD6E",
+		"enr:-LG4QGuEEWi3jTOcPUUwQiNsPSt6u-zJO455nI7nIpwl4KMUTV_pOnsxbLRgU2uI6fdgrjTpgNb6EbAjjTtS4-rmbaGGAZCwx82xh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB5pkc4AAAgCf__________gmlkgnY0gmlwhCIm6eWJc2VjcDI1NmsxoQLdlMpIS6ndVia90J8V0MNAzQcvEHHTvuYvgtGC-x55pYN1ZHCCD6E",
+		"enr:-LG4QNbopI8yniBEKA88rQnM_jch8eML3CwIedYCcGj_ATIiWWl1B6ecncmv-UsX4FgJVav55O_vFgfU95jAHLNq75OGAZCwyAfwh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB5pkc4AAAgCf__________gmlkgnY0gmlwhCIvBAKJc2VjcDI1NmsxoQOLDdXK1aerAL7oM2NFFkXWATPiwh8LJVygJL1jvoKw9YN1ZHCCD6E",
+		"enr:-LG4QHdSweICNDUEsTXxDmjhc9ZZolXyJzcv6F547G_3u5uhCYikm2xpWay1lnva_ifMZSWuioB_UJta8w9PUVHz6HCGAZCwyFHQh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB5pkc4AAAgCf__________gmlkgnY0gmlwhCKXxmqJc2VjcDI1NmsxoQIpKtnJ2gkRjdWljBijoBSKtCFCu1LqjLWuNkU3GMtK9YN1ZHCCD6E",
+		"enr:-LG4QKMfgK7jhO4yQ7-CFUfP-yJbspkHRe1mibEvTkURHneeOmC7LZTHih8IoIgUpljxv6Y5yE6B66wA4wK4I1VfOZ2GAZCwyBr-h2F0dG5ldHOIAAAAAAAAAACEZXRoMpB5pkc4AAAgCf__________gmlkgnY0gmlwhCISE0uJc2VjcDI1NmsxoQKYswnQXlZp_1qAk7oioBgIeBppLF1L4ZLvEglS69aUbIN1ZHCCD6E",
+		"enr:-LG4QK419449i2AXNVHLYqQff4yUToPIDUpWG8cLFZvk8hqVSGxdPCfv8YlXzfHn21mWAF1Z5kPVFMqrDuD1WufEsCOGAZCwx_p0h2F0dG5ldHOIAAAAAAAAAACEZXRoMpB5pkc4AAAgCf__________gmlkgnY0gmlwhCKlMHKJc2VjcDI1NmsxoQPNclITf31-j4j9zvCJZ-trVoIh4rzbLAs1-fsryt1XuoN1ZHCCD6E",
+		"enr:-LG4QMwbcNwYQKAsdjHpGeJiEZxhCNukA6O1SO0MyITl1OgPN-lkI2hsoYtcKe0vBi0V-rI7xvzuC3Fp9lGBfyBRfuCGAZCwyA1th2F0dG5ldHOIAAAAAAAAAACEZXRoMpB5pkc4AAAgCf__________gmlkgnY0gmlwhCIjOSyJc2VjcDI1NmsxoQNFm80FFjGtkgdfVIzYFwW0Ihybl-LQ9c2eC2ZBXEZWtIN1ZHCCD6E",
 	},
 }
 
@@ -117,9 +127,9 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	IntervalsPerSlot:   3,
 
 	// Shard node mainnet settings.
-	DepositChainID:         1501865,                                      // Chain ID of eth1 mainnet. //todo tn5
-	DepositNetworkID:       1501865,                                      // Network ID of eth1 mainnet. //todo tn5
-	DepositContractAddress: "0x68933556d6fb9240d5831c828009fe42eb971361", //todo tn5
+	DepositChainID:         181, // Chain ID of eth1 mainnet.
+	DepositNetworkID:       181, // Network ID of eth1 mainnet.
+	DepositContractAddress: "0x329c3A3d65Ab0bE08c6eff6695933391Cfc02cCA",
 
 	// Validator params.
 	RandomSubnetsPerValidator:         1 << 0,
@@ -211,7 +221,7 @@ var mainnetBeaconConfig = &BeaconChainConfig{
 	DelegateForkSlot:     0,
 	PrefixFinForkSlot:    0,
 	FinEth1ForkSlot:      0,
-	BlockVotingForkSlot:  math.MaxUint64, // todo set fot mainnet
+	BlockVotingForkSlot:  216000,
 	BellatrixForkVersion: []byte{2, 0, 0, 0},
 	BellatrixForkEpoch:   mainnetBellatrixForkEpoch,
 	ShardingForkVersion:  []byte{3, 0, 0, 0},

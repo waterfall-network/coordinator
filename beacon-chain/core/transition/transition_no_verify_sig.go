@@ -376,10 +376,10 @@ func altairOperations(
 	if err != nil {
 		return nil, errors.Wrap(err, "could not process altair attestation")
 	}
-	if _, err := altair.ProcessDeposits(ctx, bState, signedBeaconBlock.Block().Body().Deposits()); err != nil {
+	if bState, err = altair.ProcessDeposits(ctx, bState, signedBeaconBlock.Block().Body().Deposits()); err != nil {
 		return nil, errors.Wrap(err, "could not process altair deposit")
 	}
-	if _, err := b.ProcessWithdrawal(ctx, bState, signedBeaconBlock.Block().Body().Withdrawals()); err != nil {
+	if bState, err = b.ProcessWithdrawal(ctx, bState, signedBeaconBlock.Block().Body().Withdrawals()); err != nil {
 		return nil, errors.Wrap(err, "could not process altair withdrawals")
 	}
 	return b.ProcessVoluntaryExits(ctx, bState, signedBeaconBlock.Block().Body().VoluntaryExits())
@@ -402,10 +402,10 @@ func phase0Operations(
 	if err != nil {
 		return nil, errors.Wrap(err, "could not process block attestations")
 	}
-	if _, err := b.ProcessDeposits(ctx, bState, signedBeaconBlock.Block().Body().Deposits()); err != nil {
+	if bState, err = b.ProcessDeposits(ctx, bState, signedBeaconBlock.Block().Body().Deposits()); err != nil {
 		return nil, errors.Wrap(err, "could not process deposits")
 	}
-	if _, err := b.ProcessWithdrawal(ctx, bState, signedBeaconBlock.Block().Body().Withdrawals()); err != nil {
+	if bState, err = b.ProcessWithdrawal(ctx, bState, signedBeaconBlock.Block().Body().Withdrawals()); err != nil {
 		return nil, errors.Wrap(err, "could not process withdrawals")
 	}
 	return b.ProcessVoluntaryExits(ctx, bState, signedBeaconBlock.Block().Body().VoluntaryExits())

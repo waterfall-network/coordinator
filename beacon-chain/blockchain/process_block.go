@@ -248,6 +248,10 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		return err
 	}
 
+	log.WithError(err).WithError(err).WithFields(logrus.Fields{
+		"block.slot": signed.Block().Slot(),
+	}).Info("onBlock: fc boost proposer root")
+
 	if err := s.savePostStateInfo(ctx, blockRoot, signed, postState, false /* reg sync */); err != nil {
 		log.WithError(err).WithFields(logrus.Fields{
 			"block.slot": signed.Block().Slot(),
@@ -436,12 +440,22 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 			return err
 		}
 		fRoot := bytesutil.ToBytes32(postState.FinalizedCheckpoint().Root)
+
+		log.WithError(err).WithError(err).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+		}).Info("onBlock: update finalized")
+
 		if err := s.cfg.ForkChoiceStore.Prune(ctx, fRoot); err != nil {
 			log.WithError(err).WithFields(logrus.Fields{
 				"block.slot": signed.Block().Slot(),
 			}).Error("onBlock error could not prune proto array fork choice nodes")
 			return errors.Wrap(err, "could not prune proto array fork choice nodes")
 		}
+
+		log.WithError(err).WithError(err).WithFields(logrus.Fields{
+			"block.slot": signed.Block().Slot(),
+		}).Info("onBlock: fc prune")
+
 		isOptimistic, err := s.cfg.ForkChoiceStore.IsOptimistic(fRoot)
 		if err != nil {
 			log.WithError(err).WithFields(logrus.Fields{
@@ -449,6 +463,11 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 			}).Error("onBlock error could not check if node is optimistically synced")
 			return errors.Wrap(err, "could not check if node is optimistically synced")
 		}
+
+		log.WithError(err).WithError(err).WithFields(logrus.Fields{
+			"block.slot":   signed.Block().Slot(),
+			"isOptimistic": isOptimistic,
+		}).Info("onBlock: fc is optimistic")
 
 		go func() {
 			// Send an event regarding the new finalized checkpoint over a common event feed.
@@ -791,14 +810,36 @@ func (s *Service) insertBlockToForkChoiceStore(
 func (s *Service) savePostStateInfo(ctx context.Context, r [32]byte, b block.SignedBeaconBlock, st state.BeaconState, initSync bool) error {
 	ctx, span := trace.StartSpan(ctx, "blockChain.savePostStateInfo")
 	defer span.End()
+
+	log.WithFields(logrus.Fields{
+		"slot":     b.Block().Slot(),
+		"initSync": initSync,
+	}).Info("onBlock: savePostStateInfo 000")
+	tstart := time.Now()
+
 	if initSync {
 		s.saveInitSyncBlock(r, b)
 	} else if err := s.cfg.BeaconDB.SaveBlock(ctx, b); err != nil {
 		return errors.Wrapf(err, "could not save block from slot %d", b.Block().Slot())
 	}
+
+	log.WithFields(logrus.Fields{
+		"slot":     b.Block().Slot(),
+		"initSync": initSync,
+		"elapsed":  time.Since(tstart),
+	}).Info("onBlock: savePostStateInfo block")
+	tstart = time.Now()
+
 	if err := s.cfg.StateGen.SaveState(ctx, r, st); err != nil {
 		return errors.Wrap(err, "could not save state")
 	}
+
+	log.WithFields(logrus.Fields{
+		"slot":     b.Block().Slot(),
+		"initSync": initSync,
+		"elapsed":  time.Since(tstart),
+	}).Info("onBlock: savePostStateInfo state")
+
 	return nil
 }
 

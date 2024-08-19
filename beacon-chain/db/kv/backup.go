@@ -98,7 +98,7 @@ func (s *Store) Backup(ctx context.Context, outputDir string, permissionOverride
 		for _, ik := range innerKeys {
 			err = s.db.View(func(tx *bolt.Tx) error {
 				bkt := tx.Bucket(k)
-				return copyDB.Update(func(tx2 *bolt.Tx) error {
+				return copyDB.Batch(func(tx2 *bolt.Tx) error {
 					b2, err := tx2.CreateBucketIfNotExists(k)
 					if err != nil {
 						return err

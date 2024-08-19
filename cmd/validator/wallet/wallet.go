@@ -36,6 +36,8 @@ var Commands = &cli.Command{
 				features.Mainnet,
 				features.PyrmontTestnet,
 				features.Testnet8,
+				features.Testnet5,
+				features.Testnet9,
 				cmd.AcceptTosFlag,
 			}),
 			Before: func(cliCtx *cli.Context) error {
@@ -66,6 +68,8 @@ var Commands = &cli.Command{
 				features.Mainnet,
 				features.PyrmontTestnet,
 				features.Testnet8,
+				features.Testnet5,
+				features.Testnet9,
 				cmd.AcceptTosFlag,
 			}),
 			Before: func(cliCtx *cli.Context) error {
@@ -95,6 +99,8 @@ var Commands = &cli.Command{
 				features.Mainnet,
 				features.PyrmontTestnet,
 				features.Testnet8,
+				features.Testnet5,
+				features.Testnet9,
 				cmd.AcceptTosFlag,
 			}),
 			Before: func(cliCtx *cli.Context) error {

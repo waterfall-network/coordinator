@@ -261,6 +261,7 @@ func (s *Store) DeleteBlock(ctx context.Context, root [32]byte) error {
 func (s *Store) SaveBlock(ctx context.Context, signed block.SignedBeaconBlock) error {
 	ctx, span := trace.StartSpan(ctx, "BeaconDB.SaveBlock")
 	defer span.End()
+
 	blockRoot, err := signed.Block().HashTreeRoot()
 	if err != nil {
 		return err
@@ -290,13 +291,13 @@ func (s *Store) SaveBlocks(ctx context.Context, blocks []block.SignedBeaconBlock
 		if err != nil {
 			return err
 		}
-
 		blockRoots[i] = blockRoot[:]
 		encodedBlocks[i] = enc
 		indicesByBucket := createBlockIndicesFromBlock(ctx, blk.Block())
 		indicesForBlocks[i] = indicesByBucket
 	}
-	return s.db.Update(func(tx *bolt.Tx) error {
+
+	return s.db.Batch(func(tx *bolt.Tx) error {
 		bkt := tx.Bucket(blocksBucket)
 		for i, blk := range blocks {
 			if existingBlock := bkt.Get(blockRoots[i]); existingBlock != nil {
@@ -318,7 +319,7 @@ func (s *Store) SaveBlocks(ctx context.Context, blocks []block.SignedBeaconBlock
 func (s *Store) SaveHeadBlockRoot(ctx context.Context, blockRoot [32]byte) error {
 	_, span := trace.StartSpan(ctx, "BeaconDB.SaveHeadBlockRoot")
 	defer span.End()
-	return s.db.Update(func(tx *bolt.Tx) error {
+	return s.db.Batch(func(tx *bolt.Tx) error {
 		hasStateSummary := s.hasStateSummaryBytes(tx, blockRoot)
 		hasStateInDB := tx.Bucket(stateBucket).Get(blockRoot[:]) != nil
 		if !(hasStateInDB || hasStateSummary) {
@@ -369,7 +370,7 @@ func (s *Store) GenesisBlockRoot(ctx context.Context) ([32]byte, error) {
 func (s *Store) SaveGenesisBlockRoot(ctx context.Context, blockRoot [32]byte) error {
 	_, span := trace.StartSpan(ctx, "BeaconDB.SaveGenesisBlockRoot")
 	defer span.End()
-	return s.db.Update(func(tx *bolt.Tx) error {
+	return s.db.Batch(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(blocksBucket)
 		return bucket.Put(genesisBlockRootKey, blockRoot[:])
 	})
@@ -382,7 +383,7 @@ func (s *Store) SaveGenesisBlockRoot(ctx context.Context, blockRoot [32]byte) er
 func (s *Store) SaveOriginCheckpointBlockRoot(ctx context.Context, blockRoot [32]byte) error {
 	_, span := trace.StartSpan(ctx, "BeaconDB.SaveOriginCheckpointBlockRoot")
 	defer span.End()
-	return s.db.Update(func(tx *bolt.Tx) error {
+	return s.db.Batch(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(blocksBucket)
 		return bucket.Put(originCheckpointBlockRootKey, blockRoot[:])
 	})
@@ -393,7 +394,7 @@ func (s *Store) SaveOriginCheckpointBlockRoot(ctx context.Context, blockRoot [32
 func (s *Store) SaveBackfillBlockRoot(ctx context.Context, blockRoot [32]byte) error {
 	_, span := trace.StartSpan(ctx, "BeaconDB.SaveBackfillBlockRoot")
 	defer span.End()
-	return s.db.Update(func(tx *bolt.Tx) error {
+	return s.db.Batch(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(blocksBucket)
 		return bucket.Put(backfillBlockRootKey, blockRoot[:])
 	})

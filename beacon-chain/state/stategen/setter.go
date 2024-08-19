@@ -93,7 +93,7 @@ func (s *State) saveStateByRoot(ctx context.Context, blockRoot [32]byte, st stat
 			"0epoch": slots.ToEpoch(st.Slot()),
 			"1slot":  fmt.Sprintf("%d", st.Slot()),
 			"root":   fmt.Sprintf("%#x", blockRoot),
-		}).Debug("Save state by root: add epoch boundary cache success")
+		}).Info("Save state by root: add epoch boundary cache success")
 	} else {
 		// Always check that the correct epoch boundary states have been saved
 		// for the current epoch.
@@ -132,7 +132,7 @@ func (s *State) saveStateByRoot(ctx context.Context, blockRoot [32]byte, st stat
 				log.WithFields(logrus.Fields{
 					"slot": epochStart,
 					"root": fmt.Sprintf("%#x", bRoot),
-				}).Debug("Save state by root: recovering state")
+				}).Info("Save state by root: recovering state")
 
 				hState := s.hotStateCache.get([32]byte(bRoot))
 				if err := s.epochBoundaryStateCache.put([32]byte(bRoot), hState); err != nil {
@@ -149,7 +149,7 @@ func (s *State) saveStateByRoot(ctx context.Context, blockRoot [32]byte, st stat
 			"1slot":         fmt.Sprintf("%d", st.Slot()),
 			"2cachedBefore": ok,
 			"root":          fmt.Sprintf("%#x", blockRoot),
-		}).Debug("Save state by root: add epoch boundary cache success")
+		}).Info("Save state by root: add epoch boundary cache success")
 	}
 
 	// On an intermediate slots, save state summary.
