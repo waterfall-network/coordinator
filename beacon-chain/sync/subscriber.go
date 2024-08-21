@@ -49,6 +49,21 @@ func (s *Service) noopValidator(_ context.Context, _ peer.ID, msg *pubsub.Messag
 
 // Register PubSub subscribers
 func (s *Service) registerSubscribers(epoch types.Epoch, digest [4]byte) {
+	log.WithFields(logrus.Fields{
+		"epoch":  epoch,
+		"digest": fmt.Sprintf("%#x", digest),
+	}).Info("SUBSCRIBER: registerSubscribers")
+
+	defer func(tstart time.Time, slot types.Slot) {
+		log.WithFields(
+			logrus.Fields{
+				"elapsed": time.Since(tstart),
+				"slot":    fmt.Sprintf("%d", slot),
+				"epoch":   epoch,
+				"digest":  fmt.Sprintf("%#x", digest),
+			}).Info("SUBSCRIBER: registerSubscribers: END")
+	}(time.Now(), slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())))
+
 	s.subscribe(
 		p2p.BlockSubnetTopicFormat,
 		s.validateBeaconBlockPubSub,
@@ -426,6 +441,7 @@ func (s *Service) subscribeDynamicWithSubnets(
 				ticker.Done()
 				return
 			case currentSlot := <-ticker.C():
+				tstart := time.Now()
 
 				log.WithFields(logrus.Fields{
 					"0:currentSlot": currentSlot,
@@ -433,7 +449,7 @@ func (s *Service) subscribeDynamicWithSubnets(
 					"2:digest":      fmt.Sprintf("%#x", digest),
 					"3:s.curSlot":   s.cfg.chain.CurrentSlot(),
 					"4:calcSlot":    slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
-				}).Debug("Validator subscription: subscribeDynamicWithSubnets: slot ticker 0")
+				}).Info("Validator subscription: subscribeDynamicWithSubnets: slot ticker 0")
 
 				if s.chainStarted.IsSet() && s.cfg.initialSync.Syncing() {
 					continue
@@ -478,7 +494,7 @@ func (s *Service) subscribeDynamicWithSubnets(
 					"2:digest":      fmt.Sprintf("%#x", digest),
 					"3:s.curSlot":   s.cfg.chain.CurrentSlot(),
 					"4:calcSlot":    slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
-				}).Debug("Validator subscription: subscribeDynamicWithSubnets: start subscribe aggregator subnet 2")
+				}).Info("SUBSCRIBER: Validator subscription: subscribeDynamicWithSubnets: start subscribe aggregator subnet 2")
 
 				switch topicFormat {
 				case p2p.AttestationSubnetTopicFormat:
@@ -499,7 +515,7 @@ func (s *Service) subscribeDynamicWithSubnets(
 						"2:digest":      fmt.Sprintf("%#x", digest),
 						"3:s.curSlot":   s.cfg.chain.CurrentSlot(),
 						"4:calcSlot":    slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
-					}).Debug("Validator subscription: subscribeDynamicWithSubnets: start lookup Attester Subnets 3")
+					}).Info("SUBSCRIBER: Validator subscription: subscribeDynamicWithSubnets: start lookup Attester Subnets 3")
 
 					for _, idx := range attesterSubs {
 						s.lookupAttesterSubnets(digest, idx)
@@ -527,8 +543,15 @@ func (s *Service) subscribeDynamicWithSubnets(
 						"2:digest":      fmt.Sprintf("%#x", digest),
 						"3:s.curSlot":   s.cfg.chain.CurrentSlot(),
 						"4:calcSlot":    slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
-					}).Debug("Validator subscription: subscribeDynamicWithSubnets: success 4")
+					}).Info("SUBSCRIBER: Validator subscription: subscribeDynamicWithSubnets: success 4")
 				}
+
+				log.WithFields(logrus.Fields{
+					"elapsed":    time.Since(tstart),
+					"slot":       currentSlot,
+					"digest":     fmt.Sprintf("%#x", digest),
+					"wantedSubs": len(wantedSubs),
+				}).Info("SUBSCRIBER: update")
 			}
 		}
 	}()
@@ -847,6 +870,15 @@ func (s *Service) retrievePersistentSubs(currSlot types.Slot) []uint64 {
 	wantedSubs = append(wantedSubs, persistentSubs...)
 	wantedSubs = append(wantedSubs, aggrSubs...)
 	wantedSubs = append(wantedSubs, prevotingSubs...)
+
+	log.WithFields(logrus.Fields{
+		"slot":           currSlot,
+		"persistentSubs": persistentSubs,
+		"aggrSubs":       aggrSubs,
+		"prevotingSubs":  prevotingSubs,
+		"res":            slice.SetUint64(wantedSubs),
+	}).Info("SUBSCRIBER: retrievePersistentSubs")
+
 	//uniq
 	return slice.SetUint64(wantedSubs)
 }

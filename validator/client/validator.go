@@ -607,6 +607,18 @@ func (v *validator) UpdateDuties(ctx context.Context, slot types.Slot) error {
 // subscribeToSubnets iterates through each validator duty, signs each slot, and asks beacon node
 // to eagerly subscribe to subnets so that the aggregator has attestations to aggregate.
 func (v *validator) subscribeToSubnets(ctx context.Context, res *ethpb.DutiesResponse) error {
+
+	defer func(tstart time.Time, slot types.Slot) {
+		log.WithFields(
+			logrus.Fields{
+				"elapsed":             time.Since(tstart),
+				"slot":                fmt.Sprintf("%d", slot),
+				"xDuties":             len(res.Duties),
+				"xCurrentEpochDuties": len(res.CurrentEpochDuties),
+				"xNextEpochDuties":    len(res.NextEpochDuties),
+			}).Info("SUBSCRIBER: END (subscribeToSubnets)")
+	}(time.Now(), slots.CurrentSlot(v.genesisTime))
+
 	subscribeSlots := make([]types.Slot, 0, len(res.CurrentEpochDuties)+len(res.NextEpochDuties))
 	subscribeCommitteeIndices := make([]types.CommitteeIndex, 0, len(res.CurrentEpochDuties)+len(res.NextEpochDuties))
 	subscribeIsAggregator := make([]bool, 0, len(res.CurrentEpochDuties)+len(res.NextEpochDuties))
@@ -666,12 +678,14 @@ func (v *validator) subscribeToSubnets(ctx context.Context, res *ethpb.DutiesRes
 		}
 	}
 
-	_, err := v.validatorClient.SubscribeCommitteeSubnets(ctx, &ethpb.CommitteeSubnetsSubscribeRequest{
-		Slots:         subscribeSlots,
-		CommitteeIds:  subscribeCommitteeIndices,
-		IsAggregator:  subscribeIsAggregator,
-		ProposerSlots: proposerSlots,
-	})
+	_, err := v.validatorClient.SubscribeCommitteeSubnets(ctx,
+		&ethpb.CommitteeSubnetsSubscribeRequest{
+			Slots:         subscribeSlots,
+			CommitteeIds:  subscribeCommitteeIndices,
+			IsAggregator:  subscribeIsAggregator,
+			ProposerSlots: proposerSlots,
+		},
+	)
 
 	return err
 }
