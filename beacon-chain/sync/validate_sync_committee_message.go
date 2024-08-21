@@ -14,7 +14,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/signing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
 	p2ptypes "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p/types"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
@@ -253,27 +252,13 @@ func (s *Service) rejectInvalidSyncCommitteeSignature(m *ethpb.SyncCommitteeMess
 		// Batch verify message signature before unmarshalling
 		// the signature to a G2 point if batch verification is
 		// enabled.
-		if features.Get().EnableBatchVerification {
-			set := &bls.SignatureBatch{
-				Messages:   [][32]byte{sigRoot},
-				PublicKeys: []bls.PublicKey{pKey},
-				Signatures: [][]byte{m.Signature},
-			}
-			return s.validateWithBatchVerifier(ctx, "sync committee message", set)
+		set := &bls.SignatureBatch{
+			Messages:     [][32]byte{sigRoot},
+			PublicKeys:   []bls.PublicKey{pKey},
+			Signatures:   [][]byte{m.Signature},
+			Descriptions: []string{signing.SyncCommitteeSignature},
 		}
-
-		// We reject a malformed signature from bytes according to the p2p specification.
-		blsSig, err := bls.SignatureFromBytes(m.Signature)
-		if err != nil {
-			tracing.AnnotateError(span, err)
-			return pubsub.ValidationReject, err
-		}
-
-		verified := blsSig.Verify(pKey, sigRoot[:])
-		if !verified {
-			return pubsub.ValidationReject, errors.New("signature failed verification")
-		}
-		return pubsub.ValidationAccept, nil
+		return s.validateWithBatchVerifier(ctx, "sync committee message", set)
 	}
 }
 

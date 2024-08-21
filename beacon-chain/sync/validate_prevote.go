@@ -15,7 +15,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/signing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/p2p"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
@@ -149,19 +148,12 @@ func (s *Service) validateUnaggregatedPrevoteWithState(ctx context.Context, p *e
 		return pubsub.ValidationReject, errors.New("prevote bitfield is invalid")
 	}
 
-	if features.Get().EnableBatchVerification {
-		set, err := blocks.PrevoteSignatureBatch(ctx, bs, []*eth.PreVote{p})
-		if err != nil {
-			tracing.AnnotateError(span, err)
-			return pubsub.ValidationReject, err
-		}
-		return s.validateWithBatchVerifier(ctx, "prevote", set)
-	}
-	if err := verifyPrevoteSignature(ctx, bs, p); err != nil {
+	set, err := blocks.PrevoteSignatureBatch(ctx, bs, []*eth.PreVote{p})
+	if err != nil {
 		tracing.AnnotateError(span, err)
 		return pubsub.ValidationReject, err
 	}
-	return pubsub.ValidationAccept, nil
+	return s.validateWithBatchVerifier(ctx, "prevote", set)
 }
 
 func verifyPrevoteSignature(ctx context.Context, beaconState state.ReadOnlyBeaconState, pv *eth.PreVote) error {

@@ -15,7 +15,6 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/signing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/transition"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/encoding/bytesutil"
@@ -199,20 +198,7 @@ func (s *Service) validateAggregatedAtt(ctx context.Context, signed *ethpb.Signe
 	set := bls.NewSet()
 	set.Join(selectionSigSet).Join(aggregatorSigSet).Join(attSigSet)
 
-	if features.Get().EnableBatchVerification {
-		return s.validateWithBatchVerifier(ctx, "aggregate", set)
-	}
-	valid, err := set.Verify()
-	if err != nil {
-		tracing.AnnotateError(span, errors.Errorf("Could not join signature set"))
-		return pubsub.ValidationIgnore, err
-	}
-	if !valid {
-		err = errors.Errorf("Could not verify selection or aggregator or attestation signature")
-		tracing.AnnotateError(span, err)
-		return pubsub.ValidationReject, err
-	}
-	return pubsub.ValidationAccept, nil
+	return s.validateWithBatchVerifier(ctx, "aggregate", set)
 }
 
 func (s *Service) validateBlockInAttestation(ctx context.Context, satt *ethpb.SignedAggregateAttestationAndProof) bool {
@@ -253,6 +239,11 @@ func validateIndexInCommittee(ctx context.Context, bs state.ReadOnlyBeaconState,
 	if err != nil {
 		return err
 	}
+
+	if a.AggregationBits.Count() == 0 {
+		return errors.New("no attesting indices")
+	}
+
 	var withinCommittee bool
 	for _, i := range committee {
 		if validatorIndex == i {
@@ -276,7 +267,7 @@ func validateSelectionIndex(
 	validatorIndex types.ValidatorIndex,
 	proof []byte,
 ) (*bls.SignatureBatch, error) {
-	_, span := trace.StartSpan(ctx, "sync.validateSelectionIndex")
+	ctx, span := trace.StartSpan(ctx, "sync.validateSelectionIndex")
 	defer span.End()
 
 	committee, err := helpers.BeaconCommitteeFromState(ctx, bs, data.Slot, data.CommitteeIndex)
@@ -313,9 +304,10 @@ func validateSelectionIndex(
 		return nil, err
 	}
 	return &bls.SignatureBatch{
-		Signatures: [][]byte{proof},
-		PublicKeys: []bls.PublicKey{publicKey},
-		Messages:   [][32]byte{root},
+		Signatures:   [][]byte{proof},
+		PublicKeys:   []bls.PublicKey{publicKey},
+		Messages:     [][32]byte{root},
+		Descriptions: []string{signing.SelectionProof},
 	}, nil
 }
 
@@ -340,8 +332,9 @@ func aggSigSet(s state.ReadOnlyBeaconState, a *ethpb.SignedAggregateAttestationA
 		return nil, err
 	}
 	return &bls.SignatureBatch{
-		Signatures: [][]byte{a.Signature},
-		PublicKeys: []bls.PublicKey{publicKey},
-		Messages:   [][32]byte{root},
+		Signatures:   [][]byte{a.Signature},
+		PublicKeys:   []bls.PublicKey{publicKey},
+		Messages:     [][32]byte{root},
+		Descriptions: []string{signing.AggregatorSignature},
 	}, nil
 }
