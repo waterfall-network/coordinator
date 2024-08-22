@@ -159,6 +159,17 @@ func (s *Service) savePendingAtt(att *ethpb.SignedAggregateAttestationAndProof) 
 
 	s.pendingAttsLock.Lock()
 	defer s.pendingAttsLock.Unlock()
+
+	const pendingAttsLimit = 10_000
+	numOfPendingAtts := 0
+	for _, v := range s.blkRootToPendingAtts {
+		numOfPendingAtts += len(v)
+	}
+	// Exit early if we exceed the pending attestations limit.
+	if numOfPendingAtts >= pendingAttsLimit {
+		return
+	}
+
 	_, ok := s.blkRootToPendingAtts[root]
 	if !ok {
 		s.blkRootToPendingAtts[root] = []*ethpb.SignedAggregateAttestationAndProof{att}

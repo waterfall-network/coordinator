@@ -331,6 +331,7 @@ func TestProcessPendingAtts_HasBlockSaveAggregatedAtt(t *testing.T) {
 		signatureChan:                  make(chan *signatureVerifier, verifierLimit),
 	}
 	go r.verifierRoutine()
+	r.initCaches()
 
 	s, err := util.NewBeaconState()
 	require.NoError(t, err)

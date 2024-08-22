@@ -219,23 +219,23 @@ func ProcessSlotsIfPossible(ctx context.Context, state state.BeaconState, target
 //	      if (state.slot + 1) % SLOTS_PER_EPOCH == 0:
 //	          process_epoch(state)
 //	      state.slot = Slot(state.slot + 1)
-func ProcessSlots(ctx context.Context, state state.BeaconState, slot types.Slot) (state.BeaconState, error) {
+func ProcessSlots(ctx context.Context, st state.BeaconState, slot types.Slot) (state.BeaconState, error) {
 	ctx, span := trace.StartSpan(ctx, "core.state.ProcessSlots")
 	defer span.End()
-	if state == nil || state.IsNil() {
+	if st == nil || st.IsNil() {
 		return nil, errors.New("nil state")
 	}
-	span.AddAttributes(trace.Int64Attribute("slots", int64(slot)-int64(state.Slot()))) // lint:ignore uintcast -- This is OK for tracing.
+	span.AddAttributes(trace.Int64Attribute("slots", int64(slot)-int64(st.Slot()))) // lint:ignore uintcast -- This is OK for tracing.
 
 	// The block must have a higher slot than parent state.
-	if state.Slot() >= slot {
-		err := fmt.Errorf("expected state.slot %d < slot %d", state.Slot(), slot)
+	if st.Slot() >= slot {
+		err := fmt.Errorf("expected state.slot %d < slot %d", st.Slot(), slot)
 		tracing.AnnotateError(span, err)
 		return nil, err
 	}
 
-	highestSlot := state.Slot()
-	key, err := cacheKey(ctx, state)
+	highestSlot := st.Slot()
+	key, err := cacheKey(ctx, st)
 	if err != nil {
 		return nil, err
 	}
@@ -248,7 +248,7 @@ func ProcessSlots(ctx context.Context, state state.BeaconState, slot types.Slot)
 
 	if cachedState != nil && !cachedState.IsNil() && cachedState.Slot() < slot {
 		highestSlot = cachedState.Slot()
-		state = cachedState
+		st = cachedState
 	}
 	if err := SkipSlotCache.MarkInProgress(key); errors.Is(err, cache.ErrAlreadyInProgress) {
 		cachedState, err = SkipSlotCache.Get(ctx, key)
@@ -257,7 +257,7 @@ func ProcessSlots(ctx context.Context, state state.BeaconState, slot types.Slot)
 		}
 		if cachedState != nil && !cachedState.IsNil() && cachedState.Slot() < slot {
 			highestSlot = cachedState.Slot()
-			state = cachedState
+			st = cachedState
 		}
 	} else if err != nil {
 		return nil, err
@@ -266,56 +266,81 @@ func ProcessSlots(ctx context.Context, state state.BeaconState, slot types.Slot)
 		SkipSlotCache.MarkNotInProgress(key)
 	}()
 
-	for state.Slot() < slot {
+	for st.Slot() < slot {
 		if ctx.Err() != nil {
+			log.WithError(ctx.Err()).WithFields(logrus.Fields{
+				"stSlot": st.Slot(),
+				"slot":   slot,
+			}).Error("Slot processing: context err")
 			tracing.AnnotateError(span, ctx.Err())
 			// Cache last best value.
-			if highestSlot < state.Slot() {
-				if SkipSlotCache.Put(ctx, key, state); err != nil {
-					log.WithError(err).Error("Failed to put skip slot cache value")
-				}
+			if highestSlot < st.Slot() {
+				SkipSlotCache.Put(ctx, key, st)
 			}
 			return nil, ctx.Err()
 		}
-		state, err = ProcessSlot(ctx, state)
+		st, err = ProcessSlot(ctx, st)
 		if err != nil {
 			tracing.AnnotateError(span, err)
 			return nil, errors.Wrap(err, "could not process slot")
 		}
-		if time.CanProcessEpoch(state) {
+		if time.CanProcessEpoch(st) {
 			// new epoch
-			switch state.Version() {
-			case version.Phase0:
-				state, err = ProcessEpochPrecompute(ctx, state)
-				if err != nil {
-					tracing.AnnotateError(span, err)
-					return nil, errors.Wrap(err, "could not process epoch with optimizations")
+			//check nextSlotCache
+			nscState, err := GetNextEpochStateByState(ctx, st)
+			if err != nil {
+				log.WithError(err).WithFields(logrus.Fields{
+					"slot": st.Slot(),
+				}).Warn("Transition: process epoch: next slot cache not found")
+			}
+
+			if nscState == nil {
+				switch st.Version() {
+				case version.Phase0:
+					st, err = ProcessEpochPrecompute(ctx, st)
+					if err != nil {
+						tracing.AnnotateError(span, err)
+						return nil, errors.Wrap(err, "could not process epoch with optimizations")
+					}
+
+				case version.Altair, version.Bellatrix:
+					st, err = altair.ProcessEpoch(ctx, st)
+					if err != nil {
+						tracing.AnnotateError(span, err)
+						return nil, errors.Wrap(err, "could not process epoch")
+					}
+
+				default:
+					return nil, errors.New("beacon state should have a version")
 				}
-			case version.Altair, version.Bellatrix:
-				state, err = altair.ProcessEpoch(ctx, state)
-				if err != nil {
-					tracing.AnnotateError(span, err)
-					return nil, errors.Wrap(err, "could not process epoch")
+				if err := SetNextEpochCache(ctx, st); err != nil {
+					log.WithError(err).WithFields(logrus.Fields{
+						"slot": st.Slot(),
+					}).Warn("Transition: process epoch: set next slot cache failed")
 				}
-			default:
-				return nil, errors.New("beacon state should have a version")
+
+			} else {
+				log.WithFields(logrus.Fields{
+					"slot": st.Slot(),
+				}).Info("Transition: process epoch: next slot cache success")
+				st = nscState
 			}
 		}
-		if err := state.SetSlot(state.Slot() + 1); err != nil {
+		if err := st.SetSlot(st.Slot() + 1); err != nil {
 			tracing.AnnotateError(span, err)
 			return nil, errors.Wrap(err, "failed to increment state slot")
 		}
 
-		if time.CanUpgradeToAltair(state.Slot()) {
-			state, err = altair.UpgradeToAltair(ctx, state)
+		if time.CanUpgradeToAltair(st.Slot()) {
+			st, err = altair.UpgradeToAltair(ctx, st)
 			if err != nil {
 				tracing.AnnotateError(span, err)
 				return nil, err
 			}
 		}
 
-		if time.CanUpgradeToBellatrix(state.Slot()) {
-			state, err = execution.UpgradeToBellatrix(ctx, state)
+		if time.CanUpgradeToBellatrix(st.Slot()) {
+			st, err = execution.UpgradeToBellatrix(ctx, st)
 			if err != nil {
 				tracing.AnnotateError(span, err)
 				return nil, err
@@ -323,11 +348,11 @@ func ProcessSlots(ctx context.Context, state state.BeaconState, slot types.Slot)
 		}
 	}
 
-	if highestSlot < state.Slot() {
-		SkipSlotCache.Put(ctx, key, state)
+	if highestSlot < st.Slot() {
+		SkipSlotCache.Put(ctx, key, st)
 	}
 
-	return state, nil
+	return st, nil
 }
 
 // VerifyOperationLengths verifies that block operation lengths are valid.

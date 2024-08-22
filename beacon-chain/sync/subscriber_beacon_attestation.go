@@ -45,13 +45,6 @@ func (s *Service) committeeIndexBeaconAttestationSubscriber(_ context.Context, m
 		return nil
 	}
 
-	log.WithFields(logrus.Fields{
-		"curSlot":       slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
-		"pv.AggrBits":   fmt.Sprintf("%#x", a.AggregationBits),
-		"pv.Data.Slot":  a.Data.Slot,
-		"pv.Data.Index": fmt.Sprintf("%#x", a.Data.BeaconBlockRoot),
-	}).Debug("Atts: incoming: handler: success")
-
 	return s.cfg.attPool.SaveUnaggregatedAttestation(a)
 }
 
