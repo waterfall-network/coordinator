@@ -198,6 +198,7 @@ func TestProcessBlock_IncorrectProcessExits(t *testing.T) {
 	assert.ErrorContains(t, wanted, err)
 }
 
+// todo fix required
 func createFullBlockWithOperations(t *testing.T) (state.BeaconState,
 	*ethpb.SignedBeaconBlock, []*ethpb.Attestation, []*ethpb.ProposerSlashing, []*ethpb.VoluntaryExit) {
 	beaconState, privKeys := util.DeterministicGenesisState(t, 32)
@@ -358,6 +359,9 @@ func createFullBlockWithOperations(t *testing.T) (state.BeaconState,
 			},
 		},
 	})
+	//upEth1 := beaconState.Eth1Data()
+	//upEth1.DepositCount = 16
+	//beaconState.SetEth1Data(upEth1)
 
 	sig, err := util.BlockSignature(beaconState, block.Block, privKeys)
 	require.NoError(t, err)

@@ -303,6 +303,7 @@ func TestRevalidateSubscription_CorrectlyFormatsTopic(t *testing.T) {
 func TestStaticSubnets(t *testing.T) {
 	p := p2ptest.NewTestP2P(t)
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	r := Service{
 		ctx: ctx,
 		cfg: &config{
@@ -326,7 +327,6 @@ func TestStaticSubnets(t *testing.T) {
 	if uint64(len(topics)) != params.BeaconNetworkConfig().AttestationSubnetCount {
 		t.Errorf("Wanted the number of subnet topics registered to be %d but got %d", params.BeaconNetworkConfig().AttestationSubnetCount, len(topics))
 	}
-	cancel()
 }
 
 func Test_wrapAndReportValidation(t *testing.T) {
@@ -443,6 +443,7 @@ func Test_wrapAndReportValidation(t *testing.T) {
 }
 
 func TestFilterSubnetPeers(t *testing.T) {
+	params.UseTestConfig()
 	gFlags := new(flags.GlobalFlags)
 	gFlags.MinimumPeersPerSubnet = 4
 	flags.Init(gFlags)
@@ -450,6 +451,7 @@ func TestFilterSubnetPeers(t *testing.T) {
 	defer flags.Init(new(flags.GlobalFlags))
 	p := p2ptest.NewTestP2P(t)
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	currSlot := types.Slot(100)
 	r := Service{
 		ctx: ctx,
@@ -461,9 +463,11 @@ func TestFilterSubnetPeers(t *testing.T) {
 			},
 			p2p: p,
 		},
-		chainStarted: abool.New(),
-		subHandler:   newSubTopicHandler(),
+		chainStarted:  abool.New(),
+		subHandler:    newSubTopicHandler(),
+		signatureChan: make(chan *signatureVerifier, verifierLimit),
 	}
+	go r.verifierRoutine()
 	// Empty cache at the end of the test.
 	defer cache.SubnetIDs.EmptyAllCaches()
 	digest, err := r.currentForkDigest()
@@ -505,13 +509,12 @@ func TestFilterSubnetPeers(t *testing.T) {
 
 	recPeers = r.filterNeededPeers(wantedPeers)
 	assert.DeepEqual(t, 1, len(recPeers), "expected at least 1 suitable peer to prune")
-
-	cancel()
 }
 
 func TestSubscribeWithSyncSubnets_StaticOK(t *testing.T) {
 	p := p2ptest.NewTestP2P(t)
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	currSlot := types.Slot(100)
 	r := Service{
 		ctx: ctx,
@@ -536,13 +539,16 @@ func TestSubscribeWithSyncSubnets_StaticOK(t *testing.T) {
 }
 
 func TestSubscribeWithSyncSubnets_DynamicOK(t *testing.T) {
-	t.Skip()
+	t.Skip() //unstable
+	params.SetupTestConfigCleanup(t)
+	params.UseTestConfig()
 	p := p2ptest.NewTestP2P(t)
 	params.SetupTestConfigCleanup(t)
 	cfg := params.BeaconConfig()
 	cfg.SecondsPerSlot = 1
 	params.OverrideBeaconConfig(cfg)
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	currSlot := types.Slot(100)
 	r := Service{
 		ctx: ctx,
@@ -554,9 +560,11 @@ func TestSubscribeWithSyncSubnets_DynamicOK(t *testing.T) {
 			},
 			p2p: p,
 		},
-		chainStarted: abool.New(),
-		subHandler:   newSubTopicHandler(),
+		chainStarted:  abool.New(),
+		subHandler:    newSubTopicHandler(),
+		signatureChan: make(chan *signatureVerifier, verifierLimit),
 	}
+	go r.verifierRoutine()
 	// Empty cache at the end of the test.
 	defer cache.SyncSubnetIDs.EmptyAllCaches()
 	slot := r.cfg.chain.CurrentSlot()
@@ -576,7 +584,6 @@ func TestSubscribeWithSyncSubnets_DynamicOK(t *testing.T) {
 
 	secondSub := fmt.Sprintf(p2p.SyncCommitteeSubnetTopicFormat, digest, 1) + r.cfg.p2p.Encoding().ProtocolSuffix()
 	assert.Equal(t, true, topicMap[secondSub])
-	cancel()
 }
 
 func TestSubscribeWithSyncSubnets_StaticSwitchFork(t *testing.T) {

@@ -20,7 +20,7 @@ import (
 )
 
 func TestGoodByeRPCHandler_Disconnects_With_Peer(t *testing.T) {
-	t.Skip() // Unstable test
+	//t.Skip() // Unstable test
 	p1 := p2ptest.NewTestP2P(t)
 	p2 := p2ptest.NewTestP2P(t)
 	p1.Connect(p2)

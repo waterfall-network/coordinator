@@ -24,7 +24,8 @@ import (
 )
 
 func TestSendRequest_SendBeaconBlocksByRangeRequest(t *testing.T) {
-	t.Skip() // Unstable test
+	//t.Skip() // Unstable test
+	params.UseTestConfig()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	pcl := fmt.Sprintf("%s/ssz_snappy", p2p.RPCBlocksByRangeTopicV1)
