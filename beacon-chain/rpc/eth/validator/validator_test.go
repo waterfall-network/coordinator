@@ -1364,34 +1364,6 @@ func TestSubmitBeaconCommitteeSubscription(t *testing.T) {
 		assert.Equal(t, 1, len(ids))
 	})
 
-	t.Run("Validators assigned to subnet", func(t *testing.T) {
-		cache.SubnetIDs.EmptyAllCaches()
-		req := &ethpbv1.SubmitBeaconCommitteeSubscriptionsRequest{
-			Data: []*ethpbv1.BeaconCommitteeSubscribe{
-				{
-					ValidatorIndex: 1,
-					CommitteeIndex: 1,
-					Slot:           1,
-					IsAggregator:   true,
-				},
-				{
-					ValidatorIndex: 2,
-					CommitteeIndex: 1,
-					Slot:           1,
-					IsAggregator:   false,
-				},
-			},
-		}
-		_, err = vs.SubmitBeaconCommitteeSubscription(ctx, req)
-		require.NoError(t, err)
-		ids, ok, _ := cache.SubnetIDs.GetPersistentSubnets(pubKeys[1])
-		require.Equal(t, true, ok, "subnet for validator 1 not found")
-		assert.Equal(t, 1, len(ids))
-		ids, ok, _ = cache.SubnetIDs.GetPersistentSubnets(pubKeys[2])
-		require.Equal(t, true, ok, "subnet for validator 2 not found")
-		assert.Equal(t, 1, len(ids))
-	})
-
 	t.Run("No subscriptions", func(t *testing.T) {
 		req := &ethpbv1.SubmitBeaconCommitteeSubscriptionsRequest{
 			Data: make([]*ethpbv1.BeaconCommitteeSubscribe, 0),

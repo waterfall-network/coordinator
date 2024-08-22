@@ -33,6 +33,11 @@ type Listener interface {
 	LocalNode() *enode.LocalNode
 }
 
+const (
+	udp4 = iota
+	udp6
+)
+
 // RefreshENR uses an epoch to refresh the enr entry for our node
 // with the tracked committee ids for the epoch, allowing our node
 // to be dynamically discoverable by others given our tracked committee ids.
@@ -41,6 +46,12 @@ func (s *Service) RefreshENR() {
 	if s.dv5Listener == nil || !s.isInitialized() {
 		return
 	}
+	currEpoch := slots.ToEpoch(slots.CurrentSlot(uint64(s.genesisTime.Unix())))
+	if err := initializePersistentSubnets(s.dv5Listener.LocalNode().ID(), currEpoch); err != nil {
+		log.WithError(err).Error("Could not initialize persistent subnets")
+		return
+	}
+
 	bitV := bitfield.NewBitvector64()
 	committees := cache.SubnetIDs.GetAllSubnets()
 	for _, idx := range committees {
@@ -48,15 +59,20 @@ func (s *Service) RefreshENR() {
 	}
 	currentBitV, err := attBitvector(s.dv5Listener.Self().Record())
 	if err != nil {
-		log.Errorf("Could not retrieve att bitfield: %v", err)
+		log.WithError(err).Error("Could not retrieve att bitfield")
 		return
 	}
 	// Compare current epoch with our fork epochs
-	currEpoch := slots.ToEpoch(slots.CurrentSlot(uint64(s.genesisTime.Unix())))
 	altairForkEpoch := params.BeaconConfig().AltairForkEpoch
 	switch {
-	// Altair Behaviour
-	case currEpoch >= altairForkEpoch:
+	case currEpoch < altairForkEpoch:
+		// Phase 0 behaviour.
+		if bytes.Equal(bitV, currentBitV) {
+			// return early if bitfield hasn't changed
+			return
+		}
+		s.updateSubnetRecordWithMetadata(bitV)
+	default:
 		// Retrieve sync subnets from application level
 		// cache.
 		bitS := bitfield.Bitvector4{byte(0x00)}
@@ -66,7 +82,7 @@ func (s *Service) RefreshENR() {
 		}
 		currentBitS, err := syncBitvector(s.dv5Listener.Self().Record())
 		if err != nil {
-			log.Errorf("Could not retrieve sync bitfield: %v", err)
+			log.WithError(err).Error("Could not retrieve sync bitfield")
 			return
 		}
 		if bytes.Equal(bitV, currentBitV) && bytes.Equal(bitS, currentBitS) &&
@@ -75,13 +91,6 @@ func (s *Service) RefreshENR() {
 			return
 		}
 		s.updateSubnetRecordWithMetadataV2(bitV, bitS)
-	default:
-		// Phase 0 behaviour.
-		if bytes.Equal(bitV, currentBitV) {
-			// return early if bitfield hasn't changed
-			return
-		}
-		s.updateSubnetRecordWithMetadata(bitV)
 	}
 	// ping all peers to inform them of new metadata
 	s.pingPeers()
@@ -134,9 +143,9 @@ func (s *Service) createListener(
 	// by default we will listen to all interfaces.
 	var bindIP net.IP
 	switch udpVersionFromIP(ipAddr) {
-	case "udp4":
+	case udp4:
 		bindIP = net.IPv4zero
-	case "udp6":
+	case udp6:
 		bindIP = net.IPv6zero
 	default:
 		return nil, errors.New("invalid ip provided")
@@ -238,7 +247,33 @@ func (s *Service) createLocalNode(
 		return nil, errors.Wrap(err, "could not add eth2 fork version entry to enr")
 	}
 	localNode = initializeAttSubnets(localNode)
-	return initializeSyncCommSubnets(localNode), nil
+	localNode = initializeSyncCommSubnets(localNode)
+
+	if s.cfg != nil && s.cfg.HostAddress != "" {
+		hostIP := net.ParseIP(s.cfg.HostAddress)
+		if hostIP.To4() == nil && hostIP.To16() == nil {
+			return nil, errors.Errorf("invalid host address: %s", s.cfg.HostAddress)
+		} else {
+			localNode.SetFallbackIP(hostIP)
+			localNode.SetStaticIP(hostIP)
+		}
+	}
+
+	if s.cfg != nil && s.cfg.HostDNS != "" {
+		host := s.cfg.HostDNS
+		ips, err := net.LookupIP(host)
+		if err != nil {
+			return nil, errors.Wrapf(err, "could not resolve host address: %s", host)
+		}
+		if len(ips) > 0 {
+			// Use first IP returned from the
+			// resolver.
+			firstIP := ips[0]
+			localNode.SetFallbackIP(firstIP)
+		}
+	}
+
+	return localNode, nil
 }
 
 func (s *Service) startDiscoveryV5(
@@ -257,24 +292,22 @@ func (s *Service) startDiscoveryV5(
 // filterPeer validates each node that we retrieve from our dht. We
 // try to ascertain that the peer can be a valid protocol peer.
 // Validity Conditions:
-//  1. The local node is still actively looking for peers to
-//     connect to.
-//  2. Peer has a valid IP and TCP port set in their enr.
-//  3. Peer hasn't been marked as 'bad'
-//  4. Peer is not currently active or connected.
-//  5. Peer is ready to receive incoming connections.
-//  6. Peer's fork digest in their ENR matches that of
+//  1. Peer has a valid IP and TCP port set in their enr.
+//  2. Peer hasn't been marked as 'bad'.
+//  3. Peer is not currently active or connected.
+//  4. Peer is ready to receive incoming connections.
+//  5. Peer's fork digest in their ENR matches that of
 //     our localnodes.
 func (s *Service) filterPeer(node *enode.Node) bool {
 	// Ignore nil node entries passed in.
 	if node == nil {
 		return false
 	}
-	// ignore nodes with no ip address stored.
+	// Ignore nodes with no IP address stored.
 	if node.IP() == nil {
 		return false
 	}
-	// do not dial nodes with their tcp ports not set
+	// Ignore nodes with their TCP ports not set.
 	if err := node.Record().Load(enr.WithEntry("tcp", new(enr.TCP))); err != nil {
 		if !enr.IsNotFound(err) {
 			log.WithError(err).Error("Could not retrieve tcp port")
@@ -286,18 +319,23 @@ func (s *Service) filterPeer(node *enode.Node) bool {
 		log.WithError(err).Error("Could not convert to peer data")
 		return false
 	}
+	// Ignore bad nodes.
 	if s.peers.IsBad(peerData.ID) {
 		return false
 	}
+	// Ignore nodes that are already active.
 	if s.peers.IsActive(peerData.ID) {
 		return false
 	}
+	// Ignore nodes that are already connected.
 	if s.host.Network().Connectedness(peerData.ID) == network.Connected {
 		return false
 	}
+	// Ignore nodes that are not ready to receive incoming connections.
 	if !s.peers.IsReadyToDial(peerData.ID) {
 		return false
 	}
+	// Ignore nodes that don't match our fork digest.
 	nodeENR := node.Record()
 	// Decide whether or not to connect to peer that does not
 	// match the proper fork ENR data with our local node.
@@ -396,6 +434,31 @@ func (s *Service) isPeerAtLimit(inbound bool) bool {
 	return activePeers >= maxPeers || numOfConns >= maxPeers
 }
 
+// PeersFromStringAddrs converts peer raw ENRs into multiaddrs for p2p.
+func PeersFromStringAddrs(addrs []string) ([]ma.Multiaddr, error) {
+	var allAddrs []ma.Multiaddr
+	enodeString, multiAddrString := parseGenericAddrs(addrs)
+	for _, stringAddr := range multiAddrString {
+		addr, err := multiAddrFromString(stringAddr)
+		if err != nil {
+			return nil, errors.Wrapf(err, "Could not get multiaddr from string")
+		}
+		allAddrs = append(allAddrs, addr)
+	}
+	for _, stringAddr := range enodeString {
+		enodeAddr, err := enode.Parse(enode.ValidSchemes, stringAddr)
+		if err != nil {
+			return nil, errors.Wrapf(err, "Could not get enode from string")
+		}
+		addr, err := convertToSingleMultiAddr(enodeAddr)
+		if err != nil {
+			return nil, errors.Wrapf(err, "Could not get multiaddr")
+		}
+		allAddrs = append(allAddrs, addr)
+	}
+	return allAddrs, nil
+}
+
 func parseBootStrapAddrs(addrs []string) (discv5Nodes []string) {
 	discv5Nodes, _ = parseGenericAddrs(addrs)
 	if len(discv5Nodes) == 0 {
@@ -420,7 +483,7 @@ func parseGenericAddrs(addrs []string) (enodeString, multiAddrString []string) {
 			multiAddrString = append(multiAddrString, addr)
 			continue
 		}
-		log.Errorf("Invalid address of %s provided: %v", addr, err)
+		log.WithError(err).Errorf("Invalid address of %s provided", addr)
 	}
 	return enodeString, multiAddrString
 }
@@ -499,37 +562,26 @@ func convertToUdpMultiAddr(node *enode.Node) ([]ma.Multiaddr, error) {
 	return addresses, nil
 }
 
-func peersFromStringAddrs(addrs []string) ([]ma.Multiaddr, error) {
-	var allAddrs []ma.Multiaddr
-	enodeString, multiAddrString := parseGenericAddrs(addrs)
-	for _, stringAddr := range multiAddrString {
-		addr, err := multiAddrFromString(stringAddr)
+func peerIdsFromMultiAddrs(addrs []ma.Multiaddr) []peer.ID {
+	var peers []peer.ID
+	for _, a := range addrs {
+		info, err := peer.AddrInfoFromP2pAddr(a)
 		if err != nil {
-			return nil, errors.Wrapf(err, "Could not get multiaddr from string")
+			log.WithError(err).Errorf("Could not derive peer info from multiaddress %s", a.String())
+			continue
 		}
-		allAddrs = append(allAddrs, addr)
+		peers = append(peers, info.ID)
 	}
-	for _, stringAddr := range enodeString {
-		enodeAddr, err := enode.Parse(enode.ValidSchemes, stringAddr)
-		if err != nil {
-			return nil, errors.Wrapf(err, "Could not get enode from string")
-		}
-		addr, err := convertToSingleMultiAddr(enodeAddr)
-		if err != nil {
-			return nil, errors.Wrapf(err, "Could not get multiaddr")
-		}
-		allAddrs = append(allAddrs, addr)
-	}
-	return allAddrs, nil
+	return peers
 }
 
 func multiAddrFromString(address string) (ma.Multiaddr, error) {
 	return ma.NewMultiaddr(address)
 }
 
-func udpVersionFromIP(ipAddr net.IP) string {
+func udpVersionFromIP(ipAddr net.IP) int {
 	if ipAddr.To4() != nil {
-		return "udp4"
+		return udp4
 	}
-	return "udp6"
+	return udp6
 }

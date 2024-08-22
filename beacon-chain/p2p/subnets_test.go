@@ -3,6 +3,8 @@ package p2p
 import (
 	"context"
 	"crypto/rand"
+	"encoding/hex"
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -14,6 +16,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed"
 	statefeed "gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/feed/state"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/cmd/beacon-chain/flags"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	pb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/wrapper"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
@@ -24,8 +27,8 @@ import (
 )
 
 func TestStartDiscV5_DiscoverPeersWithSubnets(t *testing.T) {
-	// This test needs to be entirely rewritten and should be done in a follow up PR from #7885.
-	t.Skip("This test is now failing after PR 7885 due to false positive")
+	//// This test needs to be entirely rewritten and should be done in a follow up PR from #7885.
+	//t.Skip("This test is now failing after PR 7885 due to false positive")
 	gFlags := new(flags.GlobalFlags)
 	gFlags.MinimumPeersPerSubnet = 4
 	flags.Init(gFlags)
@@ -116,11 +119,11 @@ func TestStartDiscV5_DiscoverPeersWithSubnets(t *testing.T) {
 
 	// look up 3 different subnets
 	ctx := context.Background()
-	exists, err := s.FindPeersWithSubnet(ctx, "", 1, flags.Get().MinimumPeersPerSubnet)
+	exists, err := s.FindPeersWithSubnet(ctx, GossipAttestationMessage, 1, flags.Get().MinimumPeersPerSubnet)
 	require.NoError(t, err)
-	exists2, err := s.FindPeersWithSubnet(ctx, "", 2, flags.Get().MinimumPeersPerSubnet)
+	exists2, err := s.FindPeersWithSubnet(ctx, GossipAttestationMessage, 2, flags.Get().MinimumPeersPerSubnet)
 	require.NoError(t, err)
-	exists3, err := s.FindPeersWithSubnet(ctx, "", 3, flags.Get().MinimumPeersPerSubnet)
+	exists3, err := s.FindPeersWithSubnet(ctx, GossipAttestationMessage, 3, flags.Get().MinimumPeersPerSubnet)
 	require.NoError(t, err)
 	if !exists || !exists2 || !exists3 {
 		t.Fatal("Peer with subnet doesn't exist")
@@ -137,7 +140,7 @@ func TestStartDiscV5_DiscoverPeersWithSubnets(t *testing.T) {
 	testService.RefreshENR()
 	time.Sleep(2 * time.Second)
 
-	exists, err = s.FindPeersWithSubnet(ctx, "", 2, flags.Get().MinimumPeersPerSubnet)
+	exists, err = s.FindPeersWithSubnet(ctx, GossipAttestationMessage, 2, flags.Get().MinimumPeersPerSubnet)
 	require.NoError(t, err)
 
 	assert.Equal(t, true, exists, "Peer with subnet doesn't exist")
@@ -145,11 +148,175 @@ func TestStartDiscV5_DiscoverPeersWithSubnets(t *testing.T) {
 	exitRoutine <- true
 }
 
+func TestStartDiscV5_FindPeersWithSubnet(t *testing.T) {
+	// Topology of this test:
+	//
+	//
+	// Node 1 (subscribed to subnet 1)  --\
+	//									  |
+	// Node 2 (subscribed to subnet 2)  --+--> BootNode (not subscribed to any subnet) <------- Node 0 (not subscribed to any subnet)
+	//									  |
+	// Node 3 (subscribed to subnet 3)  --/
+	//
+	// The purpose of this test is to ensure that the "Node 0" (connected only to the boot node) is able to
+	// find and connect to a node already subscribed to a specific subnet.
+	// In our case: The node i is subscribed to subnet i, with i = 1, 2, 3
+
+	// Define the genesis validators root, to ensure everybody is on the same network.
+	const genesisValidatorRootStr = "0xdeadbeefcafecafedeadbeefcafecafedeadbeefcafecafedeadbeefcafecafe"
+	genesisValidatorsRoot, err := hex.DecodeString(genesisValidatorRootStr[2:])
+	require.NoError(t, err)
+
+	// Create a context.
+	ctx := context.Background()
+
+	// Use shorter period for testing.
+	currentPeriod := pollingPeriod
+	pollingPeriod = 1 * time.Second
+	defer func() {
+		pollingPeriod = currentPeriod
+	}()
+
+	// Create flags.
+	params.SetupTestConfigCleanup(t)
+	gFlags := new(flags.GlobalFlags)
+	gFlags.MinimumPeersPerSubnet = 1
+	flags.Init(gFlags)
+
+	params.BeaconNetworkConfig().MinimumPeersInSubnetSearch = 1
+
+	// Reset config.
+	defer flags.Init(new(flags.GlobalFlags))
+
+	// First, generate a bootstrap node.
+	ipAddr, pkey := createAddrAndPrivKey(t)
+	genesisTime := time.Now()
+
+	bootNodeService := &Service{
+		cfg:                   &Config{TCPPort: 2000, UDPPort: 3000},
+		genesisTime:           genesisTime,
+		genesisValidatorsRoot: genesisValidatorsRoot,
+	}
+
+	bootNodeForkDigest, err := bootNodeService.currentForkDigest()
+	require.NoError(t, err)
+
+	bootListener, err := bootNodeService.createListener(ipAddr, pkey)
+	require.NoError(t, err)
+	defer bootListener.Close()
+
+	bootNodeENR := bootListener.Self().String()
+
+	// Create 3 nodes, each subscribed to a different subnet.
+	// Each node is connected to the boostrap node.
+	services := make([]*Service, 0, 3)
+
+	for i := 1; i <= 3; i++ {
+		subnet := uint64(i)
+		service, err := NewService(ctx, &Config{
+			Discv5BootStrapAddr: []string{bootNodeENR},
+			//BootstrapNodeAddr:   []string{bootNodeENR},
+			MaxPeers: 30,
+			TCPPort:  uint(2000 + i),
+			UDPPort:  uint(3000 + i),
+		})
+
+		require.NoError(t, err)
+
+		service.genesisTime = genesisTime
+		service.genesisValidatorsRoot = genesisValidatorsRoot
+
+		nodeForkDigest, err := service.currentForkDigest()
+		require.NoError(t, err)
+		require.Equal(t, true, nodeForkDigest == bootNodeForkDigest, "fork digest of the node doesn't match the boot node")
+
+		// Start the service.
+		service.Start()
+
+		// Set the ENR `attnets`, used by Prysm to filter peers by subnet.
+		bitV := bitfield.NewBitvector64()
+		bitV.SetBitAt(subnet, true)
+		entry := enr.WithEntry(attSubnetEnrKey, &bitV)
+		service.dv5Listener.LocalNode().Set(entry)
+
+		// Join and subscribe to the subnet, needed by libp2p.
+		topic, err := service.pubsub.Join(fmt.Sprintf(AttestationSubnetTopicFormat, bootNodeForkDigest, subnet) + "/ssz_snappy")
+		require.NoError(t, err)
+
+		_, err = topic.Subscribe()
+		require.NoError(t, err)
+
+		// Memoize the service.
+		services = append(services, service)
+	}
+
+	// Stop the services.
+	defer func() {
+		for _, service := range services {
+			err := service.Stop()
+			require.NoError(t, err)
+		}
+	}()
+
+	cfg := &Config{
+		Discv5BootStrapAddr: []string{bootNodeENR},
+		//BootstrapNodeAddr:   []string{bootNodeENR},
+		MaxPeers: 30,
+		TCPPort:  2010,
+		UDPPort:  3010,
+	}
+
+	service, err := NewService(ctx, cfg)
+	require.NoError(t, err)
+
+	service.genesisTime = genesisTime
+	service.genesisValidatorsRoot = genesisValidatorsRoot
+
+	service.Start()
+	defer func() {
+		err := service.Stop()
+		require.NoError(t, err)
+	}()
+
+	// Look up 3 different subnets.
+	exists := make([]bool, 0, 3)
+	for i := 1; i <= 3; i++ {
+		subnet := uint64(i)
+		topic := fmt.Sprintf(AttestationSubnetTopicFormat, bootNodeForkDigest, subnet)
+
+		exist := false
+
+		// This for loop is used to ensure we don't get stuck in `FindPeersWithSubnet`.
+		// Read the documentation of `FindPeersWithSubnet` for more details.
+		for j := 0; j < 3; j++ {
+			ctxWithTimeOut, cancel := context.WithTimeout(ctx, 5*time.Second)
+			defer cancel()
+
+			exist, err = service.FindPeersWithSubnet(ctxWithTimeOut, topic, subnet, 1)
+			require.NoError(t, err)
+
+			if exist {
+				break
+			}
+		}
+
+		require.NoError(t, err)
+		exists = append(exists, exist)
+
+	}
+
+	// Check if all peers are found.
+	for _, exist := range exists {
+		require.Equal(t, true, exist, "Peer with subnet doesn't exist")
+	}
+}
+
 func Test_AttSubnets(t *testing.T) {
+	params.SetupTestConfigCleanup(t)
 	tests := []struct {
 		name        string
 		record      func(t *testing.T) *enr.Record
-		want        []uint64
+		want        map[uint64]bool
 		wantErr     bool
 		errContains string
 	}{
@@ -166,7 +333,7 @@ func Test_AttSubnets(t *testing.T) {
 				localNode = initializeAttSubnets(localNode)
 				return localNode.Node().Record()
 			},
-			want:    nil,
+			want:    map[uint64]bool{},
 			wantErr: false,
 		},
 		{
@@ -183,7 +350,7 @@ func Test_AttSubnets(t *testing.T) {
 				localNode.Set(entry)
 				return localNode.Node().Record()
 			},
-			want:        []uint64{},
+			want:        map[uint64]bool{},
 			wantErr:     true,
 			errContains: "invalid bitvector provided, it has a size of",
 		},
@@ -201,7 +368,7 @@ func Test_AttSubnets(t *testing.T) {
 				localNode.Set(entry)
 				return localNode.Node().Record()
 			},
-			want:        []uint64{},
+			want:        map[uint64]bool{},
 			wantErr:     true,
 			errContains: "invalid bitvector provided, it has a size of",
 		},
@@ -219,7 +386,7 @@ func Test_AttSubnets(t *testing.T) {
 				localNode.Set(entry)
 				return localNode.Node().Record()
 			},
-			want:        []uint64{},
+			want:        map[uint64]bool{},
 			wantErr:     true,
 			errContains: "invalid bitvector provided, it has a size of",
 		},
@@ -237,7 +404,7 @@ func Test_AttSubnets(t *testing.T) {
 				localNode.Set(entry)
 				return localNode.Node().Record()
 			},
-			want:        []uint64{},
+			want:        map[uint64]bool{},
 			wantErr:     true,
 			errContains: "invalid bitvector provided, it has a size of",
 		},
@@ -257,7 +424,7 @@ func Test_AttSubnets(t *testing.T) {
 				localNode.Set(entry)
 				return localNode.Node().Record()
 			},
-			want:    []uint64{0},
+			want:    map[uint64]bool{0: true},
 			wantErr: false,
 		},
 		{
@@ -283,9 +450,10 @@ func Test_AttSubnets(t *testing.T) {
 				localNode.Set(entry)
 				return localNode.Node().Record()
 			},
-			want: []uint64{0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20,
-				22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48,
-				50, 52, 54, 56, 58, 60, 62},
+			want: map[uint64]bool{0: true, 2: true, 4: true, 6: true, 8: true, 10: true, 12: true, 14: true, 16: true, 18: true,
+				20: true, 22: true, 24: true, 26: true, 28: true, 30: true, 32: true, 34: true, 36: true, 38: true,
+				40: true, 42: true, 44: true, 46: true, 48: true, 50: true, 52: true, 54: true, 56: true, 58: true,
+				60: true, 62: true},
 			wantErr: false,
 		},
 		{
@@ -306,9 +474,13 @@ func Test_AttSubnets(t *testing.T) {
 				localNode.Set(entry)
 				return localNode.Node().Record()
 			},
-			want: []uint64{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-				21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
-				50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63},
+			want: map[uint64]bool{0: true, 1: true, 2: true, 3: true, 4: true, 5: true, 6: true, 7: true, 8: true, 9: true,
+				10: true, 11: true, 12: true, 13: true, 14: true, 15: true, 16: true, 17: true, 18: true, 19: true,
+				20: true, 21: true, 22: true, 23: true, 24: true, 25: true, 26: true, 27: true, 28: true, 29: true,
+				30: true, 31: true, 32: true, 33: true, 34: true, 35: true, 36: true, 37: true, 38: true, 39: true,
+				40: true, 41: true, 42: true, 43: true, 44: true, 45: true, 46: true, 47: true, 48: true, 49: true,
+				50: true, 51: true, 52: true, 53: true, 54: true, 55: true, 56: true, 57: true, 58: true, 59: true,
+				60: true, 61: true, 62: true, 63: true},
 			wantErr: false,
 		},
 	}
@@ -330,6 +502,7 @@ func Test_AttSubnets(t *testing.T) {
 }
 
 func Test_SyncSubnets(t *testing.T) {
+	params.SetupTestConfigCleanup(t)
 	tests := []struct {
 		name        string
 		record      func(t *testing.T) *enr.Record
@@ -489,4 +662,39 @@ func Test_SyncSubnets(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestSubnetComputation(t *testing.T) {
+	db, err := enode.OpenDB("")
+	assert.NoError(t, err)
+	defer db.Close()
+	priv, _, err := crypto.GenerateSecp256k1Key(rand.Reader)
+	assert.NoError(t, err)
+	convertedKey, err := ConvertFromInterfacePrivKey(priv)
+	assert.NoError(t, err)
+	localNode := enode.NewLocalNode(db, convertedKey)
+
+	retrievedSubnets, err := computeSubscribedSubnets(localNode.ID(), 1000)
+	assert.NoError(t, err)
+	assert.Equal(t, retrievedSubnets[0]+1, retrievedSubnets[1])
+}
+
+func TestInitializePersistentSubnets(t *testing.T) {
+	cache.SubnetIDs.EmptyAllCaches()
+	defer cache.SubnetIDs.EmptyAllCaches()
+
+	db, err := enode.OpenDB("")
+	assert.NoError(t, err)
+	defer db.Close()
+	priv, _, err := crypto.GenerateSecp256k1Key(rand.Reader)
+	assert.NoError(t, err)
+	convertedKey, err := ConvertFromInterfacePrivKey(priv)
+	assert.NoError(t, err)
+	localNode := enode.NewLocalNode(db, convertedKey)
+
+	assert.NoError(t, initializePersistentSubnets(localNode.ID(), 10000))
+	subs, ok, expTime := cache.SubnetIDs.GetPersistentSubnets()
+	assert.Equal(t, true, ok)
+	assert.Equal(t, 2, len(subs))
+	assert.Equal(t, true, expTime.After(time.Now()))
 }

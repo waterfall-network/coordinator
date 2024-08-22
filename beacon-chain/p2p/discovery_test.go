@@ -35,6 +35,7 @@ import (
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/require"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/time/slots"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/discover"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enode"
 	"gitlab.waterfall.network/waterfall/protocol/gwat/p2p/enr"
@@ -133,6 +134,107 @@ func TestStartDiscV5_DiscoverAllPeers(t *testing.T) {
 	if len(nodes) < 4 {
 		t.Errorf("The node's local table doesn't have the expected number of nodes. "+
 			"Expected more than or equal to %d but got %d", 4, len(nodes))
+	}
+}
+
+func TestCreateLocalNode(t *testing.T) {
+	testCases := []struct {
+		name          string
+		cfg           *Config
+		expectedError bool
+	}{
+		{
+			name:          "valid config",
+			cfg:           nil,
+			expectedError: false,
+		},
+		{
+			name:          "invalid host address",
+			cfg:           &Config{HostAddress: "invalid"},
+			expectedError: true,
+		},
+		{
+			name:          "valid host address",
+			cfg:           &Config{HostAddress: "192.168.0.1"},
+			expectedError: false,
+		},
+		{
+			name:          "invalid host DNS",
+			cfg:           &Config{HostDNS: "invalid"},
+			expectedError: true,
+		},
+		// // fail bazel test (but bazel debug & go: success)
+		//{
+		//	name:          "valid host DNS",
+		//	cfg:           &Config{HostDNS: "google.com"},
+		//	expectedError: false,
+		//},
+	}
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			// Define ports.
+			const (
+				udpPort = 2000
+				tcpPort = 3000
+			)
+
+			// Create a private key.
+			address, privKey := createAddrAndPrivKey(t)
+
+			// Create a service.
+			service := &Service{
+				genesisTime:           time.Now(),
+				genesisValidatorsRoot: bytesutil.PadTo([]byte{'A'}, 32),
+				cfg:                   tt.cfg,
+			}
+
+			localNode, err := service.createLocalNode(privKey, address, udpPort, tcpPort)
+			if tt.expectedError {
+				require.NotNil(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+
+			expectedAddress := address
+			if tt.cfg != nil && tt.cfg.HostAddress != "" {
+				expectedAddress = net.ParseIP(tt.cfg.HostAddress)
+			}
+
+			// Check IP.
+			// IP is not checked int case of DNS, since it can be resolved to different IPs.
+			if tt.cfg == nil || tt.cfg.HostDNS == "" {
+				ip := new(net.IP)
+				require.NoError(t, localNode.Node().Record().Load(enr.WithEntry("ip", ip)))
+				require.Equal(t, true, ip.Equal(expectedAddress))
+				require.Equal(t, true, localNode.Node().IP().Equal(expectedAddress))
+			}
+
+			// Check UDP.
+			udp := new(uint16)
+			require.NoError(t, localNode.Node().Record().Load(enr.WithEntry("udp", udp)))
+			require.Equal(t, udpPort, localNode.Node().UDP())
+
+			// Check TCP.
+			tcp := new(uint16)
+			require.NoError(t, localNode.Node().Record().Load(enr.WithEntry("tcp", tcp)))
+			require.Equal(t, tcpPort, localNode.Node().TCP())
+
+			// Check fork is set.
+			fork := new([]byte)
+			require.NoError(t, localNode.Node().Record().Load(enr.WithEntry(eth2ENRKey, fork)))
+			require.NotEmpty(t, *fork)
+
+			// Check att subnets.
+			attSubnets := new([]byte)
+			require.NoError(t, localNode.Node().Record().Load(enr.WithEntry(attSubnetEnrKey, attSubnets)))
+			require.DeepSSZEqual(t, []byte{0, 0, 0, 0, 0, 0, 0, 0}, *attSubnets)
+
+			// Check sync committees subnets.
+			syncSubnets := new([]byte)
+			require.NoError(t, localNode.Node().Record().Load(enr.WithEntry(syncCommsSubnetEnrKey, syncSubnets)))
+			require.DeepSSZEqual(t, []byte{0}, *syncSubnets)
+		})
 	}
 }
 
@@ -323,12 +425,12 @@ func TestMultipleDiscoveryAddresses(t *testing.T) {
 }
 
 func TestCorrectUDPVersion(t *testing.T) {
-	assert.Equal(t, "udp4", udpVersionFromIP(net.IPv4zero), "incorrect network version")
-	assert.Equal(t, "udp6", udpVersionFromIP(net.IPv6zero), "incorrect network version")
-	assert.Equal(t, "udp4", udpVersionFromIP(net.IP{200, 20, 12, 255}), "incorrect network version")
-	assert.Equal(t, "udp6", udpVersionFromIP(net.IP{22, 23, 24, 251, 17, 18, 0, 0, 0, 0, 12, 14, 212, 213, 16, 22}), "incorrect network version")
+	assert.Equal(t, udp4, udpVersionFromIP(net.IPv4zero), "incorrect network version")
+	assert.Equal(t, udp6, udpVersionFromIP(net.IPv6zero), "incorrect network version")
+	assert.Equal(t, udp4, udpVersionFromIP(net.IP{200, 20, 12, 255}), "incorrect network version")
+	assert.Equal(t, udp6, udpVersionFromIP(net.IP{22, 23, 24, 251, 17, 18, 0, 0, 0, 0, 12, 14, 212, 213, 16, 22}), "incorrect network version")
 	// v4 in v6
-	assert.Equal(t, "udp4", udpVersionFromIP(net.IP{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff, 212, 213, 16, 22}), "incorrect network version")
+	assert.Equal(t, udp4, udpVersionFromIP(net.IP{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff, 212, 213, 16, 22}), "incorrect network version")
 }
 
 // addPeer is a helper to add a peer with a given connection state)
@@ -379,7 +481,15 @@ func TestRefreshENR_ForkBoundaries(t *testing.T) {
 				return s
 			},
 			postValidation: func(t *testing.T, s *Service) {
-				assert.DeepEqual(t, bitfield.NewBitvector64(), s.metaData.AttnetsBitfield())
+				currEpoch := slots.ToEpoch(slots.CurrentSlot(uint64(s.genesisTime.Unix())))
+				subs, err := computeSubscribedSubnets(s.dv5Listener.LocalNode().ID(), currEpoch)
+				assert.NoError(t, err)
+
+				bitV := bitfield.NewBitvector64()
+				for _, idx := range subs {
+					bitV.SetBitAt(idx, true)
+				}
+				assert.DeepEqual(t, bitV, s.metaData.AttnetsBitfield())
 			},
 		},
 		{
@@ -398,7 +508,7 @@ func TestRefreshENR_ForkBoundaries(t *testing.T) {
 				s.dv5Listener = listener
 				s.metaData = wrapper.WrappedMetadataV0(new(ethpb.MetaDataV0))
 				s.updateSubnetRecordWithMetadata([]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01})
-				cache.SubnetIDs.AddPersistentCommittee([]byte{'A'}, []uint64{1, 2, 3, 23}, 0)
+				cache.SubnetIDs.AddPersistentCommittee([]uint64{1, 2, 3, 23}, 0)
 				return s
 			},
 			postValidation: func(t *testing.T, s *Service) {
@@ -420,7 +530,7 @@ func TestRefreshENR_ForkBoundaries(t *testing.T) {
 				assert.NoError(t, err)
 
 				// Update params
-				cfg := params.BeaconConfig()
+				cfg := params.BeaconConfig().Copy()
 				cfg.AltairForkEpoch = 5
 				params.OverrideBeaconConfig(cfg)
 				params.BeaconConfig().InitializeForkSchedule()
@@ -428,7 +538,7 @@ func TestRefreshENR_ForkBoundaries(t *testing.T) {
 				s.dv5Listener = listener
 				s.metaData = wrapper.WrappedMetadataV0(new(ethpb.MetaDataV0))
 				s.updateSubnetRecordWithMetadata([]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01})
-				cache.SubnetIDs.AddPersistentCommittee([]byte{'A'}, []uint64{1, 2, 3, 23}, 0)
+				cache.SubnetIDs.AddPersistentCommittee([]uint64{1, 2, 3, 23}, 0)
 				return s
 			},
 			postValidation: func(t *testing.T, s *Service) {
@@ -452,7 +562,7 @@ func TestRefreshENR_ForkBoundaries(t *testing.T) {
 				assert.NoError(t, err)
 
 				// Update params
-				cfg := params.BeaconConfig()
+				cfg := params.BeaconConfig().Copy()
 				cfg.AltairForkEpoch = 5
 				params.OverrideBeaconConfig(cfg)
 				params.BeaconConfig().InitializeForkSchedule()
@@ -465,7 +575,15 @@ func TestRefreshENR_ForkBoundaries(t *testing.T) {
 			postValidation: func(t *testing.T, s *Service) {
 				assert.Equal(t, version.Altair, s.metaData.Version())
 				assert.DeepEqual(t, bitfield.Bitvector4{0x00}, s.metaData.MetadataObjV1().Syncnets)
-				assert.DeepEqual(t, bitfield.Bitvector64{0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0}, s.metaData.AttnetsBitfield())
+				currEpoch := slots.ToEpoch(slots.CurrentSlot(uint64(s.genesisTime.Unix())))
+				subs, err := computeSubscribedSubnets(s.dv5Listener.LocalNode().ID(), currEpoch)
+				assert.NoError(t, err)
+
+				bitV := bitfield.NewBitvector64()
+				for _, idx := range subs {
+					bitV.SetBitAt(idx, true)
+				}
+				assert.DeepEqual(t, bitV, s.metaData.AttnetsBitfield())
 			},
 		},
 		{
@@ -483,7 +601,7 @@ func TestRefreshENR_ForkBoundaries(t *testing.T) {
 				assert.NoError(t, err)
 
 				// Update params
-				cfg := params.BeaconConfig()
+				cfg := params.BeaconConfig().Copy()
 				cfg.AltairForkEpoch = 5
 				params.OverrideBeaconConfig(cfg)
 				params.BeaconConfig().InitializeForkSchedule()
@@ -491,7 +609,7 @@ func TestRefreshENR_ForkBoundaries(t *testing.T) {
 				s.dv5Listener = listener
 				s.metaData = wrapper.WrappedMetadataV0(new(ethpb.MetaDataV0))
 				s.updateSubnetRecordWithMetadata([]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
-				cache.SubnetIDs.AddPersistentCommittee([]byte{'A'}, []uint64{1, 2, 3, 23}, 0)
+				cache.SubnetIDs.AddPersistentCommittee([]uint64{1, 2, 3, 23}, 0)
 				cache.SyncSubnetIDs.AddSyncCommitteeSubnets([]byte{'A'}, 0, []uint64{0, 1}, 0)
 				return s
 			},

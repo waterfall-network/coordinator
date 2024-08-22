@@ -532,15 +532,6 @@ func (vs *Server) SubmitBeaconCommitteeSubscription(ctx context.Context, req *et
 		}
 	}
 
-	for _, val := range validators {
-		valStatus, err := rpchelpers.ValidatorStatus(val, currEpoch)
-		if err != nil {
-			return nil, status.Errorf(codes.Internal, "Could not retrieve validator status: %v", err)
-		}
-		pubkey := val.PublicKey()
-		vs.V1Alpha1Server.AssignValidatorToSubnet(pubkey[:], v1ValidatorStatusToV1Alpha1(valStatus))
-	}
-
 	return &emptypb.Empty{}, nil
 }
 

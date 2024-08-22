@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 )
 
@@ -23,6 +24,7 @@ func TestGossipParameters(t *testing.T) {
 }
 
 func TestFanoutParameters(t *testing.T) {
+	params.SetupTestConfigCleanup(t)
 	pms := pubsubGossipParam()
 	if pms.FanoutTTL != gossipSubFanoutTTL {
 		t.Errorf("gossipSubFanoutTTL, wanted: %d, got: %d", gossipSubFanoutTTL, pms.FanoutTTL)
@@ -30,6 +32,7 @@ func TestFanoutParameters(t *testing.T) {
 }
 
 func TestHeartbeatParameters(t *testing.T) {
+	params.SetupTestConfigCleanup(t)
 	pms := pubsubGossipParam()
 	if pms.HeartbeatInterval != gossipSubHeartbeatInterval {
 		t.Errorf("gossipSubHeartbeatInterval, wanted: %d, got: %d", gossipSubHeartbeatInterval, pms.HeartbeatInterval)
@@ -37,6 +40,7 @@ func TestHeartbeatParameters(t *testing.T) {
 }
 
 func TestMiscParameters(t *testing.T) {
+	params.SetupTestConfigCleanup(t)
 	setPubSubParameters()
 	assert.Equal(t, randomSubD, pubsub.RandomSubD, "randomSubD")
 }

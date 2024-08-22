@@ -49,6 +49,21 @@ func (s *Service) noopValidator(_ context.Context, _ peer.ID, msg *pubsub.Messag
 
 // Register PubSub subscribers
 func (s *Service) registerSubscribers(epoch types.Epoch, digest [4]byte) {
+	log.WithFields(logrus.Fields{
+		"epoch":  epoch,
+		"digest": fmt.Sprintf("%#x", digest),
+	}).Info("SUBSCRIBER: registerSubscribers")
+
+	defer func(tstart time.Time, slot types.Slot) {
+		log.WithFields(
+			logrus.Fields{
+				"elapsed": time.Since(tstart),
+				"slot":    fmt.Sprintf("%d", slot),
+				"epoch":   epoch,
+				"digest":  fmt.Sprintf("%#x", digest),
+			}).Info("SUBSCRIBER: registerSubscribers: END")
+	}(time.Now(), slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())))
+
 	s.subscribe(
 		p2p.BlockSubnetTopicFormat,
 		s.validateBeaconBlockPubSub,
@@ -430,6 +445,7 @@ func (s *Service) subscribeDynamicWithSubnets(
 				ticker.Done()
 				return
 			case currentSlot := <-ticker.C():
+				tstart := time.Now()
 
 				log.WithFields(logrus.Fields{
 					"0:currentSlot": currentSlot,
@@ -533,6 +549,13 @@ func (s *Service) subscribeDynamicWithSubnets(
 						"4:calcSlot":    slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
 					}).Info("SUBSCRIBER: Validator subscription: subscribeDynamicWithSubnets: success 4")
 				}
+
+				log.WithFields(logrus.Fields{
+					"elapsed":    time.Since(tstart),
+					"slot":       currentSlot,
+					"digest":     fmt.Sprintf("%#x", digest),
+					"wantedSubs": len(wantedSubs),
+				}).Info("SUBSCRIBER: update")
 			}
 		}
 	}()

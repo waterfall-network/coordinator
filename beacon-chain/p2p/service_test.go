@@ -147,7 +147,7 @@ func TestService_Status_NoGenesisTimeSet(t *testing.T) {
 }
 
 func TestListenForNewNodes(t *testing.T) {
-	t.Skip() // unstable test
+	//t.Skip() // unstable test
 	// Setup bootnode.
 	notifier := &mock.MockStateNotifier{}
 	cfg := &Config{StateNotifier: notifier}

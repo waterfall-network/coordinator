@@ -30,11 +30,17 @@ const (
 )
 
 var mainnetNetworkConfig = &NetworkConfig{
-	GossipMaxSize:                   1 << 20,      // 1 MiB
-	GossipMaxSizeBellatrix:          10 * 1 << 20, // 10 MiB
-	MaxChunkSize:                    1 << 20,      // 1 MiB
-	MaxChunkSizeBellatrix:           10 * 1 << 20, // 10 MiB
-	AttestationSubnetCount:          64,
+	GossipMaxSize:          1 << 20,      // 1 MiB
+	GossipMaxSizeBellatrix: 10 * 1 << 20, // 10 MiB
+	MaxChunkSize:           1 << 20,      // 1 MiB
+	MaxChunkSizeBellatrix:  10 * 1 << 20, // 10 MiB
+	AttestationSubnetCount: 64,
+
+	AttestationSubnetPrefixBits: 6,
+	NodeIdBits:                  256,
+	EpochsPerSubnetSubscription: 256,
+	SubnetsPerNode:              2,
+
 	AttestationPropagationSlotRange: 32,
 	MaxRequestBlocks:                1 << 10, // 1024
 	TtfbTimeout:                     5 * time.Second,
