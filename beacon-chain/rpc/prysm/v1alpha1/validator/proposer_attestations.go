@@ -7,17 +7,14 @@ import (
 	"github.com/pkg/errors"
 	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/go-bitfield"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/altair"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/blocks"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/helpers"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/db"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/state"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	ethpb "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/attestation/aggregation"
 	attaggregation "gitlab.waterfall.network/waterfall/protocol/coordinator/proto/prysm/v1alpha1/attestation/aggregation/attestations"
-	"gitlab.waterfall.network/waterfall/protocol/coordinator/runtime/version"
 	gwatCommon "gitlab.waterfall.network/waterfall/protocol/gwat/common"
 	"go.opencensus.io/trace"
 )
@@ -97,22 +94,8 @@ func (vs *Server) packAttestations(ctx context.Context, latestState state.Beacon
 func (a proposerAtts) filter(ctx context.Context, st state.BeaconState) (proposerAtts, proposerAtts) {
 	validAtts := make([]*ethpb.Attestation, 0, len(a))
 	invalidAtts := make([]*ethpb.Attestation, 0, len(a))
-	var attestationProcessor func(context.Context, state.BeaconState, *ethpb.Attestation) (state.BeaconState, error)
-
-	switch st.Version() {
-	case version.Phase0:
-		attestationProcessor = blocks.ProcessAttestationNoVerifySignature
-	case version.Altair, version.Bellatrix:
-		// Use a wrapper here, as go needs strong typing for the function signature.
-		attestationProcessor = func(ctx context.Context, st state.BeaconState, attestation *ethpb.Attestation) (state.BeaconState, error) {
-			return altair.ProcessAttestationNoVerifySignature(ctx, st, attestation, nil)
-		}
-	default:
-		// Exit early if there is an unknown state type.
-		return validAtts, invalidAtts
-	}
 	for _, att := range a {
-		if _, err := attestationProcessor(ctx, st, att); err == nil {
+		if err := blocks.VerifyAttestationNoVerifySignature(ctx, st, att); err == nil {
 			validAtts = append(validAtts, att)
 			continue
 		}
@@ -126,16 +109,7 @@ func (a proposerAtts) sortByProfitability() (proposerAtts, error) {
 	if len(a) < 2 {
 		return a, nil
 	}
-	if features.Get().ProposerAttsSelectionUsingMaxCover {
-		return a.sortByProfitabilityUsingMaxCover()
-	}
-	sort.Slice(a, func(i, j int) bool {
-		if a[i].Data.Slot == a[j].Data.Slot {
-			return a[i].AggregationBits.Count() > a[j].AggregationBits.Count()
-		}
-		return a[i].Data.Slot > a[j].Data.Slot
-	})
-	return a, nil
+	return a.sortByProfitabilityUsingMaxCover()
 }
 
 // sortByProfitabilityUsingMaxCover orders attestations by highest slot and by highest aggregation bit count.

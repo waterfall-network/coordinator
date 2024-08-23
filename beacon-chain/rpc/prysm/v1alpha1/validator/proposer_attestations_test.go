@@ -39,9 +39,7 @@ func TestProposer_ProposerAtts_sortByProfitability(t *testing.T) {
 }
 
 func TestProposer_ProposerAtts_sortByProfitabilityUsingMaxCover(t *testing.T) {
-	resetCfg := features.InitWithReset(&features.Flags{
-		ProposerAttsSelectionUsingMaxCover: true,
-	})
+	resetCfg := features.InitWithReset(&features.Flags{})
 	defer resetCfg()
 
 	type testData struct {
@@ -116,36 +114,8 @@ func TestProposer_ProposerAtts_sortByProfitabilityUsingMaxCover(t *testing.T) {
 	})
 
 	t.Run("compare to native sort", func(t *testing.T) {
-		// The naive sort will end up with 0b11001000 being selected second (which is not optimal
-		// as it only contains a single unknown bit).
-		// The max-cover based approach will select 0b00001100 instead, despite lower bit count
-		// (since it has two new/unknown bits).
-		t.Run("naive", func(t *testing.T) {
-			resetCfg := features.InitWithReset(&features.Flags{
-				ProposerAttsSelectionUsingMaxCover: false,
-			})
-			defer resetCfg()
-
-			atts := getAtts([]testData{
-				{1, bitfield.Bitlist{0b11000011, 0b1}},
-				{1, bitfield.Bitlist{0b11001000, 0b1}},
-				{1, bitfield.Bitlist{0b00001100, 0b1}},
-			})
-			want := getAtts([]testData{
-				{1, bitfield.Bitlist{0b11000011, 0b1}},
-				{1, bitfield.Bitlist{0b11001000, 0b1}},
-				{1, bitfield.Bitlist{0b00001100, 0b1}},
-			})
-			atts, err := atts.sortByProfitability()
-			if err != nil {
-				t.Error(err)
-			}
-			require.DeepEqual(t, want, atts)
-		})
 		t.Run("max-cover", func(t *testing.T) {
-			resetCfg := features.InitWithReset(&features.Flags{
-				ProposerAttsSelectionUsingMaxCover: true,
-			})
+			resetCfg := features.InitWithReset(&features.Flags{})
 			defer resetCfg()
 
 			atts := getAtts([]testData{
