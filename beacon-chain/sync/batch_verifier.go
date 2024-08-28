@@ -83,19 +83,36 @@ func verifyBatch(verifierBatch []*signatureVerifier) {
 		return
 	}
 	aggSet := verifierBatch[0].set
-	verificationErr := error(nil)
 
 	for i := 1; i < len(verifierBatch); i++ {
 		aggSet = aggSet.Join(verifierBatch[i].set)
 	}
-	verified, err := aggSet.Verify()
-	switch {
-	case err != nil:
-		verificationErr = err
-	case !verified:
-		verificationErr = errors.New("batch signature verification failed")
+	var verificationErr error
+
+	aggSet, verificationErr = performBatchAggregation(aggSet)
+	if verificationErr == nil {
+		verified, err := aggSet.Verify()
+		switch {
+		case err != nil:
+			verificationErr = err
+		case !verified:
+			verificationErr = errors.New("batch signature verification failed")
+		}
 	}
 	for i := 0; i < len(verifierBatch); i++ {
 		verifierBatch[i].resChan <- verificationErr
 	}
+}
+
+func performBatchAggregation(aggSet *bls.SignatureBatch) (*bls.SignatureBatch, error) {
+	_, aggSet, err := aggSet.RemoveDuplicates()
+	if err != nil {
+		return nil, err
+	}
+	// Aggregate batches in the provided signature batch.
+	aggSet, err = aggSet.AggregateBatch()
+	if err != nil {
+		return nil, err
+	}
+	return aggSet, nil
 }

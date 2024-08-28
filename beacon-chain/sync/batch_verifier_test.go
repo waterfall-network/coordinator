@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/beacon-chain/core/signing"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/assert"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/testing/util"
@@ -16,14 +17,16 @@ func TestValidateWithBatchVerifier(t *testing.T) {
 	sig := keys[0].Sign(make([]byte, 32))
 	badSig := keys[1].Sign(make([]byte, 32))
 	validSet := &bls.SignatureBatch{
-		Messages:   [][32]byte{{}},
-		PublicKeys: []bls.PublicKey{keys[0].PublicKey()},
-		Signatures: [][]byte{sig.Marshal()},
+		Messages:     [][32]byte{{}},
+		PublicKeys:   []bls.PublicKey{keys[0].PublicKey()},
+		Signatures:   [][]byte{sig.Marshal()},
+		Descriptions: []string{signing.UnknownSignature},
 	}
 	invalidSet := &bls.SignatureBatch{
-		Messages:   [][32]byte{{}},
-		PublicKeys: []bls.PublicKey{keys[0].PublicKey()},
-		Signatures: [][]byte{badSig.Marshal()},
+		Messages:     [][32]byte{{}},
+		PublicKeys:   []bls.PublicKey{keys[0].PublicKey()},
+		Signatures:   [][]byte{badSig.Marshal()},
+		Descriptions: []string{signing.UnknownSignature},
 	}
 	tests := []struct {
 		name          string

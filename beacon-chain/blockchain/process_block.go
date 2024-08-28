@@ -258,6 +258,8 @@ func (s *Service) onBlock(ctx context.Context, signed block.SignedBeaconBlock, b
 		}).Error("onBlock error")
 		return err
 	}
+	s.rmBlRootProcessing(blockRoot)
+	rmBlRootProc = false
 
 	log.WithError(err).WithFields(logrus.Fields{
 		"block.slot": signed.Block().Slot(),
@@ -552,9 +554,10 @@ func (s *Service) onBlockBatch(ctx context.Context, blks []block.SignedBeaconBlo
 	jCheckpoints := make([]*ethpb.Checkpoint, len(blks))
 	fCheckpoints := make([]*ethpb.Checkpoint, len(blks))
 	sigSet := &bls.SignatureBatch{
-		Signatures: [][]byte{},
-		PublicKeys: []bls.PublicKey{},
-		Messages:   [][32]byte{},
+		Signatures:   [][]byte{},
+		PublicKeys:   []bls.PublicKey{},
+		Messages:     [][32]byte{},
+		Descriptions: []string{},
 	}
 	var set *bls.SignatureBatch
 	boundaries := make(map[[32]byte]state.BeaconState)

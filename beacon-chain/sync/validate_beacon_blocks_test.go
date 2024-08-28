@@ -373,6 +373,7 @@ func TestValidateBeaconBlockPubSub_WithLookahead(t *testing.T) {
 			Epoch: 0,
 		}}
 	r := &Service{
+		ctx: ctx,
 		cfg: &config{
 			beaconDB:      db,
 			p2p:           p,
@@ -386,7 +387,9 @@ func TestValidateBeaconBlockPubSub_WithLookahead(t *testing.T) {
 		slotToPendingBlocks: gcache.New(time.Second, 2*time.Second),
 		seenPendingBlocks:   make(map[[32]byte]bool),
 		subHandler:          newSubTopicHandler(),
+		signatureChan:       make(chan *signatureVerifier, verifierLimit),
 	}
+	go r.verifierRoutine()
 	buf := new(bytes.Buffer)
 	_, err = p.Encoding().EncodeGossip(buf, msg)
 	require.NoError(t, err)

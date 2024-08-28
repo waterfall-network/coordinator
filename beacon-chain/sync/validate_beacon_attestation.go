@@ -169,20 +169,25 @@ func (s *Service) validateCommitteeIndexBeaconAttestation(ctx context.Context, p
 
 	// Verify the block being voted and the processed state is in beaconDB and the block has passed validation if it's in the beaconDB.
 	blockRoot := bytesutil.ToBytes32(att.Data.BeaconBlockRoot)
-	if !s.hasBlockAndState(ctx, blockRoot) {
+	if s.cfg.chain.IsBlockRootProcessing(blockRoot) || !s.hasBlockAndState(ctx, blockRoot) {
+
+		// A node doesn't have the block, it'll request from peer while saving the pending attestation to a queue.
+		s.savePendingAtt(&eth.SignedAggregateAttestationAndProof{Message: &eth.AggregateAttestationAndProof{Aggregate: att}})
+
 		log.WithError(err).WithFields(logrus.Fields{
 			"pid":     fmt.Sprintf("%s", pid),
 			"topic":   fmt.Sprintf("%s", *msg.Topic),
 			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+			"root":    fmt.Sprintf("%#x", blockRoot),
 		}).Error("Atts: incoming: validate att: no block and state")
-		// A node doesn't have the block, it'll request from peer while saving the pending attestation to a queue.
-		s.savePendingAtt(&eth.SignedAggregateAttestationAndProof{Message: &eth.AggregateAttestationAndProof{Aggregate: att}})
+
 		return pubsub.ValidationIgnore, nil
 	}
 
 	if err := s.cfg.chain.VerifyFinalizedConsistency(ctx, att.Data.BeaconBlockRoot); err != nil {
 		tracing.AnnotateError(span, err)
 		log.WithError(err).WithFields(logrus.Fields{
+			"attSlot": att.GetData().Slot,
 			"pid":     fmt.Sprintf("%s", pid),
 			"topic":   fmt.Sprintf("%s", *msg.Topic),
 			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
@@ -271,15 +276,11 @@ func (s *Service) validateUnaggregatedAttWithState(ctx context.Context, a *eth.A
 	ctx, span := trace.StartSpan(ctx, "sync.validateUnaggregatedAttWithState")
 	defer span.End()
 
-	committee, err := helpers.BeaconCommitteeFromState(ctx, bs, a.Data.Slot, a.Data.CommitteeIndex)
-	if err != nil {
-		tracing.AnnotateError(span, err)
-		return pubsub.ValidationIgnore, err
-	}
+	//tstart := time.Now()
 
-	// Verify number of aggregation bits matches the committee size.
-	if err := helpers.VerifyBitfieldLength(a.AggregationBits, uint64(len(committee))); err != nil {
-		return pubsub.ValidationReject, err
+	committee, result, err := s.validateBitLength(ctx, a, bs)
+	if result != pubsub.ValidationAccept {
+		return result, err
 	}
 
 	// Attestation must be unaggregated and the bit index must exist in the range of committee indices.
@@ -289,19 +290,35 @@ func (s *Service) validateUnaggregatedAttWithState(ctx context.Context, a *eth.A
 		return pubsub.ValidationReject, errors.New("attestation bitfield is invalid")
 	}
 
-	if features.Get().EnableBatchVerification {
-		set, err := blocks.AttestationSignatureBatch(ctx, bs, []*eth.Attestation{a})
-		if err != nil {
-			tracing.AnnotateError(span, err)
-			return pubsub.ValidationReject, err
-		}
-		return s.validateWithBatchVerifier(ctx, "attestation", set)
-	}
-	if err := blocks.VerifyAttestationSignature(ctx, bs, a); err != nil {
+	set, err := blocks.AttestationSignatureBatch(ctx, bs, []*eth.Attestation{a})
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{
+			//" elapsed": time.Since(tstart),
+			"attSlot": a.GetData().Slot,
+			"curSlot": slots.CurrentSlot(uint64(s.cfg.chain.GenesisTime().Unix())),
+		}).Error("ATTS: incoming: validate: unaggregated att with state")
+
 		tracing.AnnotateError(span, err)
+		//attBadSignatureBatchCount.Inc()
 		return pubsub.ValidationReject, err
 	}
-	return pubsub.ValidationAccept, nil
+	res, err := s.validateWithBatchVerifier(ctx, "attestation", set)
+
+	return res, err
+}
+
+func (s *Service) validateBitLength(ctx context.Context, a *eth.Attestation, bs state.ReadOnlyBeaconState) ([]types.ValidatorIndex, pubsub.ValidationResult, error) {
+	committee, err := helpers.BeaconCommitteeFromState(ctx, bs, a.Data.Slot, a.Data.CommitteeIndex)
+	if err != nil {
+		return nil, pubsub.ValidationIgnore, err
+	}
+
+	// Verify number of aggregation bits matches the committee size.
+	if err := helpers.VerifyBitfieldLength(a.AggregationBits, uint64(len(committee))); err != nil {
+		return nil, pubsub.ValidationReject, err
+	}
+
+	return committee, pubsub.ValidationAccept, nil
 }
 
 // Returns true if the attestation was already seen for the participating validator for the slot.
@@ -326,8 +343,17 @@ func (s *Service) setSeenCommitteeIndicesSlot(slot types.Slot, committeeID types
 // hasBlockAndState returns true if the beacon node knows about a block and associated state in the
 // database or cache.
 func (s *Service) hasBlockAndState(ctx context.Context, blockRoot [32]byte) bool {
+	if s.hasBlockStateCache.Contains(blockRoot) {
+		return true
+	}
 	hasStateSummary := s.cfg.beaconDB.HasStateSummary(ctx, blockRoot)
 	hasState := hasStateSummary || s.cfg.beaconDB.HasState(ctx, blockRoot)
+	if !hasState {
+		return false
+	}
 	hasBlock := s.cfg.chain.HasInitSyncBlock(blockRoot) || s.cfg.beaconDB.HasBlock(ctx, blockRoot)
-	return hasState && hasBlock
+	if hasBlock {
+		s.hasBlockStateCache.Add(blockRoot, true)
+	}
+	return hasBlock
 }

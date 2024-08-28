@@ -525,7 +525,7 @@ func TestBlocksFetcher_requestBeaconBlocksByRange(t *testing.T) {
 }
 
 func TestBlocksFetcher_RequestBlocksRateLimitingLocks(t *testing.T) {
-	t.Skip() //Strange behavior
+	//t.Skip() //Strange behavior
 	p1 := p2pt.NewTestP2P(t)
 	p2 := p2pt.NewTestP2P(t)
 	p3 := p2pt.NewTestP2P(t)
@@ -595,7 +595,7 @@ func TestBlocksFetcher_RequestBlocksRateLimitingLocks(t *testing.T) {
 }
 
 func TestBlocksFetcher_requestBlocksFromPeerReturningInvalidBlocks(t *testing.T) {
-	t.Skip() // Skip for check testing in the repo.
+	//t.Skip() // Skip for check testing in the repo.
 	p1 := p2pt.NewTestP2P(t)
 	tests := []struct {
 		name         string

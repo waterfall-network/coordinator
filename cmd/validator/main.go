@@ -79,6 +79,7 @@ var appFlags = []cli.Flag{
 	flags.SuggestedFeeRecipientFlag,
 	////////////////////
 	cmd.DisableMonitoringFlag,
+	cmd.PrevotingDisableFlag,
 	cmd.MonitoringHostFlag,
 	cmd.BackupWebhookOutputDir,
 	cmd.EnableBackupWebhookFlag,

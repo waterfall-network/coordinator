@@ -22,6 +22,13 @@ type NetworkConfig struct {
 	MessageDomainInvalidSnappy      [4]byte       `yaml:"MESSAGE_DOMAIN_INVALID_SNAPPY"`      // MessageDomainInvalidSnappy is the 4-byte domain for gossip message-id isolation of invalid snappy messages.
 	MessageDomainValidSnappy        [4]byte       `yaml:"MESSAGE_DOMAIN_VALID_SNAPPY"`        // MessageDomainValidSnappy is the 4-byte domain for gossip message-id isolation of valid snappy messages.
 
+	//MinEpochsForBlockRequests   uint64 `yaml:"MIN_EPOCHS_FOR_BLOCK_REQUESTS" spec:"true"`  // MinEpochsForBlockRequests represents the minimum number of epochs for which we can serve block requests.
+	EpochsPerSubnetSubscription uint64 `yaml:"EPOCHS_PER_SUBNET_SUBSCRIPTION" spec:"true"` // EpochsPerSubnetSubscription specifies the minimum duration a validator is connected to their subnet.
+	AttestationSubnetExtraBits  uint64 `yaml:"ATTESTATION_SUBNET_EXTRA_BITS" spec:"true"`  // AttestationSubnetExtraBits is the number of extra bits of a NodeId to use when mapping to a subscribed subnet.
+	AttestationSubnetPrefixBits uint64 `yaml:"ATTESTATION_SUBNET_PREFIX_BITS" spec:"true"` // AttestationSubnetPrefixBits is defined as (ceillog2(ATTESTATION_SUBNET_COUNT) + ATTESTATION_SUBNET_EXTRA_BITS).
+	SubnetsPerNode              uint64 `yaml:"SUBNETS_PER_NODE" spec:"true"`               // SubnetsPerNode is the number of long-lived subnets a beacon node should be subscribed to.
+	NodeIdBits                  uint64 `yaml:"NODE_ID_BITS" spec:"true"`                   // NodeIdBits defines the bit length of a node id.
+
 	// DiscoveryV5 Config
 	ETH2Key                    string   // ETH2Key is the ENR key of the Ethereum consensus object in an enr.
 	AttSubnetKey               string   // AttSubnetKey is the ENR key of the subnet bitfield in the enr.

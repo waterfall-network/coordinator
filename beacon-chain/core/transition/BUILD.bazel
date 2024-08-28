@@ -7,6 +7,7 @@ go_library(
         "skip_slot_cache.go",
         "state.go",
         "trailing_slot_state_cache.go",
+        "trailing_epoch_state_cache.go",
         "transition.go",
         "transition_no_verify_sig.go",
     ],

@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -265,6 +264,7 @@ func (c *ValidatorClient) initializeFromCLI(cliCtx *cli.Context) error {
 			return err
 		}
 	}
+	configurePrevoting(cliCtx)
 	return nil
 }
 
@@ -789,7 +789,7 @@ func unmarshalFromFile(ctx context.Context, from string, to interface{}) error {
 			log.WithError(err).Error("failed to close json file")
 		}
 	}(jsonFile)
-	byteValue, readerror := ioutil.ReadAll(jsonFile)
+	byteValue, readerror := io.ReadAll(jsonFile)
 	if readerror != nil {
 		return errors.Wrap(readerror, "failed to read json file")
 	}
@@ -797,4 +797,12 @@ func unmarshalFromFile(ctx context.Context, from string, to interface{}) error {
 		return errors.Wrap(unmarshalerr, "failed to unmarshal json file")
 	}
 	return nil
+}
+
+func configurePrevoting(cliCtx *cli.Context) {
+	if cliCtx.IsSet(cmd.PrevotingDisableFlag.Name) {
+		c := params.BeaconConfig()
+		c.PrevotingDisabled = cliCtx.Bool(cmd.PrevotingDisableFlag.Name)
+		params.OverrideBeaconConfig(c)
+	}
 }

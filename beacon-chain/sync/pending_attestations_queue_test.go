@@ -109,7 +109,10 @@ func TestProcessPendingAtts_HasBlockSaveUnAggregatedAtt(t *testing.T) {
 
 	require.NoError(t, beaconState.SetGenesisTime(uint64(time.Now().Unix())))
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	r := &Service{
+		ctx: ctx,
 		cfg: &config{
 			p2p:      p1,
 			beaconDB: db,
@@ -123,7 +126,9 @@ func TestProcessPendingAtts_HasBlockSaveUnAggregatedAtt(t *testing.T) {
 		},
 		blkRootToPendingAtts:             make(map[[32]byte][]*ethpb.SignedAggregateAttestationAndProof),
 		seenUnAggregatedAttestationCache: lruwrpr.New(10),
+		signatureChan:                    make(chan *signatureVerifier, verifierLimit),
 	}
+	go r.verifierRoutine()
 
 	s, err := util.NewBeaconState()
 	require.NoError(t, err)
@@ -222,7 +227,10 @@ func TestProcessPendingAtts_NoBroadcastWithBadSignature(t *testing.T) {
 	require.NoError(t, err)
 
 	require.NoError(t, s.SetGenesisTime(uint64(time.Now().Unix())))
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	r = &Service{
+		ctx: ctx,
 		cfg: &config{
 			p2p:      p1,
 			beaconDB: db,
@@ -236,7 +244,9 @@ func TestProcessPendingAtts_NoBroadcastWithBadSignature(t *testing.T) {
 		},
 		blkRootToPendingAtts:             make(map[[32]byte][]*ethpb.SignedAggregateAttestationAndProof),
 		seenUnAggregatedAttestationCache: lruwrpr.New(10),
+		signatureChan:                    make(chan *signatureVerifier, verifierLimit),
 	}
+	go r.verifierRoutine()
 
 	r.blkRootToPendingAtts[r32] = []*ethpb.SignedAggregateAttestationAndProof{{Message: aggregateAndProof, Signature: aggreSig}}
 	require.NoError(t, r.processPendingAtts(context.Background()))
@@ -301,8 +311,10 @@ func TestProcessPendingAtts_HasBlockSaveAggregatedAtt(t *testing.T) {
 	require.NoError(t, err)
 
 	require.NoError(t, beaconState.SetGenesisTime(uint64(time.Now().Unix())))
-
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	r := &Service{
+		ctx: ctx,
 		cfg: &config{
 			p2p:      p1,
 			beaconDB: db,
@@ -316,7 +328,10 @@ func TestProcessPendingAtts_HasBlockSaveAggregatedAtt(t *testing.T) {
 		},
 		blkRootToPendingAtts:           make(map[[32]byte][]*ethpb.SignedAggregateAttestationAndProof),
 		seenAggregatedAttestationCache: lruwrpr.New(10),
+		signatureChan:                  make(chan *signatureVerifier, verifierLimit),
 	}
+	go r.verifierRoutine()
+	r.initCaches()
 
 	s, err := util.NewBeaconState()
 	require.NoError(t, err)

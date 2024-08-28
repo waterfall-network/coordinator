@@ -20,7 +20,7 @@ import (
 )
 
 // retrieves the signature batch from the raw data, public key,signature and domain provided.
-func signatureBatch(signedData, pub, signature, domain []byte) (*bls.SignatureBatch, error) {
+func signatureBatch(signedData, pub, signature, domain []byte, desc string) (*bls.SignatureBatch, error) {
 	publicKey, err := bls.PublicKeyFromBytes(pub)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not convert bytes to public key")
@@ -34,15 +34,16 @@ func signatureBatch(signedData, pub, signature, domain []byte) (*bls.SignatureBa
 		return nil, errors.Wrap(err, "could not hash container")
 	}
 	return &bls.SignatureBatch{
-		Signatures: [][]byte{signature},
-		PublicKeys: []bls.PublicKey{publicKey},
-		Messages:   [][32]byte{root},
+		Signatures:   [][]byte{signature},
+		PublicKeys:   []bls.PublicKey{publicKey},
+		Messages:     [][32]byte{root},
+		Descriptions: []string{desc},
 	}, nil
 }
 
 // verifies the signature from the raw data, public key and domain provided.
 func verifySignature(signedData, pub, signature, domain []byte) error {
-	set, err := signatureBatch(signedData, pub, signature, domain)
+	set, err := signatureBatch(signedData, pub, signature, domain, signing.UnknownSignature)
 	if err != nil {
 		return err
 	}
@@ -99,7 +100,7 @@ func VerifyBlockHeaderSignature(beaconState state.BeaconState, header *ethpb.Sig
 // VerifyBlockSignatureUsingCurrentFork verifies the proposer signature of a beacon block. This differs
 // from the above method by not using fork data from the state and instead retrieving it
 // via the respective epoch.
-func VerifyBlockSignatureUsingCurrentFork(beaconState state.ReadOnlyBeaconState, blk block.SignedBeaconBlock) error {
+func VerifyBlockSignatureUsingCurrentFork(beaconState state.ReadOnlyBeaconState, blk block.SignedBeaconBlock, blkRoot [32]byte) error {
 	currentEpoch := slots.ToEpoch(blk.Block().Slot())
 	fork, err := forks.Fork(currentEpoch)
 	if err != nil {
@@ -114,7 +115,10 @@ func VerifyBlockSignatureUsingCurrentFork(beaconState state.ReadOnlyBeaconState,
 		return err
 	}
 	proposerPubKey := proposer.PublicKey
-	return signing.VerifyBlockSigningRoot(proposerPubKey, blk.Signature(), domain, blk.Block().HashTreeRoot)
+	sig := blk.Signature()
+	return signing.VerifyBlockSigningRoot(proposerPubKey, sig, domain, func() ([32]byte, error) {
+		return blkRoot, nil
+	})
 }
 
 // BlockSignatureBatch retrieves the block signature batch from the provided block and its corresponding state.
@@ -146,7 +150,7 @@ func RandaoSignatureBatch(
 	if err != nil {
 		return nil, err
 	}
-	set, err := signatureBatch(buf, proposerPub, reveal, domain)
+	set, err := signatureBatch(buf, proposerPub, reveal, domain, signing.RandaoSignature)
 	if err != nil {
 		return nil, err
 	}
@@ -186,6 +190,7 @@ func createAttestationSignatureBatch(
 	sigs := make([][]byte, len(atts))
 	pks := make([]bls.PublicKey, len(atts))
 	msgs := make([][32]byte, len(atts))
+	descs := make([]string, len(atts))
 	for i, a := range atts {
 		sigs[i] = a.Signature
 		c, err := helpers.BeaconCommitteeFromState(ctx, beaconState, a.Data.Slot, a.Data.CommitteeIndex)
@@ -216,11 +221,13 @@ func createAttestationSignatureBatch(
 			return nil, errors.Wrap(err, "could not get signing root of object")
 		}
 		msgs[i] = root
+		descs[i] = signing.AttestationSignature
 	}
 	return &bls.SignatureBatch{
-		Signatures: sigs,
-		PublicKeys: pks,
-		Messages:   msgs,
+		Signatures:   sigs,
+		PublicKeys:   pks,
+		Messages:     msgs,
+		Descriptions: descs,
 	}, nil
 }
 
@@ -332,6 +339,7 @@ func createPrevoteSignatureBatch(
 	sigs := make([][]byte, len(prevotes))
 	pks := make([]bls.PublicKey, len(prevotes))
 	msgs := make([][32]byte, len(prevotes))
+	descs := make([]string, len(prevotes))
 	for i, p := range prevotes {
 		sigs[i] = p.Signature
 		c, err := helpers.BeaconCommitteeFromState(ctx, beaconState, p.Data.Slot, p.Data.Index)
@@ -362,10 +370,12 @@ func createPrevoteSignatureBatch(
 			return nil, errors.Wrap(err, "could not get signing root of object")
 		}
 		msgs[i] = root
+		descs[i] = signing.PrevoteSignature
 	}
 	return &bls.SignatureBatch{
-		Signatures: sigs,
-		PublicKeys: pks,
-		Messages:   msgs,
+		Signatures:   sigs,
+		PublicKeys:   pks,
+		Messages:     msgs,
+		Descriptions: descs,
 	}, nil
 }

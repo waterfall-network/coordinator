@@ -27,11 +27,9 @@ type Signature struct {
 	s *blstSignature
 }
 
-// SignatureFromBytes creates a BLS signature from a LittleEndian byte slice.
-func SignatureFromBytes(sig []byte) (common.Signature, error) {
-	if features.Get().SkipBLSVerify {
-		return &Signature{}, nil
-	}
+// signatureFromBytesNoValidation creates a BLS signature from a LittleEndian
+// byte slice. It does not validate that the signature is in the BLS group
+func signatureFromBytesNoValidation(sig []byte) (*blstSignature, error) {
 	if len(sig) != fieldparams.BLSSignatureLength {
 		return nil, fmt.Errorf("signature must be %d bytes", fieldparams.BLSSignatureLength)
 	}
@@ -39,12 +37,41 @@ func SignatureFromBytes(sig []byte) (common.Signature, error) {
 	if signature == nil {
 		return nil, errors.New("could not unmarshal bytes into signature")
 	}
+	return signature, nil
+}
+
+// SignatureFromBytesNoValidation creates a BLS signature from a LittleEndian
+// byte slice. It does not validate that the signature is in the BLS group
+func SignatureFromBytesNoValidation(sig []byte) (common.Signature, error) {
+	signature, err := signatureFromBytesNoValidation(sig)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not create signature from byte slice")
+	}
+	return &Signature{s: signature}, nil
+}
+
+// SignatureFromBytes creates a BLS signature from a LittleEndian byte slice.
+func SignatureFromBytes(sig []byte) (common.Signature, error) {
+	signature, err := signatureFromBytesNoValidation(sig)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not create signature from byte slice")
+	}
 	// Group check signature. Do not check for infinity since an aggregated signature
 	// could be infinite.
 	if !signature.SigValidate(false) {
 		return nil, errors.New("signature not in group")
 	}
 	return &Signature{s: signature}, nil
+}
+
+// AggregateCompressedSignatures converts a list of compressed signatures into a single, aggregated sig.
+func AggregateCompressedSignatures(multiSigs [][]byte) (common.Signature, error) {
+	signature := new(blstAggregateSignature)
+	valid := signature.AggregateCompressed(multiSigs, true)
+	if !valid {
+		return nil, errors.New("provided signatures fail the group check and cannot be compressed")
+	}
+	return &Signature{s: signature.ToAffine()}, nil
 }
 
 // MultipleSignaturesFromBytes creates a group of BLS signatures from a LittleEndian 2d-byte slice.
@@ -208,6 +235,15 @@ func AggregateSignatures(sigs []common.Signature) common.Signature {
 	signature := new(blstAggregateSignature)
 	signature.Aggregate(rawSigs, false)
 	return &Signature{s: signature.ToAffine()}
+}
+
+// VerifySignature verifies a single signature using public key and message.
+func VerifySignature(sig []byte, msg [32]byte, pubKey common.PublicKey) (bool, error) {
+	rSig, err := SignatureFromBytes(sig)
+	if err != nil {
+		return false, err
+	}
+	return rSig.Verify(pubKey, msg[:]), nil
 }
 
 // VerifyMultipleSignatures verifies a non-singular set of signatures and its respective pubkeys and messages.

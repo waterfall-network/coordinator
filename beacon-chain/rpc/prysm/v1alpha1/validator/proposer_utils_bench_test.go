@@ -55,23 +55,9 @@ func BenchmarkProposerAtts_sortByProfitability(b *testing.B) {
 	}
 
 	for _, tt := range tests {
-		b.Run(fmt.Sprintf("naive_%s", tt.name), func(b *testing.B) {
-			b.StopTimer()
-			resetCfg := features.InitWithReset(&features.Flags{
-				ProposerAttsSelectionUsingMaxCover: false,
-			})
-			defer resetCfg()
-			atts := aggtesting.MakeAttestationsFromBitlists(tt.inputs)
-			b.StartTimer()
-			for i := 0; i < b.N; i++ {
-				runner(atts)
-			}
-		})
 		b.Run(fmt.Sprintf("max-cover_%s", tt.name), func(b *testing.B) {
 			b.StopTimer()
-			resetCfg := features.InitWithReset(&features.Flags{
-				ProposerAttsSelectionUsingMaxCover: true,
-			})
+			resetCfg := features.InitWithReset(&features.Flags{})
 			defer resetCfg()
 			atts := aggtesting.MakeAttestationsFromBitlists(tt.inputs)
 			b.StartTimer()

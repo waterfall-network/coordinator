@@ -209,7 +209,7 @@ func (s *Service) validateBeaconBlock(ctx context.Context, blk block.SignedBeaco
 		return err
 	}
 
-	if err := blocks.VerifyBlockSignatureUsingCurrentFork(parentState, blk); err != nil {
+	if err := blocks.VerifyBlockSignatureUsingCurrentFork(parentState, blk, blockRoot); err != nil {
 		s.setBadBlock(ctx, blockRoot)
 		return err
 	}

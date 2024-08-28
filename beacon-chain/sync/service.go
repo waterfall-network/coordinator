@@ -129,6 +129,7 @@ type Service struct {
 	badBlockCache                    *lru.Cache
 	badBlockLock                     sync.RWMutex
 	signatureChan                    chan *signatureVerifier
+	hasBlockStateCache               *lru.Cache
 }
 
 // NewService initializes new regular sync service.
@@ -223,6 +224,7 @@ func (s *Service) initCaches() {
 	s.seenAttesterSlashingCache = make(map[uint64]bool)
 	s.seenProposerSlashingCache = lruwrpr.New(seenProposerSlashingSize)
 	s.badBlockCache = lruwrpr.New(badBlockSize)
+	s.hasBlockStateCache = lruwrpr.New(1024)
 }
 
 func (s *Service) registerHandlers() {

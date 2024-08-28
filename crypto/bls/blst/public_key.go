@@ -8,15 +8,15 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
-	lruwrpr "gitlab.waterfall.network/waterfall/protocol/coordinator/cache/lru"
+	"gitlab.waterfall.network/waterfall/protocol/coordinator/cache/nonblocking"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/features"
 	fieldparams "gitlab.waterfall.network/waterfall/protocol/coordinator/config/fieldparams"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/config/params"
 	"gitlab.waterfall.network/waterfall/protocol/coordinator/crypto/bls/common"
 )
 
-var maxKeys = 1000000
-var pubkeyCache = lruwrpr.New(maxKeys)
+var maxKeys = 1_000_000
+var pubkeyCache *nonblocking.LRU[[48]byte, common.PublicKey]
 
 // PublicKey used in the BLS signature scheme.
 type PublicKey struct {
@@ -25,15 +25,19 @@ type PublicKey struct {
 
 // PublicKeyFromBytes creates a BLS public key from a  BigEndian byte slice.
 func PublicKeyFromBytes(pubKey []byte) (common.PublicKey, error) {
-	if features.Get().SkipBLSVerify {
-		return &PublicKey{}, nil
-	}
+	return publicKeyFromBytes(pubKey, true)
+}
+
+func publicKeyFromBytes(pubKey []byte, cacheCopy bool) (common.PublicKey, error) {
 	if len(pubKey) != params.BeaconConfig().BLSPubkeyLength {
 		return nil, fmt.Errorf("public key must be %d bytes", params.BeaconConfig().BLSPubkeyLength)
 	}
 	newKey := (*[fieldparams.BLSPubkeyLength]byte)(pubKey)
 	if cv, ok := pubkeyCache.Get(*newKey); ok {
-		return cv.(*PublicKey).Copy(), nil
+		if cacheCopy {
+			return cv.Copy(), nil
+		}
+		return cv, nil
 	}
 	// Subgroup check NOT done when decompressing pubkey.
 	p := new(blstPublicKey).Uncompress(pubKey)
@@ -63,7 +67,7 @@ func AggregatePublicKeys(pubs [][]byte) (common.PublicKey, error) {
 	agg := new(blstAggregatePublicKey)
 	mulP1 := make([]*blstPublicKey, 0, len(pubs))
 	for _, pubkey := range pubs {
-		pubKeyObj, err := PublicKeyFromBytes(pubkey)
+		pubKeyObj, err := publicKeyFromBytes(pubkey, false)
 		if err != nil {
 			return nil, err
 		}
@@ -93,6 +97,12 @@ func (p *PublicKey) IsInfinite() bool {
 	return p.p.Equals(zeroKey)
 }
 
+// Equals checks if the provided public key is equal to
+// the current one.
+func (p *PublicKey) Equals(p2 common.PublicKey) bool {
+	return p.p.Equals(p2.(*PublicKey).p)
+}
+
 // Aggregate two public keys.
 func (p *PublicKey) Aggregate(p2 common.PublicKey) common.PublicKey {
 	if features.Get().SkipBLSVerify {
@@ -106,4 +116,18 @@ func (p *PublicKey) Aggregate(p2 common.PublicKey) common.PublicKey {
 	p.p = agg.ToAffine()
 
 	return p
+}
+
+// AggregateMultiplePubkeys aggregates the provided decompressed keys into a single key.
+func AggregateMultiplePubkeys(pubkeys []common.PublicKey) common.PublicKey {
+	mulP1 := make([]*blstPublicKey, 0, len(pubkeys))
+	for _, pubkey := range pubkeys {
+		mulP1 = append(mulP1, pubkey.(*PublicKey).p)
+	}
+	agg := new(blstAggregatePublicKey)
+	// No group check needed here since it is done in PublicKeyFromBytes
+	// Note the checks could be moved from PublicKeyFromBytes into Aggregate
+	// and take advantage of multi-threading.
+	agg.Aggregate(mulP1, false)
+	return &PublicKey{p: agg.ToAffine()}
 }

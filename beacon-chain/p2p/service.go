@@ -62,6 +62,7 @@ type Service struct {
 	started               bool
 	isPreGenesis          bool
 	pingMethod            func(ctx context.Context, id peer.ID) error
+	pingMethodLock        sync.RWMutex
 	cancel                context.CancelFunc
 	cfg                   *Config
 	peers                 *peers.Status
@@ -71,7 +72,7 @@ type Service struct {
 	metaData              metadata.Metadata
 	pubsub                *pubsub.PubSub
 	joinedTopics          map[string]*pubsub.Topic
-	joinedTopicsLock      sync.Mutex
+	joinedTopicsLock      sync.RWMutex
 	subnetsLock           map[uint64]*sync.RWMutex
 	subnetsLockLock       sync.Mutex // Lock access to subnetsLock
 	initializationLock    sync.Mutex
@@ -92,11 +93,35 @@ func NewService(ctx context.Context, cfg *Config) (*Service, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	_ = cancel // govet fix for lost cancel. Cancel is handled in service.Stop().
 
+	//cfg = validateConfig(cfg)
+	privKey, err := privKey(cfg)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to generate p2p private key")
+	}
+
+	metaData, err := metaDataFromConfig(cfg)
+	if err != nil {
+		log.WithError(err).Error("Failed to create peer metadata")
+		return nil, err
+	}
+
+	addrFilter, err := configureFilter(cfg)
+	if err != nil {
+		log.WithError(err).Error("Failed to create address filter")
+		return nil, err
+	}
+
+	ipLimiter := leakybucket.NewCollector(ipLimit, ipBurst, true /* deleteEmptyBuckets */)
+
 	s := &Service{
 		ctx:           ctx,
 		stateNotifier: cfg.StateNotifier,
 		cancel:        cancel,
 		cfg:           cfg,
+		addrFilter:    addrFilter,
+		ipLimiter:     ipLimiter,
+		privKey:       privKey,
+		metaData:      metaData,
 		isPreGenesis:  true,
 		joinedTopics:  make(map[string]*pubsub.Topic, len(gossipTopicMappings)),
 		subnetsLock:   make(map[uint64]*sync.RWMutex),
@@ -104,25 +129,9 @@ func NewService(ctx context.Context, cfg *Config) (*Service, error) {
 
 	dv5Nodes := parseBootStrapAddrs(s.cfg.BootstrapNodeAddr)
 
-	cfg.Discv5BootStrapAddr = dv5Nodes
+	cfg.Discv5BootStrapAddr = append(cfg.Discv5BootStrapAddr, dv5Nodes...)
 
 	ipAddr := ipAddr()
-	s.privKey, err = privKey(s.cfg)
-	if err != nil {
-		log.WithError(err).Error("Failed to generate p2p private key")
-		return nil, err
-	}
-	s.metaData, err = metaDataFromConfig(s.cfg)
-	if err != nil {
-		log.WithError(err).Error("Failed to create peer metadata")
-		return nil, err
-	}
-	s.addrFilter, err = configureFilter(s.cfg)
-	if err != nil {
-		log.WithError(err).Error("Failed to create address filter")
-		return nil, err
-	}
-	s.ipLimiter = leakybucket.NewCollector(ipLimit, ipBurst, true /* deleteEmptyBuckets */)
 
 	opts := s.buildOptions(ipAddr, s.privKey)
 	h, err := libp2p.New(opts...)
@@ -144,6 +153,7 @@ func NewService(ctx context.Context, cfg *Config) (*Service, error) {
 		}),
 		pubsub.WithSubscriptionFilter(s),
 		pubsub.WithPeerOutboundQueueSize(pubsubQueueSize),
+		pubsub.WithMaxMessageSize(int(params.BeaconNetworkConfig().GossipMaxSize)),
 		pubsub.WithValidateQueueSize(pubsubQueueSize),
 		pubsub.WithPeerScore(peerScoringParams()),
 		pubsub.WithPeerScoreInspect(s.peerInspector, time.Minute),
@@ -222,9 +232,9 @@ func (s *Service) Start() {
 	s.started = true
 
 	if len(s.cfg.StaticPeers) > 0 {
-		addrs, err := peersFromStringAddrs(s.cfg.StaticPeers)
+		addrs, err := PeersFromStringAddrs(s.cfg.StaticPeers)
 		if err != nil {
-			log.Errorf("Could not connect to static peer: %v", err)
+			log.WithError(err).Error("Could not connect to static peer")
 		}
 		s.connectWithAllPeers(addrs)
 	}
@@ -375,10 +385,14 @@ func (s *Service) MetadataSeq() uint64 {
 // AddPingMethod adds the metadata ping rpc method to the p2p service, so that it can
 // be used to refresh ENR.
 func (s *Service) AddPingMethod(reqFunc func(ctx context.Context, id peer.ID) error) {
+	s.pingMethodLock.Lock()
 	s.pingMethod = reqFunc
+	s.pingMethodLock.Unlock()
 }
 
 func (s *Service) pingPeers() {
+	s.pingMethodLock.RLock()
+	defer s.pingMethodLock.RUnlock()
 	if s.pingMethod == nil {
 		return
 	}
@@ -435,7 +449,7 @@ func (s *Service) awaitStateInitialized() {
 func (s *Service) connectWithAllPeers(multiAddrs []multiaddr.Multiaddr) {
 	addrInfos, err := peer.AddrInfosFromP2pAddrs(multiAddrs...)
 	if err != nil {
-		log.Errorf("Could not convert to peer address info's from multiaddresses: %v", err)
+		log.WithError(err).Error("Could not convert to peer address info's from multiaddresses")
 		return
 	}
 	for _, info := range addrInfos {
@@ -461,7 +475,7 @@ func (s *Service) connectWithPeer(ctx context.Context, info peer.AddrInfo) error
 	ctx, cancel := context.WithTimeout(ctx, maxDialTimeout)
 	defer cancel()
 	if err := s.host.Connect(ctx, info); err != nil {
-		log.WithField("fn", "connectWithPeer").WithField("peer", info.ID.String()).WithError(err).Debug("Disconnect: incr BadResponses")
+		log.WithField("fn", "connectWithPeer").WithField("peer", info.ID.String()).WithError(err).Error("Disconnect: incr BadResponses")
 		s.Peers().Scorers().BadResponsesScorer().Increment(info.ID)
 		return err
 	}

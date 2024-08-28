@@ -196,15 +196,19 @@ func TestService_BroadcastAttestation(t *testing.T) {
 		}
 	}(t)
 
+	// Attempt to broadcast nil object should fail.
+	ctx := context.Background()
+	require.ErrorContains(t, "attempted to broadcast nil", p.BroadcastAttestation(ctx, subnet, nil))
+
 	// Broadcast to peers and wait.
-	require.NoError(t, p.BroadcastAttestation(context.Background(), subnet, msg))
+	require.NoError(t, p.BroadcastAttestation(ctx, subnet, msg))
 	if util.WaitTimeout(&wg, 1*time.Second) {
 		t.Error("Failed to receive pubsub within 1s")
 	}
 }
 
 func TestService_BroadcastAttestationWithDiscoveryAttempts(t *testing.T) {
-	t.Skip() //Don`t work in the pipeline
+	//t.Skip() //Don`t work in the pipeline
 	// Setup bootnode.
 	cfg := &Config{}
 	port := 2000
@@ -437,8 +441,11 @@ func TestService_BroadcastSyncCommittee(t *testing.T) {
 		}
 	}(t)
 
+	// Broadcasting nil should fail.
+	ctx := context.Background()
+	require.ErrorContains(t, "attempted to broadcast nil", p.BroadcastSyncCommitteeMessage(ctx, subnet, nil))
 	// Broadcast to peers and wait.
-	require.NoError(t, p.BroadcastSyncCommitteeMessage(context.Background(), subnet, msg))
+	require.NoError(t, p.BroadcastSyncCommitteeMessage(ctx, subnet, msg))
 	if util.WaitTimeout(&wg, 1*time.Second) {
 		t.Error("Failed to receive pubsub within 1s")
 	}

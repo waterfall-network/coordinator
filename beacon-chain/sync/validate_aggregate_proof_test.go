@@ -361,7 +361,10 @@ func TestValidateAggregateAndProof_CanValidate(t *testing.T) {
 	require.NoError(t, err)
 
 	require.NoError(t, beaconState.SetGenesisTime(uint64(time.Now().Unix())))
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	r := &Service{
+		ctx: ctx,
 		cfg: &config{
 			p2p:         p,
 			beaconDB:    db,
@@ -377,7 +380,9 @@ func TestValidateAggregateAndProof_CanValidate(t *testing.T) {
 			attestationNotifier: (&mock.ChainService{}).OperationNotifier(),
 		},
 		seenAggregatedAttestationCache: lruwrpr.New(10),
+		signatureChan:                  make(chan *signatureVerifier, verifierLimit),
 	}
+	go r.verifierRoutine()
 	r.initCaches()
 
 	buf := new(bytes.Buffer)
@@ -457,8 +462,10 @@ func TestVerifyIndexInCommittee_SeenAggregatorEpoch(t *testing.T) {
 	signedAggregateAndProof.Signature, err = signing.ComputeDomainAndSign(beaconState, 0, signedAggregateAndProof.Message, params.BeaconConfig().DomainAggregateAndProof, privKeys[ai])
 	require.NoError(t, err)
 	require.NoError(t, beaconState.SetGenesisTime(uint64(time.Now().Unix())))
-
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	r := &Service{
+		ctx: ctx,
 		cfg: &config{
 			p2p:         p,
 			beaconDB:    db,
@@ -476,7 +483,9 @@ func TestVerifyIndexInCommittee_SeenAggregatorEpoch(t *testing.T) {
 			attestationNotifier: (&mock.ChainService{}).OperationNotifier(),
 		},
 		seenAggregatedAttestationCache: lruwrpr.New(10),
+		signatureChan:                  make(chan *signatureVerifier, verifierLimit),
 	}
+	go r.verifierRoutine()
 	r.initCaches()
 
 	buf := new(bytes.Buffer)

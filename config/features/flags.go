@@ -98,10 +98,6 @@ var (
 		Name:  "slasher",
 		Usage: "Enables a slasher in the beacon node for detecting slashable offenses",
 	}
-	disableProposerAttsSelectionUsingMaxCover = &cli.BoolFlag{
-		Name:  "disable-proposer-atts-selection-using-max-cover",
-		Usage: "Disable max-cover algorithm when selecting attestations for proposer",
-	}
 	enableSlashingProtectionPruning = &cli.BoolFlag{
 		Name:  "enable-slashing-protection-history-pruning",
 		Usage: "Enables the pruning of the validator client's slashing protection database",
@@ -139,10 +135,6 @@ var (
 	disableGetBlockOptimizations = &cli.BoolFlag{
 		Name:  "disable-get-block-optimizations",
 		Usage: "This disables some optimizations on the GetBlock() function.",
-	}
-	disableBatchGossipVerification = &cli.BoolFlag{
-		Name:  "disable-batch-gossip-verification",
-		Usage: "This enables batch verification of signatures received over gossip.",
 	}
 	disableBalanceTrieComputation = &cli.BoolFlag{
 		Name:  "disable-balance-trie-computation",
@@ -201,14 +193,12 @@ var BeaconChainFlags = append(deprecatedFlags, []cli.Flag{
 	checkPtInfoCache,
 	disableBroadcastSlashingFlag,
 	enableSlasherFlag,
-	disableProposerAttsSelectionUsingMaxCover,
 	disableOptimizedBalanceUpdate,
 	enableHistoricalSpaceRepresentation,
 	disableCorrectlyInsertOrphanedAtts,
 	disableGetBlockOptimizations,
 	disableCorrectlyPruneCanonicalAtts,
 	disableActiveBalanceCache,
-	disableBatchGossipVerification,
 	disableBalanceTrieComputation,
 	enableNativeState,
 	enableForkChoiceDoublyLinkedTree,

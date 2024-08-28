@@ -106,6 +106,14 @@ func configureEth1Config(cliCtx *cli.Context) {
 	}
 }
 
+func configurePrevoting(cliCtx *cli.Context) {
+	if cliCtx.IsSet(cmd.PrevotingDisableFlag.Name) {
+		c := params.BeaconConfig()
+		c.PrevotingDisabled = cliCtx.Bool(cmd.PrevotingDisableFlag.Name)
+		params.OverrideBeaconConfig(c)
+	}
+}
+
 func configureNetwork(cliCtx *cli.Context) {
 	if cliCtx.IsSet(cmd.BootstrapNode.Name) {
 		c := params.BeaconNetworkConfig()

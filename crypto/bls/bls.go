@@ -24,6 +24,13 @@ func PublicKeyFromBytes(pubKey []byte) (PublicKey, error) {
 	return blst.PublicKeyFromBytes(pubKey)
 }
 
+// SignatureFromBytesNoValidation creates a BLS signature from a LittleEndian byte slice.
+// It does not check validity of the signature, use only when the byte slice has
+// already been verified
+func SignatureFromBytesNoValidation(sig []byte) (Signature, error) {
+	return blst.SignatureFromBytesNoValidation(sig)
+}
+
 // SignatureFromBytes creates a BLS signature from a LittleEndian byte slice.
 func SignatureFromBytes(sig []byte) (Signature, error) {
 	return blst.SignatureFromBytes(sig)
@@ -39,9 +46,24 @@ func AggregatePublicKeys(pubs [][]byte) (PublicKey, error) {
 	return blst.AggregatePublicKeys(pubs)
 }
 
+// AggregateMultiplePubkeys aggregates the provided decompressed keys into a single key.
+func AggregateMultiplePubkeys(pubs []PublicKey) PublicKey {
+	return blst.AggregateMultiplePubkeys(pubs)
+}
+
 // AggregateSignatures converts a list of signatures into a single, aggregated sig.
 func AggregateSignatures(sigs []common.Signature) common.Signature {
 	return blst.AggregateSignatures(sigs)
+}
+
+// AggregateCompressedSignatures converts a list of compressed signatures into a single, aggregated sig.
+func AggregateCompressedSignatures(multiSigs [][]byte) (common.Signature, error) {
+	return blst.AggregateCompressedSignatures(multiSigs)
+}
+
+// VerifySignature verifies a single signature. For performance reason, always use VerifyMultipleSignatures if possible.
+func VerifySignature(sig []byte, msg [32]byte, pubKey common.PublicKey) (bool, error) {
+	return blst.VerifySignature(sig, msg, pubKey)
 }
 
 // VerifyMultipleSignatures verifies multiple signatures for distinct messages securely.
