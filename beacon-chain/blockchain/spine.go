@@ -57,7 +57,8 @@ func (s *Service) GetOptimisticSpines(ctx context.Context, baseSpine gwatCommon.
 		log.WithError(errWrap).WithFields(logrus.Fields{
 			"baseSpine": baseSpine,
 		}).Error("Get Optimistic Spines: retrieving opt spine failed")
-		return s.GetCacheOptimisticSpines(baseSpine), nil
+		return nil, errWrap
+		//return s.GetCacheOptimisticSpines(baseSpine), nil
 	}
 	s.setCacheOptimisticSpines(baseSpine, optSpines)
 
