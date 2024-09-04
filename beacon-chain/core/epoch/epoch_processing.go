@@ -44,27 +44,6 @@ func (s sortableIndices) Less(i, j int) bool {
 	return s.validators[s.indices[i]].ActivationEligibilityEpoch < s.validators[s.indices[j]].ActivationEligibilityEpoch
 }
 
-// sortableIndicesMap implements the Sort interface to sort newly activated validator indices
-// by activation epoch and by index number.
-type sortableIndicesMap struct {
-	indices   []types.ValidatorIndex
-	idxValMap map[types.ValidatorIndex]*ethpb.Validator
-}
-
-// Len is the number of elements in the collection.
-func (s sortableIndicesMap) Len() int { return len(s.indices) }
-
-// Swap swaps the elements with indexes i and j.
-func (s sortableIndicesMap) Swap(i, j int) { s.indices[i], s.indices[j] = s.indices[j], s.indices[i] }
-
-// Less reports whether the element with index i must sort before the element with index j.
-func (s sortableIndicesMap) Less(i, j int) bool {
-	if s.idxValMap[s.indices[i]].ActivationEligibilityEpoch == s.idxValMap[s.indices[j]].ActivationEligibilityEpoch {
-		return s.indices[i] < s.indices[j]
-	}
-	return s.idxValMap[s.indices[i]].ActivationEligibilityEpoch < s.idxValMap[s.indices[j]].ActivationEligibilityEpoch
-}
-
 // AttestingBalance returns the total balance from all the attesting indices.
 //
 // WARNING: This method allocates a new copy of the attesting validator indices set and is
@@ -113,15 +92,17 @@ func AttestingBalance(ctx context.Context, state state.ReadOnlyBeaconState, atts
 //	     validator.activation_epoch = compute_activation_exit_epoch(get_current_epoch(state))
 func ProcessRegistryUpdates(ctx context.Context, st state.BeaconState) (state.BeaconState, error) {
 	currentEpoch := time.CurrentEpoch(st)
+	vals := st.Validators()
 	var err error
 	ejectionBal := params.BeaconConfig().EjectionBalance
 	activationEligibilityEpoch := time.CurrentEpoch(st) + 1
-
-	err = st.ApplyToEveryValidator(func(idx int, validator *ethpb.Validator) (bool, *ethpb.Validator, error) {
+	for idx, validator := range vals {
 		// Process the validators for activation eligibility.
 		if helpers.IsEligibleForActivationQueue(validator) {
 			validator.ActivationEligibilityEpoch = activationEligibilityEpoch
-			return true, validator, nil
+			if err := st.UpdateValidatorAtIndex(types.ValidatorIndex(idx), validator); err != nil {
+				return nil, err
+			}
 		}
 
 		// Process the validators for ejection.
@@ -131,29 +112,20 @@ func ProcessRegistryUpdates(ctx context.Context, st state.BeaconState) (state.Be
 			ejectionHash := bytesutil.ToBytes32(validator.CreatorAddress)
 			st, err = validators.InitiateValidatorExit(ctx, st, types.ValidatorIndex(idx), ejectionHash)
 			if err != nil {
-				return false, validator, errors.Wrapf(err, "could not initiate exit for validator %d", idx)
+				return nil, errors.Wrapf(err, "could not initiate exit for validator %d", idx)
 			}
 		}
-		return false, validator, nil
-	})
-	if err != nil {
-		return nil, err
 	}
 
 	// Queue validators eligible for activation and not yet dequeued for activation.
-	activationQ := make([]types.ValidatorIndex, 0, 100)
-	idxValMap := make(map[types.ValidatorIndex]*ethpb.Validator)
-	err = st.ApplyToEveryValidator(func(idx int, validator *ethpb.Validator) (bool, *ethpb.Validator, error) {
+	var activationQ []types.ValidatorIndex
+	for idx, validator := range vals {
 		if helpers.IsEligibleForActivation(st, validator) {
 			activationQ = append(activationQ, types.ValidatorIndex(idx))
-			idxValMap[types.ValidatorIndex(idx)] = validator
 		}
-		return false, validator, nil
-	})
-	if err != nil {
-		return nil, err
 	}
-	sort.Sort(sortableIndicesMap{indices: activationQ, idxValMap: idxValMap})
+
+	sort.Sort(sortableIndices{indices: activationQ, validators: vals})
 
 	// Only activate just enough validators according to the activation churn limit.
 	limit := uint64(len(activationQ))
