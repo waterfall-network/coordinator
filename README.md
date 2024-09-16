@@ -35,7 +35,7 @@ Coordinator maintains two permanent branches:
 * [develop](https://github.com/waterfall-network/coordinator/tree/develop): This is used for development, it contains the latest PRs. Developers should base their PRs on this branch.
 
 ### Guide
-Want to get involved? Check out our [Contribution Guide](https://docs.prylabs.network/docs/contribute/contribution-guidelines/) to learn more!
+Want to get involved? Check out our [Contribution Guide](/CONTRIBUTING.md) to learn more!
 
 ## License
 
