@@ -8,7 +8,7 @@ We recommend downloading the software from the official documentation site: http
 
 ## Audit reports
 
-- Jul 8, 2024 by Hacken, [web](https://audits.hacken.io/waterfall/l1-waterfall-network-node-apr2024/) [pdf]()
+- Jul 8, 2024 by Hacken, [web](https://audits.hacken.io/waterfall/l1-waterfall-network-node-apr2024/) [pdf](https://docs.waterfall.network/assets/audits/hacken_audit_report_24_06_2024.pdf)
 
 ## Reporting a Vulnerability
 
