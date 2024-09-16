@@ -40,7 +40,9 @@ Want to get involved? Check out our [Contribution Guide](/CONTRIBUTING.md) to le
 ## License
 
 - [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html)
-- [APACHE LICENSE, VERSION 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+
+The code written for the Waterfall project is distributed under [APACHE LICENSE, VERSION 2.0](https://www.apache.org/licenses/LICENSE-2.0), also
+included in our repository in the `LICENSE` file.
 
 ## Legal Disclaimer
 
