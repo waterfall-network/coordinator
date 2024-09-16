@@ -29,10 +29,10 @@ To participate in staking, you can join the [official eth2 launchpad](https://la
 
 ## Contributing
 ### Branches
-Prysm maintains two permanent branches:
+Coordinator maintains two permanent branches:
 
-* [master](https://gitlab.waterfall.network/waterfall/protocol/coordinator/tree/master): This points to the latest stable release. It is ideal for most users.
-* [develop](https://gitlab.waterfall.network/waterfall/protocol/coordinator/tree/develop): This is used for development, it contains the latest PRs. Developers should base their PRs on this branch.
+* [main](https://github.com/waterfall-network/coordinator/tree/main): This points to the latest stable release. It is ideal for most users.
+* [develop](https://github.com/waterfall-network/coordinator/tree/develop): This is used for development, it contains the latest PRs. Developers should base their PRs on this branch.
 
 ### Guide
 Want to get involved? Check out our [Contribution Guide](https://docs.prylabs.network/docs/contribute/contribution-guidelines/) to learn more!
