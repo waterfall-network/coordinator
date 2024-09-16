@@ -5,7 +5,7 @@ The Waterfall team forked the project on October 20, 2021, and has since made it
 - [Discord](https://discord.gg/Nwb8aR2XvR)
 - [Documentation](https://docs.waterfall.network/)
 
-This is the core repository for Coordinator, a [Golang](https://golang.org/) implementation of the [Waterfall Consensus](https://waterfall.network/) specification, developed by Fuente Labs.
+This is the core repository for Coordinator, a [Golang](https://golang.org/) implementation of the [Waterfall Consensus](https://waterfall.network/) specification, developed by Blue Wave Inc.
 
 ## Building the source
 
