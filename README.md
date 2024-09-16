@@ -1,4 +1,4 @@
-# Coordinator: A Waterfall Consensus Implementation Written in Go
+# Coordinator: A Waterfall Consensus and Cordination Layer Implementation Written in Go
 
 The Waterfall team forked the project on October 20, 2021, and has since made its own changes.
 
