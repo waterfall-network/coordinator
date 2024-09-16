@@ -8,13 +8,15 @@ We recommend downloading the software from the official documentation site: http
 
 ## Audit reports
 
-- Jul 8, 2024 by Hacken, [web](https://audits.hacken.io/waterfall/l1-waterfall-network-node-apr2024/) [pdf](https://docs.waterfall.network/assets/audits/hacken_audit_report_24_06_2024.pdf)
+- Jul 8, 2024 by Hacken, [web](https://audits.hacken.io/waterfall/l1-waterfall-network-node-apr2024/) , [pdf](https://docs.waterfall.network/assets/audits/hacken_audit_report_24_06_2024.pdf)
 
 ## Reporting a Vulnerability
 
 **Please do not file a public ticket** mentioning the vulnerability, as doing so could increase the likelihood of the vulnerability being used before a fix has been created, released and installed on the network.
 
 The following key may be used to communicate sensitive information to developers.
+
+Email: `security@waterfall.network`
 
 Fingerprint: `3FB5 199A DA6D 04EF 55A6  B31D 9413 51F9 5EBB 44DC`
 
