@@ -26,7 +26,7 @@ $ cd $GOPATH/src/github.com/waterfall-network/coordinator
 **4. Link your local clone to the fork on your Github repo.**
 
 ```
-$ git remote add myprysmrepo https://github.com/<your_github_user_name>/coordinator.git
+$ git remote add mycoordinatorrepo https://github.com/<your_github_user_name>/coordinator.git
 ```
 
 **5. Link your local clone to the Waterfall Network repo so that you can easily fetch future changes to the Waterfall Network repo.**
