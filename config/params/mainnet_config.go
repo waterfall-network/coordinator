@@ -39,7 +39,7 @@ var mainnetNetworkConfig = &NetworkConfig{
 	AttestationSubnetPrefixBits: 6,
 	NodeIdBits:                  256,
 	EpochsPerSubnetSubscription: 256,
-	SubnetsPerNode:              2,
+	SubnetsPerNode:              4,
 
 	AttestationPropagationSlotRange: 32,
 	MaxRequestBlocks:                1 << 10, // 1024

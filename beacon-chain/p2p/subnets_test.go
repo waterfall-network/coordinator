@@ -676,7 +676,8 @@ func TestSubnetComputation(t *testing.T) {
 
 	retrievedSubnets, err := computeSubscribedSubnets(localNode.ID(), 1000)
 	assert.NoError(t, err)
-	assert.Equal(t, retrievedSubnets[0]+1, retrievedSubnets[1])
+	rangeLen := params.BeaconNetworkConfig().AttestationSubnetCount / params.BeaconNetworkConfig().SubnetsPerNode
+	assert.Equal(t, retrievedSubnets[0]+rangeLen, retrievedSubnets[1])
 }
 
 func TestInitializePersistentSubnets(t *testing.T) {
@@ -695,6 +696,6 @@ func TestInitializePersistentSubnets(t *testing.T) {
 	assert.NoError(t, initializePersistentSubnets(localNode.ID(), 10000))
 	subs, ok, expTime := cache.SubnetIDs.GetPersistentSubnets()
 	assert.Equal(t, true, ok)
-	assert.Equal(t, 2, len(subs))
+	assert.Equal(t, params.BeaconNetworkConfig().SubnetsPerNode, uint64(len(subs)))
 	assert.Equal(t, true, expTime.After(time.Now()))
 }
