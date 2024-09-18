@@ -229,7 +229,7 @@ func computeSubscribedSubnets(nodeID enode.ID, epoch types.Epoch) ([]uint64, err
 	subs := make([]uint64, 0, subnetsPerNode)
 
 	for i := uint64(0); i < subnetsPerNode; i++ {
-		sub, err := computeSubscribedSubnet(nodeID, epoch, i)
+		sub, err := computeSubscribedSubnet(nodeID, epoch, i, subnetsPerNode)
 		if err != nil {
 			return nil, err
 		}
@@ -251,7 +251,7 @@ func computeSubscribedSubnets(nodeID enode.ID, epoch types.Epoch) ([]uint64, err
 //	    permutation_seed,
 //	)
 //	return SubnetID((permutated_prefix + index) % ATTESTATION_SUBNET_COUNT)
-func computeSubscribedSubnet(nodeID enode.ID, epoch types.Epoch, index uint64) (uint64, error) {
+func computeSubscribedSubnet(nodeID enode.ID, epoch types.Epoch, index, subnetsPerNode uint64) (uint64, error) {
 	nodeOffset, nodeIdPrefix := computeOffsetAndPrefix(nodeID)
 	seedInput := (nodeOffset + uint64(epoch)) / params.BeaconNetworkConfig().EpochsPerSubnetSubscription
 	permSeed := hash.Hash(bytesutil.Bytes8(seedInput))
@@ -259,7 +259,9 @@ func computeSubscribedSubnet(nodeID enode.ID, epoch types.Epoch, index uint64) (
 	if err != nil {
 		return 0, err
 	}
-	subnet := (uint64(permutatedPrefix) + index) % params.BeaconNetworkConfig().AttestationSubnetCount
+	rangeLen := params.BeaconNetworkConfig().AttestationSubnetCount / subnetsPerNode
+	rangeIndex := uint64(permutatedPrefix) % rangeLen
+	subnet := rangeIndex + rangeLen*index
 	return subnet, nil
 }
 
